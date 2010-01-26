@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension-point id="rabbit.tracking.tracker" name="Tracker Extension" schema="schema/rabbit.tracking.tracker.exsd"/>
+   <extension
+         point="org.eclipse.ui.startup">
+      <startup
+            class="rabbit.tracking.internal.Startup">
+      </startup>
+   </extension>
+   <extension
+         point="org.eclipse.core.runtime.preferences">
+      <initializer
+            class="rabbit.tracking.PreferenceInitializer">
+      </initializer>
+   </extension>
+
+</plugin>

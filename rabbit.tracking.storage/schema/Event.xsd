@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+		   xmlns:jaxb="http://java.sun.com/xml/ns/jaxb" jaxb:version="2.0">
+
+	<xs:element name="events" type="eventListType" />
+
+	<xs:complexType name="eventListType">
+		<xs:sequence>
+			<xs:element name="commandEvents" type="commandEventListType" maxOccurs="unbounded" />
+			<xs:element name="workbenchEvents" type="workbenchEventListType" maxOccurs="unbounded" />
+		</xs:sequence>
+	</xs:complexType>
+
+	<!-- Command Events: -->
+	<xs:complexType name="commandEventListType">
+		<xs:complexContent>
+			<xs:extension base="typeWithDate">
+				<xs:sequence>
+					<xs:element name="commandEvent" type="commandEventType" maxOccurs="unbounded" />
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:complexType name="commandEventType">
+		<xs:attribute name="commandId" type="xs:string" use="required" />
+		<xs:attribute name="count" type="countType" use="required" />
+	</xs:complexType>
+
+	<!-- Workbench Events -->
+	<xs:complexType name="workbenchEventListType">
+		<xs:complexContent>
+			<xs:extension base="typeWithDate">
+				<xs:sequence>
+					<xs:element name="workbenchEvent" type="workbenchEventType" maxOccurs="unbounded" />
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:complexType name="workbenchEventType">
+		<xs:attribute name="partId" type="xs:string" use="required" />
+		<xs:attribute name="perspectiveId" type="xs:string" use="required" />
+		<xs:attribute name="duration" type="xs:duration" use="required" />
+	</xs:complexType>
+
+
+	<xs:complexType name="typeWithDate">
+		<xs:attribute name="date" type="xs:date" />
+	</xs:complexType>
+	
+	<xs:simpleType name="countType">
+		<xs:restriction base="xs:int">
+			<xs:minInclusive value="0" />
+		</xs:restriction>
+	</xs:simpleType>
+
+</xs:schema>

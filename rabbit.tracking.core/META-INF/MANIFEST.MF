@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: rabbit.tracking.core
+Bundle-SymbolicName: rabbit.tracking.core;singleton:=true
+Bundle-Version: 0.1.0.qualifier
+Bundle-Activator: rabbit.tracking.TrackingPlugin
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Export-Package: rabbit.tracking,
+ rabbit.tracking.internal,
+ rabbit.tracking.trackers
+Bundle-ActivationPolicy: lazy

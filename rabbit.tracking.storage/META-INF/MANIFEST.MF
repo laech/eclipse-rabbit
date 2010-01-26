@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Rabbit Storage
+Bundle-SymbolicName: rabbit.tracking.storage;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-Activator: rabbit.tracking.storage.xml.Activator
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime,
+ rabbit.tracking.event,
+ google-collections;bundle-version="1.0.0"
+Bundle-ActivationPolicy: lazy
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Export-Package: rabbit.tracking.storage.xml
