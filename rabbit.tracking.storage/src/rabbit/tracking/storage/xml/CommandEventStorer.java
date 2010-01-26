@@ -9,7 +9,7 @@ import rabbit.tracking.storage.xml.schema.CommandEventListType;
 import rabbit.tracking.storage.xml.schema.CommandEventType;
 import rabbit.tracking.storage.xml.schema.EventListType;
 
-public class CommandEventStorer extends AbstractXmlStorer<CommandEvent, CommandEventType, CommandEventListType> {
+public class CommandEventStorer<T extends CommandEvent> extends AbstractXmlStorer<T, CommandEventType, CommandEventListType> {
 
 	/**
 	 * Constructor.
@@ -19,7 +19,7 @@ public class CommandEventStorer extends AbstractXmlStorer<CommandEvent, CommandE
 	}
 
 	@Override
-	protected CommandEventType newXmlType(CommandEvent e) {
+	protected CommandEventType newXmlType(T e) {
 		CommandEventType type = OBJECT_FACTORY.createCommandEventType();
 		type.setCommandId(e.getExecutionEvent().getCommand().getId());
 		type.setCount(1);
@@ -32,14 +32,14 @@ public class CommandEventStorer extends AbstractXmlStorer<CommandEvent, CommandE
 	}
 
 	@Override
-	protected boolean hasSameId(CommandEventType x, CommandEvent e) {
+	protected boolean hasSameId(CommandEventType x, T e) {
 
 		return e.getExecutionEvent().getCommand().getId()
 				.equals(x.getCommandId());
 	}
 
 	@Override
-	protected void merge(CommandEventType x, CommandEvent e) {
+	protected void merge(CommandEventType x, T e) {
 		x.setCount(x.getCount() + 1);
 	}
 	
@@ -64,7 +64,7 @@ public class CommandEventStorer extends AbstractXmlStorer<CommandEvent, CommandE
 	}
 
 	@Override
-	protected void merge(CommandEventListType main, CommandEvent e) {
+	protected void merge(CommandEventListType main, T e) {
 		merge(main.getCommandEvent(), e);
 	}
 

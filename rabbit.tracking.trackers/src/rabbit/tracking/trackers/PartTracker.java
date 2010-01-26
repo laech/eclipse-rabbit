@@ -13,6 +13,7 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 
 import rabbit.tracking.event.WorkbenchEvent;
+import rabbit.tracking.storage.xml.IXmlStorer;
 import rabbit.tracking.storage.xml.WorkbenchEventStorer;
 
 public class PartTracker extends Tracker implements IPartListener, IWindowListener {
@@ -36,7 +37,7 @@ public class PartTracker extends Tracker implements IPartListener, IWindowListen
 			return;
 		}
 		
-		WorkbenchEventStorer s = new WorkbenchEventStorer();
+		IXmlStorer<WorkbenchEvent> s = new WorkbenchEventStorer<WorkbenchEvent>();
 		s.insert(data);
 		s.write();
 	}

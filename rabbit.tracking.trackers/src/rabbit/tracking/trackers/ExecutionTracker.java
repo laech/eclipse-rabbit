@@ -13,6 +13,7 @@ import org.eclipse.ui.commands.ICommandService;
 
 import rabbit.tracking.event.CommandEvent;
 import rabbit.tracking.storage.xml.CommandEventStorer;
+import rabbit.tracking.storage.xml.IXmlStorer;
 
 /**
  * Tracks command executions.
@@ -34,7 +35,7 @@ public class ExecutionTracker extends Tracker implements IExecutionListener {
 	@Override
 	protected void doDisable() {
 		getCommandService().removeExecutionListener(this);
-		CommandEventStorer s = new CommandEventStorer();
+		IXmlStorer<CommandEvent> s = new CommandEventStorer<CommandEvent>();
 		s.insert(events);
 		s.write();
 	}

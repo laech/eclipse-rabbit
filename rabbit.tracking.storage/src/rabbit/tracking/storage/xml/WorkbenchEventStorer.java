@@ -9,7 +9,7 @@ import rabbit.tracking.storage.xml.schema.EventListType;
 import rabbit.tracking.storage.xml.schema.WorkbenchEventListType;
 import rabbit.tracking.storage.xml.schema.WorkbenchEventType;
 
-public class WorkbenchEventStorer extends AbstractXmlStorer<WorkbenchEvent, WorkbenchEventType, WorkbenchEventListType> {
+public class WorkbenchEventStorer<T extends WorkbenchEvent> extends AbstractXmlStorer<T, WorkbenchEventType, WorkbenchEventListType> {
 	
 	public WorkbenchEventStorer() {
 	}
@@ -25,7 +25,7 @@ public class WorkbenchEventStorer extends AbstractXmlStorer<WorkbenchEvent, Work
 	}
 
 	@Override
-	protected boolean hasSameId(WorkbenchEventType x, WorkbenchEvent e) {
+	protected boolean hasSameId(WorkbenchEventType x, T e) {
 		
 		boolean result = false;
 		if (e.getPerspective() != null) {
@@ -45,7 +45,7 @@ public class WorkbenchEventStorer extends AbstractXmlStorer<WorkbenchEvent, Work
 	}
 
 	@Override
-	protected void merge(WorkbenchEventListType main, WorkbenchEvent e) {
+	protected void merge(WorkbenchEventListType main, T e) {
 		merge(main.getWorkbenchEvent(), e);
 	}
 
@@ -55,7 +55,7 @@ public class WorkbenchEventStorer extends AbstractXmlStorer<WorkbenchEvent, Work
 	}
 
 	@Override
-	protected void merge(WorkbenchEventType main, WorkbenchEvent e) {
+	protected void merge(WorkbenchEventType main, T e) {
 		main.getDuration().add(datatypeFactory.newDuration(e.getDuration()));
 	}
 
@@ -65,7 +65,7 @@ public class WorkbenchEventStorer extends AbstractXmlStorer<WorkbenchEvent, Work
 	}
 
 	@Override
-	protected WorkbenchEventType newXmlType(WorkbenchEvent e) {
+	protected WorkbenchEventType newXmlType(T e) {
 		
 		WorkbenchEventType type = OBJECT_FACTORY.createWorkbenchEventType();
 		type.setDuration(datatypeFactory.newDuration(e.getDuration()));

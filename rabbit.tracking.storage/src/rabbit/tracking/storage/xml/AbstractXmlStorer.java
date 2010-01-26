@@ -204,6 +204,7 @@ public abstract class AbstractXmlStorer<E extends Event, T, S extends EventGroup
 	 * 
 	 * @param col The collection of events.
 	 */
+	@Override
 	public void insert(Collection<? extends E> col) {
 		
 		for (E e: col) {
@@ -216,6 +217,7 @@ public abstract class AbstractXmlStorer<E extends Event, T, S extends EventGroup
 	 * 
 	 * @param e The event.
 	 */
+	@Override
 	public void insert(E e) {
 		
 		if (!isSameMonthInYear(e.getTime(), currentMonth)) {
