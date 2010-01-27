@@ -7,7 +7,7 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 
-public class WorkbenchEvent extends Event {
+public class WorkbenchEvent extends ContinuousEvent {
 
 	private IWorkbenchPart workbenchPart;
 	private IPerspectiveDescriptor perspective;

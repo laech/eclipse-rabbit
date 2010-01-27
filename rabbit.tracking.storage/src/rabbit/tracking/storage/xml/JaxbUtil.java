@@ -20,8 +20,11 @@ public class JaxbUtil {
 		try {
 			initialize();
 		} catch (JAXBException e) {
-			System.err.println("Unexpected JaxbUtil initialization error.");
-			e.printStackTrace();
+			try {
+				initialize();
+			} catch (JAXBException ex) {
+				ex.printStackTrace();
+			}
 		}
 	}
 	

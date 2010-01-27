@@ -1,5 +1,7 @@
 package rabbit.tracking.trackers;
 
+import rabbit.tracking.core.ITracker;
+
 
 /**
  * Defines common behaviors for a tracker.

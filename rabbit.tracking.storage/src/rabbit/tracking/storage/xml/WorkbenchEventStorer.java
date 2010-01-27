@@ -32,7 +32,7 @@ public class WorkbenchEventStorer<T extends WorkbenchEvent> extends AbstractXmlS
 			result = e.getPerspective().getId().equals(x.getPerspectiveId());
 		}
 		if (e.getWorkbenchPart() != null) {
-			result = result && e.getWorkbenchPart().getSite().getId().equals(x.getPartId());
+			result = (result && e.getWorkbenchPart().getSite().getId().equals(x.getPartId()));
 		}
 		return result;
 	}
@@ -41,7 +41,7 @@ public class WorkbenchEventStorer<T extends WorkbenchEvent> extends AbstractXmlS
 	protected boolean hasSameId(WorkbenchEventType x1, WorkbenchEventType x2) {
 		
 		return x1.getPartId().equals(x2.getPartId())
-			&& x2.getPerspectiveId().equals(x2.getPerspectiveId());
+			&& x1.getPerspectiveId().equals(x2.getPerspectiveId());
 	}
 
 	@Override
@@ -51,24 +51,24 @@ public class WorkbenchEventStorer<T extends WorkbenchEvent> extends AbstractXmlS
 
 	@Override
 	protected void merge(WorkbenchEventListType main, WorkbenchEventListType data) {
-		merge(main.getWorkbenchEvent(), main.getWorkbenchEvent());
+		merge(main.getWorkbenchEvent(), data.getWorkbenchEvent());
 	}
 
 	@Override
 	protected void merge(WorkbenchEventType main, T e) {
-		main.getDuration().add(datatypeFactory.newDuration(e.getDuration()));
+		main.setDuration(main.getDuration() + e.getDuration());
 	}
 
 	@Override
 	protected void merge(WorkbenchEventType main, WorkbenchEventType x2) {
-		main.getDuration().add(x2.getDuration());
+		main.setDuration(main.getDuration() + x2.getDuration());
 	}
 
 	@Override
 	protected WorkbenchEventType newXmlType(T e) {
 		
 		WorkbenchEventType type = OBJECT_FACTORY.createWorkbenchEventType();
-		type.setDuration(datatypeFactory.newDuration(e.getDuration()));
+		type.setDuration(e.getDuration());
 		type.setPartId(e.getWorkbenchPart().getSite().getId());
 		type.setPerspectiveId(e.getPerspective().getId());
 		

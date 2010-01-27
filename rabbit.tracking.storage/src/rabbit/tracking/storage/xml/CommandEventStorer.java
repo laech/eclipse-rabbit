@@ -9,7 +9,8 @@ import rabbit.tracking.storage.xml.schema.CommandEventListType;
 import rabbit.tracking.storage.xml.schema.CommandEventType;
 import rabbit.tracking.storage.xml.schema.EventListType;
 
-public class CommandEventStorer<T extends CommandEvent> extends AbstractXmlStorer<T, CommandEventType, CommandEventListType> {
+public class CommandEventStorer<T extends CommandEvent> 
+	extends AbstractXmlStorer<T, CommandEventType, CommandEventListType> {
 
 	/**
 	 * Constructor.

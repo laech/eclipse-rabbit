@@ -1,4 +1,4 @@
-package rabbit.tracking.internal;
+package rabbit.tracking.core.internal;
 
 import org.eclipse.ui.IStartup;
 

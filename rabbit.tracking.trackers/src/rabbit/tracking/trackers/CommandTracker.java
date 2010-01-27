@@ -13,17 +13,17 @@ import org.eclipse.ui.commands.ICommandService;
 
 import rabbit.tracking.event.CommandEvent;
 import rabbit.tracking.storage.xml.CommandEventStorer;
-import rabbit.tracking.storage.xml.IXmlStorer;
+import rabbit.tracking.storage.xml.IStorer;
 
 /**
  * Tracks command executions.
  */
-public class ExecutionTracker extends Tracker implements IExecutionListener {
+public class CommandTracker extends Tracker implements IExecutionListener {
 	
 	private Set<CommandEvent> events;
 
 	/** Constructor. */
-	public ExecutionTracker() {
+	public CommandTracker() {
 		events = new LinkedHashSet<CommandEvent>();
 	}
 
@@ -35,9 +35,12 @@ public class ExecutionTracker extends Tracker implements IExecutionListener {
 	@Override
 	protected void doDisable() {
 		getCommandService().removeExecutionListener(this);
-		IXmlStorer<CommandEvent> s = new CommandEventStorer<CommandEvent>();
+		if (events.isEmpty()) {
+			return;
+		}
+		IStorer<CommandEvent> s = new CommandEventStorer<CommandEvent>();
 		s.insert(events);
-		s.write();
+		s.commit();
 	}
 
 	/**

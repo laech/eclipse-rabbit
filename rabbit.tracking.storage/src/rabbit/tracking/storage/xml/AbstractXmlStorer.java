@@ -3,9 +3,10 @@ package rabbit.tracking.storage.xml;
 import java.io.File;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
-import java.util.Date;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -15,21 +16,25 @@ import javax.xml.datatype.DatatypeConstants;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
-import rabbit.tracking.event.Event;
-import rabbit.tracking.storage.xml.schema.EventGroup;
+import rabbit.tracking.event.DiscreteEvent;
+import rabbit.tracking.storage.xml.schema.EventGroupType;
 import rabbit.tracking.storage.xml.schema.EventListType;
 import rabbit.tracking.storage.xml.schema.ObjectFactory;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
-
 /**
- * @param <E> The event type.
- * @param <T> The corresponding XML object type of the event type.
- * @param <S> The group holder type that separates the XML object types
- *            according to event date.
+ * This abstract class is designed specifically for the XML schema.
+ * 
+ * @param <E>
+ *            The event type. Such as {@link rabbit.tracking.event.CommandEvent}.
+ * @param <T>
+ *            The corresponding XML object type of the event type. Such as
+ *            {@link rabbit.tracking.storage.xml.schema.CommandEventType}.
+ * @param <S>
+ *            The group holder type that separates the XML object types
+ *            according to event date. Such as
+ *            {@link rabbit.tracking.storage.xml.schema.CommandEventListType}.
  */
-public abstract class AbstractXmlStorer<E extends Event, T, S extends EventGroup> implements IXmlStorer<E> {
+public abstract class AbstractXmlStorer<E extends DiscreteEvent, T, S extends EventGroupType> implements IStorer<E> {
 
 	/**
 	 * Formats a date into "yyyy-MM-dd".
@@ -73,7 +78,7 @@ public abstract class AbstractXmlStorer<E extends Event, T, S extends EventGroup
 	 * Sole constructor.
 	 */
 	public AbstractXmlStorer() {
-		data = Sets.newLinkedHashSet();
+		data = new LinkedHashSet<S>();
 		currentMonth = Calendar.getInstance();
 	}
 
@@ -85,7 +90,7 @@ public abstract class AbstractXmlStorer<E extends Event, T, S extends EventGroup
 	 * @param cal The calendar to convert from.
 	 * @return The converted calendar.
 	 */
-	public XMLGregorianCalendar toXMLGregorianCalendarDate(Calendar cal) {
+	public static XMLGregorianCalendar toXMLGregorianCalendarDate(Calendar cal) {
 		
 		return datatypeFactory.newXMLGregorianCalendarDate(
 				cal.get(Calendar.YEAR), 
@@ -101,14 +106,14 @@ public abstract class AbstractXmlStorer<E extends Event, T, S extends EventGroup
 	 * @param date The date of the data.
 	 * @return The logical file, check existence with {@link File#exists()}.
 	 */
-	public File getStorageFile(Date date) {
+	public File getDataFile(Calendar date) {
 		
 		StringBuilder builder = new StringBuilder();
 		builder.append(getStorageLocation().getAbsolutePath());
 		builder.append(File.separator);
 		builder.append(getFileNamePrefix());
 		builder.append("-");
-		builder.append(MONTH_FORMATTER.format(date));
+		builder.append(MONTH_FORMATTER.format(date.getTime()));
 		builder.append(".xml");
 		
 		return new File(builder.toString());
@@ -128,7 +133,7 @@ public abstract class AbstractXmlStorer<E extends Event, T, S extends EventGroup
 	 * @param endDate The end date of the date period bound.
 	 * @return A list files that are physically existing.
 	 */
-	public List<File> getStorageFiles(Calendar startDate, Calendar endDate) {
+	public List<File> getDataFiles(Calendar startDate, Calendar endDate) {
 		
 		Calendar start = (Calendar) startDate.clone();
 		start.set(Calendar.DAY_OF_MONTH, 1);
@@ -136,10 +141,10 @@ public abstract class AbstractXmlStorer<E extends Event, T, S extends EventGroup
 		Calendar end = (Calendar) endDate.clone();
 		end.set(Calendar.DAY_OF_MONTH, start.get(Calendar.DAY_OF_MONTH));
 
-		List<File> result = Lists.newArrayList();
+		List<File> result = new ArrayList<File>();
 		while (start.compareTo(end) <= 0) {
 
-			File f = getStorageFile(start.getTime());
+			File f = getDataFile(start);
 			if (f.exists()) {
 				result.add(f);
 			}
@@ -156,9 +161,8 @@ public abstract class AbstractXmlStorer<E extends Event, T, S extends EventGroup
 	 * @return The absolute path to the storage location folder.
 	 */
 	public File getStorageLocation() {
-		
-		// TODO
-		File f = new File("C:\\Users\\o-o\\Desktop\\Rabbit\\XMLs");
+
+		File f = new File(StoragePlugin.getDefault().getStoragePath().toOSString());
 		if (!f.exists()) {
 			f.mkdirs();
 		}
@@ -221,7 +225,7 @@ public abstract class AbstractXmlStorer<E extends Event, T, S extends EventGroup
 	public void insert(E e) {
 		
 		if (!isSameMonthInYear(e.getTime(), currentMonth)) {
-			write();
+			commit();
 			//:
 			currentMonth = e.getTime();
 		}
@@ -252,7 +256,7 @@ public abstract class AbstractXmlStorer<E extends Event, T, S extends EventGroup
 	 * @return true if the two calendars are representing the same date in time,
 	 * 				false otherwise.
 	 */
-	public boolean isSameDate(Calendar cal, XMLGregorianCalendar xmlCal) {
+	public static boolean isSameDate(Calendar cal, XMLGregorianCalendar xmlCal) {
 		
 		return ((xmlCal.getYear()  == cal.get(Calendar.YEAR))
 			 && (xmlCal.getMonth() == cal.get(Calendar.MONTH) + 1)
@@ -267,7 +271,7 @@ public abstract class AbstractXmlStorer<E extends Event, T, S extends EventGroup
 	 * @return true if the two calendars are representing the same month in time,
 	 * 				false otherwise.
 	 */
-	public boolean isSameMonthInYear(Calendar cal1, Calendar cal2) {
+	public static boolean isSameMonthInYear(Calendar cal1, Calendar cal2) {
 		
 		return ((cal1.get(Calendar.YEAR)  == cal2.get(Calendar.YEAR))
 			 && (cal1.get(Calendar.MONTH) == cal2.get(Calendar.MONTH)));
@@ -393,13 +397,13 @@ public abstract class AbstractXmlStorer<E extends Event, T, S extends EventGroup
 	/**
 	 * Writes the data to disk.
 	 */
-	public void write() {
+	public void commit() {
 		
 		if (data.isEmpty()) {
 			return;
 		}
 		
-		File f = getStorageFile(currentMonth.getTime());
+		File f = getDataFile(currentMonth);
 		EventListType events = read(f);
 		List<S> mainList = getXmlTypeCategories(events);
 		

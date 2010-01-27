@@ -8,12 +8,13 @@ import java.util.Set;
 import org.eclipse.ui.IPartListener;
 import org.eclipse.ui.IPartService;
 import org.eclipse.ui.IWindowListener;
+import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 
 import rabbit.tracking.event.WorkbenchEvent;
-import rabbit.tracking.storage.xml.IXmlStorer;
+import rabbit.tracking.storage.xml.IStorer;
 import rabbit.tracking.storage.xml.WorkbenchEventStorer;
 
 public class PartTracker extends Tracker implements IPartListener, IWindowListener {
@@ -33,13 +34,26 @@ public class PartTracker extends Tracker implements IPartListener, IWindowListen
 			s.removePartListener(this);
 		}
 		
+		final IWorkbench wb = PlatformUI.getWorkbench();
+		wb.getDisplay().syncExec(new Runnable() {
+
+			@Override
+			public void run() {
+				
+				IWorkbenchWindow win = wb.getActiveWorkbenchWindow();
+				if (win != null && win.getPartService().getActivePart() != null) {
+					endSession(win);
+				}
+			}
+		});
+		
 		if (data.isEmpty()) {
 			return;
 		}
 		
-		IXmlStorer<WorkbenchEvent> s = new WorkbenchEventStorer<WorkbenchEvent>();
+		IStorer<WorkbenchEvent> s = new WorkbenchEventStorer<WorkbenchEvent>();
 		s.insert(data);
-		s.write();
+		s.commit();
 	}
 
 	@Override
@@ -71,6 +85,7 @@ public class PartTracker extends Tracker implements IPartListener, IWindowListen
 	@Override
 	public void partDeactivated(IWorkbenchPart part) {
 		endSession(part.getSite().getWorkbenchWindow());
+		System.out.println(part.getSite().getId());
 	}
 
 	private void startSession() {
@@ -86,7 +101,6 @@ public class PartTracker extends Tracker implements IPartListener, IWindowListen
 			throw new IllegalStateException("Duration cannot be 0 or negative.");
 		}
 		start = Long.MAX_VALUE;
-		
 		data.add(new WorkbenchEvent(Calendar.getInstance(), duration, win));
 	}
 

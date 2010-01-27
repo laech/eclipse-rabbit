@@ -14,7 +14,7 @@
 	<!-- Command Events: -->
 	<xs:complexType name="commandEventListType">
 		<xs:complexContent>
-			<xs:extension base="typeWithDate">
+			<xs:extension base="eventGroupType">
 				<xs:sequence>
 					<xs:element name="commandEvent" type="commandEventType" maxOccurs="unbounded" />
 				</xs:sequence>
@@ -29,7 +29,7 @@
 	<!-- Workbench Events -->
 	<xs:complexType name="workbenchEventListType">
 		<xs:complexContent>
-			<xs:extension base="typeWithDate">
+			<xs:extension base="eventGroupType">
 				<xs:sequence>
 					<xs:element name="workbenchEvent" type="workbenchEventType" maxOccurs="unbounded" />
 				</xs:sequence>
@@ -39,16 +39,22 @@
 	<xs:complexType name="workbenchEventType">
 		<xs:attribute name="partId" type="xs:string" use="required" />
 		<xs:attribute name="perspectiveId" type="xs:string" use="required" />
-		<xs:attribute name="duration" type="xs:duration" use="required" />
+		<xs:attribute name="duration" type="durationType" use="required" />
 	</xs:complexType>
 
 
-	<xs:complexType name="typeWithDate">
+	<xs:complexType name="eventGroupType">
 		<xs:attribute name="date" type="xs:date" />
 	</xs:complexType>
 	
 	<xs:simpleType name="countType">
 		<xs:restriction base="xs:int">
+			<xs:minInclusive value="0" />
+		</xs:restriction>
+	</xs:simpleType>
+	
+	<xs:simpleType name="durationType">
+		<xs:restriction base="xs:long">
 			<xs:minInclusive value="0" />
 		</xs:restriction>
 	</xs:simpleType>

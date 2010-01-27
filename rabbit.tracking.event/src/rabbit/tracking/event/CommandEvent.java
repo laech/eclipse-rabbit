@@ -4,12 +4,17 @@ import java.util.Calendar;
 
 import org.eclipse.core.commands.ExecutionEvent;
 
-public class CommandEvent extends Event {
+/**
+ * k
+ * @author o-o
+ *
+ */
+public class CommandEvent extends DiscreteEvent {
 
 	private ExecutionEvent event;
 	
 	public CommandEvent(Calendar time, ExecutionEvent e) {
-		super(time, 0);
+		super(time);
 		event = e;
 	}
 

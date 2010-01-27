@@ -1,6 +1,6 @@
-package rabbit.tracking.internal;
+package rabbit.tracking.core.internal;
 
-import rabbit.tracking.trackers.ITracker;
+import rabbit.tracking.core.ITracker;
 
 /**
  * An object of this type will created when reading the extension point.
