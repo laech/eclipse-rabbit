@@ -9,8 +9,6 @@ import static rabbit.tracking.storage.xml.AbstractXmlStorer.OBJECT_FACTORY;
 import static rabbit.tracking.storage.xml.AbstractXmlStorer.isSameDate;
 import static rabbit.tracking.storage.xml.AbstractXmlStorer.toXMLGregorianCalendarDate;
 
-import java.io.File;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -22,7 +20,6 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
-import org.junit.Before;
 
 import rabbit.tracking.event.WorkbenchEvent;
 import rabbit.tracking.storage.xml.schema.WorkbenchEventListType;
@@ -35,8 +32,6 @@ public class WorkbenchEventStorerTest extends AbstractXmlStorerTest<WorkbenchEve
 	private WorkbenchEventStorer<WorkbenchEvent> storer = create();
 	
 	private IWorkbenchWindow win = getWorkbenchWindow(); 
-	
-	private File dataFile = storer.getDataFile(Calendar.getInstance());
 	
 	public IWorkbenchWindow getWorkbenchWindow() {
 		
@@ -51,7 +46,8 @@ public class WorkbenchEventStorerTest extends AbstractXmlStorerTest<WorkbenchEve
 		return win;
 	}
 	
-	private WorkbenchEvent createEvent() {
+	@Override
+	protected WorkbenchEvent createEvent() {
 		final IWorkbench wb = PlatformUI.getWorkbench();
 		wb.getDisplay().syncExec(new Runnable() {
 
@@ -65,15 +61,8 @@ public class WorkbenchEventStorerTest extends AbstractXmlStorerTest<WorkbenchEve
 		return event;
 	}
 	
-	@Before
-	public void cleanup() {
-		if (dataFile.exists()) {
-			dataFile.delete();
-		}
-	}
-	
 	@Override
-	public void testHasSameIdWorkbenchEventTypeT() {
+	public void testHasSameId_workbenchEventTypeAndEvent() {
 		
 		WorkbenchEventType x1 = OBJECT_FACTORY.createWorkbenchEventType();
 		x1.setPartId("paId");
@@ -94,7 +83,7 @@ public class WorkbenchEventStorerTest extends AbstractXmlStorerTest<WorkbenchEve
 	}
 
 	@Override
-	public void testHasSameIdWorkbenchEventTypeWorkbenchEventType() {
+	public void testHasSameId_workbenchEventTypeAndWorkbenchEventType() {
 
 		WorkbenchEvent e = createEvent();
 
@@ -212,7 +201,7 @@ public class WorkbenchEventStorerTest extends AbstractXmlStorerTest<WorkbenchEve
 			assertEquals(e.getPerspective().getId(), event.getPerspectiveId());
 			assertEquals(e.getWorkbenchPart().getSite().getId(), event.getPartId());
 
-			assertTrue(getDataField().isEmpty());
+			assertTrue(getDataField(storer).isEmpty());
 
 			//...
 
@@ -305,7 +294,7 @@ public class WorkbenchEventStorerTest extends AbstractXmlStorerTest<WorkbenchEve
 	public void testInsert() {
 		
 		try {
-			Collection<WorkbenchEventListType> data = getDataField();
+			Collection<WorkbenchEventListType> data = getDataField(storer);
 			
 			assertEquals(0, data.size());
 			
@@ -388,7 +377,7 @@ public class WorkbenchEventStorerTest extends AbstractXmlStorerTest<WorkbenchEve
 	@Override
 	public void testInsertCollection() {
 		try {
-			Collection<WorkbenchEventListType> data = getDataField();
+			Collection<WorkbenchEventListType> data = getDataField(storer);
 			
 			assertEquals(0, data.size());
 			
@@ -476,12 +465,5 @@ public class WorkbenchEventStorerTest extends AbstractXmlStorerTest<WorkbenchEve
 			ex.printStackTrace();
 			fail();
 		}
-	}
-	
-	@SuppressWarnings("unchecked")
-	private Collection<WorkbenchEventListType> getDataField() throws Exception {
-		Field f = AbstractXmlStorer.class.getDeclaredField("data");
-		f.setAccessible(true);
-		return (Collection<WorkbenchEventListType>) f.get(storer);
 	}
 }

@@ -8,11 +8,5 @@
             class="rabbit.tracking.core.internal.Startup">
       </startup>
    </extension>
-   <extension
-         point="org.eclipse.core.runtime.preferences">
-      <initializer
-            class="rabbit.tracking.core.internal.PreferenceInitializer">
-      </initializer>
-   </extension>
 
 </plugin>

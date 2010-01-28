@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
+   <extension-point id="rabbit.tracking.uiPages" name="rabbit.tracking.uiPages" schema="schema/rabbit.tracking.uiPages.exsd"/>
    <extension
          point="org.eclipse.ui.views">
       <view

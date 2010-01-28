@@ -1,7 +1,5 @@
 package rabbit.tracking.storage.xml;
 
-import java.io.File;
-
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
@@ -44,9 +42,6 @@ public class StoragePlugin extends AbstractUIPlugin {
 	 */
 	public IPath getStoragePath() {
 		// TODO
-		getPreferenceStore().setDefault(STORAGE_LOCATION, 
-				System.getProperty("user.home") + 
-				File.separator + "Desktop" + File.separator + "Rabbit");
 		return new Path(getPreferenceStore().getString(STORAGE_LOCATION));
 	}
 

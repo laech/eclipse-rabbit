@@ -9,7 +9,9 @@ import static rabbit.tracking.storage.xml.AbstractXmlStorer.toXMLGregorianCalend
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.GregorianCalendar;
 import java.util.HashSet;
 import java.util.List;
@@ -19,6 +21,8 @@ import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -31,11 +35,29 @@ public abstract class AbstractXmlStorerTest<E extends DiscreteEvent, T, S extend
 
 	protected abstract AbstractXmlStorer<E, T, S> create();
 	
+	protected File dataFile = storer.getDataFile(Calendar.getInstance());
+	
+	@SuppressWarnings("unchecked")
+	protected Collection<S> getDataField(AbstractXmlStorer<E, T, S> s) throws Exception {
+		Field f = AbstractXmlStorer.class.getDeclaredField("data");
+		f.setAccessible(true);
+		return (Collection<S>) f.get(s);
+	}
+	
 	@BeforeClass
 	public static void setUp() {
-		//TODO
-		StoragePlugin.getDefault().getPreferenceStore().setValue(
-				StoragePlugin.STORAGE_LOCATION, "C:\\Users\\o-o\\Desktop");
+		String path = StoragePlugin.getDefault().getStoragePath().toOSString();
+		path += File.separator;
+		path += "TestFiles";
+		IPreferenceStore pre = StoragePlugin.getDefault().getPreferenceStore();
+		pre.setValue(StoragePlugin.STORAGE_LOCATION, path);
+	}
+	
+	@Before
+	public void cleanup() {
+		if (dataFile.exists()) {
+			dataFile.delete();
+		}
 	}
 	
 	@Test
@@ -186,9 +208,9 @@ public abstract class AbstractXmlStorerTest<E extends DiscreteEvent, T, S extend
 	}
 	
 	@Test
-	public abstract void testHasSameIdWorkbenchEventTypeT();
+	public abstract void testHasSameId_workbenchEventTypeAndEvent();
 	@Test
-	public abstract void testHasSameIdWorkbenchEventTypeWorkbenchEventType();
+	public abstract void testHasSameId_workbenchEventTypeAndWorkbenchEventType();
 	@Test
 	public abstract void testMerge_xmlListTypeAndEvent();
 	@Test
@@ -201,5 +223,7 @@ public abstract class AbstractXmlStorerTest<E extends DiscreteEvent, T, S extend
 	public abstract void testNewXmlTypeHolderXMLGregorianCalendar();
 	@Test
 	public abstract void testNewXmlTypeT();
+	
+	protected abstract E createEvent();
 
 }

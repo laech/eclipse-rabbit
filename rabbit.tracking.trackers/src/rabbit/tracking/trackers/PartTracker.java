@@ -96,7 +96,7 @@ public class PartTracker extends Tracker implements IPartListener, IWindowListen
 	}
 
 	private void endSession(IWorkbenchWindow win) {
-		long duration = System.nanoTime() - start;
+		long duration = (System.nanoTime() - start) / 1000000;
 		if (duration <= 0) {
 			throw new IllegalStateException("Duration cannot be 0 or negative.");
 		}

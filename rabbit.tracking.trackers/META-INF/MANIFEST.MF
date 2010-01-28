@@ -8,5 +8,6 @@ Require-Bundle: org.eclipse.ui,
  rabbit.tracking.storage,
  rabbit.tracking.event,
  org.eclipse.core.runtime,
- rabbit.tracking.core
+ rabbit.tracking.core,
+ org.junit4
 Bundle-ClassPath: .
