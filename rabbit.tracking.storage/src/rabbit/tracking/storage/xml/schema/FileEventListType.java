@@ -17,16 +17,16 @@ import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for workbenchEventListType complex type.
+ * <p>Java class for fileEventListType complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="workbenchEventListType">
+ * &lt;complexType name="fileEventListType">
  *   &lt;complexContent>
  *     &lt;extension base="{}eventGroupType">
  *       &lt;sequence>
- *         &lt;element name="workbenchEvent" type="{}workbenchEventType" maxOccurs="unbounded"/>
+ *         &lt;element name="fileEvent" type="{}fileEventType" maxOccurs="unbounded"/>
  *       &lt;/sequence>
  *     &lt;/extension>
  *   &lt;/complexContent>
@@ -36,43 +36,43 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "workbenchEventListType", propOrder = {
-    "workbenchEvent"
+@XmlType(name = "fileEventListType", propOrder = {
+    "fileEvent"
 })
-public class WorkbenchEventListType
+public class FileEventListType
     extends EventGroupType
 {
 
     @XmlElement(required = true)
-    protected List<WorkbenchEventType> workbenchEvent;
+    protected List<FileEventType> fileEvent;
 
     /**
-     * Gets the value of the workbenchEvent property.
+     * Gets the value of the fileEvent property.
      * 
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
-     * This is why there is not a <CODE>set</CODE> method for the workbenchEvent property.
+     * This is why there is not a <CODE>set</CODE> method for the fileEvent property.
      * 
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
-     *    getWorkbenchEvent().add(newItem);
+     *    getFileEvent().add(newItem);
      * </pre>
      * 
      * 
      * <p>
      * Objects of the following type(s) are allowed in the list
-     * {@link WorkbenchEventType }
+     * {@link FileEventType }
      * 
      * 
      */
-    public List<WorkbenchEventType> getWorkbenchEvent() {
-        if (workbenchEvent == null) {
-            workbenchEvent = new ArrayList<WorkbenchEventType>();
+    public List<FileEventType> getFileEvent() {
+        if (fileEvent == null) {
+            fileEvent = new ArrayList<FileEventType>();
         }
-        return this.workbenchEvent;
+        return this.fileEvent;
     }
 
 }

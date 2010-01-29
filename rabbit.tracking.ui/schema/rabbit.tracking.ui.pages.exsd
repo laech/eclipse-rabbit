@@ -17,10 +17,9 @@
          </appinfo>
       </annotation>
       <complexType>
-         <choice minOccurs="1" maxOccurs="unbounded">
-            <element ref="category"/>
+         <sequence minOccurs="1" maxOccurs="unbounded">
             <element ref="page"/>
-         </choice>
+         </sequence>
          <attribute name="point" type="string" use="required">
             <annotation>
                <documentation>
@@ -48,25 +47,6 @@
       </complexType>
    </element>
 
-   <element name="category">
-      <complexType>
-         <attribute name="name" type="string" use="required">
-            <annotation>
-               <documentation>
-                  
-               </documentation>
-            </annotation>
-         </attribute>
-         <attribute name="parentCategory" type="string">
-            <annotation>
-               <documentation>
-                  
-               </documentation>
-            </annotation>
-         </attribute>
-      </complexType>
-   </element>
-
    <element name="page">
       <complexType>
          <attribute name="class" type="string" use="required">
@@ -75,7 +55,7 @@
                   
                </documentation>
                <appinfo>
-                  <meta.attribute kind="java" basedOn=":rabbit.features.ui.IPage"/>
+                  <meta.attribute kind="java" basedOn=":rabbit.tracking.ui.IPage"/>
                </appinfo>
             </annotation>
          </attribute>
@@ -87,13 +67,6 @@
             </annotation>
          </attribute>
          <attribute name="description" type="string">
-            <annotation>
-               <documentation>
-                  
-               </documentation>
-            </annotation>
-         </attribute>
-         <attribute name="category" type="string">
             <annotation>
                <documentation>
                   

@@ -39,9 +39,24 @@
 	<xs:complexType name="workbenchEventType">
 		<xs:attribute name="partId" type="xs:string" use="required" />
 		<xs:attribute name="perspectiveId" type="xs:string" use="required" />
-		<xs:attribute name="duration" type="durationType" use="required" />
+		<xs:attribute ref="duration" use="required" />
 	</xs:complexType>
-
+	
+	<!-- File Events: -->
+	<xs:complexType name="fileEventListType">
+		<xs:complexContent>
+			<xs:extension base="eventGroupType">
+				<xs:sequence>
+					<xs:element name="fileEvent" type="fileEventType" maxOccurs="unbounded" />
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:complexType name="fileEventType">
+		<xs:attribute name="fileId" type="xs:string" use="required" />
+		<xs:attribute ref="duration" use="required" />
+	</xs:complexType>
+	
 
 	<xs:complexType name="eventGroupType">
 		<xs:attribute name="date" type="xs:date" />
@@ -58,5 +73,7 @@
 			<xs:minInclusive value="0" />
 		</xs:restriction>
 	</xs:simpleType>
+	
+	<xs:attribute name="duration" type="durationType" />
 
 </xs:schema>

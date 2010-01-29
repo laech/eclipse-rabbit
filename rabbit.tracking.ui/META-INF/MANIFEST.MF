@@ -3,10 +3,11 @@ Bundle-ManifestVersion: 2
 Bundle-Name: UI
 Bundle-SymbolicName: rabbit.tracking.ui;singleton:=true
 Bundle-Version: 1.0.0.qualifier
-Bundle-Activator: rabbit.features.ui.Activator
+Bundle-Activator: rabbit.tracking.ui.Activator
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
- org.eclipse.ui.forms,
- rabbit.tracking.trackers
+ org.eclipse.ui.forms
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Export-Package: rabbit.tracking.ui,
+ rabbit.tracking.ui.pages

@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Pages
+Bundle-SymbolicName: rabbit.tracking.ui.pages;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-Activator: rabbit.tracking.ui.pages.Activator
+Require-Bundle: org.eclipse.core.runtime,
+ rabbit.tracking.ui,
+ org.eclipse.ui,
+ rabbit.tracking.storage;bundle-version="1.0.0"
+Bundle-ActivationPolicy: lazy
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6

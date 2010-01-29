@@ -11,22 +11,20 @@ package rabbit.tracking.storage.xml.schema;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlSchemaType;
-import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
-import javax.xml.datatype.XMLGregorianCalendar;
 
 
 /**
- * <p>Java class for eventGroupType complex type.
+ * <p>Java class for fileEventType complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="eventGroupType">
+ * &lt;complexType name="fileEventType">
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *       &lt;attribute name="date" type="{http://www.w3.org/2001/XMLSchema}date" />
+ *       &lt;attribute name="fileId" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
+ *       &lt;attribute ref="{}duration use="required""/>
  *     &lt;/restriction>
  *   &lt;/complexContent>
  * &lt;/complexType>
@@ -35,40 +33,52 @@ import javax.xml.datatype.XMLGregorianCalendar;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "eventGroupType")
-@XmlSeeAlso({
-    WorkbenchEventListType.class,
-    FileEventListType.class,
-    CommandEventListType.class
-})
-public class EventGroupType {
+@XmlType(name = "fileEventType")
+public class FileEventType {
 
-    @XmlAttribute
-    @XmlSchemaType(name = "date")
-    protected XMLGregorianCalendar date;
+    @XmlAttribute(required = true)
+    protected String fileId;
+    @XmlAttribute(required = true)
+    protected long duration;
 
     /**
-     * Gets the value of the date property.
+     * Gets the value of the fileId property.
      * 
      * @return
      *     possible object is
-     *     {@link XMLGregorianCalendar }
+     *     {@link String }
      *     
      */
-    public XMLGregorianCalendar getDate() {
-        return date;
+    public String getFileId() {
+        return fileId;
     }
 
     /**
-     * Sets the value of the date property.
+     * Sets the value of the fileId property.
      * 
      * @param value
      *     allowed object is
-     *     {@link XMLGregorianCalendar }
+     *     {@link String }
      *     
      */
-    public void setDate(XMLGregorianCalendar value) {
-        this.date = value;
+    public void setFileId(String value) {
+        this.fileId = value;
+    }
+
+    /**
+     * Gets the value of the duration property.
+     * 
+     */
+    public long getDuration() {
+        return duration;
+    }
+
+    /**
+     * Sets the value of the duration property.
+     * 
+     */
+    public void setDuration(long value) {
+        this.duration = value;
     }
 
 }
