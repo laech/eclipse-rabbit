@@ -10,7 +10,7 @@ public class TrackerObject {
 	private String id;
 	private String name;
 	private String description;
-	private ITracker tracker;
+	private ITracker<?> tracker;
 
 	/**
 	 * Constructs a new tracker object.
@@ -24,7 +24,7 @@ public class TrackerObject {
 	 * @param t
 	 *            The tracker.
 	 */
-	public TrackerObject(String id, String name, String description, ITracker t) {
+	public TrackerObject(String id, String name, String description, ITracker<?> t) {
 		this.id = id;
 		this.name = name;
 		this.description = description;
@@ -93,7 +93,7 @@ public class TrackerObject {
 	 * 
 	 * @return The tracker.
 	 */
-	public ITracker getTracker() {
+	public ITracker<?> getTracker() {
 		return tracker;
 	}
 
@@ -103,7 +103,7 @@ public class TrackerObject {
 	 * @param tracker
 	 *            The new tracker.
 	 */
-	public void setTracker(ITracker tracker) {
+	public void setTracker(ITracker<?> tracker) {
 		this.tracker = tracker;
 	}
 }

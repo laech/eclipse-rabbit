@@ -1,7 +1,10 @@
 package rabbit.tracking.ui;
 
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -11,6 +14,7 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.FormAttachment;
@@ -31,159 +35,206 @@ import rabbit.tracking.ui.pages.PageExtension;
 
 public class RabbitView extends ViewPart {
 
-	private FormToolkit toolkit;
+	private Map<IPage, Composite> pages;
 	
+	private FormToolkit toolkit;
+	private StackLayout stackLayout;
+	private Composite displayComposite;
+
 	public RabbitView() {
+		pages = new HashMap<IPage, Composite>();
 		toolkit = new FormToolkit(PlatformUI.getWorkbench().getDisplay());
+		stackLayout = new StackLayout();
 	}
 
 	@Override
 	public void createPartControl(Composite parent) {
+
 		ScrolledForm form = toolkit.createScrolledForm(parent);
 		form.getBody().setLayout(new FormLayout());
 
-		setContentDescription("Rabbit Metrics");
+//		 setContentDescription("Rabbit Metrics");
 
-		final Sash s = new Sash(form.getBody(), SWT.VERTICAL);
-		s.setBackground(toolkit.getColors().getBorderColor());
 		FormData fd = new FormData();
 		fd.width = 1;
 		fd.top = new FormAttachment(0, 0);
 		fd.left = new FormAttachment(0, 200);
 		fd.bottom = new FormAttachment(100, 0);
-		s.setLayoutData(fd);
-		s.addListener(SWT.Selection, new Listener() {
+		final Sash sash = new Sash(form.getBody(), SWT.VERTICAL);
+		sash.setBackground(toolkit.getColors().getBorderColor());
+		sash.setLayoutData(fd);
+		sash.addListener(SWT.Selection, new Listener() {
 			@Override
 			public void handleEvent(Event e) {
-				((FormData) s.getLayoutData()).left = new FormAttachment(0, e.x);
-				s.getParent().layout();
+				((FormData) sash.getLayoutData()).left = new FormAttachment(0,
+						e.x);
+				sash.getParent().layout();
 			}
 		});
 
-		Composite cmp = toolkit.createComposite(form.getBody());
-		cmp.setLayout(new FillLayout());
-		fd = new FormData();
-		fd.top = new FormAttachment(0, 0);
-		fd.left = new FormAttachment(0, 0);
-		fd.right = new FormAttachment(s, 0);
-		fd.bottom = new FormAttachment(100, 0);
-		cmp.setLayoutData(fd);
-		createTree(cmp);
+		// Extension list:
 
-		cmp = toolkit.createComposite(form.getBody());
-		cmp.setLayout(new FillLayout());
-		fd = new FormData();
-		fd.top = new FormAttachment(0, 0);
-		fd.left = new FormAttachment(s, 0);
-		fd.right = new FormAttachment(100, 0);
-		fd.bottom = new FormAttachment(100, 0);
-		cmp.setLayoutData(fd);
-//		createTable(cmp);
+		FormData leftData = new FormData();
+		leftData.top = new FormAttachment(0, 0);
+		leftData.left = new FormAttachment(0, 0);
+		leftData.right = new FormAttachment(sash, 0);
+		leftData.bottom = new FormAttachment(100, 0);
+		Composite left = toolkit.createComposite(form.getBody());
+		left.setLayout(new FillLayout());
+		left.setLayoutData(leftData);
+		createTree(left);
+
+		// Displaying area:
+
+		FormData rightData = new FormData();
+		rightData.top = new FormAttachment(0, 0);
+		rightData.left = new FormAttachment(sash, 0);
+		rightData.right = new FormAttachment(100, 0);
+		rightData.bottom = new FormAttachment(100, 0);
+		displayComposite = toolkit.createComposite(form.getBody());
+		displayComposite.setLayout(stackLayout);
+		displayComposite.setLayoutData(rightData);
+		
 	}
 
 	private void createTree(Composite parent) {
-		
+
+		parent.setLayout(new FillLayout());
 		TreeViewer viewer = new TreeViewer(parent, SWT.NONE);
-		viewer.setContentProvider(new ITreeContentProvider() {
-			
-			private final Object[] emptyArray = new Object[0];
-
-			@Override
-			public Object[] getChildren(Object o) {
-				
-				if (o instanceof Collection<?>) {
-					return ((Collection<?>) o).toArray();
-					
-				} else if (o instanceof PageExtension) {
-					return ((PageExtension) o).getChildren().toArray();
-				}
-				return emptyArray;
-			}
-
-			@Override
-			public Object getParent(Object element) {
-				return null;
-			}
-
-			@Override
-			public boolean hasChildren(Object o) {
-				
-				if ((o instanceof Collection<?>) || (o instanceof PageExtension)) {
-					return true;
-				}
-				return false;
-			}
-
-			@Override
-			public Object[] getElements(Object inputElement) {
-				return getChildren(inputElement);
-			}
-
-			@Override
-			public void dispose() {
-			}
-
-			@Override
-			public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-			}
-		});
+		viewer.setContentProvider(new TreeContentProvider());
+		viewer.setLabelProvider(new TreeLabelProvider());
 		
-		viewer.setLabelProvider(new LabelProvider() {
-
-			@Override
-			public Image getImage(Object element) {
-				// TODO Auto-generated method stub
-				return super.getImage(element);
-			}
-
-			@Override
-			public String getText(Object element) {
-				if (element instanceof PageExtension) {
-					return ((PageExtension) element).getName();
-				}
-				return super.getText(element);
-			}
-			
-		});
-		
-		final Tree tree = viewer.getTree();//new Tree(parent, SWT.NONE);
+		final Tree tree = viewer.getTree();// new Tree(parent, SWT.NONE);
 		tree.setHeaderVisible(true);
 
-		final TreeColumn column = new TreeColumn(tree, SWT.NONE);
-		column.setText("Metrics");
+		final TreeColumn title = new TreeColumn(tree, SWT.NONE);
+		title.setText("Metrics");
+		
 		tree.addListener(SWT.Resize, new Listener() {
 			@Override
 			public void handleEvent(Event event) {
-				column.setWidth(tree.getBounds().width);
+				title.setWidth(tree.getBounds().width);
 			}
 		});
-		
+
 		viewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
-				
+
 				ISelection selection = event.getSelection();
 				if (selection instanceof IStructuredSelection) {
-//					PageExtension page = (PageExtension) ((IStructuredSelection) selection).getFirstElement();
-//					display(page);
+					 PageExtension page = (PageExtension)
+					 	((IStructuredSelection) selection).getFirstElement();
+					 display(page.getPage());
 				}
 			}
-			
 		});
 
 		viewer.setInput(Activator.getDefault().getPages());
 		viewer.expandAll();
 	}
 	
+	private void display(IPage page) {
+		
+		Composite cmp = null;
+		if (page != null) {
+			cmp = pages.get(page);
+			if (cmp == null) {
+				cmp = toolkit.createComposite(displayComposite);
+				cmp.setLayout(new FillLayout());
+				page.createContents(cmp);
+				pages.put(page, cmp);
+			}
+		}
+
+		stackLayout.topControl = cmp;
+		displayComposite.layout();
+	}
+
 	@Override
 	public void setFocus() {
-
 	}
 
 	@Override
 	public void dispose() {
 		toolkit.dispose();
 		super.dispose();
+	}
+
+	private static class TreeContentProvider implements ITreeContentProvider {
+
+		private static final Object[] EMPTY_ARRAY = new Object[0];
+
+		@Override
+		public Object[] getChildren(Object o) {
+
+			if (o instanceof Collection<?>) {
+				return ((Collection<?>) o).toArray();
+
+			} else if (o instanceof PageExtension) {
+				return ((PageExtension) o).getChildren().toArray();
+			}
+			return EMPTY_ARRAY;
+		}
+
+		@Override
+		public Object getParent(Object element) {
+			return null;
+		}
+
+		@Override
+		public boolean hasChildren(Object o) {
+
+			if ((o instanceof Collection<?>) || (o instanceof PageExtension)) {
+				return true;
+			}
+			return false;
+		}
+
+		@Override
+		public Object[] getElements(Object inputElement) {
+			return getChildren(inputElement);
+		}
+
+		@Override
+		public void dispose() {
+		}
+
+		@Override
+		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
+		}
+	}
+
+	private static class TreeLabelProvider extends LabelProvider {
+
+		private Map<ImageDescriptor, Image> images 
+					= new HashMap<ImageDescriptor, Image>();
+
+		@Override
+		public Image getImage(Object element) {
+//			if (element instanceof PageExtension) {
+//				return ((PageExtension) element).getImage();
+//			}
+			return super.getImage(element);
+		}
+
+		@Override
+		public void dispose() {
+			
+			for (Image img : images.values()) {
+				img.dispose();
+			}
+			super.dispose();
+		}
+
+		@Override
+		public String getText(Object element) {
+			if (element instanceof PageExtension) {
+				return ((PageExtension) element).getName();
+			}
+			return super.getText(element);
+		}
+
 	}
 
 }

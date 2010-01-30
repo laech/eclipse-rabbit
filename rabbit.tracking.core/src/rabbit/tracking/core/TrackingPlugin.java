@@ -56,11 +56,11 @@ public class TrackingPlugin extends AbstractUIPlugin implements IWorkbenchListen
 		for (IConfigurationElement e : elements) {
 			try {
 				Object o = e.createExecutableExtension("class");
-				if (o instanceof ITracker) {
+				if (o instanceof ITracker<?>) {
 					String id = e.getAttribute("id");
 					String name = e.getAttribute("name");
 					String description = e.getAttribute("description");
-					ITracker s = (ITracker) o;
+					ITracker<?> s = (ITracker<?>) o;
 					result.add(new TrackerObject(id, name, description, s));
 				}
 			} catch (Exception ex) {

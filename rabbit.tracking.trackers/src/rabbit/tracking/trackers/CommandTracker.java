@@ -1,8 +1,6 @@
 package rabbit.tracking.trackers;
 
 import java.util.Calendar;
-import java.util.LinkedHashSet;
-import java.util.Set;
 
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
@@ -18,13 +16,11 @@ import rabbit.tracking.storage.xml.IStorer;
 /**
  * Tracks command executions.
  */
-public class CommandTracker extends Tracker implements IExecutionListener {
+public class CommandTracker extends Tracker<CommandEvent> implements IExecutionListener {
 	
-	private Set<CommandEvent> events;
-
 	/** Constructor. */
 	public CommandTracker() {
-		events = new LinkedHashSet<CommandEvent>();
+		super();
 	}
 
 	@Override
@@ -35,12 +31,11 @@ public class CommandTracker extends Tracker implements IExecutionListener {
 	@Override
 	protected void doDisable() {
 		getCommandService().removeExecutionListener(this);
-		if (events.isEmpty()) {
-			return;
-		}
-		IStorer<CommandEvent> s = new CommandEventStorer<CommandEvent>();
-		s.insert(events);
-		s.commit();
+	}
+
+	@Override
+	protected IStorer<CommandEvent> createDataStorer() {
+		return new CommandEventStorer<CommandEvent>();
 	}
 
 	/**
@@ -55,7 +50,7 @@ public class CommandTracker extends Tracker implements IExecutionListener {
 
 	@Override
 	public void preExecute(String commandId, ExecutionEvent event) {
-		events.add(new CommandEvent(Calendar.getInstance(), event));
+		addData(new CommandEvent(Calendar.getInstance(), event));
 	}
 
 	@Override

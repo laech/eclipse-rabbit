@@ -2,7 +2,6 @@ package rabbit.tracking.trackers;
 
 import java.util.Calendar;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.eclipse.ui.IPartListener;
@@ -17,15 +16,13 @@ import rabbit.tracking.event.WorkbenchEvent;
 import rabbit.tracking.storage.xml.IStorer;
 import rabbit.tracking.storage.xml.WorkbenchEventStorer;
 
-public class PartTracker extends Tracker implements IPartListener,
+public class PartTracker extends Tracker<WorkbenchEvent> implements IPartListener,
 		IWindowListener {
 
 	private long start;
 
-	private Set<WorkbenchEvent> data;
-
 	public PartTracker() {
-		data = new LinkedHashSet<WorkbenchEvent>();
+		super();
 	}
 
 	@Override
@@ -48,14 +45,6 @@ public class PartTracker extends Tracker implements IPartListener,
 				}
 			}
 		});
-
-		if (data.isEmpty()) {
-			return;
-		}
-
-		IStorer<WorkbenchEvent> s = new WorkbenchEventStorer<WorkbenchEvent>();
-		s.insert(data);
-		s.commit();
 	}
 
 	@Override
@@ -65,7 +54,19 @@ public class PartTracker extends Tracker implements IPartListener,
 		for (IPartService s : getPartServices()) {
 			s.addPartListener(this);
 		}
-		startSession();
+		
+		final IWorkbench wb = PlatformUI.getWorkbench();
+		wb.getDisplay().syncExec(new Runnable() {
+
+			@Override
+			public void run() {
+
+				IWorkbenchWindow win = wb.getActiveWorkbenchWindow();
+				if (win != null && win.getPartService().getActivePart() != null) {
+					startSession();
+				}
+			}
+		});
 	}
 
 	/**
@@ -101,10 +102,10 @@ public class PartTracker extends Tracker implements IPartListener,
 	protected void endSession(IWorkbenchWindow win) {
 		long duration = (System.nanoTime() - start) / 1000000;
 		if (duration <= 0) {
-			throw new IllegalStateException("Duration cannot be 0 or negative.");
+			return;
 		}
 		start = Long.MAX_VALUE;
-		data.add(new WorkbenchEvent(Calendar.getInstance(), duration, win));
+		addData(new WorkbenchEvent(Calendar.getInstance(), duration, win));
 	}
 
 	@Override
@@ -119,6 +120,9 @@ public class PartTracker extends Tracker implements IPartListener,
 	public void windowClosed(IWorkbenchWindow window) {
 		System.err.println("Window closed.");
 		window.getPartService().removePartListener(this);
+		if (window.getPartService().getActivePart() != null) {
+			endSession(window);
+		}
 	}
 
 	@Override
@@ -133,6 +137,9 @@ public class PartTracker extends Tracker implements IPartListener,
 	public void windowOpened(IWorkbenchWindow window) {
 		System.err.println("Window opened.");
 		window.getPartService().addPartListener(this);
+		if (window.getPartService().getActivePart() != null) {
+			startSession();
+		}
 	}
 
 	@Override
@@ -148,9 +155,11 @@ public class PartTracker extends Tracker implements IPartListener,
 	@Override
 	public void partOpened(IWorkbenchPart p) {
 		System.err.println("Part opened.");
-		if (p == p.getSite().getWorkbenchWindow().getPartService().getActivePart()) {
-			startSession();
-		}
+	}
+
+	@Override
+	protected IStorer<WorkbenchEvent> createDataStorer() {
+		return new WorkbenchEventStorer<WorkbenchEvent>();
 	}
 
 }

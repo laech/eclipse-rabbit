@@ -6,7 +6,6 @@ import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.fail;
 
-import java.lang.reflect.Method;
 import java.util.Calendar;
 import java.util.Random;
 
@@ -102,10 +101,7 @@ public class WorkbenchEventTest extends ContinuousEventTest {
 			// Then open it.
 			IWorkbenchPart newPart = win.getActivePage().showView(partId); 
 			
-			Method m = WorkbenchEvent.class.getDeclaredMethod("setDefaults", IWorkbenchWindow.class);
-			m.setAccessible(true);
-			m.invoke(event, win);
-			
+			event.setDefaults(win);
 			assertSame(newPers, event.getPerspective());
 			assertSame(newPart, event.getWorkbenchPart());
 			

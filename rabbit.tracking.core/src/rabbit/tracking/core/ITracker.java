@@ -1,9 +1,11 @@
 package rabbit.tracking.core;
 
+import java.util.Collection;
+
 /**
  * Represents a tracker that tracks events.
  */
-public interface ITracker {
+public interface ITracker<T> {
 
 	/**
 	 * Checks whether this tracker is enabled.
@@ -23,5 +25,22 @@ public interface ITracker {
 	 *            <tt>(enable == {@link #isEnabled()})</tt>.
 	 */
 	public void setEnabled(boolean enable);
+	
+	/**
+	 * Gets the data collected by this tracker.
+	 * @return The data.
+	 */
+	public Collection<T> getData();
+	
+	/**
+	 * Flushes the data collected by this tracker.
+	 */
+	public void flushData();
+	
+	/**
+	 * Saves the data collected by this tracker. All data will be flushed after
+	 * saving.
+	 */
+	public void saveData();
 
 }

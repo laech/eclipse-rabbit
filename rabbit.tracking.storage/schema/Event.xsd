@@ -38,7 +38,7 @@
 	</xs:complexType>
 	<xs:complexType name="workbenchEventType">
 		<xs:attribute name="partId" type="xs:string" use="required" />
-		<xs:attribute name="perspectiveId" type="xs:string" use="required" />
+		<xs:attribute name="perspectiveId" type="xs:string" use="optional" />
 		<xs:attribute ref="duration" use="required" />
 	</xs:complexType>
 	

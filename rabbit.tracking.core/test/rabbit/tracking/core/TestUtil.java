@@ -1,14 +1,17 @@
 package rabbit.tracking.core;
 
+import java.util.Collection;
+import java.util.Collections;
+
 public class TestUtil {
 	
 	/**
 	 * Creates a new tracker for testing.
 	 * @return A new tracker.
 	 */
-	public static ITracker newTracker() {
+	public static <T> ITracker<T> newTracker() {
 		
-		return new ITracker() {
+		return new ITracker<T>() {
 			
 			boolean isEnabled = false;
 
@@ -20,6 +23,19 @@ public class TestUtil {
 			@Override
 			public void setEnabled(boolean enable) {
 				isEnabled = enable;
+			}
+
+			@Override
+			public Collection<T> getData() {
+				return Collections.emptyList();
+			}
+
+			@Override
+			public void flushData() {
+			}
+
+			@Override
+			public void saveData() {
 			}
 			
 		};

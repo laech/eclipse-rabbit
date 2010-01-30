@@ -14,7 +14,7 @@ public class TrackerObjectTest {
 	private String id = "idA";
 	private String name = "nameA";
 	private String description = "descA";
-	private ITracker tracker = TestUtil.newTracker();
+	private ITracker<?> tracker = TestUtil.newTracker();
 	
 	private TrackerObject tObject = new TrackerObject(id, name, description, tracker);
 
@@ -70,7 +70,7 @@ public class TrackerObjectTest {
 	@Test
 	public void testSetTracker() {
 		
-		ITracker newTracker = TestUtil.newTracker();
+		ITracker<?> newTracker = TestUtil.newTracker();
 		tObject.setTracker(newTracker);
 		assertSame(newTracker, tObject.getTracker());
 	}

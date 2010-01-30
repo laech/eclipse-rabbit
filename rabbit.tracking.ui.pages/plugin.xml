@@ -6,6 +6,10 @@
       <page
             class="rabbit.tracking.ui.pages.CommandPage"
             name="Sample Page">
+         <page
+               class="rabbit.tracking.ui.pages.CommandPage"
+               name="Sample Page 2">
+         </page>
       </page>
    </extension>
 

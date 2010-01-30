@@ -1,21 +1,33 @@
 package rabbit.tracking.trackers;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.Set;
+
 import rabbit.tracking.core.ITracker;
+import rabbit.tracking.storage.xml.IStorer;
 
 
 /**
  * Defines common behaviors for a tracker.
  */
-public abstract class Tracker implements ITracker {
+public abstract class Tracker<T> implements ITracker<T> {
 
 	/** Variable to indicate whether this tracker is activated. */
 	private boolean isEnabled;
+	
+	private Set<T> data;
+	
+	private IStorer<T> storer;
 
 	/**
 	 * Constructs a new tracker.
 	 */
 	public Tracker() {
 		isEnabled = false;
+		data = new LinkedHashSet<T>();
+		storer = createDataStorer();
 	}
 
 	/**
@@ -68,4 +80,37 @@ public abstract class Tracker implements ITracker {
 			isEnabled = enable;
 		}
 	}
+
+	@Override
+	public Collection<T> getData() {
+		return Collections.unmodifiableSet(data);
+	}
+	
+	@Override
+	public void flushData() {
+		data.clear();
+	}
+	
+	@Override
+	public void saveData() {
+		if (!getData().isEmpty()) {
+			storer.insert(getData());
+			storer.commit();
+			flushData();
+		}
+	}
+	
+	/**
+	 * Adds an event data to the collection.
+	 * @param o The data.
+	 */
+	protected void addData(T o) {
+		data.add(o);
+	}
+	
+	/**
+	 * Creates a storer for storing the data.
+	 * @return A data storer.
+	 */
+	protected  abstract IStorer<T> createDataStorer();
 }

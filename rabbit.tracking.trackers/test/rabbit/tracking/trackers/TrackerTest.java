@@ -3,11 +3,13 @@ package rabbit.tracking.trackers;
 import org.junit.*;
 import static org.junit.Assert.*;
 
-public abstract class TrackerTest {
+public abstract class TrackerTest<T> {
 	
-	private Tracker tracker = createTracker();
+	private Tracker<T> tracker = createTracker();
 	
-	protected abstract Tracker createTracker();
+	protected abstract Tracker<T> createTracker();
+	
+	protected abstract T createEvent();
 
 	@Test
 	public void testTracker() {
@@ -21,6 +23,9 @@ public abstract class TrackerTest {
 	
 	@Test
 	public void testSetEnabled() {
+		if (tracker.isEnabled()) {
+			tracker.setEnabled(false);
+		}
 		
 		tracker.setEnabled(true);
 		assertTrue(tracker.isEnabled());
@@ -32,4 +37,36 @@ public abstract class TrackerTest {
 		assertTrue(tracker.isEnabled());
 	}
 
+	@Test
+	public void testGetData() {
+		assertNotNull(tracker.getData());
+		assertTrue(tracker.getData().isEmpty());
+	}
+	
+	@Test
+	public void testAddData() {
+		tracker.addData(createEvent());
+		assertEquals(1, tracker.getData().size());
+	}
+	
+	@Test
+	public void testCreateDataStorer() {
+		assertNotNull(tracker.createDataStorer());
+	}
+	
+	@Test
+	public void testFlushData() {
+		tracker.addData(createEvent());
+		assertFalse(tracker.getData().isEmpty());
+		tracker.flushData();
+		assertTrue(tracker.getData().isEmpty());
+	}
+	
+	@Test
+	public void testSaveData() {
+		tracker.addData(createEvent());
+		assertFalse(tracker.getData().isEmpty());
+		tracker.saveData();
+		assertTrue(tracker.getData().isEmpty());
+	}
 }

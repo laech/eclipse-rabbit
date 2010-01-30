@@ -8,11 +8,12 @@ import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.TableViewer;
-import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.commands.ICommandService;
@@ -38,10 +39,12 @@ public class CommandPage implements IPage {
 		viewer.setContentProvider(new ContentProvider());
 		viewer.setLabelProvider(new TableLabelProvider());
 		
+		final Table table = viewer.getTable();
+		table.setHeaderVisible(true);
 		for (String name : columnNames) {
-			TableViewerColumn column = new TableViewerColumn(viewer, SWT.NONE);
-			column.getColumn().setText(name);
-			column.getColumn().setWidth(100);
+			TableColumn column = new TableColumn(table, SWT.NONE);
+			column.setText(name);
+			column.setWidth(100);
 		}
 	}
 
