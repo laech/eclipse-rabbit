@@ -9,7 +9,7 @@ import rabbit.tracking.storage.xml.schema.EventListType;
 import rabbit.tracking.storage.xml.schema.WorkbenchEventListType;
 import rabbit.tracking.storage.xml.schema.WorkbenchEventType;
 
-public class WorkbenchEventStorer<T extends WorkbenchEvent> extends AbstractXmlStorer<T, WorkbenchEventType, WorkbenchEventListType> {
+public class WorkbenchEventStorer extends AbstractXmlStorer<WorkbenchEvent, WorkbenchEventType, WorkbenchEventListType> {
 	
 	public WorkbenchEventStorer() {
 	}
@@ -25,27 +25,22 @@ public class WorkbenchEventStorer<T extends WorkbenchEvent> extends AbstractXmlS
 	}
 
 	@Override
-	protected boolean hasSameId(WorkbenchEventType x, T e) {
+	protected boolean hasSameId(WorkbenchEventType x, WorkbenchEvent e) {
 		
 		boolean result = false;
-		if (e.getPerspective() != null) {
-			result = e.getPerspective().getId().equals(x.getPerspectiveId());
-		}
 		if (e.getWorkbenchPart() != null) {
-			result = (result && e.getWorkbenchPart().getSite().getId().equals(x.getPartId()));
+			result = e.getWorkbenchPart().getSite().getId().equals(x.getPartId());
 		}
 		return result;
 	}
 
 	@Override
 	protected boolean hasSameId(WorkbenchEventType x1, WorkbenchEventType x2) {
-		
-		return x1.getPartId().equals(x2.getPartId())
-			&& x1.getPerspectiveId().equals(x2.getPerspectiveId());
+		return x1.getPartId().equals(x2.getPartId());
 	}
 
 	@Override
-	protected void merge(WorkbenchEventListType main, T e) {
+	protected void merge(WorkbenchEventListType main, WorkbenchEvent e) {
 		merge(main.getWorkbenchEvent(), e);
 	}
 
@@ -55,7 +50,7 @@ public class WorkbenchEventStorer<T extends WorkbenchEvent> extends AbstractXmlS
 	}
 
 	@Override
-	protected void merge(WorkbenchEventType main, T e) {
+	protected void merge(WorkbenchEventType main, WorkbenchEvent e) {
 		main.setDuration(main.getDuration() + e.getDuration());
 	}
 
@@ -65,12 +60,11 @@ public class WorkbenchEventStorer<T extends WorkbenchEvent> extends AbstractXmlS
 	}
 
 	@Override
-	protected WorkbenchEventType newXmlType(T e) {
+	protected WorkbenchEventType newXmlType(WorkbenchEvent e) {
 		
 		WorkbenchEventType type = OBJECT_FACTORY.createWorkbenchEventType();
 		type.setDuration(e.getDuration());
 		type.setPartId(e.getWorkbenchPart().getSite().getId());
-		type.setPerspectiveId(e.getPerspective().getId());
 		
 		return type;
 	}

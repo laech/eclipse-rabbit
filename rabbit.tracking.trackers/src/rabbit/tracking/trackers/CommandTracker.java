@@ -1,6 +1,7 @@
 package rabbit.tracking.trackers;
 
 import java.util.Calendar;
+import org.eclipse.ui.IWorkbenchCommandConstants;
 
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
@@ -11,11 +12,11 @@ import org.eclipse.ui.commands.ICommandService;
 
 import rabbit.tracking.event.CommandEvent;
 import rabbit.tracking.storage.xml.CommandEventStorer;
-import rabbit.tracking.storage.xml.IStorer;
 
 /**
  * Tracks command executions.
  */
+@SuppressWarnings("unused")
 public class CommandTracker extends Tracker<CommandEvent> implements IExecutionListener {
 	
 	/** Constructor. */
@@ -34,8 +35,8 @@ public class CommandTracker extends Tracker<CommandEvent> implements IExecutionL
 	}
 
 	@Override
-	protected IStorer<CommandEvent> createDataStorer() {
-		return new CommandEventStorer<CommandEvent>();
+	protected CommandEventStorer createDataStorer() {
+		return new CommandEventStorer();
 	}
 
 	/**
@@ -51,6 +52,8 @@ public class CommandTracker extends Tracker<CommandEvent> implements IExecutionL
 	@Override
 	public void preExecute(String commandId, ExecutionEvent event) {
 		addData(new CommandEvent(Calendar.getInstance(), event));
+		System.out.println(commandId);
+		System.out.println("\t" + event.getCommand().getHandler().getClass());
 	}
 
 	@Override

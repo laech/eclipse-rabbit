@@ -1,16 +1,12 @@
 package rabbit.tracking.ui.pages;
 
+import java.util.HashMap;
 import java.util.Map;
 
-import org.eclipse.core.commands.common.NotDefinedException;
+import org.eclipse.core.commands.Command;
 import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.viewers.IStructuredContentProvider;
-import org.eclipse.jface.viewers.ITableLabelProvider;
-import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.TableViewer;
-import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
@@ -18,34 +14,116 @@ import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.commands.ICommandService;
 
+import rabbit.tracking.storage.xml.CommandEventStorer;
 import rabbit.tracking.ui.DisplayPreference;
-import rabbit.tracking.ui.IPage;
 
-public class CommandPage implements IPage {
+public class CommandPage extends AbstractGraphTablePage {
 	
-	private static final String[] columnNames = new String[] { "Name", "Description", "Usage Count", "Graph" };
+	private static ICommandService service = (ICommandService) PlatformUI
+			.getWorkbench().getService(ICommandService.class);;
 
 	private TableViewer viewer;
-//	private CommandEventStorer dataAccessor;
+	private TableColumn nameCol;
+	private TableColumn usageCol;
+	private TableColumn graphCol;
+	private TableColumn descriptionCol;
+	
+	public static final int NAME_COLUMN_INDEX = 0;
+	public static final int DESCRIPTION_COLUMN_INDEX = 1;
+	public static final int USAGE_COLUMN_INDEX = 2;
+	public static final int GRAPH_COLUMN_INDEX = 3;
 
+	private CommandEventStorer dataStore;
+
+	
+	private Map<Command, Integer> dataMapping;
+	
 	public CommandPage() {
-//		dataAccessor = new CommandEventStorer();
+		super();
+		dataStore = new CommandEventStorer();
+		dataMapping = new HashMap<Command, Integer>();
 	}
 
 	@Override
-	public void createContents(Composite parent) {
-		
+	public void doCreateContents(Composite parent) {
+
 		viewer = new TableViewer(parent, SWT.NONE);
-		viewer.setContentProvider(new ContentProvider());
-		viewer.setLabelProvider(new TableLabelProvider());
-		
+		viewer.setContentProvider(new CommandPageContentProvider());
+		viewer.setLabelProvider(new CommandPageLabelProvider(this));
+
 		final Table table = viewer.getTable();
 		table.setHeaderVisible(true);
-		for (String name : columnNames) {
-			TableColumn column = new TableColumn(table, SWT.NONE);
-			column.setText(name);
-			column.setWidth(100);
+		
+		nameCol = new TableColumn(table, SWT.LEFT, NAME_COLUMN_INDEX);
+		nameCol.setText("Name");
+		nameCol.setWidth(120);
+		nameCol.setMoveable(true);
+		nameCol.addSelectionListener(new TableColumnComparator(viewer) {
+			@Override
+			protected int getColumnIndex() {
+				return NAME_COLUMN_INDEX;
+			}
+		});
+		
+		descriptionCol = new TableColumn(table, SWT.LEFT, DESCRIPTION_COLUMN_INDEX);
+		descriptionCol.setText("Description");
+		descriptionCol.setWidth(180);
+		descriptionCol.setMoveable(true);
+		descriptionCol.addSelectionListener(new TableColumnComparator(viewer) {
+			@Override
+			protected int getColumnIndex() {
+				return DESCRIPTION_COLUMN_INDEX;
+			}
+		});
+		
+		usageCol = new TableColumn(table, SWT.RIGHT, USAGE_COLUMN_INDEX);
+		usageCol.setText("Usage");
+		usageCol.setWidth(60);
+		usageCol.setMoveable(true);
+		usageCol.addSelectionListener(new TableColumnComparator(viewer) {
+			@Override
+			protected int getColumnIndex() {
+				return USAGE_COLUMN_INDEX;
+			}
+		});
+		
+		graphCol = new TableColumn(table, SWT.LEFT, GRAPH_COLUMN_INDEX);
+		graphCol.setWidth(100);
+		graphCol.addSelectionListener(new TableColumnComparator(viewer) {
+			@Override
+			protected int getColumnIndex() {
+				return USAGE_COLUMN_INDEX; // Same as sorting the usage column.
+			}
+		});
+	}
+	
+	int getUsage(Command cmd) {
+		Integer usage = dataMapping.get(cmd);
+		if (usage == null) {
+			return 0;
+		} else {
+			return usage.intValue();
 		}
+	}
+	
+	@Override
+	protected TableViewer getViewer() {
+		return viewer;
+	}
+
+	@Override
+	protected TableColumn getGraphColumn() {
+		return graphCol;
+	}
+	
+	@Override
+	protected TableColumn getUsageColumn() {
+		return usageCol;
+	}
+	
+	@Override
+	protected TableColumn[] getAllColumns() {
+		return new TableColumn[] { nameCol, descriptionCol, usageCol, graphCol };
 	}
 
 	@Override
@@ -56,52 +134,17 @@ public class CommandPage implements IPage {
 
 	@Override
 	public void update(DisplayPreference p) {
-//		viewer.setInput(dataAccessor.getData(p.getStartDate(), p.getEndDate()));
-	}
-
-	private static class TableLabelProvider extends LabelProvider implements ITableLabelProvider {
-
-		private ICommandService service = (ICommandService) PlatformUI
-				.getWorkbench().getService(ICommandService.class);
+		setMaxUsage(0);
+		dataMapping.clear();
 		
-		@Override
-		public Image getColumnImage(Object element, int columnIndex) {
-			return null;
-		}
-
-		@Override
-		public String getColumnText(Object element, int columnIndex) {
-			if (columnIndex == 0) {
-				String id = ((Map.Entry<?, ?>) element).getKey().toString();
-				String name = null;
-				try {
-					name = service.getCommand(id).getName();
-				} catch (NotDefinedException e) {
-					name = id;
-				}
-				return name;
+		Map<String, Integer> data = dataStore.getData(p.getStartDate(), p.getEndDate());
+		for (Map.Entry<String, Integer> entry : data.entrySet()) {
+			dataMapping.put(service.getCommand(entry.getKey()), entry.getValue());
+			
+			if (entry.getValue() > getMaxUsage()) {
+				setMaxUsage(entry.getValue());
 			}
-			return null;
 		}
-	}
-	
-	private static class ContentProvider implements IStructuredContentProvider  {
-
-		@Override
-		public Object[] getElements(Object inputElement) {
-			if (!(inputElement instanceof Map<?, ?>)) {
-				return null;
-			}
-			Map<?, ?> map = (Map<?, ?>) inputElement;
-			return map.entrySet().toArray();
-		}
-
-		@Override
-		public void dispose() {
-		}
-
-		@Override
-		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-		}
+		viewer.setInput(dataMapping.keySet());
 	}
 }

@@ -51,7 +51,7 @@ public class PageExtension implements Comparable<PageExtension> {
 		return description;
 	}
 
-	public ImageDescriptor getImage() {
+	public ImageDescriptor getImageDescriptor() {
 		return image;
 	}
 

@@ -156,7 +156,6 @@ public class PartTrackerTest extends TrackerTest<WorkbenchEvent> {
 			long durationInMillis, int size, Calendar start, Calendar end) {
 
 		assertEquals(size, tracker.getData().size());
-		assertEquals(pers, event.getPerspective());
 		assertEquals(part, event.getWorkbenchPart());
 		assertTrue(start.compareTo(event.getTime()) <= 0);
 		assertTrue(end.compareTo(event.getTime()) >= 0);
@@ -172,6 +171,6 @@ public class PartTrackerTest extends TrackerTest<WorkbenchEvent> {
 	@Override
 	protected WorkbenchEvent createEvent() {
 		return new WorkbenchEvent(Calendar.getInstance(), 10,
-				getWorkbenchWindow());
+				getWorkbenchWindow().getPartService().getActivePart());
 	}
 }

@@ -2,7 +2,6 @@ package rabbit.tracking.storage.xml;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static rabbit.tracking.storage.xml.AbstractXmlStorer.OBJECT_FACTORY;
@@ -13,9 +12,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.List;
-import java.util.Random;
 
-import org.eclipse.ui.IPerspectiveDescriptor;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
@@ -29,7 +26,7 @@ public class WorkbenchEventStorerTest extends AbstractXmlStorerTest<WorkbenchEve
 
 	private WorkbenchEvent event;
 	
-	private WorkbenchEventStorer<WorkbenchEvent> storer = create();
+	private WorkbenchEventStorer storer = create();
 	
 	private IWorkbenchWindow win = getWorkbenchWindow(); 
 	
@@ -55,7 +52,7 @@ public class WorkbenchEventStorerTest extends AbstractXmlStorerTest<WorkbenchEve
 			public void run() {
 				
 				event = new WorkbenchEvent(Calendar.getInstance(), 10, 
-						wb.getActiveWorkbenchWindow());
+						wb.getActiveWorkbenchWindow().getPartService().getActivePart());
 			}			
 		});
 		return event;
@@ -66,19 +63,13 @@ public class WorkbenchEventStorerTest extends AbstractXmlStorerTest<WorkbenchEve
 		
 		WorkbenchEventType x1 = OBJECT_FACTORY.createWorkbenchEventType();
 		x1.setPartId("paId");
-		x1.setPerspectiveId("ppId");
 		
 		WorkbenchEventType x2 = OBJECT_FACTORY.createWorkbenchEventType();
 		x2.setPartId(x1.getPartId());
-		x2.setPerspectiveId(x1.getPerspectiveId());
 		
 		assertTrue(storer.hasSameId(x1, x2));
 		
 		x2.setPartId("another");
-		assertFalse(storer.hasSameId(x1, x2));
-		
-		x2.setPartId(x1.getPartId());
-		x2.setPerspectiveId("ocbhie");
 		assertFalse(storer.hasSameId(x1, x2));
 	}
 
@@ -89,15 +80,10 @@ public class WorkbenchEventStorerTest extends AbstractXmlStorerTest<WorkbenchEve
 
 		WorkbenchEventType x = OBJECT_FACTORY.createWorkbenchEventType();
 		x.setPartId(e.getWorkbenchPart().getSite().getId());
-		x.setPerspectiveId(e.getPerspective().getId());
 
 		assertTrue(storer.hasSameId(x, e));
 
 		x.setPartId("");
-		assertFalse(storer.hasSameId(x, e));
-
-		x.setPartId(e.getWorkbenchPart().getSite().getId());
-		x.setPerspectiveId("");
 		assertFalse(storer.hasSameId(x, e));
 	}
 
@@ -164,7 +150,6 @@ public class WorkbenchEventStorerTest extends AbstractXmlStorerTest<WorkbenchEve
 		WorkbenchEventType xml = storer.newXmlType(e);
 		
 		assertEquals(xml.getPartId(), e.getWorkbenchPart().getSite().getId());
-		assertEquals(xml.getPerspectiveId(), e.getPerspective().getId());
 		assertEquals(xml.getDuration(), e.getDuration());
 	}
 
@@ -177,8 +162,8 @@ public class WorkbenchEventStorerTest extends AbstractXmlStorerTest<WorkbenchEve
 	}
 
 	@Override
-	protected WorkbenchEventStorer<WorkbenchEvent> create() {
-		return new WorkbenchEventStorer<WorkbenchEvent>();
+	protected WorkbenchEventStorer create() {
+		return new WorkbenchEventStorer();
 	}
 
 	@Override
@@ -198,7 +183,6 @@ public class WorkbenchEventStorerTest extends AbstractXmlStorerTest<WorkbenchEve
 
 			WorkbenchEventType event = list.getWorkbenchEvent().get(0);
 			assertEquals(e.getDuration(), event.getDuration());
-			assertEquals(e.getPerspective().getId(), event.getPerspectiveId());
 			assertEquals(e.getWorkbenchPart().getSite().getId(), event.getPartId());
 
 			assertTrue(getDataField(storer).isEmpty());
@@ -220,21 +204,11 @@ public class WorkbenchEventStorerTest extends AbstractXmlStorerTest<WorkbenchEve
 
 			event = list.getWorkbenchEvent().get(0);
 			assertEquals(totalDuration, event.getDuration());
-			assertEquals(e.getPerspective().getId(), event.getPerspectiveId());
 			assertEquals(e.getWorkbenchPart().getSite().getId(), event.getPartId());
 			
 			//...
 			
 			// Insert an new and different event:
-			
-			Random random = new Random();
-			
-			IPerspectiveDescriptor newPers = PlatformUI.getWorkbench()
-				.getPerspectiveRegistry().getPerspectives()[random.nextInt(5)];
-			// Make sure the new perspective is not the old one.
-			assertNotSame("Perspective already opened, please choose another one", 
-					newPers, e.getPerspective());
-			// Then set the new perspective.
 			
 			String partId = "org.eclipse.ui.views.ProblemView";
 			// Make sure the new part is not the old one.
@@ -244,7 +218,6 @@ public class WorkbenchEventStorerTest extends AbstractXmlStorerTest<WorkbenchEve
 			IWorkbenchPart newPart = getWorkbenchWindow().getActivePage().showView(partId);
 
 			WorkbenchEvent e2 = createEvent();
-			e2.setPerspective(newPers);
 			e2.setWorkbenchPart(newPart);
 			storer.insert(e2);
 			storer.commit();
@@ -263,11 +236,9 @@ public class WorkbenchEventStorerTest extends AbstractXmlStorerTest<WorkbenchEve
 				event = list.getWorkbenchEvent().get(0);
 			}
 			
-			assertEquals(e2.getPerspective().getId(), type.getPerspectiveId());
 			assertEquals(e2.getWorkbenchPart().getSite().getId(), type.getPartId());
 			assertEquals(e2.getDuration(), type.getDuration());
 			
-			assertEquals(e.getPerspective().getId(), event.getPerspectiveId());
 			assertEquals(e.getWorkbenchPart().getSite().getId(), event.getPartId());
 			assertEquals(totalDuration, event.getDuration());
 			
@@ -307,7 +278,6 @@ public class WorkbenchEventStorerTest extends AbstractXmlStorerTest<WorkbenchEve
 			assertEquals(1, data.iterator().next().getWorkbenchEvent().size());
 			
 			WorkbenchEventType type = data.iterator().next().getWorkbenchEvent().get(0);
-			assertEquals(e.getPerspective().getId(), type.getPerspectiveId());
 			assertEquals(e.getWorkbenchPart().getSite().getId(), type.getPartId());
 			assertEquals(e.getDuration(), type.getDuration());
 			
@@ -322,20 +292,10 @@ public class WorkbenchEventStorerTest extends AbstractXmlStorerTest<WorkbenchEve
 			assertEquals(1, data.iterator().next().getWorkbenchEvent().size());
 			
 			type = data.iterator().next().getWorkbenchEvent().get(0);
-			assertEquals(e.getPerspective().getId(), type.getPerspectiveId());
 			assertEquals(e.getWorkbenchPart().getSite().getId(), type.getPartId());
 			assertEquals(totalDuration, type.getDuration());
 			
 			// Insert an new and different event:
-			
-			Random random = new Random();
-			
-			IPerspectiveDescriptor newPers = PlatformUI.getWorkbench()
-				.getPerspectiveRegistry().getPerspectives()[random.nextInt(5)];
-			// Make sure the new perspective is not the old one.
-			assertNotSame("Perspective already opened, please choose another one", 
-					newPers, e.getPerspective());
-			// Then set the new perspective.
 			
 			String partId = "org.eclipse.ui.views.TaskList";
 			// Make sure the new part is not the old one.
@@ -345,7 +305,6 @@ public class WorkbenchEventStorerTest extends AbstractXmlStorerTest<WorkbenchEve
 			IWorkbenchPart newPart = getWorkbenchWindow().getActivePage().showView(partId);
 
 			e = createEvent();
-			e.setPerspective(newPers);
 			e.setWorkbenchPart(newPart);
 			storer.insert(e);
 			
@@ -353,7 +312,6 @@ public class WorkbenchEventStorerTest extends AbstractXmlStorerTest<WorkbenchEve
 			assertEquals(2, data.iterator().next().getWorkbenchEvent().size());
 			
 			type = data.iterator().next().getWorkbenchEvent().get(1);
-			assertEquals(e.getPerspective().getId(), type.getPerspectiveId());
 			assertEquals(e.getWorkbenchPart().getSite().getId(), type.getPartId());
 			assertEquals(e.getDuration(), type.getDuration());
 			
@@ -394,7 +352,6 @@ public class WorkbenchEventStorerTest extends AbstractXmlStorerTest<WorkbenchEve
 				assertEquals(1, data.iterator().next().getWorkbenchEvent().size());
 
 				type = data.iterator().next().getWorkbenchEvent().get(0);
-				assertEquals(e.getPerspective().getId(), type.getPerspectiveId());
 				assertEquals(e.getWorkbenchPart().getSite().getId(), type.getPartId());
 				assertEquals(e.getDuration(), type.getDuration());
 			}
@@ -408,15 +365,6 @@ public class WorkbenchEventStorerTest extends AbstractXmlStorerTest<WorkbenchEve
 
 				// Make a new event with different ids:
 
-				Random random = new Random();
-
-				IPerspectiveDescriptor newPers = PlatformUI.getWorkbench()
-				.getPerspectiveRegistry().getPerspectives()[random.nextInt(5)];
-				// Make sure the new perspective is not the old one.
-				assertNotSame("Perspective already opened, please choose another one", 
-						newPers, e.getPerspective());
-				// Then set the new perspective.
-
 				String partId = "org.eclipse.jdt.ui.PackageExplorer";
 				// Make sure the new part is not the old one.
 				assertFalse("View already opened, please choose another one.", 
@@ -425,7 +373,6 @@ public class WorkbenchEventStorerTest extends AbstractXmlStorerTest<WorkbenchEve
 				IWorkbenchPart newPart = getWorkbenchWindow().getActivePage().showView(partId);
 
 				WorkbenchEvent eNew = createEvent();
-				eNew.setPerspective(newPers);
 				eNew.setWorkbenchPart(newPart);
 
 				list.clear();
@@ -437,12 +384,10 @@ public class WorkbenchEventStorerTest extends AbstractXmlStorerTest<WorkbenchEve
 				assertEquals(2, data.iterator().next().getWorkbenchEvent().size());
 
 				type = data.iterator().next().getWorkbenchEvent().get(0);
-				assertEquals(eWithSameId.getPerspective().getId(), type.getPerspectiveId());
 				assertEquals(eWithSameId.getWorkbenchPart().getSite().getId(), type.getPartId());
 				assertEquals(totalDuration, type.getDuration());
 
 				type = data.iterator().next().getWorkbenchEvent().get(1);
-				assertEquals(eNew.getPerspective().getId(), type.getPerspectiveId());
 				assertEquals(eNew.getWorkbenchPart().getSite().getId(), type.getPartId());
 				assertEquals(eNew.getDuration(), type.getDuration());
 			}

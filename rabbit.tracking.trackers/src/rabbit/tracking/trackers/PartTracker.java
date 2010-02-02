@@ -13,7 +13,6 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 
 import rabbit.tracking.event.WorkbenchEvent;
-import rabbit.tracking.storage.xml.IStorer;
 import rabbit.tracking.storage.xml.WorkbenchEventStorer;
 
 public class PartTracker extends Tracker<WorkbenchEvent> implements IPartListener,
@@ -41,7 +40,7 @@ public class PartTracker extends Tracker<WorkbenchEvent> implements IPartListene
 
 				IWorkbenchWindow win = wb.getActiveWorkbenchWindow();
 				if (win != null && win.getPartService().getActivePart() != null) {
-					endSession(win);
+					endSession(win.getPartService().getActivePart());
 				}
 			}
 		});
@@ -86,26 +85,27 @@ public class PartTracker extends Tracker<WorkbenchEvent> implements IPartListene
 	@Override
 	public void partActivated(IWorkbenchPart part) {
 		System.err.print("Part activated.\t");
+		System.out.println(part.getClass().toString());
 		startSession();
 	}
 
 	@Override
 	public void partDeactivated(IWorkbenchPart part) {
 		System.err.println("Part deactivated.");
-		endSession(part.getSite().getWorkbenchWindow());
+		endSession(part);
 	}
 
 	protected void startSession() {
 		start = System.nanoTime();
 	}
 
-	protected void endSession(IWorkbenchWindow win) {
+	protected void endSession(IWorkbenchPart part) {
 		long duration = (System.nanoTime() - start) / 1000000;
 		if (duration <= 0) {
 			return;
 		}
 		start = Long.MAX_VALUE;
-		addData(new WorkbenchEvent(Calendar.getInstance(), duration, win));
+		addData(new WorkbenchEvent(Calendar.getInstance(), duration, part));
 	}
 
 	@Override
@@ -121,7 +121,7 @@ public class PartTracker extends Tracker<WorkbenchEvent> implements IPartListene
 		System.err.println("Window closed.");
 		window.getPartService().removePartListener(this);
 		if (window.getPartService().getActivePart() != null) {
-			endSession(window);
+			endSession(window.getPartService().getActivePart());
 		}
 	}
 
@@ -129,7 +129,7 @@ public class PartTracker extends Tracker<WorkbenchEvent> implements IPartListene
 	public void windowDeactivated(IWorkbenchWindow window) {
 		System.err.println("Window deactivated.");
 		if (window.getPartService().getActivePart() != null) {
-			endSession(window);
+			endSession(window.getPartService().getActivePart());
 		}
 	}
 
@@ -158,8 +158,8 @@ public class PartTracker extends Tracker<WorkbenchEvent> implements IPartListene
 	}
 
 	@Override
-	protected IStorer<WorkbenchEvent> createDataStorer() {
-		return new WorkbenchEventStorer<WorkbenchEvent>();
+	protected WorkbenchEventStorer createDataStorer() {
+		return new WorkbenchEventStorer();
 	}
 
 }

@@ -7,6 +7,7 @@ Bundle-Activator: rabbit.tracking.ui.pages.Activator
 Require-Bundle: org.eclipse.core.runtime,
  rabbit.tracking.ui,
  org.eclipse.ui,
- rabbit.tracking.storage
+ rabbit.tracking.storage,
+ rabbit.tracking.event
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6

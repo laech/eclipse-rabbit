@@ -27,7 +27,7 @@ import rabbit.tracking.storage.xml.schema.CommandEventType;
 
 public class CommandEventStorerTest extends AbstractXmlStorerTest<CommandEvent, CommandEventType, CommandEventListType> {
 
-	private CommandEventStorer<CommandEvent> storer = create();
+	private CommandEventStorer storer = create();
 	
 	/**
 	 * Gets the workbench command service.
@@ -40,8 +40,8 @@ public class CommandEventStorerTest extends AbstractXmlStorerTest<CommandEvent, 
 	}
 	
 	@Override
-	protected CommandEventStorer<CommandEvent> create() {
-		return new CommandEventStorer<CommandEvent>();
+	protected CommandEventStorer create() {
+		return new CommandEventStorer();
 	}
 	
 	private ExecutionEvent createExecutionEvent(String commandId) {
