@@ -6,7 +6,8 @@ Bundle-Version: 0.1.0.qualifier
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  rabbit.tracking.event,
- org.junit4
+ org.junit4,
+ org.eclipse.core.resources
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: rabbit.tracking.storage.xml
 Bundle-ActivationPolicy: lazy

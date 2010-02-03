@@ -28,6 +28,9 @@ public class ViewComparator extends ViewerComparator {
 			text2 = ((IViewCategory) e2).getLabel();
 		}
 
+		text1 = text1.replace("&", "");
+		text2 = text2.replace("&", "");
+		
 		if (text1.equals(GENERNAL_CATEGORY) || text2.equals(OTHER_CATEGORY)) {
 			return -1;
 		} else if (text1.equals(OTHER_CATEGORY)

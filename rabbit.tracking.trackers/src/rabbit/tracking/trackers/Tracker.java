@@ -76,10 +76,6 @@ public abstract class Tracker<T> implements ITracker<T> {
 				doEnable();
 			} else {
 				doDisable();
-				
-				//TODO
-				
-				saveData();
 			}
 			isEnabled = enable;
 		}

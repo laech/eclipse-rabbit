@@ -116,12 +116,6 @@ public abstract class AbstractXmlStorerTest<E extends DiscreteEvent, T, S extend
 	}
 
 	@Test
-	public abstract void testInsertCollection();
-
-	@Test
-	public abstract void testInsert();
-
-	@Test
 	public void testIsSameDate() {
 		
 		try {
@@ -198,21 +192,39 @@ public abstract class AbstractXmlStorerTest<E extends DiscreteEvent, T, S extend
 	}
 	
 	@Test
+	public void testGetDataStore() {
+		assertNotNull(storer.getDataStore());
+	}
+	
+	@Test
 	public abstract void testHasSameId_workbenchEventTypeAndEvent();
+
 	@Test
 	public abstract void testHasSameId_workbenchEventTypeAndWorkbenchEventType();
+
 	@Test
 	public abstract void testMerge_xmlListTypeAndEvent();
+
 	@Test
 	public abstract void testMerge_xmlListTypeAndxmlListType();
+
 	@Test
 	public abstract void testMerge_xmlTypeAndEvent();
+
 	@Test
 	public abstract void testMerge_xmlTypeAndXmlType();
+
 	@Test
 	public abstract void testNewXmlTypeHolderXMLGregorianCalendar();
+
 	@Test
 	public abstract void testNewXmlTypeT();
+
+	@Test
+	public abstract void testInsertCollection();
+
+	@Test
+	public abstract void testInsert();
 	
 	protected abstract E createEvent();
 

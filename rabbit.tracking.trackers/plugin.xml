@@ -13,6 +13,11 @@
             id="rabbit.tracking.trackers.partTracker"
             name="Part Tracker">
       </tracker>
+      <tracker
+            class="rabbit.tracking.trackers.FileTracker"
+            id="rabbit.tracking.trackers.fileTracker"
+            name="File Tracker">
+      </tracker>
    </extension>
 
 </plugin>

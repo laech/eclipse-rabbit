@@ -17,16 +17,16 @@ import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for partEventListType complex type.
+ * <p>Java class for perspectiveEventListType complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="partEventListType">
+ * &lt;complexType name="perspectiveEventListType">
  *   &lt;complexContent>
  *     &lt;extension base="{}eventGroupType">
  *       &lt;sequence>
- *         &lt;element name="partEvent" type="{}partEventType" maxOccurs="unbounded"/>
+ *         &lt;element name="perspectiveEvent" type="{}perspectiveEventType" maxOccurs="unbounded"/>
  *       &lt;/sequence>
  *     &lt;/extension>
  *   &lt;/complexContent>
@@ -36,43 +36,43 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "partEventListType", propOrder = {
-    "partEvent"
+@XmlType(name = "perspectiveEventListType", propOrder = {
+    "perspectiveEvent"
 })
-public class PartEventListType
+public class PerspectiveEventListType
     extends EventGroupType
 {
 
     @XmlElement(required = true)
-    protected List<PartEventType> partEvent;
+    protected List<PerspectiveEventType> perspectiveEvent;
 
     /**
-     * Gets the value of the partEvent property.
+     * Gets the value of the perspectiveEvent property.
      * 
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
-     * This is why there is not a <CODE>set</CODE> method for the partEvent property.
+     * This is why there is not a <CODE>set</CODE> method for the perspectiveEvent property.
      * 
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
-     *    getPartEvent().add(newItem);
+     *    getPerspectiveEvent().add(newItem);
      * </pre>
      * 
      * 
      * <p>
      * Objects of the following type(s) are allowed in the list
-     * {@link PartEventType }
+     * {@link PerspectiveEventType }
      * 
      * 
      */
-    public List<PartEventType> getPartEvent() {
-        if (partEvent == null) {
-            partEvent = new ArrayList<PartEventType>();
+    public List<PerspectiveEventType> getPerspectiveEvent() {
+        if (perspectiveEvent == null) {
+            perspectiveEvent = new ArrayList<PerspectiveEventType>();
         }
-        return this.partEvent;
+        return this.perspectiveEvent;
     }
 
 }

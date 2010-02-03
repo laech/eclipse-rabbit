@@ -8,6 +8,8 @@
 		<xs:sequence>
 			<xs:element name="commandEvents" type="commandEventListType" maxOccurs="unbounded" />
 			<xs:element name="partEvents" type="partEventListType" maxOccurs="unbounded" />
+			<xs:element name="fileEvents" type="fileEventListType" maxOccurs="unbounded" />
+			<xs:element name="perspectiveEvents" type="perspectiveEventListType" maxOccurs="unbounded" />
 		</xs:sequence>
 	</xs:complexType>
 
@@ -26,7 +28,7 @@
 		<xs:attribute name="count" type="countType" use="required" />
 	</xs:complexType>
 
-	<!-- WorkbenchPart Events -->
+	<!-- WorkbenchPart Events: -->
 	<xs:complexType name="partEventListType">
 		<xs:complexContent>
 			<xs:extension base="eventGroupType">
@@ -41,6 +43,21 @@
 		<xs:attribute ref="duration" use="required" />
 	</xs:complexType>
 	
+	<!-- Perspective Events: -->
+	<xs:complexType name="perspectiveEventListType">
+		<xs:complexContent>
+			<xs:extension base="eventGroupType">
+				<xs:sequence>
+					<xs:element name="perspectiveEvent" type="perspectiveEventType" maxOccurs="unbounded" />
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:complexType name="perspectiveEventType">
+		<xs:attribute name="perspectiveId" type="xs:string" use="required" />
+		<xs:attribute ref="duration" use="required"></xs:attribute>
+	</xs:complexType>
+	
 	<!-- File Events: -->
 	<xs:complexType name="fileEventListType">
 		<xs:complexContent>
@@ -52,7 +69,7 @@
 		</xs:complexContent>
 	</xs:complexType>
 	<xs:complexType name="fileEventType">
-		<xs:attribute name="fileId" type="xs:string" use="required" />
+		<xs:attribute name="filePath" type="xs:string" use="required" />
 		<xs:attribute ref="duration" use="required" />
 	</xs:complexType>
 	

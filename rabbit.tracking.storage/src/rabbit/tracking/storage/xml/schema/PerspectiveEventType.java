@@ -15,15 +15,15 @@ import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for partEventType complex type.
+ * <p>Java class for perspectiveEventType complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="partEventType">
+ * &lt;complexType name="perspectiveEventType">
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *       &lt;attribute name="partId" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
+ *       &lt;attribute name="perspectiveId" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
  *       &lt;attribute ref="{}duration use="required""/>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -33,36 +33,36 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "partEventType")
-public class PartEventType {
+@XmlType(name = "perspectiveEventType")
+public class PerspectiveEventType {
 
     @XmlAttribute(required = true)
-    protected String partId;
+    protected String perspectiveId;
     @XmlAttribute(required = true)
     protected long duration;
 
     /**
-     * Gets the value of the partId property.
+     * Gets the value of the perspectiveId property.
      * 
      * @return
      *     possible object is
      *     {@link String }
      *     
      */
-    public String getPartId() {
-        return partId;
+    public String getPerspectiveId() {
+        return perspectiveId;
     }
 
     /**
-     * Sets the value of the partId property.
+     * Sets the value of the perspectiveId property.
      * 
      * @param value
      *     allowed object is
      *     {@link String }
      *     
      */
-    public void setPartId(String value) {
-        this.partId = value;
+    public void setPerspectiveId(String value) {
+        this.perspectiveId = value;
     }
 
     /**

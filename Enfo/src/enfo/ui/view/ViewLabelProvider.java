@@ -50,9 +50,9 @@ public class ViewLabelProvider extends LabelProvider {
 	@Override
 	public String getText(Object element) {
 		if (element instanceof IViewDescriptor) {
-			return ((IViewDescriptor) element).getLabel();
+			return ((IViewDescriptor) element).getLabel().replace("&", "");
 		} else if (element instanceof IViewCategory) {
-			return ((IViewCategory) element).getLabel();
+			return ((IViewCategory) element).getLabel().replace("&", "");
 		}
 		return null;
 	}
