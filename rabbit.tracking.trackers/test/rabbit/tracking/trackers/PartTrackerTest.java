@@ -15,9 +15,9 @@ import org.eclipse.ui.PlatformUI;
 import org.junit.Before;
 import org.junit.Test;
 
-import rabbit.tracking.event.WorkbenchEvent;
+import rabbit.tracking.event.PartEvent;
 
-public class PartTrackerTest extends TrackerTest<WorkbenchEvent> {
+public class PartTrackerTest extends TrackerTest<PartEvent> {
 
 	private IWorkbenchWindow win;
 	private PartTracker tracker;
@@ -58,7 +58,7 @@ public class PartTrackerTest extends TrackerTest<WorkbenchEvent> {
 		TimeUnit.MILLISECONDS.sleep(35);
 		tracker.setEnabled(false);
 		Calendar end = Calendar.getInstance();
-		WorkbenchEvent event = tracker.getData().iterator().next();
+		PartEvent event = tracker.getData().iterator().next();
 		assertAccuracy(event, newPers, newPart, 35, 1, start, end);
 
 		// Test partActivated then partDeactivated:
@@ -151,7 +151,7 @@ public class PartTrackerTest extends TrackerTest<WorkbenchEvent> {
 		assertAccuracy(event, newPers, newPart, 50, 1, start, end);
 	}
 
-	private void assertAccuracy(WorkbenchEvent event,
+	private void assertAccuracy(PartEvent event,
 			IPerspectiveDescriptor pers, IWorkbenchPart part,
 			long durationInMillis, int size, Calendar start, Calendar end) {
 
@@ -169,8 +169,8 @@ public class PartTrackerTest extends TrackerTest<WorkbenchEvent> {
 	}
 
 	@Override
-	protected WorkbenchEvent createEvent() {
-		return new WorkbenchEvent(Calendar.getInstance(), 10,
+	protected PartEvent createEvent() {
+		return new PartEvent(Calendar.getInstance(), 10,
 				getWorkbenchWindow().getPartService().getActivePart());
 	}
 }

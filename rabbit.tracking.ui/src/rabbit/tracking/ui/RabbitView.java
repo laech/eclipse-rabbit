@@ -1,5 +1,7 @@
 package rabbit.tracking.ui;
 
+import java.text.DateFormat;
+import java.text.Format;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Observable;
@@ -85,6 +87,7 @@ public class RabbitView extends ViewPart implements Observer {
 		displayComposite.setLayout(stackLayout);
 		displayComposite.setLayoutData(rightData);
 		
+		updateMessage(DisplayPreference.getInstance());
 	}
 
 	protected void display(IPage page) {
@@ -125,15 +128,24 @@ public class RabbitView extends ViewPart implements Observer {
 		if (!(o instanceof DisplayPreference)) {
 			return;
 		}
+		
+		DisplayPreference p = (DisplayPreference) o;
+		updateMessage(p);
 
 		// Mark all invisible pages as "not yet updated":
 		for (Map.Entry<IPage, Composite> entry : pages.entrySet()) {
 			boolean isVisible = stackLayout.topControl == entry.getValue();
 			if (isVisible) {
-				entry.getKey().update((DisplayPreference) o);
+				entry.getKey().update(p);
 			}
 			pageUpdateStatuses.put(entry.getKey(), Boolean.valueOf(isVisible));
 		}
 	}
 
+	private void updateMessage(DisplayPreference p) {
+		Format formatter = DateFormat.getDateInstance(DateFormat.MEDIUM);
+		setContentDescription("Showing data: "
+				+ formatter.format(p.getStartDate().getTime()) + " - "
+				+ formatter.format(p.getEndDate().getTime()));
+	}
 }

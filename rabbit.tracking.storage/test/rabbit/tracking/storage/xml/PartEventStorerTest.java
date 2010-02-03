@@ -18,15 +18,15 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 
-import rabbit.tracking.event.WorkbenchEvent;
-import rabbit.tracking.storage.xml.schema.WorkbenchEventListType;
-import rabbit.tracking.storage.xml.schema.WorkbenchEventType;
+import rabbit.tracking.event.PartEvent;
+import rabbit.tracking.storage.xml.schema.PartEventListType;
+import rabbit.tracking.storage.xml.schema.PartEventType;
 
-public class WorkbenchEventStorerTest extends AbstractXmlStorerTest<WorkbenchEvent, WorkbenchEventType, WorkbenchEventListType> {
+public class PartEventStorerTest extends AbstractXmlStorerTest<PartEvent, PartEventType, PartEventListType> {
 
-	private WorkbenchEvent event;
+	private PartEvent event;
 	
-	private WorkbenchEventStorer storer = create();
+	private PartEventStorer storer = create();
 	
 	private IWorkbenchWindow win = getWorkbenchWindow(); 
 	
@@ -44,14 +44,14 @@ public class WorkbenchEventStorerTest extends AbstractXmlStorerTest<WorkbenchEve
 	}
 	
 	@Override
-	protected WorkbenchEvent createEvent() {
+	protected PartEvent createEvent() {
 		final IWorkbench wb = PlatformUI.getWorkbench();
 		wb.getDisplay().syncExec(new Runnable() {
 
 			@Override
 			public void run() {
 				
-				event = new WorkbenchEvent(Calendar.getInstance(), 10, 
+				event = new PartEvent(Calendar.getInstance(), 10, 
 						wb.getActiveWorkbenchWindow().getPartService().getActivePart());
 			}			
 		});
@@ -61,10 +61,10 @@ public class WorkbenchEventStorerTest extends AbstractXmlStorerTest<WorkbenchEve
 	@Override
 	public void testHasSameId_workbenchEventTypeAndEvent() {
 		
-		WorkbenchEventType x1 = OBJECT_FACTORY.createWorkbenchEventType();
+		PartEventType x1 = OBJECT_FACTORY.createPartEventType();
 		x1.setPartId("paId");
 		
-		WorkbenchEventType x2 = OBJECT_FACTORY.createWorkbenchEventType();
+		PartEventType x2 = OBJECT_FACTORY.createPartEventType();
 		x2.setPartId(x1.getPartId());
 		
 		assertTrue(storer.hasSameId(x1, x2));
@@ -76,9 +76,9 @@ public class WorkbenchEventStorerTest extends AbstractXmlStorerTest<WorkbenchEve
 	@Override
 	public void testHasSameId_workbenchEventTypeAndWorkbenchEventType() {
 
-		WorkbenchEvent e = createEvent();
+		PartEvent e = createEvent();
 
-		WorkbenchEventType x = OBJECT_FACTORY.createWorkbenchEventType();
+		PartEventType x = OBJECT_FACTORY.createPartEventType();
 		x.setPartId(e.getWorkbenchPart().getSite().getId());
 
 		assertTrue(storer.hasSameId(x, e));
@@ -90,41 +90,41 @@ public class WorkbenchEventStorerTest extends AbstractXmlStorerTest<WorkbenchEve
 	@Override
 	public void testMerge_xmlListTypeAndEvent() {
 		
-		WorkbenchEvent e = createEvent();
-		WorkbenchEventType x = storer.newXmlType(e);
+		PartEvent e = createEvent();
+		PartEventType x = storer.newXmlType(e);
 		
-		WorkbenchEventListType main = OBJECT_FACTORY.createWorkbenchEventListType();
-		main.getWorkbenchEvent().add(x);
+		PartEventListType main = OBJECT_FACTORY.createPartEventListType();
+		main.getPartEvent().add(x);
 		
 		long totalDuration = x.getDuration() * 2;
 		storer.merge(main, e);
-		assertEquals(1, main.getWorkbenchEvent().size());
-		assertEquals(totalDuration, main.getWorkbenchEvent().get(0).getDuration());
+		assertEquals(1, main.getPartEvent().size());
+		assertEquals(totalDuration, main.getPartEvent().get(0).getDuration());
 	}
 
 	@Override
 	public void testMerge_xmlListTypeAndxmlListType() {
 		
-		WorkbenchEvent e = createEvent();
-		WorkbenchEventType x = storer.newXmlType(e);
+		PartEvent e = createEvent();
+		PartEventType x = storer.newXmlType(e);
 		
-		WorkbenchEventListType main = OBJECT_FACTORY.createWorkbenchEventListType();
-		main.getWorkbenchEvent().add(x);
+		PartEventListType main = OBJECT_FACTORY.createPartEventListType();
+		main.getPartEvent().add(x);
 		
-		WorkbenchEventListType tmp = OBJECT_FACTORY.createWorkbenchEventListType();
-		tmp.getWorkbenchEvent().add(x);
+		PartEventListType tmp = OBJECT_FACTORY.createPartEventListType();
+		tmp.getPartEvent().add(x);
 		
 		long totalDuration = x.getDuration() * 2;
 		storer.merge(main, tmp);
-		assertEquals(1, main.getWorkbenchEvent().size());
-		assertEquals(totalDuration, main.getWorkbenchEvent().get(0).getDuration());
+		assertEquals(1, main.getPartEvent().size());
+		assertEquals(totalDuration, main.getPartEvent().get(0).getDuration());
 	}
 
 	@Override
 	public void testMerge_xmlTypeAndEvent() {
 		
-		WorkbenchEvent e = createEvent();
-		WorkbenchEventType main = storer.newXmlType(e);
+		PartEvent e = createEvent();
+		PartEventType main = storer.newXmlType(e);
 		
 		long totalDuration = e.getDuration() + main.getDuration();
 		storer.merge(main, e);
@@ -134,9 +134,9 @@ public class WorkbenchEventStorerTest extends AbstractXmlStorerTest<WorkbenchEve
 	@Override
 	public void testMerge_xmlTypeAndXmlType() {
 		
-		WorkbenchEvent e = createEvent();
-		WorkbenchEventType main = storer.newXmlType(e);
-		WorkbenchEventType tmp = storer.newXmlType(e);
+		PartEvent e = createEvent();
+		PartEventType main = storer.newXmlType(e);
+		PartEventType tmp = storer.newXmlType(e);
 		
 		long totalDuration = main.getDuration() + tmp.getDuration();
 		storer.merge(main, tmp);
@@ -146,8 +146,8 @@ public class WorkbenchEventStorerTest extends AbstractXmlStorerTest<WorkbenchEve
 	@Override
 	public void testNewXmlTypeT() {
 		
-		WorkbenchEvent e = createEvent();
-		WorkbenchEventType xml = storer.newXmlType(e);
+		PartEvent e = createEvent();
+		PartEventType xml = storer.newXmlType(e);
 		
 		assertEquals(xml.getPartId(), e.getWorkbenchPart().getSite().getId());
 		assertEquals(xml.getDuration(), e.getDuration());
@@ -157,31 +157,31 @@ public class WorkbenchEventStorerTest extends AbstractXmlStorerTest<WorkbenchEve
 	public void testNewXmlTypeHolderXMLGregorianCalendar() {
 		
 		Calendar cal = Calendar.getInstance();
-		WorkbenchEventListType type = storer.newXmlTypeHolder(toXMLGregorianCalendarDate(cal));
+		PartEventListType type = storer.newXmlTypeHolder(toXMLGregorianCalendarDate(cal));
 		assertTrue(isSameDate(cal, type.getDate()));
 	}
 
 	@Override
-	protected WorkbenchEventStorer create() {
-		return new WorkbenchEventStorer();
+	protected PartEventStorer create() {
+		return new PartEventStorer();
 	}
 
 	@Override
 	public void testCommit() {
 		
 		try {
-			WorkbenchEvent e = createEvent();
+			PartEvent e = createEvent();
 			storer.insert(e);
 			storer.commit();
 			assertTrue(dataFile.exists());
 
-			List<WorkbenchEventListType> allEvents = storer.read(dataFile).getWorkbenchEvents();
+			List<PartEventListType> allEvents = storer.getDataStore().read(dataFile).getPartEvents();
 			assertEquals(1, allEvents.size());
 
-			WorkbenchEventListType list = allEvents.get(0);
-			assertEquals(1, list.getWorkbenchEvent().size());
+			PartEventListType list = allEvents.get(0);
+			assertEquals(1, list.getPartEvent().size());
 
-			WorkbenchEventType event = list.getWorkbenchEvent().get(0);
+			PartEventType event = list.getPartEvent().get(0);
 			assertEquals(e.getDuration(), event.getDuration());
 			assertEquals(e.getWorkbenchPart().getSite().getId(), event.getPartId());
 
@@ -196,13 +196,13 @@ public class WorkbenchEventStorerTest extends AbstractXmlStorerTest<WorkbenchEve
 			storer.insert(e);
 			storer.commit();
 
-			allEvents = storer.read(dataFile).getWorkbenchEvents();
+			allEvents = storer.getDataStore().read(dataFile).getPartEvents();
 			assertEquals(1, allEvents.size());
 
 			list = allEvents.get(0);
-			assertEquals(1, list.getWorkbenchEvent().size());
+			assertEquals(1, list.getPartEvent().size());
 
-			event = list.getWorkbenchEvent().get(0);
+			event = list.getPartEvent().get(0);
 			assertEquals(totalDuration, event.getDuration());
 			assertEquals(e.getWorkbenchPart().getSite().getId(), event.getPartId());
 			
@@ -217,23 +217,23 @@ public class WorkbenchEventStorerTest extends AbstractXmlStorerTest<WorkbenchEve
 			// Then open it.
 			IWorkbenchPart newPart = getWorkbenchWindow().getActivePage().showView(partId);
 
-			WorkbenchEvent e2 = createEvent();
+			PartEvent e2 = createEvent();
 			e2.setWorkbenchPart(newPart);
 			storer.insert(e2);
 			storer.commit();
 			
-			allEvents = storer.read(dataFile).getWorkbenchEvents();
+			allEvents = storer.getDataStore().read(dataFile).getPartEvents();
 			assertEquals(1, allEvents.size());
 
 			list = allEvents.get(0);
-			assertEquals(2, list.getWorkbenchEvent().size());
+			assertEquals(2, list.getPartEvent().size());
 
-			WorkbenchEventType type = list.getWorkbenchEvent().get(0);
+			PartEventType type = list.getPartEvent().get(0);
 			if (storer.hasSameId(event, type)) {
-				type = list.getWorkbenchEvent().get(1);
-				event = list.getWorkbenchEvent().get(0);
+				type = list.getPartEvent().get(1);
+				event = list.getPartEvent().get(0);
 			} else {
-				event = list.getWorkbenchEvent().get(0);
+				event = list.getPartEvent().get(0);
 			}
 			
 			assertEquals(e2.getWorkbenchPart().getSite().getId(), type.getPartId());
@@ -252,7 +252,7 @@ public class WorkbenchEventStorerTest extends AbstractXmlStorerTest<WorkbenchEve
 			storer.insert(e);
 			storer.commit();
 			
-			allEvents = storer.read(dataFile).getWorkbenchEvents();
+			allEvents = storer.getDataStore().read(dataFile).getPartEvents();
 			assertEquals(2, allEvents.size());
 
 		} catch (Exception e) {
@@ -265,19 +265,19 @@ public class WorkbenchEventStorerTest extends AbstractXmlStorerTest<WorkbenchEve
 	public void testInsert() {
 		
 		try {
-			Collection<WorkbenchEventListType> data = getDataField(storer);
+			Collection<PartEventListType> data = getDataField(storer);
 			
 			assertEquals(0, data.size());
 			
 			// Insert a new event:
 			
-			WorkbenchEvent e = createEvent();
+			PartEvent e = createEvent();
 			storer.insert(e);
 			
 			assertEquals(1, data.size());
-			assertEquals(1, data.iterator().next().getWorkbenchEvent().size());
+			assertEquals(1, data.iterator().next().getPartEvent().size());
 			
-			WorkbenchEventType type = data.iterator().next().getWorkbenchEvent().get(0);
+			PartEventType type = data.iterator().next().getPartEvent().get(0);
 			assertEquals(e.getWorkbenchPart().getSite().getId(), type.getPartId());
 			assertEquals(e.getDuration(), type.getDuration());
 			
@@ -289,9 +289,9 @@ public class WorkbenchEventStorerTest extends AbstractXmlStorerTest<WorkbenchEve
 			storer.insert(e);
 			
 			assertEquals(1, data.size());
-			assertEquals(1, data.iterator().next().getWorkbenchEvent().size());
+			assertEquals(1, data.iterator().next().getPartEvent().size());
 			
-			type = data.iterator().next().getWorkbenchEvent().get(0);
+			type = data.iterator().next().getPartEvent().get(0);
 			assertEquals(e.getWorkbenchPart().getSite().getId(), type.getPartId());
 			assertEquals(totalDuration, type.getDuration());
 			
@@ -309,9 +309,9 @@ public class WorkbenchEventStorerTest extends AbstractXmlStorerTest<WorkbenchEve
 			storer.insert(e);
 			
 			assertEquals(1, data.size());
-			assertEquals(2, data.iterator().next().getWorkbenchEvent().size());
+			assertEquals(2, data.iterator().next().getPartEvent().size());
 			
-			type = data.iterator().next().getWorkbenchEvent().get(1);
+			type = data.iterator().next().getPartEvent().get(1);
 			assertEquals(e.getWorkbenchPart().getSite().getId(), type.getPartId());
 			assertEquals(e.getDuration(), type.getDuration());
 			
@@ -335,13 +335,13 @@ public class WorkbenchEventStorerTest extends AbstractXmlStorerTest<WorkbenchEve
 	@Override
 	public void testInsertCollection() {
 		try {
-			Collection<WorkbenchEventListType> data = getDataField(storer);
+			Collection<PartEventListType> data = getDataField(storer);
 			
 			assertEquals(0, data.size());
 			
-			WorkbenchEvent e = null;
-			WorkbenchEventType type = null;
-			List<WorkbenchEvent> list = new ArrayList<WorkbenchEvent>();
+			PartEvent e = null;
+			PartEventType type = null;
+			List<PartEvent> list = new ArrayList<PartEvent>();
 			
 			{// Insert a new event:
 				e = createEvent();
@@ -349,9 +349,9 @@ public class WorkbenchEventStorerTest extends AbstractXmlStorerTest<WorkbenchEve
 				storer.insert(list);
 
 				assertEquals(1, data.size());
-				assertEquals(1, data.iterator().next().getWorkbenchEvent().size());
+				assertEquals(1, data.iterator().next().getPartEvent().size());
 
-				type = data.iterator().next().getWorkbenchEvent().get(0);
+				type = data.iterator().next().getPartEvent().get(0);
 				assertEquals(e.getWorkbenchPart().getSite().getId(), type.getPartId());
 				assertEquals(e.getDuration(), type.getDuration());
 			}
@@ -359,7 +359,7 @@ public class WorkbenchEventStorerTest extends AbstractXmlStorerTest<WorkbenchEve
 			{// Insert collection with two elements:
 				// Make a new event with the same ids:
 				long totalDuration = e.getDuration();
-				WorkbenchEvent eWithSameId = createEvent();
+				PartEvent eWithSameId = createEvent();
 				totalDuration += eWithSameId.getDuration();
 
 
@@ -372,7 +372,7 @@ public class WorkbenchEventStorerTest extends AbstractXmlStorerTest<WorkbenchEve
 				// Then open it.
 				IWorkbenchPart newPart = getWorkbenchWindow().getActivePage().showView(partId);
 
-				WorkbenchEvent eNew = createEvent();
+				PartEvent eNew = createEvent();
 				eNew.setWorkbenchPart(newPart);
 
 				list.clear();
@@ -381,13 +381,13 @@ public class WorkbenchEventStorerTest extends AbstractXmlStorerTest<WorkbenchEve
 				storer.insert(list);
 
 				assertEquals(1, data.size());
-				assertEquals(2, data.iterator().next().getWorkbenchEvent().size());
+				assertEquals(2, data.iterator().next().getPartEvent().size());
 
-				type = data.iterator().next().getWorkbenchEvent().get(0);
+				type = data.iterator().next().getPartEvent().get(0);
 				assertEquals(eWithSameId.getWorkbenchPart().getSite().getId(), type.getPartId());
 				assertEquals(totalDuration, type.getDuration());
 
-				type = data.iterator().next().getWorkbenchEvent().get(1);
+				type = data.iterator().next().getPartEvent().get(1);
 				assertEquals(eNew.getWorkbenchPart().getSite().getId(), type.getPartId());
 				assertEquals(eNew.getDuration(), type.getDuration());
 			}

@@ -4,8 +4,20 @@
    <extension
          point="rabbit.tracking.ui.pages">
       <page
-            class="rabbit.tracking.ui.pages.CommandPage"
-            name="Sample Page">
+            class="rabbit.tracking.ui.pages.EclipseUsagePage"
+            name="Eclipse Usage">
+         <page
+               class="rabbit.tracking.ui.pages.CommandPage"
+               name="Commands">
+         </page>
+         <page
+               class="rabbit.tracking.ui.pages.PartPage"
+               name="Workbench Tools">
+         </page>
+         <page
+               class="rabbit.tracking.ui.pages.SessionPage"
+               name="Sessions">
+         </page>
       </page>
    </extension>
 

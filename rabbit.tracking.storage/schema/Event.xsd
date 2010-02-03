@@ -7,7 +7,7 @@
 	<xs:complexType name="eventListType">
 		<xs:sequence>
 			<xs:element name="commandEvents" type="commandEventListType" maxOccurs="unbounded" />
-			<xs:element name="workbenchEvents" type="workbenchEventListType" maxOccurs="unbounded" />
+			<xs:element name="partEvents" type="partEventListType" maxOccurs="unbounded" />
 		</xs:sequence>
 	</xs:complexType>
 
@@ -26,17 +26,17 @@
 		<xs:attribute name="count" type="countType" use="required" />
 	</xs:complexType>
 
-	<!-- Workbench Events -->
-	<xs:complexType name="workbenchEventListType">
+	<!-- WorkbenchPart Events -->
+	<xs:complexType name="partEventListType">
 		<xs:complexContent>
 			<xs:extension base="eventGroupType">
 				<xs:sequence>
-					<xs:element name="workbenchEvent" type="workbenchEventType" maxOccurs="unbounded" />
+					<xs:element name="partEvent" type="partEventType" maxOccurs="unbounded" />
 				</xs:sequence>
 			</xs:extension>
 		</xs:complexContent>
 	</xs:complexType>
-	<xs:complexType name="workbenchEventType">
+	<xs:complexType name="partEventType">
 		<xs:attribute name="partId" type="xs:string" use="required" />
 		<xs:attribute ref="duration" use="required" />
 	</xs:complexType>

@@ -10,10 +10,11 @@ import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 
-public abstract class TableColumnComparator extends ViewerComparator implements SelectionListener {
+public class TableColumnComparator extends ViewerComparator implements SelectionListener {
 
-	public int sortDirection;
-	public TableViewer viewer;
+	private int sortDirection;
+	private TableViewer viewer;
+	private TableColumn curColumn;
 
 	public TableColumnComparator(TableViewer viewer) {
 		sortDirection = SWT.NONE;
@@ -26,19 +27,20 @@ public abstract class TableColumnComparator extends ViewerComparator implements 
 
 	@Override
 	public void widgetSelected(SelectionEvent e) {
-		TableColumn curColumn = (TableColumn) e.widget;
+		curColumn = (TableColumn) e.widget;
 		Table table = curColumn.getParent();
 		TableColumn preColumn = table.getSortColumn();
 		sortDirection = table.getSortDirection();
+		
 		if (preColumn == curColumn) {
 			sortDirection = (sortDirection == SWT.UP) ? SWT.DOWN : SWT.UP;
-			viewer.refresh();
 		} else {
 			table.setSortColumn(curColumn);
 			sortDirection = SWT.UP;
 			viewer.setComparator(this);
 		}
 		table.setSortDirection(sortDirection);
+		viewer.refresh();
 	}
 
 	@Override
@@ -60,5 +62,7 @@ public abstract class TableColumnComparator extends ViewerComparator implements 
 		return value; 
 	}
 
-	protected abstract int getColumnIndex();
+	protected int getColumnIndex() {
+		return viewer.getTable().indexOf(curColumn);
+	}
 }

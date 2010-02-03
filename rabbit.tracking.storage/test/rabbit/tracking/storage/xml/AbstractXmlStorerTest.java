@@ -35,7 +35,7 @@ public abstract class AbstractXmlStorerTest<E extends DiscreteEvent, T, S extend
 
 	protected abstract AbstractXmlStorer<E, T, S> create();
 	
-	protected File dataFile = storer.getDataFile(Calendar.getInstance());
+	protected File dataFile = storer.getDataStore().getDataFile(Calendar.getInstance());
 	
 	@SuppressWarnings("unchecked")
 	protected Collection<S> getDataField(AbstractXmlStorer<E, T, S> s) throws Exception {
@@ -70,7 +70,7 @@ public abstract class AbstractXmlStorerTest<E extends DiscreteEvent, T, S extend
 
 	@Test
 	public void testGetDataFile() {
-		assertNotNull(storer.getDataFile(Calendar.getInstance()));
+		assertNotNull(storer.getDataStore().getDataFile(Calendar.getInstance()));
 	}
 
 	@Test
@@ -86,36 +86,26 @@ public abstract class AbstractXmlStorerTest<E extends DiscreteEvent, T, S extend
 		insideUpperBound.add(Calendar.MONTH, -1);
 		
 		Set<File> files = new HashSet<File>();
-		files.add(storer.getDataFile(lowerBound));
-		files.add(storer.getDataFile(upperBound));
-		files.add(storer.getDataFile(insideLowerBound));
-		files.add(storer.getDataFile(insideUpperBound));
+		files.add(storer.getDataStore().getDataFile(lowerBound));
+		files.add(storer.getDataStore().getDataFile(upperBound));
+		files.add(storer.getDataStore().getDataFile(insideLowerBound));
+		files.add(storer.getDataStore().getDataFile(insideUpperBound));
 		for (File f : files) {
 			f.createNewFile();
 		}
 		
-		List<File> returnedFiles = storer.getDataFiles(lowerBound, upperBound);
+		List<File> returnedFiles = storer.getDataStore().getDataFiles(lowerBound, upperBound);
 		assertEquals(files.size(), returnedFiles.size());
 		for (File f : returnedFiles) {
 			assertTrue(files.contains(f));
 		}
 		
-		assertEquals(0, storer.getDataFiles(upperBound, lowerBound).size());
+		assertEquals(0, storer.getDataStore().getDataFiles(upperBound, lowerBound).size());
 		
 		for (File f : files) {
 			f.delete();
 		}
-		assertEquals(0, storer.getDataFiles(lowerBound, upperBound).size());
-	}
-
-	@Test
-	public void testGetFileNamePrefix() {
-		assertNotNull(storer.getFileNamePrefix());
-	}
-
-	@Test
-	public void testGetStorageLocation() {
-		assertNotNull(storer.getStorageLocation());
+		assertEquals(0, storer.getDataStore().getDataFiles(lowerBound, upperBound).size());
 	}
 
 	@Test
@@ -172,14 +162,14 @@ public abstract class AbstractXmlStorerTest<E extends DiscreteEvent, T, S extend
 	public void testRead() throws IOException {
 		
 		Calendar cal = new GregorianCalendar(1, 1, 1);
-		File f = storer.getDataFile(cal);
+		File f = storer.getDataStore().getDataFile(cal);
 		
 		if (f.exists()) {
-			assertNotNull(storer.read(f));
+			assertNotNull(storer.getDataStore().read(f));
 			
 		} else {
 			f.createNewFile();
-			assertNotNull(storer.read(f));
+			assertNotNull(storer.getDataStore().read(f));
 			f.delete();
 		}
 	}
@@ -202,7 +192,7 @@ public abstract class AbstractXmlStorerTest<E extends DiscreteEvent, T, S extend
 		File f = new File(System.getProperty("user.home") + File.separator + "tmpTestFile.xml");
 		assertFalse(f.exists());
 		
-		storer.write(AbstractXmlStorer.OBJECT_FACTORY.createEventListType(), f);
+		storer.getDataStore().write(AbstractXmlStorer.OBJECT_FACTORY.createEventListType(), f);
 		assertTrue(f.exists());
 		f.delete();
 	}

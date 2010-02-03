@@ -4,11 +4,11 @@ import java.util.Calendar;
 
 import org.eclipse.ui.IWorkbenchPart;
 
-public class WorkbenchEvent extends ContinuousEvent {
+public class PartEvent extends ContinuousEvent {
 
 	private IWorkbenchPart workbenchPart;
 	
-	public WorkbenchEvent(Calendar time, long duration, IWorkbenchPart part) {
+	public PartEvent(Calendar time, long duration, IWorkbenchPart part) {
 		super(time, duration);
 		setWorkbenchPart(part);
 	}

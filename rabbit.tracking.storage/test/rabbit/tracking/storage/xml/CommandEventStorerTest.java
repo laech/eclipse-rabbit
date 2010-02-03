@@ -63,7 +63,7 @@ public class CommandEventStorerTest extends AbstractXmlStorerTest<CommandEvent, 
 			storer.commit();
 			assertTrue(dataFile.exists());
 
-			List<CommandEventListType> allEvents = storer.read(dataFile).getCommandEvents();
+			List<CommandEventListType> allEvents = storer.getDataStore().read(dataFile).getCommandEvents();
 			assertEquals(1, allEvents.size());
 
 			CommandEventListType list = allEvents.get(0);
@@ -82,7 +82,7 @@ public class CommandEventStorerTest extends AbstractXmlStorerTest<CommandEvent, 
 			storer.insert(e);
 			storer.commit();
 
-			allEvents = storer.read(dataFile).getCommandEvents();
+			allEvents = storer.getDataStore().read(dataFile).getCommandEvents();
 			assertEquals(1, allEvents.size());
 
 			list = allEvents.get(0);
@@ -101,7 +101,7 @@ public class CommandEventStorerTest extends AbstractXmlStorerTest<CommandEvent, 
 			storer.insert(eNew);
 			storer.commit();
 			
-			allEvents = storer.read(dataFile).getCommandEvents();
+			allEvents = storer.getDataStore().read(dataFile).getCommandEvents();
 			assertEquals(1, allEvents.size());
 
 			list = allEvents.get(0);
@@ -131,7 +131,7 @@ public class CommandEventStorerTest extends AbstractXmlStorerTest<CommandEvent, 
 			storer.insert(e);
 			storer.commit();
 			
-			allEvents = storer.read(dataFile).getCommandEvents();
+			allEvents = storer.getDataStore().read(dataFile).getCommandEvents();
 			assertEquals(2, allEvents.size());
 
 		} catch (Exception e) {

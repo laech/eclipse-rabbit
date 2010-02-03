@@ -3,14 +3,12 @@ package rabbit.tracking.storage.xml;
 import java.io.File;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.xml.bind.JAXBException;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeConstants;
 import javax.xml.datatype.DatatypeFactory;
@@ -40,17 +38,9 @@ public abstract class AbstractXmlStorer<E extends DiscreteEvent, T, S extends Ev
 	 * Formats a date into "yyyy-MM-dd".
 	 */
 	public static final DateFormat DAY_FORMATTER = new SimpleDateFormat("yyyy-MM-dd");
-
-	/**
-	 * Formats a date into "yyyy-MM".
-	 */
-	public static final DateFormat MONTH_FORMATTER = new SimpleDateFormat("yyyy-MM");
-
-	/**
-	 * An object factory for creating XML object types.
-	 */
-	public static final ObjectFactory OBJECT_FACTORY = new ObjectFactory();
 	
+	public static final ObjectFactory OBJECT_FACTORY = new ObjectFactory();
+
 	/**
 	 * An data type factory for creating XML data types.
 	 */
@@ -97,76 +87,6 @@ public abstract class AbstractXmlStorer<E extends DiscreteEvent, T, S extends Ev
 				cal.get(Calendar.MONTH) + 1, 
 				cal.get(Calendar.DAY_OF_MONTH), 
 				DatatypeConstants.FIELD_UNDEFINED);
-	}
-
-	/**
-	 * Gets the file for storing the data from the given date. Also can be used
-	 * to get the file that has the data from the given date stored. 
-	 * 
-	 * @param date The date of the data.
-	 * @return The logical file, check existence with {@link File#exists()}.
-	 */
-	public File getDataFile(Calendar date) {
-		
-		StringBuilder builder = new StringBuilder();
-		builder.append(getStorageLocation().getAbsolutePath());
-		builder.append(File.separator);
-		builder.append(getFileNamePrefix());
-		builder.append("-");
-		builder.append(MONTH_FORMATTER.format(date.getTime()));
-		builder.append(".xml");
-		
-		return new File(builder.toString());
-	}
-
-	/**
-	 * Unique file name prefix, will be used as part of the file name.
-	 * 
-	 * @return The file name prefix, shall only contain alphabets.
-	 */
-	protected abstract String getFileNamePrefix();
-
-	/**
-	 * Gets the files that has the data from the given dates stored.
-	 * 
-	 * @param startDate The start date of the date period bound.
-	 * @param endDate The end date of the date period bound.
-	 * @return A list files that are physically existing.
-	 */
-	public List<File> getDataFiles(Calendar startDate, Calendar endDate) {
-		
-		Calendar start = (Calendar) startDate.clone();
-		start.set(Calendar.DAY_OF_MONTH, 1);
-
-		Calendar end = (Calendar) endDate.clone();
-		end.set(Calendar.DAY_OF_MONTH, start.get(Calendar.DAY_OF_MONTH));
-
-		List<File> result = new ArrayList<File>();
-		while (start.compareTo(end) <= 0) {
-
-			File f = getDataFile(start);
-			if (f.exists()) {
-				result.add(f);
-			}
-
-			start.add(Calendar.MONTH, 1);
-		}
-		return result;
-	}
-
-	/**
-	 * Gets the storage folder for storing data, the folder will be created if
-	 * it is not already exist. 
-	 * 
-	 * @return The absolute path to the storage location folder.
-	 */
-	public File getStorageLocation() {
-
-		File f = new File(StoragePlugin.getDefault().getStoragePath().toOSString());
-		if (!f.exists()) {
-			f.mkdirs();
-		}
-		return f;
 	}
 
 	/**
@@ -375,26 +295,6 @@ public abstract class AbstractXmlStorer<E extends DiscreteEvent, T, S extends Ev
 	protected abstract S newXmlTypeHolder(XMLGregorianCalendar date);
 	
 	/**
-	 * Reads an {@link EventListType} (the document root) from the file.
-	 * 
-	 * @param file The file containing the data.
-	 * @return An {@link EventListType} containing the data, or an empty 
-	 *         {@link EventListType} if: the file does not exist or exceptions
-	 *         occurred while reading the file.
-	 */
-	protected EventListType read(File file) {
-		try {
-			if (file.exists()) {
-				return JaxbUtil.unmarshal(EventListType.class, file);
-			} else {
-				return OBJECT_FACTORY.createEventListType();
-			}
-		} catch (JAXBException e) {
-			return OBJECT_FACTORY.createEventListType();
-		}
-	}
-	
-	/**
 	 * Writes the data to disk.
 	 */
 	public void commit() {
@@ -403,8 +303,8 @@ public abstract class AbstractXmlStorer<E extends DiscreteEvent, T, S extends Ev
 			return;
 		}
 		
-		File f = getDataFile(currentMonth);
-		EventListType events = read(f);
+		File f = getDataStore().getDataFile(currentMonth);
+		EventListType events = getDataStore().read(f);
 		List<S> mainList = getXmlTypeCategories(events);
 		
 		for (S newList : data) {
@@ -423,22 +323,7 @@ public abstract class AbstractXmlStorer<E extends DiscreteEvent, T, S extends Ev
 			}
 		}
 		
-		write(events, f);
+		getDataStore().write(events, f);
 		data.clear();
-	}
-	
-	/**
-	 * Writes the given {@link EventListType} into the given {@link File}.
-	 * 
-	 * @param list The data.
-	 * @param f The file to write to.
-	 */
-	protected void write(EventListType list, File f) {
-		try {
-			JaxbUtil.marshal(OBJECT_FACTORY.createEvents(list), f);
-
-		} catch (JAXBException e) {
-			e.printStackTrace();
-		}
 	}
 }

@@ -18,7 +18,7 @@ public class WorkbenchEventTest extends ContinuousEventTest {
 	private IWorkbenchWindow win = getWorkbenchWindow(); 
 	private IWorkbenchPart part = getWorkbenchWindow().getPartService().getActivePart();
 	
-	private WorkbenchEvent event = createEvent(Calendar.getInstance(), 10);
+	private PartEvent event = createEvent(Calendar.getInstance(), 10);
 	
 	public IWorkbenchWindow getWorkbenchWindow() {
 		
@@ -34,8 +34,8 @@ public class WorkbenchEventTest extends ContinuousEventTest {
 	}
 	
 	@Override
-	protected WorkbenchEvent createEvent(Calendar time, long duration) {
-		return new WorkbenchEvent(time, duration, getWorkbenchWindow().getPartService().getActivePart());
+	protected PartEvent createEvent(Calendar time, long duration) {
+		return new PartEvent(time, duration, getWorkbenchWindow().getPartService().getActivePart());
 	}
 	
 	@Test

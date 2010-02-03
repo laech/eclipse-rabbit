@@ -12,10 +12,10 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 
-import rabbit.tracking.event.WorkbenchEvent;
-import rabbit.tracking.storage.xml.WorkbenchEventStorer;
+import rabbit.tracking.event.PartEvent;
+import rabbit.tracking.storage.xml.PartEventStorer;
 
-public class PartTracker extends Tracker<WorkbenchEvent> implements IPartListener,
+public class PartTracker extends Tracker<PartEvent> implements IPartListener,
 		IWindowListener {
 
 	private long start;
@@ -105,7 +105,7 @@ public class PartTracker extends Tracker<WorkbenchEvent> implements IPartListene
 			return;
 		}
 		start = Long.MAX_VALUE;
-		addData(new WorkbenchEvent(Calendar.getInstance(), duration, part));
+		addData(new PartEvent(Calendar.getInstance(), duration, part));
 	}
 
 	@Override
@@ -158,8 +158,8 @@ public class PartTracker extends Tracker<WorkbenchEvent> implements IPartListene
 	}
 
 	@Override
-	protected WorkbenchEventStorer createDataStorer() {
-		return new WorkbenchEventStorer();
+	protected PartEventStorer createDataStorer() {
+		return new PartEventStorer();
 	}
 
 }
