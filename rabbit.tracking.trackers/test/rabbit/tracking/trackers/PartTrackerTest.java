@@ -30,7 +30,9 @@ public class PartTrackerTest extends AbstractPartTrackerTest<PartEvent> {
 		assertEquals(part, event.getWorkbenchPart());
 		assertTrue(start.compareTo(event.getTime()) <= 0);
 		assertTrue(end.compareTo(event.getTime()) >= 0);
-		assertTrue(durationInMillis - 10 <= event.getDuration());
-		assertTrue(durationInMillis + 20 >= event.getDuration());
+		
+		// 1/10 of a second is acceptable?
+		assertTrue(durationInMillis - 100 <= event.getDuration());
+		assertTrue(durationInMillis + 100 >= event.getDuration());
 	}
 }

@@ -19,7 +19,7 @@ public class FileEventStorer extends
 
 	@Override
 	protected boolean hasSameId(FileEventType x, FileEvent e) {
-		return x.getFilePath().equals(e.getFile().getFullPath());
+		return x.getFilePath().equals(e.getFile().getFullPath().toString());
 	}
 
 	@Override

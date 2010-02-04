@@ -16,8 +16,9 @@ public class FileTrackerTest extends AbstractPartTrackerTest<FileEvent> {
 	protected void assertAccuracy(FileEvent event, IWorkbenchPart part,
 			long durationInMillis, int size, Calendar start, Calendar end) {
 		
-		Assert.assertTrue(durationInMillis - 10 <= event.getDuration());
-		Assert.assertTrue(durationInMillis + 20 >= event.getDuration());
+		// 1/10 of a second is acceptable?
+		Assert.assertTrue(durationInMillis - 100 <= event.getDuration());
+		Assert.assertTrue(durationInMillis + 100 >= event.getDuration());
 		Assert.assertTrue(start.compareTo(event.getTime()) <= 0);
 		Assert.assertTrue(end.compareTo(event.getTime()) >= 0);
 		Assert.assertEquals(size, tracker.getData().size());

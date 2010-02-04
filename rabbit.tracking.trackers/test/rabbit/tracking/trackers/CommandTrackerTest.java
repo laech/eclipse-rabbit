@@ -13,7 +13,7 @@ import org.junit.Test;
 import rabbit.tracking.event.CommandEvent;
 
 
-public class CommandTrackerTest extends TrackerTest<CommandEvent> {
+public class CommandTrackerTest extends AbstractTrackerTest<CommandEvent> {
 	
 	private CommandTracker tracker = createTracker();
 	

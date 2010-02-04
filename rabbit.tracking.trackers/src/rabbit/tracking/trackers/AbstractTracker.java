@@ -12,7 +12,7 @@ import rabbit.tracking.storage.xml.IStorer;
 /**
  * Defines common behaviors for a tracker.
  */
-public abstract class Tracker<T> implements ITracker<T> {
+public abstract class AbstractTracker<T> implements ITracker<T> {
 
 	/** Variable to indicate whether this tracker is activated. */
 	private boolean isEnabled;
@@ -24,7 +24,7 @@ public abstract class Tracker<T> implements ITracker<T> {
 	/**
 	 * Constructs a new tracker.
 	 */
-	public Tracker() {
+	public AbstractTracker() {
 		isEnabled = false;
 		data = new LinkedHashSet<T>();
 		storer = createDataStorer();
@@ -74,8 +74,10 @@ public abstract class Tracker<T> implements ITracker<T> {
 		if (isEnabled() != enable) {
 			if (enable) {
 				doEnable();
+				flushData();
 			} else {
 				doDisable();
+				saveData();
 			}
 			isEnabled = enable;
 		}
@@ -96,7 +98,6 @@ public abstract class Tracker<T> implements ITracker<T> {
 		if (!getData().isEmpty()) {
 			storer.insert(getData());
 			storer.commit();
-			flushData();
 		}
 	}
 	

@@ -17,7 +17,7 @@ import rabbit.tracking.storage.xml.CommandEventStorer;
  * Tracks command executions.
  */
 @SuppressWarnings("unused")
-public class CommandTracker extends Tracker<CommandEvent> implements IExecutionListener {
+public class CommandTracker extends AbstractTracker<CommandEvent> implements IExecutionListener {
 	
 	/** Constructor. */
 	public CommandTracker() {
@@ -52,8 +52,6 @@ public class CommandTracker extends Tracker<CommandEvent> implements IExecutionL
 	@Override
 	public void preExecute(String commandId, ExecutionEvent event) {
 		addData(new CommandEvent(Calendar.getInstance(), event));
-		System.out.println(commandId);
-		System.out.println("\t" + event.getCommand().getHandler().getClass());
 	}
 
 	@Override

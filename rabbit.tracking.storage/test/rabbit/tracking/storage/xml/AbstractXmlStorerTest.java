@@ -31,7 +31,7 @@ import rabbit.tracking.storage.xml.schema.EventGroupType;
 
 public abstract class AbstractXmlStorerTest<E extends DiscreteEvent, T, S extends EventGroupType> {
 	
-	private AbstractXmlStorer<E, T, S> storer = create();
+	protected AbstractXmlStorer<E, T, S> storer = create();
 
 	protected abstract AbstractXmlStorer<E, T, S> create();
 	
@@ -64,9 +64,6 @@ public abstract class AbstractXmlStorerTest<E extends DiscreteEvent, T, S extend
 	public void testAbstractXmlStorer() {
 		assertNotNull(storer);
 	}
-
-	@Test
-	public abstract void testCommit();
 
 	@Test
 	public void testGetDataFile() {
@@ -197,6 +194,15 @@ public abstract class AbstractXmlStorerTest<E extends DiscreteEvent, T, S extend
 	}
 	
 	@Test
+	public abstract void testCommit();
+	
+	@Test
+	public abstract void testInsert();
+	
+	@Test
+	public abstract void testInsertCollection();
+	
+	@Test
 	public abstract void testHasSameId_workbenchEventTypeAndEvent();
 
 	@Test
@@ -220,12 +226,9 @@ public abstract class AbstractXmlStorerTest<E extends DiscreteEvent, T, S extend
 	@Test
 	public abstract void testNewXmlTypeT();
 
-	@Test
-	public abstract void testInsertCollection();
-
-	@Test
-	public abstract void testInsert();
-	
+	/** Creates an event for testing. */
 	protected abstract E createEvent();
-
+	
+	/** Creates an event that is different to {@link #createEvent()}.*/
+	protected abstract E createEvent2();
 }

@@ -132,7 +132,9 @@ public class ExtensionList {
 		@Override
 		public void dispose() {
 			for (Image img : images.values()) {
-				img.dispose();
+				if (img != null) {
+					img.dispose();
+				}
 			}
 			super.dispose();
 		}

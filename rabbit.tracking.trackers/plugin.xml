@@ -18,6 +18,11 @@
             id="rabbit.tracking.trackers.fileTracker"
             name="File Tracker">
       </tracker>
+      <tracker
+            class="rabbit.tracking.trackers.PerspectiveTracker"
+            id="rabbit.tracking.trackers.perspectiveTracker"
+            name="Perspective Tracker">
+      </tracker>
    </extension>
 
 </plugin>

@@ -70,12 +70,12 @@ public class CommandPage extends AbstractGraphicalTablePage {
 	protected TableColumn[] createColumns(Table table) {
 		TableColumn nameCol = new TableColumn(table, SWT.LEFT);
 		nameCol.setText("Name");
-		nameCol.setWidth(120);
+		nameCol.setWidth(150);
 		nameCol.setMoveable(true);
 		
 		TableColumn descriptionCol = new TableColumn(table, SWT.LEFT);
 		descriptionCol.setText("Description");
-		descriptionCol.setWidth(180);
+		descriptionCol.setWidth(200);
 		descriptionCol.setMoveable(true);
 
 		return new TableColumn[] { nameCol, descriptionCol };

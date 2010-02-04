@@ -36,21 +36,6 @@ public abstract class AbstractGraphicalTablePage implements IPage {
 		final Table table = viewer.getTable();
 		table.setHeaderVisible(true);
 		table.addListener(SWT.EraseItem, createEraseItemListener());
-		table.addListener(SWT.Resize, new Listener() {
-			@Override
-			public void handleEvent(Event event) {
-				int width = 0;
-				for (TableColumn c : table.getColumns()) {
-					if (c != getGraphColumn()) {
-						width += c.getWidth();
-					}
-				}
-				width = getViewer().getTable().getSize().x - width;
-				if (width >= 100) {
-					getGraphColumn().setWidth(width - 5);
-				}
-			}
-		});
 		
 		TableColumnComparator sorter = new TableColumnComparator(viewer);
 		for (TableColumn column : createColumns(table)) {
@@ -59,7 +44,7 @@ public abstract class AbstractGraphicalTablePage implements IPage {
 		
 		usageCol = new TableColumn(table, SWT.RIGHT);
 		usageCol.setText(getUsageColumnText());
-		usageCol.setWidth(100);
+		usageCol.setWidth(80);
 		usageCol.setMoveable(true);
 		usageCol.addSelectionListener(sorter);
 		
@@ -87,7 +72,7 @@ public abstract class AbstractGraphicalTablePage implements IPage {
 					return;
 				}
 				int x = getX(table);
-				int y = e.y;
+				int y = e.y + 1;
 				int height = e.height - 1;
 
 				GC gc = e.gc;
@@ -95,7 +80,7 @@ public abstract class AbstractGraphicalTablePage implements IPage {
 				int oldAntialias = gc.getAntialias();
 				
 				gc.setAntialias(SWT.ON);
-				gc.setBackground(gc.getDevice().getSystemColor(SWT.COLOR_GRAY));
+				gc.setBackground(gc.getDevice().getSystemColor(SWT.COLOR_LIST_SELECTION));
 				gc.fillRectangle(x, y, 2, height);
 				gc.fillRoundRectangle(x, y, width, height, 4, 4);
 				

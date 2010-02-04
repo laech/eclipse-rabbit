@@ -107,7 +107,7 @@ public class TrackingPluginTest {
 			e.printStackTrace();
 			Assert.fail("Field properties might have been changed, test needs rewritten.");
 		}
-		
+		Assert.fail();
 		return null;
 	}
 	

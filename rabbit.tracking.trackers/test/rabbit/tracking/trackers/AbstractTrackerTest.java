@@ -3,11 +3,11 @@ package rabbit.tracking.trackers;
 import org.junit.*;
 import static org.junit.Assert.*;
 
-public abstract class TrackerTest<T> {
+public abstract class AbstractTrackerTest<T> {
 	
-	private Tracker<T> tracker = createTracker();
+	private AbstractTracker<T> tracker = createTracker();
 	
-	protected abstract Tracker<T> createTracker();
+	protected abstract AbstractTracker<T> createTracker();
 	
 	protected abstract T createEvent();
 
@@ -67,6 +67,9 @@ public abstract class TrackerTest<T> {
 		tracker.addData(createEvent());
 		assertFalse(tracker.getData().isEmpty());
 		tracker.saveData();
+		assertFalse(tracker.getData().isEmpty()); // Only empty when re-enabled.
+		tracker.setEnabled(false);
+		tracker.setEnabled(true);
 		assertTrue(tracker.getData().isEmpty());
 	}
 }

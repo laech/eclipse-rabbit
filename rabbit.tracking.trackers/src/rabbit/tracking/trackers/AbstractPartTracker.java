@@ -12,7 +12,7 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 
-public abstract class AbstractPartTracker<E> extends Tracker<E> implements IPartListener,
+public abstract class AbstractPartTracker<E> extends AbstractTracker<E> implements IPartListener,
 		IWindowListener {
 
 	private long start;

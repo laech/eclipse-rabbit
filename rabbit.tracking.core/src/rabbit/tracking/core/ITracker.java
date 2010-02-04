@@ -17,7 +17,8 @@ public interface ITracker<T> {
 
 	/**
 	 * Enables or disables this tracker. When disabled, this tracker will not
-	 * track any events.
+	 * track any events, and previous data will be saved. When enabled, all 
+	 * previous data will be flushed.
 	 * 
 	 * @param enable
 	 *            <tt>true</tt> to enable this tracker, <tt>false</tt> to disable
@@ -38,8 +39,7 @@ public interface ITracker<T> {
 	public void flushData();
 	
 	/**
-	 * Saves the data collected by this tracker. All data will be flushed after
-	 * saving.
+	 * Saves the data collected by this tracker.
 	 */
 	public void saveData();
 

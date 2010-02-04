@@ -22,7 +22,7 @@ public enum DataStore implements IDataStore {
 	/**
 	 * Formats a date into "yyyy-MM".
 	 */
-	private static final DateFormat MONTH_FORMATTER = new SimpleDateFormat("yyyy-MM");
+	private final DateFormat monthFormatter = new SimpleDateFormat("yyyy-MM");
 
 	/**
 	 * An object factory for creating XML object types.
@@ -42,7 +42,7 @@ public enum DataStore implements IDataStore {
 		builder.append(File.separator);
 		builder.append(id);
 		builder.append("-");
-		builder.append(MONTH_FORMATTER.format(date.getTime()));
+		builder.append(monthFormatter.format(date.getTime()));
 		builder.append(".xml");
 		
 		return new File(builder.toString());

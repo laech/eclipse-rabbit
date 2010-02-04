@@ -53,6 +53,11 @@ public class CommandEventStorerTest extends AbstractXmlStorerTest<CommandEvent, 
 	protected CommandEvent createEvent() {
 		return new CommandEvent(Calendar.getInstance(), createExecutionEvent("adnk2o385"));
 	}
+
+	@Override
+	protected CommandEvent createEvent2() {
+		return new CommandEvent(Calendar.getInstance(), createExecutionEvent("23545656"));
+	}
 	
 	@Override
 	public void testCommit() {

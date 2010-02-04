@@ -19,7 +19,7 @@ import org.eclipse.ui.part.FileEditorInput;
 import org.junit.Before;
 import org.junit.Test;
 
-public abstract class AbstractPartTrackerTest<E> extends TrackerTest<E> {
+public abstract class AbstractPartTrackerTest<E> extends AbstractTrackerTest<E> {
 
 	private IWorkbenchWindow win;
 	protected AbstractPartTracker<E> tracker;
@@ -174,18 +174,6 @@ public abstract class AbstractPartTrackerTest<E> extends TrackerTest<E> {
 		event = tracker.getData().iterator().next();
 		assertAccuracy(event, newPart, 50, 1, start, end);
 	}
-
-//	private void assertAccuracy(PartEvent event,
-//			IPerspectiveDescriptor pers, IWorkbenchPart part,
-//			long durationInMillis, int size, Calendar start, Calendar end) {
-//
-//		assertEquals(size, tracker.getData().size());
-//		assertEquals(part, event.getWorkbenchPart());
-//		assertTrue(start.compareTo(event.getTime()) <= 0);
-//		assertTrue(end.compareTo(event.getTime()) >= 0);
-//		assertTrue(durationInMillis - 10 <= event.getDuration());
-//		assertTrue(durationInMillis + 20 >= event.getDuration());
-//	}
 
 	protected abstract void assertAccuracy(E event, IWorkbenchPart part,
 			long durationInMillis, int size, Calendar start, Calendar end);
