@@ -1,14 +1,14 @@
-package rabbit.tracking.ui.pages;
+package rabbit.tracking.ui.pages.internal;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import org.eclipse.core.commands.Command;
-import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.ui.ISharedImages;
@@ -18,23 +18,35 @@ import org.eclipse.ui.commands.ICommandService;
 import rabbit.tracking.storage.xml.CommandDataAccessor;
 import rabbit.tracking.storage.xml.IAccessor;
 import rabbit.tracking.ui.DisplayPreference;
+import rabbit.tracking.ui.pages.AbstractGraphTablePage;
 
-public class CommandPage extends AbstractGraphicalTablePage {
-	
-	private static ICommandService service = (ICommandService) PlatformUI
-			.getWorkbench().getService(ICommandService.class);;
+/**
+ * A page for displaying command usage.
+ */
+public class CommandPage extends AbstractGraphTablePage {
 
 	private IAccessor dataStore;
+	private ICommandService service;
 
-	
+	/** The data model, the values are usage counts of the commands. */
 	private Map<Command, Long> dataMapping;
-	
+
+	/**
+	 * Constructor.
+	 */
 	public CommandPage() {
 		super();
 		dataStore = new CommandDataAccessor();
 		dataMapping = new HashMap<Command, Long>();
+		service = (ICommandService) PlatformUI.getWorkbench().getService(ICommandService.class);
 	}
-	
+
+	/**
+	 * Gets the usage of a command.
+	 * 
+	 * @param cmd The command.
+	 * @return The usage count of the command.
+	 */
 	long getUsage(Command cmd) {
 		Long usage = dataMapping.get(cmd);
 		if (usage == null) {
@@ -43,36 +55,32 @@ public class CommandPage extends AbstractGraphicalTablePage {
 			return usage.longValue();
 		}
 	}
-	
-	@Override
-	public ImageDescriptor getIcon() {
-		return PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(
-				ISharedImages.IMG_TOOL_CUT);
+
+	@Override public Image getImage() {
+		return PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_CUT);
 	}
 
-	@Override
-	public void update(DisplayPreference p) {
-		setMaxUsage(0);
+	@Override public void update(DisplayPreference p) {
+		setMaxValue(0);
 		dataMapping.clear();
-		
+
 		Map<String, Long> data = dataStore.getData(p.getStartDate(), p.getEndDate());
 		for (Entry<String, Long> entry : data.entrySet()) {
 			dataMapping.put(service.getCommand(entry.getKey()), entry.getValue());
-			
-			if (entry.getValue() > getMaxUsage()) {
-				setMaxUsage(entry.getValue());
+
+			if (entry.getValue() > getMaxValue()) {
+				setMaxValue(entry.getValue());
 			}
 		}
 		getViewer().setInput(dataMapping.keySet());
 	}
 
-	@Override
-	protected TableColumn[] createColumns(Table table) {
+	@Override protected TableColumn[] createColumns(Table table) {
 		TableColumn nameCol = new TableColumn(table, SWT.LEFT);
 		nameCol.setText("Name");
 		nameCol.setWidth(150);
 		nameCol.setMoveable(true);
-		
+
 		TableColumn descriptionCol = new TableColumn(table, SWT.LEFT);
 		descriptionCol.setText("Description");
 		descriptionCol.setWidth(200);
@@ -81,18 +89,15 @@ public class CommandPage extends AbstractGraphicalTablePage {
 		return new TableColumn[] { nameCol, descriptionCol };
 	}
 
-	@Override
-	protected IStructuredContentProvider createContentProvider() {
+	@Override protected IStructuredContentProvider createContentProvider() {
 		return new CommandPageContentProvider();
 	}
 
-	@Override
-	protected ITableLabelProvider createLabelProvider() {
+	@Override protected ITableLabelProvider createLabelProvider() {
 		return new CommandPageLabelProvider(this);
 	}
 
-	@Override
-	protected String getUsageColumnText() {
+	@Override protected String getValueColumnText() {
 		return "Usage Count";
 	}
 }

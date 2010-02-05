@@ -1,86 +1,71 @@
 package rabbit.tracking.ui;
 
 import java.util.Calendar;
-import java.util.GregorianCalendar;
 import java.util.Observable;
 
-public class DisplayPreference extends Observable {
-	
-	// The time period:
-	
+/**
+ * Contains preferences for displaying data.
+ */
+public final class DisplayPreference extends Observable {
+
 	private Calendar startDate;
 	private Calendar endDate;
-	
-	private DisplayPreference() {
-		
-		// Setup the default values:
-		
-		Calendar from = new GregorianCalendar();
-		from.set(from.get(Calendar.YEAR), from.get(Calendar.MONTH), from.get(Calendar.DAY_OF_MONTH) - 7);
-		
-		Calendar to = new GregorianCalendar();
-		to.set(to.get(Calendar.YEAR), to.get(Calendar.MONTH), to.get(Calendar.DAY_OF_MONTH) + 1);
-		
-		startDate = from;
-		endDate   = to;
+
+	/** Constructor. */
+	public DisplayPreference() {
+		Calendar start = Calendar.getInstance();
+		start.add(Calendar.DAY_OF_MONTH, -7);
+		setStartDate(start);
+		setEndDate(Calendar.getInstance());
 	}
-	
+
 	/**
-	 * Gets the start date for the data to be displayed.
+	 * Gets a copy of the start date.
 	 * 
-	 * @return The start date for the data to be displayed.
+	 * @return A copy of the start date.
 	 */
 	public Calendar getStartDate() {
-		return startDate;
+		return (Calendar) startDate.clone();
 	}
-	
+
 	/**
-	 * Sets the start date for the data to be displayed.
-	 * This method is not intended to be called by clients.
-	 * @param date The new start date.
+	 * Sets the start date.
+	 * 
+	 * @param date The start date.
+	 * @throws NullPointerException If the parameter is null.
 	 */
 	public void setStartDate(Calendar date) {
-		if (startDate == date) {
+		if (date == null)
+			throw new NullPointerException("Date cannot be null.");
+		if (date.equals(startDate))
 			return;
-		}
 		startDate = date;
 		setChanged();
 		notifyObservers();
 	}
-	
+
 	/**
-	 * Gets the end date for the data to be displayed.
+	 * Gets a copy of the end date.
 	 * 
-	 * @return The end date for the data to be displayed.
+	 * @return A copy of the end date.
 	 */
 	public Calendar getEndDate() {
-		return endDate;
+		return (Calendar) endDate.clone();
 	}
-	
+
 	/**
-	 * Sets the end date for the data to be displayed.
-	 * This method is not intended to be called by clients.
-	 * @param date The new end date.
+	 * Sets the end date.
+	 * 
+	 * @param date The end date.
+	 * @throws NullPointerException If the parameter is null.
 	 */
 	public void setEndDate(Calendar date) {
-		if (endDate == date) {
+		if (date == null)
+			throw new NullPointerException("Date cannot be null.");
+		if (date.equals(endDate))
 			return;
-		}
 		endDate = date;
 		setChanged();
 		notifyObservers();
-	}
-	
-	/**
-	 * Gets the shared instance of this class.
-	 * @return The shared instance of this class.
-	 */
-	public static DisplayPreference getInstance() {
-		return SingletonHolder.INSTANCE;
-	}
-	
-	// Singleton holder
-	private static class SingletonHolder {
-		private static DisplayPreference INSTANCE = new DisplayPreference();
 	}
 }

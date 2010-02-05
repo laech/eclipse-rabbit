@@ -12,52 +12,48 @@ import org.junit.Test;
 
 import rabbit.tracking.event.CommandEvent;
 
-
+/**
+ * Test for {@link CommandTracker}
+ */
 public class CommandTrackerTest extends AbstractTrackerTest<CommandEvent> {
-	
+
 	private CommandTracker tracker = createTracker();
-	
-	@Test
-	public void testAccuracy() {
-		
+
+	@Test public void testAccuracy() {
 		String commandId = "abc.cef.godwjcnf";
 		ExecutionEvent ee = createExecutionEvent(commandId);
-		
+
 		tracker.setEnabled(true);
 		assertTrue(tracker.getData().isEmpty());
 		Calendar start = Calendar.getInstance();
 		tracker.preExecute(commandId, ee);
 		Calendar end = Calendar.getInstance();
 		assertEquals(1, tracker.getData().size());
-		
+
 		CommandEvent e = tracker.getData().iterator().next();
 		assertEquals(ee, e.getExecutionEvent());
 		assertTrue(start.compareTo(e.getTime()) <= 0);
 		assertTrue(end.compareTo(e.getTime()) >= 0);
 	}
 
-	@Override
-	protected CommandTracker createTracker() {
+	@Override protected CommandTracker createTracker() {
 		return new CommandTracker();
 	}
 
-	@Override
-	protected CommandEvent createEvent() {
+	@Override protected CommandEvent createEvent() {
 		return new CommandEvent(Calendar.getInstance(), createExecutionEvent("1"));
 	}
-	
+
 	private ExecutionEvent createExecutionEvent(String commandId) {
-		return new ExecutionEvent(getCommandService()
-				.getCommand(commandId), Collections.EMPTY_MAP, null, null);
+		return new ExecutionEvent(getCommandService().getCommand(commandId), Collections.EMPTY_MAP, null, null);
 	}
-	
+
 	/**
 	 * Gets the workbench command service.
 	 * 
 	 * @return The command service.
 	 */
 	private ICommandService getCommandService() {
-		return (ICommandService) PlatformUI.getWorkbench().getService(
-				ICommandService.class);
+		return (ICommandService) PlatformUI.getWorkbench().getService(ICommandService.class);
 	}
 }

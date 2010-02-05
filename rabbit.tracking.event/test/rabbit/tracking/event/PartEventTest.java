@@ -13,49 +13,47 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.junit.Test;
 
+/**
+ * Test for {@link PartEvent}
+ */
 public class PartEventTest extends ContinuousEventTest {
-	
-	private IWorkbenchWindow win = getWorkbenchWindow(); 
+
+	private IWorkbenchWindow win = getWorkbenchWindow();
 	private IWorkbenchPart part = getWorkbenchWindow().getPartService().getActivePart();
-	
+
 	private PartEvent event = createEvent(Calendar.getInstance(), 10);
-	
+
+	/** Gets the currently active workbench window. */
 	public IWorkbenchWindow getWorkbenchWindow() {
-		
+
 		final IWorkbench wb = PlatformUI.getWorkbench();
 		wb.getDisplay().syncExec(new Runnable() {
-
-			@Override
-			public void run() {
+			@Override public void run() {
 				win = wb.getActiveWorkbenchWindow();
 			}
 		});
 		return win;
 	}
-	
-	@Override
-	protected PartEvent createEvent(Calendar time, long duration) {
+
+	@Override protected PartEvent createEvent(Calendar time, long duration) {
 		return new PartEvent(time, duration, getWorkbenchWindow().getPartService().getActivePart());
 	}
-	
-	@Test
-	public void testWorkbenchEvent() {
+
+	@Test public void testWorkbenchEvent() {
 		assertNotNull(event);
 	}
 
-	@Test
-	public void testGetWorkbenchPart() {
+	@Test public void testGetWorkbenchPart() {
 		assertSame(part, event.getWorkbenchPart());
 	}
 
-	@Test
-	public void testSetWorkbenchPart() {
-		
+	@Test public void testSetWorkbenchPart() {
+
 		try {
 			IWorkbenchPart newP = win.getActivePage().showView("org.eclipse.ui.navigator.ProjectExplorer");
 			event.setWorkbenchPart(newP);
 			assertSame(newP, event.getWorkbenchPart());
-			
+
 		} catch (PartInitException e) {
 			e.printStackTrace();
 			fail();

@@ -27,7 +27,7 @@ public class JaxbUtil {
 			}
 		}
 	}
-	
+
 	private JaxbUtil() {}
 
 	private static void initialize() throws JAXBException {
@@ -41,8 +41,7 @@ public class JaxbUtil {
 	}
 
 	public static <T> T unmarshal(Class<T> type, File f) throws JAXBException {
-		@SuppressWarnings("unchecked")
-		JAXBElement<T> doc = (JAXBElement<T>) unmar.unmarshal(f);
+		@SuppressWarnings("unchecked") JAXBElement<T> doc = (JAXBElement<T>) unmar.unmarshal(f);
 		return doc.getValue();
 	}
 }

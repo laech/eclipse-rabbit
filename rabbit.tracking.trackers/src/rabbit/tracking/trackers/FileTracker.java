@@ -10,14 +10,12 @@ import rabbit.tracking.event.FileEvent;
 import rabbit.tracking.storage.xml.FileEventStorer;
 
 public class FileTracker extends AbstractPartTracker<FileEvent> {
-	
+
 	public FileTracker() {
 		super();
 	}
 
-	@Override
-	protected FileEvent createEvent(Calendar time, long duration,
-			IWorkbenchPart p) {
+	@Override protected FileEvent tryCreateEvent(Calendar time, long duration, IWorkbenchPart p) {
 		if (p instanceof IEditorPart) {
 			IFile f = (IFile) ((IEditorPart) p).getEditorInput().getAdapter(IFile.class);
 			return new FileEvent(time, duration, f);
@@ -25,8 +23,7 @@ public class FileTracker extends AbstractPartTracker<FileEvent> {
 		return null;
 	}
 
-	@Override
-	protected FileEventStorer createDataStorer() {
+	@Override protected FileEventStorer createDataStorer() {
 		return new FileEventStorer();
 	}
 }

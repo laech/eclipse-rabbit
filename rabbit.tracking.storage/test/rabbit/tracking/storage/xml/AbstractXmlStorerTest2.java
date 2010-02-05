@@ -14,34 +14,33 @@ import rabbit.tracking.storage.xml.schema.EventGroupType;
 
 public abstract class AbstractXmlStorerTest2<E extends DiscreteEvent, T, S extends EventGroupType>
 		extends AbstractXmlStorerTest<E, T, S> {
-	
-	@Override
-	public void testInsertCollection() {
+
+	@Override public void testInsertCollection() {
 		try {
 			Collection<S> data = getDataField(storer);
-			
+
 			assertEquals(0, data.size());
-			
+
 			E e = null;
 			T type = null;
 			List<E> list = new ArrayList<E>();
-			
+
 			{// Insert a new event:
 				e = createEvent();
 				list.add(e);
 				storer.insert(list);
 
 				assertEquals(1, data.size());
-				
+
 				assertEquals(1, getEventTypes(data.iterator().next()).size());
 
 				type = getEventTypes(data.iterator().next()).iterator().next();
-				
+
 				assertTrue(isEqual(type, e));
 			}
-			
+
 			{// Insert collection with two elements:
-				
+
 				// Make a new event with the same id to be merged:
 				E eWithSameId = createEvent();
 
@@ -63,7 +62,7 @@ public abstract class AbstractXmlStorerTest2<E extends DiscreteEvent, T, S exten
 				type = getEventTypes(data.iterator().next()).get(1);
 				assertTrue(isEqual(type, eNew));
 			}
-			
+
 			{// Insert event of a different date:
 				list.clear();
 				e = createEvent();
@@ -71,58 +70,57 @@ public abstract class AbstractXmlStorerTest2<E extends DiscreteEvent, T, S exten
 				int day = cal.get(Calendar.DAY_OF_MONTH);
 				day = (day < 15) ? day + 1 : day - 1;
 				cal.set(Calendar.DAY_OF_MONTH, day);
-				
+
 				list.add(e);
 				storer.insert(list);
-				
+
 				assertEquals(2, data.size());
 			}
-			
+
 		} catch (Exception ex) {
 			ex.printStackTrace();
 			fail();
 		}
 	}
-	
-	@Override
-	public void testInsert() {
-		
+
+	@Override public void testInsert() {
+
 		try {
 			Collection<S> data = getDataField(storer);
-			
+
 			assertEquals(0, data.size());
-			
+
 			// Insert a new event:
-			
+
 			E e = createEvent();
 			storer.insert(e);
-			
+
 			assertEquals(1, data.size());
 			assertEquals(1, getEventTypes(data.iterator().next()).size());
-			
+
 			T type = getEventTypes(data.iterator().next()).get(0);
 			assertTrue(isEqual(type, e));
-			
+
 			// Insert an event with the same partId and perspectiveId:
-			
+
 			e = createEvent();
 			storer.insert(e);
-			
+
 			assertEquals(1, data.size());
 			assertEquals(1, getEventTypes(data.iterator().next()).size());
-			
+
 			type = getEventTypes(data.iterator().next()).get(0);
 			mergeValue(e, e);
 			assertTrue(isEqual(type, e));
-			
+
 			// Insert an new and different event:
 
 			e = createEvent2();
 			storer.insert(e);
-			
+
 			assertEquals(1, data.size());
 			assertEquals(2, getEventTypes(data.iterator().next()).size());
-			
+
 			type = getEventTypes(data.iterator().next()).get(1);
 			assertTrue(isEqual(type, e));
 
@@ -135,16 +133,15 @@ public abstract class AbstractXmlStorerTest2<E extends DiscreteEvent, T, S exten
 			storer.insert(e);
 
 			assertEquals(2, data.size());
-			
+
 		} catch (Exception ex) {
 			ex.printStackTrace();
 			fail();
 		}
 	}
-	
-	@Override
-	public void testCommit() {
-		
+
+	@Override public void testCommit() {
+
 		try {
 			E e = createEvent();
 			storer.insert(e);
@@ -162,7 +159,7 @@ public abstract class AbstractXmlStorerTest2<E extends DiscreteEvent, T, S exten
 
 			assertTrue(getDataField(storer).isEmpty());
 
-			//...
+			// ...
 
 			e = createEvent();
 			storer.insert(e);
@@ -177,15 +174,15 @@ public abstract class AbstractXmlStorerTest2<E extends DiscreteEvent, T, S exten
 			type = getEventTypes(list).get(0);
 			mergeValue(e, e);
 			assertTrue(isEqual(type, e));
-			
-			//...
-			
+
+			// ...
+
 			// Insert an new and different event:
 
 			E e2 = createEvent2();
 			storer.insert(e2);
 			storer.commit();
-			
+
 			allEvents = storer.getXmlTypeCategories(storer.getDataStore().read(dataFile));
 			assertEquals(1, allEvents.size());
 
@@ -199,11 +196,11 @@ public abstract class AbstractXmlStorerTest2<E extends DiscreteEvent, T, S exten
 			} else {
 				type = getEventTypes(list).get(0);
 			}
-			
+
 			assertTrue(isEqual(newType, e2));
 			assertTrue(isEqual(type, e));
-			
-			//..
+
+			// ..
 
 			e = createEvent();
 			Calendar cal = e.getTime();
@@ -212,7 +209,7 @@ public abstract class AbstractXmlStorerTest2<E extends DiscreteEvent, T, S exten
 			cal.set(Calendar.DAY_OF_MONTH, day);
 			storer.insert(e);
 			storer.commit();
-			
+
 			allEvents = storer.getXmlTypeCategories(storer.getDataStore().read(dataFile));
 			assertEquals(2, allEvents.size());
 

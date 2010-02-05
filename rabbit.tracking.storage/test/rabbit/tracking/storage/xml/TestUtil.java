@@ -4,6 +4,8 @@ import java.io.File;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 
+import rabbit.tracking.storage.xml.internal.StoragePlugin;
+
 public class TestUtil {
 
 	public static void setUpPathForTesting() {

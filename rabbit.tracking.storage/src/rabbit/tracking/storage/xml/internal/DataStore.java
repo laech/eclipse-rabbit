@@ -1,4 +1,4 @@
-package rabbit.tracking.storage.xml;
+package rabbit.tracking.storage.xml.internal;
 
 import java.io.File;
 import java.text.DateFormat;
@@ -9,16 +9,21 @@ import java.util.List;
 
 import javax.xml.bind.JAXBException;
 
+import rabbit.tracking.storage.xml.IDataStore;
+import rabbit.tracking.storage.xml.JaxbUtil;
 import rabbit.tracking.storage.xml.schema.EventListType;
 import rabbit.tracking.storage.xml.schema.ObjectFactory;
 
+/**
+ * Data stores.
+ */
 public enum DataStore implements IDataStore {
-	
-	COMMAND_STORE     ("commandEvents"),
-	PART_STORE        ("partEvents"),
-	PERSPECTIVE_STORE ("perspectiveEvents"),
-	FILE_STORE        ("fileEvents");
-	
+
+	COMMAND_STORE("commandEvents"),
+	PART_STORE("partEvents"),
+	PERSPECTIVE_STORE("perspectiveEvents"),
+	FILE_STORE("fileEvents");
+
 	/**
 	 * Formats a date into "yyyy-MM".
 	 */
@@ -28,15 +33,14 @@ public enum DataStore implements IDataStore {
 	 * An object factory for creating XML object types.
 	 */
 	private static final ObjectFactory OBJECT_FACTORY = new ObjectFactory();
-	
+
 	private String id;
-	
-	DataStore(String identifier) {
-		id = identifier;
+
+	DataStore(String id) {
+		this.id = id;
 	}
 
-	@Override
-	public File getDataFile(Calendar date) {
+	@Override public File getDataFile(Calendar date) {
 		StringBuilder builder = new StringBuilder();
 		builder.append(getStorageLocation().getAbsolutePath());
 		builder.append(File.separator);
@@ -44,12 +48,10 @@ public enum DataStore implements IDataStore {
 		builder.append("-");
 		builder.append(monthFormatter.format(date.getTime()));
 		builder.append(".xml");
-		
 		return new File(builder.toString());
 	}
 
-	@Override
-	public List<File> getDataFiles(Calendar startDate, Calendar endDate) {
+	@Override public List<File> getDataFiles(Calendar startDate, Calendar endDate) {
 		Calendar start = (Calendar) startDate.clone();
 		start.set(Calendar.DAY_OF_MONTH, 1);
 
@@ -60,45 +62,38 @@ public enum DataStore implements IDataStore {
 		while (start.compareTo(end) <= 0) {
 
 			File f = getDataFile(start);
-			if (f.exists()) {
+			if (f.exists())
 				result.add(f);
-			}
 
 			start.add(Calendar.MONTH, 1);
 		}
 		return result;
 	}
 
-	@Override
-	public EventListType read(File file) {
+	@Override public EventListType read(File file) {
 		try {
-			if (file.exists()) {
+			if (file.exists())
 				return JaxbUtil.unmarshal(EventListType.class, file);
-			} else {
+			else
 				return OBJECT_FACTORY.createEventListType();
-			}
+			
 		} catch (JAXBException e) {
 			return OBJECT_FACTORY.createEventListType();
 		}
 	}
 
-	@Override
-	public void write(EventListType doc, File f) {
+	@Override public void write(EventListType doc, File f) {
 		try {
 			JaxbUtil.marshal(OBJECT_FACTORY.createEvents(doc), f);
-
 		} catch (JAXBException e) {
 			e.printStackTrace();
 		}
 	}
-	
-	@Override
-	public File getStorageLocation() {
 
+	@Override public File getStorageLocation() {
 		File f = new File(StoragePlugin.getDefault().getStoragePath().toOSString());
-		if (!f.exists()) {
+		if (!f.exists())
 			f.mkdirs();
-		}
 		return f;
 	}
 

@@ -11,6 +11,9 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.commands.ICommandService;
 import org.junit.Test;
 
+/**
+ * Test for {@link CommandEvent}
+ */
 public class CommandEventTest extends DiscreteEventTest {
 
 	private ExecutionEvent exe = new ExecutionEvent(getCommandService()
@@ -18,34 +21,29 @@ public class CommandEventTest extends DiscreteEventTest {
 
 	private CommandEvent event = new CommandEvent(Calendar.getInstance(), exe);
 
-	@Override
-	protected CommandEvent createEvent(Calendar time) {
+	@Override protected CommandEvent createEvent(Calendar time) {
 		return new CommandEvent(time, exe);
 	}
-	
+
 	/**
 	 * Gets the workbench command service.
 	 * 
 	 * @return The command service.
 	 */
 	private ICommandService getCommandService() {
-		return (ICommandService) PlatformUI.getWorkbench().getService(
-				ICommandService.class);
+		return (ICommandService) PlatformUI.getWorkbench().getService(ICommandService.class);
 	}
 
-	@Test
-	public void testCommandEvent() {
+	@Test public void testCommandEvent() {
 		assertNotNull(event);
 	}
 
-	@Test
-	public void testGetExecutionEvent() {
+	@Test public void testGetExecutionEvent() {
 		assertSame(exe, event.getExecutionEvent());
 	}
 
-	@Test
-	public void testSetExecutionEvent() {
-		
+	@Test public void testSetExecutionEvent() {
+
 		ExecutionEvent newExe = new ExecutionEvent(getCommandService()
 				.getCommand("blah"), Collections.EMPTY_MAP, null, null);
 		event.setExecutionEvent(newExe);

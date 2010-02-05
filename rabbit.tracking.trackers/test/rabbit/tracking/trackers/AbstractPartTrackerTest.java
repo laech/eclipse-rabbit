@@ -19,39 +19,38 @@ import org.eclipse.ui.part.FileEditorInput;
 import org.junit.Before;
 import org.junit.Test;
 
+/**
+ * Test {@link AbstractPartTracker}
+ */
 public abstract class AbstractPartTrackerTest<E> extends AbstractTrackerTest<E> {
 
 	private IWorkbenchWindow win;
 	protected AbstractPartTracker<E> tracker;
 
-	@Before
-	public void setup() {
+	@Before public void setup() {
 		win = getWorkbenchWindow();
 		tracker = createTracker();
 	}
 
+	/** Gets the currently active window. */
 	public IWorkbenchWindow getWorkbenchWindow() {
-
 		final IWorkbench wb = PlatformUI.getWorkbench();
 		wb.getDisplay().syncExec(new Runnable() {
-
-			@Override
-			public void run() {
+			@Override public void run() {
 				win = wb.getActiveWorkbenchWindow();
 			}
 		});
 		return win;
 	}
-	
+
+	/** Gets a file for testing. */
 	protected IFile getFileForTesting() {
 		IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
 		IProject project = root.getProject("Tmp");
-		
 		if (!project.isAccessible()) {
 			try {
 				project.create(null);
 				project.open(null);
-				
 			} catch (CoreException e) {
 				e.printStackTrace();
 			}
@@ -59,11 +58,11 @@ public abstract class AbstractPartTrackerTest<E> extends AbstractTrackerTest<E> 
 		return project.getFile("hello.txt");
 	}
 
-	@Test
-	public void testAccuracy() throws InterruptedException, PartInitException {
+	@Test public void testAccuracy() throws InterruptedException, PartInitException {
 
-		// Usage an editor instead of a view so that the FileTrackerTest also works.
-		
+		// Usage an editor instead of a view so that the FileTrackerTest also
+		// works.
+
 		IFile file = getFileForTesting();
 		IEditorDescriptor desc = PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(file.getName());
 		IWorkbenchPage page = PlatformUI.getWorkbench().getWorkbenchWindows()[0].getActivePage();
@@ -72,7 +71,7 @@ public abstract class AbstractPartTrackerTest<E> extends AbstractTrackerTest<E> 
 		} catch (PartInitException e) {
 			e.printStackTrace();
 		}
-		
+
 		IWorkbenchPart newPart = page.getActiveEditor();
 
 		// Test enable then disable:
@@ -83,7 +82,7 @@ public abstract class AbstractPartTrackerTest<E> extends AbstractTrackerTest<E> 
 		tracker.setEnabled(false);
 		Calendar end = Calendar.getInstance();
 		E event = tracker.getData().iterator().next();
-		assertAccuracy(event, newPart, 35, 1, start, end);
+		internalAssertAccuracy(event, newPart, 35, 1, start, end);
 
 		// Test partActivated then partDeactivated:
 		// these two methods are always called when changing views.
@@ -95,7 +94,7 @@ public abstract class AbstractPartTrackerTest<E> extends AbstractTrackerTest<E> 
 		tracker.partDeactivated(newPart);
 		end = Calendar.getInstance();
 		event = tracker.getData().iterator().next();
-		assertAccuracy(event, newPart, 25, 1, start, end);
+		internalAssertAccuracy(event, newPart, 25, 1, start, end);
 
 		// Test partActivated then windowClosed:
 
@@ -106,7 +105,7 @@ public abstract class AbstractPartTrackerTest<E> extends AbstractTrackerTest<E> 
 		tracker.windowClosed(win);
 		end = Calendar.getInstance();
 		event = tracker.getData().iterator().next();
-		assertAccuracy(event, newPart, 70, 1, start, end);
+		internalAssertAccuracy(event, newPart, 70, 1, start, end);
 
 		// Test windowOpened then partDeactivated:
 
@@ -117,7 +116,7 @@ public abstract class AbstractPartTrackerTest<E> extends AbstractTrackerTest<E> 
 		tracker.partDeactivated(newPart);
 		end = Calendar.getInstance();
 		event = tracker.getData().iterator().next();
-		assertAccuracy(event, newPart, 60, 1, start, end);
+		internalAssertAccuracy(event, newPart, 60, 1, start, end);
 
 		// Test windowOpened then windowClosed:
 
@@ -128,8 +127,8 @@ public abstract class AbstractPartTrackerTest<E> extends AbstractTrackerTest<E> 
 		tracker.windowClosed(win);
 		end = Calendar.getInstance();
 		event = tracker.getData().iterator().next();
-		assertAccuracy(event, newPart, 10, 1, start, end);
-		
+		internalAssertAccuracy(event, newPart, 10, 1, start, end);
+
 		// Test windowOpened then windowDeactivated:
 
 		tracker.flushData();
@@ -139,8 +138,8 @@ public abstract class AbstractPartTrackerTest<E> extends AbstractTrackerTest<E> 
 		tracker.windowDeactivated(win);
 		end = Calendar.getInstance();
 		event = tracker.getData().iterator().next();
-		assertAccuracy(event, newPart, 20, 1, start, end);
-		
+		internalAssertAccuracy(event, newPart, 20, 1, start, end);
+
 		// Test windowActivated then windowDeactivated:
 
 		tracker.flushData();
@@ -150,7 +149,7 @@ public abstract class AbstractPartTrackerTest<E> extends AbstractTrackerTest<E> 
 		tracker.windowDeactivated(win);
 		end = Calendar.getInstance();
 		event = tracker.getData().iterator().next();
-		assertAccuracy(event, newPart, 30, 1, start, end);
+		internalAssertAccuracy(event, newPart, 30, 1, start, end);
 
 		// Test windowActivated then windowClosed:
 
@@ -161,8 +160,8 @@ public abstract class AbstractPartTrackerTest<E> extends AbstractTrackerTest<E> 
 		tracker.windowClosed(win);
 		end = Calendar.getInstance();
 		event = tracker.getData().iterator().next();
-		assertAccuracy(event, newPart, 40, 1, start, end);
-		
+		internalAssertAccuracy(event, newPart, 40, 1, start, end);
+
 		// Test windowActivated then partDeactivated:
 
 		tracker.flushData();
@@ -172,15 +171,13 @@ public abstract class AbstractPartTrackerTest<E> extends AbstractTrackerTest<E> 
 		tracker.partDeactivated(newPart);
 		end = Calendar.getInstance();
 		event = tracker.getData().iterator().next();
-		assertAccuracy(event, newPart, 50, 1, start, end);
+		internalAssertAccuracy(event, newPart, 50, 1, start, end);
 	}
 
-	protected abstract void assertAccuracy(E event, IWorkbenchPart part,
+	protected abstract void internalAssertAccuracy(E event, IWorkbenchPart part,
 			long durationInMillis, int size, Calendar start, Calendar end);
 
-	@Override
-	protected abstract AbstractPartTracker<E> createTracker();
+	@Override protected abstract AbstractPartTracker<E> createTracker();
 
-	@Override
-	protected abstract E createEvent();
+	@Override protected abstract E createEvent();
 }

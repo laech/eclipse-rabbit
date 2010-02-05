@@ -1,4 +1,4 @@
-package rabbit.tracking.ui.pages;
+package rabbit.tracking.ui.pages.internal;
 
 import org.eclipse.core.commands.Command;
 import org.eclipse.core.commands.common.NotDefinedException;
@@ -6,21 +6,27 @@ import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
 
+/**
+ * Label provider for a command page.
+ */
 public class CommandPageLabelProvider extends LabelProvider implements ITableLabelProvider {
-	
+
 	private CommandPage page;
-	
+
+	/**
+	 * Constructs a new label provider.
+	 * 
+	 * @param page The parent.
+	 */
 	public CommandPageLabelProvider(CommandPage page) {
 		this.page = page;
 	}
 
-	@Override
-	public Image getColumnImage(Object element, int columnIndex) {
+	@Override public Image getColumnImage(Object element, int columnIndex) {
 		return null;
 	}
 
-	@Override
-	public String getColumnText(Object element, int columnIndex) {
+	@Override public String getColumnText(Object element, int columnIndex) {
 		if (!(element instanceof Command)) {
 			return null;
 		}

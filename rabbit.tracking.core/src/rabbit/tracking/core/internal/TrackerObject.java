@@ -15,14 +15,10 @@ public class TrackerObject {
 	/**
 	 * Constructs a new tracker object.
 	 * 
-	 * @param id
-	 *            The id of the tracker.
-	 * @param name
-	 *            The name of the tracker.
-	 * @param description
-	 *            The description of the tracker.
-	 * @param t
-	 *            The tracker.
+	 * @param id The id of the tracker.
+	 * @param name The name of the tracker.
+	 * @param description The description of the tracker.
+	 * @param t The tracker.
 	 */
 	public TrackerObject(String id, String name, String description, ITracker<?> t) {
 		this.id = id;
@@ -43,8 +39,7 @@ public class TrackerObject {
 	/**
 	 * Sets the id of the tracker.
 	 * 
-	 * @param id
-	 *            The new id.
+	 * @param id The new id.
 	 */
 	public void setId(String id) {
 		this.id = id;
@@ -62,8 +57,7 @@ public class TrackerObject {
 	/**
 	 * Sets the name of the tracker.
 	 * 
-	 * @param name
-	 *            The new name.
+	 * @param name The new name.
 	 */
 	public void setName(String name) {
 		this.name = name;
@@ -81,8 +75,7 @@ public class TrackerObject {
 	/**
 	 * Sets the description of the tracker.
 	 * 
-	 * @param description
-	 *            The new description.
+	 * @param description The new description.
 	 */
 	public void setDescription(String description) {
 		this.description = description;
@@ -100,8 +93,7 @@ public class TrackerObject {
 	/**
 	 * Sets the tracker.
 	 * 
-	 * @param tracker
-	 *            The new tracker.
+	 * @param tracker The new tracker.
 	 */
 	public void setTracker(ITracker<?> tracker) {
 		this.tracker = tracker;

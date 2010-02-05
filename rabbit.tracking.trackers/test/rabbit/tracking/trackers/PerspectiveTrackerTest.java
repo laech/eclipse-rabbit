@@ -12,36 +12,34 @@ import org.junit.*;
 
 import rabbit.tracking.event.PerspectiveEvent;
 
+/**
+ * Test for {@link PerspectiveTracker}
+ */
 public class PerspectiveTrackerTest extends AbstractTrackerTest<PerspectiveEvent> {
 
 	private PerspectiveTracker tracker;
 	private IWorkbenchWindow win;
 
-	@Before
-	public void setup() {
+	@Before public void setup() {
 		tracker = createTracker();
-		
+
 		final IWorkbench wb = PlatformUI.getWorkbench();
 		wb.getDisplay().syncExec(new Runnable() {
-
-			@Override
-			public void run() {
+			@Override public void run() {
 				win = wb.getActiveWorkbenchWindow();
 			}
 		});
 	}
-	
-	@Test
-	public void testAccuracy() throws InterruptedException {
+
+	@Test public void testAccuracy() throws InterruptedException {
 		PerspectiveEvent e = null;
 		Calendar start = null;
 		Calendar end = null;
 		long duration = 0;
 		int size = 0;
-		
-		win.getActivePage().setPerspective(PlatformUI.getWorkbench()
-				.getPerspectiveRegistry().getPerspectives()[0]);
-		
+
+		win.getActivePage().setPerspective(PlatformUI.getWorkbench().getPerspectiveRegistry().getPerspectives()[0]);
+
 		// Test enable then disable:
 
 		tracker.setEnabled(true);
@@ -51,7 +49,7 @@ public class PerspectiveTrackerTest extends AbstractTrackerTest<PerspectiveEvent
 		tracker.setEnabled(false);
 		size = 1;
 		e = tracker.getData().iterator().next();
-		assertAccuracy(e, start, end, duration, size, win.getActivePage().getPerspective());
+		internalAssertAccuracy(e, start, end, duration, size, win.getActivePage().getPerspective());
 
 		// Test perspectiveActivated then perspectiveDeactivated:
 
@@ -63,7 +61,7 @@ public class PerspectiveTrackerTest extends AbstractTrackerTest<PerspectiveEvent
 		tracker.perspectiveDeactivated(win.getActivePage(), win.getActivePage().getPerspective());
 		size = 1;
 		e = tracker.getData().iterator().next();
-		assertAccuracy(e, start, end, duration, size, win.getActivePage().getPerspective());
+		internalAssertAccuracy(e, start, end, duration, size, win.getActivePage().getPerspective());
 
 		// Test perspectiveActivated then windowClosed:
 
@@ -75,7 +73,7 @@ public class PerspectiveTrackerTest extends AbstractTrackerTest<PerspectiveEvent
 		tracker.windowClosed(win);
 		size = 1;
 		e = tracker.getData().iterator().next();
-		assertAccuracy(e, start, end, duration, size, win.getActivePage().getPerspective());
+		internalAssertAccuracy(e, start, end, duration, size, win.getActivePage().getPerspective());
 
 		// Test windowOpened then perspectiveDeactivated:
 
@@ -87,7 +85,7 @@ public class PerspectiveTrackerTest extends AbstractTrackerTest<PerspectiveEvent
 		tracker.perspectiveDeactivated(win.getActivePage(), win.getActivePage().getPerspective());
 		size = 1;
 		e = tracker.getData().iterator().next();
-		assertAccuracy(e, start, end, duration, size, win.getActivePage().getPerspective());
+		internalAssertAccuracy(e, start, end, duration, size, win.getActivePage().getPerspective());
 
 		// Test windowOpened then windowClosed:
 
@@ -99,8 +97,8 @@ public class PerspectiveTrackerTest extends AbstractTrackerTest<PerspectiveEvent
 		tracker.windowClosed(win);
 		size = 1;
 		e = tracker.getData().iterator().next();
-		assertAccuracy(e, start, end, duration, size, win.getActivePage().getPerspective());
-		
+		internalAssertAccuracy(e, start, end, duration, size, win.getActivePage().getPerspective());
+
 		// Test windowOpened then windowDeactivated:
 
 		tracker.flushData();
@@ -111,8 +109,8 @@ public class PerspectiveTrackerTest extends AbstractTrackerTest<PerspectiveEvent
 		tracker.windowDeactivated(win);
 		size = 1;
 		e = tracker.getData().iterator().next();
-		assertAccuracy(e, start, end, duration, size, win.getActivePage().getPerspective());
-		
+		internalAssertAccuracy(e, start, end, duration, size, win.getActivePage().getPerspective());
+
 		// Test windowActivated then windowDeactivated:
 
 		tracker.flushData();
@@ -123,7 +121,7 @@ public class PerspectiveTrackerTest extends AbstractTrackerTest<PerspectiveEvent
 		tracker.windowDeactivated(win);
 		size = 1;
 		e = tracker.getData().iterator().next();
-		assertAccuracy(e, start, end, duration, size, win.getActivePage().getPerspective());
+		internalAssertAccuracy(e, start, end, duration, size, win.getActivePage().getPerspective());
 
 		// Test windowActivated then windowClosed:
 
@@ -135,10 +133,10 @@ public class PerspectiveTrackerTest extends AbstractTrackerTest<PerspectiveEvent
 		tracker.windowClosed(win);
 		size = 1;
 		e = tracker.getData().iterator().next();
-		assertAccuracy(e, start, end, duration, size, win.getActivePage().getPerspective());
-		
+		internalAssertAccuracy(e, start, end, duration, size, win.getActivePage().getPerspective());
+
 		// Test windowActivated then perspectiveDeactivated:
-		
+
 		tracker.flushData();
 		tracker.windowActivated(win);
 		start = Calendar.getInstance();
@@ -147,12 +145,12 @@ public class PerspectiveTrackerTest extends AbstractTrackerTest<PerspectiveEvent
 		tracker.perspectiveDeactivated(win.getActivePage(), win.getActivePage().getPerspective());
 		size = 1;
 		e = tracker.getData().iterator().next();
-		assertAccuracy(e, start, end, duration, size, win.getActivePage().getPerspective());
+		internalAssertAccuracy(e, start, end, duration, size, win.getActivePage().getPerspective());
 	}
 
-	private void assertAccuracy(PerspectiveEvent e, Calendar start,
+	private void internalAssertAccuracy(PerspectiveEvent e, Calendar start,
 			Calendar end, long duration, int size, IPerspectiveDescriptor per) {
-		
+
 		assertEquals(per, e.getPerspective());
 		assertEquals(size, tracker.getData().size());
 		assertTrue(start.compareTo(e.getTime()) <= 0);
@@ -161,14 +159,11 @@ public class PerspectiveTrackerTest extends AbstractTrackerTest<PerspectiveEvent
 		assertTrue(duration + 100 >= e.getDuration());
 	}
 
-	@Override
-	protected PerspectiveEvent createEvent() {
-		return new PerspectiveEvent(Calendar.getInstance(), 101, win
-				.getActivePage().getPerspective());
+	@Override protected PerspectiveEvent createEvent() {
+		return new PerspectiveEvent(Calendar.getInstance(), 101, win.getActivePage().getPerspective());
 	}
 
-	@Override
-	protected PerspectiveTracker createTracker() {
+	@Override protected PerspectiveTracker createTracker() {
 		return new PerspectiveTracker();
 	}
 

@@ -5,18 +5,14 @@ import java.io.File;
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
 import org.eclipse.jface.preference.IPreferenceStore;
 
-import rabbit.tracking.storage.xml.StoragePlugin;
-
 /**
  * Initialize the plug-in preferences.
  */
 public class PreferenceInitializer extends AbstractPreferenceInitializer {
 
-	public PreferenceInitializer() {
-	}
+	public PreferenceInitializer() {}
 
-	@Override
-	public void initializeDefaultPreferences() {
+	@Override public void initializeDefaultPreferences() {
 		// TODO
 		String path = System.getProperty("user.home") + File.separator
 				+ "Desktop" + File.separator + "Rabbit" + File.separator

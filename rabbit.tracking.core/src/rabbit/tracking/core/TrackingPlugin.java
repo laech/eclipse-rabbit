@@ -43,9 +43,8 @@ public class TrackingPlugin extends AbstractUIPlugin implements IWorkbenchListen
 	/**
 	 * The constructor.
 	 */
-	public TrackingPlugin() {
-	}
-	
+	public TrackingPlugin() {}
+
 	/**
 	 * Creates sensors from the extension point.
 	 * 
@@ -72,13 +71,11 @@ public class TrackingPlugin extends AbstractUIPlugin implements IWorkbenchListen
 		return result;
 	}
 
-	@Override
-	public void postShutdown(IWorkbench workbench) {
-		// Ignore.
+	@Override public void postShutdown(IWorkbench workbench) {
+	// Ignore.
 	}
 
-	@Override
-	public boolean preShutdown(IWorkbench workbench, boolean forced) {
+	@Override public boolean preShutdown(IWorkbench workbench, boolean forced) {
 		for (TrackerObject t : trackerList) {
 			t.getTracker().setEnabled(false);
 		}
@@ -87,6 +84,7 @@ public class TrackingPlugin extends AbstractUIPlugin implements IWorkbenchListen
 
 	/**
 	 * Enables or disables the trackers.
+	 * 
 	 * @param trackers The trackers to perform actions on.
 	 * @param enable True to enable, false to disable.
 	 */
@@ -96,12 +94,11 @@ public class TrackingPlugin extends AbstractUIPlugin implements IWorkbenchListen
 		}
 	}
 
-	@Override
-	public void start(BundleContext context) throws Exception {
+	@Override public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
 		PlatformUI.getWorkbench().addWorkbenchListener(this);
-		
+
 		if (trackerList != null) { // May be we didn't stop correctly?
 			setEnableTrackers(trackerList, false);
 			trackerList.clear();
@@ -110,12 +107,11 @@ public class TrackingPlugin extends AbstractUIPlugin implements IWorkbenchListen
 		IConfigurationElement[] elements = Platform.getExtensionRegistry()
 				.getConfigurationElementsFor(TRACKER_EXTENSION_ID);
 		trackerList = createSensorsFromExtension(elements);
-		
+
 		setEnableTrackers(trackerList, true);
 	}
 
-	@Override
-	public void stop(BundleContext context) throws Exception {
+	@Override public void stop(BundleContext context) throws Exception {
 		PlatformUI.getWorkbench().removeWorkbenchListener(this);
 		setEnableTrackers(trackerList, false);
 		plugin = null;

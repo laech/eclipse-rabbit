@@ -4,18 +4,18 @@
    <extension
          point="rabbit.tracking.ui.pages">
       <page
-            class="rabbit.tracking.ui.pages.EclipseUsagePage"
+            class="rabbit.tracking.ui.pages.internal.EclipseUsagePage"
             name="Eclipse Usage">
          <page
-               class="rabbit.tracking.ui.pages.CommandPage"
+               class="rabbit.tracking.ui.pages.internal.CommandPage"
                name="Commands">
          </page>
          <page
-               class="rabbit.tracking.ui.pages.PartPage"
-               name="Workbench Tools">
+               class="rabbit.tracking.ui.pages.internal.PartPage"
+               name="Editors and Views">
          </page>
          <page
-               class="rabbit.tracking.ui.pages.SessionPage"
+               class="rabbit.tracking.ui.pages.internal.SessionPage"
                name="Sessions">
          </page>
       </page>

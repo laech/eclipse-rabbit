@@ -16,27 +16,26 @@ import java.util.Set;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import rabbit.tracking.storage.xml.AbstractXmlStorer;
+import rabbit.tracking.storage.xml.internal.DataStore;
+
 public class DataStoreTest {
 
 	private DataStore store = DataStore.COMMAND_STORE;
 
-	@BeforeClass
-	public static void setUp() {
+	@BeforeClass public static void setUp() {
 		TestUtil.setUpPathForTesting();
 	}
 
-	@Test
-	public void testGetStorageLocation() {
+	@Test public void testGetStorageLocation() {
 		assertNotNull(store.getStorageLocation());
 	}
 
-	@Test
-	public void testGetDataFile() {
+	@Test public void testGetDataFile() {
 		assertNotNull(store.getDataFile(Calendar.getInstance()));
 	}
 
-	@Test
-	public void testGetDataFiles() throws IOException {
+	@Test public void testGetDataFiles() throws IOException {
 
 		Calendar lowerBound = new GregorianCalendar(1, 1, 1);
 		Calendar upperBound = new GregorianCalendar(3, 1, 1);
@@ -70,8 +69,7 @@ public class DataStoreTest {
 		assertEquals(0, store.getDataFiles(lowerBound, upperBound).size());
 	}
 
-	@Test
-	public void testRead() throws IOException {
+	@Test public void testRead() throws IOException {
 
 		Calendar cal = new GregorianCalendar(1, 1, 1);
 		File f = store.getDataFile(cal);
@@ -86,8 +84,7 @@ public class DataStoreTest {
 		}
 	}
 
-	@Test
-	public void testWrite() {
+	@Test public void testWrite() {
 
 		File f = new File(System.getProperty("user.home") + File.separator
 				+ "tmpTestFile.xml");

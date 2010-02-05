@@ -1,4 +1,4 @@
-package rabbit.tracking.ui.pages;
+package rabbit.tracking.ui.pages.internal;
 
 import java.text.DecimalFormat;
 import java.text.Format;
@@ -9,20 +9,20 @@ import org.eclipse.jface.viewers.BaseLabelProvider;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.swt.graphics.Image;
 
+/**
+ * A label provider for a session page.
+ */
 public class SessionPageLabelProvider extends BaseLabelProvider implements ITableLabelProvider {
 
 	private static Format formatter = new DecimalFormat("#0.00");
-	
-	public SessionPageLabelProvider() {
-	}
-	
-	@Override
-	public Image getColumnImage(Object element, int columnIndex) {
+
+	public SessionPageLabelProvider() {}
+
+	@Override public Image getColumnImage(Object element, int columnIndex) {
 		return null;
 	}
 
-	@Override
-	public String getColumnText(Object element, int columnIndex) {
+	@Override public String getColumnText(Object element, int columnIndex) {
 		if (!(element instanceof Map.Entry<?, ?>)) {
 			return null;
 		}

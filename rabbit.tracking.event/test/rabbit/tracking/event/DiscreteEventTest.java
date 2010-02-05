@@ -8,36 +8,36 @@ import java.util.GregorianCalendar;
 
 import org.junit.Test;
 
+/**
+ * Test for {@link DiscreteEvent}
+ */
 public class DiscreteEventTest {
 
 	private Calendar time = Calendar.getInstance();
 
 	private DiscreteEvent event = createEvent(time);
 
+	/** Creates an event for testing. */
 	protected DiscreteEvent createEvent(Calendar time) {
 		return new DiscreteEvent(time);
 	}
 
-	@Test
-	public void testEvent() {
+	@Test public void testEvent() {
 		assertNotNull(event);
 	}
 
-	@Test
-	public void testGetTime() {
+	@Test public void testGetTime() {
 		assertEquals(time, event.getTime());
 	}
 
-	@Test
-	public void testSetTime() {
+	@Test public void testSetTime() {
 
 		Calendar newTime = new GregorianCalendar(10, Calendar.JANUARY, 20);
 		event.setTime(newTime);
 		assertEquals(newTime, event.getTime());
 	}
 
-	@Test(expected = IllegalArgumentException.class)
-	public void testSetTimeNull() {
+	@Test(expected = IllegalArgumentException.class) public void testSetTimeNull() {
 		event.setTime(null);
 	}
 

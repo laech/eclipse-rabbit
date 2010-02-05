@@ -8,7 +8,6 @@ import java.util.Set;
 import rabbit.tracking.core.ITracker;
 import rabbit.tracking.storage.xml.IStorer;
 
-
 /**
  * Defines common behaviors for a tracker.
  */
@@ -16,9 +15,9 @@ public abstract class AbstractTracker<T> implements ITracker<T> {
 
 	/** Variable to indicate whether this tracker is activated. */
 	private boolean isEnabled;
-	
+
 	private Set<T> data;
-	
+
 	private IStorer<T> storer;
 
 	/**
@@ -64,13 +63,11 @@ public abstract class AbstractTracker<T> implements ITracker<T> {
 	 */
 	protected abstract void doDisable();
 
-	@Override
-	public boolean isEnabled() {
+	@Override public boolean isEnabled() {
 		return isEnabled;
 	}
 
-	@Override
-	public void setEnabled(boolean enable) {
+	@Override public void setEnabled(boolean enable) {
 		if (isEnabled() != enable) {
 			if (enable) {
 				doEnable();
@@ -83,35 +80,34 @@ public abstract class AbstractTracker<T> implements ITracker<T> {
 		}
 	}
 
-	@Override
-	public Collection<T> getData() {
+	@Override public Collection<T> getData() {
 		return Collections.unmodifiableSet(data);
 	}
-	
-	@Override
-	public void flushData() {
+
+	@Override public void flushData() {
 		data.clear();
 	}
-	
-	@Override
-	public void saveData() {
+
+	@Override public void saveData() {
 		if (!getData().isEmpty()) {
 			storer.insert(getData());
 			storer.commit();
 		}
 	}
-	
+
 	/**
 	 * Adds an event data to the collection.
+	 * 
 	 * @param o The data.
 	 */
 	protected void addData(T o) {
 		data.add(o);
 	}
-	
+
 	/**
 	 * Creates a storer for storing the data.
+	 * 
 	 * @return A data storer.
 	 */
-	protected  abstract IStorer<T> createDataStorer();
+	protected abstract IStorer<T> createDataStorer();
 }

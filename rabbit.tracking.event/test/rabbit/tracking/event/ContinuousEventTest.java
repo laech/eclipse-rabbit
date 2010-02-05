@@ -6,28 +6,28 @@ import java.util.Calendar;
 
 import org.junit.Test;
 
+/**
+ * Test for {@link ContinuousEvent}
+ */
 public class ContinuousEventTest extends DiscreteEventTest {
 
 	private long duration = 1010111;
-	
+
 	private ContinuousEvent event = createEvent(Calendar.getInstance());
 
-	@Override
-	protected ContinuousEvent createEvent(Calendar time) {
+	@Override protected ContinuousEvent createEvent(Calendar time) {
 		return createEvent(time, duration);
 	}
-	
+
 	protected ContinuousEvent createEvent(Calendar time, long duration) {
 		return new ContinuousEvent(time, duration);
 	}
 
-	@Test
-	public void testGetDuration() {
+	@Test public void testGetDuration() {
 		assertEquals(duration, event.getDuration());
 	}
 
-	@Test
-	public void testSetDuration() {
+	@Test public void testSetDuration() {
 
 		long newDura = 349850;
 		event.setDuration(newDura);
@@ -38,8 +38,7 @@ public class ContinuousEventTest extends DiscreteEventTest {
 		assertEquals(newDura, event.getDuration());
 	}
 
-	@Test(expected = IllegalArgumentException.class)
-	public void testSetDurationNegative() {
+	@Test(expected = IllegalArgumentException.class) public void testSetDurationNegative() {
 		event.setDuration(-1);
 	}
 

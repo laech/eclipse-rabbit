@@ -5,7 +5,7 @@
    <extension
          point="org.eclipse.ui.views">
       <view
-            class="rabbit.tracking.ui.RabbitView"
+            class="rabbit.tracking.ui.internal.RabbitView"
             id="Rabbit.Features.UI.view1"
             name="Metrics"
             restorable="true">
