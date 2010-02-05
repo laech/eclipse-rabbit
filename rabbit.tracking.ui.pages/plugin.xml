@@ -18,6 +18,10 @@
                class="rabbit.tracking.ui.pages.internal.SessionPage"
                name="Sessions">
          </page>
+         <page
+               class="rabbit.tracking.ui.pages.internal.PerspectivePage"
+               name="Perspectives">
+         </page>
       </page>
    </extension>
 

@@ -1,7 +1,6 @@
 package rabbit.tracking.storage.xml;
 
 import static org.junit.Assert.assertEquals;
-
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -22,14 +21,11 @@ import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
-import org.eclipse.jface.preference.IPreferenceStore;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import rabbit.tracking.event.DiscreteEvent;
-import rabbit.tracking.storage.xml.AbstractXmlStorer;
-import rabbit.tracking.storage.xml.internal.StoragePlugin;
 import rabbit.tracking.storage.xml.schema.EventGroupType;
 
 /**
@@ -48,11 +44,7 @@ public abstract class AbstractXmlStorerTest<E extends DiscreteEvent, T, S extend
 	}
 
 	@BeforeClass public static void setUp() {
-		String path = StoragePlugin.getDefault().getStoragePath().toOSString();
-		path += File.separator;
-		path += "TestFiles";
-		IPreferenceStore pre = StoragePlugin.getDefault().getPreferenceStore();
-		pre.setValue(StoragePlugin.STORAGE_LOCATION, path);
+		TestUtil.setUpPathForTesting();
 	}
 
 	@Before public void cleanup() {

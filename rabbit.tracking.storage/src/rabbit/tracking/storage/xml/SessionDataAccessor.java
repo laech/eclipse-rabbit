@@ -20,13 +20,20 @@ import rabbit.tracking.storage.xml.schema.PartEventType;
  * Gets data about how much time is spent using Eclipse everyday.
  */
 public class SessionDataAccessor implements IAccessor {
+	
+	/**
+	 * The format used to format the dates.
+	 * @see SimpleDateFormat
+	 */
+	public static final String DATE_FORMAT = "yyyy-MM-dd E";
 
-	private static final Format formatter = new SimpleDateFormat("yyyy-MM-dd");
+	private final Format formatter ;
 	private IDataStore dataStore;
 
 	/** Constructor. */
 	public SessionDataAccessor() {
 		dataStore = DataStore.PART_STORE;
+		formatter = new SimpleDateFormat(DATE_FORMAT);
 	}
 
 	/**
@@ -52,7 +59,11 @@ public class SessionDataAccessor implements IAccessor {
 					long value = 0;
 					for (PartEventType e : list.getPartEvent()) {
 						value += e.getDuration();
-						System.out.println(e.getDuration());
+					}
+					
+					Long oldValue = result.get(dateStr);
+					if (oldValue != null) {
+						value += oldValue.longValue();
 					}
 					result.put(dateStr, value);
 				}

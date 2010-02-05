@@ -128,7 +128,7 @@ public class RabbitView extends ViewPart implements Observer {
 
 		toolBar.add(new ControlContribution("fromDateTime") {
 			@Override protected Control createControl(Composite parent) {
-				fromDateTime = new DateTime(parent, SWT.DROP_DOWN);
+				fromDateTime = new DateTime(parent, SWT.DROP_DOWN | SWT.BORDER);
 				fromDateTime.setToolTipText("Selects the start date for the data to be displayed.");
 				fromDateTime.addSelectionListener(update);
 				updateDateTime(fromDateTime, displayPref.getStartDate());
@@ -146,7 +146,7 @@ public class RabbitView extends ViewPart implements Observer {
 
 		toolBar.add(new ControlContribution("toDateTime") {
 			@Override protected Control createControl(Composite parent) {
-				toDateTime = new DateTime(parent, SWT.DROP_DOWN);
+				toDateTime = new DateTime(parent, SWT.DROP_DOWN | SWT.BORDER);
 				toDateTime.setToolTipText("Selects the end date for the data to be displayed.");
 				toDateTime.addSelectionListener(update);
 				updateDateTime(toDateTime, displayPref.getEndDate());

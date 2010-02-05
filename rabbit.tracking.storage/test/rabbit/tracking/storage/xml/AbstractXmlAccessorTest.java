@@ -9,13 +9,10 @@ import java.util.Map;
 
 import javax.xml.datatype.XMLGregorianCalendar;
 
-import org.eclipse.jface.preference.IPreferenceStore;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import rabbit.tracking.storage.xml.AbstractXmlAccessor;
-import rabbit.tracking.storage.xml.internal.StoragePlugin;
 import rabbit.tracking.storage.xml.schema.EventGroupType;
 import rabbit.tracking.storage.xml.schema.EventListType;
 import rabbit.tracking.storage.xml.schema.ObjectFactory;
@@ -29,11 +26,7 @@ public abstract class AbstractXmlAccessorTest<T, S extends EventGroupType> {
 	protected ObjectFactory objectFactory = new ObjectFactory();
 
 	@BeforeClass public static void setUpBeforeClass() throws Exception {
-		String path = StoragePlugin.getDefault().getStoragePath().toOSString();
-		path += File.separator;
-		path += "TestFiles2";
-		IPreferenceStore pre = StoragePlugin.getDefault().getPreferenceStore();
-		pre.setValue(StoragePlugin.STORAGE_LOCATION, path);
+		TestUtil.setUpPathForTesting();
 	}
 
 	@Test public void testGetDataStore() {
@@ -75,6 +68,51 @@ public abstract class AbstractXmlAccessorTest<T, S extends EventGroupType> {
 		accessor.getCategories(events).add(list2);
 
 		File f = accessor.getDataStore().getDataFile(tmp);
+		accessor.getDataStore().write(events, f);
+		Map<String, Long> data = accessor.getData(start.toGregorianCalendar(), end.toGregorianCalendar());
+		Assert.assertEquals(1, data.size());
+		Assert.assertEquals(id, data.entrySet().iterator().next().getKey());
+		Assert.assertEquals(count1 + count2, data.entrySet().iterator().next().getValue().longValue());
+	}
+	
+	/**
+	 * Tests that two lists with the same date are stored, then getting the data
+	 * out should return the combined data. Note that although two lists with
+	 * the same date should not have happened.
+	 */
+	@Test public void testGetData_twoListsWithSameDate() {
+		Calendar date = Calendar.getInstance();
+		String id = "qfnnvkfde877thfg";
+
+		// 1:
+
+		int count1 = 1232948;
+		T type1 = createXmlType();
+		setId(type1, id);
+		setUsage(type1, count1);
+
+		S list1 = createListType();
+		XMLGregorianCalendar start = toXMLGregorianCalendarDate(date);
+		list1.setDate(start);
+		accessor.getXmlTypes(list1).add(type1);
+
+		// 2:
+
+		int count2 = 2342817;
+		T type2 = createXmlType();
+		setId(type2, id);
+		setUsage(type2, count2);
+
+		S list2 = createListType();
+		XMLGregorianCalendar end = toXMLGregorianCalendarDate(date);
+		list2.setDate(end);
+		accessor.getXmlTypes(list2).add(type2);
+
+		EventListType events = objectFactory.createEventListType();
+		accessor.getCategories(events).add(list1);
+		accessor.getCategories(events).add(list2);
+
+		File f = accessor.getDataStore().getDataFile(date);
 		accessor.getDataStore().write(events, f);
 		Map<String, Long> data = accessor.getData(start.toGregorianCalendar(), end.toGregorianCalendar());
 		Assert.assertEquals(1, data.size());
