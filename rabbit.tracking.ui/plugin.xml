@@ -1,15 +1,38 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.4"?>
 <plugin>
-   <extension-point id="rabbit.tracking.ui.pages" name="rabbit.tracking.ui.pages" schema="schema/rabbit.tracking.ui.pages.exsd"/>
+   <extension-point id="rabbit.ui.pages" name="rabbit.ui.pages" schema="schema/rabbit.ui.pages.exsd"/>
    <extension
          point="org.eclipse.ui.views">
       <view
-            class="rabbit.tracking.ui.internal.RabbitView"
-            id="Rabbit.Features.UI.view1"
-            name="Metrics"
+            class="rabbit.ui.internal.RabbitView"
+            id="rabbit.ui.view.rabbitview"
+            name="Rabbit"
             restorable="true">
       </view>
+   </extension>
+   <extension
+         point="rabbit.ui.pages">
+      <page
+            class="rabbit.ui.internal.pages.EclipseUsagePage"
+            name="Eclipse Usage">
+         <page
+               class="rabbit.ui.internal.pages.CommandPage"
+               name="Commands">
+         </page>
+         <page
+               class="rabbit.ui.internal.pages.PartPage"
+               name="Editors and Views">
+         </page>
+         <page
+               class="rabbit.ui.internal.pages.SessionPage"
+               name="Sessions">
+         </page>
+         <page
+               class="rabbit.ui.internal.pages.PerspectivePage"
+               name="Perspectives">
+         </page>
+      </page>
    </extension>
 
 </plugin>
