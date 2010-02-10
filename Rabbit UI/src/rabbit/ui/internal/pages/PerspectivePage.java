@@ -17,6 +17,7 @@ import org.eclipse.ui.PlatformUI;
 import rabbit.core.storage.IAccessor;
 import rabbit.core.storage.xml.PerspectiveDataAccessor;
 import rabbit.ui.DisplayPreference;
+import rabbit.ui.internal.UndefinedPerspectiveDescriptor;
 import rabbit.ui.pages.AbstractGraphTreePage;
 
 /**
@@ -74,6 +75,9 @@ public class PerspectivePage extends AbstractGraphTreePage {
 		Map<String, Long> map = dataStore.getData(p.getStartDate(), p.getEndDate());
 		for (Map.Entry<String, Long> entry : map.entrySet()) {
 			IPerspectiveDescriptor pd = registry.findPerspectiveWithId(entry.getKey());
+			if (pd == null) {
+				pd = new UndefinedPerspectiveDescriptor(entry.getKey());
+			}
 			double value = entry.getValue().doubleValue() / MILLIS_TO_MINUTES;
 			dataMapping.put(pd, value);
 			if (Double.compare(value, getMaxValue()) > 0) {

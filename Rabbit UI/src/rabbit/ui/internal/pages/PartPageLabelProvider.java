@@ -7,19 +7,26 @@ import java.util.Map;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.BaseLabelProvider;
+import org.eclipse.jface.viewers.IColorProvider;
 import org.eclipse.jface.viewers.ITableLabelProvider;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.IWorkbenchPartDescriptor;
+import org.eclipse.ui.PlatformUI;
+
+import rabbit.ui.internal.UndefinedWorkbenchPartDescriptor;
 
 /**
  * Label provider for a part page.
  */
-public class PartPageLabelProvider extends BaseLabelProvider implements ITableLabelProvider {
+public class PartPageLabelProvider extends BaseLabelProvider implements ITableLabelProvider, IColorProvider {
 
 	/** Keys are workbench part id, values may be null. */
 	private Map<String, Image> images;
 	private PartPage page;
 	private Format formatter;
+	private final Color undefinedColor;
 
 	/**
 	 * Constructs a new page.
@@ -31,6 +38,7 @@ public class PartPageLabelProvider extends BaseLabelProvider implements ITableLa
 		this.page = page;
 		images = new HashMap<String, Image>();
 		formatter = new DecimalFormat("#0.00");
+		undefinedColor = PlatformUI.getWorkbench().getDisplay().getSystemColor(SWT.COLOR_DARK_GRAY);
 	}
 
 	@Override
@@ -72,5 +80,18 @@ public class PartPageLabelProvider extends BaseLabelProvider implements ITableLa
 			}
 		}
 		super.dispose();
+	}
+
+	@Override
+	public Color getBackground(Object element) {
+		return null;
+	}
+
+	@Override
+	public Color getForeground(Object element) {
+		if (element instanceof UndefinedWorkbenchPartDescriptor) {
+			return undefinedColor;
+		}
+		return null;
 	}
 }

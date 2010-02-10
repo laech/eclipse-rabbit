@@ -10,7 +10,6 @@ import java.util.Set;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.BaseLabelProvider;
 import org.eclipse.jface.viewers.IColorProvider;
@@ -83,13 +82,13 @@ public class FilePageLabelProvider extends BaseLabelProvider implements ITableLa
 				return resourceMap.get(resource.getPath());
 			}
 
-			IFile file = workspace.getFile(Path.fromPortableString(resource.getPath()));
+			IFile file = workspace.getFile(resource.getPath());
 			if (!file.exists()) {
-				deletedResources.add(resource.getPath());
+				deletedResources.add(resource.getPath().toString());
 			}
 			IEditorDescriptor editor = IDE.getDefaultEditor(file);
 			if (editor == null) {
-				resourceMap.put(resource.getPath(), fileImg);
+				resourceMap.put(resource.getPath().toString(), fileImg);
 				return fileImg;
 			}
 
@@ -140,10 +139,9 @@ public class FilePageLabelProvider extends BaseLabelProvider implements ITableLa
 
 	@Override
 	public Color getForeground(Object element) {
-		// if (element instanceof ResourceElement && !((ResourceElement)
-		// element).exists()) {
-		// return deletedColor;
-		// }
+		if (element instanceof ResourceElement && !((ResourceElement) element).exists()) {
+			return deletedColor;
+		}
 		return null;
 	}
 

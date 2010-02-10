@@ -4,6 +4,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Tree;
@@ -13,9 +15,11 @@ import rabbit.core.internal.storage.xml.ResourceData;
 import rabbit.core.storage.IAccessor;
 import rabbit.core.storage.xml.FileDataAccessor;
 import rabbit.ui.DisplayPreference;
+import rabbit.ui.internal.FileElement;
+import rabbit.ui.internal.FolderElement;
 import rabbit.ui.internal.MillisConverter;
+import rabbit.ui.internal.ProjectElement;
 import rabbit.ui.internal.ResourceElement;
-import rabbit.ui.internal.ResourceElement.ResourceType;
 import rabbit.ui.pages.AbstractGraphTreePage;
 
 public abstract class ResourcePage extends AbstractGraphTreePage {
@@ -31,24 +35,28 @@ public abstract class ResourcePage extends AbstractGraphTreePage {
 		Map<String, Long> rawData = accessor.getData(p.getStartDate(), p.getEndDate());
 		Map<String, ResourceElement> ls = new HashMap<String, ResourceElement>(rawData.size());
 		for (Map.Entry<String, Long> entry : rawData.entrySet()) {
-			String path = ResourceData.INSTANCE.getFilePath(entry.getKey());
-			if (path == null) {
+			String pathString = ResourceData.INSTANCE.getFilePath(entry.getKey());
+			if (pathString == null) {
 				continue;
 			}
 
-			String project = ResourceElement.getProjectPath(path);
+			IPath path = Path.fromPortableString(pathString);
+			if (path.segmentCount() <= 1) {
+				continue;
+			}
+
+			String project = path.segment(0);
 			ResourceElement l = ls.get(project);
 			if (l == null) {
-				l = ResourceElement.createProject(project);
+				l = new ProjectElement(path.uptoSegment(1));
 				ls.put(project, l);
 			}
 
-			String folder = ResourceElement.getFolderPath(path);
-			if (folder != null) {
-				l = l.insert(folder, ResourceType.FOLDER, 0);
+			if (path.segmentCount() >= 3) {
+				l = l.insert(new FolderElement(path.uptoSegment(2)));
 			}
 
-			l.insert(path, ResourceType.FILE, MillisConverter.toMinutes(entry.getValue()));
+			l.insert(new FileElement(path.removeFirstSegments(path.segmentCount() - 2), MillisConverter.toMinutes(entry.getValue())));
 
 		}
 		getViewer().setInput(ls.values());
