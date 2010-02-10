@@ -11,7 +11,7 @@ import rabbit.core.internal.storage.xml.schema.events.PerspectiveEventType;
 import rabbit.core.storage.xml.IDataStore;
 
 public class PerspectiveEventStorer
-		extends AbstractXmlStorer<PerspectiveEvent, PerspectiveEventType, PerspectiveEventListType> {
+		extends AbstractStorer<PerspectiveEvent, PerspectiveEventType, PerspectiveEventListType> {
 
 	@Override
 	protected List<PerspectiveEventListType> getXmlTypeCategories(EventListType events) {

@@ -4,7 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static rabbit.core.internal.storage.xml.AbstractXmlStorer.isSameDate;
+import static rabbit.core.internal.storage.xml.AbstractStorer.isSameDate;
 import static rabbit.core.internal.storage.xml.DatatypeConverter.toXMLGregorianCalendarDate;
 
 import java.util.ArrayList;
@@ -24,7 +24,7 @@ import rabbit.core.internal.storage.xml.CommandEventStorer;
 import rabbit.core.internal.storage.xml.schema.events.CommandEventListType;
 import rabbit.core.internal.storage.xml.schema.events.CommandEventType;
 
-public class CommandEventStorerTest extends AbstractXmlStorerTest<CommandEvent, CommandEventType, CommandEventListType> {
+public class CommandEventStorerTest extends AbstractStorerTest<CommandEvent, CommandEventType, CommandEventListType> {
 
 	private CommandEventStorer storer = create();
 

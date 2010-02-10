@@ -2,7 +2,7 @@ package rabbit.core.internal.storage.xml;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static rabbit.core.internal.storage.xml.AbstractXmlStorer.OBJECT_FACTORY;
+import static rabbit.core.internal.storage.xml.AbstractStorer.OBJECT_FACTORY;
 
 import java.util.Calendar;
 import java.util.List;
@@ -18,7 +18,7 @@ import rabbit.core.internal.storage.xml.PartEventStorer;
 import rabbit.core.internal.storage.xml.schema.events.PartEventListType;
 import rabbit.core.internal.storage.xml.schema.events.PartEventType;
 
-public class PartEventStorerTest extends AbstractXmlStorerTest2<PartEvent, PartEventType, PartEventListType> {
+public class PartEventStorerTest extends AbstractStorerTest2<PartEvent, PartEventType, PartEventListType> {
 
 	private PartEvent event;
 

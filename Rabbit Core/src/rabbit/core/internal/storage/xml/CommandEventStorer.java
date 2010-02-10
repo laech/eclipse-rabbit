@@ -11,7 +11,7 @@ import rabbit.core.internal.storage.xml.schema.events.EventListType;
 import rabbit.core.storage.xml.IDataStore;
 
 public class CommandEventStorer
-		extends AbstractXmlStorer<CommandEvent, CommandEventType, CommandEventListType> {
+		extends AbstractStorer<CommandEvent, CommandEventType, CommandEventListType> {
 
 	/**
 	 * Constructor.

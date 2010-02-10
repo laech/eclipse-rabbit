@@ -1,6 +1,6 @@
 package rabbit.core.storage.xml;
 
-import rabbit.core.internal.storage.xml.AbstractXmlAccessorTest;
+import rabbit.core.internal.storage.xml.AbstractAccessorTest;
 import rabbit.core.internal.storage.xml.schema.events.PartEventListType;
 import rabbit.core.internal.storage.xml.schema.events.PartEventType;
 import rabbit.core.storage.xml.PartDataAccessor;
@@ -8,7 +8,7 @@ import rabbit.core.storage.xml.PartDataAccessor;
 /**
  * Test for {@link PartDataAccessor}
  */
-public class PartDataAccessorTest extends AbstractXmlAccessorTest<PartEventType, PartEventListType> {
+public class PartDataAccessorTest extends AbstractAccessorTest<PartEventType, PartEventListType> {
 
 	@Override
 	protected PartDataAccessor create() {

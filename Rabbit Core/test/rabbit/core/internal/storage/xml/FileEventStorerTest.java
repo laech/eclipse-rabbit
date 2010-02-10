@@ -9,10 +9,9 @@ import rabbit.core.events.FileEvent;
 import rabbit.core.internal.storage.xml.schema.events.FileEventListType;
 import rabbit.core.internal.storage.xml.schema.events.FileEventType;
 import rabbit.core.internal.storage.xml.schema.events.ObjectFactory;
-import rabbit.core.storage.xml.FileEventStorer;
 
 public class FileEventStorerTest
-		extends AbstractXmlStorerTest2<FileEvent, FileEventType, FileEventListType> {
+		extends AbstractStorerTest2<FileEvent, FileEventType, FileEventListType> {
 
 	@Override
 	protected List<FileEventType> getEventTypes(FileEventListType type) {

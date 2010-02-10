@@ -51,6 +51,8 @@ public class ColumnComparator extends ViewerComparator implements SelectionListe
 
 	@Override
 	public void widgetSelected(SelectionEvent e) {
+		Object[] expandedElements = viewer.getExpandedElements();
+
 		selectedColumn = (TreeColumn) e.widget;
 		Tree table = selectedColumn.getParent();
 		TreeColumn previousColumn = table.getSortColumn();
@@ -65,10 +67,19 @@ public class ColumnComparator extends ViewerComparator implements SelectionListe
 		}
 		table.setSortDirection(sortDirection);
 		viewer.refresh();
+		viewer.setExpandedElements(expandedElements);
 	}
 
 	@Override
 	public int compare(Viewer v, Object e1, Object e2) {
+		int value = doCompare(v, e1, e2);
+		if (sortDirection == SWT.DOWN) {
+			value *= -1;
+		}
+		return value;
+	}
+
+	protected int doCompare(Viewer v, Object e1, Object e2) {
 		ITableLabelProvider lp = (ITableLabelProvider) viewer.getLabelProvider();
 		String s1 = lp.getColumnText(e1, getSelectedColumnIndex());
 		String s2 = lp.getColumnText(e2, getSelectedColumnIndex());
@@ -78,10 +89,6 @@ public class ColumnComparator extends ViewerComparator implements SelectionListe
 			value = s1.compareTo(s2);
 		} else {
 			value = (s1 == null) ? -1 : 1;
-		}
-
-		if (sortDirection == SWT.DOWN) {
-			value *= -1;
 		}
 		return value;
 	}

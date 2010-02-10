@@ -15,8 +15,8 @@ import rabbit.core.events.DiscreteEvent;
 import rabbit.core.internal.storage.xml.DatatypeConverter;
 import rabbit.core.internal.storage.xml.schema.events.EventGroupType;
 
-public abstract class AbstractXmlStorerTest2<E extends DiscreteEvent, T, S extends EventGroupType>
-		extends AbstractXmlStorerTest<E, T, S> {
+public abstract class AbstractStorerTest2<E extends DiscreteEvent, T, S extends EventGroupType>
+		extends AbstractStorerTest<E, T, S> {
 
 	@Override
 	public void testInsertCollection() {

@@ -1,11 +1,11 @@
 package rabbit.core.storage.xml;
 
-import rabbit.core.internal.storage.xml.AbstractXmlAccessorTest;
+import rabbit.core.internal.storage.xml.AbstractAccessorTest;
 import rabbit.core.internal.storage.xml.schema.events.PerspectiveEventListType;
 import rabbit.core.internal.storage.xml.schema.events.PerspectiveEventType;
 import rabbit.core.storage.xml.PerspectiveDataAccessor;
 
-public class PerspectiveDataAccessorTest extends AbstractXmlAccessorTest<PerspectiveEventType, PerspectiveEventListType> {
+public class PerspectiveDataAccessorTest extends AbstractAccessorTest<PerspectiveEventType, PerspectiveEventListType> {
 
 	@Override
 	protected PerspectiveDataAccessor create() {

@@ -18,6 +18,7 @@ import org.eclipse.ui.views.IViewRegistry;
 import rabbit.core.storage.IAccessor;
 import rabbit.core.storage.xml.PartDataAccessor;
 import rabbit.ui.DisplayPreference;
+import rabbit.ui.internal.UndefinedWorkbenchPartDescriptor;
 import rabbit.ui.pages.AbstractGraphTreePage;
 
 /**

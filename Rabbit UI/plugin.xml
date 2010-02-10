@@ -14,7 +14,7 @@
    <extension
          point="rabbit.ui.pages">
       <page
-            class="rabbit.ui.internal.pages.EclipseUsagePage"
+            class="rabbit.ui.internal.pages.EclipseUsageCategory"
             name="Eclipse Usage">
          <page
                class="rabbit.ui.internal.pages.CommandPage"
@@ -31,6 +31,22 @@
          <page
                class="rabbit.ui.internal.pages.PerspectivePage"
                name="Perspectives">
+         </page>
+      </page>
+      <page
+            class="rabbit.ui.internal.pages.ResourcesCategory"
+            name="Resources">
+         <page
+               class="rabbit.ui.internal.pages.FilePage"
+               name="Files">
+         </page>
+         <page
+               class="rabbit.ui.internal.pages.FolderPage"
+               name="Folders">
+         </page>
+         <page
+               class="rabbit.ui.internal.pages.ProjectPage"
+               name="Projects">
          </page>
       </page>
    </extension>

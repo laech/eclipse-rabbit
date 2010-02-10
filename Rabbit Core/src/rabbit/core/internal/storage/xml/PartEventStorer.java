@@ -11,7 +11,7 @@ import rabbit.core.internal.storage.xml.schema.events.PartEventType;
 import rabbit.core.storage.xml.IDataStore;
 
 public class PartEventStorer
-		extends AbstractXmlStorer<PartEvent, PartEventType, PartEventListType> {
+		extends AbstractStorer<PartEvent, PartEventType, PartEventListType> {
 
 	public PartEventStorer() {
 	}

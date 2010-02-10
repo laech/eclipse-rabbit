@@ -1,18 +1,17 @@
-package rabbit.core.storage.xml;
+package rabbit.core.internal.storage.xml;
 
 import java.util.List;
 
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import rabbit.core.events.FileEvent;
-import rabbit.core.internal.storage.xml.AbstractXmlStorer;
-import rabbit.core.internal.storage.xml.DataStore;
 import rabbit.core.internal.storage.xml.schema.events.EventListType;
 import rabbit.core.internal.storage.xml.schema.events.FileEventListType;
 import rabbit.core.internal.storage.xml.schema.events.FileEventType;
+import rabbit.core.storage.xml.IDataStore;
 
 public class FileEventStorer extends
-		AbstractXmlStorer<FileEvent, FileEventType, FileEventListType> {
+		AbstractStorer<FileEvent, FileEventType, FileEventListType> {
 
 	@Override
 	protected List<FileEventListType> getXmlTypeCategories(EventListType events) {

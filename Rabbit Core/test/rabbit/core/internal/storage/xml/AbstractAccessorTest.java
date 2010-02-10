@@ -13,17 +13,17 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import rabbit.core.internal.storage.xml.AbstractXmlAccessor;
+import rabbit.core.TestUtil;
 import rabbit.core.internal.storage.xml.schema.events.EventGroupType;
 import rabbit.core.internal.storage.xml.schema.events.EventListType;
 import rabbit.core.internal.storage.xml.schema.events.ObjectFactory;
 
 /**
- * Test for {@link AbstractXmlAccessor}
+ * Test for {@link AbstractAccessor}
  */
-public abstract class AbstractXmlAccessorTest<T, S extends EventGroupType> {
+public abstract class AbstractAccessorTest<T, S extends EventGroupType> {
 
-	protected AbstractXmlAccessor<T, S> accessor = create();
+	protected AbstractAccessor<T, S> accessor = create();
 	protected ObjectFactory objectFactory = new ObjectFactory();
 
 	@BeforeClass
@@ -161,7 +161,7 @@ public abstract class AbstractXmlAccessorTest<T, S extends EventGroupType> {
 	}
 
 	/** Creates a subject for testing. */
-	protected abstract AbstractXmlAccessor<T, S> create();
+	protected abstract AbstractAccessor<T, S> create();
 
 	/**
 	 * Creates a new list type.

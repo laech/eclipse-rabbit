@@ -149,7 +149,7 @@ public abstract class AbstractGraphTreePage implements IPage {
 	 * 
 	 * @return The maximum.
 	 */
-	protected double getMaxValue() {
+	public double getMaxValue() {
 		return maxValue;
 	}
 
@@ -160,7 +160,7 @@ public abstract class AbstractGraphTreePage implements IPage {
 	 *            The value.
 	 * @see #getGraphColumn()
 	 */
-	protected void setMaxValue(double max) {
+	public void setMaxValue(double max) {
 		maxValue = max;
 	}
 

@@ -25,24 +25,25 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import rabbit.core.TestUtil;
 import rabbit.core.events.DiscreteEvent;
 import rabbit.core.internal.storage.xml.schema.events.EventGroupType;
 import rabbit.core.internal.storage.xml.schema.events.ObjectFactory;
 
 /**
- * Test for {@link AbstractXmlStorer}
+ * Test for {@link AbstractStorer}
  */
-public abstract class AbstractXmlStorerTest<E extends DiscreteEvent, T, S extends EventGroupType> {
+public abstract class AbstractStorerTest<E extends DiscreteEvent, T, S extends EventGroupType> {
 
-	protected AbstractXmlStorer<E, T, S> storer = create();
+	protected AbstractStorer<E, T, S> storer = create();
 
 	protected ObjectFactory objectFactory = new ObjectFactory();
 
 	protected File dataFile = storer.getDataStore().getDataFile(Calendar.getInstance());
 
 	@SuppressWarnings("unchecked")
-	protected Collection<S> getDataField(AbstractXmlStorer<E, T, S> s) throws Exception {
-		Field f = AbstractXmlStorer.class.getDeclaredField("data");
+	protected Collection<S> getDataField(AbstractStorer<E, T, S> s) throws Exception {
+		Field f = AbstractStorer.class.getDeclaredField("data");
 		f.setAccessible(true);
 		return (Collection<S>) f.get(s);
 	}
@@ -106,7 +107,7 @@ public abstract class AbstractXmlStorerTest<E extends DiscreteEvent, T, S extend
 
 	@Test
 	public void testGetXmlTypeCategories() {
-		assertNotNull(storer.getXmlTypeCategories(AbstractXmlStorer.OBJECT_FACTORY.createEventListType()));
+		assertNotNull(storer.getXmlTypeCategories(AbstractStorer.OBJECT_FACTORY.createEventListType()));
 	}
 
 	@Test
@@ -116,10 +117,10 @@ public abstract class AbstractXmlStorerTest<E extends DiscreteEvent, T, S extend
 			Calendar cal = Calendar.getInstance();
 
 			XMLGregorianCalendar xmlCal = DatatypeFactory.newInstance().newXMLGregorianCalendarDate(1, 1, 1, 1);
-			assertFalse(AbstractXmlStorer.isSameDate(cal, xmlCal));
+			assertFalse(AbstractStorer.isSameDate(cal, xmlCal));
 
 			xmlCal = toXMLGregorianCalendarDate(cal);
-			assertTrue(AbstractXmlStorer.isSameDate(cal, xmlCal));
+			assertTrue(AbstractStorer.isSameDate(cal, xmlCal));
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -132,10 +133,10 @@ public abstract class AbstractXmlStorerTest<E extends DiscreteEvent, T, S extend
 
 		Calendar cal1 = Calendar.getInstance();
 		Calendar cal2 = Calendar.getInstance();
-		assertTrue(AbstractXmlStorer.isSameMonthInYear(cal1, cal2));
+		assertTrue(AbstractStorer.isSameMonthInYear(cal1, cal2));
 
 		cal2.add(Calendar.MONTH, 1);
-		assertFalse(AbstractXmlStorer.isSameMonthInYear(cal1, cal2));
+		assertFalse(AbstractStorer.isSameMonthInYear(cal1, cal2));
 	}
 
 	@Test
@@ -166,7 +167,7 @@ public abstract class AbstractXmlStorerTest<E extends DiscreteEvent, T, S extend
 		File f = new File(System.getProperty("user.home") + File.separator + "tmpTestFile.xml");
 		assertFalse(f.exists());
 
-		storer.getDataStore().write(AbstractXmlStorer.OBJECT_FACTORY.createEventListType(), f);
+		storer.getDataStore().write(AbstractStorer.OBJECT_FACTORY.createEventListType(), f);
 		assertTrue(f.exists());
 		f.delete();
 	}
@@ -215,5 +216,5 @@ public abstract class AbstractXmlStorerTest<E extends DiscreteEvent, T, S extend
 	/** Creates an event that is different to {@link #createEvent()}. */
 	protected abstract E createEvent2();
 
-	protected abstract AbstractXmlStorer<E, T, S> create();
+	protected abstract AbstractStorer<E, T, S> create();
 }

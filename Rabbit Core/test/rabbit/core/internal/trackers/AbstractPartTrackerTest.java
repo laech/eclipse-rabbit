@@ -1,5 +1,7 @@
 package rabbit.core.internal.trackers;
 
+import static org.junit.Assert.assertEquals;
+
 import java.util.Calendar;
 import java.util.concurrent.TimeUnit;
 
@@ -175,6 +177,31 @@ public abstract class AbstractPartTrackerTest<E> extends AbstractTrackerTest<E> 
 		end = Calendar.getInstance();
 		event = tracker.getData().iterator().next();
 		internalAssertAccuracy(event, newPart, 50, 1, start, end);
+	}
+
+	@Test
+	public void testAccuracy2() throws InterruptedException {
+		IFile file = getFileForTesting();
+		IEditorDescriptor desc = PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(file.getName());
+		IWorkbenchPage page = PlatformUI.getWorkbench().getWorkbenchWindows()[0].getActivePage();
+		try {
+			page.openEditor(new FileEditorInput(file), desc.getId());
+		} catch (PartInitException e) {
+			e.printStackTrace();
+		}
+
+		IWorkbenchPart newPart = page.getActiveEditor();
+
+		// Assume a part was never activated, calling deactivated should do
+		// nothing.
+
+		TimeUnit.MILLISECONDS.sleep(30);
+		tracker.partDeactivated(newPart);
+		assertEquals(0, tracker.getData().size());
+
+		TimeUnit.MILLISECONDS.sleep(30);
+		tracker.windowDeactivated(page.getWorkbenchWindow());
+		assertEquals(0, tracker.getData().size());
 	}
 
 	protected abstract void internalAssertAccuracy(E event, IWorkbenchPart part,

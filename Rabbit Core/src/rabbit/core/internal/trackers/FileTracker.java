@@ -7,8 +7,8 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPart;
 
 import rabbit.core.events.FileEvent;
+import rabbit.core.internal.storage.xml.FileEventStorer;
 import rabbit.core.internal.storage.xml.ResourceData;
-import rabbit.core.storage.xml.FileEventStorer;
 
 public class FileTracker extends AbstractPartTracker<FileEvent> {
 
@@ -21,7 +21,7 @@ public class FileTracker extends AbstractPartTracker<FileEvent> {
 		if (p instanceof IEditorPart) {
 			IFile f = (IFile) ((IEditorPart) p).getEditorInput().getAdapter(IFile.class);
 			if (f != null) {
-				String id = ResourceData.INSTANCE.insert(f.getFullPath());
+				String id = ResourceData.INSTANCE.insert(f.getFullPath().toString());
 				return new FileEvent(time, duration, id);
 			}
 		}

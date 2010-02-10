@@ -1,14 +1,16 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: UI
-Bundle-SymbolicName: rabbit.ui;singleton:=true
+Bundle-SymbolicName: Rabbit_UI;singleton:=true
 Bundle-Version: 0.1.0.qualifier
 Bundle-Activator: rabbit.ui.internal.RabbitUI
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  org.eclipse.ui.forms,
  org.junit4,
- rabbit.core
+ rabbit.core,
+ org.eclipse.core.resources,
+ org.eclipse.ui.ide
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: rabbit.ui,

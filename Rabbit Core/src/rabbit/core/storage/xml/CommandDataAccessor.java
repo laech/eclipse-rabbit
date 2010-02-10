@@ -2,13 +2,13 @@ package rabbit.core.storage.xml;
 
 import java.util.Collection;
 
-import rabbit.core.internal.storage.xml.AbstractXmlAccessor;
+import rabbit.core.internal.storage.xml.AbstractAccessor;
 import rabbit.core.internal.storage.xml.DataStore;
 import rabbit.core.internal.storage.xml.schema.events.CommandEventListType;
 import rabbit.core.internal.storage.xml.schema.events.CommandEventType;
 import rabbit.core.internal.storage.xml.schema.events.EventListType;
 
-public class CommandDataAccessor extends AbstractXmlAccessor<CommandEventType, CommandEventListType> {
+public class CommandDataAccessor extends AbstractAccessor<CommandEventType, CommandEventListType> {
 
 	@Override
 	protected Collection<CommandEventListType> getCategories(EventListType doc) {

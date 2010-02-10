@@ -10,7 +10,6 @@ import org.eclipse.ui.IWorkbenchPart;
 
 import rabbit.core.events.FileEvent;
 import rabbit.core.internal.storage.xml.ResourceData;
-import rabbit.core.internal.trackers.FileTracker;
 
 /**
  * Test for {@link FileTracker}
@@ -28,7 +27,7 @@ public class FileTrackerTest extends AbstractPartTrackerTest<FileEvent> {
 		Assert.assertTrue(end.compareTo(event.getTime()) >= 0);
 		Assert.assertEquals(size, tracker.getData().size());
 		IFile file = (IFile) ((IEditorPart) part).getEditorInput().getAdapter(IFile.class);
-		Assert.assertEquals(event.getFileId(), ResourceData.INSTANCE.getId(file.getFullPath()));
+		Assert.assertEquals(event.getFileId(), ResourceData.INSTANCE.getId(file.getFullPath().toString()));
 	}
 
 	@Override

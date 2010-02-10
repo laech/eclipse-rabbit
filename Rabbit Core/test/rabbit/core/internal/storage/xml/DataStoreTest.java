@@ -16,8 +16,7 @@ import java.util.Set;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import rabbit.core.internal.storage.xml.AbstractXmlStorer;
-import rabbit.core.internal.storage.xml.DataStore;
+import rabbit.core.TestUtil;
 
 public class DataStoreTest {
 
@@ -96,7 +95,7 @@ public class DataStoreTest {
 				+ "tmpTestFile.xml");
 		assertFalse(f.exists());
 
-		store.write(AbstractXmlStorer.OBJECT_FACTORY.createEventListType(), f);
+		store.write(AbstractStorer.OBJECT_FACTORY.createEventListType(), f);
 		assertTrue(f.exists());
 		f.delete();
 	}

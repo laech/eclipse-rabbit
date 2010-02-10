@@ -116,7 +116,7 @@ public class ResourceData implements IWorkbenchListener, IResourceChangeListener
 		}
 	}
 
-	public String insert(IPath path) {
+	public String insert(String path) {
 		String id = getId(path);
 		if (id == null) {
 			id = generateId();
@@ -138,22 +138,22 @@ public class ResourceData implements IWorkbenchListener, IResourceChangeListener
 		return System.currentTimeMillis() + "" + random.nextInt();
 	}
 
-	public String getId(IPath path) {
-		Set<String> ids = resources.get(path.toString());
+	public String getId(String path) {
+		Set<String> ids = resources.get(path);
 		if (ids != null) {
 			return ids.iterator().next();
 		}
 		return null;
 	}
 
-	public IPath getFilePath(String id) {
+	public String getFilePath(String id) {
 		if (!allIds.contains(id)) {
 			return null;
 		}
 		for (Map.Entry<String, Set<String>> entry : resources.entrySet()) {
 			for (String str : entry.getValue()) {
 				if (str.equals(id)) {
-					return new Path(entry.getKey());
+					return entry.getKey();
 				}
 			}
 		}

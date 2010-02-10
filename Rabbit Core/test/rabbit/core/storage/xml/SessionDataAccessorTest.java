@@ -13,13 +13,12 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import rabbit.core.TestUtil;
 import rabbit.core.internal.storage.xml.DataStore;
-import rabbit.core.internal.storage.xml.TestUtil;
 import rabbit.core.internal.storage.xml.schema.events.EventListType;
 import rabbit.core.internal.storage.xml.schema.events.ObjectFactory;
 import rabbit.core.internal.storage.xml.schema.events.PartEventListType;
 import rabbit.core.internal.storage.xml.schema.events.PartEventType;
-import rabbit.core.storage.xml.SessionDataAccessor;
 
 /**
  * Test for {@link SessionDataAccessor}

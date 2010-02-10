@@ -25,12 +25,12 @@ import rabbit.core.storage.xml.IDataStore;
  * @param <S>
  *            The XML category type.
  */
-public abstract class AbstractXmlAccessor<T, S extends EventGroupType> implements IAccessor {
+public abstract class AbstractAccessor<T, S extends EventGroupType> implements IAccessor {
 
 	private final IDataStore dataStore;
 
 	/** Constructor. */
-	public AbstractXmlAccessor() {
+	public AbstractAccessor() {
 		dataStore = getDataStore();
 	}
 

@@ -2,7 +2,7 @@ package rabbit.core.internal.storage.xml;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static rabbit.core.internal.storage.xml.AbstractXmlStorer.OBJECT_FACTORY;
+import static rabbit.core.internal.storage.xml.AbstractStorer.OBJECT_FACTORY;
 
 import java.util.Calendar;
 import java.util.List;
@@ -16,7 +16,7 @@ import rabbit.core.internal.storage.xml.schema.events.PerspectiveEventListType;
 import rabbit.core.internal.storage.xml.schema.events.PerspectiveEventType;
 
 public class PerspectiveEventStorerTest
-		extends AbstractXmlStorerTest2<PerspectiveEvent, PerspectiveEventType, PerspectiveEventListType> {
+		extends AbstractStorerTest2<PerspectiveEvent, PerspectiveEventType, PerspectiveEventListType> {
 
 	private PerspectiveEventStorer storer = create();
 

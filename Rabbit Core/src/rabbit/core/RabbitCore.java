@@ -25,7 +25,7 @@ public class RabbitCore extends AbstractUIPlugin implements IWorkbenchListener {
 	public static final String PLUGIN_ID = "rabbit.core";
 
 	/** ID of the tracker extension point. */
-	public static final String TRACKER_EXTENSION_ID = "rabbit.tracker";
+	public static final String TRACKER_EXTENSION_ID = "rabbit.core.trackers";
 
 	/**
 	 * Identifier for getting the storage location from the preference store.

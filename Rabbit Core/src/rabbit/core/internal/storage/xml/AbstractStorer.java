@@ -29,7 +29,7 @@ import rabbit.core.storage.xml.IDataStore;
  *            according to event date. Such as
  *            {@link rabbit.tracking.storage.xml.schema.CommandEventListType}.
  */
-public abstract class AbstractXmlStorer<E extends DiscreteEvent, T, S extends EventGroupType> implements IStorer<E> {
+public abstract class AbstractStorer<E extends DiscreteEvent, T, S extends EventGroupType> implements IStorer<E> {
 
 	protected static final ObjectFactory OBJECT_FACTORY = new ObjectFactory();
 
@@ -40,7 +40,7 @@ public abstract class AbstractXmlStorer<E extends DiscreteEvent, T, S extends Ev
 	/**
 	 * Sole constructor.
 	 */
-	public AbstractXmlStorer() {
+	public AbstractStorer() {
 		data = new LinkedHashSet<S>();
 		currentMonth = Calendar.getInstance();
 	}
