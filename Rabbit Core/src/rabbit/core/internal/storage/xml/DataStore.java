@@ -12,7 +12,6 @@ import javax.xml.bind.JAXBException;
 import rabbit.core.RabbitCore;
 import rabbit.core.internal.storage.xml.schema.events.EventListType;
 import rabbit.core.internal.storage.xml.schema.events.ObjectFactory;
-import rabbit.core.storage.xml.IDataStore;
 
 /**
  * Data stores.

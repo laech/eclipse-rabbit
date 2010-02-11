@@ -2,6 +2,8 @@ package rabbit.ui.internal;
 
 import java.util.Collection;
 
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -13,6 +15,8 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
+
+import rabbit.ui.internal.util.PageDescriptor;
 
 /**
  * A panel containing a collection of available metrics.
@@ -92,9 +96,19 @@ public class MetricsPanel {
 	 *            The parent composite.
 	 */
 	public void createContents(Composite parent) {
-		TreeViewer viewer = new TreeViewer(parent, SWT.NONE);
+		final TreeViewer viewer = new TreeViewer(parent, SWT.SINGLE);
 		viewer.setLabelProvider(new TreeLabelProvider());
 		viewer.setContentProvider(new TreeContentProvider());
+		viewer.addDoubleClickListener(new IDoubleClickListener() {
+			@Override
+			public void doubleClick(DoubleClickEvent e) {
+				IStructuredSelection select = (IStructuredSelection) e.getSelection();
+				Object o = select.getFirstElement();
+				if (((ITreeContentProvider) viewer.getContentProvider()).hasChildren(o)) {
+					viewer.setExpandedState(o, !viewer.getExpandedState(o));
+				}
+			}
+		});
 
 		viewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
@@ -106,7 +120,6 @@ public class MetricsPanel {
 				}
 			}
 		});
-
 		viewer.setInput(RabbitUI.getDefault().getPages());
 		viewer.expandAll();
 	}

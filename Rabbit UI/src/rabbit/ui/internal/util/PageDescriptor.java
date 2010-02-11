@@ -1,4 +1,4 @@
-package rabbit.ui.internal;
+package rabbit.ui.internal.util;
 
 import java.util.Collections;
 import java.util.Comparator;

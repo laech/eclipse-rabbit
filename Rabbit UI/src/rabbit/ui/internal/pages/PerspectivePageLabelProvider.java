@@ -15,7 +15,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.IPerspectiveDescriptor;
 import org.eclipse.ui.PlatformUI;
 
-import rabbit.ui.internal.UndefinedPerspectiveDescriptor;
+import rabbit.ui.internal.util.UndefinedPerspectiveDescriptor;
 
 /**
  * Label provider for {@link PerspectivePaeg}

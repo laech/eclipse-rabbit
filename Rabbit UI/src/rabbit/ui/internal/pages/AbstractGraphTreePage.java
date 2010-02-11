@@ -1,9 +1,15 @@
-package rabbit.ui.pages;
+package rabbit.ui.internal.pages;
 
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IDoubleClickListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.widgets.Composite;
@@ -12,6 +18,10 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.swt.widgets.TreeItem;
+
+import rabbit.ui.internal.RabbitUI;
+import rabbit.ui.pages.ColumnComparator;
+import rabbit.ui.pages.IPage;
 
 /**
  * A page that contains a tree (can be used as a table) that is capable of
@@ -35,6 +45,7 @@ public abstract class AbstractGraphTreePage implements IPage {
 	private TreeViewer viewer;
 	private TreeColumn valueColumn;
 	private TreeColumn graphColumn;
+	private TreeColumn[] otherColumns;
 
 	private Listener graphPainter = new Listener() {
 		@Override
@@ -117,31 +128,79 @@ public abstract class AbstractGraphTreePage implements IPage {
 		viewer = new TreeViewer(parent, SWT.NONE);
 		viewer.setContentProvider(createContentProvider());
 		viewer.setLabelProvider(createLabelProvider());
+		viewer.addDoubleClickListener(new IDoubleClickListener() {
+			@Override
+			public void doubleClick(DoubleClickEvent e) {
+				IStructuredSelection select = (IStructuredSelection) e.getSelection();
+				Object o = select.getFirstElement();
+				if (((ITreeContentProvider) viewer.getContentProvider()).hasChildren(o)) {
+					viewer.setExpandedState(o, !viewer.getExpandedState(o));
+				}
+			}
+		});
 
-		final Tree Tree = viewer.getTree();
-		Tree.setHeaderVisible(true);
-		Tree.addListener(SWT.PaintItem, graphPainter);
+		final Tree tree = viewer.getTree();
+		tree.setHeaderVisible(true);
+		tree.addListener(SWT.PaintItem, graphPainter);
+		tree.addDisposeListener(new DisposeListener() {
+			@Override
+			public void widgetDisposed(DisposeEvent e) {
+				saveState();
+			}
+		});
 
 		ColumnComparator sorter = new ColumnComparator(viewer);
-		for (TreeColumn column : createColumns(Tree)) {
+		otherColumns = createColumns(tree);
+		for (TreeColumn column : otherColumns) {
 			column.addSelectionListener(sorter);
 		}
 
-		valueColumn = new TreeColumn(Tree, SWT.RIGHT);
+		valueColumn = new TreeColumn(tree, SWT.RIGHT);
 		valueColumn.setText(getValueColumnText());
 		valueColumn.setWidth(100);
 		valueColumn.setMoveable(true);
 		valueColumn.addSelectionListener(sorter);
 
-		graphColumn = new TreeColumn(Tree, SWT.LEFT);
+		graphColumn = new TreeColumn(tree, SWT.LEFT);
 		graphColumn.setWidth(100);
 		graphColumn.setMoveable(true);
 		graphColumn.addSelectionListener(new ColumnComparator(viewer) {
 			@Override
 			protected int getSelectedColumnIndex() {
-				return Tree.indexOf(getValueColumn());
+				return tree.indexOf(getValueColumn());
 			}
 		});
+
+		restoreState();
+	}
+
+	/** Saves the state of the page. */
+	protected void saveState() {
+		IPreferenceStore store = RabbitUI.getDefault().getPreferenceStore();
+		store.setValue(getClass().getSimpleName() + ".Graph", graphColumn.getWidth());
+		store.setValue(getClass().getSimpleName() + ".Value", valueColumn.getWidth());
+		for (TreeColumn column : otherColumns) {
+			store.setValue(getClass().getSimpleName() + '.' + column.getText() + "Width", column.getWidth());
+		}
+	}
+
+	/** Restores the state of the page. */
+	protected void restoreState() {
+		IPreferenceStore store = RabbitUI.getDefault().getPreferenceStore();
+		int width = store.getInt(getClass().getSimpleName() + ".Graph");
+		if (width > 0) {
+			graphColumn.setWidth(width);
+		}
+		width = store.getInt(getClass().getSimpleName() + ".Value");
+		if (width > 0) {
+			valueColumn.setWidth(width);
+		}
+		for (TreeColumn column : otherColumns) {
+			width = store.getInt(getClass().getSimpleName() + '.' + column.getText() + "Width");
+			if (width > 0) {
+				column.setWidth(width);
+			}
+		}
 	}
 
 	/**

@@ -4,6 +4,7 @@ import java.util.Collection;
 
 import rabbit.core.internal.storage.xml.AbstractAccessor;
 import rabbit.core.internal.storage.xml.DataStore;
+import rabbit.core.internal.storage.xml.IDataStore;
 import rabbit.core.internal.storage.xml.schema.events.CommandEventListType;
 import rabbit.core.internal.storage.xml.schema.events.CommandEventType;
 import rabbit.core.internal.storage.xml.schema.events.EventListType;

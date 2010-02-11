@@ -1,12 +1,12 @@
 package rabbit.ui.internal.pages;
 
-import rabbit.ui.internal.pages.CommandPage;
-import rabbit.ui.pages.AbstractGraphTablePageTest;
-
+/**
+ * Test for {@link CommandPage}
+ */
 public class CommandPageTest extends AbstractGraphTablePageTest {
 
 	@Override
-	protected CommandPage createPage() {
+	protected AbstractGraphTreePage createPage() {
 		return new CommandPage();
 	}
 

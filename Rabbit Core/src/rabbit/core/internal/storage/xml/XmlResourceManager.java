@@ -18,6 +18,7 @@ import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.IResourceDeltaVisitor;
+import org.eclipse.core.runtime.AssertionFailedException;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
@@ -28,18 +29,22 @@ import rabbit.core.RabbitCore;
 import rabbit.core.internal.storage.xml.schema.resources.ObjectFactory;
 import rabbit.core.internal.storage.xml.schema.resources.ResourceListType;
 import rabbit.core.internal.storage.xml.schema.resources.ResourceType;
+import rabbit.core.storage.IResourceManager;
 
-public class ResourceData implements IWorkbenchListener, IResourceChangeListener {
+/**
+ * An XML {@link IResourceManager}.
+ */
+public enum XmlResourceManager implements IResourceManager, IResourceChangeListener, IWorkbenchListener {
 
-	public static final ResourceData INSTANCE = new ResourceData();
+	INSTANCE;
 
 	private JAXBContext jaxb;
-	private Marshaller mar;
 	private Unmarshaller unmar;
+	private Marshaller mar;
 
 	private ObjectFactory objectFactory;
-	private Random random;
 	private Set<String> allIds;
+	private Random random;
 
 	private Map<String, Set<String>> resources;
 
@@ -74,7 +79,8 @@ public class ResourceData implements IWorkbenchListener, IResourceChangeListener
 		}
 	};
 
-	private ResourceData() {
+	/** Constructor. */
+	XmlResourceManager() {
 		try {
 			jaxb = JAXBContext.newInstance(ObjectFactory.class);
 			mar = jaxb.createMarshaller();
@@ -116,6 +122,55 @@ public class ResourceData implements IWorkbenchListener, IResourceChangeListener
 		}
 	}
 
+	/**
+	 * Generates a random id.
+	 * 
+	 * @return A random id.
+	 */
+	private String generateId() {
+		return System.currentTimeMillis() + "" + random.nextInt();
+	}
+
+	private File getDataFile() {
+		IPath path = Path.fromOSString(RabbitCore.getDefault().getStoragePath().toOSString());
+		path = path.addTrailingSeparator();
+		path = path.append("ResourceDB");
+		path = path.addTrailingSeparator();
+		path = path.append("Resources");
+		path = path.addFileExtension("xml");
+
+		File file = path.toFile();
+		if (!file.getParentFile().exists()) {
+			file.getParentFile().mkdirs();
+		}
+		return file;
+	}
+
+	@Override
+	public String getFilePath(String id) {
+		if (!allIds.contains(id)) {
+			return null;
+		}
+		for (Map.Entry<String, Set<String>> entry : resources.entrySet()) {
+			for (String str : entry.getValue()) {
+				if (str.equals(id)) {
+					return entry.getKey();
+				}
+			}
+		}
+		throw new AssertionFailedException("Bug");
+	}
+
+	@Override
+	public String getId(String path) {
+		Set<String> ids = resources.get(path);
+		if (ids != null) {
+			return ids.iterator().next();
+		}
+		return null;
+	}
+
+	@Override
 	public String insert(String path) {
 		String id = getId(path);
 		if (id == null) {
@@ -134,49 +189,22 @@ public class ResourceData implements IWorkbenchListener, IResourceChangeListener
 		return id;
 	}
 
-	private String generateId() {
-		return System.currentTimeMillis() + "" + random.nextInt();
-	}
-
-	public String getId(String path) {
-		Set<String> ids = resources.get(path);
-		if (ids != null) {
-			return ids.iterator().next();
-		}
-		return null;
-	}
-
-	public String getFilePath(String id) {
-		if (!allIds.contains(id)) {
-			return null;
-		}
-		for (Map.Entry<String, Set<String>> entry : resources.entrySet()) {
-			for (String str : entry.getValue()) {
-				if (str.equals(id)) {
-					return entry.getKey();
-				}
-			}
-		}
-		throw new RuntimeException("Bug");
-	}
-
-	private File getDataFile() {
-		IPath path = Path.fromOSString(RabbitCore.getDefault().getStoragePath().toOSString());
-		path = path.addTrailingSeparator();
-		path = path.append("ResourceDB");
-		path = path.addTrailingSeparator();
-		path = path.append("Resources");
-		path = path.addFileExtension("xml");
-
-		File file = path.toFile();
-		if (!file.getParentFile().exists()) {
-			file.getParentFile().mkdirs();
-		}
-		return file;
-	}
-
 	private void marshal(JAXBElement<?> e, File f) throws JAXBException {
 		mar.marshal(e, f);
+	}
+
+	@Override
+	public void resourceChanged(IResourceChangeEvent event) {
+		IResourceDelta delta = event.getDelta();
+		if (delta == null) {
+			return;
+		}
+
+		try {
+			delta.accept(renameVisitor);
+		} catch (CoreException e) {
+			e.printStackTrace();
+		}
 	}
 
 	private <T> T unmarshal(Class<T> type, File f) throws JAXBException {
@@ -204,19 +232,5 @@ public class ResourceData implements IWorkbenchListener, IResourceChangeListener
 	@Override
 	public boolean preShutdown(IWorkbench workbench, boolean forced) {
 		return true;
-	}
-
-	@Override
-	public void resourceChanged(IResourceChangeEvent event) {
-		IResourceDelta delta = event.getDelta();
-		if (delta == null) {
-			return;
-		}
-
-		try {
-			delta.accept(renameVisitor);
-		} catch (CoreException e) {
-			e.printStackTrace();
-		}
 	}
 }

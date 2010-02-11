@@ -1,11 +1,11 @@
-package rabbit.ui.internal.pages;
+package rabbit.ui.internal.util;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 import org.junit.Test;
 
-import rabbit.ui.internal.UndefinedWorkbenchPartDescriptor;
+import rabbit.ui.internal.util.UndefinedWorkbenchPartDescriptor;
 
 /**
  * Test for {@link UndefinedWorkbenchPartDescriptor}

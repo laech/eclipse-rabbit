@@ -8,7 +8,6 @@ import rabbit.core.events.CommandEvent;
 import rabbit.core.internal.storage.xml.schema.events.CommandEventListType;
 import rabbit.core.internal.storage.xml.schema.events.CommandEventType;
 import rabbit.core.internal.storage.xml.schema.events.EventListType;
-import rabbit.core.storage.xml.IDataStore;
 
 public class CommandEventStorer
 		extends AbstractStorer<CommandEvent, CommandEventType, CommandEventListType> {

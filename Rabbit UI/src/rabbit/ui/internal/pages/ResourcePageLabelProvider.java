@@ -3,9 +3,7 @@ package rabbit.ui.internal.pages;
 import java.text.DecimalFormat;
 import java.text.Format;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IWorkspaceRoot;
@@ -22,22 +20,27 @@ import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.ide.IDE;
 
-import rabbit.ui.internal.ResourceElement;
-import rabbit.ui.internal.ResourceElement.ResourceType;
+import rabbit.ui.internal.util.ResourceElement;
+import rabbit.ui.internal.util.ResourceElement.ResourceType;
 
-public class FilePageLabelProvider extends BaseLabelProvider implements ITableLabelProvider, IColorProvider {
+/**
+ * Label provider for a {@link ResourcePage}.
+ */
+public class ResourcePageLabelProvider extends BaseLabelProvider implements ITableLabelProvider, IColorProvider {
 
+	/** Maps the given path of a resource to an image (may be null). */
 	private final Map<String, Image> resourceMap;
+	/** Maps the given id of an editor to an image (may be null). */
 	private final Map<String, Image> editorMap;
+
+	private final IWorkspaceRoot workspace;
 	private final Image projectImg;
 	private final Image folderImg;
 	private final Image fileImg;
-	private final IWorkspaceRoot workspace;
 
-	private final Set<String> deletedResources;
-	private final Color deletedColor;
+	private final Color deletedResourceColor;
 
-	private final Format formatter = new DecimalFormat("#0.00");
+	private final Format formatter;
 
 	private boolean showProjectValues;
 	private boolean showFolderValues;
@@ -45,7 +48,7 @@ public class FilePageLabelProvider extends BaseLabelProvider implements ITableLa
 
 	private ResourcePage parent;
 
-	public FilePageLabelProvider(ResourcePage parent, boolean showProjectValues, boolean showFolderValues, boolean showFileValues) {
+	public ResourcePageLabelProvider(ResourcePage parent, boolean showProjectValues, boolean showFolderValues, boolean showFileValues) {
 		ISharedImages images = PlatformUI.getWorkbench().getSharedImages();
 		projectImg = images.getImage(IDE.SharedImages.IMG_OBJ_PROJECT);
 		folderImg = images.getImage(ISharedImages.IMG_OBJ_FOLDER);
@@ -53,9 +56,9 @@ public class FilePageLabelProvider extends BaseLabelProvider implements ITableLa
 		editorMap = new HashMap<String, Image>();
 		resourceMap = new HashMap<String, Image>();
 		workspace = ResourcesPlugin.getWorkspace().getRoot();
+		formatter = new DecimalFormat("#0.00");
 
-		deletedResources = new HashSet<String>();
-		deletedColor = PlatformUI.getWorkbench().getDisplay().getSystemColor(SWT.COLOR_DARK_GRAY);
+		deletedResourceColor = PlatformUI.getWorkbench().getDisplay().getSystemColor(SWT.COLOR_DARK_GRAY);
 
 		this.showProjectValues = showProjectValues;
 		this.showFolderValues = showFolderValues;
@@ -83,9 +86,6 @@ public class FilePageLabelProvider extends BaseLabelProvider implements ITableLa
 			}
 
 			IFile file = workspace.getFile(resource.getPath());
-			if (!file.exists()) {
-				deletedResources.add(resource.getPath().toString());
-			}
 			IEditorDescriptor editor = IDE.getDefaultEditor(file);
 			if (editor == null) {
 				resourceMap.put(resource.getPath().toString(), fileImg);
@@ -140,7 +140,7 @@ public class FilePageLabelProvider extends BaseLabelProvider implements ITableLa
 	@Override
 	public Color getForeground(Object element) {
 		if (element instanceof ResourceElement && !((ResourceElement) element).exists()) {
-			return deletedColor;
+			return deletedResourceColor;
 		}
 		return null;
 	}

@@ -15,7 +15,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.IWorkbenchPartDescriptor;
 import org.eclipse.ui.PlatformUI;
 
-import rabbit.ui.internal.UndefinedWorkbenchPartDescriptor;
+import rabbit.ui.internal.util.UndefinedWorkbenchPartDescriptor;
 
 /**
  * Label provider for a part page.

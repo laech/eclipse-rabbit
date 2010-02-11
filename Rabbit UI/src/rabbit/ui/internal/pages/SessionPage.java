@@ -15,7 +15,6 @@ import org.eclipse.ui.PlatformUI;
 import rabbit.core.storage.IAccessor;
 import rabbit.core.storage.xml.SessionDataAccessor;
 import rabbit.ui.DisplayPreference;
-import rabbit.ui.pages.AbstractGraphTreePage;
 
 /**
  * A page displaying how much time is spent on using Eclipse every day.

@@ -8,7 +8,6 @@ import rabbit.core.events.PartEvent;
 import rabbit.core.internal.storage.xml.schema.events.EventListType;
 import rabbit.core.internal.storage.xml.schema.events.PartEventListType;
 import rabbit.core.internal.storage.xml.schema.events.PartEventType;
-import rabbit.core.storage.xml.IDataStore;
 
 public class PartEventStorer
 		extends AbstractStorer<PartEvent, PartEventType, PartEventListType> {

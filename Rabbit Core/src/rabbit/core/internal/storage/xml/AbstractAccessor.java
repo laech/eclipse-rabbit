@@ -14,7 +14,6 @@ import javax.xml.datatype.XMLGregorianCalendar;
 import rabbit.core.internal.storage.xml.schema.events.EventGroupType;
 import rabbit.core.internal.storage.xml.schema.events.EventListType;
 import rabbit.core.storage.IAccessor;
-import rabbit.core.storage.xml.IDataStore;
 
 /**
  * Abstract class provides default behaviors, this class is designed

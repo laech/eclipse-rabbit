@@ -1,4 +1,4 @@
-package rabbit.ui.internal;
+package rabbit.ui.internal.util;
 
 import static org.junit.Assert.*;
 
@@ -8,7 +8,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import rabbit.ui.DisplayPreference;
-import rabbit.ui.internal.PageDescriptor;
+import rabbit.ui.internal.util.PageDescriptor;
 import rabbit.ui.pages.IPage;
 
 /**

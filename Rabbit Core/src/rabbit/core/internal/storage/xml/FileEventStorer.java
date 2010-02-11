@@ -8,7 +8,6 @@ import rabbit.core.events.FileEvent;
 import rabbit.core.internal.storage.xml.schema.events.EventListType;
 import rabbit.core.internal.storage.xml.schema.events.FileEventListType;
 import rabbit.core.internal.storage.xml.schema.events.FileEventType;
-import rabbit.core.storage.xml.IDataStore;
 
 public class FileEventStorer extends
 		AbstractStorer<FileEvent, FileEventType, FileEventListType> {

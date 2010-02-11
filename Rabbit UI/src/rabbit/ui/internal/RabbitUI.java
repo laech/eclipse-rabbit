@@ -11,6 +11,7 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
+import rabbit.ui.internal.util.PageDescriptor;
 import rabbit.ui.pages.IPage;
 
 /**

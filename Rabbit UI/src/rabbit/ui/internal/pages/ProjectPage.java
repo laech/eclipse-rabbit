@@ -8,14 +8,17 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.ide.IDE;
 
-import rabbit.ui.internal.ResourceElement;
-import rabbit.ui.internal.ResourceElement.ResourceType;
+import rabbit.ui.internal.util.ResourceElement;
+import rabbit.ui.internal.util.ResourceElement.ResourceType;
 
+/**
+ * A page for displaying time spent working under different projects.
+ */
 public class ProjectPage extends ResourcePage {
 
 	@Override
 	protected ITableLabelProvider createLabelProvider() {
-		return new FilePageLabelProvider(this, true, false, false);
+		return new ResourcePageLabelProvider(this, true, false, false);
 	}
 
 	@Override

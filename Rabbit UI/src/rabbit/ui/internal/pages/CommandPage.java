@@ -18,7 +18,6 @@ import org.eclipse.ui.commands.ICommandService;
 import rabbit.core.storage.IAccessor;
 import rabbit.core.storage.xml.CommandDataAccessor;
 import rabbit.ui.DisplayPreference;
-import rabbit.ui.pages.AbstractGraphTreePage;
 
 /**
  * A page for displaying command usage.

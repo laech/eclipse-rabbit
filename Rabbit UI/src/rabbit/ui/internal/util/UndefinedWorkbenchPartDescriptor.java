@@ -1,4 +1,4 @@
-package rabbit.ui.internal;
+package rabbit.ui.internal.util;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.ISharedImages;

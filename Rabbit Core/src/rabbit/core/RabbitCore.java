@@ -15,6 +15,8 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
 import rabbit.core.internal.TrackerObject;
+import rabbit.core.internal.storage.xml.XmlResourceManager;
+import rabbit.core.storage.IResourceManager;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -81,9 +83,20 @@ public class RabbitCore extends AbstractUIPlugin implements IWorkbenchListener {
 		return result;
 	}
 
+	/**
+	 * Call this method to saves all current data collected by the trackers now.
+	 */
+	public void saveTrackerData() {
+		for (TrackerObject t : trackerList) {
+			t.getTracker().saveData();
+			t.getTracker().flushData();
+		}
+	}
+
 	@Override
 	public void postShutdown(IWorkbench workbench) {
-		// Ignore.
+		// Important not to do anything here, let XmlResourcemanager do its
+		// final work.
 	}
 
 	/**
@@ -92,8 +105,16 @@ public class RabbitCore extends AbstractUIPlugin implements IWorkbenchListener {
 	 * @return The full path to the storage location folder.
 	 */
 	public IPath getStoragePath() {
-		// TODO
 		return new Path(getPreferenceStore().getString(STORAGE_LOCATION));
+	}
+
+	/**
+	 * Gets the resource manager.
+	 * 
+	 * @return The resource manager.
+	 */
+	public IResourceManager getResourceManager() {
+		return XmlResourceManager.INSTANCE;
 	}
 
 	@Override

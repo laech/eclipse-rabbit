@@ -6,8 +6,10 @@ import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 
+import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ControlContribution;
 import org.eclipse.jface.action.IToolBarManager;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -24,12 +26,14 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Sash;
+import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.forms.widgets.Form;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
 import org.eclipse.ui.part.ViewPart;
 
+import rabbit.core.RabbitCore;
 import rabbit.ui.DisplayPreference;
 import rabbit.ui.pages.IPage;
 
@@ -106,6 +110,16 @@ public class RabbitView extends ViewPart implements Observer {
 		displayForm.getBody().setLayout(stackLayout);
 		displayForm.setToolBarVerticalAlignment(SWT.TOP);
 		createToolBarItems(displayForm.getToolBarManager());
+
+		String text = "Updates to latest data";
+		ImageDescriptor icon = PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(ISharedImages.IMG_ELCL_SYNCED);
+		getViewSite().getActionBars().getToolBarManager().add(new Action(text, icon) {
+			@Override
+			public void run() {
+				RabbitCore.getDefault().saveTrackerData();
+				update(displayPref, null);
+			}
+		});
 	}
 
 	/**

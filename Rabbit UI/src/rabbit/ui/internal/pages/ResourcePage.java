@@ -11,23 +11,29 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeColumn;
 
-import rabbit.core.internal.storage.xml.ResourceData;
+import rabbit.core.RabbitCore;
 import rabbit.core.storage.IAccessor;
+import rabbit.core.storage.IResourceManager;
 import rabbit.core.storage.xml.FileDataAccessor;
 import rabbit.ui.DisplayPreference;
-import rabbit.ui.internal.FileElement;
-import rabbit.ui.internal.FolderElement;
-import rabbit.ui.internal.MillisConverter;
-import rabbit.ui.internal.ProjectElement;
-import rabbit.ui.internal.ResourceElement;
-import rabbit.ui.pages.AbstractGraphTreePage;
+import rabbit.ui.internal.util.FileElement;
+import rabbit.ui.internal.util.FolderElement;
+import rabbit.ui.internal.util.MillisConverter;
+import rabbit.ui.internal.util.ProjectElement;
+import rabbit.ui.internal.util.ResourceElement;
 
+/**
+ * A page for displaying resource usage.
+ */
 public abstract class ResourcePage extends AbstractGraphTreePage {
 
-	private IAccessor accessor = new FileDataAccessor();
+	private IAccessor accessor;
+	private IResourceManager resourceMapper;
 
 	public ResourcePage() {
 		super();
+		accessor = new FileDataAccessor();
+		resourceMapper = RabbitCore.getDefault().getResourceManager();
 	}
 
 	@Override
@@ -35,7 +41,7 @@ public abstract class ResourcePage extends AbstractGraphTreePage {
 		Map<String, Long> rawData = accessor.getData(p.getStartDate(), p.getEndDate());
 		Map<String, ResourceElement> ls = new HashMap<String, ResourceElement>(rawData.size());
 		for (Map.Entry<String, Long> entry : rawData.entrySet()) {
-			String pathString = ResourceData.INSTANCE.getFilePath(entry.getKey());
+			String pathString = resourceMapper.getFilePath(entry.getKey());
 			if (pathString == null) {
 				continue;
 			}
@@ -53,11 +59,10 @@ public abstract class ResourcePage extends AbstractGraphTreePage {
 			}
 
 			if (path.segmentCount() >= 3) {
-				l = l.insert(new FolderElement(path.uptoSegment(2)));
+				l = l.insert(new FolderElement(path.removeLastSegments(1)));
 			}
 
-			l.insert(new FileElement(path.removeFirstSegments(path.segmentCount() - 2), MillisConverter.toMinutes(entry.getValue())));
-
+			l.insert(new FileElement(path, MillisConverter.toMinutes(entry.getValue())));
 		}
 		getViewer().setInput(ls.values());
 		getViewer().expandAll();
@@ -96,7 +101,8 @@ public abstract class ResourcePage extends AbstractGraphTreePage {
 
 			@Override
 			public boolean hasChildren(Object element) {
-				return (element instanceof ResourceElement) && !((ResourceElement) element).getChildren().isEmpty();
+				return (element instanceof ResourceElement)
+						&& !((ResourceElement) element).getChildren().isEmpty();
 			}
 		};
 	}

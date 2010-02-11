@@ -13,6 +13,7 @@ import java.util.Map;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import rabbit.core.internal.storage.xml.DataStore;
+import rabbit.core.internal.storage.xml.IDataStore;
 import rabbit.core.internal.storage.xml.schema.events.PartEventListType;
 import rabbit.core.internal.storage.xml.schema.events.PartEventType;
 import rabbit.core.storage.IAccessor;

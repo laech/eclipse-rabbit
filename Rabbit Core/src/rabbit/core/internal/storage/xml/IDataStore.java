@@ -1,4 +1,4 @@
-package rabbit.core.storage.xml;
+package rabbit.core.internal.storage.xml;
 
 import java.io.File;
 import java.util.Calendar;

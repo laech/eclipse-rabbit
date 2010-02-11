@@ -1,25 +1,30 @@
-package rabbit.ui.pages;
+package rabbit.ui.internal.pages;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-
+import org.eclipse.ui.PlatformUI;
 import org.junit.Before;
 import org.junit.Test;
 
-import rabbit.ui.pages.AbstractGraphTreePage;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Test for {@link AbstractGraphTreePage}
  */
 public abstract class AbstractGraphTablePageTest {
 
-	protected AbstractGraphTreePage page = createPage();
+	protected AbstractGraphTreePage page;
 
 	protected abstract AbstractGraphTreePage createPage();
 
 	@Before
 	public void setUp() {
-
+		page = createPage();
+		PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+			@Override
+			public void run() {
+				page.createContents(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell());
+			}
+		});
 	}
 
 	@Test

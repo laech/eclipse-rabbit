@@ -17,8 +17,7 @@ import org.eclipse.ui.PlatformUI;
 import rabbit.core.storage.IAccessor;
 import rabbit.core.storage.xml.PerspectiveDataAccessor;
 import rabbit.ui.DisplayPreference;
-import rabbit.ui.internal.UndefinedPerspectiveDescriptor;
-import rabbit.ui.pages.AbstractGraphTreePage;
+import rabbit.ui.internal.util.UndefinedPerspectiveDescriptor;
 
 /**
  * A page displays perspective usage.

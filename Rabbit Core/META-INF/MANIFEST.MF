@@ -1,8 +1,8 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: rabbit.tracking.core
+Bundle-Name: Rabbit Core
 Bundle-SymbolicName: rabbit.core;singleton:=true
-Bundle-Version: 0.1.0.qualifier
+Bundle-Version: 0.1.0.beta
 Bundle-Activator: rabbit.core.RabbitCore
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
@@ -11,12 +11,12 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.ui.ide
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: rabbit.core,
- rabbit.core.events,
- rabbit.core.internal,
- rabbit.core.internal.storage.xml,
- rabbit.core.internal.storage.xml.schema.events,
- rabbit.core.internal.storage.xml.schema.resources,
- rabbit.core.internal.trackers,
+ rabbit.core.events;uses:="org.eclipse.ui",
+ rabbit.core.internal;x-internal:=true,
+ rabbit.core.internal.storage.xml;x-internal:=true;uses:="rabbit.core.internal.storage.xml.schema.events,org.eclipse.ui,rabbit.core.events",
+ rabbit.core.internal.storage.xml.schema.events;x-internal:=true;uses:="javax.xml.bind,javax.xml.datatype",
+ rabbit.core.internal.storage.xml.schema.resources;x-internal:=true;uses:="javax.xml.bind",
+ rabbit.core.internal.trackers;x-internal:=true;uses:="org.eclipse.ui,org.eclipse.core.resources,rabbit.core.events",
  rabbit.core.storage,
- rabbit.core.storage.xml
+ rabbit.core.storage.xml;uses:="rabbit.core.internal.storage.xml.schema.events,rabbit.core.internal.storage.xml"
 Bundle-ActivationPolicy: lazy

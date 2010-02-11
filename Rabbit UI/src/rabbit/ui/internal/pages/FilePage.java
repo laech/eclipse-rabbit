@@ -5,6 +5,9 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 
+/**
+ * A page for displaying time spent working on different files.
+ */
 public class FilePage extends ResourcePage {
 
 	@Override
@@ -14,6 +17,6 @@ public class FilePage extends ResourcePage {
 
 	@Override
 	protected ITableLabelProvider createLabelProvider() {
-		return new FilePageLabelProvider(this, false, false, true);
+		return new ResourcePageLabelProvider(this, false, false, true);
 	}
 }

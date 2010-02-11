@@ -8,9 +8,12 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 
-import rabbit.ui.internal.ResourceElement;
-import rabbit.ui.internal.ResourceElement.ResourceType;
+import rabbit.ui.internal.util.ResourceElement;
+import rabbit.ui.internal.util.ResourceElement.ResourceType;
 
+/**
+ * A page for displaying time spent working under different folders.
+ */
 public class FolderPage extends ResourcePage {
 
 	@Override
@@ -26,7 +29,7 @@ public class FolderPage extends ResourcePage {
 
 	@Override
 	protected ITableLabelProvider createLabelProvider() {
-		return new FilePageLabelProvider(this, false, true, false);
+		return new ResourcePageLabelProvider(this, false, true, false);
 	}
 
 	@Override

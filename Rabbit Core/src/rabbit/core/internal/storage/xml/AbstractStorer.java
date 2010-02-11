@@ -14,7 +14,6 @@ import rabbit.core.internal.storage.xml.schema.events.EventGroupType;
 import rabbit.core.internal.storage.xml.schema.events.EventListType;
 import rabbit.core.internal.storage.xml.schema.events.ObjectFactory;
 import rabbit.core.storage.IStorer;
-import rabbit.core.storage.xml.IDataStore;
 
 /**
  * This abstract class is designed specifically for the XML schema.

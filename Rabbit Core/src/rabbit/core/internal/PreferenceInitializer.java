@@ -19,7 +19,8 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 	public void initializeDefaultPreferences() {
 		// TODO
 		String path = System.getProperty("user.home") + File.separator
-				+ "Desktop" + File.separator + "Rabbit" + File.separator
+						// + "Desktop" + File.separator
+				+ "Rabbit" + File.separator
 				+ "XmlDb";
 		IPreferenceStore store = RabbitCore.getDefault().getPreferenceStore();
 		store.setDefault(RabbitCore.STORAGE_LOCATION, path);
