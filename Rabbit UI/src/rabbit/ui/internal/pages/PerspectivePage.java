@@ -17,14 +17,13 @@ import org.eclipse.ui.PlatformUI;
 import rabbit.core.storage.IAccessor;
 import rabbit.core.storage.xml.PerspectiveDataAccessor;
 import rabbit.ui.DisplayPreference;
+import rabbit.ui.internal.util.MillisConverter;
 import rabbit.ui.internal.util.UndefinedPerspectiveDescriptor;
 
 /**
  * A page displays perspective usage.
  */
 public class PerspectivePage extends AbstractGraphTreePage {
-
-	private static final int MILLIS_TO_MINUTES = 1000 * 60;
 
 	private IAccessor dataStore;
 	private IPerspectiveRegistry registry;
@@ -77,7 +76,7 @@ public class PerspectivePage extends AbstractGraphTreePage {
 			if (pd == null) {
 				pd = new UndefinedPerspectiveDescriptor(entry.getKey());
 			}
-			double value = entry.getValue().doubleValue() / MILLIS_TO_MINUTES;
+			double value = MillisConverter.toMinutes(entry.getValue());
 			dataMapping.put(pd, value);
 			if (Double.compare(value, getMaxValue()) > 0) {
 				setMaxValue(value);
@@ -86,15 +85,12 @@ public class PerspectivePage extends AbstractGraphTreePage {
 		getViewer().setInput(dataMapping.keySet());
 	}
 
-	/**
-	 * Gets the usage value of a perspective.
-	 * 
-	 * @param p
-	 *            The perspective.
-	 * @return The usage value.
-	 */
-	double getValue(IPerspectiveDescriptor p) {
-		Double value = dataMapping.get(p);
+	@Override
+	double getValue(Object o) {
+		if (!(o instanceof IPerspectiveDescriptor)) {
+			return 0;
+		}
+		Double value = dataMapping.get(o);
 		return (value == null) ? 0 : value;
 	}
 

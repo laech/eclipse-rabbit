@@ -48,7 +48,7 @@ public class CommandPageLabelProvider extends LabelProvider implements ITableLab
 			case 1:
 				return cmd.getDescription();
 			case 2:
-				return Long.toString(page.getUsage(cmd));
+				return page.getValue(cmd) + "";
 			default:
 				return null;
 			}

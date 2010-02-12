@@ -94,6 +94,15 @@ public class ColumnComparator extends ViewerComparator implements SelectionListe
 	}
 
 	/**
+	 * Gets the currently selected column.
+	 * 
+	 * @return The selected column.
+	 */
+	public TreeColumn getSelectedColumn() {
+		return selectedColumn;
+	}
+
+	/**
 	 * Gets the index of the currently selected column.
 	 * 
 	 * @return The index of the currently selected column.

@@ -15,6 +15,7 @@ import org.eclipse.ui.PlatformUI;
 import rabbit.core.storage.IAccessor;
 import rabbit.core.storage.xml.SessionDataAccessor;
 import rabbit.ui.DisplayPreference;
+import rabbit.ui.internal.util.MillisConverter;
 
 /**
  * A page displaying how much time is spent on using Eclipse every day.
@@ -22,10 +23,12 @@ import rabbit.ui.DisplayPreference;
 public class SessionPage extends AbstractGraphTreePage {
 
 	private IAccessor dataStore;
+	private Map<String, Double> model;
 
 	/** Constructs a new page. */
 	public SessionPage() {
 		dataStore = new SessionDataAccessor();
+		model = new LinkedHashMap<String, Double>();
 	}
 
 	@Override
@@ -56,12 +59,11 @@ public class SessionPage extends AbstractGraphTreePage {
 	@Override
 	public void update(DisplayPreference p) {
 		setMaxValue(0);
-		Map<String, Double> model = new LinkedHashMap<String, Double>();
-		Map<String, Long> data = dataStore.getData(p.getStartDate(), p.getEndDate());
+		model.clear();
 
-		int millisToHours = 1000 * 60 * 60;
+		Map<String, Long> data = dataStore.getData(p.getStartDate(), p.getEndDate());
 		for (Map.Entry<String, Long> entry : data.entrySet()) {
-			double value = entry.getValue() / (double) millisToHours;
+			double value = MillisConverter.toHours(entry.getValue());
 			model.put(entry.getKey(), value);
 			if (Double.compare(value, getMaxValue()) > 0) {
 				setMaxValue(value);
@@ -73,6 +75,15 @@ public class SessionPage extends AbstractGraphTreePage {
 	@Override
 	protected String getValueColumnText() {
 		return "Usage (Hours)";
+	}
+
+	@Override
+	double getValue(Object o) {
+		if (!(o instanceof String)) {
+			return 0;
+		}
+		Double value = model.get(o);
+		return (value == null) ? 0 : value;
 	}
 
 }

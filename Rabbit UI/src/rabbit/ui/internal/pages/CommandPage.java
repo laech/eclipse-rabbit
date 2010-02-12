@@ -70,20 +70,13 @@ public class CommandPage extends AbstractGraphTreePage {
 		return PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_CUT);
 	}
 
-	/**
-	 * Gets the usage of a command.
-	 * 
-	 * @param cmd
-	 *            The command.
-	 * @return The usage count of the command.
-	 */
-	long getUsage(Command cmd) {
-		Long usage = dataMapping.get(cmd);
-		if (usage == null) {
+	@Override
+	double getValue(Object o) {
+		if (!(o instanceof Command)) {
 			return 0;
-		} else {
-			return usage.longValue();
 		}
+		Long value = dataMapping.get(o);
+		return (value == null) ? 0 : value;
 	}
 
 	@Override

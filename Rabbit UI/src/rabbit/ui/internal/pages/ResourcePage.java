@@ -69,6 +69,15 @@ public abstract class ResourcePage extends AbstractGraphTreePage {
 	}
 
 	@Override
+	double getValue(Object o) {
+		if (!(o instanceof ResourceElement)) {
+			return 0;
+		}
+
+		return ((ResourceElement) o).getValue();
+	}
+
+	@Override
 	protected String getValueColumnText() {
 		return "Time (Minutes)";
 	}

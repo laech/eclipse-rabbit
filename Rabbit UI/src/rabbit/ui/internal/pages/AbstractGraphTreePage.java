@@ -7,6 +7,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
@@ -149,7 +150,15 @@ public abstract class AbstractGraphTreePage implements IPage {
 			}
 		});
 
-		ColumnComparator sorter = new ColumnComparator(viewer);
+		ColumnComparator sorter = new ColumnComparator(viewer) {
+			@Override
+			protected int doCompare(Viewer v, Object e1, Object e2) {
+				if (getSelectedColumn() == getValueColumn() || getSelectedColumn() == getGraphColumn()) {
+					return Double.compare(getValue(e1), getValue(e2));
+				}
+				return super.doCompare(v, e1, e2);
+			}
+		};
 		otherColumns = createColumns(tree);
 		for (TreeColumn column : otherColumns) {
 			column.addSelectionListener(sorter);
@@ -164,12 +173,7 @@ public abstract class AbstractGraphTreePage implements IPage {
 		graphColumn = new TreeColumn(tree, SWT.LEFT);
 		graphColumn.setWidth(100);
 		graphColumn.setMoveable(true);
-		graphColumn.addSelectionListener(new ColumnComparator(viewer) {
-			@Override
-			protected int getSelectedColumnIndex() {
-				return tree.indexOf(getValueColumn());
-			}
-		});
+		graphColumn.addSelectionListener(sorter);
 
 		restoreState();
 	}
@@ -249,6 +253,15 @@ public abstract class AbstractGraphTreePage implements IPage {
 	protected TreeViewer getViewer() {
 		return viewer;
 	}
+
+	/**
+	 * Gets the usage value of the given object.
+	 * 
+	 * @param o
+	 *            The object to get value for.
+	 * @return The value, or 0 if this object has no usage value.
+	 */
+	abstract double getValue(Object o);
 
 	/**
 	 * Creates an content provider for the viewer.

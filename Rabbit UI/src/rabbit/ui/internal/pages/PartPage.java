@@ -18,6 +18,7 @@ import org.eclipse.ui.views.IViewRegistry;
 import rabbit.core.storage.IAccessor;
 import rabbit.core.storage.xml.PartDataAccessor;
 import rabbit.ui.DisplayPreference;
+import rabbit.ui.internal.util.MillisConverter;
 import rabbit.ui.internal.util.UndefinedWorkbenchPartDescriptor;
 
 /**
@@ -52,7 +53,6 @@ public class PartPage extends AbstractGraphTreePage {
 		IEditorRegistry editReg = PlatformUI.getWorkbench().getEditorRegistry();
 
 		Map<String, Long> data = dataStore.getData(p.getStartDate(), p.getEndDate());
-		int millisToMinutes = 1000 * 60;
 		for (Map.Entry<String, Long> entry : data.entrySet()) {
 
 			IWorkbenchPartDescriptor part = viewReg.find(entry.getKey());
@@ -63,7 +63,7 @@ public class PartPage extends AbstractGraphTreePage {
 				part = new UndefinedWorkbenchPartDescriptor(entry.getKey());
 			}
 
-			double value = entry.getValue() / (double) millisToMinutes;
+			double value = MillisConverter.toMinutes(entry.getValue());
 			if (Double.compare(value, getMaxValue()) > 0) {
 				setMaxValue(value);
 			}
@@ -77,20 +77,13 @@ public class PartPage extends AbstractGraphTreePage {
 		return "Usage (Minutes)";
 	}
 
-	/**
-	 * Gets the usage value of a part.
-	 * 
-	 * @param part
-	 *            The workbench part.
-	 * @return The usage value.
-	 */
-	double getValue(IWorkbenchPartDescriptor part) {
-		Double value = dataMapping.get(part);
-		if (value == null) {
+	@Override
+	double getValue(Object o) {
+		if (!(o instanceof IWorkbenchPartDescriptor)) {
 			return 0;
-		} else {
-			return value;
 		}
+		Double value = dataMapping.get(o);
+		return (value == null) ? 0 : value;
 	}
 
 	@Override

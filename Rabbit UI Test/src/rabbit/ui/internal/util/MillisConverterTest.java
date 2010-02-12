@@ -1,10 +1,8 @@
 package rabbit.ui.internal.util;
 
-import static org.junit.Assert.assertTrue;
-
 import org.junit.Test;
 
-import rabbit.ui.internal.util.MillisConverter;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Test for {@link MillisConverter}
