@@ -65,15 +65,12 @@ public abstract class AbstractGraphTreePage implements IPage {
 
 			GC gc = e.gc;
 			Color oldBackground = gc.getBackground();
-			int oldAntialias = gc.getAntialias();
 
-			gc.setAntialias(SWT.ON);
 			gc.setBackground(gc.getDevice().getSystemColor(SWT.COLOR_TITLE_BACKGROUND));
 			gc.fillRectangle(x, y, 2, height);
-			gc.fillRoundRectangle(x, y, width, height, 4, 4);
+			gc.fillRoundRectangle(x, y, width, height, 2, 2);
 
 			gc.setBackground(oldBackground);
-			gc.setAntialias(oldAntialias);
 		}
 
 		/**
@@ -149,6 +146,18 @@ public abstract class AbstractGraphTreePage implements IPage {
 				saveState();
 			}
 		});
+
+		if (System.getProperty("os.name").toLowerCase().contains("linux")) {
+			tree.addListener(SWT.EraseItem, new Listener() {
+				@Override
+				public void handleEvent(Event e) {
+					if ((e.detail & SWT.SELECTED) != 0) {
+						e.detail &= ~SWT.SELECTED;
+						e.gc.setForeground(e.display.getSystemColor(SWT.COLOR_LIST_FOREGROUND));
+					}
+				}
+			});
+		}
 
 		ColumnComparator sorter = new ColumnComparator(viewer) {
 			@Override
