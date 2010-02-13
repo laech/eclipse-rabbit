@@ -49,6 +49,9 @@ public abstract class AbstractGraphTreePage implements IPage {
 	private TreeColumn[] otherColumns;
 
 	private Listener graphPainter = new Listener() {
+
+		private boolean isLinux = System.getProperty("os.name").toLowerCase().contains("linux");
+
 		@Override
 		public void handleEvent(Event e) {
 
@@ -61,16 +64,28 @@ public abstract class AbstractGraphTreePage implements IPage {
 			}
 			int x = getX(tree);
 			int y = e.y + 1;
-			int height = e.height - 1;
+			int height = e.height - 2;
 
 			GC gc = e.gc;
 			Color oldBackground = gc.getBackground();
+			Color oldForeground = gc.getForeground();
+			int oldAnti = gc.getAntialias();
 
-			gc.setBackground(gc.getDevice().getSystemColor(SWT.COLOR_TITLE_BACKGROUND));
-			gc.fillRectangle(x, y, 2, height);
-			gc.fillRoundRectangle(x, y, width, height, 2, 2);
+			gc.setBackground(e.display.getSystemColor(SWT.COLOR_TITLE_BACKGROUND));
+			if (isLinux) {
+				gc.fillRectangle(x, y, width, height);
+			} else {
+				gc.setAntialias(SWT.ON);
+				gc.fillRectangle(x, y, 2, height);
+				gc.fillRoundRectangle(x, y, width, height, 4, 4);
+			}
+			gc.setForeground(e.display.getSystemColor(SWT.COLOR_LIST_BACKGROUND));
+			gc.drawLine(x - 1, y - 1, x - 1, y + height);
+			gc.drawLine(x + width, y - 1, x + width, y + height);
 
 			gc.setBackground(oldBackground);
+			gc.setForeground(oldForeground);
+			gc.setAntialias(oldAnti);
 		}
 
 		/**
@@ -108,6 +123,12 @@ public abstract class AbstractGraphTreePage implements IPage {
 				double value = Double.parseDouble(item.getText(tree.indexOf(getValueColumn())));
 				width = (int) (value * getGraphColumn().getWidth() / getMaxValue());
 				width = ((value != 0) && (width == 0)) ? 2 : width;
+
+				if (value != 0 && width < 2) {
+					width = 2;
+				} else if (width == getGraphColumn().getWidth()) {
+					width -= 1;
+				}
 			} catch (NumberFormatException ex) {
 			}
 			return width;
@@ -146,18 +167,6 @@ public abstract class AbstractGraphTreePage implements IPage {
 				saveState();
 			}
 		});
-
-		if (System.getProperty("os.name").toLowerCase().contains("linux")) {
-			tree.addListener(SWT.EraseItem, new Listener() {
-				@Override
-				public void handleEvent(Event e) {
-					if ((e.detail & SWT.SELECTED) != 0) {
-						e.detail &= ~SWT.SELECTED;
-						e.gc.setForeground(e.display.getSystemColor(SWT.COLOR_LIST_FOREGROUND));
-					}
-				}
-			});
-		}
 
 		ColumnComparator sorter = new ColumnComparator(viewer) {
 			@Override
