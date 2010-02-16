@@ -12,9 +12,15 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.window.ToolTip;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.TreeItem;
+import org.eclipse.ui.forms.widgets.FormToolkit;
 
 import rabbit.ui.internal.util.PageDescriptor;
 
@@ -78,15 +84,19 @@ public class MetricsPanel {
 	}
 
 	private RabbitView view;
+	private FormToolkit toolkit;
 
 	/**
 	 * Constructor.
 	 * 
 	 * @param v
 	 *            The parent view.
+	 * @param toolkit
+	 *            A FormToolkit for drawing widgets.
 	 */
-	public MetricsPanel(RabbitView v) {
+	public MetricsPanel(RabbitView v, FormToolkit toolkit) {
 		view = v;
+		this.toolkit = toolkit;
 	}
 
 	/**
@@ -120,6 +130,25 @@ public class MetricsPanel {
 				}
 			}
 		});
+
+		viewer.getTree().addListener(SWT.MouseHover, new Listener() {
+			@Override
+			public void handleEvent(Event e) {
+				Point location = new Point(e.x, e.y);
+				TreeItem item = viewer.getTree().getItem(location);
+				if (item == null || !(item.getData() instanceof PageDescriptor)) {
+					return;
+				}
+
+				ToolTip toolTip = new FormToolTip(viewer.getTree(), toolkit, (PageDescriptor) item.getData());
+				location.x = 20;
+				location.y = 20;
+				toolTip.setShift(location);
+				toolTip.setPopupDelay(200);
+
+			}
+		});
+
 		viewer.setInput(RabbitUI.getDefault().getPages());
 		viewer.expandAll();
 	}

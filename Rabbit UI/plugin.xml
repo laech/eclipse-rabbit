@@ -5,7 +5,9 @@
    <extension
          point="org.eclipse.ui.views">
       <view
+            allowMultiple="true"
             class="rabbit.ui.internal.RabbitView"
+            icon="resources/icon.png"
             id="rabbit.ui.view.rabbitview"
             name="Rabbit"
             restorable="true">
@@ -15,37 +17,46 @@
          point="rabbit.ui.pages">
       <page
             class="rabbit.ui.internal.pages.EclipseUsageCategory"
+            description="Displays usage information about Eclipse"
             name="Eclipse Usage">
          <page
                class="rabbit.ui.internal.pages.CommandPage"
+               description="Displays the execution count of each command"
                name="Commands">
          </page>
          <page
                class="rabbit.ui.internal.pages.PartPage"
+               description="Displays how much time is spent using different views and editors"
                name="Editors and Views">
          </page>
          <page
                class="rabbit.ui.internal.pages.SessionPage"
+               description="Displays the how much time is spent using Eclipse"
                name="Sessions">
          </page>
          <page
                class="rabbit.ui.internal.pages.PerspectivePage"
+               description="Displays how much time is spent using different perspectives"
                name="Perspectives">
          </page>
       </page>
       <page
             class="rabbit.ui.internal.pages.ResourcesCategory"
+            description="Displays how time is spent on different resources"
             name="Resources">
          <page
                class="rabbit.ui.internal.pages.FilePage"
+               description="Displays the amount of time spent editing each file"
                name="Files">
          </page>
          <page
                class="rabbit.ui.internal.pages.FolderPage"
+               description="Displays the amount of time spent working under each directory"
                name="Folders">
          </page>
          <page
                class="rabbit.ui.internal.pages.ProjectPage"
+               description="Displays the amount of time spent working on each project"
                name="Projects">
          </page>
       </page>

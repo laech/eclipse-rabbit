@@ -65,8 +65,8 @@ public class FolderElement extends ResourceElement {
 	}
 
 	@Override
-	public double getValue() {
-		double value = 0;
+	public long getValue() {
+		long value = 0;
 		for (ResourceElement e : getChildren()) {
 			value += e.getValue();
 		}

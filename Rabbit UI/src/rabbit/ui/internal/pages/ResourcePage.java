@@ -1,6 +1,5 @@
 package rabbit.ui.internal.pages;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -18,7 +17,6 @@ import rabbit.core.storage.xml.FileDataAccessor;
 import rabbit.ui.DisplayPreference;
 import rabbit.ui.internal.util.FileElement;
 import rabbit.ui.internal.util.FolderElement;
-import rabbit.ui.internal.util.MillisConverter;
 import rabbit.ui.internal.util.ProjectElement;
 import rabbit.ui.internal.util.ResourceElement;
 
@@ -62,14 +60,14 @@ public abstract class ResourcePage extends AbstractGraphTreePage {
 				l = l.insert(new FolderElement(path.removeLastSegments(1)));
 			}
 
-			l.insert(new FileElement(path, MillisConverter.toMinutes(entry.getValue())));
+			l.insert(new FileElement(path, entry.getValue()));
 		}
 		getViewer().setInput(ls.values());
 		getViewer().expandAll();
 	}
 
 	@Override
-	double getValue(Object o) {
+	long getValue(Object o) {
 		if (!(o instanceof ResourceElement)) {
 			return 0;
 		}
@@ -79,7 +77,7 @@ public abstract class ResourcePage extends AbstractGraphTreePage {
 
 	@Override
 	protected String getValueColumnText() {
-		return "Time (Minutes)";
+		return "Time";
 	}
 
 	@Override
@@ -93,26 +91,6 @@ public abstract class ResourcePage extends AbstractGraphTreePage {
 
 	@Override
 	protected ITreeContentProvider createContentProvider() {
-		return new AbstractTreeContentProvider() {
-			@Override
-			public Object[] getChildren(Object parent) {
-				if (parent instanceof Collection<?>) {
-					return ((Collection<?>) parent).toArray();
-				} else if (parent instanceof ResourceElement) {
-					return ((ResourceElement) parent).getChildren().toArray();
-				}
-				return EMPTY_ARRAY;
-			}
-
-			public Object[] getElements(Object inputElement) {
-				return getChildren(inputElement);
-			}
-
-			@Override
-			public boolean hasChildren(Object element) {
-				return (element instanceof ResourceElement)
-						&& !((ResourceElement) element).getChildren().isEmpty();
-			}
-		};
+		return new ResourcePageContentProvider();
 	}
 }

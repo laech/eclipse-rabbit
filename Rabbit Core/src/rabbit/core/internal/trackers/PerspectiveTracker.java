@@ -1,6 +1,7 @@
 package rabbit.core.internal.trackers;
 
 import java.util.Calendar;
+import java.util.Observer;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.ui.IPerspectiveDescriptor;
@@ -12,13 +13,15 @@ import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 
+import rabbit.core.RabbitCore;
 import rabbit.core.events.PerspectiveEvent;
 import rabbit.core.internal.storage.xml.PerspectiveEventStorer;
 
 /**
  * Tracker for tracking on perspective usage.
  */
-public class PerspectiveTracker extends AbstractTracker<PerspectiveEvent> implements IPerspectiveListener3, IWindowListener {
+public class PerspectiveTracker extends AbstractTracker<PerspectiveEvent>
+		implements IPerspectiveListener3, IWindowListener, Observer {
 
 	/** Start time of a session, in nanoseconds. */
 	private long start;
@@ -27,6 +30,7 @@ public class PerspectiveTracker extends AbstractTracker<PerspectiveEvent> implem
 	 * Constructor.
 	 */
 	public PerspectiveTracker() {
+		super();
 	}
 
 	@Override
@@ -36,16 +40,20 @@ public class PerspectiveTracker extends AbstractTracker<PerspectiveEvent> implem
 
 	@Override
 	protected void doDisable() {
+		RabbitCore.getDefault().getIdleDetector().deleteObserver(this);
 		checkState(false);
-		for (IWorkbenchWindow win : getWorkbenchWindows())
+		for (IWorkbenchWindow win : getWorkbenchWindows()) {
 			win.removePerspectiveListener(this);
+		}
 	}
 
 	@Override
 	protected void doEnable() {
+		RabbitCore.getDefault().getIdleDetector().addObserver(this);
 		checkState(true);
-		for (IWorkbenchWindow win : getWorkbenchWindows())
+		for (IWorkbenchWindow win : getWorkbenchWindows()) {
 			win.addPerspectiveListener(this);
+		}
 	}
 
 	/**
@@ -61,21 +69,30 @@ public class PerspectiveTracker extends AbstractTracker<PerspectiveEvent> implem
 			@Override
 			public void run() {
 				IWorkbenchWindow win = workbench.getActiveWorkbenchWindow();
-				if (win == null)
+				if (win == null) {
 					return;
-
+				}
 				IWorkbenchPage page = win.getActivePage();
-				if (page == null)
+				if (page == null) {
 					return;
-
+				}
 				if (page.getPerspective() != null) {
-					if (isEnabling)
+					if (isEnabling) {
 						startSession();
-					else
+					}
+					else {
 						endSession(page.getPerspective());
+					}
 				}
 			}
 		});
+	}
+
+	@Override
+	public void update(java.util.Observable o, Object arg) {
+		if (o == RabbitCore.getDefault().getIdleDetector() && isEnabled()) {
+			checkState(RabbitCore.getDefault().getIdleDetector().isUserActive());
+		}
 	}
 
 	/**

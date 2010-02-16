@@ -18,7 +18,6 @@ import org.eclipse.ui.views.IViewRegistry;
 import rabbit.core.storage.IAccessor;
 import rabbit.core.storage.xml.PartDataAccessor;
 import rabbit.ui.DisplayPreference;
-import rabbit.ui.internal.util.MillisConverter;
 import rabbit.ui.internal.util.UndefinedWorkbenchPartDescriptor;
 
 /**
@@ -26,8 +25,7 @@ import rabbit.ui.internal.util.UndefinedWorkbenchPartDescriptor;
  */
 public class PartPage extends AbstractGraphTreePage {
 
-	// Values are usage values (in minutes) for keys.
-	private Map<IWorkbenchPartDescriptor, Double> dataMapping;
+	private Map<IWorkbenchPartDescriptor, Long> dataMapping;
 	private IAccessor dataStore;
 
 	/**
@@ -36,7 +34,7 @@ public class PartPage extends AbstractGraphTreePage {
 	public PartPage() {
 		super();
 		dataStore = new PartDataAccessor();
-		dataMapping = new HashMap<IWorkbenchPartDescriptor, Double>();
+		dataMapping = new HashMap<IWorkbenchPartDescriptor, Long>();
 	}
 
 	@Override
@@ -63,26 +61,22 @@ public class PartPage extends AbstractGraphTreePage {
 				part = new UndefinedWorkbenchPartDescriptor(entry.getKey());
 			}
 
-			double value = MillisConverter.toMinutes(entry.getValue());
-			if (Double.compare(value, getMaxValue()) > 0) {
-				setMaxValue(value);
+			if (entry.getValue() > getMaxValue()) {
+				setMaxValue(entry.getValue());
 			}
-			dataMapping.put(part, value);
+			dataMapping.put(part, entry.getValue());
 		}
 		getViewer().setInput(dataMapping.keySet());
 	}
 
 	@Override
 	protected String getValueColumnText() {
-		return "Usage (Minutes)";
+		return "Usage";
 	}
 
 	@Override
-	double getValue(Object o) {
-		if (!(o instanceof IWorkbenchPartDescriptor)) {
-			return 0;
-		}
-		Double value = dataMapping.get(o);
+	long getValue(Object o) {
+		Long value = dataMapping.get(o);
 		return (value == null) ? 0 : value;
 	}
 

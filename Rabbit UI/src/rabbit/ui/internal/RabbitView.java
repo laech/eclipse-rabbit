@@ -8,13 +8,17 @@ import java.util.Observer;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ControlContribution;
+import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StackLayout;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
@@ -50,6 +54,11 @@ public class RabbitView extends ViewPart implements Observer {
 	private Form displayForm;
 	private DateTime fromDateTime;
 	private DateTime toDateTime;
+	/**
+	 * A preference for updating the pages, do not attach pages to this
+	 * preference as observers because we don't want them to update themselves
+	 * automatically, we want to update them manually.
+	 */
 	private DisplayPreference displayPref;
 
 	/**
@@ -95,8 +104,17 @@ public class RabbitView extends ViewPart implements Observer {
 		left.setText("Metrics");
 		left.setLayoutData(leftData);
 		left.getBody().setLayout(new FillLayout());
-		MetricsPanel list = new MetricsPanel(this);
+		MetricsPanel list = new MetricsPanel(this, toolkit);
 		list.createContents(left.getBody());
+
+		final Image metricsImg = RabbitUI.imageDescriptorFromPlugin(RabbitUI.PLUGIN_ID, "resources/metrics.png").createImage();
+		left.setImage(metricsImg);
+		left.addDisposeListener(new DisposeListener() {
+			@Override
+			public void widgetDisposed(DisposeEvent e) {
+				metricsImg.dispose();
+			}
+		});
 
 		// Displaying area:
 		FormData rightData = new FormData();
@@ -111,7 +129,16 @@ public class RabbitView extends ViewPart implements Observer {
 		displayForm.setToolBarVerticalAlignment(SWT.TOP);
 		createToolBarItems(displayForm.getToolBarManager());
 
-		String text = "Updates to latest data";
+		final Image statImg = RabbitUI.imageDescriptorFromPlugin(RabbitUI.PLUGIN_ID, "resources/stat.png").createImage();
+		displayForm.setImage(statImg);
+		displayForm.addDisposeListener(new DisposeListener() {
+			@Override
+			public void widgetDisposed(DisposeEvent e) {
+				statImg.dispose();
+			}
+		});
+
+		String text = "Saves data about the current workbench and updates the pages";
 		ImageDescriptor icon = PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(ISharedImages.IMG_ELCL_SYNCED);
 		getViewSite().getActionBars().getToolBarManager().add(new Action(text, icon) {
 			@Override
@@ -129,22 +156,39 @@ public class RabbitView extends ViewPart implements Observer {
 	 *            The tool bar.
 	 */
 	protected void createToolBarItems(IToolBarManager toolBar) {
+		String text = "Apply";
+		ImageDescriptor icon = RabbitUI.imageDescriptorFromPlugin("org.eclipse.ui.browser", "icons/elcl16/nav_refresh.gif");
+		final IAction updateAction = new Action(text, icon) {
+			@Override
+			public void run() {
+				update();
+				setEnabled(false);
+			}
+		};
+		updateAction.setEnabled(false);
+
 		final SelectionListener update = new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				if (e.widget == fromDateTime) {
 					Calendar calendar = displayPref.getStartDate();
-					updateDate(calendar, fromDateTime);
-					displayPref.setStartDate(calendar);
+					if (!isSameDate(calendar, fromDateTime)) {
+						updateAction.setEnabled(true);
+						updateDate(calendar, fromDateTime);
+						displayPref.setStartDate(calendar);
+					}
 				} else if (e.widget == toDateTime) {
 					Calendar calendar = displayPref.getEndDate();
-					updateDate(calendar, toDateTime);
-					displayPref.setEndDate(calendar);
+					if (!isSameDate(calendar, toDateTime)) {
+						updateAction.setEnabled(true);
+						updateDate(calendar, toDateTime);
+						displayPref.setEndDate(calendar);
+					}
 				}
 			}
 		};
 
-		toolBar.add(new ControlContribution("fromDateTime") {
+		toolBar.add(new ControlContribution("rabbit.ui.fromDateTime") {
 			@Override
 			protected Control createControl(Composite parent) {
 				fromDateTime = new DateTime(parent, SWT.DROP_DOWN | SWT.BORDER);
@@ -155,7 +199,7 @@ public class RabbitView extends ViewPart implements Observer {
 			}
 		});
 
-		toolBar.add(new ControlContribution("separator") {
+		toolBar.add(new ControlContribution("rabbit.ui.separator") {
 			@Override
 			protected Control createControl(Composite parent) {
 				// Really we just want some space, not an actual separator.
@@ -164,7 +208,7 @@ public class RabbitView extends ViewPart implements Observer {
 			}
 		});
 
-		toolBar.add(new ControlContribution("toDateTime") {
+		toolBar.add(new ControlContribution("rabbit.ui.toDateTime") {
 			@Override
 			protected Control createControl(Composite parent) {
 				toDateTime = new DateTime(parent, SWT.DROP_DOWN | SWT.BORDER);
@@ -174,6 +218,16 @@ public class RabbitView extends ViewPart implements Observer {
 				return toDateTime;
 			}
 		});
+
+		toolBar.add(new ControlContribution("rabbit.ui.separator2") {
+			@Override
+			protected Control createControl(Composite parent) {
+				// Really we just want some space, not an actual separator.
+				Label separator = new Label(parent, SWT.NO_BACKGROUND);
+				return separator;
+			}
+		});
+		toolBar.add(updateAction);
 
 		toolBar.update(true);
 	}
@@ -204,6 +258,21 @@ public class RabbitView extends ViewPart implements Observer {
 		date.set(Calendar.YEAR, widget.getYear());
 		date.set(Calendar.MONTH, widget.getMonth());
 		date.set(Calendar.DAY_OF_MONTH, widget.getDay());
+	}
+
+	/**
+	 * Checks whether the calendar and the widget represent the same date.
+	 * 
+	 * @param date
+	 *            The calendar.
+	 * @param widget
+	 *            The widget.
+	 * @return True if the date are the same, false otherwise.
+	 */
+	protected static boolean isSameDate(Calendar date, DateTime widget) {
+		return date.get(Calendar.YEAR) == widget.getYear()
+				&& date.get(Calendar.MONTH) == widget.getMonth()
+				&& date.get(Calendar.DAY_OF_MONTH) == widget.getDay();
 	}
 
 	/**
@@ -249,11 +318,17 @@ public class RabbitView extends ViewPart implements Observer {
 
 		updateDateTime(fromDateTime, displayPref.getStartDate());
 		updateDateTime(toDateTime, displayPref.getEndDate());
+		// Do not update here, update will be call when user clicks the button.
+	}
 
+	/**
+	 * Updates the pages to current preference.
+	 */
+	private void update() {
 		// Mark all invisible pages as "not yet updated":
 		for (Map.Entry<IPage, Composite> entry : pages.entrySet()) {
 			boolean isVisible = stackLayout.topControl == entry.getValue();
-			if (isVisible) {
+			if (isVisible) {// update current visible page.
 				entry.getKey().update(displayPref);
 			}
 			pageUpdateStatuses.put(entry.getKey(), Boolean.valueOf(isVisible));

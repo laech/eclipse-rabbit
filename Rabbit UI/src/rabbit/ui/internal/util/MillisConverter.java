@@ -1,34 +1,47 @@
 package rabbit.ui.internal.util;
 
+import java.text.DecimalFormat;
+import java.text.Format;
+
 /**
  * Utility class that converters milliseconds to other time units.
  */
 public class MillisConverter {
 
-	private static double SECOND = 1000;
-	private static double MINUTE = SECOND * 60;
-	private static double HOUR = MINUTE * 60;
+	private static int SECOND = 1000;
+	private static int MINUTE = SECOND * 60;
+	private static int HOUR = MINUTE * 60;
 
-	/**
-	 * Converts to seconds.
-	 * 
-	 * @param millis
-	 *            Time in milliseconds
-	 * @return Time in seconds.
-	 */
-	public static double toSeconds(long millis) {
-		return millis / SECOND;
-	}
+	private static Format timeFormat = new DecimalFormat("#00");
 
-	/**
-	 * Converts to minutes.
-	 * 
-	 * @param millis
-	 *            Time in milliseconds
-	 * @return Time in minutes.
-	 */
-	public static double toMinutes(long millis) {
-		return millis / MINUTE;
+	public static String toDefaultString(long millis) {
+		int hours = (int) (millis / HOUR);
+		millis = millis % HOUR;
+
+		int minutes = (int) (millis / MINUTE);
+		millis = millis % MINUTE;
+
+		int seconds = (int) (millis / SECOND);
+
+		StringBuilder result = new StringBuilder();
+		if (hours > 0) {
+			result.append(hours);
+			result.append(" hr ");
+		}
+
+		if (minutes > 0) {
+			if (hours > 0) {
+				result.append(timeFormat.format(minutes));
+			} else {
+				result.append(minutes);
+			}
+			result.append(" min ");
+			result.append(timeFormat.format(seconds));
+		} else {
+			result.append(seconds);
+		}
+		result.append(" s");
+		return result.toString();
 	}
 
 	/**
@@ -39,7 +52,28 @@ public class MillisConverter {
 	 * @return Time in hours.
 	 */
 	public static double toHours(long millis) {
-		return millis / HOUR;
+		return millis / (double) HOUR;
 	}
 
+	/**
+	 * Converts to minutes.
+	 * 
+	 * @param millis
+	 *            Time in milliseconds
+	 * @return Time in minutes.
+	 */
+	public static double toMinutes(long millis) {
+		return millis / (double) MINUTE;
+	}
+
+	/**
+	 * Converts to seconds.
+	 * 
+	 * @param millis
+	 *            Time in milliseconds
+	 * @return Time in seconds.
+	 */
+	public static double toSeconds(long millis) {
+		return millis / (double) SECOND;
+	}
 }

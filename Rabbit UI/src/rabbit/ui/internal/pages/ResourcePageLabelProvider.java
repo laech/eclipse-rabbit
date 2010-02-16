@@ -1,7 +1,5 @@
 package rabbit.ui.internal.pages;
 
-import java.text.DecimalFormat;
-import java.text.Format;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -20,6 +18,7 @@ import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.ide.IDE;
 
+import rabbit.ui.internal.util.MillisConverter;
 import rabbit.ui.internal.util.ResourceElement;
 import rabbit.ui.internal.util.ResourceElement.ResourceType;
 
@@ -40,8 +39,6 @@ public class ResourcePageLabelProvider extends BaseLabelProvider implements ITab
 
 	private final Color deletedResourceColor;
 
-	private final Format formatter;
-
 	private boolean showProjectValues;
 	private boolean showFolderValues;
 	private boolean showFileValues;
@@ -56,7 +53,6 @@ public class ResourcePageLabelProvider extends BaseLabelProvider implements ITab
 		editorMap = new HashMap<String, Image>();
 		resourceMap = new HashMap<String, Image>();
 		workspace = ResourcesPlugin.getWorkspace().getRoot();
-		formatter = new DecimalFormat("#0.00");
 
 		deletedResourceColor = PlatformUI.getWorkbench().getDisplay().getSystemColor(SWT.COLOR_DARK_GRAY);
 
@@ -114,7 +110,7 @@ public class ResourcePageLabelProvider extends BaseLabelProvider implements ITab
 		case 0:
 			return resource.getName();
 		case 1:
-			double value = -1;
+			long value = -1;
 			if (resource.getType() == ResourceType.PROJECT) {
 				value = (showProjectValues) ? resource.getValue() : value;
 			} else if (resource.getType() == ResourceType.FOLDER) {
@@ -123,10 +119,10 @@ public class ResourcePageLabelProvider extends BaseLabelProvider implements ITab
 				value = (showFileValues) ? resource.getValue() : value;
 			}
 			if (value > -1) {
-				if (Double.compare(value, parent.getMaxValue()) > 0) {
+				if (value > parent.getMaxValue()) {
 					parent.setMaxValue(value);
 				}
-				return formatter.format(value);
+				return MillisConverter.toDefaultString(value);
 			}
 		}
 		return null;

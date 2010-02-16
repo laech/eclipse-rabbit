@@ -41,7 +41,7 @@ import rabbit.ui.pages.IPage;
  */
 public abstract class AbstractGraphTreePage implements IPage {
 
-	private double maxValue;
+	private long maxValue;
 
 	private TreeViewer viewer;
 	private TreeColumn valueColumn;
@@ -120,7 +120,7 @@ public abstract class AbstractGraphTreePage implements IPage {
 		private int getWidth(Tree tree, TreeItem item) {
 			int width = 0;
 			try {
-				double value = Double.parseDouble(item.getText(tree.indexOf(getValueColumn())));
+				double value = getValue(item.getData());// Double.parseDouble(item.getText(tree.indexOf(getValueColumn())));
 				width = (int) (value * getGraphColumn().getWidth() / getMaxValue());
 				width = ((value != 0) && (width == 0)) ? 2 : width;
 
@@ -228,9 +228,9 @@ public abstract class AbstractGraphTreePage implements IPage {
 	/**
 	 * Gets the current maximum value used for painting.
 	 * 
-	 * @return The maximum.
+	 * @return The maximum value in milliseconds.
 	 */
-	public double getMaxValue() {
+	public long getMaxValue() {
 		return maxValue;
 	}
 
@@ -238,10 +238,10 @@ public abstract class AbstractGraphTreePage implements IPage {
 	 * Sets the maximum value for painting.
 	 * 
 	 * @param max
-	 *            The value.
+	 *            The value in milliseconds.
 	 * @see #getGraphColumn()
 	 */
-	public void setMaxValue(double max) {
+	public void setMaxValue(long max) {
 		maxValue = max;
 	}
 
@@ -277,9 +277,10 @@ public abstract class AbstractGraphTreePage implements IPage {
 	 * 
 	 * @param o
 	 *            The object to get value for.
-	 * @return The value, or 0 if this object has no usage value.
+	 * @return The value in milliseconds, or 0 if this object has no usage
+	 *         value.
 	 */
-	abstract double getValue(Object o);
+	abstract long getValue(Object o);
 
 	/**
 	 * Creates an content provider for the viewer.

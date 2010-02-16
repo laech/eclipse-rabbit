@@ -11,7 +11,7 @@ import org.eclipse.core.runtime.IPath;
  */
 public class FileElement extends ResourceElement {
 
-	private double value;
+	private long value;
 	private boolean isExisting;
 	private String name;
 	private IPath path;
@@ -22,14 +22,14 @@ public class FileElement extends ResourceElement {
 	 * @param path
 	 *            The full path in the workspace to this resource.
 	 * @param value
-	 *            The usage value.
+	 *            The usage value in milliseconds.
 	 * @throws IllegalArgumentException
 	 *             If the path has less than two segments, or the value is
 	 *             negative.
 	 * @throws NullPointerException
 	 *             If the path is null.
 	 */
-	public FileElement(IPath path, double value) {
+	public FileElement(IPath path, long value) {
 		setPath(path);
 		setValue(value);
 	}
@@ -71,7 +71,7 @@ public class FileElement extends ResourceElement {
 	}
 
 	@Override
-	public double getValue() {
+	public long getValue() {
 		return value;
 	}
 
@@ -79,11 +79,11 @@ public class FileElement extends ResourceElement {
 	 * Sets the usage value of this resource.
 	 * 
 	 * @param value
-	 *            The usage value.
+	 *            The usage value in milliseconds.
 	 * @throws IllegalArgumentException
 	 *             If the value is negative.
 	 */
-	protected void setValue(double value) {
+	protected void setValue(long value) {
 		if (value < 0) {
 			throw new IllegalArgumentException();
 		}

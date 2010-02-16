@@ -1,7 +1,5 @@
 package rabbit.core.storage.xml;
 
-import static rabbit.core.internal.storage.xml.DatatypeConverter.toXMLGregorianCalendarDate;
-
 import java.io.File;
 import java.text.Format;
 import java.text.SimpleDateFormat;
@@ -14,9 +12,10 @@ import javax.xml.datatype.XMLGregorianCalendar;
 
 import rabbit.core.internal.storage.xml.DataStore;
 import rabbit.core.internal.storage.xml.IDataStore;
-import rabbit.core.internal.storage.xml.schema.events.PartEventListType;
-import rabbit.core.internal.storage.xml.schema.events.PartEventType;
+import rabbit.core.internal.storage.xml.schema.events.PerspectiveEventListType;
+import rabbit.core.internal.storage.xml.schema.events.PerspectiveEventType;
 import rabbit.core.storage.IAccessor;
+import static rabbit.core.internal.storage.xml.DatatypeConverter.toXMLGregorianCalendarDate;
 
 /**
  * Gets data about how much time is spent using Eclipse everyday.
@@ -35,7 +34,7 @@ public class SessionDataAccessor implements IAccessor {
 
 	/** Constructor. */
 	public SessionDataAccessor() {
-		dataStore = DataStore.PART_STORE;
+		dataStore = DataStore.PERSPECTIVE_STORE;
 		formatter = new SimpleDateFormat(DATE_FORMAT);
 	}
 
@@ -54,14 +53,14 @@ public class SessionDataAccessor implements IAccessor {
 
 		List<File> files = dataStore.getDataFiles(start, end);
 		for (File f : files) {
-			for (PartEventListType list : dataStore.read(f).getPartEvents()) {
+			for (PerspectiveEventListType list : dataStore.read(f).getPerspectiveEvents()) {
 
 				XMLGregorianCalendar date = list.getDate();
 				if (date.compare(startXmlCal) >= 0 && date.compare(endXmlCal) <= 0) {
 
 					String dateStr = formatter.format(date.toGregorianCalendar().getTime());
 					long value = 0;
-					for (PartEventType e : list.getPartEvent()) {
+					for (PerspectiveEventType e : list.getPerspectiveEvent()) {
 						value += e.getDuration();
 					}
 

@@ -17,7 +17,6 @@ import org.eclipse.ui.PlatformUI;
 import rabbit.core.storage.IAccessor;
 import rabbit.core.storage.xml.PerspectiveDataAccessor;
 import rabbit.ui.DisplayPreference;
-import rabbit.ui.internal.util.MillisConverter;
 import rabbit.ui.internal.util.UndefinedPerspectiveDescriptor;
 
 /**
@@ -27,12 +26,12 @@ public class PerspectivePage extends AbstractGraphTreePage {
 
 	private IAccessor dataStore;
 	private IPerspectiveRegistry registry;
-	private Map<IPerspectiveDescriptor, Double> dataMapping;
+	private Map<IPerspectiveDescriptor, Long> dataMapping;
 
 	public PerspectivePage() {
 		super();
 		dataStore = new PerspectiveDataAccessor();
-		dataMapping = new HashMap<IPerspectiveDescriptor, Double>();
+		dataMapping = new HashMap<IPerspectiveDescriptor, Long>();
 		registry = PlatformUI.getWorkbench().getPerspectiveRegistry();
 	}
 
@@ -58,7 +57,7 @@ public class PerspectivePage extends AbstractGraphTreePage {
 
 	@Override
 	protected String getValueColumnText() {
-		return "Usage (Minutes)";
+		return "Usage";
 	}
 
 	@Override
@@ -70,27 +69,24 @@ public class PerspectivePage extends AbstractGraphTreePage {
 	public void update(DisplayPreference p) {
 		setMaxValue(0);
 		dataMapping.clear();
+
 		Map<String, Long> map = dataStore.getData(p.getStartDate(), p.getEndDate());
 		for (Map.Entry<String, Long> entry : map.entrySet()) {
 			IPerspectiveDescriptor pd = registry.findPerspectiveWithId(entry.getKey());
 			if (pd == null) {
 				pd = new UndefinedPerspectiveDescriptor(entry.getKey());
 			}
-			double value = MillisConverter.toMinutes(entry.getValue());
-			dataMapping.put(pd, value);
-			if (Double.compare(value, getMaxValue()) > 0) {
-				setMaxValue(value);
+			dataMapping.put(pd, entry.getValue());
+			if (entry.getValue() > getMaxValue()) {
+				setMaxValue(entry.getValue());
 			}
 		}
 		getViewer().setInput(dataMapping.keySet());
 	}
 
 	@Override
-	double getValue(Object o) {
-		if (!(o instanceof IPerspectiveDescriptor)) {
-			return 0;
-		}
-		Double value = dataMapping.get(o);
+	long getValue(Object o) {
+		Long value = dataMapping.get(o);
 		return (value == null) ? 0 : value;
 	}
 

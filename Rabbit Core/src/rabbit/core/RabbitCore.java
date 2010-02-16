@@ -10,10 +10,10 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchListener;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
+import rabbit.core.internal.IdleDetector;
 import rabbit.core.internal.TrackerObject;
 import rabbit.core.internal.storage.xml.XmlResourceManager;
 import rabbit.core.storage.IResourceManager;
@@ -51,6 +51,8 @@ public class RabbitCore extends AbstractUIPlugin implements IWorkbenchListener {
 	/** List of trackers loaded. */
 	private List<TrackerObject> trackerList;
 
+	private IdleDetector idleDetector;
+
 	/**
 	 * The constructor.
 	 */
@@ -84,19 +86,12 @@ public class RabbitCore extends AbstractUIPlugin implements IWorkbenchListener {
 	}
 
 	/**
-	 * Call this method to saves all current data collected by the trackers now.
+	 * Gets the resource manager.
+	 * 
+	 * @return The resource manager.
 	 */
-	public void saveTrackerData() {
-		for (TrackerObject t : trackerList) {
-			t.getTracker().saveData();
-			t.getTracker().flushData();
-		}
-	}
-
-	@Override
-	public void postShutdown(IWorkbench workbench) {
-		// Important not to do anything here, let XmlResourcemanager do its
-		// final work.
+	public IResourceManager getResourceManager() {
+		return XmlResourceManager.INSTANCE;
 	}
 
 	/**
@@ -108,13 +103,10 @@ public class RabbitCore extends AbstractUIPlugin implements IWorkbenchListener {
 		return new Path(getPreferenceStore().getString(STORAGE_LOCATION));
 	}
 
-	/**
-	 * Gets the resource manager.
-	 * 
-	 * @return The resource manager.
-	 */
-	public IResourceManager getResourceManager() {
-		return XmlResourceManager.INSTANCE;
+	@Override
+	public void postShutdown(IWorkbench workbench) {
+		// Important not to do anything here, let XmlResourcemanager do its
+		// final work.
 	}
 
 	@Override
@@ -123,6 +115,16 @@ public class RabbitCore extends AbstractUIPlugin implements IWorkbenchListener {
 			t.getTracker().setEnabled(false);
 		}
 		return true;
+	}
+
+	/**
+	 * Call this method to saves all current data collected by the trackers now.
+	 */
+	public void saveTrackerData() {
+		for (TrackerObject t : trackerList) {
+			t.getTracker().saveData();
+			t.getTracker().flushData();
+		}
 	}
 
 	/**
@@ -143,24 +145,36 @@ public class RabbitCore extends AbstractUIPlugin implements IWorkbenchListener {
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
-		PlatformUI.getWorkbench().addWorkbenchListener(this);
+
+		idleDetector = new IdleDetector(getWorkbench().getDisplay(), 10000);
+		getWorkbench().addWorkbenchListener(this);
 
 		if (trackerList != null) { // May be we didn't stop correctly?
 			setEnableTrackers(trackerList, false);
 			trackerList.clear();
 		}
+		if (idleDetector != null) {
+			idleDetector.setRunning(false);
+		}
 
-		IConfigurationElement[] elements = Platform.getExtensionRegistry()
-				.getConfigurationElementsFor(TRACKER_EXTENSION_ID);
+		IConfigurationElement[] elements = Platform.getExtensionRegistry().getConfigurationElementsFor(TRACKER_EXTENSION_ID);
 		trackerList = createSensorsFromExtension(elements);
 
 		setEnableTrackers(trackerList, true);
+
+		idleDetector.setRunning(true);
+	}
+
+	public IdleDetector getIdleDetector() {
+		return idleDetector;
 	}
 
 	@Override
 	public void stop(BundleContext context) throws Exception {
-		PlatformUI.getWorkbench().removeWorkbenchListener(this);
+		idleDetector.setRunning(false);
+		getWorkbench().removeWorkbenchListener(this);
 		setEnableTrackers(trackerList, false);
+
 		plugin = null;
 		super.stop(context);
 	}

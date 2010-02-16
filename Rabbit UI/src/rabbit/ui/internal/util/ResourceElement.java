@@ -99,9 +99,9 @@ public abstract class ResourceElement {
 	/**
 	 * Gets the usage value of this resource.
 	 * 
-	 * @return The usage value.
+	 * @return The usage value in milliseconds.
 	 */
-	public abstract double getValue();
+	public abstract long getValue();
 
 	/**
 	 * Sets the path to this resource.

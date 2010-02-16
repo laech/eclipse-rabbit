@@ -1,7 +1,5 @@
 package rabbit.ui.internal.pages;
 
-import java.text.DecimalFormat;
-import java.text.Format;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -15,6 +13,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.IPerspectiveDescriptor;
 import org.eclipse.ui.PlatformUI;
 
+import rabbit.ui.internal.util.MillisConverter;
 import rabbit.ui.internal.util.UndefinedPerspectiveDescriptor;
 
 /**
@@ -24,12 +23,10 @@ public class PerspectivePageLabelProvider extends BaseLabelProvider implements I
 
 	private Map<String, Image> images;
 	private PerspectivePage parent;
-	private Format formatter;
 	private final Color undefinedColor;
 
 	public PerspectivePageLabelProvider(PerspectivePage parent) {
 		this.parent = parent;
-		formatter = new DecimalFormat("#0.00");
 		images = new HashMap<String, Image>();
 		undefinedColor = PlatformUI.getWorkbench().getDisplay().getSystemColor(SWT.COLOR_DARK_GRAY);
 	}
@@ -56,7 +53,7 @@ public class PerspectivePageLabelProvider extends BaseLabelProvider implements I
 		case 0:
 			return p.getLabel();
 		case 1:
-			return formatter.format(parent.getValue(p));
+			return MillisConverter.toDefaultString(parent.getValue(p));
 		default:
 			return null;
 		}

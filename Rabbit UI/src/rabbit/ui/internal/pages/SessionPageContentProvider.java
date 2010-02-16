@@ -1,6 +1,6 @@
 package rabbit.ui.internal.pages;
 
-import java.util.Map;
+import java.util.Collection;
 
 /**
  * Content provider for a session page.
@@ -17,15 +17,15 @@ public class SessionPageContentProvider extends AbstractTreeContentProvider {
 
 	@Override
 	public Object[] getChildren(Object parentElement) {
-		if (parentElement instanceof Map<?, ?>) {
-			return ((Map<?, ?>) parentElement).entrySet().toArray();
+		if (parentElement instanceof Collection<?>) {
+			return ((Collection<?>) parentElement).toArray();
 		}
 		return EMPTY_ARRAY;
 	}
 
 	@Override
 	public boolean hasChildren(Object element) {
-		return (element instanceof Map<?, ?>);
+		return (element instanceof Collection<?>);
 	}
 
 }

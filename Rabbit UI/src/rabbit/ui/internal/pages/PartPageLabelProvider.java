@@ -1,7 +1,5 @@
 package rabbit.ui.internal.pages;
 
-import java.text.DecimalFormat;
-import java.text.Format;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -15,6 +13,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.IWorkbenchPartDescriptor;
 import org.eclipse.ui.PlatformUI;
 
+import rabbit.ui.internal.util.MillisConverter;
 import rabbit.ui.internal.util.UndefinedWorkbenchPartDescriptor;
 
 /**
@@ -25,7 +24,6 @@ public class PartPageLabelProvider extends BaseLabelProvider implements ITableLa
 	/** Keys are workbench part id, values may be null. */
 	private Map<String, Image> images;
 	private PartPage page;
-	private Format formatter;
 	private final Color undefinedColor;
 
 	/**
@@ -37,7 +35,6 @@ public class PartPageLabelProvider extends BaseLabelProvider implements ITableLa
 	public PartPageLabelProvider(PartPage page) {
 		this.page = page;
 		images = new HashMap<String, Image>();
-		formatter = new DecimalFormat("#0.00");
 		undefinedColor = PlatformUI.getWorkbench().getDisplay().getSystemColor(SWT.COLOR_DARK_GRAY);
 	}
 
@@ -66,7 +63,7 @@ public class PartPageLabelProvider extends BaseLabelProvider implements ITableLa
 		case 0:
 			return part.getLabel();
 		case 1:
-			return formatter.format(page.getValue(part));
+			return MillisConverter.toDefaultString(page.getValue(part));
 		default:
 			return null;
 		}

@@ -71,10 +71,7 @@ public class CommandPage extends AbstractGraphTreePage {
 	}
 
 	@Override
-	double getValue(Object o) {
-		if (!(o instanceof Command)) {
-			return 0;
-		}
+	long getValue(Object o) {
 		Long value = dataMapping.get(o);
 		return (value == null) ? 0 : value;
 	}

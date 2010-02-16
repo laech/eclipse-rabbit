@@ -4,6 +4,8 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Observable;
+import java.util.Observer;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -15,18 +17,22 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 
+import rabbit.core.RabbitCore;
+
 /**
  * Defines common behaviors for part trackers.
  * 
  * @param <E>
  *            The event type that is being tracked.
  */
-public abstract class AbstractPartTracker<E>
-		extends AbstractTracker<E> implements IPartListener, IWindowListener {
+public abstract class AbstractPartTracker<E> extends AbstractTracker<E>
+		implements IPartListener, IWindowListener, Observer {
 
 	private long start;
 	private Map<IWorkbenchPart, Boolean> partStates;
-	private IWorkbenchPart currentActivePart;
+	// private IWorkbenchPart currentActivePart;
+
+	private Runnable idleDetectorCode;
 
 	/**
 	 * Constructor.
@@ -35,11 +41,34 @@ public abstract class AbstractPartTracker<E>
 		super();
 		start = Long.MAX_VALUE;
 		partStates = new HashMap<IWorkbenchPart, Boolean>();
-		currentActivePart = null;
+		// currentActivePart = null;
+
+		idleDetectorCode = new Runnable() {
+			@Override
+			public void run() {
+				if (!isEnabled()) {
+					return;
+				}
+				IWorkbenchWindow win = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+				if (win == null) {
+					return;
+				}
+				IWorkbenchPart part = win.getPartService().getActivePart();
+				if (part == null) {
+					return;
+				}
+				if (RabbitCore.getDefault().getIdleDetector().isUserActive()) {
+					startSession(part);
+				} else {
+					endSession(part);
+				}
+			}
+		};
 	}
 
 	@Override
 	protected void doDisable() {
+		RabbitCore.getDefault().getIdleDetector().deleteObserver(this);
 		PlatformUI.getWorkbench().removeWindowListener(this);
 		for (IPartService s : getPartServices())
 			s.removePartListener(this);
@@ -57,7 +86,8 @@ public abstract class AbstractPartTracker<E>
 
 	@Override
 	protected void doEnable() {
-		// PlatformUI.getWorkbench().addWindowListener(this);
+		RabbitCore.getDefault().getIdleDetector().addObserver(this);
+		PlatformUI.getWorkbench().addWindowListener(this);
 		for (IPartService s : getPartServices())
 			s.addPartListener(this);
 
@@ -72,6 +102,13 @@ public abstract class AbstractPartTracker<E>
 				}
 			}
 		});
+	}
+
+	@Override
+	public void update(Observable o, Object arg) {
+		if (o == RabbitCore.getDefault().getIdleDetector()) {
+			PlatformUI.getWorkbench().getDisplay().syncExec(idleDetectorCode);
+		}
 	}
 
 	/**
@@ -104,9 +141,9 @@ public abstract class AbstractPartTracker<E>
 	 * Starts a new session.
 	 */
 	protected void startSession(IWorkbenchPart part) {
-		if (currentActivePart != null) {
-			partStates.put(currentActivePart, Boolean.FALSE);
-		}
+		// if (currentActivePart != null) {
+		// partStates.put(currentActivePart, Boolean.FALSE);
+		// }
 		start = System.nanoTime();
 		partStates.put(part, Boolean.TRUE);
 	}

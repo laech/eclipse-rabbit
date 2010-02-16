@@ -1,22 +1,20 @@
 package rabbit.ui.internal.pages;
 
-import java.text.DecimalFormat;
-import java.text.Format;
-import java.util.Map;
-import java.util.Map.Entry;
-
 import org.eclipse.jface.viewers.BaseLabelProvider;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.swt.graphics.Image;
+
+import rabbit.ui.internal.util.MillisConverter;
 
 /**
  * A label provider for a session page.
  */
 public class SessionPageLabelProvider extends BaseLabelProvider implements ITableLabelProvider {
 
-	private static Format formatter = new DecimalFormat("#0.00");
+	private SessionPage parent;
 
-	public SessionPageLabelProvider() {
+	public SessionPageLabelProvider(SessionPage parent) {
+		this.parent = parent;
 	}
 
 	@Override
@@ -26,17 +24,12 @@ public class SessionPageLabelProvider extends BaseLabelProvider implements ITabl
 
 	@Override
 	public String getColumnText(Object element, int columnIndex) {
-		if (!(element instanceof Map.Entry<?, ?>)) {
-			return null;
-		}
-
-		Map.Entry<?, ?> entry = (Entry<?, ?>) element;
 		switch (columnIndex) {
 		case 0:
-			return entry.getKey().toString();
+			return element.toString();
 		case 1:
 			try {
-				return formatter.format(entry.getValue());
+				return MillisConverter.toDefaultString(parent.getValue(element));
 			} catch (IllegalArgumentException e) {
 				return null;
 			}

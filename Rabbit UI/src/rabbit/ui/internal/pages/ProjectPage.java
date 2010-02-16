@@ -1,6 +1,9 @@
 package rabbit.ui.internal.pages;
 
+import java.util.Collection;
+
 import org.eclipse.jface.viewers.ITableLabelProvider;
+import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.swt.graphics.Image;
@@ -37,5 +40,15 @@ public class ProjectPage extends ResourcePage {
 			}
 
 		});
+	}
+
+	@Override
+	protected ITreeContentProvider createContentProvider() {
+		return new ResourcePageContentProvider() {
+			@Override
+			public boolean hasChildren(Object element) {
+				return (element instanceof Collection<?>);
+			}
+		};
 	}
 }
