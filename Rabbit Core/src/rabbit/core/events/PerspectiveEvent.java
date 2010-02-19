@@ -40,10 +40,12 @@ public class PerspectiveEvent extends ContinuousEvent {
 	 * 
 	 * @param perspective
 	 *            The perspective.
+	 * @throws NullPointerException
+	 *             If the parameter is null.
 	 */
 	public void setPerspective(IPerspectiveDescriptor perspective) {
 		if (perspective == null) {
-			throw new NullPointerException("Argument cannot be null");
+			throw new NullPointerException();
 		}
 		this.perspective = perspective;
 	}

@@ -39,7 +39,7 @@ public abstract class ResourcePage extends AbstractGraphTreePage {
 		Map<String, Long> rawData = accessor.getData(p.getStartDate(), p.getEndDate());
 		Map<String, ResourceElement> ls = new HashMap<String, ResourceElement>(rawData.size());
 		for (Map.Entry<String, Long> entry : rawData.entrySet()) {
-			String pathString = resourceMapper.getFilePath(entry.getKey());
+			String pathString = resourceMapper.getPath(entry.getKey());
 			if (pathString == null) {
 				continue;
 			}
@@ -60,6 +60,7 @@ public abstract class ResourcePage extends AbstractGraphTreePage {
 				l = l.insert(new FolderElement(path.removeLastSegments(1)));
 			}
 
+			System.out.println(path);
 			l.insert(new FileElement(path, entry.getValue()));
 		}
 		getViewer().setInput(ls.values());

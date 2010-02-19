@@ -45,7 +45,7 @@ public class CommandEvent extends DiscreteEvent {
 	 */
 	public void setExecutionEvent(ExecutionEvent event) {
 		if (event == null) {
-			throw new NullPointerException("Argument cannot be null");
+			throw new NullPointerException();
 		}
 		this.event = event;
 	}

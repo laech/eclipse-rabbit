@@ -143,7 +143,7 @@ public class RabbitView extends ViewPart implements Observer {
 		getViewSite().getActionBars().getToolBarManager().add(new Action(text, icon) {
 			@Override
 			public void run() {
-				RabbitCore.getDefault().saveTrackerData();
+				RabbitCore.getDefault().saveCurrentData();
 				update(displayPref, null);
 			}
 		});
@@ -157,7 +157,7 @@ public class RabbitView extends ViewPart implements Observer {
 	 */
 	protected void createToolBarItems(IToolBarManager toolBar) {
 		String text = "Apply";
-		ImageDescriptor icon = RabbitUI.imageDescriptorFromPlugin("org.eclipse.ui.browser", "icons/elcl16/nav_refresh.gif");
+		ImageDescriptor icon = RabbitUI.imageDescriptorFromPlugin("org.eclipse.ui.browser", "icons/elcl16/nav_refresh.gif"); //$NON-NLS-1$//$NON-NLS-2$
 		final IAction updateAction = new Action(text, icon) {
 			@Override
 			public void run() {
@@ -202,7 +202,8 @@ public class RabbitView extends ViewPart implements Observer {
 		toolBar.add(new ControlContribution("rabbit.ui.separator") {
 			@Override
 			protected Control createControl(Composite parent) {
-				// Really we just want some space, not an actual separator.
+				// Really we just want some space, not an actual
+				// separator.
 				Label separator = new Label(parent, SWT.NO_BACKGROUND);
 				return separator;
 			}
@@ -222,7 +223,8 @@ public class RabbitView extends ViewPart implements Observer {
 		toolBar.add(new ControlContribution("rabbit.ui.separator2") {
 			@Override
 			protected Control createControl(Composite parent) {
-				// Really we just want some space, not an actual separator.
+				// Really we just want some space, not an actual
+				// separator.
 				Label separator = new Label(parent, SWT.NO_BACKGROUND);
 				return separator;
 			}

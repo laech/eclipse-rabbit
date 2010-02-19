@@ -13,7 +13,7 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 
-import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IResourceDelta;
@@ -21,7 +21,6 @@ import org.eclipse.core.resources.IResourceDeltaVisitor;
 import org.eclipse.core.runtime.AssertionFailedException;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchListener;
 
@@ -52,35 +51,33 @@ public enum XmlResourceManager implements IResourceManager, IResourceChangeListe
 		@Override
 		public boolean visit(IResourceDelta delta) throws CoreException {
 
-			if ((delta.getKind() != IResourceDelta.ADDED) || !(delta.getResource() instanceof IFile)) {
+			if ((delta.getFlags() & IResourceDelta.MOVED_FROM) == 0) {
+				return true;
+			}
+			IResource resource = delta.getResource();
+
+			String oldPath = delta.getMovedFromPath().toString();
+			Set<String> oldIds = resources.get(oldPath);
+			if (oldIds == null) {
 				return true;
 			}
 
-			IFile file = (IFile) delta.getResource();
-			String newPath = file.getFullPath().toString();
-			if (delta.getMovedFromPath() != null) {
-				String oldPath = delta.getMovedFromPath().toString();
-
-				Set<String> oldIds = resources.get(oldPath);
-				if (oldIds == null) {
-					return false;
-				}
-
-				Set<String> newIds = resources.get(newPath);
-				if (newIds == null) {
-					newIds = new HashSet<String>();
-					resources.put(newPath, newIds);
-				}
-				newIds.addAll(oldIds);
-
-				resources.remove(oldPath);
+			String newPath = resource.getFullPath().toString();
+			Set<String> newIds = resources.get(newPath);
+			if (newIds == null) {
+				newIds = new HashSet<String>();
+				resources.put(newPath, newIds);
 			}
-			return false;
+			newIds.addAll(oldIds);
+
+			resources.remove(oldPath);
+
+			return true;
 		}
 	};
 
 	/** Constructor. */
-	XmlResourceManager() {
+	private XmlResourceManager() {
 		try {
 			jaxb = JAXBContext.newInstance(ObjectFactory.class);
 			mar = jaxb.createMarshaller();
@@ -96,10 +93,17 @@ public enum XmlResourceManager implements IResourceManager, IResourceChangeListe
 			}
 		}
 
-		resources = new HashMap<String, Set<String>>();
 		objectFactory = new ObjectFactory();
 		random = new Random();
-		allIds = new HashSet<String>();
+
+		resources = convert(getData());
+		allIds = new HashSet<String>(resources.size() * 2);
+		for (Set<String> ids : resources.values()) {
+			allIds.addAll(ids);
+		}
+	}
+
+	private ResourceListType getData() {
 		ResourceListType database = null;
 		try {
 			if (getDataFile().exists()) {
@@ -112,14 +116,7 @@ public enum XmlResourceManager implements IResourceManager, IResourceChangeListe
 				database = objectFactory.createResourceListType();
 			}
 		}
-
-		for (ResourceType type : database.getResource()) {
-
-			Set<String> ids = new HashSet<String>();
-			ids.addAll(type.getResourceId());
-			resources.put(type.getPath(), ids);
-			allIds.addAll(ids);
-		}
+		return database;
 	}
 
 	/**
@@ -132,12 +129,8 @@ public enum XmlResourceManager implements IResourceManager, IResourceChangeListe
 	}
 
 	private File getDataFile() {
-		IPath path = Path.fromOSString(RabbitCore.getDefault().getStoragePath().toOSString());
-		path = path.addTrailingSeparator();
-		path = path.append("ResourceDB");
-		path = path.addTrailingSeparator();
-		path = path.append("Resources");
-		path = path.addFileExtension("xml");
+		IPath path = RabbitCore.getDefault().getStoragePath()
+				.append("ResourceDB").append("Resources").addFileExtension("xml");
 
 		File file = path.toFile();
 		if (!file.getParentFile().exists()) {
@@ -147,7 +140,7 @@ public enum XmlResourceManager implements IResourceManager, IResourceChangeListe
 	}
 
 	@Override
-	public String getFilePath(String id) {
+	public String getPath(String id) {
 		if (!allIds.contains(id)) {
 			return null;
 		}
@@ -158,7 +151,7 @@ public enum XmlResourceManager implements IResourceManager, IResourceChangeListe
 				}
 			}
 		}
-		throw new AssertionFailedException("Bug");
+		throw new AssertionFailedException("Bug?");
 	}
 
 	@Override
@@ -199,7 +192,6 @@ public enum XmlResourceManager implements IResourceManager, IResourceChangeListe
 		if (delta == null) {
 			return;
 		}
-
 		try {
 			delta.accept(renameVisitor);
 		} catch (CoreException e) {
@@ -215,18 +207,53 @@ public enum XmlResourceManager implements IResourceManager, IResourceChangeListe
 
 	@Override
 	public void postShutdown(IWorkbench workbench) {
-		ResourceListType database = objectFactory.createResourceListType();
-		for (Map.Entry<String, Set<String>> entry : resources.entrySet()) {
-			ResourceType type = objectFactory.createResourceType();
-			type.setPath(entry.getKey());
-			type.getResourceId().addAll(entry.getValue());
-			database.getResource().add(type);
+		write();
+	}
+
+	/**
+	 * Saves the current data to disk.
+	 */
+	public synchronized void write() {
+		// Note: the file database is shared across workspaces, so this method
+		// needs to be synchronized and data need to be merged.
+
+		ResourceListType oldData = getData();
+		for (ResourceType type : oldData.getResource()) {
+
+			Set<String> ids = resources.get(type.getPath());
+			if (ids == null) {
+				ids = new HashSet<String>();
+				resources.put(type.getPath(), ids);
+			}
+			ids.addAll(type.getResourceId());
+			allIds.addAll(type.getResourceId());
 		}
 		try {
-			marshal(objectFactory.createResources(database), getDataFile());
+			marshal(objectFactory.createResources(convert(resources)), getDataFile());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+
+	private ResourceListType convert(Map<String, Set<String>> v) {
+		ResourceListType resources = objectFactory.createResourceListType();
+		for (Map.Entry<String, Set<String>> entry : v.entrySet()) {
+			ResourceType type = objectFactory.createResourceType();
+			type.setPath(entry.getKey());
+			type.getResourceId().addAll(entry.getValue());
+			resources.getResource().add(type);
+		}
+		return resources;
+	}
+
+	private Map<String, Set<String>> convert(ResourceListType v) {
+		Map<String, Set<String>> data = new HashMap<String, Set<String>>(v.getResource().size() * 2);
+		for (ResourceType type : v.getResource()) {
+			Set<String> ids = new HashSet<String>(type.getResourceId().size() * 2);
+			ids.addAll(type.getResourceId());
+			data.put(type.getPath(), ids);
+		}
+		return data;
 	}
 
 	@Override

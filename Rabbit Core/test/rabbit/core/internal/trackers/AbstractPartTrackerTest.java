@@ -1,7 +1,5 @@
 package rabbit.core.internal.trackers;
 
-import static org.junit.Assert.assertEquals;
-
 import java.util.Calendar;
 import java.util.concurrent.TimeUnit;
 
@@ -9,7 +7,6 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.ui.IEditorDescriptor;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
@@ -18,8 +15,11 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.FileEditorInput;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * Test {@link AbstractPartTracker}
@@ -51,13 +51,16 @@ public abstract class AbstractPartTrackerTest<E> extends AbstractTrackerTest<E> 
 	protected IFile getFileForTesting() {
 		IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
 		IProject project = root.getProject("Tmp");
-		if (!project.isAccessible()) {
-			try {
+		try {
+			if (!project.exists()) {
 				project.create(null);
-				project.open(null);
-			} catch (CoreException e) {
-				e.printStackTrace();
 			}
+			if (!project.isOpen()) {
+				project.open(null);
+			}
+		} catch (Exception e) {
+			Assert.fail();
+			return null;
 		}
 		return project.getFile("hello.txt");
 	}

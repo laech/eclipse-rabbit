@@ -27,7 +27,7 @@ public class SessionDataAccessor implements IAccessor {
 	 * 
 	 * @see SimpleDateFormat
 	 */
-	public static final String DATE_FORMAT = "yyyy-MM-dd E";
+	public static final String DATE_FORMAT = "yyyy-MM-dd E"; //$NON-NLS-1$
 
 	private final Format formatter;
 	private IDataStore dataStore;

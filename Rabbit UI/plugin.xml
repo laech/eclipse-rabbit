@@ -61,5 +61,13 @@
          </page>
       </page>
    </extension>
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            class="rabbit.ui.internal.pref.RabbitPreferencePage"
+            id="rabbit.ui.mainPref"
+            name="Rabbit">
+      </page>
+   </extension>
 
 </plugin>

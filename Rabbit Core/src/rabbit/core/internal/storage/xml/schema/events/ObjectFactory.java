@@ -27,7 +27,7 @@ import javax.xml.namespace.QName;
 @XmlRegistry
 public class ObjectFactory {
 
-	private final static QName _Events_QNAME = new QName("", "events");
+	private final static QName _Events_QNAME = new QName("", "events"); //$NON-NLS-1$//$NON-NLS-2$
 
 	/**
 	 * Create a new ObjectFactory that can be used to create new instances of

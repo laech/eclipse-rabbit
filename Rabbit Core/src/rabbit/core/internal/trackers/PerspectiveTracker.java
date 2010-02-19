@@ -25,6 +25,7 @@ public class PerspectiveTracker extends AbstractTracker<PerspectiveEvent>
 
 	/** Start time of a session, in nanoseconds. */
 	private long start;
+	private IPerspectiveDescriptor currentPerspective;
 
 	/**
 	 * Constructor.
@@ -40,30 +41,32 @@ public class PerspectiveTracker extends AbstractTracker<PerspectiveEvent>
 
 	@Override
 	protected void doDisable() {
-		RabbitCore.getDefault().getIdleDetector().deleteObserver(this);
 		checkState(false);
 		for (IWorkbenchWindow win : getWorkbenchWindows()) {
 			win.removePerspectiveListener(this);
 		}
+		RabbitCore.getDefault().getIdleDetector().deleteObserver(this);
+		PlatformUI.getWorkbench().removeWindowListener(this);
 	}
 
 	@Override
 	protected void doEnable() {
-		RabbitCore.getDefault().getIdleDetector().addObserver(this);
 		checkState(true);
 		for (IWorkbenchWindow win : getWorkbenchWindows()) {
 			win.addPerspectiveListener(this);
 		}
+		RabbitCore.getDefault().getIdleDetector().addObserver(this);
+		PlatformUI.getWorkbench().addWindowListener(this);
 	}
 
 	/**
 	 * Checks the current workbench state, and perform the appropriate actions.
 	 * 
-	 * @param isEnabling
-	 *            true to indicate this tracker is enabling, false to indicate
-	 *            this tracker is disabling.
+	 * @param startSession
+	 *            true to indicate a new session should be started, false to
+	 *            indicate a session should be ended.
 	 */
-	private void checkState(final boolean isEnabling) {
+	private void checkState(final boolean startSession) {
 		final IWorkbench workbench = PlatformUI.getWorkbench();
 		workbench.getDisplay().syncExec(new Runnable() {
 			@Override
@@ -77,11 +80,11 @@ public class PerspectiveTracker extends AbstractTracker<PerspectiveEvent>
 					return;
 				}
 				if (page.getPerspective() != null) {
-					if (isEnabling) {
-						startSession();
+					if (startSession) {
+						startSession(page.getPerspective());
 					}
 					else {
-						endSession(page.getPerspective());
+						tryEndSession();
 					}
 				}
 			}
@@ -91,7 +94,7 @@ public class PerspectiveTracker extends AbstractTracker<PerspectiveEvent>
 	@Override
 	public void update(java.util.Observable o, Object arg) {
 		if (o == RabbitCore.getDefault().getIdleDetector() && isEnabled()) {
-			checkState(RabbitCore.getDefault().getIdleDetector().isUserActive());
+			checkState(!RabbitCore.getDefault().getIdleDetector().isUserActive());
 		}
 	}
 
@@ -106,9 +109,18 @@ public class PerspectiveTracker extends AbstractTracker<PerspectiveEvent>
 
 	/**
 	 * Starts a session.
+	 * 
+	 * @param p
+	 *            The perspective.
+	 * @throws NullPointerException
+	 *             If the parameter is null.
 	 */
-	private void startSession() {
+	private void startSession(IPerspectiveDescriptor p) {
+		if (p == null) {
+			throw new NullPointerException();
+		}
 		start = System.nanoTime();
+		currentPerspective = p;
 	}
 
 	/**
@@ -117,39 +129,31 @@ public class PerspectiveTracker extends AbstractTracker<PerspectiveEvent>
 	 * @param p
 	 *            The perspective to generate an event object from.
 	 */
-	private void endSession(IPerspectiveDescriptor p) {
-		long duration = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - start);
-		if (duration <= 0) {
-			System.err.println("Perspective tracker duration = " + duration);
+	private void tryEndSession() {
+		if (start == Long.MAX_VALUE || currentPerspective == null) {
 			return;
 		}
-		addData(new PerspectiveEvent(Calendar.getInstance(), duration, p));
+		long duration = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - start);
+		if (duration > 0) {
+			addData(new PerspectiveEvent(Calendar.getInstance(), duration, currentPerspective));
+		}
+		start = Long.MAX_VALUE;
+		currentPerspective = null;
 	}
 
-	/**
-	 * Starts or stops a session if the conditions are OK.
-	 * 
-	 * @param win
-	 *            The session subject.
-	 * @param start
-	 *            true to start a session, false to stop a session.
-	 */
-	private void tryStartOrEndSession(IWorkbenchWindow win, boolean start) {
+	private void tryStartSession(IWorkbenchWindow win) {
 		IWorkbenchPage page = win.getActivePage();
 		if (page == null) {
 			return;
 		}
 		if (page.getPerspective() != null) {
-			if (start)
-				startSession();
-			else
-				endSession(page.getPerspective());
+			startSession(page.getPerspective());
 		}
 	}
 
 	@Override
 	public void perspectiveActivated(IWorkbenchPage page, IPerspectiveDescriptor perspective) {
-		startSession();
+		startSession(perspective);
 		/*
 		 * Note: perspectiveActivated is also called when a new perspective is
 		 * opened and become active.
@@ -158,7 +162,7 @@ public class PerspectiveTracker extends AbstractTracker<PerspectiveEvent>
 
 	@Override
 	public void perspectiveDeactivated(IWorkbenchPage page, IPerspectiveDescriptor perspective) {
-		endSession(perspective);
+		tryEndSession();
 		/*
 		 * Note: perspectiveDeactivated is also called when an active
 		 * perspective is closed.
@@ -168,27 +172,27 @@ public class PerspectiveTracker extends AbstractTracker<PerspectiveEvent>
 	@Override
 	public void windowActivated(IWorkbenchWindow window) {
 		// Starts tracking if there is an active perspective in this window.
-		tryStartOrEndSession(window, true);
+		tryStartSession(window);
 	}
 
 	@Override
 	public void windowDeactivated(IWorkbenchWindow window) {
 		// Stops tracking if there is an active perspective in this window.
-		tryStartOrEndSession(window, false);
+		tryEndSession();
 	}
 
 	@Override
 	public void windowOpened(IWorkbenchWindow window) {
 		window.addPerspectiveListener(this);
 		// Starts tracking if there is an active perspective in this window.
-		tryStartOrEndSession(window, true);
+		tryStartSession(window);
 	}
 
 	@Override
 	public void windowClosed(IWorkbenchWindow window) {
 		window.removePerspectiveListener(this);
 		// Stops tracking if there is an active perspective in this window.
-		tryStartOrEndSession(window, false);
+		tryEndSession();
 	}
 
 	@Override

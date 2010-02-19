@@ -43,7 +43,7 @@ public class ContinuousEvent extends DiscreteEvent {
 	 */
 	public void setDuration(long duration) {
 		if (duration < 0) {
-			throw new IllegalArgumentException("Duration cannot be negative.");
+			throw new IllegalArgumentException();
 		}
 
 		this.duration = duration;

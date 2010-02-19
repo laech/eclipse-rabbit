@@ -16,7 +16,7 @@ public interface IResourceManager {
 	 *         <tt>{@link IResource#getFullPath()}.toString()</tt>, or null if not
 	 *         found.
 	 */
-	String getFilePath(String fileId);
+	String getPath(String fileId);
 
 	/**
 	 * Gets the id of the given file path.

@@ -49,12 +49,12 @@ public abstract class AbstractStorerTest<E extends DiscreteEvent, T, S extends E
 	}
 
 	@BeforeClass
-	public static void setUp() {
+	public static void setUpBeforeClass() {
 		TestUtil.setUpPathForTesting();
 	}
 
 	@Before
-	public void cleanup() {
+	public void setUp() {
 		if (dataFile.exists()) {
 			dataFile.delete();
 		}

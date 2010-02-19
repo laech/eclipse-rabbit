@@ -1,7 +1,7 @@
 package rabbit.core.internal;
 
-import java.io.File;
-
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
 import org.eclipse.jface.preference.IPreferenceStore;
 
@@ -17,13 +17,11 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 
 	@Override
 	public void initializeDefaultPreferences() {
-		// TODO
-		String path = System.getProperty("user.home") + File.separator
-						// + "Desktop" + File.separator
-				+ "Rabbit" + File.separator
-				+ "XmlDb";
+		IPath path = Path.fromOSString(System.getProperty("user.home")).append("Rabbit").append("XmlDb");
+
 		IPreferenceStore store = RabbitCore.getDefault().getPreferenceStore();
-		store.setDefault(RabbitCore.STORAGE_LOCATION, path);
+		store.setDefault(RabbitCore.STORAGE_LOCATION, path.toOSString());
+		store.setDefault(RabbitCore.IDLE_DETECTOR_ENABLE, false);
 	}
 
 }

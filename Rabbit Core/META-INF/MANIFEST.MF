@@ -4,11 +4,15 @@ Bundle-Name: Rabbit Core
 Bundle-SymbolicName: rabbit.core;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-Activator: rabbit.core.RabbitCore
-Require-Bundle: org.eclipse.ui,
- org.eclipse.core.runtime,
+Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.core.resources,
+ org.eclipse.ui,
  org.eclipse.ui.ide,
- org.junit4;resolution:=optional
+ org.junit4;resolution:=optional,
+ org.eclipse.swtbot.eclipse.finder;resolution:=optional,
+ org.eclipse.swtbot.junit4_x;resolution:=optional,
+ org.eclipse.swtbot.swt.finder;resolution:=optional,
+ org.eclipse.ltk.core.refactoring;resolution:=optional
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: rabbit.core,
  rabbit.core.events;uses:="org.eclipse.ui",

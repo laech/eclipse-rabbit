@@ -14,6 +14,13 @@ public class MillisConverter {
 
 	private static Format timeFormat = new DecimalFormat("#00");
 
+	/**
+	 * Formats the given duration into a human readable string.
+	 * 
+	 * @param millis
+	 *            The duration in milliseconds.
+	 * @return A human readable string representing the duration.
+	 */
 	public static String toDefaultString(long millis) {
 		int hours = (int) (millis / HOUR);
 		millis = millis % HOUR;
@@ -38,9 +45,16 @@ public class MillisConverter {
 			result.append(" min ");
 			result.append(timeFormat.format(seconds));
 		} else {
-			result.append(seconds);
+			if (hours > 0) {
+				result.append(timeFormat.format(minutes));
+				result.append(" min ");
+				result.append(timeFormat.format(seconds));
+			} else {
+				result.append(seconds);
+			}
 		}
 		result.append(" s");
+
 		return result.toString();
 	}
 

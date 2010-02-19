@@ -45,7 +45,7 @@ public class PartEvent extends ContinuousEvent {
 	 */
 	public void setWorkbenchPart(IWorkbenchPart workbenchPart) {
 		if (workbenchPart == null) {
-			throw new NullPointerException("Argument cannot be null");
+			throw new NullPointerException();
 		}
 		this.workbenchPart = workbenchPart;
 	}

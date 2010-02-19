@@ -128,13 +128,13 @@ public abstract class AbstractPartTracker<E> extends AbstractTracker<E>
 	@Override
 	public void partActivated(IWorkbenchPart part) {
 		startSession(part);
-		System.out.println("act : " + part);
+		// System.out.println("act : " + part);
 	}
 
 	@Override
 	public void partDeactivated(IWorkbenchPart part) {
 		endSession(part);
-		System.out.println("deact : " + part);
+		// System.out.println("deact : " + part);
 	}
 
 	/**
@@ -185,14 +185,14 @@ public abstract class AbstractPartTracker<E> extends AbstractTracker<E>
 
 	@Override
 	public void windowActivated(IWorkbenchWindow window) {
-		System.out.println("act : " + window);
+		// System.out.println("act : " + window);
 		if (window.getPartService().getActivePart() != null)
 			startSession(window.getPartService().getActivePart());
 	}
 
 	@Override
 	public void windowClosed(IWorkbenchWindow window) {
-		System.out.println("clo : " + window);
+		// System.out.println("clo : " + window);
 		window.getPartService().removePartListener(this);
 		if (window.getPartService().getActivePart() != null)
 			endSession(window.getPartService().getActivePart());
@@ -200,14 +200,14 @@ public abstract class AbstractPartTracker<E> extends AbstractTracker<E>
 
 	@Override
 	public void windowDeactivated(IWorkbenchWindow window) {
-		System.out.println("deact : " + window);
+		// System.out.println("deact : " + window);
 		if (window.getPartService().getActivePart() != null)
 			endSession(window.getPartService().getActivePart());
 	}
 
 	@Override
 	public void windowOpened(IWorkbenchWindow window) {
-		System.out.println("opn : " + window);
+		// System.out.println("opn : " + window);
 		window.getPartService().addPartListener(this);
 		if (window.getPartService().getActivePart() != null)
 			startSession(window.getPartService().getActivePart());
@@ -215,16 +215,16 @@ public abstract class AbstractPartTracker<E> extends AbstractTracker<E>
 
 	@Override
 	public void partBroughtToTop(IWorkbenchPart part) {
-		System.out.println("br : " + part);
+		// System.out.println("br : " + part);
 	}
 
 	@Override
 	public void partClosed(IWorkbenchPart part) {
-		System.out.println("clo : " + part);
+		// System.out.println("clo : " + part);
 	}
 
 	@Override
 	public void partOpened(IWorkbenchPart p) {
-		System.out.println("opn : " + p);
+		// System.out.println("opn : " + p);
 	}
 }

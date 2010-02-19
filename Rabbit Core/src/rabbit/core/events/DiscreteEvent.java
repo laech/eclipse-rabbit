@@ -40,7 +40,7 @@ public class DiscreteEvent {
 	 */
 	public void setTime(Calendar time) {
 		if (time == null) {
-			throw new NullPointerException("Argument cannot be null.");
+			throw new NullPointerException();
 		}
 
 		this.time = time;
