@@ -15,7 +15,7 @@ import org.eclipse.ui.PlatformUI;
 
 import rabbit.core.RabbitCore;
 import rabbit.core.events.PerspectiveEvent;
-import rabbit.core.internal.storage.xml.PerspectiveEventStorer;
+import rabbit.core.storage.IStorer;
 
 /**
  * Tracker for tracking on perspective usage.
@@ -35,8 +35,8 @@ public class PerspectiveTracker extends AbstractTracker<PerspectiveEvent>
 	}
 
 	@Override
-	protected PerspectiveEventStorer createDataStorer() {
-		return new PerspectiveEventStorer();
+	protected IStorer<PerspectiveEvent> createDataStorer() {
+		return RabbitCore.getStorer(PerspectiveEvent.class);
 	}
 
 	@Override
@@ -71,6 +71,10 @@ public class PerspectiveTracker extends AbstractTracker<PerspectiveEvent>
 		workbench.getDisplay().syncExec(new Runnable() {
 			@Override
 			public void run() {
+				if (startSession == false) {
+					tryEndSession();
+					return;
+				}
 				IWorkbenchWindow win = workbench.getActiveWorkbenchWindow();
 				if (win == null) {
 					return;
@@ -80,12 +84,7 @@ public class PerspectiveTracker extends AbstractTracker<PerspectiveEvent>
 					return;
 				}
 				if (page.getPerspective() != null) {
-					if (startSession) {
-						startSession(page.getPerspective());
-					}
-					else {
-						tryEndSession();
-					}
+					startSession(page.getPerspective());
 				}
 			}
 		});
@@ -94,7 +93,7 @@ public class PerspectiveTracker extends AbstractTracker<PerspectiveEvent>
 	@Override
 	public void update(java.util.Observable o, Object arg) {
 		if (o == RabbitCore.getDefault().getIdleDetector() && isEnabled()) {
-			checkState(!RabbitCore.getDefault().getIdleDetector().isUserActive());
+			checkState(RabbitCore.getDefault().getIdleDetector().isUserActive());
 		}
 	}
 

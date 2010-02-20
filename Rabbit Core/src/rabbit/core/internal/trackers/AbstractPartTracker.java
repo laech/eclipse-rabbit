@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 import org.eclipse.ui.IPartListener;
 import org.eclipse.ui.IPartService;
@@ -144,7 +143,7 @@ public abstract class AbstractPartTracker<E> extends AbstractTracker<E>
 		// if (currentActivePart != null) {
 		// partStates.put(currentActivePart, Boolean.FALSE);
 		// }
-		start = System.nanoTime();
+		start = System.currentTimeMillis();
 		partStates.put(part, Boolean.TRUE);
 	}
 
@@ -160,7 +159,7 @@ public abstract class AbstractPartTracker<E> extends AbstractTracker<E>
 			return;
 		}
 		partStates.put(part, Boolean.FALSE);
-		long duration = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - start);
+		long duration = System.currentTimeMillis() - start;
 		if (duration <= 0)
 			return;
 

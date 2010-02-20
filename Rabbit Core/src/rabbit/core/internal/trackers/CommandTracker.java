@@ -9,8 +9,9 @@ import org.eclipse.core.commands.NotHandledException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.commands.ICommandService;
 
+import rabbit.core.RabbitCore;
 import rabbit.core.events.CommandEvent;
-import rabbit.core.internal.storage.xml.CommandEventStorer;
+import rabbit.core.storage.IStorer;
 
 /**
  * Tracks command executions.
@@ -33,15 +34,10 @@ public class CommandTracker extends AbstractTracker<CommandEvent> implements IEx
 	}
 
 	@Override
-	protected CommandEventStorer createDataStorer() {
-		return new CommandEventStorer();
+	protected IStorer<CommandEvent> createDataStorer() {
+		return RabbitCore.getStorer(CommandEvent.class);
 	}
 
-	/**
-	 * Gets the workbench command service.
-	 * 
-	 * @return The command service.
-	 */
 	private ICommandService getCommandService() {
 		return (ICommandService) PlatformUI.getWorkbench().getService(
 				ICommandService.class);

@@ -1,5 +1,8 @@
 package rabbit.core;
 
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Collection;
@@ -14,8 +17,16 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import rabbit.core.events.CommandEvent;
+import rabbit.core.events.FileEvent;
+import rabbit.core.events.PartEvent;
+import rabbit.core.events.PerspectiveEvent;
 import rabbit.core.internal.IdleDetector;
 import rabbit.core.internal.TrackerObject;
+import rabbit.core.internal.storage.xml.CommandEventStorer;
+import rabbit.core.internal.storage.xml.FileEventStorer;
+import rabbit.core.internal.storage.xml.PartEventStorer;
+import rabbit.core.internal.storage.xml.PerspectiveEventStorer;
 
 /**
  * Test for {@link RabbitCore}
@@ -194,6 +205,20 @@ public class RabbitCoreTest {
 		// System.err.println("WARNING: numElements=" + elements.length +
 		// " numTrackers=" + trackers.size());
 		// }
+	}
+
+	@Test
+	public void testGetStorer() {
+		assertTrue(RabbitCore.getStorer(PerspectiveEvent.class) instanceof PerspectiveEventStorer);
+		assertTrue(RabbitCore.getStorer(CommandEvent.class) instanceof CommandEventStorer);
+		assertTrue(RabbitCore.getStorer(FileEvent.class) instanceof FileEventStorer);
+		assertTrue(RabbitCore.getStorer(PartEvent.class) instanceof PartEventStorer);
+		assertNull(RabbitCore.getStorer(String.class));
+	}
+
+	@Test(expected = NullPointerException.class)
+	public void testGetStorer_withNull() {
+		RabbitCore.getStorer(null);
 	}
 
 	/**

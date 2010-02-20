@@ -6,8 +6,9 @@ import org.eclipse.ui.IPartListener;
 import org.eclipse.ui.IWindowListener;
 import org.eclipse.ui.IWorkbenchPart;
 
+import rabbit.core.RabbitCore;
 import rabbit.core.events.PartEvent;
-import rabbit.core.internal.storage.xml.PartEventStorer;
+import rabbit.core.storage.IStorer;
 
 /**
  * Tracks workbench part usage.
@@ -19,8 +20,8 @@ public class PartTracker extends AbstractPartTracker<PartEvent> implements IPart
 	}
 
 	@Override
-	protected PartEventStorer createDataStorer() {
-		return new PartEventStorer();
+	protected IStorer<PartEvent> createDataStorer() {
+		return RabbitCore.getStorer(PartEvent.class);
 	}
 
 	@Override

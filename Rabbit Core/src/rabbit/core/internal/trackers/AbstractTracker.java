@@ -5,6 +5,8 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import org.eclipse.core.runtime.Assert;
+
 import rabbit.core.ITracker;
 import rabbit.core.storage.IStorer;
 
@@ -27,6 +29,7 @@ public abstract class AbstractTracker<T> implements ITracker<T> {
 		isEnabled = false;
 		data = new LinkedHashSet<T>();
 		storer = createDataStorer();
+		Assert.isNotNull(storer);
 	}
 
 	/**

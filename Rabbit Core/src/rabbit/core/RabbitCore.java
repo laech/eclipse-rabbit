@@ -2,7 +2,10 @@ package rabbit.core;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IPath;
@@ -15,10 +18,19 @@ import org.eclipse.ui.IWorkbenchListener;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
+import rabbit.core.events.CommandEvent;
+import rabbit.core.events.FileEvent;
+import rabbit.core.events.PartEvent;
+import rabbit.core.events.PerspectiveEvent;
 import rabbit.core.internal.IdleDetector;
 import rabbit.core.internal.TrackerObject;
+import rabbit.core.internal.storage.xml.CommandEventStorer;
+import rabbit.core.internal.storage.xml.FileEventStorer;
+import rabbit.core.internal.storage.xml.PartEventStorer;
+import rabbit.core.internal.storage.xml.PerspectiveEventStorer;
 import rabbit.core.internal.storage.xml.XmlResourceManager;
 import rabbit.core.storage.IResourceManager;
+import rabbit.core.storage.IStorer;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -44,8 +56,20 @@ public class RabbitCore extends AbstractUIPlugin implements IWorkbenchListener {
 	 */
 	public static final String IDLE_DETECTOR_ENABLE = "enableIdleDetector";
 
+	/* Map<EventType, EventStorerType> */
+	private static final Map<Class<?>, IStorer<?>> storers;
+
 	/** The shared instance. */
 	private static RabbitCore plugin;
+
+	static {
+		Map<Class<?>, IStorer<?>> map = new HashMap<Class<?>, IStorer<?>>();
+		map.put(PerspectiveEvent.class, new PerspectiveEventStorer());
+		map.put(CommandEvent.class, new CommandEventStorer());
+		map.put(FileEvent.class, new FileEventStorer());
+		map.put(PartEvent.class, new PartEventStorer());
+		storers = Collections.unmodifiableMap(map);
+	}
 
 	/**
 	 * Returns the shared instance
@@ -54,6 +78,35 @@ public class RabbitCore extends AbstractUIPlugin implements IWorkbenchListener {
 	 */
 	public static RabbitCore getDefault() {
 		return plugin;
+	}
+
+	/**
+	 * Gets a storer that stores the objects of the given type.
+	 * <p>
+	 * The following object types are supported:
+	 * <ul>
+	 * <li>{@link CommandEvent}</li>
+	 * <li>{@link FileEvent}</li>
+	 * <li>{@link PartEvent}</li>
+	 * <li>{@link PerspectiveEvent}</li>
+	 * </ul>
+	 * </p>
+	 * 
+	 * @param <T>
+	 *            The type of the objects that the storer can store.
+	 * @param objectClass
+	 *            The class of the type.
+	 * @return A storer that stores the objects of the given type, or null.
+	 * @throws NullPointerException
+	 *             If null is passed in.
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T> IStorer<T> getStorer(Class<T> objectClass) {
+		if (null == objectClass) {
+			throw new NullPointerException();
+		}
+		Object storer = storers.get(objectClass);
+		return (null == storer) ? null : (IStorer<T>) storer;
 	}
 
 	/** List of trackers loaded. */
@@ -66,6 +119,7 @@ public class RabbitCore extends AbstractUIPlugin implements IWorkbenchListener {
 	 */
 	public RabbitCore() {
 		idleDetector = new IdleDetector(getWorkbench().getDisplay(), 10000, 1000);
+		trackerList = Collections.emptyList();
 	}
 
 	/**
@@ -166,22 +220,13 @@ public class RabbitCore extends AbstractUIPlugin implements IWorkbenchListener {
 		plugin = this;
 
 		getWorkbench().addWorkbenchListener(this);
-
-		if (trackerList != null) { // May be we didn't stop correctly?
-			setEnableTrackers(trackerList, false);
-			trackerList.clear();
-		}
-		if (idleDetector != null) {
-			idleDetector.setRunning(false);
-		}
-
-		IConfigurationElement[] elements = Platform.getExtensionRegistry().getConfigurationElementsFor(TRACKER_EXTENSION_ID);
-		trackerList = createTrackers(elements);
-
+		trackerList = createTrackers(Platform.getExtensionRegistry().getConfigurationElementsFor(TRACKER_EXTENSION_ID));
 		setEnableTrackers(trackerList, true);
 
 		if (isIdleDetectionEnabled()) {
 			idleDetector.setRunning(true);
+		} else {
+			idleDetector.setRunning(false);
 		}
 	}
 

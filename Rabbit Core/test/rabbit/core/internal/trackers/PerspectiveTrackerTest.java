@@ -3,14 +3,13 @@ package rabbit.core.internal.trackers;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Calendar;
 import java.util.Iterator;
 import java.util.Observable;
 import java.util.concurrent.TimeUnit;
 
-import org.eclipse.swtbot.eclipse.finder.SWTWorkbenchBot;
-import org.eclipse.swtbot.swt.finder.junit.SWTBotJunit4ClassRunner;
 import org.eclipse.ui.IPerspectiveDescriptor;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
@@ -19,7 +18,6 @@ import org.eclipse.ui.PlatformUI;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
 import rabbit.core.RabbitCore;
 import rabbit.core.events.PerspectiveEvent;
@@ -28,39 +26,27 @@ import rabbit.core.internal.IdleDetector;
 /**
  * Test for {@link PerspectiveTracker}
  */
-@RunWith(SWTBotJunit4ClassRunner.class)
 public class PerspectiveTrackerTest extends AbstractTrackerTest<PerspectiveEvent> {
 
 	private PerspectiveTracker tracker;
-	private IWorkbenchWindow activeWindow;
 
-	private static SWTWorkbenchBot bot;
-	private static IWorkbenchPage page;
+	private IWorkbenchWindow activeWindow;
 
 	@BeforeClass
 	public static void setUpBeforeClass() {
-		bot = new SWTWorkbenchBot();
-		bot.viewByTitle("Welcome").close();
-		page = bot.activeView().getReference().getPage();
+		RabbitCore.getDefault().setIdleDetectionEnabled(false);
 	}
 
 	@Before
-	public void setup() {
+	public void setUp() {
 		tracker = createTracker();
-		if (page.getPerspective() == null) {
-			page.getWorkbenchWindow().getShell().getDisplay().syncExec(new Runnable() {
-				@Override
-				public void run() {
-					page.setPerspective(PlatformUI.getWorkbench().getPerspectiveRegistry().getPerspectives()[0]);
-				}
-			});
-		}
 
 		final IWorkbench wb = PlatformUI.getWorkbench();
 		wb.getDisplay().syncExec(new Runnable() {
 			@Override
 			public void run() {
-				activeWindow = wb.getActiveWorkbenchWindow();
+				wb.getActiveWorkbenchWindow().getActivePage().setPerspective(
+						wb.getPerspectiveRegistry().getPerspectives()[0]);
 			}
 		});
 	}
@@ -109,7 +95,7 @@ public class PerspectiveTrackerTest extends AbstractTrackerTest<PerspectiveEvent
 		tracker.setEnabled(false);
 		Calendar end = Calendar.getInstance();
 		PerspectiveEvent e = tracker.getData().iterator().next();
-		internalAssertAccuracy(e, start, end, duration, 1, page.getPerspective());
+		internalAssertAccuracy(e, start, end, duration, 1, getActiveWindow().getActivePage().getPerspective());
 	}
 
 	@Test
@@ -214,8 +200,14 @@ public class PerspectiveTrackerTest extends AbstractTrackerTest<PerspectiveEvent
 
 		// Test IPerspectiveListener.
 		TimeUnit.MILLISECONDS.sleep(30);
-		getActiveWindow().getActivePage().setPerspective(
-				PlatformUI.getWorkbench().getPerspectiveRegistry().getPerspectives()[1]);
+		getActiveWindow().getShell().getDisplay().syncExec(new Runnable() {
+			@Override
+			public void run() {
+				getActiveWindow().getActivePage().setPerspective(
+						PlatformUI.getWorkbench().getPerspectiveRegistry().getPerspectives()[1]);
+			}
+		});
+
 		assertTrue(tracker.getData().isEmpty());
 
 		// Test IWindowListener.
@@ -255,15 +247,9 @@ public class PerspectiveTrackerTest extends AbstractTrackerTest<PerspectiveEvent
 		long duration = 0;
 		int size = 0;
 
-		PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
-			@Override
-			public void run() {
-				activeWindow.getActivePage().setPerspective(
-						PlatformUI.getWorkbench().getPerspectiveRegistry().getPerspectives()[0]);
-			}
-		});
-
 		// Test enable then disable:
+
+		IWorkbenchWindow activeWindow = getActiveWindow();
 
 		tracker.setEnabled(true);
 		start = Calendar.getInstance();
@@ -383,6 +369,9 @@ public class PerspectiveTrackerTest extends AbstractTrackerTest<PerspectiveEvent
 	}
 
 	private void callIdleDetectorToNotify() throws Exception {
+		Field isActive = IdleDetector.class.getDeclaredField("isActive");
+		isActive.setAccessible(true);
+
 		Method setChanged = Observable.class.getDeclaredMethod("setChanged");
 		setChanged.setAccessible(true);
 
@@ -390,13 +379,16 @@ public class PerspectiveTrackerTest extends AbstractTrackerTest<PerspectiveEvent
 		notifyObservers.setAccessible(true);
 
 		IdleDetector detector = RabbitCore.getDefault().getIdleDetector();
+		detector.setRunning(true);
+		isActive.set(detector, false);
 		setChanged.invoke(detector);
 		notifyObservers.invoke(detector);
+		detector.setRunning(false);
 	}
 
 	@Override
 	protected PerspectiveEvent createEvent() {
-		return new PerspectiveEvent(Calendar.getInstance(), 101, activeWindow.getActivePage().getPerspective());
+		return new PerspectiveEvent(Calendar.getInstance(), 101, getActiveWindow().getActivePage().getPerspective());
 	}
 
 	@Override

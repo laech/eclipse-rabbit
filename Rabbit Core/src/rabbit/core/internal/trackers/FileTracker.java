@@ -8,7 +8,7 @@ import org.eclipse.ui.IWorkbenchPart;
 
 import rabbit.core.RabbitCore;
 import rabbit.core.events.FileEvent;
-import rabbit.core.internal.storage.xml.FileEventStorer;
+import rabbit.core.storage.IStorer;
 
 public class FileTracker extends AbstractPartTracker<FileEvent> {
 
@@ -29,7 +29,7 @@ public class FileTracker extends AbstractPartTracker<FileEvent> {
 	}
 
 	@Override
-	protected FileEventStorer createDataStorer() {
-		return new FileEventStorer();
+	protected IStorer<FileEvent> createDataStorer() {
+		return RabbitCore.getStorer(FileEvent.class);
 	}
 }
