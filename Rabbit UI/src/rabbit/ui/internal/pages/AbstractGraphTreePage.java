@@ -250,7 +250,7 @@ public abstract class AbstractGraphTreePage implements IPage {
 	 * 
 	 * @return The column that is used for painting.
 	 */
-	protected TreeColumn getGraphColumn() {
+	public TreeColumn getGraphColumn() {
 		return graphColumn;
 	}
 
@@ -259,7 +259,7 @@ public abstract class AbstractGraphTreePage implements IPage {
 	 * 
 	 * @return The column for displaying the usage information.
 	 */
-	protected TreeColumn getValueColumn() {
+	public TreeColumn getValueColumn() {
 		return valueColumn;
 	}
 
@@ -268,7 +268,7 @@ public abstract class AbstractGraphTreePage implements IPage {
 	 * 
 	 * @return The viewer.
 	 */
-	protected TreeViewer getViewer() {
+	public TreeViewer getViewer() {
 		return viewer;
 	}
 

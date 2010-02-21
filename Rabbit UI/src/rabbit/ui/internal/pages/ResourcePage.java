@@ -36,6 +36,8 @@ public abstract class ResourcePage extends AbstractGraphTreePage {
 
 	@Override
 	public void update(DisplayPreference p) {
+		setMaxValue(0);
+
 		Map<String, Long> rawData = accessor.getData(p.getStartDate(), p.getEndDate());
 		Map<String, ResourceElement> ls = new HashMap<String, ResourceElement>(rawData.size());
 		for (Map.Entry<String, Long> entry : rawData.entrySet()) {
@@ -60,7 +62,6 @@ public abstract class ResourcePage extends AbstractGraphTreePage {
 				l = l.insert(new FolderElement(path.removeLastSegments(1)));
 			}
 
-			System.out.println(path);
 			l.insert(new FileElement(path, entry.getValue()));
 		}
 		getViewer().setInput(ls.values());

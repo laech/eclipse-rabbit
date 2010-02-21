@@ -1,14 +1,14 @@
 package rabbit.ui.internal.pages;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.ui.PlatformUI;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Test for {@link AbstractGraphTreePage}
@@ -33,9 +33,9 @@ public abstract class AbstractGraphTablePageTest {
 	@Test
 	public void testGetSetMaxValue() {
 		page.setMaxValue(10);
-		assertTrue(Double.compare(10, page.getMaxValue()) == 0);
+		assertEquals(0, page.getMaxValue());
 		page.setMaxValue(101);
-		assertTrue(Double.compare(101, page.getMaxValue()) == 0);
+		assertEquals(101, page.getMaxValue());
 	}
 
 	@Test
@@ -72,7 +72,7 @@ public abstract class AbstractGraphTablePageTest {
 					Tree tree = new Tree(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), SWT.NONE);
 					assertNotNull(page.createColumns(tree));
 				} catch (Exception e) {
-					Assert.fail();
+					fail();
 				}
 			}
 		});

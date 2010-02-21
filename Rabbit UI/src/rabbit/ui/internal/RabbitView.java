@@ -1,10 +1,11 @@
 package rabbit.ui.internal;
 
+import static org.eclipse.ui.plugin.AbstractUIPlugin.imageDescriptorFromPlugin;
+import static rabbit.ui.internal.RabbitUI.PLUGIN_ID;
+
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Observable;
-import java.util.Observer;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ControlContribution;
@@ -13,11 +14,6 @@ import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StackLayout;
-import org.eclipse.swt.events.DisposeEvent;
-import org.eclipse.swt.events.DisposeListener;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.FormAttachment;
@@ -30,7 +26,6 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Sash;
-import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.forms.widgets.Form;
 import org.eclipse.ui.forms.widgets.FormToolkit;
@@ -44,33 +39,37 @@ import rabbit.ui.pages.IPage;
 /**
  * A view to show metrics.
  */
-public class RabbitView extends ViewPart implements Observer {
+public class RabbitView extends ViewPart {
 
+	/**
+	 * A map containing page status (updated or not), if a page is not updated
+	 * (value return false), then it will be updated before it's displayed (when
+	 * a user clicks on a tree node).
+	 */
+	private Map<IPage, Boolean> pageStatus;
 	private Map<IPage, Composite> pages;
-	private Map<IPage, Boolean> pageUpdateStatuses;
-
+	private DisplayPreference displayPref;
 	private FormToolkit toolkit;
 	private StackLayout stackLayout;
 	private Form displayForm;
 	private DateTime fromDateTime;
 	private DateTime toDateTime;
-	/**
-	 * A preference for updating the pages, do not attach pages to this
-	 * preference as observers because we don't want them to update themselves
-	 * automatically, we want to update them manually.
-	 */
-	private DisplayPreference displayPref;
+
+	private final Image metricsImg;
+	private final Image statImg;
 
 	/**
 	 * Constructs a new view.
 	 */
 	public RabbitView() {
-		pageUpdateStatuses = new HashMap<IPage, Boolean>();
+		statImg = imageDescriptorFromPlugin(PLUGIN_ID, "resources/stat.png").createImage();
+		metricsImg = imageDescriptorFromPlugin(PLUGIN_ID, "resources/metrics.png").createImage();
+
 		pages = new HashMap<IPage, Composite>();
 		toolkit = new FormToolkit(PlatformUI.getWorkbench().getDisplay());
 		stackLayout = new StackLayout();
 		displayPref = new DisplayPreference();
-		displayPref.addObserver(this);
+		pageStatus = new HashMap<IPage, Boolean>();
 	}
 
 	@Override
@@ -102,19 +101,11 @@ public class RabbitView extends ViewPart implements Observer {
 		leftData.bottom = new FormAttachment(100, 0);
 		Form left = toolkit.createForm(form.getBody());
 		left.setText("Metrics");
+		left.setImage(metricsImg);
 		left.setLayoutData(leftData);
 		left.getBody().setLayout(new FillLayout());
 		MetricsPanel list = new MetricsPanel(this, toolkit);
 		list.createContents(left.getBody());
-
-		final Image metricsImg = RabbitUI.imageDescriptorFromPlugin(RabbitUI.PLUGIN_ID, "resources/metrics.png").createImage();
-		left.setImage(metricsImg);
-		left.addDisposeListener(new DisposeListener() {
-			@Override
-			public void widgetDisposed(DisposeEvent e) {
-				metricsImg.dispose();
-			}
-		});
 
 		// Displaying area:
 		FormData rightData = new FormData();
@@ -125,28 +116,10 @@ public class RabbitView extends ViewPart implements Observer {
 		displayForm = toolkit.createForm(form.getBody());
 		displayForm.setLayoutData(rightData);
 		displayForm.setText("Statistics");
+		displayForm.setImage(statImg);
 		displayForm.getBody().setLayout(stackLayout);
 		displayForm.setToolBarVerticalAlignment(SWT.TOP);
 		createToolBarItems(displayForm.getToolBarManager());
-
-		final Image statImg = RabbitUI.imageDescriptorFromPlugin(RabbitUI.PLUGIN_ID, "resources/stat.png").createImage();
-		displayForm.setImage(statImg);
-		displayForm.addDisposeListener(new DisposeListener() {
-			@Override
-			public void widgetDisposed(DisposeEvent e) {
-				statImg.dispose();
-			}
-		});
-
-		String text = "Saves data about the current workbench and updates the pages";
-		ImageDescriptor icon = PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(ISharedImages.IMG_ELCL_SYNCED);
-		getViewSite().getActionBars().getToolBarManager().add(new Action(text, icon) {
-			@Override
-			public void run() {
-				RabbitCore.getDefault().saveCurrentData();
-				update(displayPref, null);
-			}
-		});
 	}
 
 	/**
@@ -156,35 +129,12 @@ public class RabbitView extends ViewPart implements Observer {
 	 *            The tool bar.
 	 */
 	protected void createToolBarItems(IToolBarManager toolBar) {
-		String text = "Apply";
-		ImageDescriptor icon = RabbitUI.imageDescriptorFromPlugin("org.eclipse.ui.browser", "icons/elcl16/nav_refresh.gif"); //$NON-NLS-1$//$NON-NLS-2$
+		String text = "Refresh";
+		ImageDescriptor icon = imageDescriptorFromPlugin("org.eclipse.ui.browser", "icons/elcl16/nav_refresh.gif");
 		final IAction updateAction = new Action(text, icon) {
 			@Override
 			public void run() {
 				update();
-				setEnabled(false);
-			}
-		};
-		updateAction.setEnabled(false);
-
-		final SelectionListener update = new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				if (e.widget == fromDateTime) {
-					Calendar calendar = displayPref.getStartDate();
-					if (!isSameDate(calendar, fromDateTime)) {
-						updateAction.setEnabled(true);
-						updateDate(calendar, fromDateTime);
-						displayPref.setStartDate(calendar);
-					}
-				} else if (e.widget == toDateTime) {
-					Calendar calendar = displayPref.getEndDate();
-					if (!isSameDate(calendar, toDateTime)) {
-						updateAction.setEnabled(true);
-						updateDate(calendar, toDateTime);
-						displayPref.setEndDate(calendar);
-					}
-				}
 			}
 		};
 
@@ -193,7 +143,6 @@ public class RabbitView extends ViewPart implements Observer {
 			protected Control createControl(Composite parent) {
 				fromDateTime = new DateTime(parent, SWT.DROP_DOWN | SWT.BORDER);
 				fromDateTime.setToolTipText("Selects the start date for the data to be displayed.");
-				fromDateTime.addSelectionListener(update);
 				updateDateTime(fromDateTime, displayPref.getStartDate());
 				return fromDateTime;
 			}
@@ -205,6 +154,7 @@ public class RabbitView extends ViewPart implements Observer {
 				// Really we just want some space, not an actual
 				// separator.
 				Label separator = new Label(parent, SWT.NO_BACKGROUND);
+				separator.setText("  ");
 				return separator;
 			}
 		});
@@ -214,7 +164,6 @@ public class RabbitView extends ViewPart implements Observer {
 			protected Control createControl(Composite parent) {
 				toDateTime = new DateTime(parent, SWT.DROP_DOWN | SWT.BORDER);
 				toDateTime.setToolTipText("Selects the end date for the data to be displayed.");
-				toDateTime.addSelectionListener(update);
 				updateDateTime(toDateTime, displayPref.getEndDate());
 				return toDateTime;
 			}
@@ -226,6 +175,7 @@ public class RabbitView extends ViewPart implements Observer {
 				// Really we just want some space, not an actual
 				// separator.
 				Label separator = new Label(parent, SWT.NO_BACKGROUND);
+				separator.setText("  ");
 				return separator;
 			}
 		});
@@ -295,10 +245,10 @@ public class RabbitView extends ViewPart implements Observer {
 				pages.put(page, cmp);
 			}
 
-			Boolean updated = pageUpdateStatuses.get(page);
+			Boolean updated = pageStatus.get(page);
 			if (updated == null || updated == false) {
 				page.update(displayPref);
-				pageUpdateStatuses.put(page, Boolean.TRUE);
+				pageStatus.put(page, Boolean.TRUE);
 			}
 		}
 
@@ -308,32 +258,32 @@ public class RabbitView extends ViewPart implements Observer {
 
 	@Override
 	public void dispose() {
+		metricsImg.dispose();
+		statImg.dispose();
 		toolkit.dispose();
 		super.dispose();
-	}
-
-	@Override
-	public void update(Observable o, Object arg) {
-		if (o != displayPref) {
-			return;
-		}
-
-		updateDateTime(fromDateTime, displayPref.getStartDate());
-		updateDateTime(toDateTime, displayPref.getEndDate());
-		// Do not update here, update will be call when user clicks the button.
 	}
 
 	/**
 	 * Updates the pages to current preference.
 	 */
 	private void update() {
+		updateDate(displayPref.getStartDate(), fromDateTime);
+		updateDate(displayPref.getEndDate(), toDateTime);
+
+		// Sync with today's data:
+		if (isSameDate(Calendar.getInstance(), toDateTime)) {
+			RabbitCore.getDefault().saveCurrentData();
+		}
+
 		// Mark all invisible pages as "not yet updated":
 		for (Map.Entry<IPage, Composite> entry : pages.entrySet()) {
 			boolean isVisible = stackLayout.topControl == entry.getValue();
-			if (isVisible) {// update current visible page.
+			if (isVisible) {
+				// update current visible page.
 				entry.getKey().update(displayPref);
 			}
-			pageUpdateStatuses.put(entry.getKey(), Boolean.valueOf(isVisible));
+			pageStatus.put(entry.getKey(), Boolean.valueOf(isVisible));
 		}
 	}
 

@@ -24,7 +24,7 @@ import rabbit.ui.DisplayPreference;
  */
 public class CommandPage extends AbstractGraphTreePage {
 
-	private IAccessor dataStore;
+	private IAccessor accessor;
 	private ICommandService service;
 
 	/** The data model, the values are usage counts of the commands. */
@@ -35,7 +35,7 @@ public class CommandPage extends AbstractGraphTreePage {
 	 */
 	public CommandPage() {
 		super();
-		dataStore = new CommandDataAccessor();
+		accessor = new CommandDataAccessor();
 		dataMapping = new HashMap<Command, Long>();
 		service = (ICommandService) PlatformUI.getWorkbench().getService(ICommandService.class);
 	}
@@ -86,7 +86,7 @@ public class CommandPage extends AbstractGraphTreePage {
 		setMaxValue(0);
 		dataMapping.clear();
 
-		Map<String, Long> data = dataStore.getData(p.getStartDate(), p.getEndDate());
+		Map<String, Long> data = accessor.getData(p.getStartDate(), p.getEndDate());
 		for (Entry<String, Long> entry : data.entrySet()) {
 			dataMapping.put(service.getCommand(entry.getKey()), entry.getValue());
 

@@ -39,14 +39,15 @@ public class MetricsPanel {
 		@Override
 		public Object[] getChildren(Object o) {
 
-			if (o instanceof Collection<?>)
+			if (o instanceof Collection<?>) {
 				return ((Collection<?>) o).toArray();
 
-			else if (o instanceof PageDescriptor)
+			} else if (o instanceof PageDescriptor) {
 				return ((PageDescriptor) o).getChildren().toArray();
 
-			else
+			} else {
 				return EMPTY_ARRAY;
+			}
 		}
 
 		@Override
@@ -70,7 +71,6 @@ public class MetricsPanel {
 	}
 
 	private static class TreeLabelProvider extends LabelProvider {
-
 		@Override
 		public Image getImage(Object o) {
 			return ((PageDescriptor) o).getPage().getImage();
@@ -80,7 +80,6 @@ public class MetricsPanel {
 		public String getText(Object o) {
 			return ((PageDescriptor) o).getName();
 		}
-
 	}
 
 	private RabbitView view;

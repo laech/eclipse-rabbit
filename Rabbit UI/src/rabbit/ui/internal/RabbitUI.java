@@ -75,7 +75,7 @@ public class RabbitUI extends AbstractUIPlugin {
 	 * 
 	 * @return The pages.
 	 */
-	Set<PageDescriptor> getPages() {
+	public Set<PageDescriptor> getPages() {
 		return pages;
 	}
 
@@ -84,7 +84,7 @@ public class RabbitUI extends AbstractUIPlugin {
 	 * 
 	 * @param e
 	 *            The element.
-	 * @return A tree.
+	 * @return A tree, or null if one cannot be created.
 	 */
 	private PageDescriptor recursiveGet(IConfigurationElement e) {
 
@@ -96,7 +96,7 @@ public class RabbitUI extends AbstractUIPlugin {
 			o = e.createExecutableExtension("class");
 
 		} catch (CoreException ex) {
-			ex.printStackTrace();
+			System.err.println(ex.getMessage());
 			return null;
 		}
 
