@@ -6,7 +6,7 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import rabbit.ui.pages.IPage;
+import rabbit.ui.IPage;
 
 /**
  * Represents a page extension descriptor.

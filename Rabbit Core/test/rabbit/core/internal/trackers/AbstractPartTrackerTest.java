@@ -39,7 +39,6 @@ import rabbit.core.internal.IdleDetector;
 @RunWith(SWTBotJunit4ClassRunner.class)
 public abstract class AbstractPartTrackerTest<E extends ContinuousEvent> extends AbstractTrackerTest<E> {
 
-	private final String editorId = "org.eclipse.ui.DefaultTextEditor";
 	protected AbstractPartTracker<E> tracker;
 
 	protected static SWTWorkbenchBot bot;
@@ -356,7 +355,7 @@ public abstract class AbstractPartTrackerTest<E extends ContinuousEvent> extends
 			public void run() {
 				try {
 					editor = getActiveWindow().getActivePage().openEditor(
-							new FileEditorInput(getFileForTesting()), editorId, true);
+							new FileEditorInput(getFileForTesting()), "org.eclipse.ui.DefaultTextEditor", true);
 				} catch (Exception e) {
 					fail();
 				}

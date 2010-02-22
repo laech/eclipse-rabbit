@@ -6,7 +6,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.ide.IDE;
 
 import rabbit.ui.DisplayPreference;
-import rabbit.ui.pages.IPage;
+import rabbit.ui.IPage;
 
 public class ResourcesCategory implements IPage {
 

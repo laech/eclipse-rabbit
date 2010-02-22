@@ -20,9 +20,9 @@ import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.swt.widgets.TreeItem;
 
+import rabbit.ui.ColumnComparator;
+import rabbit.ui.IPage;
 import rabbit.ui.internal.RabbitUI;
-import rabbit.ui.pages.ColumnComparator;
-import rabbit.ui.pages.IPage;
 
 /**
  * A page that contains a tree (can be used as a table) that is capable of

@@ -134,7 +134,9 @@ public enum XmlResourceManager implements IResourceManager, IResourceChangeListe
 
 		File file = path.toFile();
 		if (!file.getParentFile().exists()) {
-			file.getParentFile().mkdirs();
+			if (!file.getParentFile().mkdirs()) {
+				throw new RuntimeException();
+			}
 		}
 		return file;
 	}

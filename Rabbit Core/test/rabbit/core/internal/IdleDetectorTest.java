@@ -290,7 +290,7 @@ public class IdleDetectorTest {
 		return file;
 	}
 
-	private class ObserverTester implements Observer {
+	private static class ObserverTester implements Observer {
 		private int activeCount = 0;
 		private int inactiveCount = 0;
 

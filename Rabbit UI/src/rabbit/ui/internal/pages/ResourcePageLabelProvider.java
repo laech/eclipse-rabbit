@@ -75,8 +75,8 @@ public class ResourcePageLabelProvider extends BaseLabelProvider implements ITab
 			return folderImg;
 
 		} else if (resource.getType() == ResourceType.FILE) {
-			if (resourceMap.containsKey(resource.getPath())) {
-				return resourceMap.get(resource.getPath());
+			if (resourceMap.containsKey(resource.getPath().toString())) {
+				return resourceMap.get(resource.getPath().toString());
 			}
 
 			IFile file = workspace.getFile(resource.getPath());

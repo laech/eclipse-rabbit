@@ -1,4 +1,4 @@
-package rabbit.ui.pages;
+package rabbit.ui;
 
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.TableViewer;

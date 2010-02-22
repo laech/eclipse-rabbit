@@ -56,7 +56,9 @@ public abstract class AbstractStorerTest<E extends DiscreteEvent, T, S extends E
 	@Before
 	public void setUp() {
 		if (dataFile.exists()) {
-			dataFile.delete();
+			if (!dataFile.delete()) {
+				System.err.println("File is not deleted.");
+			}
 		}
 	}
 
@@ -88,7 +90,9 @@ public abstract class AbstractStorerTest<E extends DiscreteEvent, T, S extends E
 		files.add(storer.getDataStore().getDataFile(insideLowerBound));
 		files.add(storer.getDataStore().getDataFile(insideUpperBound));
 		for (File f : files) {
-			f.createNewFile();
+			if (!f.createNewFile() && !f.exists()) {
+				throw new RuntimeException();
+			}
 		}
 
 		List<File> returnedFiles = storer.getDataStore().getDataFiles(lowerBound, upperBound);
@@ -100,7 +104,9 @@ public abstract class AbstractStorerTest<E extends DiscreteEvent, T, S extends E
 		assertEquals(0, storer.getDataStore().getDataFiles(upperBound, lowerBound).size());
 
 		for (File f : files) {
-			f.delete();
+			if (!f.delete()) {
+				System.err.println("File is not deleted.");
+			}
 		}
 		assertEquals(0, storer.getDataStore().getDataFiles(lowerBound, upperBound).size());
 	}
@@ -155,9 +161,13 @@ public abstract class AbstractStorerTest<E extends DiscreteEvent, T, S extends E
 			assertNotNull(storer.getDataStore().read(f));
 
 		} else {
-			f.createNewFile();
+			if (!f.createNewFile()) {
+				throw new RuntimeException();
+			}
 			assertNotNull(storer.getDataStore().read(f));
-			f.delete();
+			if (!f.delete()) {
+				System.err.println("File is not deleted.");
+			}
 		}
 	}
 
@@ -169,7 +179,9 @@ public abstract class AbstractStorerTest<E extends DiscreteEvent, T, S extends E
 
 		storer.getDataStore().write(AbstractStorer.OBJECT_FACTORY.createEventListType(), f);
 		assertTrue(f.exists());
-		f.delete();
+		if (!f.delete()) {
+			System.err.println("File is not deleted.");
+		}
 	}
 
 	@Test

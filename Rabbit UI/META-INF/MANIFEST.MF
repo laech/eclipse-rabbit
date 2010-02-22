@@ -20,5 +20,4 @@ Export-Package: rabbit.ui,
  rabbit.ui.internal;x-internal:=true,
  rabbit.ui.internal.pages;x-internal:=true,
  rabbit.ui.internal.pref;x-internal:=true,
- rabbit.ui.internal.util;x-internal:=true,
- rabbit.ui.pages
+ rabbit.ui.internal.util;x-internal:=true

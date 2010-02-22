@@ -99,7 +99,9 @@ public enum DataStore implements IDataStore {
 	public File getStorageLocation() {
 		File f = new File(RabbitCore.getDefault().getStoragePath().toOSString());
 		if (!f.exists()) {
-			f.mkdirs();
+			if (!f.mkdirs()) {
+				throw new RuntimeException();
+			}
 		}
 		return f;
 	}

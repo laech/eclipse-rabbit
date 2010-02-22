@@ -6,7 +6,7 @@ import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 
 import rabbit.ui.DisplayPreference;
-import rabbit.ui.pages.IPage;
+import rabbit.ui.IPage;
 
 /**
  * An empty category page used to contain other pages.

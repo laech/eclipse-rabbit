@@ -6,16 +6,18 @@ import java.util.Calendar;
 
 import org.junit.Test;
 
-import rabbit.core.events.ContinuousEvent;
-
 /**
  * Test for {@link ContinuousEvent}
  */
 public class ContinuousEventTest extends DiscreteEventTest {
 
-	private long duration = 1010111;
+	private static long duration = 348723;
 
-	private ContinuousEvent event = createEvent(Calendar.getInstance());
+	private ContinuousEvent event;
+
+	public ContinuousEventTest() {
+		event = createEvent(Calendar.getInstance());
+	}
 
 	@Override
 	protected ContinuousEvent createEvent(Calendar time) {

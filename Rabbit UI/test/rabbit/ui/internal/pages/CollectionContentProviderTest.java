@@ -24,7 +24,7 @@ public class CollectionContentProviderTest {
 	public void setUp() {
 		notEmptyCollection.clear();
 		notEmptyCollection.add(new Object());
-		notEmptyCollection.add(new String());
+		notEmptyCollection.add("");
 	}
 
 	@Test

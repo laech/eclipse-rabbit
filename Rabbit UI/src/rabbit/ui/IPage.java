@@ -1,9 +1,8 @@
-package rabbit.ui.pages;
+package rabbit.ui;
 
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 
-import rabbit.ui.DisplayPreference;
 
 /**
  * Represents a page for displaying graphical information.

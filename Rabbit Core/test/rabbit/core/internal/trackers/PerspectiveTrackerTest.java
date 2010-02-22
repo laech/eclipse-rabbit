@@ -71,7 +71,7 @@ public class PerspectiveTrackerTest extends AbstractTrackerTest<PerspectiveEvent
 		for (IPerspectiveDescriptor p : PlatformUI.getWorkbench().getPerspectiveRegistry().getPerspectives()) {
 			if (!p.equals(oldPers)) {
 				newPers = p;
-				return;
+				break;
 			}
 		}
 
@@ -82,8 +82,13 @@ public class PerspectiveTrackerTest extends AbstractTrackerTest<PerspectiveEvent
 		win.getActivePage().setPerspective(newPers);
 		Calendar end = Calendar.getInstance();
 
+		assertEquals(1, tracker.getData().size());
 		PerspectiveEvent event = tracker.getData().iterator().next();
-		internalAssertAccuracy(event, start, end, duration, 1, oldPers);
+		assertEquals(oldPers, event.getPerspective());
+		assertTrue(start.compareTo(event.getTime()) <= 0);
+		assertTrue(end.compareTo(event.getTime()) >= 0);
+		assertTrue(end.getTimeInMillis() - start.getTimeInMillis() >= event.getDuration());
+		assertTrue(duration <= event.getDuration());
 	}
 
 	@Test

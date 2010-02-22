@@ -45,20 +45,16 @@ public class XmlResourceManagerTest {
 	}
 
 	@Before
-	public void setUp() {
-		getDataFile().delete();
+	public void setUp() throws Exception {
+		if (!getDataFile().delete())
+			System.err.println("File is not deleted.");
 	}
 
-	private File getDataFile() {
-		try {
-			Method dataFile = XmlResourceManager.class.getDeclaredMethod("getDataFile");
-			dataFile.setAccessible(true);
-			File file = (File) dataFile.invoke(manager);
-			return file;
-		} catch (Exception e) {
-			fail();
-			return null;
-		}
+	private File getDataFile() throws Exception {
+		Method dataFile = XmlResourceManager.class.getDeclaredMethod("getDataFile");
+		dataFile.setAccessible(true);
+		File file = (File) dataFile.invoke(manager);
+		return file;
 	}
 
 	@Test
@@ -368,14 +364,14 @@ public class XmlResourceManagerTest {
 	}
 
 	@Test
-	public void testPostShutdown() {
+	public void testPostShutdown() throws Exception {
 		assertFalse(getDataFile().exists());
 		manager.postShutdown(PlatformUI.getWorkbench());
 		assertTrue(getDataFile().exists());
 	}
 
 	@Test
-	public void testShutdown() {
+	public void testShutdown() throws Exception {
 		assertFalse(getDataFile().exists());
 		PlatformUI.getWorkbench().close();
 		assertTrue(getDataFile().exists());

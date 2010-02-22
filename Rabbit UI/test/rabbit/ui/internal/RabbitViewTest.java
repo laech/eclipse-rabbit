@@ -22,8 +22,8 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import rabbit.ui.DisplayPreference;
+import rabbit.ui.IPage;
 import rabbit.ui.internal.util.PageDescriptor;
-import rabbit.ui.pages.IPage;
 
 public class RabbitViewTest {
 

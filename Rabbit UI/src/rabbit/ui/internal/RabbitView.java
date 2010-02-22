@@ -34,7 +34,7 @@ import org.eclipse.ui.part.ViewPart;
 
 import rabbit.core.RabbitCore;
 import rabbit.ui.DisplayPreference;
-import rabbit.ui.pages.IPage;
+import rabbit.ui.IPage;
 
 /**
  * A view to show metrics.
