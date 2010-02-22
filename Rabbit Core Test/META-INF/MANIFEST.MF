@@ -1,13 +1,18 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Rabbit Core
-Bundle-SymbolicName: rabbit.core;singleton:=true
+Bundle-Name: Rabbit Core Test
+Bundle-SymbolicName: rabbit.core.test
 Bundle-Version: 1.0.0.qualifier
-Bundle-Activator: rabbit.core.RabbitCore
-Require-Bundle: org.eclipse.core.runtime,
- org.eclipse.core.resources,
- org.eclipse.ui
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Require-Bundle: rabbit.core,
+ org.eclipse.core.runtime,
+ org.eclipse.swtbot.eclipse.finder,
+ org.eclipse.swtbot.junit4_x,
+ org.junit4,
+ org.eclipse.ui,
+ org.eclipse.ui.ide,
+ org.eclipse.core.resources,
+ org.eclipse.swtbot.swt.finder
 Export-Package: rabbit.core,
  rabbit.core.events;uses:="org.eclipse.ui",
  rabbit.core.internal;x-friends:="rabbit.core.test",
@@ -15,14 +20,8 @@ Export-Package: rabbit.core,
   uses:="rabbit.core.internal.storage.xml.schema.events,
    org.eclipse.ui,
    rabbit.core.events",
- rabbit.core.internal.storage.xml.schema.events;x-friends:="rabbit.core.test";
-  uses:="javax.xml.bind,
-   javax.xml.datatype",
- rabbit.core.internal.storage.xml.schema.resources;x-friends:="rabbit.core.test";uses:="javax.xml.bind",
  rabbit.core.internal.trackers;x-friends:="rabbit.core.test";
   uses:="org.eclipse.ui,
    org.eclipse.core.resources,
    rabbit.core.events",
- rabbit.core.storage,
  rabbit.core.storage.xml;uses:="rabbit.core.internal.storage.xml.schema.events,rabbit.core.internal.storage.xml"
-Bundle-ActivationPolicy: lazy
