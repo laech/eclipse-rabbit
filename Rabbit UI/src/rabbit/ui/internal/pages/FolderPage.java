@@ -9,6 +9,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 
+import rabbit.ui.DisplayPreference;
 import rabbit.ui.internal.util.FolderElement;
 import rabbit.ui.internal.util.ResourceElement;
 import rabbit.ui.internal.util.ResourceElement.ResourceType;
@@ -16,7 +17,7 @@ import rabbit.ui.internal.util.ResourceElement.ResourceType;
 /**
  * A page for displaying time spent working under different folders.
  */
-public class FolderPage extends ResourcePage {
+public class FolderPage extends FilePage {
 
 	@Override
 	public void createContents(Composite parent) {
@@ -31,15 +32,7 @@ public class FolderPage extends ResourcePage {
 
 	@Override
 	protected ITableLabelProvider createLabelProvider() {
-		return new ResourcePageLabelProvider(this, false, true, false);
-	}
-
-	@Override
-	long getValue(Object o) {
-		if (!(o instanceof FolderElement)) {
-			return 0;
-		}
-		return super.getValue(o);
+		return new ResourcePageLabelProvider(false, true, false);
 	}
 
 	@Override
@@ -58,4 +51,28 @@ public class FolderPage extends ResourcePage {
 			}
 		};
 	}
+
+	@Override
+	public void update(DisplayPreference p) {
+		super.update(p);
+		setMaxValue(0);
+		for (ResourceElement project : data) {
+			for (ResourceElement e : project.getChildren()) {
+				long value = e.getValue();
+				if (e.getType() == ResourceType.FOLDER && value > getMaxValue()) {
+					setMaxValue(value);
+				}
+			}
+		}
+	}
+
+	@Override
+	long getValue(Object o) {
+		if (o instanceof FolderElement) {
+			return ((FolderElement) o).getValue();
+		} else {
+			return 0;
+		}
+	}
+
 }

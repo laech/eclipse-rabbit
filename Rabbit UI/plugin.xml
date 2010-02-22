@@ -17,7 +17,7 @@
          point="rabbit.ui.pages">
       <page
             class="rabbit.ui.internal.pages.EclipseUsageCategory"
-            description="Displays usage information about Eclipse"
+            description="This category contains pages that display usage information about Eclipse"
             name="Eclipse Usage">
          <page
                class="rabbit.ui.internal.pages.CommandPage"
@@ -42,7 +42,7 @@
       </page>
       <page
             class="rabbit.ui.internal.pages.ResourcesCategory"
-            description="Displays how time is spent on different resources"
+            description="This category contains pages that display how time is spent on different resources"
             name="Resources">
          <page
                class="rabbit.ui.internal.pages.FilePage"

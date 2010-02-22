@@ -14,6 +14,6 @@ import org.junit.runners.Suite;
 		UndefinedWorkbenchPartDescriptorTest.class,
 //
 })
-public class AllTests {
+public class Tests {
 
 }

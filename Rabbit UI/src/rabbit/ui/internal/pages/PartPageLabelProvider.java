@@ -58,6 +58,9 @@ public class PartPageLabelProvider extends BaseLabelProvider implements ITableLa
 
 	@Override
 	public String getColumnText(Object element, int columnIndex) {
+		if (!(element instanceof IWorkbenchPartDescriptor)) {
+			return null;
+		}
 		IWorkbenchPartDescriptor part = (IWorkbenchPartDescriptor) element;
 		switch (columnIndex) {
 		case 0:

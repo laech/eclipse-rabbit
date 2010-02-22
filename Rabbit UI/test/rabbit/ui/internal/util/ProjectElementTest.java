@@ -1,5 +1,11 @@
 package rabbit.ui.internal.util;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
@@ -8,12 +14,6 @@ import org.eclipse.core.runtime.Path;
 import org.junit.Test;
 
 import rabbit.ui.internal.util.ResourceElement.ResourceType;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * Test for {@link ProjectElement}
@@ -77,7 +77,7 @@ public class ProjectElementTest extends ResourceElementTest {
 		FileElement file2 = new FileElement(Path.fromPortableString("/p/d/b.txt"), 10);
 		project.insert(file1);
 		project.insert(file2);
-		assertTrue(Double.compare(20, project.getValue()) == 0);
+		assertEquals(20, project.getValue());
 	}
 
 	@Override

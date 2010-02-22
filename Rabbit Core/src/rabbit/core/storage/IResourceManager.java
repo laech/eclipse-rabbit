@@ -3,7 +3,7 @@ package rabbit.core.storage;
 import org.eclipse.core.resources.IResource;
 
 /**
- * Manages mapping of path to id and vice versa.
+ * Manages mapping of file paths to id and vice versa.
  */
 public interface IResourceManager {
 

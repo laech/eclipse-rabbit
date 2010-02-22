@@ -7,7 +7,6 @@ import org.junit.runners.Suite;
 @Suite.SuiteClasses( {
 		CollectionContentProviderTest.class,
 		CommandPageTest.class,
-		FilePageTest.class,
 		FolderPageTest.class,
 		PartPageTest.class,
 		PerspectivePageTest.class,

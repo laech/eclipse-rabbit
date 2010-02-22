@@ -1,5 +1,7 @@
 package rabbit.ui.internal.pages;
 
+import static rabbit.ui.internal.util.MillisConverter.toDefaultString;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -18,12 +20,11 @@ import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.ide.IDE;
 
-import rabbit.ui.internal.util.MillisConverter;
 import rabbit.ui.internal.util.ResourceElement;
 import rabbit.ui.internal.util.ResourceElement.ResourceType;
 
 /**
- * Label provider for a {@link ResourcePage}.
+ * Label provider for a {@link FilePage}.
  */
 public class ResourcePageLabelProvider extends BaseLabelProvider implements ITableLabelProvider, IColorProvider {
 
@@ -43,24 +44,21 @@ public class ResourcePageLabelProvider extends BaseLabelProvider implements ITab
 	private boolean showFolderValues;
 	private boolean showFileValues;
 
-	private ResourcePage parent;
+	public ResourcePageLabelProvider(boolean showProjectValues, boolean showFolderValues, boolean showFileValues) {
+		workspace = ResourcesPlugin.getWorkspace().getRoot();
+		deletedResourceColor = PlatformUI.getWorkbench().getDisplay().getSystemColor(SWT.COLOR_DARK_GRAY);
 
-	public ResourcePageLabelProvider(ResourcePage parent, boolean showProjectValues, boolean showFolderValues, boolean showFileValues) {
 		ISharedImages images = PlatformUI.getWorkbench().getSharedImages();
 		projectImg = images.getImage(IDE.SharedImages.IMG_OBJ_PROJECT);
 		folderImg = images.getImage(ISharedImages.IMG_OBJ_FOLDER);
 		fileImg = images.getImage(ISharedImages.IMG_OBJ_FILE);
+
 		editorMap = new HashMap<String, Image>();
 		resourceMap = new HashMap<String, Image>();
-		workspace = ResourcesPlugin.getWorkspace().getRoot();
-
-		deletedResourceColor = PlatformUI.getWorkbench().getDisplay().getSystemColor(SWT.COLOR_DARK_GRAY);
 
 		this.showProjectValues = showProjectValues;
 		this.showFolderValues = showFolderValues;
 		this.showFileValues = showFileValues;
-
-		this.parent = parent;
 	}
 
 	@Override
@@ -110,19 +108,12 @@ public class ResourcePageLabelProvider extends BaseLabelProvider implements ITab
 		case 0:
 			return resource.getName();
 		case 1:
-			long value = -1;
 			if (resource.getType() == ResourceType.PROJECT) {
-				value = (showProjectValues) ? resource.getValue() : value;
+				return (showProjectValues) ? toDefaultString(resource.getValue()) : null;
 			} else if (resource.getType() == ResourceType.FOLDER) {
-				value = (showFolderValues) ? resource.getValue() : value;
+				return (showFolderValues) ? toDefaultString(resource.getValue()) : null;
 			} else if (resource.getType() == ResourceType.FILE) {
-				value = (showFileValues) ? resource.getValue() : value;
-			}
-			if (value > -1) {
-				if (value > parent.getMaxValue()) {
-					parent.setMaxValue(value);
-				}
-				return MillisConverter.toDefaultString(value);
+				return (showFileValues) ? toDefaultString(resource.getValue()) : null;
 			}
 		}
 		return null;

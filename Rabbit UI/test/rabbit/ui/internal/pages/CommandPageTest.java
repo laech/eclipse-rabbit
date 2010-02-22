@@ -2,9 +2,13 @@ package rabbit.ui.internal.pages;
 
 import static org.junit.Assert.assertEquals;
 
+import java.lang.reflect.Field;
 import java.util.Calendar;
 import java.util.Map;
 
+import org.eclipse.core.commands.Command;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.commands.ICommandService;
 import org.junit.Test;
 
 import rabbit.core.storage.IAccessor;
@@ -14,7 +18,7 @@ import rabbit.ui.DisplayPreference;
 /**
  * Test for {@link CommandPage}
  */
-public class CommandPageTest extends AbstractGraphTablePageTest {
+public class CommandPageTest extends AbstractGraphTreePageTest {
 
 	@Override
 	protected AbstractGraphTreePage createPage() {
@@ -47,6 +51,26 @@ public class CommandPageTest extends AbstractGraphTablePageTest {
 		}
 		page.update(pref);
 		assertEquals(max, page.getMaxValue());
+	}
+
+	@SuppressWarnings("unchecked")
+	@Test
+	public void testGetValue() throws Exception {
+		Field field = CommandPage.class.getDeclaredField("dataMapping");
+		field.setAccessible(true);
+		Map<Command, Long> data = (Map<Command, Long>) field.get(page);
+
+		Command command = getCommandService().getDefinedCommands()[0];
+		long value = 1989;
+		data.put(command, value);
+		assertEquals(value, page.getValue(command));
+
+		Command noValueCommand = getCommandService().getCommand(System.currentTimeMillis() + "");
+		assertEquals(0, page.getValue(noValueCommand));
+	}
+
+	private static ICommandService getCommandService() {
+		return (ICommandService) PlatformUI.getWorkbench().getService(ICommandService.class);
 	}
 
 }

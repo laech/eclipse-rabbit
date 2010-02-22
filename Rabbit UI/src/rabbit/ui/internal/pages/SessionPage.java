@@ -42,7 +42,7 @@ public class SessionPage extends AbstractGraphTreePage {
 
 	@Override
 	protected ITreeContentProvider createContentProvider() {
-		return new SessionPageContentProvider();
+		return new CollectionContentProvider();
 	}
 
 	@Override

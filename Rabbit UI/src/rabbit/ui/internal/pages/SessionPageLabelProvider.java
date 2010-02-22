@@ -28,11 +28,7 @@ public class SessionPageLabelProvider extends BaseLabelProvider implements ITabl
 		case 0:
 			return element.toString();
 		case 1:
-			try {
-				return MillisConverter.toDefaultString(parent.getValue(element));
-			} catch (IllegalArgumentException e) {
-				return null;
-			}
+			return MillisConverter.toDefaultString(parent.getValue(element));
 		default:
 			return null;
 		}

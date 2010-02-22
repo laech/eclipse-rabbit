@@ -227,6 +227,11 @@ public abstract class AbstractGraphTreePage implements IPage {
 
 	/**
 	 * Gets the current maximum value used for painting.
+	 * <p>
+	 * Note that the value return is for painting only, therefore the value
+	 * returned may or may not be the maximum of all {@link #getValue(Object)}
+	 * returned.
+	 * </p>
 	 * 
 	 * @return The maximum value in milliseconds.
 	 */

@@ -63,5 +63,4 @@ public class RabbitPreferencePage extends PreferencePage implements IWorkbenchPr
 	@Override
 	public void init(IWorkbench workbench) {
 	}
-
 }

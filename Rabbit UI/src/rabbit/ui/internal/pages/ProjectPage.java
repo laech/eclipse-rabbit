@@ -11,17 +11,19 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.ide.IDE;
 
+import rabbit.ui.DisplayPreference;
+import rabbit.ui.internal.util.ProjectElement;
 import rabbit.ui.internal.util.ResourceElement;
 import rabbit.ui.internal.util.ResourceElement.ResourceType;
 
 /**
  * A page for displaying time spent working under different projects.
  */
-public class ProjectPage extends ResourcePage {
+public class ProjectPage extends FilePage {
 
 	@Override
 	protected ITableLabelProvider createLabelProvider() {
-		return new ResourcePageLabelProvider(this, true, false, false);
+		return new ResourcePageLabelProvider(true, false, false);
 	}
 
 	@Override
@@ -50,5 +52,27 @@ public class ProjectPage extends ResourcePage {
 				return (element instanceof Collection<?>);
 			}
 		};
+	}
+
+	@Override
+	public void update(DisplayPreference p) {
+		super.update(p);
+
+		setMaxValue(0);
+		for (ResourceElement project : data) {
+			long value = project.getValue();
+			if (value > getMaxValue()) {
+				setMaxValue(value);
+			}
+		}
+	}
+
+	@Override
+	long getValue(Object o) {
+		if (o instanceof ProjectElement) {
+			return ((ProjectElement) o).getValue();
+		} else {
+			return 0;
+		}
 	}
 }

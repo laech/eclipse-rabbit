@@ -13,7 +13,7 @@ import org.junit.Test;
 /**
  * Test for {@link AbstractGraphTreePage}
  */
-public abstract class AbstractGraphTablePageTest {
+public abstract class AbstractGraphTreePageTest {
 
 	protected AbstractGraphTreePage page;
 
@@ -33,7 +33,7 @@ public abstract class AbstractGraphTablePageTest {
 	@Test
 	public void testGetSetMaxValue() {
 		page.setMaxValue(10);
-		assertEquals(0, page.getMaxValue());
+		assertEquals(10, page.getMaxValue());
 		page.setMaxValue(101);
 		assertEquals(101, page.getMaxValue());
 	}
@@ -77,4 +77,10 @@ public abstract class AbstractGraphTablePageTest {
 			}
 		});
 	}
+
+	@Test
+	public void testGetImage() {
+		assertNotNull(page.getImage());
+	}
+
 }

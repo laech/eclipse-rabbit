@@ -1,32 +1,118 @@
 package rabbit.ui.internal.pages;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.viewers.ITableLabelProvider;
+import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Tree;
+import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 
+import rabbit.core.RabbitCore;
+import rabbit.core.storage.IAccessor;
+import rabbit.core.storage.IResourceManager;
+import rabbit.core.storage.xml.FileDataAccessor;
+import rabbit.ui.DisplayPreference;
 import rabbit.ui.internal.util.FileElement;
+import rabbit.ui.internal.util.FolderElement;
+import rabbit.ui.internal.util.ProjectElement;
+import rabbit.ui.internal.util.ResourceElement;
 
 /**
  * A page for displaying time spent working on different files.
  */
-public class FilePage extends ResourcePage {
+public class FilePage extends AbstractGraphTreePage {
 
-	@Override
-	public Image getImage() {
-		return PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJ_FILE);
+	private IAccessor accessor;
+	private IResourceManager resourceMapper;
+	protected Collection<ResourceElement> data;
+
+	public FilePage() {
+		super();
+		accessor = new FileDataAccessor();
+		resourceMapper = RabbitCore.getDefault().getResourceManager();
+		data = new ArrayList<ResourceElement>();
 	}
 
 	@Override
-	protected ITableLabelProvider createLabelProvider() {
-		return new ResourcePageLabelProvider(this, false, false, true);
+	public void update(DisplayPreference p) {
+		setMaxValue(0);
+
+		Map<String, Long> rawData = accessor.getData(p.getStartDate(), p.getEndDate());
+		Map<String, ResourceElement> resources = new HashMap<String, ResourceElement>(rawData.size());
+		for (Map.Entry<String, Long> entry : rawData.entrySet()) {
+			String pathString = resourceMapper.getPath(entry.getKey());
+			if (pathString == null) {
+				continue;
+			}
+
+			IPath path = Path.fromPortableString(pathString);
+			if (path.segmentCount() <= 1) {
+				continue;
+			}
+
+			String project = path.segment(0);
+			ResourceElement element = resources.get(project);
+			if (element == null) {
+				element = new ProjectElement(path.uptoSegment(1));
+				resources.put(project, element);
+			}
+			if (path.segmentCount() >= 3) {
+				element = element.insert(new FolderElement(path.removeLastSegments(1)));
+			}
+			element.insert(new FileElement(path, entry.getValue()));
+
+			if (entry.getValue() > getMaxValue()) {
+				setMaxValue(entry.getValue());
+			}
+		}
+		getViewer().setInput((data = resources.values()));
+		getViewer().expandAll();
 	}
 
 	@Override
 	long getValue(Object o) {
-		if (!(o instanceof FileElement)) {
+		if (o instanceof FileElement) {
+			return ((FileElement) o).getValue();
+		} else {
 			return 0;
 		}
-		return super.getValue(o);
+	}
+
+	@Override
+	protected String getValueColumnText() {
+		return "Time Spent";
+	}
+
+	@Override
+	protected TreeColumn[] createColumns(Tree tree) {
+		TreeColumn nameColumn = new TreeColumn(tree, SWT.LEFT);
+		nameColumn.setText("Resource");
+		nameColumn.setWidth(200);
+		nameColumn.setMoveable(true);
+		return new TreeColumn[] { nameColumn };
+	}
+
+	@Override
+	protected ITreeContentProvider createContentProvider() {
+		return new ResourcePageContentProvider();
+	}
+
+	@Override
+	protected ITableLabelProvider createLabelProvider() {
+		return new ResourcePageLabelProvider(false, false, true);
+	}
+
+	@Override
+	public Image getImage() {
+		return PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJ_FILE);
 	}
 }
