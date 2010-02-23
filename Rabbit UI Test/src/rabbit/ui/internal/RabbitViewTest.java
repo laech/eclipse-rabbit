@@ -11,7 +11,6 @@ import java.util.GregorianCalendar;
 import java.util.Map;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.DateTime;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
@@ -84,14 +83,6 @@ public class RabbitViewTest {
 		RabbitView view = new RabbitView();
 		view.createPartControl(shell);
 		view.dispose();
-
-		Field metricsImg = RabbitView.class.getDeclaredField("metricsImg");
-		metricsImg.setAccessible(true);
-		assertTrue(((Image) metricsImg.get(view)).isDisposed());
-
-		Field statImg = RabbitView.class.getDeclaredField("statImg");
-		statImg.setAccessible(true);
-		assertTrue(((Image) statImg.get(view)).isDisposed());
 
 		Field toolkit = RabbitView.class.getDeclaredField("toolkit");
 		toolkit.setAccessible(true);

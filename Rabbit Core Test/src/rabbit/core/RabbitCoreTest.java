@@ -11,7 +11,6 @@ import java.util.Set;
 
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.jface.preference.IPreferenceStore;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -21,7 +20,6 @@ import rabbit.core.events.CommandEvent;
 import rabbit.core.events.FileEvent;
 import rabbit.core.events.PartEvent;
 import rabbit.core.events.PerspectiveEvent;
-import rabbit.core.internal.IdleDetector;
 import rabbit.core.internal.TrackerObject;
 import rabbit.core.internal.storage.xml.CommandEventStorer;
 import rabbit.core.internal.storage.xml.FileEventStorer;
@@ -70,7 +68,9 @@ public class RabbitCoreTest {
 	@Test
 	public void testStart() throws Exception {
 		// It's already started by now.
-		Assert.assertTrue(plugin.isIdleDetectionEnabled() == plugin.getIdleDetector().isRunning());
+		// Assert.assertTrue(plugin.isIdleDetectionEnabled() ==
+		// plugin.getIdleDetector().isRunning());
+		Assert.assertTrue(plugin.getIdleDetector().isRunning());
 		for (TrackerObject t : getTrackers(plugin)) {
 			Assert.assertTrue(t.getTracker().isEnabled());
 		}
@@ -115,10 +115,11 @@ public class RabbitCoreTest {
 		}
 	}
 
-	@Test
-	public void testIsIdleDetectionEnabled() {
-		Assert.assertTrue(plugin.getIdleDetector().isRunning() == plugin.isIdleDetectionEnabled());
-	}
+	// @Test
+	// public void testIsIdleDetectionEnabled() {
+	// Assert.assertTrue(plugin.getIdleDetector().isRunning() ==
+	// plugin.isIdleDetectionEnabled());
+	// }
 
 	@Test
 	public void testGetIdleDetector() {
@@ -131,35 +132,35 @@ public class RabbitCoreTest {
 		Assert.assertTrue(plugin.getIdleDetector().getRunDelay() == 1000);
 	}
 
-	@Test
-	public void testSetIdleDetectionEnabled() throws Exception {
-		IPreferenceStore store = plugin.getPreferenceStore();
-		IdleDetector detector = plugin.getIdleDetector();
-		detector.setRunning(true);
-
-		plugin.setIdleDetectionEnabled(false);
-		Assert.assertFalse(store.getBoolean(RabbitCore.IDLE_DETECTOR_ENABLE));
-		Assert.assertFalse(plugin.isIdleDetectionEnabled());
-		Assert.assertFalse(detector.isRunning());
-
-		plugin.setIdleDetectionEnabled(true);
-		Assert.assertTrue(store.getBoolean(RabbitCore.IDLE_DETECTOR_ENABLE));
-		Assert.assertTrue(plugin.isIdleDetectionEnabled());
-		Assert.assertTrue(detector.isRunning());
-
-		// Test this preference is permanently saved:
-
-		RabbitCore rc = new RabbitCore();
-		rc.start(plugin.getBundle().getBundleContext());
-		Assert.assertTrue(rc.isIdleDetectionEnabled());
-		rc.stop(rc.getBundle().getBundleContext());
-
-		rc.setIdleDetectionEnabled(false);
-		rc = new RabbitCore();
-		rc.start(plugin.getBundle().getBundleContext());
-		Assert.assertFalse(rc.isIdleDetectionEnabled());
-		rc.stop(rc.getBundle().getBundleContext());
-	}
+	// @Test
+	// public void testSetIdleDetectionEnabled() throws Exception {
+	// IPreferenceStore store = plugin.getPreferenceStore();
+	// IdleDetector detector = plugin.getIdleDetector();
+	// detector.setRunning(true);
+	//
+	// plugin.setIdleDetectionEnabled(false);
+	// Assert.assertFalse(store.getBoolean(RabbitCore.IDLE_DETECTOR_ENABLE));
+	// Assert.assertFalse(plugin.isIdleDetectionEnabled());
+	// Assert.assertFalse(detector.isRunning());
+	//
+	// plugin.setIdleDetectionEnabled(true);
+	// Assert.assertTrue(store.getBoolean(RabbitCore.IDLE_DETECTOR_ENABLE));
+	// Assert.assertTrue(plugin.isIdleDetectionEnabled());
+	// Assert.assertTrue(detector.isRunning());
+	//
+	// // Test this preference is permanently saved:
+	//
+	// RabbitCore rc = new RabbitCore();
+	// rc.start(plugin.getBundle().getBundleContext());
+	// Assert.assertTrue(rc.isIdleDetectionEnabled());
+	// rc.stop(rc.getBundle().getBundleContext());
+	//
+	// rc.setIdleDetectionEnabled(false);
+	// rc = new RabbitCore();
+	// rc.start(plugin.getBundle().getBundleContext());
+	// Assert.assertFalse(rc.isIdleDetectionEnabled());
+	// rc.stop(rc.getBundle().getBundleContext());
+	// }
 
 	@Test
 	public void testGetResourceManager() {

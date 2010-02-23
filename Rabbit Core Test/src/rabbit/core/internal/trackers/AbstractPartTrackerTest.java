@@ -52,7 +52,7 @@ public abstract class AbstractPartTrackerTest<E extends ContinuousEvent> extends
 	public static void setUpBeforeClass() {
 		bot = new SWTWorkbenchBot();
 		bot.viewByTitle("Welcome").close();
-		RabbitCore.getDefault().setIdleDetectionEnabled(false);
+		// RabbitCore.getDefault().setIdleDetectionEnabled(false);
 	}
 
 	@Before

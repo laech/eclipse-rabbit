@@ -168,15 +168,7 @@ public abstract class AbstractGraphTreePage implements IPage {
 			}
 		});
 
-		ColumnComparator sorter = new ColumnComparator(viewer) {
-			@Override
-			protected int doCompare(Viewer v, Object e1, Object e2) {
-				if (getSelectedColumn() == getValueColumn() || getSelectedColumn() == getGraphColumn()) {
-					return Double.compare(getValue(e1), getValue(e2));
-				}
-				return super.doCompare(v, e1, e2);
-			}
-		};
+		ColumnComparator sorter = createComparator(viewer);
 		otherColumns = createColumns(tree);
 		for (TreeColumn column : otherColumns) {
 			column.addSelectionListener(sorter);
@@ -194,6 +186,18 @@ public abstract class AbstractGraphTreePage implements IPage {
 		graphColumn.addSelectionListener(sorter);
 
 		restoreState();
+	}
+
+	protected ColumnComparator createComparator(TreeViewer viewer) {
+		return new ColumnComparator(viewer) {
+			@Override
+			protected int doCompare(Viewer v, Object e1, Object e2) {
+				if (getSelectedColumn() == getValueColumn() || getSelectedColumn() == getGraphColumn()) {
+					return (getValue(e1) > getValue(e2)) ? 1 : -1;
+				}
+				return super.doCompare(v, e1, e2);
+			}
+		};
 	}
 
 	/** Saves the state of the page. */

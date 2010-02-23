@@ -59,6 +59,11 @@ public abstract class AbstractGraphTreePageTest {
 	}
 
 	@Test
+	public void testCreateComparator() {
+		assertNotNull(page.createComparator(page.getViewer()));
+	}
+
+	@Test
 	public void testCreateLabelProvider() throws Exception {
 		assertNotNull(page.createLabelProvider());
 	}

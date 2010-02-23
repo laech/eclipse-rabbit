@@ -1,7 +1,6 @@
 package rabbit.ui.internal;
 
 import static org.eclipse.ui.plugin.AbstractUIPlugin.imageDescriptorFromPlugin;
-import static rabbit.ui.internal.RabbitUI.PLUGIN_ID;
 
 import java.util.Calendar;
 import java.util.HashMap;
@@ -14,7 +13,6 @@ import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StackLayout;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
@@ -55,16 +53,10 @@ public class RabbitView extends ViewPart {
 	private DateTime fromDateTime;
 	private DateTime toDateTime;
 
-	private final Image metricsImg;
-	private final Image statImg;
-
 	/**
 	 * Constructs a new view.
 	 */
 	public RabbitView() {
-		statImg = imageDescriptorFromPlugin(PLUGIN_ID, "resources/stat.png").createImage();
-		metricsImg = imageDescriptorFromPlugin(PLUGIN_ID, "resources/metrics.png").createImage();
-
 		pages = new HashMap<IPage, Composite>();
 		toolkit = new FormToolkit(PlatformUI.getWorkbench().getDisplay());
 		stackLayout = new StackLayout();
@@ -101,7 +93,6 @@ public class RabbitView extends ViewPart {
 		leftData.bottom = new FormAttachment(100, 0);
 		Form left = toolkit.createForm(form.getBody());
 		left.setText("Metrics");
-		left.setImage(metricsImg);
 		left.setLayoutData(leftData);
 		left.getBody().setLayout(new FillLayout());
 		MetricsPanel list = new MetricsPanel(this, toolkit);
@@ -116,7 +107,6 @@ public class RabbitView extends ViewPart {
 		displayForm = toolkit.createForm(form.getBody());
 		displayForm.setLayoutData(rightData);
 		displayForm.setText("Statistics");
-		displayForm.setImage(statImg);
 		displayForm.getBody().setLayout(stackLayout);
 		displayForm.setToolBarVerticalAlignment(SWT.TOP);
 		createToolBarItems(displayForm.getToolBarManager());
@@ -180,7 +170,6 @@ public class RabbitView extends ViewPart {
 			}
 		});
 		toolBar.add(updateAction);
-
 		toolBar.update(true);
 	}
 
@@ -258,8 +247,6 @@ public class RabbitView extends ViewPart {
 
 	@Override
 	public void dispose() {
-		metricsImg.dispose();
-		statImg.dispose();
 		toolkit.dispose();
 		super.dispose();
 	}

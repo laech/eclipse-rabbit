@@ -2,6 +2,8 @@ package rabbit.ui;
 
 import java.util.Calendar;
 
+import rabbit.ui.internal.RabbitUI;
+
 /**
  * TODO
  * 
@@ -14,10 +16,9 @@ public final class DisplayPreference {
 
 	/** Constructor. */
 	public DisplayPreference() {
-		Calendar start = Calendar.getInstance();
-		start.add(Calendar.DAY_OF_MONTH, -7);
-		startDate = start;
 		endDate = Calendar.getInstance();
+		startDate = (Calendar) endDate.clone();
+		startDate.add(Calendar.DAY_OF_MONTH, -RabbitUI.getDefault().getDefaultDisplayDatePeriod());
 		// setStartDate(start);
 		// setEndDate(Calendar.getInstance());
 	}

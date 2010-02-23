@@ -8,6 +8,7 @@ import java.util.TreeSet;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
@@ -23,6 +24,8 @@ public class RabbitUI extends AbstractUIPlugin {
 	public static final String PLUGIN_ID = "rabbit.ui";
 
 	public static final String UI_PAGE_EXTENSION_ID = "rabbit.ui.pages";
+
+	public static final String DEFAULT_DISPLAY_DATE_PERIOD = "defaultDisplayDatePeriod";
 
 	// The shared instance
 	private static RabbitUI plugin;
@@ -114,5 +117,25 @@ public class RabbitUI extends AbstractUIPlugin {
 			}
 		}
 		return extension;
+	}
+
+	/**
+	 * Gets the default number of days to display the data in the main view.
+	 * 
+	 * @return The default number of days.
+	 */
+	public int getDefaultDisplayDatePeriod() {
+		return getPreferenceStore().getInt(DEFAULT_DISPLAY_DATE_PERIOD);
+	}
+
+	/**
+	 * Sets the default number of days to display the data in the main view.
+	 * 
+	 * @param numDays
+	 *            The number of days.
+	 */
+	public void setDefaultDisplayDatePeriod(int numDays) {
+		IPreferenceStore store = getPreferenceStore();
+		store.setValue(DEFAULT_DISPLAY_DATE_PERIOD, numDays);
 	}
 }

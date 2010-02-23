@@ -9,6 +9,8 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Tree;
@@ -20,6 +22,7 @@ import rabbit.core.RabbitCore;
 import rabbit.core.storage.IAccessor;
 import rabbit.core.storage.IResourceManager;
 import rabbit.core.storage.xml.FileDataAccessor;
+import rabbit.ui.ColumnComparator;
 import rabbit.ui.DisplayPreference;
 import rabbit.ui.internal.util.FileElement;
 import rabbit.ui.internal.util.FolderElement;
@@ -32,6 +35,7 @@ import rabbit.ui.internal.util.ResourceElement;
 public class FilePage extends AbstractGraphTreePage {
 
 	private IAccessor accessor;
+	private TreeColumn nameColumn;
 	private IResourceManager resourceMapper;
 	protected Collection<ResourceElement> data;
 
@@ -94,7 +98,7 @@ public class FilePage extends AbstractGraphTreePage {
 
 	@Override
 	protected TreeColumn[] createColumns(Tree tree) {
-		TreeColumn nameColumn = new TreeColumn(tree, SWT.LEFT);
+		nameColumn = new TreeColumn(tree, SWT.LEFT);
 		nameColumn.setText("Resource");
 		nameColumn.setWidth(200);
 		nameColumn.setMoveable(true);
@@ -109,6 +113,38 @@ public class FilePage extends AbstractGraphTreePage {
 	@Override
 	protected ITableLabelProvider createLabelProvider() {
 		return new ResourcePageLabelProvider(false, false, true);
+	}
+
+	@Override
+	protected ColumnComparator createComparator(TreeViewer viewer) {
+		return new ColumnComparator(viewer) {
+			@Override
+			public int category(Object element) {
+				if (element instanceof FileElement) {
+					return 1;
+				} else if (element instanceof FolderElement) {
+					return 2;
+				} else {
+					return 0;
+				}
+			}
+
+			@Override
+			protected int doCompare(Viewer v, Object e1, Object e2) {
+				if (getSelectedColumn() == nameColumn) {
+					if (e1 instanceof FileElement && !(e2 instanceof FileElement)) {
+						return -1;
+					} else if (!(e1 instanceof FileElement) && e2 instanceof FileElement) {
+						return 1;
+					} else {
+						return super.doCompare(v, e1, e2);
+					}
+				} else if (getSelectedColumn() == getValueColumn() || getSelectedColumn() == getGraphColumn()) {
+					return (getValue(e1) > getValue(e2)) ? 1 : -1;
+				}
+				return super.doCompare(v, e1, e2);
+			}
+		};
 	}
 
 	@Override

@@ -34,7 +34,7 @@ public class PerspectiveTrackerTest extends AbstractTrackerTest<PerspectiveEvent
 
 	@BeforeClass
 	public static void setUpBeforeClass() {
-		RabbitCore.getDefault().setIdleDetectionEnabled(false);
+		// RabbitCore.getDefault().setIdleDetectionEnabled(false);
 	}
 
 	@Before

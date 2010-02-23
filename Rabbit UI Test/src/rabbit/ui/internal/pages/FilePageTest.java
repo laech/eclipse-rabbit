@@ -1,6 +1,7 @@
 package rabbit.ui.internal.pages;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.lang.reflect.Field;
 import java.util.Calendar;
@@ -12,6 +13,7 @@ import org.junit.Test;
 
 import rabbit.core.storage.IAccessor;
 import rabbit.core.storage.xml.FileDataAccessor;
+import rabbit.ui.ColumnComparator;
 import rabbit.ui.DisplayPreference;
 import rabbit.ui.internal.util.FileElement;
 import rabbit.ui.internal.util.FolderElement;
@@ -75,6 +77,15 @@ public class FilePageTest extends AbstractGraphTreePageTest {
 		assertEquals(0, page.getValue(folder));
 		assertEquals(value, page.getValue(file));
 		assertEquals(0, page.getValue(new Object()));
+	}
+
+	@Test
+	public void testComparator() {
+		FileElement file = new FileElement(Path.fromPortableString("/p/z.txt"), 10);
+		FolderElement folder = new FolderElement(Path.fromPortableString("/p/a"));
+		ColumnComparator sorter = page.createComparator(page.getViewer());
+		assertTrue(sorter.compare(page.getViewer(), file, folder) < 0);
+		assertTrue(sorter.compare(page.getViewer(), folder, file) > 0);
 	}
 
 	@SuppressWarnings("unchecked")

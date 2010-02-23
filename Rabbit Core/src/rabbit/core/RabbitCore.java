@@ -223,11 +223,11 @@ public class RabbitCore extends AbstractUIPlugin implements IWorkbenchListener {
 		trackerList = createTrackers(Platform.getExtensionRegistry().getConfigurationElementsFor(TRACKER_EXTENSION_ID));
 		setEnableTrackers(trackerList, true);
 
-		if (isIdleDetectionEnabled()) {
-			idleDetector.setRunning(true);
-		} else {
-			idleDetector.setRunning(false);
-		}
+		// if (isIdleDetectionEnabled()) {
+		idleDetector.setRunning(true);
+		// } else {
+		// idleDetector.setRunning(false);
+		// }
 	}
 
 	/**
@@ -251,25 +251,25 @@ public class RabbitCore extends AbstractUIPlugin implements IWorkbenchListener {
 		super.stop(context);
 	}
 
-	/**
-	 * Checks to see whether idleness detection is enabled.
-	 * 
-	 * @return True if idleness detection is enabled, false otherwise.
-	 */
-	public boolean isIdleDetectionEnabled() {
-		return getPreferenceStore().getBoolean(IDLE_DETECTOR_ENABLE);
-	}
-
-	/**
-	 * Sets whether idleness detection should be enabled. This change is saved
-	 * permanently into the preference store.
-	 * 
-	 * @param enable
-	 *            True to enable idleness detection, false to disable it. The
-	 *            change is applied immediately.
-	 */
-	public void setIdleDetectionEnabled(boolean enable) {
-		getPreferenceStore().setValue(IDLE_DETECTOR_ENABLE, enable);
-		idleDetector.setRunning(enable);
-	}
+	// /**
+	// * Checks to see whether idleness detection is enabled.
+	// *
+	// * @return True if idleness detection is enabled, false otherwise.
+	// */
+	// public boolean isIdleDetectionEnabled() {
+	// return getPreferenceStore().getBoolean(IDLE_DETECTOR_ENABLE);
+	// }
+	//
+	// /**
+	// * Sets whether idleness detection should be enabled. This change is saved
+	// * permanently into the preference store.
+	// *
+	// * @param enable
+	// * True to enable idleness detection, false to disable it. The
+	// * change is applied immediately.
+	// */
+	// public void setIdleDetectionEnabled(boolean enable) {
+	// getPreferenceStore().setValue(IDLE_DETECTOR_ENABLE, enable);
+	// idleDetector.setRunning(enable);
+	// }
 }

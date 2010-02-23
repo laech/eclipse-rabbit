@@ -5,17 +5,20 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Spinner;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 
-import rabbit.core.RabbitCore;
+import rabbit.ui.internal.RabbitUI;
 
 public class RabbitPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
 
-	private Button idleFeature;
+	// private Button idleFeature;
+	private Spinner daySpinner;
 
 	public RabbitPreferencePage() {
 	}
@@ -37,25 +40,43 @@ public class RabbitPreferencePage extends PreferencePage implements IWorkbenchPr
 		cmp.setLayout(layout);
 		cmp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
-		idleFeature = new Button(cmp, SWT.CHECK);
-		idleFeature.setSelection(RabbitCore.getDefault().isIdleDetectionEnabled());
-		idleFeature.setText("Enable idleness detection");
-		idleFeature.setToolTipText(
-				"Idleness detection helps to track more accurate data by taking user idleness into account");
+		Group viewGroup = new Group(cmp, SWT.NONE);
+		viewGroup.setText("Rabbit View");
+		viewGroup.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
+		viewGroup.setLayout(new GridLayout(3, false));
+		{
+			new Label(viewGroup, SWT.HORIZONTAL).setText("By default, display data for the last ");
+			daySpinner = new Spinner(viewGroup, SWT.BORDER);
+			daySpinner.setMinimum(0);
+			daySpinner.setMaximum(9999);
+			daySpinner.setSelection(RabbitUI.getDefault().getDefaultDisplayDatePeriod());
+			new Label(viewGroup, SWT.HORIZONTAL).setText(" days.");
+		}
+
+		// idleFeature = new Button(cmp, SWT.CHECK);
+		// idleFeature.setSelection(RabbitCore.getDefault().isIdleDetectionEnabled());
+		// idleFeature.setText("Enable idleness detection");
+		// idleFeature.setToolTipText(
+		// "Idleness detection helps to track more accurate data by taking user idleness into account");
 
 		return cmp;
 	}
 
 	@Override
 	protected void performDefaults() {
-		idleFeature.setSelection(false);
+		// idleFeature.setSelection(false);
+		daySpinner.setSelection(7);
 		super.performDefaults();
 	}
 
 	@Override
 	public boolean performOk() {
-		if (RabbitCore.getDefault().isIdleDetectionEnabled() != idleFeature.getSelection()) {
-			RabbitCore.getDefault().setIdleDetectionEnabled(idleFeature.getSelection());
+		// if (RabbitCore.getDefault().isIdleDetectionEnabled() !=
+		// idleFeature.getSelection()) {
+		// RabbitCore.getDefault().setIdleDetectionEnabled(idleFeature.getSelection());
+		// }
+		if (RabbitUI.getDefault().getDefaultDisplayDatePeriod() != daySpinner.getSelection()) {
+			RabbitUI.getDefault().setDefaultDisplayDatePeriod(daySpinner.getSelection());
 		}
 		return true;
 	}
