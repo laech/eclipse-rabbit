@@ -3,7 +3,10 @@ package rabbit.core.events;
 import java.util.Calendar;
 
 /**
- * Represents a file event.
+ * Represents a file event. This object stores the file id instead of the file
+ * itself.
+ * 
+ * @see rabbit.core.RabbitCore#getResourceManager()
  */
 public class FileEvent extends ContinuousEvent {
 
@@ -27,7 +30,8 @@ public class FileEvent extends ContinuousEvent {
 	/**
 	 * Gets the file id.
 	 * 
-	 * @return The file.
+	 * @return The file id.
+	 * @see rabbit.core.RabbitCore#getResourceManager()
 	 */
 	public String getFileId() {
 		return fileId;
@@ -38,6 +42,7 @@ public class FileEvent extends ContinuousEvent {
 	 * 
 	 * @param fileId
 	 *            The file id.
+	 * @see rabbit.core.RabbitCore#getResourceManager()
 	 */
 	public void setFileId(String fileId) {
 		this.fileId = fileId;

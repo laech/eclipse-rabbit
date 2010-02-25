@@ -85,7 +85,7 @@ public class PerspectivePage extends AbstractGraphTreePage {
 	}
 
 	@Override
-	long getValue(Object o) {
+	public long getValue(Object o) {
 		Long value = dataMapping.get(o);
 		return (value == null) ? 0 : value;
 	}

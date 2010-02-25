@@ -1,11 +1,11 @@
 package rabbit.core.internal.storage.xml;
 
 import java.io.File;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.TreeMap;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
@@ -249,7 +249,7 @@ public enum XmlResourceManager implements IResourceManager, IResourceChangeListe
 	}
 
 	private Map<String, Set<String>> convert(ResourceListType v) {
-		Map<String, Set<String>> data = new HashMap<String, Set<String>>(v.getResource().size() * 2);
+		Map<String, Set<String>> data = new TreeMap<String, Set<String>>();
 		for (ResourceType type : v.getResource()) {
 			Set<String> ids = new HashSet<String>(type.getResourceId().size() * 2);
 			ids.addAll(type.getResourceId());

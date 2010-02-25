@@ -6,8 +6,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.BaseLabelProvider;
 import org.eclipse.jface.viewers.IColorProvider;
@@ -20,20 +21,16 @@ import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.ide.IDE;
 
-import rabbit.ui.internal.util.ResourceElement;
-import rabbit.ui.internal.util.ResourceElement.ResourceType;
-
 /**
  * Label provider for a {@link FilePage}.
  */
-public class ResourcePageLabelProvider extends BaseLabelProvider implements ITableLabelProvider, IColorProvider {
+public class ResourcePageLabelProvider2 extends BaseLabelProvider implements ITableLabelProvider, IColorProvider {
 
 	/** Maps the given path of a resource to an image (may be null). */
 	private final Map<String, Image> resourceMap;
 	/** Maps the given id of an editor to an image (may be null). */
 	private final Map<String, Image> editorMap;
 
-	private final IWorkspaceRoot workspace;
 	private final Image projectImg;
 	private final Image folderImg;
 	private final Image fileImg;
@@ -44,8 +41,9 @@ public class ResourcePageLabelProvider extends BaseLabelProvider implements ITab
 	private boolean showFolderValues;
 	private boolean showFileValues;
 
-	public ResourcePageLabelProvider(boolean showProjectValues, boolean showFolderValues, boolean showFileValues) {
-		workspace = ResourcesPlugin.getWorkspace().getRoot();
+	private ResourcePage page;
+
+	public ResourcePageLabelProvider2(ResourcePage parent, boolean showProjectValues, boolean showFolderValues, boolean showFileValues) {
 		deletedResourceColor = PlatformUI.getWorkbench().getDisplay().getSystemColor(SWT.COLOR_DARK_GRAY);
 
 		ISharedImages images = PlatformUI.getWorkbench().getSharedImages();
@@ -59,64 +57,68 @@ public class ResourcePageLabelProvider extends BaseLabelProvider implements ITab
 		this.showProjectValues = showProjectValues;
 		this.showFolderValues = showFolderValues;
 		this.showFileValues = showFileValues;
+
+		page = parent;
 	}
 
 	@Override
 	public Image getColumnImage(Object element, int columnIndex) {
-		if (!(element instanceof ResourceElement) || columnIndex != 0) {
+		if (!(element instanceof IResource) || columnIndex != 0) {
 			return null;
 		}
 
-		ResourceElement resource = (ResourceElement) element;
-		if (resource.getType() == ResourceType.PROJECT) {
+		IResource resource = (IResource) element;
+		int type = resource.getType();
+		switch (type) {
+		case IResource.PROJECT:
 			return projectImg;
-
-		} else if (resource.getType() == ResourceType.FOLDER) {
+		case IResource.FOLDER:
 			return folderImg;
+		case IResource.FILE:
+			if (resourceMap.containsKey(resource.getFullPath().toString()))
+				return resourceMap.get(resource.getFullPath().toString());
 
-		} else if (resource.getType() == ResourceType.FILE) {
-			if (resourceMap.containsKey(resource.getPath().toString())) {
-				return resourceMap.get(resource.getPath().toString());
-			}
-
-			IFile file = workspace.getFile(resource.getPath());
-			IEditorDescriptor editor = IDE.getDefaultEditor(file);
+			IEditorDescriptor editor = IDE.getDefaultEditor((IFile) resource);
 			if (editor == null) {
-				resourceMap.put(resource.getPath().toString(), fileImg);
+				resourceMap.put(resource.getFullPath().toString(), fileImg);
 				return fileImg;
 			}
 
-			if (editorMap.containsKey(editor.getId())) {
+			if (editorMap.containsKey(editor.getId()))
 				return editorMap.get(editor.getId());
-			}
 
 			ImageDescriptor des = editor.getImageDescriptor();
 			Image img = (des == null) ? null : des.createImage();
 			editorMap.put(editor.getId(), img);
 			return img;
+		default:
+			return null;
 		}
-		return null;
 	}
 
 	@Override
 	public String getColumnText(Object element, int columnIndex) {
-		if (!(element instanceof ResourceElement)) {
+		if (!(element instanceof IResource)) {
 			return null;
 		}
-		ResourceElement resource = (ResourceElement) element;
+		IResource resource = (IResource) element;
 		switch (columnIndex) {
 		case 0:
-			return resource.getName();
+			if (resource instanceof IFolder)
+				return resource.getProjectRelativePath().toString();
+			else
+				return resource.getName();
 		case 1:
-			if (resource.getType() == ResourceType.PROJECT) {
-				return (showProjectValues) ? toDefaultString(resource.getValue()) : null;
-			} else if (resource.getType() == ResourceType.FOLDER) {
-				return (showFolderValues) ? toDefaultString(resource.getValue()) : null;
-			} else if (resource.getType() == ResourceType.FILE) {
-				return (showFileValues) ? toDefaultString(resource.getValue()) : null;
+			if (resource instanceof IProject) {
+				return (showProjectValues) ? toDefaultString(page.getValue(resource)) : null;
+			} else if (resource instanceof IFolder) {
+				return (showFolderValues) ? toDefaultString(page.getValue(resource)) : null;
+			} else if (resource instanceof IFile) {
+				return (showFileValues) ? toDefaultString(page.getValue(resource)) : null;
 			}
+		default:
+			return null;
 		}
-		return null;
 	}
 
 	@Override
@@ -126,10 +128,10 @@ public class ResourcePageLabelProvider extends BaseLabelProvider implements ITab
 
 	@Override
 	public Color getForeground(Object element) {
-		if (element instanceof ResourceElement && !((ResourceElement) element).exists()) {
+		if (element instanceof IResource && !((IResource) element).exists())
 			return deletedResourceColor;
-		}
-		return null;
+		else
+			return null;
 	}
 
 	@Override

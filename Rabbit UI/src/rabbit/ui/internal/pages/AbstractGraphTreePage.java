@@ -185,6 +185,7 @@ public abstract class AbstractGraphTreePage implements IPage {
 		graphColumn.setMoveable(true);
 		graphColumn.addSelectionListener(sorter);
 
+		viewer.setComparator(sorter);
 		restoreState();
 	}
 
@@ -289,7 +290,7 @@ public abstract class AbstractGraphTreePage implements IPage {
 	 * @return The value in milliseconds, or 0 if this object has no usage
 	 *         value.
 	 */
-	abstract long getValue(Object o);
+	public abstract long getValue(Object o);
 
 	/**
 	 * Creates an content provider for the viewer.

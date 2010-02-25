@@ -6,7 +6,9 @@ Bundle-Version: 1.0.0.qualifier
 Bundle-Activator: rabbit.core.RabbitCore
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.core.resources,
- org.eclipse.ui
+ org.eclipse.ui,
+ org.eclipse.ui.ide,
+ org.eclipse.ui.views.log
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: rabbit.core,
  rabbit.core.events;uses:="org.eclipse.ui",

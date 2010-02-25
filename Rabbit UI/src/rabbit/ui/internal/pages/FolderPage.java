@@ -1,5 +1,8 @@
 package rabbit.ui.internal.pages;
 
+import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
@@ -10,29 +13,15 @@ import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 
 import rabbit.ui.DisplayPreference;
-import rabbit.ui.internal.util.FolderElement;
-import rabbit.ui.internal.util.ResourceElement;
-import rabbit.ui.internal.util.ResourceElement.ResourceType;
 
 /**
  * A page for displaying time spent working under different folders.
  */
-public class FolderPage extends FilePage {
-
-	@Override
-	public void createContents(Composite parent) {
-		super.createContents(parent);
-		getViewer().addFilter(new ViewerFilter() {
-			@Override
-			public boolean select(Viewer viewer, Object parentElement, Object element) {
-				return (element instanceof ResourceElement) && ((ResourceElement) element).getType() != ResourceType.FILE;
-			}
-		});
-	}
+public class FolderPage extends ResourcePage {
 
 	@Override
 	protected ITableLabelProvider createLabelProvider() {
-		return new ResourcePageLabelProvider(false, true, false);
+		return new ResourcePageLabelProvider2(this, false, true, false);
 	}
 
 	@Override
@@ -41,13 +30,22 @@ public class FolderPage extends FilePage {
 	}
 
 	@Override
+	public void createContents(Composite parent) {
+		super.createContents(parent);
+		getViewer().addFilter(new ViewerFilter() {
+			@Override
+			public boolean select(Viewer viewer, Object parentElement, Object element) {
+				return element instanceof IContainer;
+			}
+		});
+	}
+
+	@Override
 	protected ITreeContentProvider createContentProvider() {
-		return new ResourcePageContentProvider() {
+		return new ResourcePageContentProvider2(this) {
 			@Override
 			public boolean hasChildren(Object o) {
-				return (o instanceof ResourceElement)
-						&& ((ResourceElement) o).getType() == ResourceType.PROJECT
-						&& !((ResourceElement) o).getChildren().isEmpty();
+				return o instanceof IProject;
 			}
 		};
 	}
@@ -55,24 +53,12 @@ public class FolderPage extends FilePage {
 	@Override
 	public void update(DisplayPreference p) {
 		super.update(p);
-		setMaxValue(0);
-		for (ResourceElement project : data) {
-			for (ResourceElement e : project.getChildren()) {
-				long value = e.getValue();
-				if (e.getType() == ResourceType.FOLDER && value > getMaxValue()) {
-					setMaxValue(value);
-				}
-			}
-		}
+		setMaxValue(getMaxFolderValue());
 	}
 
 	@Override
-	long getValue(Object o) {
-		if (o instanceof FolderElement) {
-			return ((FolderElement) o).getValue();
-		} else {
-			return 0;
-		}
+	public long getValue(Object o) {
+		return (o instanceof IFolder) ? getValueOfFolder((IFolder) o) : 0;
 	}
 
 }

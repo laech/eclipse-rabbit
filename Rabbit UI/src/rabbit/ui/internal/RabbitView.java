@@ -110,6 +110,11 @@ public class RabbitView extends ViewPart {
 		displayForm.getBody().setLayout(stackLayout);
 		displayForm.setToolBarVerticalAlignment(SWT.TOP);
 		createToolBarItems(displayForm.getToolBarManager());
+
+		Label label = toolkit.createLabel(displayForm.getBody(), null, SWT.CENTER);
+		label.setImage(getTitleImage());
+		stackLayout.topControl = label;
+		displayForm.getBody().layout();
 	}
 
 	/**
@@ -259,7 +264,8 @@ public class RabbitView extends ViewPart {
 		updateDate(displayPref.getEndDate(), toDateTime);
 
 		// Sync with today's data:
-		if (isSameDate(Calendar.getInstance(), toDateTime)) {
+		Calendar today = Calendar.getInstance();
+		if (isSameDate(today, toDateTime) || today.before(displayPref.getEndDate())) {
 			RabbitCore.getDefault().saveCurrentData();
 		}
 

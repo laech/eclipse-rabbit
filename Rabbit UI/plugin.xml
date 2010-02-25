@@ -6,12 +6,17 @@
          point="org.eclipse.ui.views">
       <view
             allowMultiple="true"
+            category="rabbit.ui.view"
             class="rabbit.ui.internal.RabbitView"
             icon="resources/icon.png"
             id="rabbit.ui.view.rabbitview"
             name="Rabbit"
             restorable="true">
       </view>
+      <category
+            id="rabbit.ui.view"
+            name="Rabbit">
+      </category>
    </extension>
    <extension
          point="rabbit.ui.pages">

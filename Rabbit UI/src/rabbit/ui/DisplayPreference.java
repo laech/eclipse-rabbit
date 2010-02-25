@@ -5,8 +5,6 @@ import java.util.Calendar;
 import rabbit.ui.internal.RabbitUI;
 
 /**
- * TODO
- * 
  * Contains preferences for displaying data.
  */
 public final class DisplayPreference {

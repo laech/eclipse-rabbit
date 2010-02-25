@@ -81,12 +81,16 @@ public class ColumnComparator extends ViewerComparator implements SelectionListe
 
 	protected int doCompare(Viewer v, Object e1, Object e2) {
 		ITableLabelProvider lp = (ITableLabelProvider) viewer.getLabelProvider();
-		String s1 = lp.getColumnText(e1, getSelectedColumnIndex());
-		String s2 = lp.getColumnText(e2, getSelectedColumnIndex());
+		int index = 0;
+		if (selectedColumn != null) {
+			index = getSelectedColumnIndex();
+		}
+		String s1 = lp.getColumnText(e1, index);
+		String s2 = lp.getColumnText(e2, index);
 
 		int value = 0;
 		if (s1 != null && s2 != null) {
-			value = s1.compareTo(s2);
+			value = s1.compareToIgnoreCase(s2);
 		} else {
 			value = (s1 == null) ? -1 : 1;
 		}
