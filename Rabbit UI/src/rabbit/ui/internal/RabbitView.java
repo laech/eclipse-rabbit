@@ -2,6 +2,8 @@ package rabbit.ui.internal;
 
 import static org.eclipse.ui.plugin.AbstractUIPlugin.imageDescriptorFromPlugin;
 
+import java.text.Format;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
@@ -13,10 +15,14 @@ import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StackLayout;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.DateTime;
@@ -24,9 +30,13 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Sash;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.forms.events.HyperlinkAdapter;
+import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.Form;
 import org.eclipse.ui.forms.widgets.FormToolkit;
+import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
 import org.eclipse.ui.part.ViewPart;
 
@@ -46,12 +56,13 @@ public class RabbitView extends ViewPart {
 	 */
 	private Map<IPage, Boolean> pageStatus;
 	private Map<IPage, Composite> pages;
-	private DisplayPreference displayPref;
+	private DisplayPreference preferences;
 	private FormToolkit toolkit;
 	private StackLayout stackLayout;
 	private Form displayForm;
-	private DateTime fromDateTime;
-	private DateTime toDateTime;
+
+	// private DateTime fromDateTime;
+	// private DateTime toDateTime;
 
 	/**
 	 * Constructs a new view.
@@ -60,7 +71,7 @@ public class RabbitView extends ViewPart {
 		pages = new HashMap<IPage, Composite>();
 		toolkit = new FormToolkit(PlatformUI.getWorkbench().getDisplay());
 		stackLayout = new StackLayout();
-		displayPref = new DisplayPreference();
+		preferences = new DisplayPreference();
 		pageStatus = new HashMap<IPage, Boolean>();
 	}
 
@@ -117,37 +128,27 @@ public class RabbitView extends ViewPart {
 		displayForm.getBody().layout();
 	}
 
-	/**
-	 * Creates the tool bar items.
-	 * 
-	 * @param toolBar
-	 *            The tool bar.
-	 */
-	protected void createToolBarItems(IToolBarManager toolBar) {
-		String text = "Refresh";
-		ImageDescriptor icon = imageDescriptorFromPlugin("org.eclipse.ui.browser", "icons/elcl16/nav_refresh.gif");
-		final IAction updateAction = new Action(text, icon) {
-			@Override
-			public void run() {
-				update();
-			}
-		};
-
+	private void createDateTimes(IToolBarManager toolBar) {
 		toolBar.add(new ControlContribution("rabbit.ui.fromDateTime") {
 			@Override
 			protected Control createControl(Composite parent) {
-				fromDateTime = new DateTime(parent, SWT.DROP_DOWN | SWT.BORDER);
+				final DateTime fromDateTime = new DateTime(parent, SWT.DROP_DOWN | SWT.BORDER);
 				fromDateTime.setToolTipText("Selects the start date for the data to be displayed.");
-				updateDateTime(fromDateTime, displayPref.getStartDate());
+				updateDateTime(fromDateTime, preferences.getStartDate());
+				fromDateTime.addListener(SWT.Selection, new Listener() {
+					@Override
+					public void handleEvent(Event event) {
+						updateDate(preferences.getEndDate(), fromDateTime);
+					}
+				});
 				return fromDateTime;
 			}
 		});
 
-		toolBar.add(new ControlContribution("rabbit.ui.separator") {
+		// Really we just want some space, not an actual separator.
+		toolBar.add(new ControlContribution("rabbit.ui.dateTimeSeparator") {
 			@Override
 			protected Control createControl(Composite parent) {
-				// Really we just want some space, not an actual
-				// separator.
 				Label separator = new Label(parent, SWT.NO_BACKGROUND);
 				separator.setText("  ");
 				return separator;
@@ -157,23 +158,128 @@ public class RabbitView extends ViewPart {
 		toolBar.add(new ControlContribution("rabbit.ui.toDateTime") {
 			@Override
 			protected Control createControl(Composite parent) {
-				toDateTime = new DateTime(parent, SWT.DROP_DOWN | SWT.BORDER);
+				final DateTime toDateTime = new DateTime(parent, SWT.DROP_DOWN | SWT.BORDER);
 				toDateTime.setToolTipText("Selects the end date for the data to be displayed.");
-				updateDateTime(toDateTime, displayPref.getEndDate());
+				toDateTime.addListener(SWT.Selection, new Listener() {
+					@Override
+					public void handleEvent(Event event) {
+						updateDate(preferences.getStartDate(), toDateTime);
+					}
+				});
+				updateDateTime(toDateTime, preferences.getEndDate());
 				return toDateTime;
 			}
 		});
+	}
 
-		toolBar.add(new ControlContribution("rabbit.ui.separator2") {
+	private void createCalendars(IToolBarManager toolBar) {
+		GridLayout layout = new GridLayout();
+		layout.marginHeight = -1; // better looking
+		layout.marginWidth = -1;
+		layout.verticalSpacing = 0;
+		final Shell shell = new Shell(getSite().getShell(), SWT.TOOL);
+		shell.setLayout(layout);
+
+		final DateTime calendar = new DateTime(shell, SWT.CALENDAR);
+
+		Listener closer = new Listener() {
+			@Override
+			public void handleEvent(Event event) {
+				if (shell.isVisible()) {
+					shell.setVisible(false);
+				}
+			}
+		};
+		calendar.addListener(SWT.Selection, closer);
+		// shell.addListener(SWT.FocusIn, closer);
+		// shell.getParent().addListener(SWT.FocusIn, closer);
+		shell.getDisplay().addFilter(SWT.MouseDown, new Listener() {
+			@Override
+			public void handleEvent(Event event) {
+				System.out.println(event.widget);
+			}
+		});
+
+		Composite cmp = toolkit.createComposite(shell);
+		cmp.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, true, false));
+		cmp.setLayout(new GridLayout(3, true));
+		{
+			toolkit.createLabel(cmp, "");
+
+			Hyperlink today = toolkit.createHyperlink(cmp, "Today", SWT.CENTER);
+			today.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, false));
+			today.addHyperlinkListener(new HyperlinkAdapter() {
+				@Override
+				public void linkActivated(HyperlinkEvent e) {
+					Calendar date = Calendar.getInstance();
+					calendar.setDate(date.get(Calendar.YEAR), date.get(Calendar.MONTH), date.get(Calendar.DAY_OF_MONTH));
+				}
+			});
+
+			Hyperlink close = toolkit.createHyperlink(cmp, "Close", SWT.RIGHT);
+			close.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false));
+			close.addHyperlinkListener(new HyperlinkAdapter() {
+				@Override
+				public void linkActivated(HyperlinkEvent e) {
+					shell.setVisible(false);
+				}
+			});
+		}
+
+		shell.pack();
+		final Format formatter = new SimpleDateFormat("yyyy-MM-dd");
+		toolBar.add(new ControlContribution("rabbit.ui.fromButton") {
 			@Override
 			protected Control createControl(Composite parent) {
-				// Really we just want some space, not an actual
-				// separator.
+				final Button fromButton = toolkit.createButton(parent, formatter.format(preferences.getStartDate().getTime()), SWT.TOGGLE | SWT.FLAT);
+				fromButton.addListener(SWT.Selection, new Listener() {
+					@Override
+					public void handleEvent(Event event) {
+						Point location = fromButton.toDisplay(event.x, event.y + fromButton.getBounds().height);
+						shell.setLocation(location);
+						if (!shell.isVisible()) {
+							// shell.open();
+							shell.setVisible(true);
+						}
+						fromButton.setText("adfb");
+					}
+				});
+				return fromButton;
+			}
+		});
+	}
+
+	/**
+	 * Creates the tool bar items.
+	 * 
+	 * @param toolBar
+	 *            The tool bar.
+	 */
+	private void createToolBarItems(IToolBarManager toolBar) {
+		// if (System.getProperty("os.name").toLowerCase().contains("windows"))
+		// {
+		createDateTimes(toolBar);
+		// } else {
+		createCalendars(toolBar);
+		// }
+
+		// Really we just want some space, not an actual separator.
+		toolBar.add(new ControlContribution("rabbit.ui.refreshSeparator") {
+			@Override
+			protected Control createControl(Composite parent) {
 				Label separator = new Label(parent, SWT.NO_BACKGROUND);
 				separator.setText("  ");
 				return separator;
 			}
 		});
+		String text = "Refresh";
+		ImageDescriptor icon = imageDescriptorFromPlugin("org.eclipse.ui.browser", "icons/elcl16/nav_refresh.gif");
+		final IAction updateAction = new Action(text, icon) {
+			@Override
+			public void run() {
+				update();
+			}
+		};
 		toolBar.add(updateAction);
 		toolBar.update(true);
 	}
@@ -207,18 +313,20 @@ public class RabbitView extends ViewPart {
 	}
 
 	/**
-	 * Checks whether the calendar and the widget represent the same date.
+	 * Checks whether the two calendars has the same year, month, and day of
+	 * month.
 	 * 
-	 * @param date
+	 * @param date1
 	 *            The calendar.
-	 * @param widget
-	 *            The widget.
-	 * @return True if the date are the same, false otherwise.
+	 * @param date2
+	 *            The other calendar.
+	 * @return True if the dates has the same year, month, and day of month,
+	 *         false otherwise.
 	 */
-	protected static boolean isSameDate(Calendar date, DateTime widget) {
-		return date.get(Calendar.YEAR) == widget.getYear()
-				&& date.get(Calendar.MONTH) == widget.getMonth()
-				&& date.get(Calendar.DAY_OF_MONTH) == widget.getDay();
+	private static boolean isSameDate(Calendar date1, Calendar date2) {
+		return date1.get(Calendar.YEAR) == date2.get(Calendar.YEAR)
+				&& date1.get(Calendar.MONTH) == date2.get(Calendar.MONTH)
+				&& date1.get(Calendar.DAY_OF_MONTH) == date2.get(Calendar.DAY_OF_MONTH);
 	}
 
 	/**
@@ -241,7 +349,7 @@ public class RabbitView extends ViewPart {
 
 			Boolean updated = pageStatus.get(page);
 			if (updated == null || updated == false) {
-				page.update(displayPref);
+				page.update(preferences);
 				pageStatus.put(page, Boolean.TRUE);
 			}
 		}
@@ -260,12 +368,9 @@ public class RabbitView extends ViewPart {
 	 * Updates the pages to current preference.
 	 */
 	private void update() {
-		updateDate(displayPref.getStartDate(), fromDateTime);
-		updateDate(displayPref.getEndDate(), toDateTime);
-
 		// Sync with today's data:
 		Calendar today = Calendar.getInstance();
-		if (isSameDate(today, toDateTime) || today.before(displayPref.getEndDate())) {
+		if (isSameDate(today, preferences.getEndDate()) || today.before(preferences.getEndDate())) {
 			RabbitCore.getDefault().saveCurrentData();
 		}
 
@@ -274,7 +379,7 @@ public class RabbitView extends ViewPart {
 			boolean isVisible = stackLayout.topControl == entry.getValue();
 			if (isVisible) {
 				// update current visible page.
-				entry.getKey().update(displayPref);
+				entry.getKey().update(preferences);
 			}
 			pageStatus.put(entry.getKey(), Boolean.valueOf(isVisible));
 		}

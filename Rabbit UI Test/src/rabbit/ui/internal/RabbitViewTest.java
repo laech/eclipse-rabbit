@@ -68,14 +68,19 @@ public class RabbitViewTest {
 	}
 
 	@Test
-	public void testIsSameDate() {
-		Calendar cal = Calendar.getInstance();
-		DateTime widget = new DateTime(shell, SWT.NONE);
-		RabbitView.updateDateTime(widget, cal);
-		assertTrue(RabbitView.isSameDate(cal, widget));
+	public void testIsSameDate() throws Exception {
+		Method isSameDate = RabbitView.class.getDeclaredMethod("isSameDate", Calendar.class, Calendar.class);
+		isSameDate.setAccessible(true);
 
-		cal.add(Calendar.DAY_OF_MONTH, 1);
-		assertFalse(RabbitView.isSameDate(cal, widget));
+		Calendar cal1 = Calendar.getInstance();
+		Calendar cal2 = (Calendar) cal1.clone();
+		assertTrue((Boolean) isSameDate.invoke(null, cal1, cal2));
+
+		cal2.add(Calendar.SECOND, 1);
+		assertTrue((Boolean) isSameDate.invoke(null, cal1, cal2));
+
+		cal2.add(Calendar.DAY_OF_MONTH, 1);
+		assertFalse((Boolean) isSameDate.invoke(null, cal1, cal2));
 	}
 
 	@Test

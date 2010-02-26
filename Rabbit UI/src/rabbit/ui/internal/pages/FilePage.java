@@ -18,8 +18,10 @@ public class FilePage extends ResourcePage {
 
 	@Override
 	public void update(DisplayPreference p) {
+		Object[] elements = getViewer().getExpandedElements();
 		super.update(p);
 		setMaxValue(getMaxFileValue());
+		getViewer().setExpandedElements(elements);
 	}
 
 	@Override
