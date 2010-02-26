@@ -2,9 +2,11 @@ package rabbit.ui.internal;
 
 import static org.eclipse.ui.plugin.AbstractUIPlugin.imageDescriptorFromPlugin;
 
+import java.text.DateFormat;
 import java.text.Format;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -60,9 +62,6 @@ public class RabbitView extends ViewPart {
 	private FormToolkit toolkit;
 	private StackLayout stackLayout;
 	private Form displayForm;
-
-	// private DateTime fromDateTime;
-	// private DateTime toDateTime;
 
 	/**
 	 * Constructs a new view.
@@ -172,83 +171,6 @@ public class RabbitView extends ViewPart {
 		});
 	}
 
-	private void createCalendars(IToolBarManager toolBar) {
-		GridLayout layout = new GridLayout();
-		layout.marginHeight = -1; // better looking
-		layout.marginWidth = -1;
-		layout.verticalSpacing = 0;
-		final Shell shell = new Shell(getSite().getShell(), SWT.TOOL);
-		shell.setLayout(layout);
-
-		final DateTime calendar = new DateTime(shell, SWT.CALENDAR);
-
-		Listener closer = new Listener() {
-			@Override
-			public void handleEvent(Event event) {
-				if (shell.isVisible()) {
-					shell.setVisible(false);
-				}
-			}
-		};
-		calendar.addListener(SWT.Selection, closer);
-		// shell.addListener(SWT.FocusIn, closer);
-		// shell.getParent().addListener(SWT.FocusIn, closer);
-		shell.getDisplay().addFilter(SWT.MouseDown, new Listener() {
-			@Override
-			public void handleEvent(Event event) {
-				System.out.println(event.widget);
-			}
-		});
-
-		Composite cmp = toolkit.createComposite(shell);
-		cmp.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, true, false));
-		cmp.setLayout(new GridLayout(3, true));
-		{
-			toolkit.createLabel(cmp, "");
-
-			Hyperlink today = toolkit.createHyperlink(cmp, "Today", SWT.CENTER);
-			today.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, false));
-			today.addHyperlinkListener(new HyperlinkAdapter() {
-				@Override
-				public void linkActivated(HyperlinkEvent e) {
-					Calendar date = Calendar.getInstance();
-					calendar.setDate(date.get(Calendar.YEAR), date.get(Calendar.MONTH), date.get(Calendar.DAY_OF_MONTH));
-				}
-			});
-
-			Hyperlink close = toolkit.createHyperlink(cmp, "Close", SWT.RIGHT);
-			close.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false));
-			close.addHyperlinkListener(new HyperlinkAdapter() {
-				@Override
-				public void linkActivated(HyperlinkEvent e) {
-					shell.setVisible(false);
-				}
-			});
-		}
-
-		shell.pack();
-		final Format formatter = new SimpleDateFormat("yyyy-MM-dd");
-		toolBar.add(new ControlContribution("rabbit.ui.fromButton") {
-			@Override
-			protected Control createControl(Composite parent) {
-				final Button fromButton = toolkit.createButton(parent, formatter.format(preferences.getStartDate().getTime()), SWT.TOGGLE | SWT.FLAT);
-				fromButton.addListener(SWT.Selection, new Listener() {
-					@Override
-					public void handleEvent(Event event) {
-						Point location = fromButton.toDisplay(event.x, event.y + fromButton.getBounds().height);
-						shell.setLocation(location);
-						if (!shell.isVisible()) {
-							// shell.open();
-							shell.setVisible(true);
-						}
-						fromButton.setText("adfb");
-					}
-				});
-				return fromButton;
-			}
-		});
-	}
-
 	/**
 	 * Creates the tool bar items.
 	 * 
@@ -258,20 +180,32 @@ public class RabbitView extends ViewPart {
 	private void createToolBarItems(IToolBarManager toolBar) {
 		// if (System.getProperty("os.name").toLowerCase().contains("windows"))
 		// {
-		createDateTimes(toolBar);
+//		createDateTimes(toolBar);
 		// } else {
-		createCalendars(toolBar);
-		// }
-
-		// Really we just want some space, not an actual separator.
-		toolBar.add(new ControlContribution("rabbit.ui.refreshSeparator") {
+//		createCalendars(toolBar);
+		toolBar.add(new ControlContribution("rabbit.ui.fromButton") {
 			@Override
 			protected Control createControl(Composite parent) {
-				Label separator = new Label(parent, SWT.NO_BACKGROUND);
-				separator.setText("  ");
-				return separator;
+				return new DateTimeButton(preferences.getStartDate()).createContents(parent);
 			}
 		});
+		toolBar.add(new ControlContribution("rabbit.ui.toButton") {
+			@Override
+			protected Control createControl(Composite parent) {
+				return new DateTimeButton(preferences.getEndDate()).createContents(parent);
+			}
+		});
+		// }
+
+//		// Really we just want some space, not an actual separator.
+//		toolBar.add(new ControlContribution("rabbit.ui.refreshSeparator") {
+//			@Override
+//			protected Control createControl(Composite parent) {
+//				Label separator = new Label(parent, SWT.NO_BACKGROUND);
+//				separator.setText("  ");
+//				return separator;
+//			}
+//		});
 		String text = "Refresh";
 		ImageDescriptor icon = imageDescriptorFromPlugin("org.eclipse.ui.browser", "icons/elcl16/nav_refresh.gif");
 		final IAction updateAction = new Action(text, icon) {
@@ -387,5 +321,113 @@ public class RabbitView extends ViewPart {
 
 	@Override
 	public void setFocus() {
+	}
+	
+	private class DateTimeButton {
+
+		private final Format format = DateFormat.getDateInstance();
+		
+		private Shell shell;
+		private DateTime dateTime;
+		private Button button;
+		private final Calendar calendar;
+		
+		private DateTimeButton(final Calendar calendar) {
+			this.calendar = calendar;
+		}
+		
+		Button createContents(final Composite parent) {
+			final IAction okAction = new Action() {
+				@Override
+				public void run() {
+					shell.setVisible(false);
+					calendar.set(dateTime.getYear(), dateTime.getMonth(), dateTime.getDay());
+					button.setText(format.format(calendar.getTime()));
+					button.setSelection(false);
+					shell.setVisible(false);
+					update();
+				}
+			};
+
+			final IAction cancelAction = new Action() {
+				@Override
+				public void run() {
+					shell.setVisible(false);
+					button.setSelection(false);
+				}
+			};
+
+			final IAction openAction = new Action() {
+				@Override
+				public void run() {
+					updateDateTime(dateTime, calendar);
+					Point location = parent.toDisplay(button.getBounds().x, button.getBounds().y + button.getBounds().height);
+					shell.setLocation(location);
+					shell.setVisible(true);
+				}
+			};
+
+			button = toolkit.createButton(parent, "    " + format.format(calendar.getTime()) + "    ", SWT.TOGGLE);
+			button.addListener(SWT.Selection, new Listener() {
+				@Override
+				public void handleEvent(Event event) {
+					if (!shell.isVisible()) {
+						openAction.run();
+					} else {
+						cancelAction.run();
+					}
+				}
+			});
+
+			GridLayout layout = new GridLayout();
+			layout.marginHeight = -1; // better looking
+			layout.marginWidth = -1;
+			layout.verticalSpacing = 0;
+			shell = new Shell(getSite().getShell(), SWT.TOOL);
+			shell.setLayout(layout);
+
+			dateTime = new DateTime(shell, SWT.CALENDAR);
+			dateTime.addListener(SWT.MouseDoubleClick, new Listener() {
+				@Override
+				public void handleEvent(Event event) {
+					okAction.run();
+				}
+			});
+
+			Composite statusbar = toolkit.createComposite(shell);
+			statusbar.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, true, false));
+			statusbar.setLayout(new GridLayout(3, true));
+			{
+				Hyperlink today = toolkit.createHyperlink(statusbar, "Today", SWT.NONE);
+				today.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
+				today.addHyperlinkListener(new HyperlinkAdapter() {
+					@Override
+					public void linkActivated(HyperlinkEvent e) {
+						Calendar calendar = Calendar.getInstance();
+						updateDateTime(dateTime, calendar);
+					}
+				});
+
+				Hyperlink ok = toolkit.createHyperlink(statusbar, "OK", SWT.NONE);
+				ok.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, false));
+				ok.addHyperlinkListener(new HyperlinkAdapter() {
+					@Override
+					public void linkActivated(HyperlinkEvent e) {
+						okAction.run();
+					}
+				});
+
+				Hyperlink cancel = toolkit.createHyperlink(statusbar, "Cancel", SWT.NONE);
+				cancel.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false));
+				cancel.addHyperlinkListener(new HyperlinkAdapter() {
+					@Override
+					public void linkActivated(HyperlinkEvent e) {
+						cancelAction.run();
+					}
+				});
+			}
+			shell.pack();
+			return button;
+		}
 	}
 }
