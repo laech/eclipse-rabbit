@@ -24,7 +24,7 @@ import org.eclipse.ui.ide.IDE;
 /**
  * Label provider for a {@link FilePage}.
  */
-public class ResourcePageLabelProvider2 extends BaseLabelProvider implements ITableLabelProvider, IColorProvider {
+public class ResourcePageLabelProvider extends BaseLabelProvider implements ITableLabelProvider, IColorProvider {
 
 	/** Maps the given path of a resource to an image (may be null). */
 	private final Map<String, Image> resourceMap;
@@ -43,7 +43,7 @@ public class ResourcePageLabelProvider2 extends BaseLabelProvider implements ITa
 
 	private ResourcePage page;
 
-	public ResourcePageLabelProvider2(ResourcePage parent, boolean showProjectValues, boolean showFolderValues, boolean showFileValues) {
+	public ResourcePageLabelProvider(ResourcePage parent, boolean showProjectValues, boolean showFolderValues, boolean showFileValues) {
 		deletedResourceColor = PlatformUI.getWorkbench().getDisplay().getSystemColor(SWT.COLOR_DARK_GRAY);
 
 		ISharedImages images = PlatformUI.getWorkbench().getSharedImages();

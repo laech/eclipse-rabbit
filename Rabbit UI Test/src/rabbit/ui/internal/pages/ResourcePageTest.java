@@ -364,27 +364,27 @@ public abstract class ResourcePageTest {
 	}
 
 	@SuppressWarnings("unchecked")
-	protected Map<IProject, Set<IResource>> getFieldProjectResources(ResourcePage page) throws Exception {
+	static Map<IProject, Set<IResource>> getFieldProjectResources(ResourcePage page) throws Exception {
 		Field field = ResourcePage.class.getDeclaredField("projectResources");
 		field.setAccessible(true);
 		return (Map<IProject, Set<IResource>>) field.get(page);
 	}
 
 	@SuppressWarnings("unchecked")
-	protected Map<IFolder, Set<IFile>> getFieldFolderFiles(ResourcePage page) throws Exception {
+	static Map<IFolder, Set<IFile>> getFieldFolderFiles(ResourcePage page) throws Exception {
 		Field field = ResourcePage.class.getDeclaredField("folderFiles");
 		field.setAccessible(true);
 		return (Map<IFolder, Set<IFile>>) field.get(page);
 	}
 
 	@SuppressWarnings("unchecked")
-	protected Map<IFile, Long> getFieldFileValues(ResourcePage page) throws Exception {
+	static Map<IFile, Long> getFieldFileValues(ResourcePage page) throws Exception {
 		Field field = ResourcePage.class.getDeclaredField("fileValues");
 		field.setAccessible(true);
 		return (Map<IFile, Long>) field.get(page);
 	}
 
-	protected void doUpdate(ResourcePage page, Map<String, Long> data) throws Exception {
+	static void doUpdate(ResourcePage page, Map<String, Long> data) throws Exception {
 		Method method = ResourcePage.class.getDeclaredMethod("doUpdate", Map.class);
 		method.setAccessible(true);
 		method.invoke(page, data);

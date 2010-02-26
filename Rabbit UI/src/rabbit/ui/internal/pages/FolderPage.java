@@ -21,7 +21,7 @@ public class FolderPage extends ResourcePage {
 
 	@Override
 	protected ITableLabelProvider createLabelProvider() {
-		return new ResourcePageLabelProvider2(this, false, true, false);
+		return new ResourcePageLabelProvider(this, false, true, false);
 	}
 
 	@Override
@@ -42,7 +42,7 @@ public class FolderPage extends ResourcePage {
 
 	@Override
 	protected ITreeContentProvider createContentProvider() {
-		return new ResourcePageContentProvider2(this) {
+		return new ResourcePageContentProvider(this) {
 			@Override
 			public boolean hasChildren(Object o) {
 				return o instanceof IProject;

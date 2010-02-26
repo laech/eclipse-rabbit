@@ -6,11 +6,11 @@ import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 
-public class ResourcePageContentProvider2 extends AbstractTreeContentProvider {
+public class ResourcePageContentProvider extends AbstractTreeContentProvider {
 
 	private ResourcePage page;
 
-	public ResourcePageContentProvider2(ResourcePage parent) {
+	public ResourcePageContentProvider(ResourcePage parent) {
 		this.page = parent;
 	}
 

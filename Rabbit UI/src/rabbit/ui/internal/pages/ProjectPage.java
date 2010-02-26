@@ -16,7 +16,7 @@ public class ProjectPage extends ResourcePage {
 
 	@Override
 	protected ITableLabelProvider createLabelProvider() {
-		return new ResourcePageLabelProvider2(this, true, false, false);
+		return new ResourcePageLabelProvider(this, true, false, false);
 	}
 
 	@Override
@@ -26,7 +26,7 @@ public class ProjectPage extends ResourcePage {
 
 	@Override
 	protected ITreeContentProvider createContentProvider() {
-		return new ResourcePageContentProvider2(this) {
+		return new ResourcePageContentProvider(this) {
 			@Override
 			public boolean hasChildren(Object element) {
 				return false;
