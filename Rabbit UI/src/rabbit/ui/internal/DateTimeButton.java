@@ -5,35 +5,38 @@ import java.text.Format;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
-import org.eclipse.jface.action.Action;
-import org.eclipse.jface.action.IAction;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.DateTime;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.ToolBar;
+import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
-import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 
 public class DateTimeButton {
 
-	private final Format format = DateFormat.getDateInstance();
+	public static Control create(Composite parent, Calendar calendar) {
+		return new DateTimeButton(calendar).createContents(parent);
+	}
 
-	private FormToolkit toolkit;
+	private final Format format = DateFormat.getDateInstance();
 	private Shell shell;
 	private DateTime dateTime;
-	private Button button;
+	private ToolBar bar;
+	private ToolItem button;
+
 	private final Calendar calendar;
 
-	private final IAction okAction = new Action() {
+	private final Runnable okAction = new Runnable() {
 		@Override
 		public void run() {
 			shell.setVisible(false);
@@ -44,7 +47,7 @@ public class DateTimeButton {
 		}
 	};
 
-	private final IAction cancelAction = new Action() {
+	private final Runnable cancelAction = new Runnable() {
 		@Override
 		public void run() {
 			shell.setVisible(false);
@@ -52,31 +55,27 @@ public class DateTimeButton {
 		}
 	};
 
-	private final IAction openAction = new Action() {
+	private final Runnable openAction = new Runnable() {
 		@Override
 		public void run() {
 			RabbitView.updateDateTime(dateTime, calendar);
 			Rectangle bounds = button.getBounds();
-			Point location = button.getParent().toDisplay(bounds.x, bounds.y + bounds.height);
+			Point location = bar.toDisplay(bounds.x, bounds.y + bounds.height);
 			shell.setLocation(location);
 			shell.setVisible(true);
 			shell.setActive();
 		}
 	};
-
-	private Shell parentShell;
-
-	DateTimeButton(Shell parentShell, Calendar calendar, FormToolkit toolkit) {
-		this.parentShell = parentShell;
+	
+	private DateTimeButton(Calendar calendar) {
 		this.calendar = calendar;
-		this.toolkit = toolkit;
 	}
-
-	Button createContents(final Composite parent) {
-		String text = "    " + format.format(calendar.getTime()) + "    ";
-		button = toolkit.createButton(parent, text, SWT.TOGGLE | SWT.FLAT);
-		button.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		button.addListener(SWT.MouseUp, new Listener() {
+	
+	private Control createContents(final Composite parent) {
+		bar = new ToolBar(parent, SWT.FLAT);
+		button = new ToolItem(bar, SWT.CHECK);
+		button.setText(format.format(calendar.getTime()));
+		button.addListener(SWT.Selection, new Listener() {
 			@Override
 			public void handleEvent(Event event) {
 				if (!shell.isVisible()) {
@@ -91,7 +90,7 @@ public class DateTimeButton {
 		layout.marginHeight = -1; // better looking
 		layout.marginWidth = -1;
 		layout.verticalSpacing = 0;
-		shell = new Shell(parentShell, SWT.TOOL);
+		shell = new Shell(parent.getShell(), SWT.TOOL);
 		shell.setLayout(layout);
 		shell.addListener(SWT.Deactivate, new Listener() {
 			@Override
@@ -115,18 +114,15 @@ public class DateTimeButton {
 			}
 		});
 
-		createStatusbar(parent);
-
-		shell.pack();
-		return button;
-	}
-
-	private void createStatusbar(Composite parent) {
-		Composite statusbar = toolkit.createComposite(shell);
+		Composite statusbar = new Composite(shell, SWT.NONE);
+		statusbar.setBackground(statusbar.getDisplay().getSystemColor(SWT.COLOR_WHITE));
 		statusbar.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, true, false));
 		statusbar.setLayout(new GridLayout());
 
-		Hyperlink today = toolkit.createHyperlink(statusbar, "Select Today", SWT.NONE);
+		Hyperlink today = new Hyperlink(statusbar, SWT.NONE);
+		today.setText("Today");
+		today.setBackground(statusbar.getBackground());
+		today.setForeground(today.getDisplay().getSystemColor(SWT.COLOR_BLUE));
 		today.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, false));
 		today.addHyperlinkListener(new HyperlinkAdapter() {
 			@Override
@@ -135,5 +131,8 @@ public class DateTimeButton {
 				okAction.run();
 			}
 		});
+
+		shell.pack();
+		return bar;
 	}
 }

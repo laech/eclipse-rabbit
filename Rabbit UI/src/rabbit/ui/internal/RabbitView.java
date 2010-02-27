@@ -121,14 +121,12 @@ public class RabbitView extends ViewPart {
 	 *            The tool bar.
 	 */
 	private void createToolBarItems(IToolBarManager toolBar) {
-		String text = "Refresh";
-		ImageDescriptor icon = imageDescriptorFromPlugin("org.eclipse.ui.browser", "icons/elcl16/nav_refresh.gif");
-		toolBar.add(new Action(text, icon) {
-			@Override
-			public void run() {
-				update();
-			}
-		});
+		
+		if (System.getProperty("os.name").toLowerCase().contains("windows")) {
+			createToolBarForWindowsOS(toolBar);
+		} else {
+			createToolBarForNonWindowsOS(toolBar);
+		}
 		
 		toolBar.add(new ControlContribution("rabbit.ui.refreshSeparator") {
 			@Override
@@ -138,12 +136,14 @@ public class RabbitView extends ViewPart {
 				return separator;
 			}
 		});
-		
-		if (System.getProperty("os.name").toLowerCase().contains("windows")) {
-			createToolBarForWindowsOS(toolBar);
-		} else {
-			createToolBarForNonWindowsOS(toolBar);
-		}
+		String text = "Refresh";
+		ImageDescriptor icon = imageDescriptorFromPlugin("org.eclipse.ui.browser", "icons/elcl16/nav_refresh.gif");
+		toolBar.add(new Action(text, icon) {
+			@Override
+			public void run() {
+				update();
+			}
+		});
 		toolBar.update(true);
 	}
 
@@ -204,8 +204,7 @@ public class RabbitView extends ViewPart {
 		toolBar.add(new ControlContribution("rabbit.ui.fromButton") {
 			@Override
 			protected Control createControl(Composite parent) {
-				return new DateTimeButton(getSite().getShell(),
-						preferences.getStartDate(), toolkit).createContents(parent);
+				return DateTimeButton.create(parent, preferences.getStartDate());
 			}
 		});
 
@@ -221,8 +220,7 @@ public class RabbitView extends ViewPart {
 		toolBar.add(new ControlContribution("rabbit.ui.toButton") {
 			@Override
 			protected Control createControl(Composite parent) {
-				return new DateTimeButton(getSite().getShell(),
-						preferences.getEndDate(), toolkit).createContents(parent);
+				return DateTimeButton.create(parent, preferences.getEndDate());
 			}
 		});
 	}
