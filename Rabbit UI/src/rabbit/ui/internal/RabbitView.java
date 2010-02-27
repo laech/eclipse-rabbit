@@ -12,10 +12,14 @@ import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StackLayout;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.DateTime;
@@ -121,29 +125,11 @@ public class RabbitView extends ViewPart {
 	 *            The tool bar.
 	 */
 	private void createToolBarItems(IToolBarManager toolBar) {
-		
 		if (System.getProperty("os.name").toLowerCase().contains("windows")) {
 			createToolBarForWindowsOS(toolBar);
 		} else {
 			createToolBarForNonWindowsOS(toolBar);
 		}
-		
-		toolBar.add(new ControlContribution("rabbit.ui.refreshSeparator") {
-			@Override
-			protected Control createControl(Composite parent) {
-				Label separator = new Label(parent, SWT.NO_BACKGROUND);
-				separator.setText("  ");
-				return separator;
-			}
-		});
-		String text = "Refresh";
-		ImageDescriptor icon = imageDescriptorFromPlugin("org.eclipse.ui.browser", "icons/elcl16/nav_refresh.gif");
-		toolBar.add(new Action(text, icon) {
-			@Override
-			public void run() {
-				update();
-			}
-		});
 		toolBar.update(true);
 	}
 
@@ -169,15 +155,7 @@ public class RabbitView extends ViewPart {
 			}
 		});
 
-//		toolBar.add(new ControlContribution("rabbit.ui.dateTimeSeparator") {
-//			@Override
-//			protected Control createControl(Composite parent) {
-//				Label separator = new Label(parent, SWT.NO_BACKGROUND);
-//				separator.setText("  ");
-//				return separator;
-//			}
-//		});
-
+		createSeparator(toolBar);
 		toolBar.add(new ControlContribution("rabbit.ui.toDateTime") {
 			@Override
 			protected Control createControl(Composite parent) {
@@ -192,6 +170,14 @@ public class RabbitView extends ViewPart {
 				return toDateTime;
 			}
 		});
+
+		createSeparator(toolBar);
+		toolBar.add(new Action("Refresh", getRefreshImageDescriptor()) {
+			@Override
+			public void run() {
+				updateView();
+			}
+		});
 	}
 
 	/**
@@ -201,29 +187,84 @@ public class RabbitView extends ViewPart {
 	 *            The tool bar.
 	 */
 	private void createToolBarForNonWindowsOS(IToolBarManager toolBar) {
+		final String space = "     ";
 		toolBar.add(new ControlContribution("rabbit.ui.fromButton") {
 			@Override
 			protected Control createControl(Composite parent) {
-				return DateTimeButton.create(parent, preferences.getStartDate());
+				Button button = toolkit.createButton(parent, null, SWT.FLAT | SWT.TOGGLE);
+				DateTimeButton.create(button, preferences.getStartDate(), space, space);
+				return button;
 			}
 		});
-
-//		toolBar.add(new ControlContribution("rabbit.ui.refreshSeparator") {
-//			@Override
-//			protected Control createControl(Composite parent) {
-//				Label separator = new Label(parent, SWT.NO_BACKGROUND);
-//				separator.setText("  ");
-//				return separator;
-//			}
-//		});
-
+		createSeparator(toolBar);
 		toolBar.add(new ControlContribution("rabbit.ui.toButton") {
 			@Override
 			protected Control createControl(Composite parent) {
-				return DateTimeButton.create(parent, preferences.getEndDate());
+				Button button = toolkit.createButton(parent, null, SWT.FLAT | SWT.TOGGLE);
+				DateTimeButton.create(button, preferences.getEndDate(), space, space);
+				return button;
+			}
+		});
+		createSeparator(toolBar);
+		toolBar.add(new ControlContribution("rabbit.ui.refreshButton") {
+			@Override
+			protected Control createControl(Composite parent) {
+				Button refresh = toolkit.createButton(parent, null, SWT.FLAT | SWT.PUSH);
+				refresh.addListener(SWT.Selection, new Listener() {
+					@Override
+					public void handleEvent(Event event) {
+						updateView();
+					}
+				});
+				ImageDescriptor icon = getRefreshImageDescriptor();
+				if (icon == null) {
+					refresh.setText("Refresh");
+					return refresh;
+				}
+				final Image image = icon.createImage();
+				refresh.setImage(image);
+				refresh.addDisposeListener(new DisposeListener() {
+					@Override
+					public void widgetDisposed(DisposeEvent e) {
+						image.dispose();
+					}
+				});
+				return refresh;
 			}
 		});
 	}
+
+	private void createSeparator(IToolBarManager toolBar) {
+		toolBar.add(new ControlContribution(null) {
+			@Override
+			protected Control createControl(Composite parent) {
+				Label separator = new Label(parent, SWT.NO_BACKGROUND);
+				separator.setText("  ");
+				return separator;
+			}
+		});
+	}
+
+	/**
+	 * Gets the image descriptor of the refresh image.
+	 * 
+	 * @return The image descriptor, or null if not found.
+	 */
+	private ImageDescriptor getRefreshImageDescriptor() {
+		return imageDescriptorFromPlugin("org.eclipse.ui.browser", "icons/elcl16/nav_refresh.gif");
+	}
+
+	// private void createSeparator(IToolBarManager toolBar, final String text)
+	// {
+	// toolBar.add(new ControlContribution(null) {
+	// @Override
+	// protected Control createControl(Composite parent) {
+	// Label separator = new Label(parent, SWT.BOTTOM);
+	// separator.setText(text);
+	// return separator;
+	// }
+	// });
+	// }
 
 	/**
 	 * Updates the widget with the data from the date.
@@ -308,7 +349,7 @@ public class RabbitView extends ViewPart {
 	/**
 	 * Updates the pages to current preference.
 	 */
-	private void update() {
+	private void updateView() {
 		// Sync with today's data:
 		Calendar today = Calendar.getInstance();
 		if (isSameDate(today, preferences.getEndDate()) || today.before(preferences.getEndDate())) {
