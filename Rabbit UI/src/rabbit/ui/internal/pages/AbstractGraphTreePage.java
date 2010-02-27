@@ -144,7 +144,7 @@ public abstract class AbstractGraphTreePage implements IPage {
 
 	@Override
 	public void createContents(Composite parent) {
-		viewer = new TreeViewer(parent, SWT.NONE);
+		viewer = new TreeViewer(parent, SWT.V_SCROLL | SWT.H_SCROLL);
 		viewer.setContentProvider(createContentProvider());
 		viewer.setLabelProvider(createLabelProvider());
 		viewer.addDoubleClickListener(new IDoubleClickListener() {

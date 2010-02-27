@@ -8,7 +8,6 @@ import java.util.Map;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ControlContribution;
-import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.SWT;
@@ -122,13 +121,15 @@ public class RabbitView extends ViewPart {
 	 *            The tool bar.
 	 */
 	private void createToolBarItems(IToolBarManager toolBar) {
-		if (System.getProperty("os.name").toLowerCase().contains("windows")) {
-			createToolBarForWindowsOS(toolBar);
-		} else {
-			createToolBarForNonWindowsOS(toolBar);
-		}
-
-		// Really we just want some space, not an actual separator.
+		String text = "Refresh";
+		ImageDescriptor icon = imageDescriptorFromPlugin("org.eclipse.ui.browser", "icons/elcl16/nav_refresh.gif");
+		toolBar.add(new Action(text, icon) {
+			@Override
+			public void run() {
+				update();
+			}
+		});
+		
 		toolBar.add(new ControlContribution("rabbit.ui.refreshSeparator") {
 			@Override
 			protected Control createControl(Composite parent) {
@@ -137,15 +138,12 @@ public class RabbitView extends ViewPart {
 				return separator;
 			}
 		});
-		String text = "Refresh";
-		ImageDescriptor icon = imageDescriptorFromPlugin("org.eclipse.ui.browser", "icons/elcl16/nav_refresh.gif");
-		final IAction updateAction = new Action(text, icon) {
-			@Override
-			public void run() {
-				update();
-			}
-		};
-		toolBar.add(updateAction);
+		
+		if (System.getProperty("os.name").toLowerCase().contains("windows")) {
+			createToolBarForWindowsOS(toolBar);
+		} else {
+			createToolBarForNonWindowsOS(toolBar);
+		}
 		toolBar.update(true);
 	}
 
@@ -171,14 +169,14 @@ public class RabbitView extends ViewPart {
 			}
 		});
 
-		toolBar.add(new ControlContribution("rabbit.ui.dateTimeSeparator") {
-			@Override
-			protected Control createControl(Composite parent) {
-				Label separator = new Label(parent, SWT.NO_BACKGROUND);
-				separator.setText("  ");
-				return separator;
-			}
-		});
+//		toolBar.add(new ControlContribution("rabbit.ui.dateTimeSeparator") {
+//			@Override
+//			protected Control createControl(Composite parent) {
+//				Label separator = new Label(parent, SWT.NO_BACKGROUND);
+//				separator.setText("  ");
+//				return separator;
+//			}
+//		});
 
 		toolBar.add(new ControlContribution("rabbit.ui.toDateTime") {
 			@Override
@@ -211,14 +209,14 @@ public class RabbitView extends ViewPart {
 			}
 		});
 
-		toolBar.add(new ControlContribution("rabbit.ui.refreshSeparator") {
-			@Override
-			protected Control createControl(Composite parent) {
-				Label separator = new Label(parent, SWT.NO_BACKGROUND);
-				separator.setText("  ");
-				return separator;
-			}
-		});
+//		toolBar.add(new ControlContribution("rabbit.ui.refreshSeparator") {
+//			@Override
+//			protected Control createControl(Composite parent) {
+//				Label separator = new Label(parent, SWT.NO_BACKGROUND);
+//				separator.setText("  ");
+//				return separator;
+//			}
+//		});
 
 		toolBar.add(new ControlContribution("rabbit.ui.toButton") {
 			@Override
