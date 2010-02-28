@@ -105,7 +105,7 @@ public class MetricsPanel {
 	 *            The parent composite.
 	 */
 	public void createContents(Composite parent) {
-		final TreeViewer viewer = new TreeViewer(parent, SWT.SINGLE);
+		final TreeViewer viewer = new TreeViewer(parent, SWT.SINGLE | SWT.V_SCROLL | SWT.H_SCROLL);
 		viewer.setLabelProvider(new TreeLabelProvider());
 		viewer.setContentProvider(new TreeContentProvider());
 		viewer.addDoubleClickListener(new IDoubleClickListener() {

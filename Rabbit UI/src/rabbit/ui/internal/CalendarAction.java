@@ -1,127 +1,91 @@
 package rabbit.ui.internal;
 
-import java.text.DateFormat;
 import java.text.Format;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.DateTime;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 
-/**
- * Associates a pop up calendar widget to a button, when the button is selected,
- * a calendar will pop up below the button to allow the user to select a date.
- */
-public class DateTimeButton {
-
-	/**
-	 * Creates a pop up calendar and associates it with the button selection
-	 * event.
-	 * 
-	 * @param button
-	 *            The button.
-	 * @param calendar
-	 *            The calendar object to manipulate.
-	 * @param prefix
-	 *            The prefix for the button's text.
-	 * @param suffix
-	 *            The suffix for the button's text.
-	 */
-	public static void create(Button button, Calendar calendar, String prefix, String suffix) {
-		new DateTimeButton(button, calendar, prefix, suffix);
+public class CalendarAction extends Action {
+	
+	public static void create(IToolBarManager toolBar, Shell parentShell, Calendar calendar) {
+		create(toolBar, parentShell, calendar, "  ", "  ");
+	}
+	
+	public static void create(IToolBarManager toolBar, Shell parentShell, Calendar calendar, String prefix, String suffix) {
+		toolBar.add(new CalendarAction(parentShell, calendar, prefix, suffix));
 	}
 
-	/**
-	 * Creates a pop up calendar and associates it with the button selection
-	 * event.
-	 * 
-	 * @param button
-	 *            The button.
-	 * @param calendar
-	 *            The calendar object to manipulate.
-	 */
-	public static void create(Button button, Calendar calendar) {
-		create(button, calendar, "", "");
-	}
-
-	private final Format format = DateFormat.getDateInstance();
+	private final Format format = new SimpleDateFormat("yyyy-MM-dd");
 	private final Calendar calendar;
 	private final String prefix;
 	private final String suffix;
-
+	
 	private DateTime dateTime;
-	private Button button;
 	private Shell shell;
+	
 
-	private final Runnable okAction = new Runnable() {
-		@Override
-		public void run() {
-			shell.setVisible(false);
-			calendar.set(dateTime.getYear(), dateTime.getMonth(), dateTime.getDay());
-			button.setText(getFormattedText());
-			button.setSelection(false);
-			shell.setVisible(false);
-		}
-	};
-
-	private final Runnable cancelAction = new Runnable() {
-		@Override
-		public void run() {
-			shell.setVisible(false);
-			button.setSelection(false);
-		}
-	};
-
-	private final Runnable openAction = new Runnable() {
-		@Override
-		public void run() {
-			RabbitView.updateDateTime(dateTime, calendar);
-			Rectangle bounds = button.getBounds();
-			Point location = button.getParent().toDisplay(bounds.x, bounds.y + bounds.height);
-			shell.setLocation(location);
-			shell.setVisible(true);
-			shell.setActive();
-		}
-	};
-
-	private DateTimeButton(Button button, Calendar calendar, String prefix, String suffix) {
+	private CalendarAction(Shell parentShell, Calendar calendar, String prefix, String suffix) {
+		super("", SWT.CHECK);
 		this.calendar = calendar;
 		this.prefix = prefix;
 		this.suffix = suffix;
-		this.button = button;
-
+		
 		if (prefix == null) {
 			prefix = "";
 		}
 		if (suffix == null) {
 			suffix = "";
 		}
+		
+		create(parentShell);
+	}
 
-		button.setText(getFormattedText());
-		button.addListener(SWT.Selection, new Listener() {
-			@Override
-			public void handleEvent(Event event) {
-				if (!shell.isVisible()) {
-					openAction.run();
-				} else {
-					cancelAction.run();
-				}
-			}
-		});
+	private void ok() {
+		shell.setVisible(false);
+		calendar.set(dateTime.getYear(), dateTime.getMonth(), dateTime.getDay());
+		setText(getFormattedText());
+		setChecked(false);
+		shell.setVisible(false);
+	}
 
-		createContents();
+	private void cancel() {
+		shell.setVisible(false);
+		setChecked(false);
+	}
+
+	private void open(Event e) {
+		RabbitView.updateDateTime(dateTime, calendar);
+		Rectangle bounds = ((ToolItem) e.widget).getBounds();
+		Point location = ((ToolItem) e.widget).getParent().toDisplay(bounds.x, bounds.y + bounds.height);
+		shell.setLocation(location);
+		shell.setVisible(true);
+		shell.setActive();
+	}
+
+	@Override
+	public void runWithEvent(Event event) {
+		if (!shell.isVisible()) {
+			open(event);
+		} else {
+			cancel();
+		}
 	}
 
 	private String getFormattedText() {
@@ -132,17 +96,19 @@ public class DateTimeButton {
 		return prefix + format.format(calendar.getTime()) + suffix;
 	}
 
-	private void createContents() {
+	private void create(Shell parentShell) {
+		setText(getFormattedText());
+
 		GridLayout layout = new GridLayout();
 		layout.marginHeight = -1; // better looking
 		layout.marginWidth = -1;
 		layout.verticalSpacing = 0;
-		shell = new Shell(button.getShell(), SWT.TOOL);
+		shell = new Shell(parentShell, SWT.TOOL);
 		shell.setLayout(layout);
 		shell.addListener(SWT.Deactivate, new Listener() {
 			@Override
 			public void handleEvent(Event event) {
-				cancelAction.run();
+				cancel();
 			}
 		});
 
@@ -150,14 +116,14 @@ public class DateTimeButton {
 		dateTime.addListener(SWT.MouseDoubleClick, new Listener() {
 			@Override
 			public void handleEvent(Event event) {
-				okAction.run();
+				ok();
 			}
 		});
 		dateTime.addListener(SWT.Selection, new Listener() {
 			@Override
 			public void handleEvent(Event event) {
 				Calendar date = new GregorianCalendar(dateTime.getYear(), dateTime.getMonth(), dateTime.getDay());
-				button.setText(getFormattedText(date));
+				setText(getFormattedText(date));
 			}
 		});
 
@@ -175,7 +141,7 @@ public class DateTimeButton {
 			@Override
 			public void linkActivated(HyperlinkEvent e) {
 				RabbitView.updateDateTime(dateTime, Calendar.getInstance());
-				okAction.run();
+				ok();
 			}
 		});
 
