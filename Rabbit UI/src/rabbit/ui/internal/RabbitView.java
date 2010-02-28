@@ -7,6 +7,7 @@ import java.util.Map;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ControlContribution;
 import org.eclipse.jface.action.IToolBarManager;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.layout.FillLayout;
@@ -124,7 +125,7 @@ public class RabbitView extends ViewPart {
 		}
 
 		createSeparator(toolBar);
-		toolBar.add(new Action("Refresh") {
+		toolBar.add(new Action("Refresh", getRefreshImageDescriptor()) {
 			@Override
 			public void run() {
 				updateView();
@@ -242,14 +243,14 @@ public class RabbitView extends ViewPart {
 		});
 	}
 
-//	/**
-//	 * Gets the image descriptor of the refresh image.
-//	 * 
-//	 * @return The image descriptor, or null if not found.
-//	 */
-//	private ImageDescriptor getRefreshImageDescriptor() {
-//		return imageDescriptorFromPlugin("org.eclipse.ui.browser", "icons/elcl16/nav_refresh.gif");
-//	}
+	/**
+	 * Gets the image descriptor of the refresh image.
+	 * 
+	 * @return The image descriptor, or null if not found.
+	 */
+	private ImageDescriptor getRefreshImageDescriptor() {
+		return RabbitUI.imageDescriptorFromPlugin("org.eclipse.ui.browser", "icons/elcl16/nav_refresh.gif");
+	}
 
 	/**
 	 * Updates the widget with the data from the date.
