@@ -1,6 +1,12 @@
 package rabbit.ui.internal.pages;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.ActionContributionItem;
+import org.eclipse.jface.action.GroupMarker;
+import org.eclipse.jface.action.IContributionItem;
+import org.eclipse.jface.action.IToolBarManager;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
@@ -14,6 +20,21 @@ public class FilePage extends ResourcePage {
 
 	public FilePage() {
 		super();
+	}
+
+	@Override
+	public IContributionItem[] createToolBarItems(IToolBarManager toolBar, GroupMarker group) {
+		ImageDescriptor icon = PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(ISharedImages.IMG_ELCL_COLLAPSEALL);
+		
+		IContributionItem collapseAll = new ActionContributionItem(new Action("Collapse All", icon) {
+			@Override
+			public void run() {
+				getViewer().collapseAll();
+			}
+		});
+		toolBar.appendToGroup(group.getGroupName(), collapseAll);
+
+		return new IContributionItem[] { collapseAll };
 	}
 
 	@Override

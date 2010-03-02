@@ -1,5 +1,8 @@
 package rabbit.ui;
 
+import org.eclipse.jface.action.GroupMarker;
+import org.eclipse.jface.action.IContributionItem;
+import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 
@@ -15,7 +18,7 @@ public interface IPage {
 	 * 
 	 * @return The image icon, or null.
 	 */
-	public Image getImage();
+	Image getImage();
 
 	/**
 	 * Creates the content of this page.
@@ -23,7 +26,13 @@ public interface IPage {
 	 * @param parent
 	 *            The parent composite.
 	 */
-	public void createContents(Composite parent);
+	void createContents(Composite parent);
+	
+	/**
+	 * @param group TODO
+	 * 
+	 */
+	IContributionItem[] createToolBarItems(IToolBarManager toolBar, GroupMarker group);
 
 	/**
 	 * Updates the data of this page.
@@ -31,6 +40,6 @@ public interface IPage {
 	 * @param preference
 	 *            The object containing the update preferences.
 	 */
-	public void update(DisplayPreference preference);
+	void update(DisplayPreference preference);
 
 }

@@ -21,7 +21,6 @@ import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.swt.widgets.TreeItem;
 
 import rabbit.ui.ColumnComparator;
-import rabbit.ui.IPage;
 import rabbit.ui.internal.RabbitUI;
 
 /**
@@ -39,7 +38,7 @@ import rabbit.ui.internal.RabbitUI;
  * and the index of the value column is last index - 1.
  * </p>
  */
-public abstract class AbstractGraphTreePage implements IPage {
+public abstract class AbstractGraphTreePage extends AbstractPage {
 
 	private long maxValue;
 

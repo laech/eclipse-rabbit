@@ -6,7 +6,10 @@ import java.util.Map;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ControlContribution;
+import org.eclipse.jface.action.GroupMarker;
+import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.IToolBarManager;
+import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StackLayout;
@@ -42,7 +45,11 @@ public class RabbitView extends ViewPart {
 	 */
 	private Map<IPage, Boolean> pageStatus;
 	private Map<IPage, Composite> pages;
-	private DisplayPreference preferences;
+	private Map<IPage, IContributionItem[]> pageToolBars;
+	private IContributionItem[] currentItems;
+	private final GroupMarker marker = new GroupMarker("rabbit.ui.extensionToolBar");
+	
+	private final DisplayPreference preferences;
 	private FormToolkit toolkit;
 	private StackLayout stackLayout;
 	private Form displayForm;
@@ -52,10 +59,12 @@ public class RabbitView extends ViewPart {
 	 */
 	public RabbitView() {
 		pages = new HashMap<IPage, Composite>();
+		pageStatus = new HashMap<IPage, Boolean>();
+		pageToolBars = new HashMap<IPage, IContributionItem[]>();
+		
 		toolkit = new FormToolkit(PlatformUI.getWorkbench().getDisplay());
 		stackLayout = new StackLayout();
 		preferences = new DisplayPreference();
-		pageStatus = new HashMap<IPage, Boolean>();
 	}
 
 	@Override
@@ -118,13 +127,17 @@ public class RabbitView extends ViewPart {
 	 *            The tool bar.
 	 */
 	private void createToolBarItems(IToolBarManager toolBar) {
-		if (System.getProperty("os.name").toLowerCase().contains("windows")) {
+		marker.setVisible(false);
+		toolBar.add(marker);
+		
+		toolBar.add(new Separator("rabbit.ui.toolBar"));
+		if (System.getProperty("os.name").toLowerCase().contains("windows"))
 			createToolBarForWindowsOS(toolBar);
-		} else {
+		else
 			createToolBarForNonWindowsOS(toolBar);
-		}
 
-		createSeparator(toolBar);
+
+		createSpace(toolBar);
 		toolBar.add(new Action("Refresh", getRefreshImageDescriptor()) {
 			@Override
 			public void run() {
@@ -144,29 +157,33 @@ public class RabbitView extends ViewPart {
 		toolBar.add(new ControlContribution("rabbit.ui.fromDateTime") {
 			@Override
 			protected Control createControl(Composite parent) {
+				final Calendar dateToBind = preferences.getStartDate();
 				final DateTime fromDateTime = new DateTime(parent, SWT.DROP_DOWN | SWT.BORDER);
-				updateDateTime(fromDateTime, preferences.getStartDate());
+				fromDateTime.setToolTipText("Select the start date for the data to be displayed");
+				updateDateTime(fromDateTime, dateToBind);
 				fromDateTime.addListener(SWT.Selection, new Listener() {
 					@Override
 					public void handleEvent(Event event) {
-						updateDate(preferences.getEndDate(), fromDateTime);
+						updateDate(dateToBind, fromDateTime);
 					}
 				});
 				return fromDateTime;
 			}
 		});
-		createSeparator(toolBar);
+		createSpace(toolBar);
 		toolBar.add(new ControlContribution("rabbit.ui.toDateTime") {
 			@Override
 			protected Control createControl(Composite parent) {
+				final Calendar dateToBind = preferences.getEndDate();
 				final DateTime toDateTime = new DateTime(parent, SWT.DROP_DOWN | SWT.BORDER);
+				toDateTime.setToolTipText("Select the end date for the data to be displayed");
+				updateDateTime(toDateTime, dateToBind);
 				toDateTime.addListener(SWT.Selection, new Listener() {
 					@Override
 					public void handleEvent(Event event) {
-						updateDate(preferences.getStartDate(), toDateTime);
+						updateDate(dateToBind, toDateTime);
 					}
 				});
-				updateDateTime(toDateTime, preferences.getEndDate());
 				return toDateTime;
 			}
 		});
@@ -232,7 +249,7 @@ public class RabbitView extends ViewPart {
 //		});
 	}
 
-	private void createSeparator(IToolBarManager toolBar) {
+	private void createSpace(IToolBarManager toolBar) {
 		toolBar.add(new ControlContribution(null) {
 			@Override
 			protected Control createControl(Composite parent) {
@@ -303,8 +320,13 @@ public class RabbitView extends ViewPart {
 	 * @param page
 	 *            The page to display.
 	 */
-	protected void display(IPage page) {
-
+	public void display(IPage page) {
+		
+		IToolBarManager manager = displayForm.getToolBarManager();
+		if (currentItems != null)
+			for (IContributionItem item : currentItems)
+				manager.remove(item);
+		
 		Composite cmp = null;
 		if (page != null) {
 			cmp = pages.get(page);
@@ -314,6 +336,14 @@ public class RabbitView extends ViewPart {
 				page.createContents(cmp);
 				pages.put(page, cmp);
 			}
+				
+			currentItems = pageToolBars.get(page);
+			if (currentItems == null)
+				currentItems = page.createToolBarItems(manager, marker);
+			else
+				for (IContributionItem item : currentItems)
+					displayForm.getToolBarManager().appendToGroup(marker.getGroupName(), item);
+			
 
 			Boolean updated = pageStatus.get(page);
 			if (updated == null || updated == false) {
@@ -322,6 +352,7 @@ public class RabbitView extends ViewPart {
 			}
 		}
 
+		manager.update(true);
 		stackLayout.topControl = cmp;
 		displayForm.getBody().layout();
 	}
