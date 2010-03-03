@@ -1,7 +1,14 @@
 package rabbit.ui.internal.util;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
+import org.eclipse.jface.action.IContributionItem;
+import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.junit.Before;
@@ -9,7 +16,6 @@ import org.junit.Test;
 
 import rabbit.ui.DisplayPreference;
 import rabbit.ui.IPage;
-import rabbit.ui.internal.util.PageDescriptor;
 
 /**
  * Test for {@link PageDescriptor}
@@ -30,6 +36,11 @@ public class PageDescriptorTest {
 
 		@Override
 		public void update(DisplayPreference preference) {
+		}
+
+		@Override
+		public IContributionItem[] createToolBarItems(IToolBarManager toolBar) {
+			return null;
 		}
 
 	}

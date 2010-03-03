@@ -3,12 +3,12 @@ package rabbit.ui.internal.pages;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.ITableLabelProvider;
-import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.widgets.Tree;
-import org.eclipse.swt.widgets.TreeColumn;
+import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.ui.IPerspectiveDescriptor;
 import org.eclipse.ui.IPerspectiveRegistry;
 import org.eclipse.ui.ISharedImages;
@@ -17,12 +17,13 @@ import org.eclipse.ui.PlatformUI;
 import rabbit.core.storage.IAccessor;
 import rabbit.core.storage.xml.PerspectiveDataAccessor;
 import rabbit.ui.DisplayPreference;
+import rabbit.ui.TableLabelComparator;
 import rabbit.ui.internal.util.UndefinedPerspectiveDescriptor;
 
 /**
  * A page displays perspective usage.
  */
-public class PerspectivePage extends AbstractGraphTreePage {
+public class PerspectivePage extends AbstractTableViewerPage {
 
 	private IAccessor dataStore;
 	private IPerspectiveRegistry registry;
@@ -36,17 +37,24 @@ public class PerspectivePage extends AbstractGraphTreePage {
 	}
 
 	@Override
-	protected TreeColumn[] createColumns(Tree t) {
-		TreeColumn nameColumn = new TreeColumn(t, SWT.LEFT);
-		nameColumn.setText("Name");
-		nameColumn.setWidth(150);
-		nameColumn.setMoveable(true);
+	public void createColumns(TableViewer viewer) {
+		TableLabelComparator textSorter = new TableLabelComparator(viewer);
+		TableLabelComparator valueSorter = createValueSorterForTable(viewer);
 
-		return new TreeColumn[] { nameColumn };
+		int[] widths = new int[] { 150, 150 };
+		int[] styles = new int[] { SWT.LEFT, SWT.RIGHT };
+		String[] names = new String[] { "Name", "Usage Count" };
+		for (int i = 0; i < names.length; i++) {
+			TableColumn column = new TableColumn(viewer.getTable(), styles[i]);
+			column.setText(names[i]);
+			column.setWidth(widths[i]);
+			column.addSelectionListener(
+					(names.length - 1 == i) ? valueSorter : textSorter);
+		}
 	}
 
 	@Override
-	protected ITreeContentProvider createContentProvider() {
+	protected IContentProvider createContentProvider() {
 		return new CollectionContentProvider();
 	}
 
@@ -56,13 +64,9 @@ public class PerspectivePage extends AbstractGraphTreePage {
 	}
 
 	@Override
-	protected String getValueColumnText() {
-		return "Usage";
-	}
-
-	@Override
 	public Image getImage() {
-		return PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_ETOOL_DEF_PERSPECTIVE);
+		return PlatformUI.getWorkbench().getSharedImages()
+				.getImage(ISharedImages.IMG_ETOOL_DEF_PERSPECTIVE);
 	}
 
 	@Override

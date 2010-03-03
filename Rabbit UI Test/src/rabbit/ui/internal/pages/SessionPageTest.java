@@ -15,10 +15,10 @@ import rabbit.ui.DisplayPreference;
 /**
  * Test for {@link SessionPage}
  */
-public class SessionPageTest extends AbstractGraphTreePageTest {
+public class SessionPageTest extends AbstractTableViewerPageTest {
 
 	@Override
-	protected AbstractGraphTreePage createPage() {
+	protected AbstractTableViewerPage createPage() {
 		return new SessionPage();
 	}
 

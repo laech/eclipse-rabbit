@@ -1,5 +1,6 @@
 package rabbit.ui;
 
+import org.eclipse.jface.viewers.IBaseLabelProvider;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TreeViewer;
@@ -8,8 +9,9 @@ import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.widgets.Tree;
-import org.eclipse.swt.widgets.TreeColumn;
+import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableColumn;
+import org.eclipse.swt.widgets.Widget;
 
 /**
  * <p>
@@ -18,7 +20,7 @@ import org.eclipse.swt.widgets.TreeColumn;
  * </p>
  * <p>
  * To register a table column for sorting, simply call the column's
- * {@link TreeColumn#addSelectionListener(TableColumnComparator)} method and
+ * {@link TableColumn#addSelectionListener(TableColumnComparator)} method and
  * pass in an instance of this class. An instance of this class can be shared by
  * multiple columns of the same viewer.
  * </p>
@@ -30,16 +32,16 @@ import org.eclipse.swt.widgets.TreeColumn;
  * @see ITableLabelProvider
  * @see TreeViewer#setLabelProvider(ITableLabelProvider)
  */
-public class ColumnComparator extends ViewerComparator implements SelectionListener {
+public class TableLabelComparator extends ViewerComparator implements SelectionListener {
 
 	/**
 	 * One of {@link SWT#NONE}, {@link SWT#UP}, {@link SWT#DOWN}.
 	 */
 	private int sortDirection;
-	private TreeViewer viewer;
-	private TreeColumn selectedColumn;
+	private TableViewer viewer;
+	private TableColumn selectedColumn;
 
-	public ColumnComparator(TreeViewer parent) {
+	public TableLabelComparator(TableViewer parent) {
 		sortDirection = SWT.NONE;
 		selectedColumn = null;
 		viewer = parent;
@@ -51,11 +53,14 @@ public class ColumnComparator extends ViewerComparator implements SelectionListe
 
 	@Override
 	public void widgetSelected(SelectionEvent e) {
-		Object[] expandedElements = viewer.getExpandedElements();
+		Widget item = e.widget;
+		if (!(item instanceof TableColumn)) {
+			return;
+		}
 
-		selectedColumn = (TreeColumn) e.widget;
-		Tree table = selectedColumn.getParent();
-		TreeColumn previousColumn = table.getSortColumn();
+		selectedColumn = (TableColumn) e.widget;
+		Table table = selectedColumn.getParent();
+		TableColumn previousColumn = table.getSortColumn();
 		sortDirection = table.getSortDirection();
 
 		if (previousColumn == selectedColumn) {
@@ -67,11 +72,17 @@ public class ColumnComparator extends ViewerComparator implements SelectionListe
 		}
 		table.setSortDirection(sortDirection);
 		viewer.refresh();
-		viewer.setExpandedElements(expandedElements);
 	}
 
 	@Override
 	public int compare(Viewer v, Object e1, Object e2) {
+		int cat1 = category(e1);
+		int cat2 = category(e2);
+
+		if (cat1 != cat2) {
+			return cat1 - cat2;
+		}
+
 		int value = doCompare(v, e1, e2);
 		if (sortDirection == SWT.DOWN) {
 			value *= -1;
@@ -80,13 +91,18 @@ public class ColumnComparator extends ViewerComparator implements SelectionListe
 	}
 
 	protected int doCompare(Viewer v, Object e1, Object e2) {
-		ITableLabelProvider lp = (ITableLabelProvider) viewer.getLabelProvider();
-		int index = 0;
-		if (selectedColumn != null) {
-			index = getSelectedColumnIndex();
+		IBaseLabelProvider provider = viewer.getLabelProvider();
+
+		String s1 = null;
+		String s2 = null;
+		if (provider instanceof ITableLabelProvider) {
+			int index = 0;
+			if (selectedColumn != null) {
+				index = viewer.getTable().indexOf(selectedColumn);
+			}
+			s1 = ((ITableLabelProvider) provider).getColumnText(e1, index);
+			s2 = ((ITableLabelProvider) provider).getColumnText(e2, index);
 		}
-		String s1 = lp.getColumnText(e1, index);
-		String s2 = lp.getColumnText(e2, index);
 
 		int value = 0;
 		if (s1 != null && s2 != null) {
@@ -102,16 +118,8 @@ public class ColumnComparator extends ViewerComparator implements SelectionListe
 	 * 
 	 * @return The selected column.
 	 */
-	public TreeColumn getSelectedColumn() {
+	public TableColumn getSelectedColumn() {
 		return selectedColumn;
 	}
 
-	/**
-	 * Gets the index of the currently selected column.
-	 * 
-	 * @return The index of the currently selected column.
-	 */
-	protected int getSelectedColumnIndex() {
-		return viewer.getTree().indexOf(selectedColumn);
-	}
 }

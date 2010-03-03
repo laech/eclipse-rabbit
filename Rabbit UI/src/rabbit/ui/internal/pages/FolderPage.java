@@ -3,6 +3,11 @@ package rabbit.ui.internal.pages;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.ActionContributionItem;
+import org.eclipse.jface.action.IContributionItem;
+import org.eclipse.jface.action.IToolBarManager;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
@@ -38,6 +43,21 @@ public class FolderPage extends ResourcePage {
 				return element instanceof IContainer;
 			}
 		});
+	}
+
+	@Override
+	public IContributionItem[] createToolBarItems(IToolBarManager toolBar) {
+		ImageDescriptor icon = PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(ISharedImages.IMG_DEF_VIEW);
+
+		IContributionItem collapseAll = new ActionContributionItem(new Action("Collapse All", icon) {
+			@Override
+			public void run() {
+				getViewer().collapseAll();
+			}
+		});
+		toolBar.add(collapseAll);//.appendToGroup(group.getGroupName(), collapseAll);
+
+		return new IContributionItem[] { collapseAll };
 	}
 
 	@Override

@@ -16,22 +16,20 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.TreeViewer;
-import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeColumn;
 
 import rabbit.core.RabbitCore;
 import rabbit.core.storage.IAccessor;
 import rabbit.core.storage.IResourceManager;
 import rabbit.core.storage.xml.FileDataAccessor;
-import rabbit.ui.ColumnComparator;
 import rabbit.ui.DisplayPreference;
+import rabbit.ui.TreeLabelComparator;
 
 /**
  * A page for displaying time spent working on different files.
  */
-public abstract class ResourcePage extends AbstractGraphTreePage {
+public abstract class ResourcePage extends AbstractTreeViewerPage {
 
 	private IAccessor accessor;
 	private IResourceManager resourceMapper;
@@ -51,8 +49,8 @@ public abstract class ResourcePage extends AbstractGraphTreePage {
 	}
 
 	@Override
-	protected ColumnComparator createComparator(TreeViewer viewer) {
-		return new ColumnComparator(viewer) {
+	protected TreeLabelComparator createComparator(TreeViewer viewer) {
+		return new TreeLabelComparator(viewer) {
 
 			@Override
 			public int category(Object element) {
@@ -66,28 +64,11 @@ public abstract class ResourcePage extends AbstractGraphTreePage {
 					return 0;
 				}
 			}
-
-			@Override
-			protected int doCompare(Viewer v, Object e1, Object e2) {
-				int cat1 = category(e1);
-				int cat2 = category(e2);
-
-				if (cat1 != cat2) {
-					return cat1 - cat2;
-				}
-
-				if (getSelectedColumn() == getValueColumn() || getSelectedColumn() == getGraphColumn()) {
-					return (getValue(e1) > getValue(e2)) ? 1 : -1;
-				}
-				return super.doCompare(v, e1, e2);
-			}
 		};
 	}
 
 	@Override
 	public void update(DisplayPreference p) {
-		System.out.println(p.getStartDate().getTime());
-		System.out.println(p.getEndDate().getTime());
 		doUpdate(accessor.getData(p.getStartDate(), p.getEndDate()));
 	}
 
@@ -137,17 +118,21 @@ public abstract class ResourcePage extends AbstractGraphTreePage {
 	}
 
 	@Override
-	protected String getValueColumnText() {
-		return "Time Spent";
-	}
+	protected void createColumns(TreeViewer viewer) {
+		TreeLabelComparator textSorter = new TreeLabelComparator(viewer);
+		TreeLabelComparator valueSorter = createValueSorterForTree(viewer);
 
-	@Override
-	protected TreeColumn[] createColumns(Tree tree) {
-		TreeColumn nameColumn = new TreeColumn(tree, SWT.LEFT);
-		nameColumn.setText("Resource");
-		nameColumn.setWidth(200);
-		nameColumn.setMoveable(true);
-		return new TreeColumn[] { nameColumn };
+		int[] widths = new int[] { 200, 150 };
+		int[] styles = new int[] { SWT.LEFT, SWT.RIGHT };
+		String[] names = new String[] { "Name", "Time Spent" };
+
+		for (int i = 0; i < names.length; i++) {
+			TreeColumn column = new TreeColumn(viewer.getTree(), styles[i]);
+			column.setText(names[i]);
+			column.setWidth(widths[i]);
+			column.addSelectionListener(
+					(names.length - 1 == i) ? valueSorter : textSorter);
+		}
 	}
 
 	@Override

@@ -17,10 +17,10 @@ import rabbit.ui.internal.util.UndefinedWorkbenchPartDescriptor;
 /**
  * Test for {@link PartPage}
  */
-public class PartPageTest extends AbstractGraphTreePageTest {
+public class PartPageTest extends AbstractTableViewerPageTest {
 
 	@Override
-	protected AbstractGraphTreePage createPage() {
+	protected AbstractTableViewerPage createPage() {
 		return new PartPage();
 	}
 

@@ -6,6 +6,8 @@ import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 
+import rabbit.ui.internal.AbstractTreeContentProvider;
+
 public class ResourcePageContentProvider extends AbstractTreeContentProvider {
 
 	private ResourcePage page;

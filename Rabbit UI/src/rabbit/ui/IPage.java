@@ -1,6 +1,5 @@
 package rabbit.ui;
 
-import org.eclipse.jface.action.GroupMarker;
 import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.swt.graphics.Image;
@@ -29,10 +28,9 @@ public interface IPage {
 	void createContents(Composite parent);
 	
 	/**
-	 * @param group TODO
 	 * 
 	 */
-	IContributionItem[] createToolBarItems(IToolBarManager toolBar, GroupMarker group);
+	IContributionItem[] createToolBarItems(IToolBarManager toolBar);
 
 	/**
 	 * Updates the data of this page.

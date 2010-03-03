@@ -17,9 +17,9 @@ import rabbit.ui.internal.util.UndefinedPerspectiveDescriptor;
 /**
  * Test for {@link PerspectivePage}
  */
-public class PerspectivePageTest extends AbstractGraphTreePageTest {
+public class PerspectivePageTest extends AbstractTableViewerPageTest {
 	@Override
-	protected AbstractGraphTreePage createPage() {
+	protected AbstractTableViewerPage createPage() {
 		return new PerspectivePage();
 	}
 

@@ -2,6 +2,8 @@ package rabbit.ui.internal.pages;
 
 import java.util.Collection;
 
+import rabbit.ui.internal.AbstractTreeContentProvider;
+
 /**
  * Collection provider takes a collection of inputs.
  */

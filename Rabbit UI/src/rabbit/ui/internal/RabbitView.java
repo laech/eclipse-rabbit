@@ -6,10 +6,11 @@ import java.util.Map;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ControlContribution;
-import org.eclipse.jface.action.GroupMarker;
 import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.IToolBarManager;
-import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.action.ToolBarManager;
+import org.eclipse.jface.layout.GridDataFactory;
+import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StackLayout;
@@ -17,6 +18,8 @@ import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.DateTime;
@@ -24,6 +27,7 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Sash;
+import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.forms.widgets.Form;
 import org.eclipse.ui.forms.widgets.FormToolkit;
@@ -44,15 +48,21 @@ public class RabbitView extends ViewPart {
 	 * a user clicks on a tree node).
 	 */
 	private Map<IPage, Boolean> pageStatus;
+
+	/** A map containing pages and the root composite of the page. */
 	private Map<IPage, Composite> pages;
-	private Map<IPage, IContributionItem[]> pageToolBars;
-	private IContributionItem[] currentItems;
-	private final GroupMarker marker = new GroupMarker("rabbit.ui.extensionToolBar");
-	
-	private final DisplayPreference preferences;
+
+	/** A map containing pages and their tool bar items. */
+	private Map<IPage, IContributionItem[]> pageToolItems;
+
+	/** A tool bar for pages to create their tool bar items. */
+	private IToolBarManager extensionToolBar;
+
 	private FormToolkit toolkit;
 	private StackLayout stackLayout;
-	private Form displayForm;
+	private Composite displayPanel;
+
+	private final DisplayPreference preferences;
 
 	/**
 	 * Constructs a new view.
@@ -60,8 +70,8 @@ public class RabbitView extends ViewPart {
 	public RabbitView() {
 		pages = new HashMap<IPage, Composite>();
 		pageStatus = new HashMap<IPage, Boolean>();
-		pageToolBars = new HashMap<IPage, IContributionItem[]>();
-		
+		pageToolItems = new HashMap<IPage, IContributionItem[]>();
+
 		toolkit = new FormToolkit(PlatformUI.getWorkbench().getDisplay());
 		stackLayout = new StackLayout();
 		preferences = new DisplayPreference();
@@ -98,7 +108,7 @@ public class RabbitView extends ViewPart {
 		left.setText("Metrics");
 		left.setLayoutData(leftData);
 		left.getBody().setLayout(new FillLayout());
-		MetricsPanel list = new MetricsPanel(this, toolkit);
+		MetricsPanel list = new MetricsPanel(this);
 		list.createContents(left.getBody());
 
 		// Displaying area:
@@ -107,17 +117,33 @@ public class RabbitView extends ViewPart {
 		rightData.left = new FormAttachment(sash, 0);
 		rightData.right = new FormAttachment(100, 0);
 		rightData.bottom = new FormAttachment(100, 0);
-		displayForm = toolkit.createForm(form.getBody());
-		displayForm.setLayoutData(rightData);
-		displayForm.setText("Statistics");
-		displayForm.getBody().setLayout(stackLayout);
-		displayForm.setToolBarVerticalAlignment(SWT.TOP);
-		createToolBarItems(displayForm.getToolBarManager());
 
-		Label label = toolkit.createLabel(displayForm.getBody(), null, SWT.CENTER);
-		label.setImage(getTitleImage());
-		stackLayout.topControl = label;
-		displayForm.getBody().layout();
+		Composite right = toolkit.createComposite(form.getBody());
+		right.setLayoutData(rightData);
+		GridLayoutFactory.fillDefaults().spacing(0, 0).applyTo(right);
+
+		Composite header = toolkit.createComposite(right);
+		header.setLayout(new GridLayout(3, false));
+		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(header);
+		{
+			Label label = toolkit.createLabel(header, "Statistics");
+			label.setFont(left.getHead().getFont());
+			label.setForeground(left.getHead().getForeground());
+
+			ToolBarManager exToolBar = new ToolBarManager();
+			ToolBar bar = exToolBar.createControl(header);
+			bar.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+			bar.setBackground(header.getBackground());
+			extensionToolBar = exToolBar;
+
+			ToolBarManager toolBar = new ToolBarManager();
+			bar = toolBar.createControl(header);
+			bar.setBackground(header.getBackground());
+			createToolBarItems(toolBar);
+		}
+		displayPanel = toolkit.createComposite(right);
+		displayPanel.setLayout(stackLayout);
+		GridDataFactory.fillDefaults().grab(true, true).span(3, 1).applyTo(displayPanel);
 	}
 
 	/**
@@ -127,15 +153,11 @@ public class RabbitView extends ViewPart {
 	 *            The tool bar.
 	 */
 	private void createToolBarItems(IToolBarManager toolBar) {
-		marker.setVisible(false);
-		toolBar.add(marker);
-		
-		toolBar.add(new Separator("rabbit.ui.toolBar"));
-		if (System.getProperty("os.name").toLowerCase().contains("windows"))
+		if (System.getProperty("os.name").toLowerCase().contains("windows")) {
 			createToolBarForWindowsOS(toolBar);
-		else
+		} else {
 			createToolBarForNonWindowsOS(toolBar);
-
+		}
 
 		createSpace(toolBar);
 		toolBar.add(new Action("Refresh", getRefreshImageDescriptor()) {
@@ -198,64 +220,13 @@ public class RabbitView extends ViewPart {
 	private void createToolBarForNonWindowsOS(IToolBarManager toolBar) {
 		CalendarAction.create(toolBar, getSite().getShell(), preferences.getStartDate(), " From: ", " ");
 		CalendarAction.create(toolBar, getSite().getShell(), preferences.getEndDate(), " To: ", " ");
-		
-//		final String space = "     ";
-//		toolBar.add(new ControlContribution("rabbit.ui.fromButton") {
-//			@Override
-//			protected Control createControl(Composite parent) {
-//				Button button = toolkit.createButton(parent, null, SWT.FLAT | SWT.TOGGLE);
-//				DateTimeButton.create(button, preferences.getStartDate(), space, space);
-//				return button;
-//			}
-//		});
-//		createSeparator(toolBar);
-//		toolBar.add(new ControlContribution("rabbit.ui.toButton") {
-//			@Override
-//			protected Control createControl(Composite parent) {
-//				Button button = toolkit.createButton(parent, null, SWT.FLAT | SWT.TOGGLE);
-//				DateTimeButton.create(button, preferences.getEndDate(), space, space);
-//				return button;
-//			}
-//		});
-//		createSeparator(toolBar);
-//		toolBar.add(new ControlContribution("rabbit.ui.refreshButton") {
-//			@Override
-//			protected Control createControl(Composite parent) {
-//				parent.setLayout(new FillLayout());
-//				Button refresh = toolkit.createButton(parent, null, SWT.FLAT | SWT.PUSH);
-//				refresh.setToolTipText("Refresh");
-//				refresh.addListener(SWT.Selection, new Listener() {
-//					@Override
-//					public void handleEvent(Event event) {
-//						updateView();
-//					}
-//				});
-//				ImageDescriptor icon = getRefreshImageDescriptor();
-//				if (icon == null) {
-//					refresh.setText("Refresh");
-//					return refresh;
-//				}
-//				final Image image = icon.createImage();
-//				refresh.setImage(image);
-//				refresh.addDisposeListener(new DisposeListener() {
-//					@Override
-//					public void widgetDisposed(DisposeEvent e) {
-//						image.dispose();
-//					}
-//				});
-//				refresh.pack();
-//				return refresh;
-//			}
-//		});
 	}
 
 	private void createSpace(IToolBarManager toolBar) {
 		toolBar.add(new ControlContribution(null) {
 			@Override
 			protected Control createControl(Composite parent) {
-				Label separator = new Label(parent, SWT.NO_BACKGROUND);
-				separator.setText("  ");
-				return separator;
+				return toolkit.createLabel(parent, "  ");
 			}
 		});
 	}
@@ -267,6 +238,54 @@ public class RabbitView extends ViewPart {
 	 */
 	private ImageDescriptor getRefreshImageDescriptor() {
 		return RabbitUI.imageDescriptorFromPlugin("org.eclipse.ui.browser", "icons/elcl16/nav_refresh.gif");
+	}
+
+	/**
+	 * Displays the given page.
+	 * 
+	 * @param page
+	 *            The page to display.
+	 */
+	public void display(IPage page) {
+		// Removes the extension tool bar items:
+		for (IContributionItem item : extensionToolBar.getItems()) {
+			item.setVisible(false);
+		}
+
+		Composite cmp = null;
+		if (page != null) {
+
+			// Updates the page:
+			cmp = pages.get(page);
+			if (cmp == null) {
+				cmp = toolkit.createComposite(displayPanel);
+				cmp.setLayout(new FillLayout());
+				page.createContents(cmp);
+				pages.put(page, cmp);
+			}
+
+			// Updates the extension tool bar items:
+			IContributionItem[] items = pageToolItems.get(page);
+			if (items == null) {
+				items = page.createToolBarItems(extensionToolBar);
+				pageToolItems.put(page, items);
+			} else {
+				for (IContributionItem item : items) {
+					item.setVisible(true);
+				}
+			}
+
+			// Updates the current visible page, mark others as not updated:
+			Boolean updated = pageStatus.get(page);
+			if (updated == null || updated == false) {
+				page.update(preferences);
+				pageStatus.put(page, Boolean.TRUE);
+			}
+		}
+
+		extensionToolBar.update(true);
+		stackLayout.topControl = cmp;
+		displayPanel.layout();
 	}
 
 	/**
@@ -312,49 +331,6 @@ public class RabbitView extends ViewPart {
 		return date1.get(Calendar.YEAR) == date2.get(Calendar.YEAR)
 				&& date1.get(Calendar.MONTH) == date2.get(Calendar.MONTH)
 				&& date1.get(Calendar.DAY_OF_MONTH) == date2.get(Calendar.DAY_OF_MONTH);
-	}
-
-	/**
-	 * Displays the given page.
-	 * 
-	 * @param page
-	 *            The page to display.
-	 */
-	public void display(IPage page) {
-		
-		IToolBarManager manager = displayForm.getToolBarManager();
-		if (currentItems != null)
-			for (IContributionItem item : currentItems)
-				manager.remove(item);
-		
-		Composite cmp = null;
-		if (page != null) {
-			cmp = pages.get(page);
-			if (cmp == null) {
-				cmp = toolkit.createComposite(displayForm.getBody());
-				cmp.setLayout(new FillLayout());
-				page.createContents(cmp);
-				pages.put(page, cmp);
-			}
-				
-			currentItems = pageToolBars.get(page);
-			if (currentItems == null)
-				currentItems = page.createToolBarItems(manager, marker);
-			else
-				for (IContributionItem item : currentItems)
-					displayForm.getToolBarManager().appendToGroup(marker.getGroupName(), item);
-			
-
-			Boolean updated = pageStatus.get(page);
-			if (updated == null || updated == false) {
-				page.update(preferences);
-				pageStatus.put(page, Boolean.TRUE);
-			}
-		}
-
-		manager.update(true);
-		stackLayout.topControl = cmp;
-		displayForm.getBody().layout();
 	}
 
 	@Override

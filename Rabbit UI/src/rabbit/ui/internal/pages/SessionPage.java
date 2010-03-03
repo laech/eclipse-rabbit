@@ -5,21 +5,22 @@ import java.util.Map;
 
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.widgets.Tree;
-import org.eclipse.swt.widgets.TreeColumn;
+import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 
 import rabbit.core.storage.IAccessor;
 import rabbit.core.storage.xml.SessionDataAccessor;
 import rabbit.ui.DisplayPreference;
+import rabbit.ui.TableLabelComparator;
 
 /**
  * A page displaying how much time is spent on using Eclipse every day.
  */
-public class SessionPage extends AbstractGraphTreePage {
+public class SessionPage extends AbstractTableViewerPage {
 
 	private IAccessor dataStore;
 	private Map<String, Long> model;
@@ -31,13 +32,20 @@ public class SessionPage extends AbstractGraphTreePage {
 	}
 
 	@Override
-	protected TreeColumn[] createColumns(Tree table) {
-		TreeColumn dateCol = new TreeColumn(table, SWT.LEFT);
-		dateCol.setText("Date");
-		dateCol.setWidth(150);
-		dateCol.setMoveable(true);
+	protected void createColumns(TableViewer viewer) {
+		TableLabelComparator valueSorter = createValueSorterForTable(viewer);
+		TableLabelComparator textSorter = new TableLabelComparator(viewer);
 
-		return new TreeColumn[] { dateCol };
+		int[] widths = new int[] { 200, 150 };
+		int[] styles = new int[] { SWT.LEFT, SWT.RIGHT };
+		String[] names = new String[] { "Date", "Duration" };
+		for (int i = 0; i < names.length; i++) {
+			TableColumn column = new TableColumn(viewer.getTable(), styles[i]);
+			column.setText(names[i]);
+			column.setWidth(widths[i]);
+			column.addSelectionListener(
+					(names.length - 1 == i) ? valueSorter : textSorter);
+		}
 	}
 
 	@Override
@@ -66,11 +74,6 @@ public class SessionPage extends AbstractGraphTreePage {
 			}
 		}
 		getViewer().setInput(model.keySet());
-	}
-
-	@Override
-	protected String getValueColumnText() {
-		return "Duration";
 	}
 
 	@Override

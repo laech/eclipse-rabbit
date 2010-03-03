@@ -5,12 +5,12 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.eclipse.core.commands.Command;
+import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.ITableLabelProvider;
-import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.widgets.Tree;
-import org.eclipse.swt.widgets.TreeColumn;
+import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.commands.ICommandService;
@@ -18,11 +18,12 @@ import org.eclipse.ui.commands.ICommandService;
 import rabbit.core.storage.IAccessor;
 import rabbit.core.storage.xml.CommandDataAccessor;
 import rabbit.ui.DisplayPreference;
+import rabbit.ui.TableLabelComparator;
 
 /**
  * A page for displaying command usage.
  */
-public class CommandPage extends AbstractGraphTreePage {
+public class CommandPage extends AbstractTableViewerPage {
 
 	private IAccessor accessor;
 	private ICommandService service;
@@ -37,37 +38,31 @@ public class CommandPage extends AbstractGraphTreePage {
 		super();
 		accessor = new CommandDataAccessor();
 		dataMapping = new HashMap<Command, Long>();
-		service = (ICommandService) PlatformUI.getWorkbench().getService(ICommandService.class);
+		service = (ICommandService)
+				PlatformUI.getWorkbench().getService(ICommandService.class);
 	}
 
 	@Override
-	protected TreeColumn[] createColumns(Tree table) {
-		TreeColumn nameCol = new TreeColumn(table, SWT.LEFT);
-		nameCol.setText("Name");
-		nameCol.setWidth(150);
-		nameCol.setMoveable(true);
+	public void createColumns(TableViewer viewer) {
+		TableLabelComparator textSorter = new TableLabelComparator(viewer);
+		TableLabelComparator valueSorter = createValueSorterForTable(viewer);
 
-		TreeColumn descriptionCol = new TreeColumn(table, SWT.LEFT);
-		descriptionCol.setText("Description");
-		descriptionCol.setWidth(200);
-		descriptionCol.setMoveable(true);
-
-		return new TreeColumn[] { nameCol, descriptionCol };
-	}
-
-	@Override
-	protected ITreeContentProvider createContentProvider() {
-		return new CollectionContentProvider();
-	}
-
-	@Override
-	protected ITableLabelProvider createLabelProvider() {
-		return new CommandPageLabelProvider(this);
+		int[] widths = new int[] { 150, 200, 100 };
+		int[] styles = new int[] { SWT.LEFT, SWT.LEFT, SWT.RIGHT };
+		String[] names = new String[] { "Name", "Description", "Usage Count" };
+		for (int i = 0; i < names.length; i++) {
+			TableColumn column = new TableColumn(viewer.getTable(), styles[i]);
+			column.setText(names[i]);
+			column.setWidth(widths[i]);
+			column.addSelectionListener(
+					(names.length - 1 == i) ? valueSorter : textSorter);
+		}
 	}
 
 	@Override
 	public Image getImage() {
-		return PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_CUT);
+		return PlatformUI.getWorkbench().getSharedImages()
+				.getImage(ISharedImages.IMG_TOOL_CUT);
 	}
 
 	@Override
@@ -77,23 +72,28 @@ public class CommandPage extends AbstractGraphTreePage {
 	}
 
 	@Override
-	protected String getValueColumnText() {
-		return "Usage Count";
-	}
-
-	@Override
 	public void update(DisplayPreference p) {
 		setMaxValue(0);
 		dataMapping.clear();
 
-		Map<String, Long> data = accessor.getData(p.getStartDate(), p.getEndDate());
-		for (Entry<String, Long> entry : data.entrySet()) {
-			dataMapping.put(service.getCommand(entry.getKey()), entry.getValue());
+		Map<String, Long> map = accessor.getData(p.getStartDate(), p.getEndDate());
+		for (Entry<String, Long> item : map.entrySet()) {
+			dataMapping.put(service.getCommand(item.getKey()), item.getValue());
 
-			if (entry.getValue() > getMaxValue()) {
-				setMaxValue(entry.getValue());
+			if (item.getValue() > getMaxValue()) {
+				setMaxValue(item.getValue());
 			}
 		}
 		getViewer().setInput(dataMapping.keySet());
+	}
+
+	@Override
+	protected IContentProvider createContentProvider() {
+		return new CollectionContentProvider();
+	}
+
+	@Override
+	protected ITableLabelProvider createLabelProvider() {
+		return new CommandPageLabelProvider(this);
 	}
 }

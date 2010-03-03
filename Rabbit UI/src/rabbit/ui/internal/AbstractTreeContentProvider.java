@@ -1,4 +1,4 @@
-package rabbit.ui.internal.pages;
+package rabbit.ui.internal;
 
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;

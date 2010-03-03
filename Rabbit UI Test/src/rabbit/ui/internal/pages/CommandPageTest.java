@@ -18,10 +18,10 @@ import rabbit.ui.DisplayPreference;
 /**
  * Test for {@link CommandPage}
  */
-public class CommandPageTest extends AbstractGraphTreePageTest {
+public class CommandPageTest extends AbstractTableViewerPageTest {
 
 	@Override
-	protected AbstractGraphTreePage createPage() {
+	protected AbstractTableViewerPage createPage() {
 		return new CommandPage();
 	}
 
