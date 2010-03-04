@@ -124,7 +124,7 @@ public class RabbitView extends ViewPart {
 
 		Composite header = toolkit.createComposite(right);
 		header.setLayout(new GridLayout(3, false));
-		GridLayoutFactory.fillDefaults().numColumns(3).margins(5, 0).applyTo(header);
+		//		GridLayoutFactory.fillDefaults().numColumns(3).margins(5, 5).applyTo(header);
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(header);
 		{
 			Label label = toolkit.createLabel(header, "Statistics");
@@ -217,15 +217,22 @@ public class RabbitView extends ViewPart {
 	 *            The tool bar.
 	 */
 	private void createToolBarForNonWindowsOS(IToolBarManager toolBar) {
-		CalendarAction.create(toolBar, getSite().getShell(), preferences.getStartDate(), " From: ", " ");
-		CalendarAction.create(toolBar, getSite().getShell(), preferences.getEndDate(), " To: ", " ");
+		CalendarAction.create(toolBar, getSite().getShell(),
+				preferences.getStartDate(), " From: ", " ");
+		createString(toolBar, "  -  ");
+		CalendarAction.create(toolBar, getSite().getShell(),
+				preferences.getEndDate(), " To: ", " ");
 	}
 
 	private void createSpace(IToolBarManager toolBar) {
+		createString(toolBar, "  ");
+	}
+
+	private void createString(IToolBarManager toolBar, final String str) {
 		toolBar.add(new ControlContribution(null) {
 			@Override
 			protected Control createControl(Composite parent) {
-				return toolkit.createLabel(parent, "  ");
+				return toolkit.createLabel(parent, str);
 			}
 		});
 	}
@@ -236,7 +243,8 @@ public class RabbitView extends ViewPart {
 	 * @return The image descriptor, or null if not found.
 	 */
 	private ImageDescriptor getRefreshImageDescriptor() {
-		return RabbitUI.imageDescriptorFromPlugin("org.eclipse.ui.browser", "icons/elcl16/nav_refresh.gif");
+		return RabbitUI.imageDescriptorFromPlugin(
+				RabbitUI.PLUGIN_ID, "resources/refresh.gif");
 	}
 
 	/**

@@ -58,12 +58,6 @@ public class ResourcePageLabelProviderTest {
 					return 0;
 				}
 			}
-
-			@Override
-			public Image getImage() {
-				return null;
-			}
-
 		};
 		provider = new ResourcePageLabelProvider(page, true, true, true);
 

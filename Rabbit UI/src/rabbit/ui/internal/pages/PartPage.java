@@ -7,10 +7,8 @@ import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.ui.IEditorRegistry;
-import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.IWorkbenchPartDescriptor;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.views.IViewRegistry;
@@ -63,12 +61,6 @@ public class PartPage extends AbstractTableViewerPage {
 	@Override
 	protected ITableLabelProvider createLabelProvider() {
 		return new PartPageLabelProvider(this);
-	}
-
-	@Override
-	public Image getImage() {
-		return PlatformUI.getWorkbench().getSharedImages()
-				.getImage(ISharedImages.IMG_DEF_VIEW);
 	}
 
 	@Override

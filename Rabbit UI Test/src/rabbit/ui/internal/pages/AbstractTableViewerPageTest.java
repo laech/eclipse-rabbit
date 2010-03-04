@@ -47,11 +47,6 @@ public abstract class AbstractTableViewerPageTest extends AbstractValueProviderP
 	}
 
 	@Test
-	public void testGetImage() {
-		assertNotNull(page.getImage());
-	}
-
-	@Test
 	public void testSaveState() throws Exception {
 		int width = 12;
 		for (TableColumn column : page.getViewer().getTable().getColumns()) {

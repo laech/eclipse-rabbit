@@ -6,6 +6,8 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import org.eclipse.jface.resource.ImageDescriptor;
+
 import rabbit.ui.IPage;
 
 /**
@@ -17,6 +19,7 @@ public class PageDescriptor {
 	private SortedSet<PageDescriptor> pages;
 	private String description;
 	private String name;
+	private ImageDescriptor image;
 
 	/**
 	 * Constructs a new descriptor.
@@ -27,10 +30,12 @@ public class PageDescriptor {
 	 *            The actual page.
 	 * @param description
 	 *            The description.
+	 * @param image
+	 *            The image icon.
 	 * @throws NullPointerException
 	 *             If name or page is null.
 	 */
-	public PageDescriptor(String name, IPage page, String description) {
+	public PageDescriptor(String name, IPage page, String description, ImageDescriptor image) {
 		// According to the extension point schema:
 		if (name == null || page == null)
 			throw new NullPointerException();
@@ -44,6 +49,7 @@ public class PageDescriptor {
 
 		this.page = page;
 		this.name = name;
+		this.image = image;
 		this.description = description;
 	}
 
@@ -107,5 +113,13 @@ public class PageDescriptor {
 	 */
 	public String getName() {
 		return name;
+	}
+
+	/**
+	 * Gets the image descriptor of the page.
+	 * @return The image descriptor.
+	 */
+	public ImageDescriptor getImageDescriptor() {
+		return image;
 	}
 }

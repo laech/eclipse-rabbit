@@ -55,11 +55,6 @@ public abstract class AbstractTreeViewerPageTest extends AbstractValueProviderPa
 	}
 
 	@Test
-	public void testGetImage() {
-		assertNotNull(page.getImage());
-	}
-
-	@Test
 	public void testSaveState() throws Exception {
 		int width = 12;
 		for (TreeColumn column : page.getViewer().getTree().getColumns()) {

@@ -5,7 +5,6 @@ import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.swt.graphics.Image;
 
 import rabbit.ui.IPage;
 import rabbit.ui.TableLabelComparator;
@@ -31,11 +30,6 @@ public abstract class AbstractValueProviderPage implements IValueProvider, IPage
 	@Override
 	public IContributionItem[] createToolBarItems(IToolBarManager toolBar) {
 		return new IContributionItem[0];
-	}
-
-	@Override
-	public Image getImage() {
-		return null;
 	}
 	
 	protected TableLabelComparator createValueSorterForTable(TableViewer viewer) {

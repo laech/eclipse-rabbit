@@ -8,7 +8,7 @@
             allowMultiple="true"
             category="rabbit.ui.view"
             class="rabbit.ui.internal.RabbitView"
-            icon="resources/icon.png"
+            icon="resources/rabbitview.png"
             id="rabbit.ui.view.rabbitview"
             name="Rabbit"
             restorable="true">
@@ -23,45 +23,54 @@
       <page
             class="rabbit.ui.internal.pages.EclipseUsageCategory"
             description="This category contains pages that display usage information about Eclipse"
+            icon="resources/eclipse.gif"
             name="Eclipse Usage">
          <page
                class="rabbit.ui.internal.pages.CommandPage"
                description="Displays the execution count of each command"
+               icon="resources/cut.gif"
                name="Commands">
          </page>
          <page
                class="rabbit.ui.internal.pages.PartPage"
                description="Displays how much time is spent using different views and editors"
+               icon="resources/pin_editor.gif"
                name="Editors and Views">
          </page>
          <page
                class="rabbit.ui.internal.pages.SessionPage"
                description="Displays the how much time is spent using Eclipse"
+               icon="resources/home.gif"
                name="Sessions">
          </page>
          <page
                class="rabbit.ui.internal.pages.PerspectivePage"
                description="Displays how much time is spent using different perspectives"
+               icon="resources/defaultpersp.gif"
                name="Perspectives">
          </page>
       </page>
       <page
             class="rabbit.ui.internal.pages.ResourcesCategory"
             description="This category contains pages that display how time is spent on different resources"
+            icon="resources/projectclosed.gif"
             name="Resources">
          <page
                class="rabbit.ui.internal.pages.FilePage"
                description="Displays the amount of time spent editing each file"
+               icon="resources/file.gif"
                name="Files">
          </page>
          <page
                class="rabbit.ui.internal.pages.FolderPage"
                description="Displays the amount of time spent working under each directory"
+               icon="resources/folder.gif"
                name="Folders">
          </page>
          <page
                class="rabbit.ui.internal.pages.ProjectPage"
                description="Displays the amount of time spent working on each project"
+               icon="resources/project.gif"
                name="Projects">
          </page>
       </page>

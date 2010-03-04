@@ -6,7 +6,6 @@ import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 
@@ -34,7 +33,7 @@ public class FilePage extends ResourcePage {
 		});
 		toolBar.add(collapseAll);
 
-		icon = RabbitUI.imageDescriptorFromPlugin("org.eclipse.debug.ui", "icons/full/elcl16/expandall.gif");
+		icon = RabbitUI.imageDescriptorFromPlugin(RabbitUI.PLUGIN_ID, "resources/expandall.gif");
 		IContributionItem expandAll = new ActionContributionItem(new Action("Expand All", icon) {
 			@Override
 			public void run() {
@@ -57,10 +56,5 @@ public class FilePage extends ResourcePage {
 	@Override
 	public long getValue(Object o) {
 		return (o instanceof IFile) ? getValueOfFile((IFile) o) : 0;
-	}
-
-	@Override
-	public Image getImage() {
-		return PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJ_FILE);
 	}
 }

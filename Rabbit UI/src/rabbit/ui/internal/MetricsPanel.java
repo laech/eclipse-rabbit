@@ -2,6 +2,7 @@ package rabbit.ui.internal;
 
 import java.util.Collection;
 
+import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.DoubleClickEvent;
@@ -65,9 +66,20 @@ public class MetricsPanel {
 		ColumnViewerToolTipSupport.enableFor(viewer, ToolTip.NO_RECREATE);
 		viewer.setLabelProvider(new ColumnLabelProvider() {
 
+			private ImageRegistry images = new ImageRegistry();
+
 			@Override
 			public Image getImage(Object element) {
-				return ((PageDescriptor) element).getPage().getImage();
+				PageDescriptor page = (PageDescriptor) element;
+				if (page.getImageDescriptor() == null) {
+					return null;
+				}
+				Image image = images.get(page.getName());
+				if (image == null) {
+					image = page.getImageDescriptor().createImage();
+					images.put(page.getName(), image);
+				}
+				return image;
 			}
 
 			@Override
@@ -85,6 +97,11 @@ public class MetricsPanel {
 				return true;
 			}
 
+			@Override
+			public void dispose() {
+				super.dispose();
+				images.dispose();
+			}
 		});
 
 		viewer.addDoubleClickListener(new IDoubleClickListener() {

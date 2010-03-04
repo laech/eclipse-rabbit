@@ -7,10 +7,7 @@ import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.TableColumn;
-import org.eclipse.ui.ISharedImages;
-import org.eclipse.ui.PlatformUI;
 
 import rabbit.core.storage.IAccessor;
 import rabbit.core.storage.xml.SessionDataAccessor;
@@ -56,11 +53,6 @@ public class SessionPage extends AbstractTableViewerPage {
 	@Override
 	protected ITableLabelProvider createLabelProvider() {
 		return new SessionPageLabelProvider(this);
-	}
-
-	@Override
-	public Image getImage() {
-		return PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_ETOOL_HOME_NAV);
 	}
 
 	@Override

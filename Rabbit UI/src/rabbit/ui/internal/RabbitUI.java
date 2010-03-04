@@ -9,6 +9,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
@@ -49,6 +50,7 @@ public class RabbitUI extends AbstractUIPlugin {
 				return o1.getName().compareTo(o2.getName());
 			}
 		});
+
 		for (IConfigurationElement e : Platform.getExtensionRegistry()
 				.getConfigurationElementsFor(UI_PAGE_EXTENSION_ID)) {
 			PageDescriptor p = recursiveGet(e);
@@ -93,6 +95,7 @@ public class RabbitUI extends AbstractUIPlugin {
 
 		String name = e.getAttribute("name");
 		String desc = e.getAttribute("description");
+		String imagePath = e.getAttribute("icon");
 
 		Object o = null;
 		try {
@@ -107,8 +110,12 @@ public class RabbitUI extends AbstractUIPlugin {
 			return null;
 		}
 
+		ImageDescriptor image = null;
+		if (imagePath != null) {
+			image = imageDescriptorFromPlugin(e.getContributor().getName(), imagePath);
+		}
 		IPage page = (IPage) o;
-		PageDescriptor extension = new PageDescriptor(name, page, desc);
+		PageDescriptor extension = new PageDescriptor(name, page, desc, image);
 
 		for (IConfigurationElement child : e.getChildren()) {
 			PageDescriptor p = recursiveGet(child);

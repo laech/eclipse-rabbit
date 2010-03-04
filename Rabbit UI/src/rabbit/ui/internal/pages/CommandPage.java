@@ -9,9 +9,7 @@ import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.TableColumn;
-import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.commands.ICommandService;
 
@@ -57,12 +55,6 @@ public class CommandPage extends AbstractTableViewerPage {
 			column.addSelectionListener(
 					(names.length - 1 == i) ? valueSorter : textSorter);
 		}
-	}
-
-	@Override
-	public Image getImage() {
-		return PlatformUI.getWorkbench().getSharedImages()
-				.getImage(ISharedImages.IMG_TOOL_CUT);
 	}
 
 	@Override
