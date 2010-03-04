@@ -11,7 +11,7 @@ import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.TableColumn;
 
-import rabbit.ui.CellPaintProvider;
+import rabbit.ui.CellPainter;
 import rabbit.ui.TableLabelComparator;
 import rabbit.ui.internal.RabbitUI;
 
@@ -41,7 +41,7 @@ public abstract class AbstractTableViewerPage extends AbstractValueProviderPage 
 
 		// Special column for painting:
 		graphCol = new TableViewerColumn(viewer, SWT.LEFT);
-		graphCol.setLabelProvider(new CellPaintProvider(this));
+		graphCol.setLabelProvider(new CellPainter(this));
 		graphCol.getColumn().setWidth(100);
 		graphCol.getColumn().addSelectionListener(createValueSorterForTable(viewer));
 

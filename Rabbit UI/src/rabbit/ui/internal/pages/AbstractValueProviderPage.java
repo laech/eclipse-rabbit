@@ -8,9 +8,9 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.graphics.Image;
 
 import rabbit.ui.IPage;
-import rabbit.ui.IValueProvider;
 import rabbit.ui.TableLabelComparator;
 import rabbit.ui.TreeLabelComparator;
+import rabbit.ui.CellPainter.IValueProvider;
 
 public abstract class AbstractValueProviderPage implements IValueProvider, IPage {
 

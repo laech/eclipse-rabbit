@@ -12,7 +12,7 @@ import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.TreeColumn;
 
-import rabbit.ui.CellPaintProvider;
+import rabbit.ui.CellPainter;
 import rabbit.ui.internal.RabbitUI;
 
 public abstract class AbstractTreeViewerPage extends AbstractValueProviderPage {
@@ -41,7 +41,7 @@ public abstract class AbstractTreeViewerPage extends AbstractValueProviderPage {
 
 		// Special column for painting:
 		graphCol = new TreeViewerColumn(viewer, SWT.LEFT);
-		graphCol.setLabelProvider(new CellPaintProvider(this));
+		graphCol.setLabelProvider(new CellPainter(this));
 		graphCol.getColumn().setWidth(100);
 		graphCol.getColumn().addSelectionListener(createValueSorterForTree(viewer));
 

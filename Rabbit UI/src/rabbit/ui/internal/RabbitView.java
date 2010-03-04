@@ -124,22 +124,21 @@ public class RabbitView extends ViewPart {
 
 		Composite header = toolkit.createComposite(right);
 		header.setLayout(new GridLayout(3, false));
+		GridLayoutFactory.fillDefaults().numColumns(3).margins(5, 0).applyTo(header);
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(header);
 		{
 			Label label = toolkit.createLabel(header, "Statistics");
 			label.setFont(left.getHead().getFont());
 			label.setForeground(left.getHead().getForeground());
 
-			ToolBarManager exToolBar = new ToolBarManager();
-			ToolBar bar = exToolBar.createControl(header);
+			ToolBar bar = new ToolBar(header, SWT.FLAT);
 			bar.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 			bar.setBackground(header.getBackground());
-			extensionToolBar = exToolBar;
+			extensionToolBar = new ToolBarManager(bar);
 
-			ToolBarManager toolBar = new ToolBarManager();
-			bar = toolBar.createControl(header);
+			bar = new ToolBar(header, SWT.FLAT);
 			bar.setBackground(header.getBackground());
-			createToolBarItems(toolBar);
+			createToolBarItems(new ToolBarManager(bar));
 		}
 		displayPanel = toolkit.createComposite(right);
 		displayPanel.setLayout(stackLayout);
