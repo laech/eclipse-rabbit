@@ -41,7 +41,7 @@ public class PerspectivePage extends AbstractTableViewerPage {
 
 		int[] widths = new int[] { 150, 150 };
 		int[] styles = new int[] { SWT.LEFT, SWT.RIGHT };
-		String[] names = new String[] { "Name", "Usage Count" };
+		String[] names = new String[] { "Name", "Usage" };
 		for (int i = 0; i < names.length; i++) {
 			TableColumn column = new TableColumn(viewer.getTable(), styles[i]);
 			column.setText(names[i]);
