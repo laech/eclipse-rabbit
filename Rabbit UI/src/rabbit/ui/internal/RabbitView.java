@@ -122,6 +122,7 @@ public class RabbitView extends ViewPart {
 		right.setLayoutData(rightData);
 		GridLayoutFactory.fillDefaults().spacing(0, 0).applyTo(right);
 
+		// Header:
 		Composite header = toolkit.createComposite(right);
 		header.setLayout(new GridLayout(3, false));
 		//		GridLayoutFactory.fillDefaults().numColumns(3).margins(5, 5).applyTo(header);
@@ -143,6 +144,20 @@ public class RabbitView extends ViewPart {
 		displayPanel = toolkit.createComposite(right);
 		displayPanel.setLayout(stackLayout);
 		GridDataFactory.fillDefaults().grab(true, true).span(3, 1).applyTo(displayPanel);
+
+		// Greeting message:
+		Composite cmp = toolkit.createComposite(displayPanel);
+		cmp.setLayout(new GridLayout());
+		{
+			Label imgLabel = toolkit.createLabel(cmp, "", SWT.CENTER);
+			imgLabel.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, true, true));
+			imgLabel.setImage(getTitleImage());
+
+			Label helloLabel = toolkit.createLabel(cmp, "Welcome!", SWT.CENTER);
+			helloLabel.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, true));
+		}
+		stackLayout.topControl = cmp;
+		displayPanel.layout();
 	}
 
 	/**

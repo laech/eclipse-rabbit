@@ -1,8 +1,11 @@
 package rabbit.ui.internal.pages;
 
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.viewers.IContentProvider;
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IDoubleClickListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITableLabelProvider;
+import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.TreeViewerColumn;
 import org.eclipse.jface.viewers.ViewerComparator;
@@ -36,6 +39,16 @@ public abstract class AbstractTreeViewerPage extends AbstractValueProviderPage {
 				saveState();
 			}
 		});
+		viewer.addDoubleClickListener(new IDoubleClickListener() {
+			@Override
+			public void doubleClick(DoubleClickEvent e) {
+				IStructuredSelection select = (IStructuredSelection) e.getSelection();
+				Object o = select.getFirstElement();
+				if (((ITreeContentProvider) viewer.getContentProvider()).hasChildren(o)) {
+					viewer.setExpandedState(o, !viewer.getExpandedState(o));
+				}
+			}
+		});
 
 		createColumns(viewer);
 
@@ -51,6 +64,11 @@ public abstract class AbstractTreeViewerPage extends AbstractValueProviderPage {
 		}
 		viewer.setComparator(createComparator(viewer));
 		restoreState();
+	}
+	
+	@Override
+	public boolean shouldPaint(Object element) {
+		return true;
 	}
 
 	/** Saves the state of the page. */
@@ -91,6 +109,6 @@ public abstract class AbstractTreeViewerPage extends AbstractValueProviderPage {
 
 	protected abstract ITableLabelProvider createLabelProvider();
 
-	protected abstract IContentProvider createContentProvider();
+	protected abstract ITreeContentProvider createContentProvider();
 
 }

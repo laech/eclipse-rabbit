@@ -42,7 +42,7 @@ public class ResourcePageContentProviderTest {
 	@BeforeClass
 	public static void beforeClass() {
 		shell = new Shell(PlatformUI.getWorkbench().getDisplay());
-		page = new FilePage();
+		page = new ResourcePage();
 		page.createContents(shell);
 		provider = new ResourcePageContentProvider(page);
 		root = ResourcesPlugin.getWorkspace().getRoot();

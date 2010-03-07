@@ -1,5 +1,8 @@
 package rabbit.ui.internal.pages;
 
+import static org.eclipse.ui.plugin.AbstractUIPlugin.imageDescriptorFromPlugin;
+import static rabbit.ui.internal.RabbitUI.PLUGIN_ID;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -13,10 +16,20 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.ActionContributionItem;
+import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.action.IContributionItem;
+import org.eclipse.jface.action.IToolBarManager;
+import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.TreeColumn;
 
 import rabbit.core.RabbitCore;
@@ -29,14 +42,60 @@ import rabbit.ui.TreeLabelComparator;
 /**
  * A page for displaying time spent working on different files.
  */
-public abstract class ResourcePage extends AbstractTreeViewerPage {
+public class ResourcePage extends AbstractTreeViewerPage {
+
+	public static enum ShowMode {
+		FILE, FOLDER, PROJECT
+	}
+
+	private ShowMode mode = ShowMode.FILE;
 
 	private IAccessor accessor;
 	private IResourceManager resourceMapper;
-
 	private Map<IProject, Set<IResource>> projectResources;
 	private Map<IFolder, Set<IFile>> folderFiles;
 	private Map<IFile, Long> fileValues;
+
+	private IAction collapseAllAction = new Action("Collapse All") {
+		@Override
+		public void run() {
+			getViewer().collapseAll();
+		}
+	};
+
+	private IAction expandAllAction = new Action("Expand All") {
+		@Override
+		public void run() {
+			getViewer().expandAll();
+		}
+	};
+
+	private IAction showFilesAction = new Action("Show Files", IAction.AS_CHECK_BOX) {
+		@Override
+		public void run() {
+			showFoldersAction.setChecked(false);
+			showProjectsAction.setChecked(false);
+			setShowMode(ShowMode.FILE);
+		}
+	};
+
+	private IAction showFoldersAction = new Action("Show Folders", IAction.AS_CHECK_BOX) {
+		@Override
+		public void run() {
+			showFilesAction.setChecked(false);
+			showProjectsAction.setChecked(false);
+			setShowMode(ShowMode.FOLDER);
+		}
+	};
+
+	private IAction showProjectsAction = new Action("Show Projects", IAction.AS_CHECK_BOX) {
+		@Override
+		public void run() {
+			showFoldersAction.setChecked(false);
+			showFilesAction.setChecked(false);
+			setShowMode(ShowMode.PROJECT);
+		}
+	};
 
 	public ResourcePage() {
 		super();
@@ -46,6 +105,24 @@ public abstract class ResourcePage extends AbstractTreeViewerPage {
 		projectResources = new HashMap<IProject, Set<IResource>>();
 		folderFiles = new HashMap<IFolder, Set<IFile>>();
 		fileValues = new HashMap<IFile, Long>();
+	}
+
+	@Override
+	protected void createColumns(TreeViewer viewer) {
+		TreeLabelComparator textSorter = new TreeLabelComparator(viewer);
+		TreeLabelComparator valueSorter = createValueSorterForTree(viewer);
+
+		int[] widths = new int[] { 200, 150 };
+		int[] styles = new int[] { SWT.LEFT, SWT.RIGHT };
+		String[] names = new String[] { "Name", "Time Spent" };
+
+		for (int i = 0; i < names.length; i++) {
+			TreeColumn column = new TreeColumn(viewer.getTree(), styles[i]);
+			column.setText(names[i]);
+			column.setWidth(widths[i]);
+			column.addSelectionListener(
+					(names.length - 1 == i) ? valueSorter : textSorter);
+		}
 	}
 
 	@Override
@@ -68,8 +145,68 @@ public abstract class ResourcePage extends AbstractTreeViewerPage {
 	}
 
 	@Override
-	public void update(DisplayPreference p) {
-		doUpdate(accessor.getData(p.getStartDate(), p.getEndDate()));
+	protected ITreeContentProvider createContentProvider() {
+		return new ResourcePageContentProvider(this);
+	}
+
+	@Override
+	public void createContents(Composite parent) {
+		super.createContents(parent);
+		getViewer().addFilter(new ViewerFilter() {
+			@Override
+			public boolean select(Viewer viewer, Object parentElement, Object element) {
+				switch (getShowMode()) {
+				case PROJECT:
+									return element instanceof IProject;
+				case FOLDER:
+									return element instanceof IContainer;
+				default:
+									return true;
+				}
+			}
+		});
+	}
+
+	@Override
+	protected ITableLabelProvider createLabelProvider() {
+		return new ResourcePageLabelProvider(this);
+	}
+
+	@Override
+	public IContributionItem[] createToolBarItems(IToolBarManager toolBar) {
+		ImageDescriptor icon = imageDescriptorFromPlugin(PLUGIN_ID, "resources/collapseall.gif");
+		collapseAllAction.setImageDescriptor(icon);
+		IContributionItem collapseAll = new ActionContributionItem(collapseAllAction);
+		toolBar.add(collapseAll);
+
+		icon = imageDescriptorFromPlugin(PLUGIN_ID, "resources/expandall.gif");
+		expandAllAction.setImageDescriptor(icon);
+		IContributionItem expandAll = new ActionContributionItem(expandAllAction);
+		toolBar.add(expandAll);
+
+		Separator sep = new Separator();
+		toolBar.add(sep);
+
+		icon = imageDescriptorFromPlugin(PLUGIN_ID, "resources/project.gif");
+		showProjectsAction.setImageDescriptor(icon);
+		showProjectsAction.setChecked(getShowMode() == ShowMode.PROJECT);
+		IContributionItem showProjects = new ActionContributionItem(showProjectsAction);
+		toolBar.add(showProjects);
+
+		icon = imageDescriptorFromPlugin(PLUGIN_ID, "resources/folder.gif");
+		showFoldersAction.setImageDescriptor(icon);
+		showFoldersAction.setChecked(getShowMode() == ShowMode.FOLDER);
+		IContributionItem showFolders = new ActionContributionItem(showFoldersAction);
+		toolBar.add(showFolders);
+
+		icon = imageDescriptorFromPlugin(PLUGIN_ID, "resources/file.gif");
+		showFilesAction.setImageDescriptor(icon);
+		showFilesAction.setChecked(getShowMode() == ShowMode.FILE);
+		IContributionItem showFiles = new ActionContributionItem(showFilesAction);
+		toolBar.add(showFiles);
+
+		return new IContributionItem[] {
+				collapseAll, expandAll, sep, showProjects, showFolders, showFiles };
 	}
 
 	private void doUpdate(Map<String, Long> data) {
@@ -114,35 +251,75 @@ public abstract class ResourcePage extends AbstractTreeViewerPage {
 				fileset.add(file);
 			}
 		}
+		updateMaxValue();
 		getViewer().setInput(projectResources.keySet());
 	}
 
-	@Override
-	protected void createColumns(TreeViewer viewer) {
-		TreeLabelComparator textSorter = new TreeLabelComparator(viewer);
-		TreeLabelComparator valueSorter = createValueSorterForTree(viewer);
-
-		int[] widths = new int[] { 200, 150 };
-		int[] styles = new int[] { SWT.LEFT, SWT.RIGHT };
-		String[] names = new String[] { "Name", "Time Spent" };
-
-		for (int i = 0; i < names.length; i++) {
-			TreeColumn column = new TreeColumn(viewer.getTree(), styles[i]);
-			column.setText(names[i]);
-			column.setWidth(widths[i]);
-			column.addSelectionListener(
-					(names.length - 1 == i) ? valueSorter : textSorter);
+	public IFile[] getFiles(IFolder folder) {
+		Set<IFile> files = folderFiles.get(folder);
+		if (files != null) {
+			return files.toArray(new IFile[files.size()]);
 		}
+		return new IFile[0];
+	}
+
+	public long getMaxFileValue() {
+		long max = 0;
+		for (long value : fileValues.values()) {
+			if (value > max) {
+				max = value;
+			}
+		}
+		return max;
+	}
+
+	public long getMaxFolderValue() {
+		long max = 0;
+		for (IFolder folder : folderFiles.keySet()) {
+			long value = getValueOfFolder(folder);
+			if (value > max) {
+				max = value;
+			}
+		}
+		return max;
+	}
+
+	public long getMaxProjectValue() {
+		long max = 0;
+		for (IProject project : projectResources.keySet()) {
+			long value = getValueOfProject(project);
+			if (value > max) {
+				max = value;
+			}
+		}
+		return max;
+	}
+
+	public IResource[] getResources(IProject project) {
+		Set<IResource> resources = projectResources.get(project);
+		if (resources != null) {
+			return resources.toArray(new IResource[resources.size()]);
+		}
+		return new IResource[0];
+	}
+
+	public ShowMode getShowMode() {
+		return mode;
 	}
 
 	@Override
-	protected ITreeContentProvider createContentProvider() {
-		return new ResourcePageContentProvider(this);
-	}
+	public long getValue(Object o) {
+		if (o instanceof IFile)
+			return getValueOfFile((IFile) o);
 
-	@Override
-	protected ITableLabelProvider createLabelProvider() {
-		return new ResourcePageLabelProvider(this, false, false, true);
+		else if (o instanceof IFolder)
+			return getValueOfFolder((IFolder) o);
+
+		else if (o instanceof IProject)
+			return getValueOfProject((IProject) o);
+
+		else
+			return 0;
 	}
 
 	public long getValueOfFile(IFile file) {
@@ -174,51 +351,40 @@ public abstract class ResourcePage extends AbstractTreeViewerPage {
 		return value;
 	}
 
-	public long getMaxProjectValue() {
-		long max = 0;
-		for (IProject project : projectResources.keySet()) {
-			long value = getValueOfProject(project);
-			if (value > max) {
-				max = value;
-			}
-		}
-		return max;
+	public void setShowMode(ShowMode newMode) {
+		if (mode == newMode)
+			return;
+
+		collapseAllAction.setEnabled(!(newMode == ShowMode.PROJECT));
+		expandAllAction.setEnabled(collapseAllAction.isEnabled());
+
+		mode = newMode;
+		updateMaxValue();
+		getViewer().refresh();
 	}
 
-	public long getMaxFolderValue() {
-		long max = 0;
-		for (IFolder folder : folderFiles.keySet()) {
-			long value = getValueOfFolder(folder);
-			if (value > max) {
-				max = value;
-			}
-		}
-		return max;
-	}
+	@Override
+	public boolean shouldPaint(Object element) {
+		return (element instanceof IProject && getShowMode() == ShowMode.PROJECT)
+				|| (element instanceof IFolder && getShowMode() == ShowMode.FOLDER)
+				|| (element instanceof IFile && getShowMode() == ShowMode.FILE);
+	};
+	@Override
+	public void update(DisplayPreference p) {
+		doUpdate(accessor.getData(p.getStartDate(), p.getEndDate()));
+	};
 
-	public long getMaxFileValue() {
-		long max = 0;
-		for (long value : fileValues.values()) {
-			if (value > max) {
-				max = value;
-			}
+	private void updateMaxValue() {
+		switch (getShowMode()) {
+		case FILE:
+			setMaxValue(getMaxFileValue());
+			break;
+		case FOLDER:
+			setMaxValue(getMaxFolderValue());
+			break;
+		default:
+			setMaxValue(getMaxProjectValue());
+			break;
 		}
-		return max;
-	}
-
-	public IResource[] getResources(IProject project) {
-		Set<IResource> resources = projectResources.get(project);
-		if (resources != null) {
-			return resources.toArray(new IResource[resources.size()]);
-		}
-		return new IResource[0];
-	}
-
-	public IFile[] getFiles(IFolder folder) {
-		Set<IFile> files = folderFiles.get(folder);
-		if (files != null) {
-			return files.toArray(new IFile[files.size()]);
-		}
-		return new IFile[0];
 	}
 }

@@ -52,26 +52,14 @@
       </page>
       <page
             class="rabbit.ui.internal.pages.ResourcesCategory"
-            description="This category contains pages that display how time is spent on different resources"
+            description="This category contains pages that display information relating to projects"
             icon="resources/projectclosed.gif"
-            name="Resources">
+            name="Project Related">
          <page
-               class="rabbit.ui.internal.pages.FilePage"
-               description="Displays the amount of time spent editing each file"
-               icon="resources/file.gif"
-               name="Files">
-         </page>
-         <page
-               class="rabbit.ui.internal.pages.FolderPage"
-               description="Displays the amount of time spent working under each directory"
-               icon="resources/folder.gif"
-               name="Folders">
-         </page>
-         <page
-               class="rabbit.ui.internal.pages.ProjectPage"
-               description="Displays the amount of time spent working on each project"
-               icon="resources/project.gif"
-               name="Projects">
+               class="rabbit.ui.internal.pages.ResourcePage"
+               description="Displays how much time is spent on different resources"
+               icon="resources/res.gif"
+               name="Resources">
          </page>
       </page>
    </extension>

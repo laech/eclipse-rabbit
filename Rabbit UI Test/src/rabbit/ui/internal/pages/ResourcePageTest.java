@@ -363,6 +363,33 @@ public abstract class ResourcePageTest extends AbstractTreeViewerPageTest {
 		assertTrue(files.contains(array[1]));
 	}
 
+	@Test
+	public void testGetValue() throws Exception {
+
+		long value = 9823;
+		Map<IProject, Set<IResource>> projectResources = getFieldProjectResources(page);
+		Map<IFolder, Set<IFile>> folderFiles = getFieldFolderFiles(page);
+		Map<IFile, Long> values = getFieldFileValues(page);
+
+		IProject project = root.getProject("p");
+		IFolder folder = project.getFolder("f");
+		IFile file = folder.getFile("a");
+
+		values.put(file, value);
+
+		Set<IFile> files = new HashSet<IFile>();
+		files.add(file);
+		folderFiles.put(folder, files);
+
+		Set<IResource> resources = new HashSet<IResource>();
+		resources.add(folder);
+		projectResources.put(project, resources);
+
+		assertEquals(value, page.getValue(file));
+		assertEquals(value, page.getValue(folder));
+		assertEquals(value, page.getValue(project));
+	}
+
 	@SuppressWarnings("unchecked")
 	static Map<IProject, Set<IResource>> getFieldProjectResources(ResourcePage page) throws Exception {
 		Field field = ResourcePage.class.getDeclaredField("projectResources");
@@ -389,9 +416,6 @@ public abstract class ResourcePageTest extends AbstractTreeViewerPageTest {
 		method.setAccessible(true);
 		method.invoke(page, data);
 	}
-
-	@Test
-	public abstract void testGetValue() throws Exception;
 
 	@Override
 	protected abstract ResourcePage createPage();

@@ -25,6 +25,7 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import rabbit.ui.internal.pages.ResourcePage.ShowMode;
 import rabbit.ui.internal.util.MillisConverter;
 
 /**
@@ -59,7 +60,9 @@ public class ResourcePageLabelProviderTest {
 				}
 			}
 		};
-		provider = new ResourcePageLabelProvider(page, true, true, true);
+		page.createContents(shell);
+
+		provider = new ResourcePageLabelProvider(page);
 
 		ResourcePageTest.getFieldFileValues(page).put(file, value);
 		ResourcePageTest.getFieldFolderFiles(page).put(folder, new HashSet<IFile>(Arrays.asList(file)));
@@ -73,17 +76,8 @@ public class ResourcePageLabelProviderTest {
 
 	@Test
 	public void testGetColumnText() {
-		// Show all:
-		provider = new ResourcePageLabelProvider(page, true, true, true);
-		assertEquals(project.getName(), provider.getColumnText(project, 0));
-		assertEquals(folder.getName(), provider.getColumnText(folder, 0));
-		assertEquals(file.getName(), provider.getColumnText(file, 0));
-		assertEquals(MillisConverter.toDefaultString(page.getValueOfProject(project)), provider.getColumnText(project, 1));
-		assertEquals(MillisConverter.toDefaultString(page.getValueOfFolder(folder)), provider.getColumnText(folder, 1));
-		assertEquals(MillisConverter.toDefaultString(page.getValueOfFile(file)), provider.getColumnText(file, 1));
-
 		// Show project only:
-		provider = new ResourcePageLabelProvider(page, true, false, false);
+		page.setShowMode(ShowMode.PROJECT);
 		assertEquals(project.getName(), provider.getColumnText(project, 0));
 		assertEquals(folder.getName(), provider.getColumnText(folder, 0));
 		assertEquals(file.getName(), provider.getColumnText(file, 0));
@@ -92,7 +86,7 @@ public class ResourcePageLabelProviderTest {
 		assertNull(provider.getColumnText(file, 1));
 
 		// Show folder only:
-		provider = new ResourcePageLabelProvider(page, false, true, false);
+		page.setShowMode(ShowMode.FOLDER);
 		assertEquals(project.getName(), provider.getColumnText(project, 0));
 		assertEquals(folder.getName(), provider.getColumnText(folder, 0));
 		assertEquals(file.getName(), provider.getColumnText(file, 0));
@@ -100,8 +94,8 @@ public class ResourcePageLabelProviderTest {
 		assertEquals(MillisConverter.toDefaultString(page.getValueOfFolder(folder)), provider.getColumnText(folder, 1));
 		assertNull(provider.getColumnText(file, 1));
 
-		// Show file only:
-		provider = new ResourcePageLabelProvider(page, false, false, true);
+		// Show file:
+		page.setShowMode(ShowMode.FILE);
 		assertEquals(project.getName(), provider.getColumnText(project, 0));
 		assertEquals(folder.getName(), provider.getColumnText(folder, 0));
 		assertEquals(file.getName(), provider.getColumnText(file, 0));

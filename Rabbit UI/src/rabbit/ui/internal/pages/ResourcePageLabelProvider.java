@@ -21,6 +21,8 @@ import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.ide.IDE;
 
+import rabbit.ui.internal.pages.ResourcePage.ShowMode;
+
 /**
  * Label provider for a {@link FilePage}.
  */
@@ -37,13 +39,9 @@ public class ResourcePageLabelProvider extends BaseLabelProvider implements ITab
 
 	private final Color deletedResourceColor;
 
-	private boolean showProjectValues;
-	private boolean showFolderValues;
-	private boolean showFileValues;
-
 	private ResourcePage page;
 
-	public ResourcePageLabelProvider(ResourcePage parent, boolean showProjectValues, boolean showFolderValues, boolean showFileValues) {
+	public ResourcePageLabelProvider(ResourcePage parent) {
 		deletedResourceColor = PlatformUI.getWorkbench().getDisplay().getSystemColor(SWT.COLOR_DARK_GRAY);
 
 		ISharedImages images = PlatformUI.getWorkbench().getSharedImages();
@@ -53,10 +51,6 @@ public class ResourcePageLabelProvider extends BaseLabelProvider implements ITab
 
 		editorMap = new HashMap<String, Image>();
 		resourceMap = new HashMap<String, Image>();
-
-		this.showProjectValues = showProjectValues;
-		this.showFolderValues = showFolderValues;
-		this.showFileValues = showFileValues;
 
 		page = parent;
 	}
@@ -109,12 +103,11 @@ public class ResourcePageLabelProvider extends BaseLabelProvider implements ITab
 			else
 				return resource.getName();
 		case 1:
-			if (resource instanceof IProject) {
-				return (showProjectValues) ? toDefaultString(page.getValue(resource)) : null;
-			} else if (resource instanceof IFolder) {
-				return (showFolderValues) ? toDefaultString(page.getValue(resource)) : null;
-			} else if (resource instanceof IFile) {
-				return (showFileValues) ? toDefaultString(page.getValue(resource)) : null;
+			if ((resource instanceof IProject && page.getShowMode() == ShowMode.PROJECT)
+					|| (resource instanceof IFolder && page.getShowMode() == ShowMode.FOLDER)
+					|| (resource instanceof IFile && page.getShowMode() == ShowMode.FILE)) {
+
+				return toDefaultString(page.getValue(resource));
 			}
 		default:
 			return null;

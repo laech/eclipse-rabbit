@@ -8,13 +8,10 @@ import org.junit.runners.Suite;
 		CollectionContentProviderTest.class,
 		CommandPageLabelProviderTest.class,
 		CommandPageTest.class,
-		FilePageTest.class,
-		FolderPageTest.class,
 		PartPageLabelProviderTest.class,
 		PartPageTest.class,
 		PerspectiveLabelProviderTest.class,
 		PerspectivePageTest.class,
-		ProjectPageTest.class,
 		SessionPageLabelProviderTest.class,
 		SessionPageTest.class,
 //

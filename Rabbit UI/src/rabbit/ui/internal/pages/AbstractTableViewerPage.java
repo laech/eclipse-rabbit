@@ -85,6 +85,11 @@ public abstract class AbstractTableViewerPage extends AbstractValueProviderPage 
 		return graphCol.getColumn().getWidth();
 	}
 
+	@Override
+	public boolean shouldPaint(Object element) {
+		return true;
+	}
+
 	protected abstract void createColumns(TableViewer viewer);
 
 	protected abstract ITableLabelProvider createLabelProvider();

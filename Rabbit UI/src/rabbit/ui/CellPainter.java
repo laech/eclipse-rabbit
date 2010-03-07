@@ -38,6 +38,13 @@ public class CellPainter extends StyledCellLabelProvider {
 		 */
 		int getColumnWidth();
 
+		/**
+		 * Checks whether a cell should be painted.
+		 * @param element The element in the cell.
+		 * @return True to paint, false otherwise.
+		 */
+		boolean shouldPaint(Object element);
+
 	}
 
 	private Color background;
@@ -65,6 +72,8 @@ public class CellPainter extends StyledCellLabelProvider {
 
 	@Override
 	public void paint(Event e, Object element) {
+		if (!valueProvider.shouldPaint(element))
+			return;
 
 		int width = getWidth(element);
 		if (width == 0) {
