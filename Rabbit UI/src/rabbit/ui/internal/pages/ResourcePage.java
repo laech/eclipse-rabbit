@@ -174,15 +174,15 @@ public class ResourcePage extends AbstractTreeViewerPage {
 
 	@Override
 	public IContributionItem[] createToolBarItems(IToolBarManager toolBar) {
-		ImageDescriptor icon = imageDescriptorFromPlugin(PLUGIN_ID, "resources/collapseall.gif");
-		collapseAllAction.setImageDescriptor(icon);
-		IContributionItem collapseAll = new ActionContributionItem(collapseAllAction);
-		toolBar.add(collapseAll);
-
-		icon = imageDescriptorFromPlugin(PLUGIN_ID, "resources/expandall.gif");
+		ImageDescriptor icon = imageDescriptorFromPlugin(PLUGIN_ID, "resources/expandall.gif");
 		expandAllAction.setImageDescriptor(icon);
 		IContributionItem expandAll = new ActionContributionItem(expandAllAction);
 		toolBar.add(expandAll);
+
+		icon = imageDescriptorFromPlugin(PLUGIN_ID, "resources/collapseall.gif");
+		collapseAllAction.setImageDescriptor(icon);
+		IContributionItem collapseAll = new ActionContributionItem(collapseAllAction);
+		toolBar.add(collapseAll);
 
 		Separator sep = new Separator();
 		toolBar.add(sep);
@@ -206,7 +206,7 @@ public class ResourcePage extends AbstractTreeViewerPage {
 		toolBar.add(showFiles);
 
 		return new IContributionItem[] {
-				collapseAll, expandAll, sep, showProjects, showFolders, showFiles };
+				expandAll, collapseAll, sep, showProjects, showFolders, showFiles };
 	}
 
 	private void doUpdate(Map<String, Long> data) {

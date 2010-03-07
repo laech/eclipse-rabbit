@@ -18,15 +18,15 @@ import rabbit.core.internal.storage.xml.schema.events.ObjectFactory;
  */
 public enum DataStore implements IDataStore {
 
-	COMMAND_STORE("commandEvents"), //$NON-NLS-1$
-	PART_STORE("partEvents"), //$NON-NLS-1$
-	PERSPECTIVE_STORE("perspectiveEvents"), //$NON-NLS-1$
-	FILE_STORE("fileEvents"); //$NON-NLS-1$
+	COMMAND_STORE("commandEvents"),
+	PART_STORE("partEvents"),
+	PERSPECTIVE_STORE("perspectiveEvents"),
+	FILE_STORE("fileEvents");
 
 	/**
 	 * Formats a date into "yyyy-MM".
 	 */
-	private final DateFormat monthFormatter = new SimpleDateFormat("yyyy-MM"); //$NON-NLS-1$
+	private final DateFormat monthFormatter = new SimpleDateFormat("yyyy-MM");
 
 	/**
 	 * An object factory for creating XML object types.
@@ -45,9 +45,9 @@ public enum DataStore implements IDataStore {
 		builder.append(getStorageLocation().getAbsolutePath());
 		builder.append(File.separator);
 		builder.append(id);
-		builder.append("-"); //$NON-NLS-1$
+		builder.append("-");
 		builder.append(monthFormatter.format(date.getTime()));
-		builder.append(".xml"); //$NON-NLS-1$
+		builder.append(".xml");
 		return new File(builder.toString());
 	}
 

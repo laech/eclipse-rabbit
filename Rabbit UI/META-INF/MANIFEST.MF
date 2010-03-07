@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Rabbit UI
 Bundle-SymbolicName: rabbit.ui;singleton:=true
-Bundle-Version: 0.1.0.beta2
+Bundle-Version: 0.1.0.beta3
 Bundle-Activator: rabbit.ui.internal.RabbitUI
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,

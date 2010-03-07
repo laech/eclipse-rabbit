@@ -21,12 +21,10 @@ import rabbit.core.storage.IStorer;
  * @param <E>
  *            The event type. Such as {@link rabbit.core.events.CommandEvent} .
  * @param <T>
- *            The corresponding XML object type of the event type. Such as
- *            {@link rabbit.tracking.storage.xml.schema.CommandEventType}.
+ *            The corresponding XML object type of the event type.
  * @param <S>
- *            The group holder type that separates the XML object types
- *            according to event date. Such as
- *            {@link rabbit.tracking.storage.xml.schema.CommandEventListType}.
+ *            A {@link EventGroupType} that separates the XML object types
+ *            according to event date.
  */
 public abstract class AbstractStorer<E extends DiscreteEvent, T, S extends EventGroupType> implements IStorer<E> {
 
@@ -46,8 +44,7 @@ public abstract class AbstractStorer<E extends DiscreteEvent, T, S extends Event
 
 	/**
 	 * Gets the XML nodes for grouping the event objects by date in a
-	 * {@link EventListType} as defined by the schema package
-	 * {@link rabbit.tracking.storage.xml.schema}.
+	 * {@link EventListType}.
 	 * 
 	 * @param <U>
 	 *            The class type.

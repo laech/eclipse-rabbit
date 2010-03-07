@@ -118,7 +118,7 @@ public class RabbitCore extends AbstractUIPlugin implements IWorkbenchListener {
 	 * The constructor.
 	 */
 	public RabbitCore() {
-		idleDetector = new IdleDetector(getWorkbench().getDisplay(), 10000, 1000);
+		idleDetector = new IdleDetector(getWorkbench().getDisplay(), 60000, 1000);
 		trackerList = Collections.emptyList();
 	}
 
