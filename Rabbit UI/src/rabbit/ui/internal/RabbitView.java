@@ -125,7 +125,6 @@ public class RabbitView extends ViewPart {
 		// Header:
 		Composite header = toolkit.createComposite(right);
 		header.setLayout(new GridLayout(3, false));
-		//		GridLayoutFactory.fillDefaults().numColumns(3).margins(5, 5).applyTo(header);
 		GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(header);
 		{
 			Label label = toolkit.createLabel(header, "Statistics");
@@ -234,7 +233,6 @@ public class RabbitView extends ViewPart {
 	private void createToolBarForNonWindowsOS(IToolBarManager toolBar) {
 		CalendarAction.create(toolBar, getSite().getShell(),
 				preferences.getStartDate(), " From: ", " ");
-		createString(toolBar, "  -  ");
 		CalendarAction.create(toolBar, getSite().getShell(),
 				preferences.getEndDate(), " To: ", " ");
 	}
