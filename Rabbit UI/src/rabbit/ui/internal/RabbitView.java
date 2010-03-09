@@ -3,9 +3,14 @@ package rabbit.ui.internal;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import org.eclipse.core.runtime.IProduct;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ControlContribution;
+import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.ToolBarManager;
@@ -166,20 +171,39 @@ public class RabbitView extends ViewPart {
 	 *            The tool bar.
 	 */
 	private void createToolBarItems(IToolBarManager toolBar) {
-		if (System.getProperty("os.name").toLowerCase().contains("windows")) {
+		boolean isWindows = Platform.getOS().equals(Platform.OS_WIN32);
+		boolean isDropDownDateTimeSupported = !getProductVersion().startsWith("3.4");
+		if (isWindows && isDropDownDateTimeSupported) {
 			createToolBarForWindowsOS(toolBar);
 		} else {
 			createToolBarForNonWindowsOS(toolBar);
 		}
 
 		createSpace(toolBar);
-		toolBar.add(new Action("Refresh", getRefreshImageDescriptor()) {
+		IAction refresh = new Action("Refresh") {
 			@Override
 			public void run() {
 				updateView();
 			}
-		});
+		};
+		if (!isWindows || isDropDownDateTimeSupported) {
+			refresh.setImageDescriptor(getRefreshImageDescriptor());
+		}
+		toolBar.add(refresh);
 		toolBar.update(true);
+	}
+
+	private static String getProductVersion() {
+		try {
+			IProduct product = Platform.getProduct();
+			String aboutText = product.getProperty("aboutText");
+			String pattern = "Version: (.*)\n";
+			Pattern p = Pattern.compile(pattern);
+			Matcher m = p.matcher(aboutText);
+			return (m.find()) ? m.group(1) : "";
+		} catch (Exception e) {
+			return "";
+		}
 	}
 
 	/**
