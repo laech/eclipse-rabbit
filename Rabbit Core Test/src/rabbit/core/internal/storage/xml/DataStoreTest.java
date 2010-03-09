@@ -17,6 +17,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import rabbit.core.TestUtil;
+import rabbit.core.internal.storage.xml.schema.events.ObjectFactory;
 
 public class DataStoreTest {
 
@@ -102,7 +103,7 @@ public class DataStoreTest {
 				+ "tmpTestFile.xml");
 		assertFalse(f.exists());
 
-		store.write(AbstractStorer.OBJECT_FACTORY.createEventListType(), f);
+		store.write(new ObjectFactory().createEventListType(), f);
 		assertTrue(f.exists());
 		if (!f.delete())
 			System.err.println("File is not deleted.");

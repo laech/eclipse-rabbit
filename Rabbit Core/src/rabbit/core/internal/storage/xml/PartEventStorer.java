@@ -16,12 +16,12 @@ public class PartEventStorer
 	}
 
 	@Override
-	protected List<PartEventListType> getXmlTypeCategories(EventListType events) {
+	public List<PartEventListType> getXmlTypeCategories(EventListType events) {
 		return events.getPartEvents();
 	}
 
 	@Override
-	protected boolean hasSameId(PartEventType x, PartEvent e) {
+	public boolean hasSameId(PartEventType x, PartEvent e) {
 
 		boolean result = false;
 		if (e.getWorkbenchPart() != null) {
@@ -31,32 +31,32 @@ public class PartEventStorer
 	}
 
 	@Override
-	protected boolean hasSameId(PartEventType x1, PartEventType x2) {
+	public boolean hasSameId(PartEventType x1, PartEventType x2) {
 		return x1.getPartId().equals(x2.getPartId());
 	}
 
 	@Override
-	protected void merge(PartEventListType main, PartEvent e) {
+	public void merge(PartEventListType main, PartEvent e) {
 		merge(main.getPartEvent(), e);
 	}
 
 	@Override
-	protected void merge(PartEventListType main, PartEventListType data) {
+	public void merge(PartEventListType main, PartEventListType data) {
 		merge(main.getPartEvent(), data.getPartEvent());
 	}
 
 	@Override
-	protected void merge(PartEventType main, PartEvent e) {
+	public void merge(PartEventType main, PartEvent e) {
 		main.setDuration(main.getDuration() + e.getDuration());
 	}
 
 	@Override
-	protected void merge(PartEventType main, PartEventType x2) {
+	public void merge(PartEventType main, PartEventType x2) {
 		main.setDuration(main.getDuration() + x2.getDuration());
 	}
 
 	@Override
-	protected PartEventType newXmlType(PartEvent e) {
+	public PartEventType newXmlType(PartEvent e) {
 
 		PartEventType type = OBJECT_FACTORY.createPartEventType();
 		type.setDuration(e.getDuration());
@@ -66,7 +66,7 @@ public class PartEventStorer
 	}
 
 	@Override
-	protected PartEventListType newXmlTypeHolder(XMLGregorianCalendar date) {
+	public PartEventListType newXmlTypeHolder(XMLGregorianCalendar date) {
 
 		PartEventListType type = OBJECT_FACTORY.createPartEventListType();
 		type.setDate(date);
@@ -75,7 +75,7 @@ public class PartEventStorer
 	}
 
 	@Override
-	protected IDataStore getDataStore() {
+	public IDataStore getDataStore() {
 		return DataStore.PART_STORE;
 	}
 }

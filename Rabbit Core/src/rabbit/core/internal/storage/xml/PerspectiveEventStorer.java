@@ -13,42 +13,42 @@ public class PerspectiveEventStorer
 		extends AbstractStorer<PerspectiveEvent, PerspectiveEventType, PerspectiveEventListType> {
 
 	@Override
-	protected List<PerspectiveEventListType> getXmlTypeCategories(EventListType events) {
+	public List<PerspectiveEventListType> getXmlTypeCategories(EventListType events) {
 		return events.getPerspectiveEvents();
 	}
 
 	@Override
-	protected boolean hasSameId(PerspectiveEventType x, PerspectiveEvent e) {
+	public boolean hasSameId(PerspectiveEventType x, PerspectiveEvent e) {
 		return x.getPerspectiveId().equals(e.getPerspective().getId());
 	}
 
 	@Override
-	protected boolean hasSameId(PerspectiveEventType x1, PerspectiveEventType x2) {
+	public boolean hasSameId(PerspectiveEventType x1, PerspectiveEventType x2) {
 		return x1.getPerspectiveId().equals(x2.getPerspectiveId());
 	}
 
 	@Override
-	protected void merge(PerspectiveEventType main, PerspectiveEvent e) {
+	public void merge(PerspectiveEventType main, PerspectiveEvent e) {
 		main.setDuration(main.getDuration() + e.getDuration());
 	}
 
 	@Override
-	protected void merge(PerspectiveEventType main, PerspectiveEventType x) {
+	public void merge(PerspectiveEventType main, PerspectiveEventType x) {
 		main.setDuration(main.getDuration() + x.getDuration());
 	}
 
 	@Override
-	protected void merge(PerspectiveEventListType main, PerspectiveEvent e) {
+	public void merge(PerspectiveEventListType main, PerspectiveEvent e) {
 		merge(main.getPerspectiveEvent(), e);
 	}
 
 	@Override
-	protected void merge(PerspectiveEventListType main, PerspectiveEventListType data) {
+	public void merge(PerspectiveEventListType main, PerspectiveEventListType data) {
 		merge(main.getPerspectiveEvent(), data.getPerspectiveEvent());
 	}
 
 	@Override
-	protected PerspectiveEventType newXmlType(PerspectiveEvent e) {
+	public PerspectiveEventType newXmlType(PerspectiveEvent e) {
 		PerspectiveEventType type = OBJECT_FACTORY.createPerspectiveEventType();
 		type.setDuration(e.getDuration());
 		type.setPerspectiveId(e.getPerspective().getId());
@@ -56,14 +56,14 @@ public class PerspectiveEventStorer
 	}
 
 	@Override
-	protected PerspectiveEventListType newXmlTypeHolder(XMLGregorianCalendar date) {
+	public PerspectiveEventListType newXmlTypeHolder(XMLGregorianCalendar date) {
 		PerspectiveEventListType type = OBJECT_FACTORY.createPerspectiveEventListType();
 		type.setDate(date);
 		return type;
 	}
 
 	@Override
-	protected IDataStore getDataStore() {
+	public IDataStore getDataStore() {
 		return DataStore.PERSPECTIVE_STORE;
 	}
 

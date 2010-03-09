@@ -109,7 +109,7 @@ public abstract class AbstractTracker<T> implements ITracker<T> {
 	 * @param o
 	 *            The data.
 	 */
-	protected void addData(T o) {
+	public void addData(T o) {
 		data.add(o);
 	}
 

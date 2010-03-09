@@ -128,7 +128,7 @@ public class RabbitCoreTest {
 
 	@Test
 	public void testIdleDetectorState() {
-		Assert.assertTrue(plugin.getIdleDetector().getIdleInterval() == 10000);
+		Assert.assertTrue(plugin.getIdleDetector().getIdleInterval() == 60000);
 		Assert.assertTrue(plugin.getIdleDetector().getRunDelay() == 1000);
 	}
 

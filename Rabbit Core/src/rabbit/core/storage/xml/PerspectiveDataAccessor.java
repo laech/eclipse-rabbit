@@ -12,27 +12,27 @@ import rabbit.core.internal.storage.xml.schema.events.PerspectiveEventType;
 public class PerspectiveDataAccessor extends AbstractAccessor<PerspectiveEventType, PerspectiveEventListType> {
 
 	@Override
-	protected Collection<PerspectiveEventListType> getCategories(EventListType doc) {
+	public Collection<PerspectiveEventListType> getCategories(EventListType doc) {
 		return doc.getPerspectiveEvents();
 	}
 
 	@Override
-	protected IDataStore getDataStore() {
+	public IDataStore getDataStore() {
 		return DataStore.PERSPECTIVE_STORE;
 	}
 
 	@Override
-	protected String getId(PerspectiveEventType e) {
+	public String getId(PerspectiveEventType e) {
 		return e.getPerspectiveId();
 	}
 
 	@Override
-	protected long getUsage(PerspectiveEventType e) {
+	public long getUsage(PerspectiveEventType e) {
 		return e.getDuration();
 	}
 
 	@Override
-	protected Collection<PerspectiveEventType> getXmlTypes(PerspectiveEventListType list) {
+	public Collection<PerspectiveEventType> getXmlTypes(PerspectiveEventListType list) {
 		return list.getPerspectiveEvent();
 	}
 

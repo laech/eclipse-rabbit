@@ -2,7 +2,6 @@ package rabbit.core.internal.storage.xml;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static rabbit.core.internal.storage.xml.AbstractStorer.OBJECT_FACTORY;
 
 import java.util.Calendar;
 import java.util.List;
@@ -14,7 +13,7 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 
 import rabbit.core.events.PartEvent;
-import rabbit.core.internal.storage.xml.PartEventStorer;
+import rabbit.core.internal.storage.xml.schema.events.ObjectFactory;
 import rabbit.core.internal.storage.xml.schema.events.PartEventListType;
 import rabbit.core.internal.storage.xml.schema.events.PartEventType;
 
@@ -83,10 +82,10 @@ public class PartEventStorerTest extends AbstractStorerTest2<PartEvent, PartEven
 	@Override
 	public void testHasSameId_typeAndEvent() {
 
-		PartEventType x1 = OBJECT_FACTORY.createPartEventType();
+		PartEventType x1 = new ObjectFactory().createPartEventType();
 		x1.setPartId("paId");
 
-		PartEventType x2 = OBJECT_FACTORY.createPartEventType();
+		PartEventType x2 = new ObjectFactory().createPartEventType();
 		x2.setPartId(x1.getPartId());
 
 		assertTrue(storer.hasSameId(x1, x2));
@@ -100,7 +99,7 @@ public class PartEventStorerTest extends AbstractStorerTest2<PartEvent, PartEven
 
 		PartEvent e = createEvent();
 
-		PartEventType x = OBJECT_FACTORY.createPartEventType();
+		PartEventType x = new ObjectFactory().createPartEventType();
 		x.setPartId(e.getWorkbenchPart().getSite().getId());
 
 		assertTrue(storer.hasSameId(x, e));

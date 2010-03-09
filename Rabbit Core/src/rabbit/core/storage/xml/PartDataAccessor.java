@@ -22,12 +22,12 @@ public class PartDataAccessor extends AbstractAccessor<PartEventType, PartEventL
 	}
 
 	@Override
-	protected Collection<PartEventListType> getCategories(EventListType doc) {
+	public Collection<PartEventListType> getCategories(EventListType doc) {
 		return doc.getPartEvents();
 	}
 
 	@Override
-	protected String getId(PartEventType e) {
+	public String getId(PartEventType e) {
 		return e.getPartId();
 	}
 
@@ -44,17 +44,17 @@ public class PartDataAccessor extends AbstractAccessor<PartEventType, PartEventL
 	}
 
 	@Override
-	protected long getUsage(PartEventType e) {
+	public long getUsage(PartEventType e) {
 		return e.getDuration();
 	}
 
 	@Override
-	protected Collection<PartEventType> getXmlTypes(PartEventListType list) {
+	public Collection<PartEventType> getXmlTypes(PartEventListType list) {
 		return list.getPartEvent();
 	}
 
 	@Override
-	protected IDataStore getDataStore() {
+	public IDataStore getDataStore() {
 		return DataStore.PART_STORE;
 	}
 }

@@ -113,7 +113,7 @@ public abstract class AbstractStorerTest<E extends DiscreteEvent, T, S extends E
 
 	@Test
 	public void testGetXmlTypeCategories() {
-		assertNotNull(storer.getXmlTypeCategories(AbstractStorer.OBJECT_FACTORY.createEventListType()));
+		assertNotNull(storer.getXmlTypeCategories(new ObjectFactory().createEventListType()));
 	}
 
 	@Test
@@ -177,7 +177,7 @@ public abstract class AbstractStorerTest<E extends DiscreteEvent, T, S extends E
 		File f = new File(System.getProperty("user.home") + File.separator + "tmpTestFile.xml");
 		assertFalse(f.exists());
 
-		storer.getDataStore().write(AbstractStorer.OBJECT_FACTORY.createEventListType(), f);
+		storer.getDataStore().write(new ObjectFactory().createEventListType(), f);
 		assertTrue(f.exists());
 		if (!f.delete()) {
 			System.err.println("File is not deleted.");

@@ -13,42 +13,42 @@ public class FileEventStorer extends
 		AbstractStorer<FileEvent, FileEventType, FileEventListType> {
 
 	@Override
-	protected List<FileEventListType> getXmlTypeCategories(EventListType events) {
+	public List<FileEventListType> getXmlTypeCategories(EventListType events) {
 		return events.getFileEvents();
 	}
 
 	@Override
-	protected boolean hasSameId(FileEventType x, FileEvent e) {
+	public boolean hasSameId(FileEventType x, FileEvent e) {
 		return x.getFileId().equals(e.getFileId());
 	}
 
 	@Override
-	protected boolean hasSameId(FileEventType x1, FileEventType x2) {
+	public boolean hasSameId(FileEventType x1, FileEventType x2) {
 		return x1.getFileId().equals(x2.getFileId());
 	}
 
 	@Override
-	protected void merge(FileEventType main, FileEvent e) {
+	public void merge(FileEventType main, FileEvent e) {
 		main.setDuration(main.getDuration() + e.getDuration());
 	}
 
 	@Override
-	protected void merge(FileEventType main, FileEventType x) {
+	public void merge(FileEventType main, FileEventType x) {
 		main.setDuration(main.getDuration() + x.getDuration());
 	}
 
 	@Override
-	protected void merge(FileEventListType main, FileEvent e) {
+	public void merge(FileEventListType main, FileEvent e) {
 		merge(main.getFileEvent(), e);
 	}
 
 	@Override
-	protected void merge(FileEventListType main, FileEventListType data) {
+	public void merge(FileEventListType main, FileEventListType data) {
 		merge(main.getFileEvent(), data.getFileEvent());
 	}
 
 	@Override
-	protected FileEventType newXmlType(FileEvent e) {
+	public FileEventType newXmlType(FileEvent e) {
 		FileEventType type = OBJECT_FACTORY.createFileEventType();
 		type.setDuration(e.getDuration());
 		type.setFileId(e.getFileId());
@@ -56,14 +56,14 @@ public class FileEventStorer extends
 	}
 
 	@Override
-	protected FileEventListType newXmlTypeHolder(XMLGregorianCalendar date) {
+	public FileEventListType newXmlTypeHolder(XMLGregorianCalendar date) {
 		FileEventListType type = OBJECT_FACTORY.createFileEventListType();
 		type.setDate(date);
 		return type;
 	}
 
 	@Override
-	protected IDataStore getDataStore() {
+	public IDataStore getDataStore() {
 		return DataStore.FILE_STORE;
 	}
 

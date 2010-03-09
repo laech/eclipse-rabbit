@@ -35,7 +35,7 @@ import rabbit.core.storage.IResourceManager;
 import rabbit.core.storage.xml.FileDataAccessor;
 import rabbit.ui.DisplayPreference;
 
-public abstract class ResourcePageTest extends AbstractTreeViewerPageTest {
+public class ResourcePageTest extends AbstractTreeViewerPageTest {
 
 	protected static IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
 	protected ResourcePage page;
@@ -54,7 +54,7 @@ public abstract class ResourcePageTest extends AbstractTreeViewerPageTest {
 
 	@Before
 	public void before() {
-		page = createPage();
+		page = new ResourcePage();
 		page.createContents(shell);
 	}
 
@@ -418,5 +418,7 @@ public abstract class ResourcePageTest extends AbstractTreeViewerPageTest {
 	}
 
 	@Override
-	protected abstract ResourcePage createPage();
+	protected AbstractTreeViewerPage createPage() {
+		return new ResourcePage();
+	}
 }

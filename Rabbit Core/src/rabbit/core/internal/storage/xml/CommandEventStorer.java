@@ -20,7 +20,7 @@ public class CommandEventStorer
 	}
 
 	@Override
-	protected CommandEventType newXmlType(CommandEvent e) {
+	public CommandEventType newXmlType(CommandEvent e) {
 		CommandEventType type = OBJECT_FACTORY.createCommandEventType();
 		type.setCommandId(e.getExecutionEvent().getCommand().getId());
 		type.setCount(1);
@@ -28,51 +28,51 @@ public class CommandEventStorer
 	}
 
 	@Override
-	protected boolean hasSameId(CommandEventType x, CommandEvent e) {
+	public boolean hasSameId(CommandEventType x, CommandEvent e) {
 
 		return e.getExecutionEvent().getCommand().getId()
 				.equals(x.getCommandId());
 	}
 
 	@Override
-	protected void merge(CommandEventType x, CommandEvent e) {
+	public void merge(CommandEventType x, CommandEvent e) {
 		x.setCount(x.getCount() + 1);
 	}
 
 	@Override
-	protected boolean hasSameId(CommandEventType x1, CommandEventType x2) {
+	public boolean hasSameId(CommandEventType x1, CommandEventType x2) {
 		return x1.getCommandId().equals(x2.getCommandId());
 	}
 
 	@Override
-	protected void merge(CommandEventType x1, CommandEventType x2) {
+	public void merge(CommandEventType x1, CommandEventType x2) {
 		x1.setCount(x1.getCount() + x2.getCount());
 	}
 
 	@Override
-	protected void merge(CommandEventListType t1, CommandEventListType t2) {
+	public void merge(CommandEventListType t1, CommandEventListType t2) {
 		merge(t1.getCommandEvent(), t2.getCommandEvent());
 	}
 
 	@Override
-	protected List<CommandEventListType> getXmlTypeCategories(EventListType events) {
+	public List<CommandEventListType> getXmlTypeCategories(EventListType events) {
 		return events.getCommandEvents();
 	}
 
 	@Override
-	protected void merge(CommandEventListType main, CommandEvent e) {
+	public void merge(CommandEventListType main, CommandEvent e) {
 		merge(main.getCommandEvent(), e);
 	}
 
 	@Override
-	protected CommandEventListType newXmlTypeHolder(XMLGregorianCalendar date) {
+	public CommandEventListType newXmlTypeHolder(XMLGregorianCalendar date) {
 		CommandEventListType type = OBJECT_FACTORY.createCommandEventListType();
 		type.setDate(date);
 		return type;
 	}
 
 	@Override
-	protected IDataStore getDataStore() {
+	public IDataStore getDataStore() {
 		return DataStore.COMMAND_STORE;
 	}
 }

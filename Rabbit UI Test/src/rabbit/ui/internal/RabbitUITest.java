@@ -28,7 +28,7 @@ public class RabbitUITest {
 
 	@Test
 	public void testDefaultDisplayDatePeriod() {
-		assertTrue(RabbitUI.getDefault().getDefaultDisplayDatePeriod() > 0);
+		assertTrue(RabbitUI.getDefault().getDefaultDisplayDatePeriod() >= 0);
 		RabbitUI.getDefault().setDefaultDisplayDatePeriod(10);
 		assertEquals(10, RabbitUI.getDefault().getDefaultDisplayDatePeriod());
 	}

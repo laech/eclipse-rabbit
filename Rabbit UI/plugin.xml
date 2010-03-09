@@ -22,42 +22,42 @@
          point="rabbit.ui.pages">
       <page
             class="rabbit.ui.internal.pages.EclipseUsageCategory"
-            description="This category contains pages that display usage information about Eclipse"
+            description="Contains pages that display Eclipse usage information"
             icon="resources/eclipse.gif"
             name="Eclipse Usage">
          <page
                class="rabbit.ui.internal.pages.CommandPage"
-               description="Displays the execution count of each command"
+               description="Execution counts commands"
                icon="resources/cut.gif"
                name="Commands">
          </page>
          <page
                class="rabbit.ui.internal.pages.PartPage"
-               description="Displays how much time is spent using different views and editors"
+               description="Time spent using different views and editors"
                icon="resources/pin_editor.gif"
                name="Editors and Views">
          </page>
          <page
                class="rabbit.ui.internal.pages.SessionPage"
-               description="Displays the how much time is spent using Eclipse"
+               description="Time spent within Eclipse"
                icon="resources/home.gif"
                name="Sessions">
          </page>
          <page
                class="rabbit.ui.internal.pages.PerspectivePage"
-               description="Displays how much time is spent using different perspectives"
+               description="Time spent using different perspectives"
                icon="resources/defaultpersp.gif"
                name="Perspectives">
          </page>
       </page>
       <page
             class="rabbit.ui.internal.pages.ResourcesCategory"
-            description="This category contains pages that display information relating to projects"
+            description="Contains pages that display information relating to projects"
             icon="resources/projectclosed.gif"
             name="Project Related">
          <page
                class="rabbit.ui.internal.pages.ResourcePage"
-               description="Displays how much time is spent on different resources"
+               description="Time spent working on different resources"
                icon="resources/res.gif"
                name="Resources">
          </page>

@@ -56,11 +56,6 @@ public abstract class AbstractTrackerTest<T> {
 	}
 
 	@Test
-	public void testCreateDataStorer() {
-		assertNotNull(tracker.createDataStorer());
-	}
-
-	@Test
 	public void testFlushData() {
 		tracker.addData(createEvent());
 		assertFalse(tracker.getData().isEmpty());

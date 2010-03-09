@@ -2,7 +2,6 @@ package rabbit.core.internal.storage.xml;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static rabbit.core.internal.storage.xml.AbstractStorer.OBJECT_FACTORY;
 
 import java.util.Calendar;
 import java.util.List;
@@ -11,7 +10,7 @@ import org.eclipse.ui.IPerspectiveDescriptor;
 import org.eclipse.ui.PlatformUI;
 
 import rabbit.core.events.PerspectiveEvent;
-import rabbit.core.internal.storage.xml.PerspectiveEventStorer;
+import rabbit.core.internal.storage.xml.schema.events.ObjectFactory;
 import rabbit.core.internal.storage.xml.schema.events.PerspectiveEventListType;
 import rabbit.core.internal.storage.xml.schema.events.PerspectiveEventType;
 
@@ -22,10 +21,10 @@ public class PerspectiveEventStorerTest
 
 	@Override
 	public void testHasSameId_typeAndEvent() {
-		PerspectiveEventType x1 = OBJECT_FACTORY.createPerspectiveEventType();
+		PerspectiveEventType x1 = new ObjectFactory().createPerspectiveEventType();
 		x1.setPerspectiveId("paId");
 
-		PerspectiveEventType x2 = OBJECT_FACTORY.createPerspectiveEventType();
+		PerspectiveEventType x2 = new ObjectFactory().createPerspectiveEventType();
 		x2.setPerspectiveId(x1.getPerspectiveId());
 
 		assertTrue(storer.hasSameId(x1, x2));
@@ -38,7 +37,7 @@ public class PerspectiveEventStorerTest
 	public void testHasSameId_typeAndType() {
 		PerspectiveEvent e = createEvent();
 
-		PerspectiveEventType x = OBJECT_FACTORY.createPerspectiveEventType();
+		PerspectiveEventType x = new ObjectFactory().createPerspectiveEventType();
 		x.setPerspectiveId(e.getPerspective().getId());
 
 		assertTrue(storer.hasSameId(x, e));

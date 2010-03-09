@@ -171,13 +171,16 @@ public class RabbitView extends ViewPart {
 	 *            The tool bar.
 	 */
 	private void createToolBarItems(IToolBarManager toolBar) {
+		// Only Windows && Eclipse 3.5 has SWT.DROP_DOWN for DateTime.
+		// We don't support 3.3 and before anyway:
 		boolean isWindows = Platform.getOS().equals(Platform.OS_WIN32);
 		boolean isDropDownDateTimeSupported = !getProductVersion().startsWith("3.4");
-		if (isWindows && isDropDownDateTimeSupported) {
+
+		if (isWindows && isDropDownDateTimeSupported)
 			createToolBarForWindowsOS(toolBar);
-		} else {
+		else
 			createToolBarForNonWindowsOS(toolBar);
-		}
+
 
 		createSpace(toolBar);
 		IAction refresh = new Action("Refresh") {
@@ -186,13 +189,24 @@ public class RabbitView extends ViewPart {
 				updateView();
 			}
 		};
-		if (!isWindows || isDropDownDateTimeSupported) {
+
+		/* 
+		 * Mainly for Eclipse 3.4 (no SWT.DROP_DOWN DateTime) on Windows.
+		 * Things look ugly on Windows if some tool bar actions have text and some
+		 * have icons, so in this case, no icons at all.
+		 */
+		if (!isWindows || isDropDownDateTimeSupported)
 			refresh.setImageDescriptor(getRefreshImageDescriptor());
-		}
+
+		//
 		toolBar.add(refresh);
 		toolBar.update(true);
 	}
 
+	/** 
+	 * Gets the version of Eclipse. Not completely reliable.
+	 * @return The version String, such as 3.5..., or an empty String.
+	 */
 	private static String getProductVersion() {
 		try {
 			IProduct product = Platform.getProduct();
@@ -340,7 +354,7 @@ public class RabbitView extends ViewPart {
 	 * @param date
 	 *            The date to get the data from.
 	 */
-	static void updateDateTime(DateTime widget, Calendar date) {
+	public static void updateDateTime(DateTime widget, Calendar date) {
 		widget.setYear(date.get(Calendar.YEAR));
 		widget.setMonth(date.get(Calendar.MONTH));
 		widget.setDay(date.get(Calendar.DAY_OF_MONTH));
@@ -354,7 +368,7 @@ public class RabbitView extends ViewPart {
 	 * @param widget
 	 *            The widget to get the data from.
 	 */
-	static void updateDate(Calendar date, DateTime widget) {
+	public static void updateDate(Calendar date, DateTime widget) {
 		date.set(Calendar.YEAR, widget.getYear());
 		date.set(Calendar.MONTH, widget.getMonth());
 		date.set(Calendar.DAY_OF_MONTH, widget.getDay());
@@ -371,7 +385,7 @@ public class RabbitView extends ViewPart {
 	 * @return True if the dates has the same year, month, and day of month,
 	 *         false otherwise.
 	 */
-	static boolean isSameDate(Calendar date1, Calendar date2) {
+	public static boolean isSameDate(Calendar date1, Calendar date2) {
 		return date1.get(Calendar.YEAR) == date2.get(Calendar.YEAR)
 				&& date1.get(Calendar.MONTH) == date2.get(Calendar.MONTH)
 				&& date1.get(Calendar.DAY_OF_MONTH) == date2.get(Calendar.DAY_OF_MONTH);

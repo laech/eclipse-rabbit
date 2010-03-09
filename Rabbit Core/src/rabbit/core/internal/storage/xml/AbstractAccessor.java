@@ -38,7 +38,7 @@ public abstract class AbstractAccessor<T, S extends EventGroupType> implements I
 	 * 
 	 * @return The data store.
 	 */
-	protected abstract IDataStore getDataStore();
+	public abstract IDataStore getDataStore();
 
 	@Override
 	public Map<String, Long> getData(Calendar start, Calendar end) {
@@ -73,7 +73,7 @@ public abstract class AbstractAccessor<T, S extends EventGroupType> implements I
 	 *            The category.
 	 * @return A collection of objects.
 	 */
-	protected abstract Collection<T> getXmlTypes(S list);
+	public abstract Collection<T> getXmlTypes(S list);
 
 	/**
 	 * Gets the collection of categories from the given parameter.
@@ -82,7 +82,7 @@ public abstract class AbstractAccessor<T, S extends EventGroupType> implements I
 	 *            The root of a document type.
 	 * @return A collection of categories.
 	 */
-	protected abstract Collection<S> getCategories(EventListType doc);
+	public abstract Collection<S> getCategories(EventListType doc);
 
 	/**
 	 * Gets the usage info from the given type.
@@ -91,7 +91,7 @@ public abstract class AbstractAccessor<T, S extends EventGroupType> implements I
 	 *            The type to get info from.
 	 * @return The usage info.
 	 */
-	protected abstract long getUsage(T e);
+	public abstract long getUsage(T e);
 
 	/**
 	 * Gets the id of the given type.
@@ -100,6 +100,6 @@ public abstract class AbstractAccessor<T, S extends EventGroupType> implements I
 	 *            The type.
 	 * @return The id.
 	 */
-	protected abstract String getId(T e);
+	public abstract String getId(T e);
 
 }

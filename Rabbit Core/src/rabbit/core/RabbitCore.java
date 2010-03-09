@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IPath;
@@ -118,7 +119,9 @@ public class RabbitCore extends AbstractUIPlugin implements IWorkbenchListener {
 	 * The constructor.
 	 */
 	public RabbitCore() {
-		idleDetector = new IdleDetector(getWorkbench().getDisplay(), 60000, 1000);
+		long oneSecond = TimeUnit.SECONDS.toMillis(1);
+		long oneMinuite = TimeUnit.MINUTES.toMillis(1);
+		idleDetector = new IdleDetector(getWorkbench().getDisplay(), oneMinuite, oneSecond);
 		trackerList = Collections.emptyList();
 	}
 

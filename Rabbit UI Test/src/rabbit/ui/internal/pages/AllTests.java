@@ -12,6 +12,9 @@ import org.junit.runners.Suite;
 		PartPageTest.class,
 		PerspectiveLabelProviderTest.class,
 		PerspectivePageTest.class,
+		ResourcePageTest.class,
+		ResourcePageContentProviderTest.class,
+		ResourcePageLabelProviderTest.class,
 		SessionPageLabelProviderTest.class,
 		SessionPageTest.class,
 //

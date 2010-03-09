@@ -102,16 +102,15 @@ public class RabbitViewTest {
 		RabbitView view = new RabbitView();
 		view.createPartControl(shell);
 
+		DisplayPreference pref = getPreference(view);
+
 		Calendar fromDate = new GregorianCalendar(1999, 1, 1);
-		DateTime fromDateTime = getFromDateTime(view);
-		fromDateTime.setDate(fromDate.get(Calendar.YEAR), fromDate.get(Calendar.MONTH), fromDate.get(Calendar.DAY_OF_MONTH));
+		pref.getStartDate().setTimeInMillis(fromDate.getTimeInMillis());
 
 		Calendar toDate = new GregorianCalendar(2010, 1, 1);
-		DateTime toDateTime = getToDateTime(view);
-		toDateTime.setDate(toDate.get(Calendar.YEAR), toDate.get(Calendar.MONTH), toDate.get(Calendar.DAY_OF_MONTH));
+		pref.getEndDate().setTimeInMillis(toDate.getTimeInMillis());
 
 		update(view);
-		DisplayPreference pref = getPreference(view);
 
 		assertEquals(fromDate.get(Calendar.YEAR), pref.getStartDate().get(Calendar.YEAR));
 		assertEquals(fromDate.get(Calendar.MONTH), pref.getStartDate().get(Calendar.MONTH));
@@ -163,25 +162,13 @@ public class RabbitViewTest {
 	}
 
 	private void update(RabbitView view) throws Exception {
-		Method update = RabbitView.class.getDeclaredMethod("update");
+		Method update = RabbitView.class.getDeclaredMethod("updateView");
 		update.setAccessible(true);
 		update.invoke(view);
 	}
 
-	private DateTime getFromDateTime(RabbitView view) throws Exception {
-		Field fromDateTimeField = RabbitView.class.getDeclaredField("fromDateTime");
-		fromDateTimeField.setAccessible(true);
-		return (DateTime) fromDateTimeField.get(view);
-	}
-
-	private DateTime getToDateTime(RabbitView view) throws Exception {
-		Field toDateTimeField = RabbitView.class.getDeclaredField("toDateTime");
-		toDateTimeField.setAccessible(true);
-		return (DateTime) toDateTimeField.get(view);
-	}
-
 	private DisplayPreference getPreference(RabbitView view) throws Exception {
-		Field pref = RabbitView.class.getDeclaredField("displayPref");
+		Field pref = RabbitView.class.getDeclaredField("preferences");
 		pref.setAccessible(true);
 		return (DisplayPreference) pref.get(view);
 	}

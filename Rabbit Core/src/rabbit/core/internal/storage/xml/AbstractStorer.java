@@ -52,7 +52,7 @@ public abstract class AbstractStorer<E extends DiscreteEvent, T, S extends Event
 	 *            The root element.
 	 * @return A list of groups.
 	 */
-	protected abstract <U extends S> List<U> getXmlTypeCategories(EventListType events);
+	public abstract <U extends S> List<U> getXmlTypeCategories(EventListType events);
 
 	/**
 	 * Checks whether the given objects has the same id.
@@ -67,7 +67,7 @@ public abstract class AbstractStorer<E extends DiscreteEvent, T, S extends Event
 	 *            A event object.
 	 * @return true If the two object has the same id.
 	 */
-	protected abstract boolean hasSameId(T x, E e);
+	public abstract boolean hasSameId(T x, E e);
 
 	/**
 	 * Checks whether the given objects has the same id.
@@ -82,7 +82,7 @@ public abstract class AbstractStorer<E extends DiscreteEvent, T, S extends Event
 	 *            A java object representing an XML element.
 	 * @return true If the two object has the same id.
 	 */
-	protected abstract boolean hasSameId(T x1, T x2);
+	public abstract boolean hasSameId(T x1, T x2);
 
 	/**
 	 * Inserts a collection of event data to be stored.
@@ -170,7 +170,7 @@ public abstract class AbstractStorer<E extends DiscreteEvent, T, S extends Event
 	 * @param event
 	 *            The event for merging.
 	 */
-	protected void merge(List<T> xList, E event) {
+	public void merge(List<T> xList, E event) {
 
 		boolean done = false;
 		for (T xmlType : xList) {
@@ -195,7 +195,7 @@ public abstract class AbstractStorer<E extends DiscreteEvent, T, S extends Event
 	 * @param newList
 	 *            The list for getting data from.
 	 */
-	protected void merge(List<T> mainList, List<T> newList) {
+	public void merge(List<T> mainList, List<T> newList) {
 
 		for (T newType : newList) {
 			boolean done = false;
@@ -222,7 +222,7 @@ public abstract class AbstractStorer<E extends DiscreteEvent, T, S extends Event
 	 * @param e
 	 *            The object to merge from.
 	 */
-	protected abstract void merge(T main, E e);
+	public abstract void merge(T main, E e);
 
 	/**
 	 * Merges the data of the second parameter into the first parameter.
@@ -232,7 +232,7 @@ public abstract class AbstractStorer<E extends DiscreteEvent, T, S extends Event
 	 * @param x
 	 *            The object to merge from.
 	 */
-	protected abstract void merge(T main, T x);
+	public abstract void merge(T main, T x);
 
 	/**
 	 * Merges the data of the second parameter into the first parameter.
@@ -242,7 +242,7 @@ public abstract class AbstractStorer<E extends DiscreteEvent, T, S extends Event
 	 * @param e
 	 *            The object to merge from.
 	 */
-	protected abstract void merge(S main, E e);
+	public abstract void merge(S main, E e);
 
 	/**
 	 * Merges the two group objects together, use the first parameter as the
@@ -253,7 +253,7 @@ public abstract class AbstractStorer<E extends DiscreteEvent, T, S extends Event
 	 * @param data
 	 *            The XML group to merge from.
 	 */
-	protected abstract void merge(S main, S data);
+	public abstract void merge(S main, S data);
 
 	/**
 	 * Creates a new XML object type from the given event.
@@ -262,7 +262,7 @@ public abstract class AbstractStorer<E extends DiscreteEvent, T, S extends Event
 	 *            The event.
 	 * @return A new XML object type.
 	 */
-	protected abstract T newXmlType(E e);
+	public abstract T newXmlType(E e);
 
 	/**
 	 * Creates a new XML object group type from the given date.
@@ -271,7 +271,7 @@ public abstract class AbstractStorer<E extends DiscreteEvent, T, S extends Event
 	 *            The date.
 	 * @return A new XML object group type configured with the date.
 	 */
-	protected abstract S newXmlTypeHolder(XMLGregorianCalendar date);
+	public abstract S newXmlTypeHolder(XMLGregorianCalendar date);
 
 	/**
 	 * Writes the data to disk.
@@ -311,5 +311,5 @@ public abstract class AbstractStorer<E extends DiscreteEvent, T, S extends Event
 	 * 
 	 * @return The data store.
 	 */
-	protected abstract IDataStore getDataStore();
+	public abstract IDataStore getDataStore();
 }

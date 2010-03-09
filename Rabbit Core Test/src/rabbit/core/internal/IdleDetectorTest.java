@@ -144,8 +144,8 @@ public class IdleDetectorTest {
 		TimeUnit.MILLISECONDS.sleep(idleInterval + (runDelay * 2));
 
 		for (int i = 0; i < 3; i++) {
-			bot.menu("Help").menu("About").click();
-			bot.shell("About Eclipse Platform").activate();
+			bot.menu("Help").menu("About Eclipse Platform").click();
+			//			bot.shell("About Eclipse Platform").activate();
 			bot.button("OK").click();
 		}
 
@@ -163,8 +163,8 @@ public class IdleDetectorTest {
 		TimeUnit.MILLISECONDS.sleep(idleInterval + (runDelay * 2));
 		Assert.assertFalse(d.isUserActive());
 
-		bot.menu("Help").menu("About").click();
-		bot.shell("About Eclipse Platform").activate();
+		bot.menu("Help").menu("About Eclipse Platform").click();
+		//		bot.shell("About Eclipse Platform").activate();
 		bot.button("OK").click();
 		Assert.assertTrue(d.isUserActive());
 	}
@@ -184,8 +184,8 @@ public class IdleDetectorTest {
 		Assert.assertFalse(d.isUserActive());
 
 		for (int i = 0; i < 3; i++) {
-			bot.menu("Help").menu("About").click();
-			bot.shell("About Eclipse Platform").activate();
+			bot.menu("Help").menu("About Eclipse Platform").click();
+			//			bot.shell("About Eclipse Platform").activate();
 			bot.button("OK").click();
 		}
 

@@ -15,27 +15,27 @@ import rabbit.core.internal.storage.xml.schema.events.FileEventType;
 public class FileDataAccessor extends AbstractAccessor<FileEventType, FileEventListType> {
 
 	@Override
-	protected Collection<FileEventListType> getCategories(EventListType doc) {
+	public Collection<FileEventListType> getCategories(EventListType doc) {
 		return doc.getFileEvents();
 	}
 
 	@Override
-	protected IDataStore getDataStore() {
+	public IDataStore getDataStore() {
 		return DataStore.FILE_STORE;
 	}
 
 	@Override
-	protected String getId(FileEventType e) {
+	public String getId(FileEventType e) {
 		return e.getFileId();
 	}
 
 	@Override
-	protected long getUsage(FileEventType e) {
+	public long getUsage(FileEventType e) {
 		return e.getDuration();
 	}
 
 	@Override
-	protected Collection<FileEventType> getXmlTypes(FileEventListType list) {
+	public Collection<FileEventType> getXmlTypes(FileEventListType list) {
 		return list.getFileEvent();
 	}
 
