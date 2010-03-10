@@ -96,7 +96,6 @@ public abstract class AbstractPartTracker<E> extends AbstractTracker<E>
 			public void run() {
 				IWorkbenchWindow win = wb.getActiveWorkbenchWindow();
 				if (win != null && win.getPartService().getActivePart() != null) {
-					System.out.println(win.getPartService().getActivePart());
 					startSession(win.getPartService().getActivePart());
 				}
 			}

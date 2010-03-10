@@ -9,6 +9,8 @@ import java.util.List;
 
 import javax.xml.bind.JAXBException;
 
+import org.eclipse.core.runtime.IPath;
+
 import rabbit.core.RabbitCore;
 import rabbit.core.internal.storage.xml.schema.events.EventListType;
 import rabbit.core.internal.storage.xml.schema.events.ObjectFactory;
@@ -35,20 +37,19 @@ public enum DataStore implements IDataStore {
 
 	private String id;
 
-	DataStore(String id) {
+	private DataStore(String id) {
 		this.id = id;
 	}
 
 	@Override
 	public File getDataFile(Calendar date) {
-		StringBuilder builder = new StringBuilder();
-		builder.append(getStorageLocation().getAbsolutePath());
-		builder.append(File.separator);
-		builder.append(id);
-		builder.append("-");
-		builder.append(monthFormatter.format(date.getTime()));
-		builder.append(".xml");
-		return new File(builder.toString());
+		return getDataFile(date, getStorageLocation());
+	}
+
+	@Override
+	public File getDataFile(Calendar date, IPath location) {
+		return location.append(id + "-" + monthFormatter.format(date.getTime()))
+				.addFileExtension("xml").toFile();
 	}
 
 	@Override
@@ -60,11 +61,13 @@ public enum DataStore implements IDataStore {
 		end.set(Calendar.DAY_OF_MONTH, start.get(Calendar.DAY_OF_MONTH));
 
 		List<File> result = new ArrayList<File>();
+		IPath[] storagePaths = RabbitCore.getDefault().getStoragePaths();
 		while (start.compareTo(end) <= 0) {
 
-			File f = getDataFile(start);
-			if (f.exists()) {
-				result.add(f);
+			for (IPath path : storagePaths) {
+				File f = getDataFile(start, path);
+				if (f.exists())
+					result.add(f);
 			}
 
 			start.add(Calendar.MONTH, 1);
@@ -96,14 +99,15 @@ public enum DataStore implements IDataStore {
 	}
 
 	@Override
-	public File getStorageLocation() {
-		File f = new File(RabbitCore.getDefault().getStoragePath().toOSString());
+	public IPath getStorageLocation() {
+		IPath path = RabbitCore.getDefault().getStoragePath();
+		File f = path.toFile();
 		if (!f.exists()) {
 			if (!f.mkdirs()) {
-				throw new RuntimeException();
+				System.err.println(getClass() + ": Cannot create storage location.");
 			}
 		}
-		return f;
+		return path;
 	}
 
 }

@@ -219,9 +219,10 @@ public class ResourcePage extends AbstractTreeViewerPage {
 		IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
 		for (Map.Entry<String, Long> entry : data.entrySet()) {
 			String pathString = resourceMapper.getPath(entry.getKey());
-			if (pathString == null) {
+			if (pathString == null)
+				pathString = resourceMapper.getExternalPath(entry.getKey());
+			if (pathString == null)
 				continue;
-			}
 
 			IFile file = root.getFile(Path.fromPortableString(pathString));
 			Long oldValue = fileValues.get(file);
@@ -371,7 +372,9 @@ public class ResourcePage extends AbstractTreeViewerPage {
 	};
 	@Override
 	public void update(DisplayPreference p) {
+		Object[] elements = getViewer().getExpandedElements();
 		doUpdate(accessor.getData(p.getStartDate(), p.getEndDate()));
+		getViewer().setExpandedElements(elements);
 	};
 
 	private void updateMaxValue() {

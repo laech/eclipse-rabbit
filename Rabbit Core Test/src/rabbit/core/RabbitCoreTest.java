@@ -1,8 +1,11 @@
 package rabbit.core;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
+import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Collection;
@@ -10,6 +13,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -172,6 +177,39 @@ public class RabbitCoreTest {
 		Assert.assertNotNull(plugin.getStoragePath());
 		Assert.assertTrue(plugin.getStoragePath().toFile().exists());
 		Assert.assertTrue(plugin.getStoragePath().toFile().isDirectory());
+	}
+
+	@Test
+	public void testStoragePaths() {
+		Set<IPath> paths = new HashSet<IPath>();
+		for (IPath path : plugin.getStoragePaths()) {
+			paths.add(path);
+		}
+		boolean hasDefaultPath = false;
+		for (IPath path : paths) {
+			if (path.toString().equals(plugin.getStoragePath().toString())) {
+				hasDefaultPath = true;
+				break;
+			}
+		}
+		if (!hasDefaultPath) {
+			fail();
+		}
+
+		IPath root = Path.fromPortableString(plugin.getPreferenceStore().getString(RabbitCore.STORAGE_LOCATION));
+		File rootFile = new File(root.toOSString());
+		File[] files = rootFile.listFiles();
+		paths = new HashSet<IPath>(files.length);
+		for (File file : files) {
+			if (file.isDirectory()) {
+				paths.add(Path.fromOSString(file.getAbsolutePath()));
+			}
+
+			System.out.println(file.getName());
+		}
+		assertEquals(paths.size(), plugin.getStoragePaths().length);
+		for (IPath path : plugin.getStoragePaths())
+			assertTrue(paths.contains(path));
 	}
 
 	@Test

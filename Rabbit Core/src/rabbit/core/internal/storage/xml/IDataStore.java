@@ -4,6 +4,8 @@ import java.io.File;
 import java.util.Calendar;
 import java.util.List;
 
+import org.eclipse.core.runtime.IPath;
+
 import rabbit.core.internal.storage.xml.schema.events.EventListType;
 
 /**
@@ -12,7 +14,7 @@ import rabbit.core.internal.storage.xml.schema.events.EventListType;
 public interface IDataStore {
 
 	/**
-	 * Gets the data file for the given date.
+	 * Gets the data file for the given date of the current workspace.
 	 * 
 	 * @param date
 	 *            The date.
@@ -21,13 +23,22 @@ public interface IDataStore {
 	File getDataFile(Calendar date);
 
 	/**
-	 * Gets the data files for between the given dates, inclusively.
+	 * Gets the data file for the given date in the given location.
+	 * @param date The date.
+	 * @param location The folder location.
+	 * @return The file, this file may not be physically existing.
+	 */
+	File getDataFile(Calendar date, IPath location);
+
+	/**
+	 * Gets the data files for between the given dates, inclusively,
+	 * of all the workspaces.
 	 * 
 	 * @param start
 	 *            The start date.
 	 * @param end
 	 *            The end date.
-	 * @return A list of files that are physically existing.
+	 * @return A list of files that are physically existing across all workspaces.
 	 */
 	List<File> getDataFiles(Calendar start, Calendar end);
 
@@ -56,6 +67,6 @@ public interface IDataStore {
 	 * 
 	 * @return The storage location.
 	 */
-	File getStorageLocation();
+	IPath getStorageLocation();
 
 }

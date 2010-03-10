@@ -17,7 +17,7 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 
 	@Override
 	public void initializeDefaultPreferences() {
-		IPath path = Path.fromOSString(System.getProperty("user.home")).append("Rabbit").append("XmlDb");
+		IPath path = Path.fromOSString(System.getProperty("user.home")).append("Rabbit");
 
 		IPreferenceStore store = RabbitCore.getDefault().getPreferenceStore();
 		store.setDefault(RabbitCore.STORAGE_LOCATION, path.toOSString());

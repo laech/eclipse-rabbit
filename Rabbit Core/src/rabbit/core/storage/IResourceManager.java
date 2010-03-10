@@ -40,4 +40,13 @@ public interface IResourceManager {
 	 */
 	String insert(String filePath);
 
+	/**
+	 * Gets the file path of the given file id from an external source. 
+	 * This method may returns a path if {@link #getPath(String)} returns null.
+	 * 
+	 * @param fileId The id of the file.
+	 * @return The file path, or null if not found.
+	 */
+	String getExternalPath(String fileId);
+
 }

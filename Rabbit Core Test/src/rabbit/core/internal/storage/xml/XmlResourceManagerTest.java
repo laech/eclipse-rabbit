@@ -16,6 +16,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import javax.xml.bind.JAXBElement;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
@@ -28,6 +30,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import rabbit.core.RabbitCore;
 import rabbit.core.TestUtil;
 import rabbit.core.internal.storage.xml.schema.resources.ObjectFactory;
 import rabbit.core.internal.storage.xml.schema.resources.ResourceListType;
@@ -69,6 +72,33 @@ public class XmlResourceManagerTest {
 	public void testGetFilePath() {
 		String id = System.nanoTime() + "" + System.currentTimeMillis();
 		assertNull(manager.getPath(id));
+	}
+
+	@Test
+	public void testGetExternalPath() throws Exception {
+		String path = System.currentTimeMillis() + "";
+		String id = System.nanoTime() + "";
+		
+		ObjectFactory of = new ObjectFactory();
+		ResourceType type = of.createResourceType();
+		type.setPath(path);
+		type.getResourceId().add(id);
+		ResourceListType resources = of.createResourceListType();
+		resources.getResource().add(type);
+
+		IPath filePath = new Path(RabbitCore.getDefault().getPreferenceStore().getString(RabbitCore.STORAGE_LOCATION));
+		filePath = filePath.append(System.currentTimeMillis() + "");
+
+		Method getDataFile = XmlResourceManager.class.getDeclaredMethod("getDataFile", IPath.class);
+		getDataFile.setAccessible(true);
+		File dataFile = (File) getDataFile.invoke(manager, filePath);
+
+		Method marshal = XmlResourceManager.class.getDeclaredMethod("marshal", JAXBElement.class, File.class);
+		marshal.setAccessible(true);
+		marshal.invoke(manager, of.createResources(resources), dataFile);
+
+		manager.write(true);
+		assertEquals(path, manager.getExternalPath(id));
 	}
 
 	@Test

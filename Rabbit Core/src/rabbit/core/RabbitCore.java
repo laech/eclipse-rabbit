@@ -1,5 +1,6 @@
 package rabbit.core;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -8,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.ISafeRunnable;
@@ -169,12 +171,34 @@ public class RabbitCore extends AbstractUIPlugin implements IWorkbenchListener {
 	}
 
 	/**
-	 * Gets the full path to the storage location of this plug-in.
+	 * Gets the full path to the storage location of this workspace.
 	 * 
 	 * @return The full path to the storage location folder.
 	 */
 	public IPath getStoragePath() {
-		return new Path(getPreferenceStore().getString(STORAGE_LOCATION));
+		String workspace = ResourcesPlugin.getWorkspace().getRoot().getLocation().toOSString();
+		workspace = workspace.replace(File.separatorChar, '.');
+		workspace = workspace.replace(":", "");
+		return new Path(getPreferenceStore().getString(STORAGE_LOCATION)).append(workspace);
+	}
+
+	/**
+	 * Gets the paths to all the workspace storage locations for this plug-in.
+	 * Includes {@link #getStoragePath()}.
+	 * @return The paths to all the workspace storage locations
+	 */
+	public IPath[] getStoragePaths() {
+		IPath root = new Path(getPreferenceStore().getString(STORAGE_LOCATION));
+		File rootFile = new File(root.toOSString());
+		File[] files = rootFile.listFiles();
+		List<IPath> paths = new ArrayList<IPath>(files.length);
+		for (File file : files) {
+			if (file.isDirectory()) {
+				paths.add(Path.fromOSString(file.getAbsolutePath()));
+			}
+		}
+
+		return paths.toArray(new IPath[paths.size()]);
 	}
 
 	@Override
@@ -200,7 +224,7 @@ public class RabbitCore extends AbstractUIPlugin implements IWorkbenchListener {
 			t.getTracker().saveData();
 			t.getTracker().flushData();
 		}
-		XmlResourceManager.INSTANCE.write();
+		XmlResourceManager.INSTANCE.write(true);
 	}
 
 	/**

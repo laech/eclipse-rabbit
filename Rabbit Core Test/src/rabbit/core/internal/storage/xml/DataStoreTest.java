@@ -7,21 +7,24 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.core.runtime.IPath;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import rabbit.core.RabbitCore;
 import rabbit.core.TestUtil;
 import rabbit.core.internal.storage.xml.schema.events.ObjectFactory;
 
 public class DataStoreTest {
 
-	private DataStore store = DataStore.COMMAND_STORE;
+	private DataStore store = DataStore.PART_STORE;
 
 	@BeforeClass
 	public static void setUp() {
@@ -75,6 +78,26 @@ public class DataStoreTest {
 			}
 		}
 		assertEquals(0, store.getDataFiles(lowerBound, upperBound).size());
+
+		// Temporary test for testing files across multiple workspaces:
+		Calendar end = Calendar.getInstance();
+		Calendar start = (Calendar) end.clone();
+		start.add(Calendar.YEAR, -1);
+
+		List<File> result = new ArrayList<File>();
+		IPath[] storagePaths = RabbitCore.getDefault().getStoragePaths();
+		Calendar date = (Calendar) start.clone();
+		while (date.compareTo(end) <= 0) {
+
+			for (IPath path : storagePaths) {
+				File f = store.getDataFile(date, path);
+				if (f.exists()) {
+					result.add(f);
+				}
+			}
+			date.add(Calendar.MONTH, 1);
+		}
+		assertEquals(result.size(), store.getDataFiles(start, end).size());
 	}
 
 	@Test
