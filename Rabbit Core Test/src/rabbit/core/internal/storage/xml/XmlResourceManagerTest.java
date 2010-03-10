@@ -9,6 +9,7 @@ import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -55,6 +56,13 @@ public class XmlResourceManagerTest {
 		dataFile.setAccessible(true);
 		File file = (File) dataFile.invoke(manager);
 		return file;
+	}
+
+	@SuppressWarnings("unchecked")
+	private Map<String, Set<String>> getResourcesFiled() throws Exception {
+		Field field = XmlResourceManager.class.getDeclaredField("resources");
+		field.setAccessible(true);
+		return (Map<String, Set<String>>) field.get(manager);
 	}
 
 	@Test
@@ -338,6 +346,7 @@ public class XmlResourceManagerTest {
 		assertTrue(type2.getResourceId().contains("id2.2"));
 	}
 
+
 	@Test
 	public void testWrite() throws Exception {
 		String path = System.nanoTime() + "" + System.currentTimeMillis();
@@ -354,12 +363,28 @@ public class XmlResourceManagerTest {
 				if (type.getResourceId().size() != 1) {
 					fail();
 				}
+				if (!type.getResourceId().get(0).equals(id)) {
+					fail();
+				}
+			}
+		}
+
+		getResourcesFiled().clear();
+		id = manager.insert(path);
+		manager.write();
+		resources = (ResourceListType) getData.invoke(manager);
+		for (ResourceType type : resources.getResource()) {
+			if (type.getPath().equals(path)) {
+				if (type.getResourceId().size() != 1) {
+					fail();
+				}
 				if (type.getResourceId().get(0).equals(id)) {
 					return;
 				}
 				fail();
 			}
 		}
+
 		fail();
 	}
 

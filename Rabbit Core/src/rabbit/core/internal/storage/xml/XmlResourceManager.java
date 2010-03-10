@@ -215,21 +215,7 @@ public enum XmlResourceManager implements IResourceManager, IResourceChangeListe
 	/**
 	 * Saves the current data to disk.
 	 */
-	public synchronized void write() {
-		// Note: the file database is shared across workspaces, so this method
-		// needs to be synchronized and data need to be merged.
-
-		ResourceListType oldData = getData();
-		for (ResourceType type : oldData.getResource()) {
-
-			Set<String> ids = resources.get(type.getPath());
-			if (ids == null) {
-				ids = new HashSet<String>();
-				resources.put(type.getPath(), ids);
-			}
-			ids.addAll(type.getResourceId());
-			allIds.addAll(type.getResourceId());
-		}
+	public void write() {
 		try {
 			marshal(objectFactory.createResources(convert(resources)), getDataFile());
 		} catch (Exception e) {
