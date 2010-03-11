@@ -27,7 +27,7 @@
             name="Eclipse Usage">
          <page
                class="rabbit.ui.internal.pages.CommandPage"
-               description="Execution counts commands"
+               description="Command execution counts"
                icon="resources/cut.gif"
                name="Commands">
          </page>
