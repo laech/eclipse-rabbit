@@ -1,3 +1,18 @@
+/*
+ * Copyright 2010 The Rabbit Eclipse Plug-in Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package rabbit.ui.internal;
 
 import java.util.Comparator;
@@ -31,12 +46,50 @@ public class RabbitUI extends AbstractUIPlugin {
 	// The shared instance
 	private static RabbitUI plugin;
 
+	/**
+	 * Returns the shared instance
+	 * 
+	 * @return the shared instance
+	 */
+	public static RabbitUI getDefault() {
+		return plugin;
+	}
+
 	private SortedSet<PageDescriptor> pages;
 
 	/**
 	 * The constructor
 	 */
 	public RabbitUI() {
+	}
+
+	/**
+	 * Gets the default number of days to display the data in the main view.
+	 * 
+	 * @return The default number of days.
+	 */
+	public int getDefaultDisplayDatePeriod() {
+		return getPreferenceStore().getInt(DEFAULT_DISPLAY_DATE_PERIOD);
+	}
+
+	/**
+	 * Gets the pages.
+	 * 
+	 * @return The pages.
+	 */
+	public Set<PageDescriptor> getPages() {
+		return pages;
+	}
+
+	/**
+	 * Sets the default number of days to display the data in the main view.
+	 * 
+	 * @param numDays
+	 *            The number of days.
+	 */
+	public void setDefaultDisplayDatePeriod(int numDays) {
+		IPreferenceStore store = getPreferenceStore();
+		store.setValue(DEFAULT_DISPLAY_DATE_PERIOD, numDays);
 	}
 
 	@Override
@@ -64,24 +117,6 @@ public class RabbitUI extends AbstractUIPlugin {
 	public void stop(BundleContext context) throws Exception {
 		plugin = null;
 		super.stop(context);
-	}
-
-	/**
-	 * Returns the shared instance
-	 * 
-	 * @return the shared instance
-	 */
-	public static RabbitUI getDefault() {
-		return plugin;
-	}
-
-	/**
-	 * Gets the pages.
-	 * 
-	 * @return The pages.
-	 */
-	public Set<PageDescriptor> getPages() {
-		return pages;
 	}
 
 	/**
@@ -124,25 +159,5 @@ public class RabbitUI extends AbstractUIPlugin {
 			}
 		}
 		return extension;
-	}
-
-	/**
-	 * Gets the default number of days to display the data in the main view.
-	 * 
-	 * @return The default number of days.
-	 */
-	public int getDefaultDisplayDatePeriod() {
-		return getPreferenceStore().getInt(DEFAULT_DISPLAY_DATE_PERIOD);
-	}
-
-	/**
-	 * Sets the default number of days to display the data in the main view.
-	 * 
-	 * @param numDays
-	 *            The number of days.
-	 */
-	public void setDefaultDisplayDatePeriod(int numDays) {
-		IPreferenceStore store = getPreferenceStore();
-		store.setValue(DEFAULT_DISPLAY_DATE_PERIOD, numDays);
 	}
 }

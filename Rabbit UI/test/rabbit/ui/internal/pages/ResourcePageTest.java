@@ -1,3 +1,18 @@
+/*
+ * Copyright 2010 The Rabbit Eclipse Plug-in Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package rabbit.ui.internal.pages;
 
 import static org.junit.Assert.assertEquals;
@@ -31,25 +46,54 @@ import org.junit.Test;
 
 import rabbit.core.RabbitCore;
 import rabbit.core.storage.IAccessor;
-import rabbit.core.storage.IResourceManager;
+import rabbit.core.storage.IResourceMapper;
 import rabbit.core.storage.xml.FileDataAccessor;
 import rabbit.ui.DisplayPreference;
 
 public class ResourcePageTest extends AbstractTreeViewerPageTest {
 
 	protected static IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
+
+	static void doUpdate(ResourcePage page, Map<String, Long> data) throws Exception {
+		Method method = ResourcePage.class.getDeclaredMethod("doUpdate", Map.class);
+		method.setAccessible(true);
+		method.invoke(page, data);
+	}
+
+	@SuppressWarnings("unchecked")
+	static Map<IFile, Long> getFieldFileValues(ResourcePage page) throws Exception {
+		Field field = ResourcePage.class.getDeclaredField("fileValues");
+		field.setAccessible(true);
+		return (Map<IFile, Long>) field.get(page);
+	}
+
+	@SuppressWarnings("unchecked")
+	static Map<IFolder, Set<IFile>> getFieldFolderFiles(ResourcePage page) throws Exception {
+		Field field = ResourcePage.class.getDeclaredField("folderFiles");
+		field.setAccessible(true);
+		return (Map<IFolder, Set<IFile>>) field.get(page);
+	}
+
+	@SuppressWarnings("unchecked")
+	static Map<IProject, Set<IResource>> getFieldProjectResources(ResourcePage page)
+			throws Exception {
+		Field field = ResourcePage.class.getDeclaredField("projectResources");
+		field.setAccessible(true);
+		return (Map<IProject, Set<IResource>>) field.get(page);
+	}
+
 	protected ResourcePage page;
 
 	private static Shell shell;
 
-	@BeforeClass
-	public static void beforeClass() {
-		shell = new Shell(PlatformUI.getWorkbench().getDisplay());
-	}
-
 	@AfterClass
 	public static void afterClass() {
 		shell.dispose();
+	}
+
+	@BeforeClass
+	public static void beforeClass() {
+		shell = new Shell(PlatformUI.getWorkbench().getDisplay());
 	}
 
 	@Before
@@ -59,60 +103,22 @@ public class ResourcePageTest extends AbstractTreeViewerPageTest {
 	}
 
 	@Test
-	public void testUpdate() {
-		Map<IProject, Long> projects = new HashMap<IProject, Long>();
-		Map<IFolder, Long> folders = new HashMap<IFolder, Long>();
-		Map<IFile, Long> files = new HashMap<IFile, Long>();
+	public void getResources() throws Exception {
+		IProject project = root.getProject("p");
+		IFolder folder = project.getFolder("f");
+		IFile file = folder.getFile("a");
 
-		DisplayPreference preference = new DisplayPreference();
-		Calendar end = preference.getEndDate();
-		preference.getStartDate().set(end.get(Calendar.YEAR), end.get(Calendar.MONTH) - 2, end.get(Calendar.DAY_OF_MONTH));
+		Set<IResource> resources = new HashSet<IResource>(2, 1);
+		resources.add(folder);
+		resources.add(file);
 
-		IAccessor accessor = new FileDataAccessor();
-		Map<String, Long> data = accessor.getData(preference.getStartDate(), preference.getEndDate());
+		Map<IProject, Set<IResource>> projectResources = getFieldProjectResources(page);
+		projectResources.put(project, resources);
 
-		IResourceManager mapper = RabbitCore.getDefault().getResourceManager();
-		for (Entry<String, Long> entry : data.entrySet()) {
-			String path = mapper.getPath(entry.getKey());
-			if (path == null) {
-				continue;
-			}
-
-			IFile file = root.getFile(Path.fromPortableString(path));
-			Long oldValue = files.get(file);
-			if (oldValue == null) {
-				oldValue = Long.valueOf(0);
-			}
-			files.put(file, oldValue + entry.getValue());
-
-			IProject project = file.getProject();
-			oldValue = projects.get(project);
-			if (oldValue == null) {
-				oldValue = Long.valueOf(0);
-			}
-			projects.put(project, oldValue + entry.getValue());
-
-			IContainer parent = file.getParent();
-			if (parent != project) {
-				IFolder folder = (IFolder) parent;
-				oldValue = folders.get(parent);
-				if (oldValue == null) {
-					oldValue = Long.valueOf(0);
-				}
-				folders.put(folder, oldValue + entry.getValue());
-			}
-		}
-
-		page.update(preference);
-		for (Entry<IProject, Long> entry : projects.entrySet()) {
-			assertEquals(entry.getValue().longValue(), page.getValueOfProject(entry.getKey()));
-		}
-		for (Entry<IFolder, Long> entry : folders.entrySet()) {
-			assertEquals(entry.getValue().longValue(), page.getValueOfFolder(entry.getKey()));
-		}
-		for (Entry<IFile, Long> entry : files.entrySet()) {
-			assertEquals(entry.getValue().longValue(), page.getValueOfFile(entry.getKey()));
-		}
+		IResource[] array = page.getResources(project);
+		assertEquals(resources.size(), array.length);
+		assertTrue(resources.contains(array[0]));
+		assertTrue(resources.contains(array[1]));
 	}
 
 	@Test
@@ -120,8 +126,8 @@ public class ResourcePageTest extends AbstractTreeViewerPageTest {
 		// Test two id pointing to same file, getting the value of the file must
 		// return the sum.
 
-		IResourceManager manager = RabbitCore.getDefault().getResourceManager();
-		
+		IResourceMapper manager = RabbitCore.getDefault().getResourceManager();
+
 		IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject("tmp");
 		if (!project.exists()) {
 			project.create(null);
@@ -159,7 +165,7 @@ public class ResourcePageTest extends AbstractTreeViewerPageTest {
 		// Now the two IDs should point to the same path:
 		assertEquals(manager.getPath(file1Id), manager.getPath(file2Id));
 		assertEquals(file1.getFullPath().toString(), manager.getPath(file1Id));
-		
+
 		long value1 = 19084;
 		long value2 = 28450;
 
@@ -174,60 +180,11 @@ public class ResourcePageTest extends AbstractTreeViewerPageTest {
 	}
 
 	@Test
-	public void testGetValueOfProject() throws Exception {
-		Map<IProject, Set<IResource>> projectResources = getFieldProjectResources(page);
-		Map<IFolder, Set<IFile>> folderFiles = getFieldFolderFiles(page);
-		Map<IFile, Long> values = getFieldFileValues(page);
-
-		final long value = 9676219;
-		IProject project = root.getProject("p");
-
-		IFolder folder1 = project.getFolder("f1");
-		{
-			IFile file1 = folder1.getFile("a");
-			IFile file2 = folder1.getFile("b");
-			values.put(file1, value);
-			values.put(file2, value);
-
-			Set<IFile> files = new HashSet<IFile>(2, 1);
-			files.add(file1);
-			files.add(file2);
-			folderFiles.put(folder1, files);
-		}
-		IFolder folder2 = project.getFolder("f2");
-		{
-			IFile file1 = folder2.getFile("c");
-			IFile file2 = folder2.getFile("d");
-			values.put(file1, value);
-			values.put(file2, value);
-
-				Set<IFile> files = new HashSet<IFile>(2, 1);
-			files.add(file1);
-			files.add(file2);
-			folderFiles.put(folder2, files);
-		}
-
-		Set<IResource> folders = new HashSet<IResource>(2, 1);
-		folders.add(folder1);
-		folders.add(folder2);
-		projectResources.put(project, folders);
-
-		assertEquals(value * 4, page.getValueOfProject(project));
-	}
-
-	@Test
-	public void testGetValueOfFolder() throws Exception {
+	public void testGetFiles() throws Exception {
 		IFolder folder = root.getFolder(Path.fromPortableString("/p/f"));
 
-		long value1 = 2938;
-		long value2 = 123999;
 		IFile file1 = folder.getFile("a");
 		IFile file2 = folder.getFile("b");
-
-		Map<IFile, Long> values = getFieldFileValues(page);
-		values.put(file1, value1);
-		values.put(file2, value2);
-
 		Set<IFile> files = new HashSet<IFile>(2, 1);
 		files.add(file1);
 		files.add(file2);
@@ -235,37 +192,43 @@ public class ResourcePageTest extends AbstractTreeViewerPageTest {
 		Map<IFolder, Set<IFile>> folderFiles = getFieldFolderFiles(page);
 		folderFiles.put(folder, files);
 
-		assertEquals(value1 + value2, page.getValueOfFolder(folder));
+		IFile[] array = page.getFiles(folder);
+		assertEquals(files.size(), array.length);
+		assertTrue(files.contains(array[0]));
+		assertTrue(files.contains(array[1]));
 	}
 
 	@Test
-	public void testGetValueOfFile() throws Exception {
-		long value = 18332;
-		IFile file = root.getFile(Path.fromPortableString("/p/a"));
-		
+	public void testGetMaxFileValue() throws Exception {
+		final long maxValue = 10998;
 		Map<IFile, Long> values = getFieldFileValues(page);
-		values.put(file, value);
-		
-		assertEquals(value, page.getValueOfFile(file));
+		for (int i = 0; i < 2; i++) {
+			values.put(root.getFile(Path.fromPortableString("/p/" + i)), maxValue - i);
+		}
+		assertEquals(maxValue, page.getMaxFileValue());
 	}
 
 	@Test
-	public void getResources() throws Exception {
-		IProject project = root.getProject("p");
-		IFolder folder = project.getFolder("f");
-		IFile file = folder.getFile("a");
+	public void testGetMaxFolderValue() throws Exception {
+		Map<IFolder, Set<IFile>> folderFiles = getFieldFolderFiles(page);
+		Map<IFile, Long> values = getFieldFileValues(page);
 
-		Set<IResource> resources = new HashSet<IResource>(2, 1);
-		resources.add(folder);
-		resources.add(file);
+		final long value = 877565464;
+		for (int i = 0; i < 3; i++) {
+			IFolder folder = root.getFolder(Path.fromPortableString("/p/" + i));
 
-		Map<IProject, Set<IResource>> projectResources = getFieldProjectResources(page);
-		projectResources.put(project, resources);
+			IFile file1 = folder.getFile("a");
+			IFile file2 = folder.getFile("b");
+			values.put(file1, value - i);
+			values.put(file2, value - i);
 
-		IResource[] array = page.getResources(project);
-		assertEquals(resources.size(), array.length);
-		assertTrue(resources.contains(array[0]));
-		assertTrue(resources.contains(array[1]));
+			Set<IFile> files = new HashSet<IFile>(2, 1);
+			files.add(file1);
+			files.add(file2);
+			folderFiles.put(folder, files);
+		}
+
+		assertEquals(value * 2, page.getMaxFolderValue());
 	}
 
 	@Test
@@ -312,58 +275,6 @@ public class ResourcePageTest extends AbstractTreeViewerPageTest {
 	}
 
 	@Test
-	public void testGetMaxFolderValue() throws Exception {
-		Map<IFolder, Set<IFile>> folderFiles = getFieldFolderFiles(page);
-		Map<IFile, Long> values = getFieldFileValues(page);
-
-		final long value = 877565464;
-		for (int i = 0; i < 3; i++) {
-			IFolder folder = root.getFolder(Path.fromPortableString("/p/" + i));
-
-			IFile file1 = folder.getFile("a");
-			IFile file2 = folder.getFile("b");
-			values.put(file1, value - i);
-			values.put(file2, value - i);
-
-			Set<IFile> files = new HashSet<IFile>(2, 1);
-			files.add(file1);
-			files.add(file2);
-			folderFiles.put(folder, files);
-		}
-
-		assertEquals(value * 2, page.getMaxFolderValue());
-	}
-
-	@Test
-	public void testGetMaxFileValue() throws Exception {
-		final long maxValue = 10998;
-		Map<IFile, Long> values = getFieldFileValues(page);
-		for (int i = 0; i < 2; i++) {
-			values.put(root.getFile(Path.fromPortableString("/p/" + i)), maxValue - i);
-		}
-		assertEquals(maxValue, page.getMaxFileValue());
-	}
-
-	@Test
-	public void testGetFiles() throws Exception {
-		IFolder folder = root.getFolder(Path.fromPortableString("/p/f"));
-
-		IFile file1 = folder.getFile("a");
-		IFile file2 = folder.getFile("b");
-		Set<IFile> files = new HashSet<IFile>(2, 1);
-		files.add(file1);
-		files.add(file2);
-
-		Map<IFolder, Set<IFile>> folderFiles = getFieldFolderFiles(page);
-		folderFiles.put(folder, files);
-
-		IFile[] array = page.getFiles(folder);
-		assertEquals(files.size(), array.length);
-		assertTrue(files.contains(array[0]));
-		assertTrue(files.contains(array[1]));
-	}
-
-	@Test
 	public void testGetValue() throws Exception {
 
 		long value = 9823;
@@ -390,31 +301,139 @@ public class ResourcePageTest extends AbstractTreeViewerPageTest {
 		assertEquals(value, page.getValue(project));
 	}
 
-	@SuppressWarnings("unchecked")
-	static Map<IProject, Set<IResource>> getFieldProjectResources(ResourcePage page) throws Exception {
-		Field field = ResourcePage.class.getDeclaredField("projectResources");
-		field.setAccessible(true);
-		return (Map<IProject, Set<IResource>>) field.get(page);
+	@Test
+	public void testGetValueOfFile() throws Exception {
+		long value = 18332;
+		IFile file = root.getFile(Path.fromPortableString("/p/a"));
+
+		Map<IFile, Long> values = getFieldFileValues(page);
+		values.put(file, value);
+
+		assertEquals(value, page.getValueOfFile(file));
 	}
 
-	@SuppressWarnings("unchecked")
-	static Map<IFolder, Set<IFile>> getFieldFolderFiles(ResourcePage page) throws Exception {
-		Field field = ResourcePage.class.getDeclaredField("folderFiles");
-		field.setAccessible(true);
-		return (Map<IFolder, Set<IFile>>) field.get(page);
+	@Test
+	public void testGetValueOfFolder() throws Exception {
+		IFolder folder = root.getFolder(Path.fromPortableString("/p/f"));
+
+		long value1 = 2938;
+		long value2 = 123999;
+		IFile file1 = folder.getFile("a");
+		IFile file2 = folder.getFile("b");
+
+		Map<IFile, Long> values = getFieldFileValues(page);
+		values.put(file1, value1);
+		values.put(file2, value2);
+
+		Set<IFile> files = new HashSet<IFile>(2, 1);
+		files.add(file1);
+		files.add(file2);
+
+		Map<IFolder, Set<IFile>> folderFiles = getFieldFolderFiles(page);
+		folderFiles.put(folder, files);
+
+		assertEquals(value1 + value2, page.getValueOfFolder(folder));
 	}
 
-	@SuppressWarnings("unchecked")
-	static Map<IFile, Long> getFieldFileValues(ResourcePage page) throws Exception {
-		Field field = ResourcePage.class.getDeclaredField("fileValues");
-		field.setAccessible(true);
-		return (Map<IFile, Long>) field.get(page);
+	@Test
+	public void testGetValueOfProject() throws Exception {
+		Map<IProject, Set<IResource>> projectResources = getFieldProjectResources(page);
+		Map<IFolder, Set<IFile>> folderFiles = getFieldFolderFiles(page);
+		Map<IFile, Long> values = getFieldFileValues(page);
+
+		final long value = 9676219;
+		IProject project = root.getProject("p");
+
+		IFolder folder1 = project.getFolder("f1");
+		{
+			IFile file1 = folder1.getFile("a");
+			IFile file2 = folder1.getFile("b");
+			values.put(file1, value);
+			values.put(file2, value);
+
+			Set<IFile> files = new HashSet<IFile>(2, 1);
+			files.add(file1);
+			files.add(file2);
+			folderFiles.put(folder1, files);
+		}
+		IFolder folder2 = project.getFolder("f2");
+		{
+			IFile file1 = folder2.getFile("c");
+			IFile file2 = folder2.getFile("d");
+			values.put(file1, value);
+			values.put(file2, value);
+
+			Set<IFile> files = new HashSet<IFile>(2, 1);
+			files.add(file1);
+			files.add(file2);
+			folderFiles.put(folder2, files);
+		}
+
+		Set<IResource> folders = new HashSet<IResource>(2, 1);
+		folders.add(folder1);
+		folders.add(folder2);
+		projectResources.put(project, folders);
+
+		assertEquals(value * 4, page.getValueOfProject(project));
 	}
 
-	static void doUpdate(ResourcePage page, Map<String, Long> data) throws Exception {
-		Method method = ResourcePage.class.getDeclaredMethod("doUpdate", Map.class);
-		method.setAccessible(true);
-		method.invoke(page, data);
+	@Test
+	public void testUpdate() {
+		Map<IProject, Long> projects = new HashMap<IProject, Long>();
+		Map<IFolder, Long> folders = new HashMap<IFolder, Long>();
+		Map<IFile, Long> files = new HashMap<IFile, Long>();
+
+		DisplayPreference preference = new DisplayPreference();
+		Calendar end = preference.getEndDate();
+		preference.getStartDate().set(end.get(Calendar.YEAR), end.get(Calendar.MONTH) - 2,
+				end.get(Calendar.DAY_OF_MONTH));
+
+		IAccessor accessor = new FileDataAccessor();
+		Map<String, Long> data = accessor.getData(preference.getStartDate(), preference
+				.getEndDate());
+
+		IResourceMapper mapper = RabbitCore.getDefault().getResourceManager();
+		for (Entry<String, Long> entry : data.entrySet()) {
+			String path = mapper.getPath(entry.getKey());
+			if (path == null) {
+				continue;
+			}
+
+			IFile file = root.getFile(Path.fromPortableString(path));
+			Long oldValue = files.get(file);
+			if (oldValue == null) {
+				oldValue = Long.valueOf(0);
+			}
+			files.put(file, oldValue + entry.getValue());
+
+			IProject project = file.getProject();
+			oldValue = projects.get(project);
+			if (oldValue == null) {
+				oldValue = Long.valueOf(0);
+			}
+			projects.put(project, oldValue + entry.getValue());
+
+			IContainer parent = file.getParent();
+			if (parent != project) {
+				IFolder folder = (IFolder) parent;
+				oldValue = folders.get(parent);
+				if (oldValue == null) {
+					oldValue = Long.valueOf(0);
+				}
+				folders.put(folder, oldValue + entry.getValue());
+			}
+		}
+
+		page.update(preference);
+		for (Entry<IProject, Long> entry : projects.entrySet()) {
+			assertEquals(entry.getValue().longValue(), page.getValueOfProject(entry.getKey()));
+		}
+		for (Entry<IFolder, Long> entry : folders.entrySet()) {
+			assertEquals(entry.getValue().longValue(), page.getValueOfFolder(entry.getKey()));
+		}
+		for (Entry<IFile, Long> entry : files.entrySet()) {
+			assertEquals(entry.getValue().longValue(), page.getValueOfFile(entry.getKey()));
+		}
 	}
 
 	@Override

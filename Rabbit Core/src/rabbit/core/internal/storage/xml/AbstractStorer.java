@@ -1,3 +1,18 @@
+/*
+ * Copyright 2010 The Rabbit Eclipse Plug-in Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package rabbit.core.internal.storage.xml;
 
 import java.io.File;
@@ -26,9 +41,42 @@ import rabbit.core.storage.IStorer;
  *            A {@link EventGroupType} that separates the XML object types
  *            according to event date.
  */
-public abstract class AbstractStorer<E extends DiscreteEvent, T, S extends EventGroupType> implements IStorer<E> {
+public abstract class AbstractStorer<E extends DiscreteEvent, T, S extends EventGroupType>
+		implements IStorer<E> {
 
 	protected static final ObjectFactory OBJECT_FACTORY = new ObjectFactory();
+
+	/**
+	 * Checks whether the two calendars are representing the same date in time.
+	 * 
+	 * @param cal
+	 *            The first calendar.
+	 * @param xmlCal
+	 *            The second calendar.
+	 * @return true if the two calendars are representing the same date in time,
+	 *         false otherwise.
+	 */
+	protected static boolean isSameDate(Calendar cal, XMLGregorianCalendar xmlCal) {
+
+		return (xmlCal.getYear() == cal.get(Calendar.YEAR))
+				&& (xmlCal.getMonth() == cal.get(Calendar.MONTH) + 1)
+				&& (xmlCal.getDay() == cal.get(Calendar.DAY_OF_MONTH));
+	}
+
+	/**
+	 * Checks whether the two calendars are representing the same month in time.
+	 * 
+	 * @param cal1
+	 *            The first calendar.
+	 * @param cal2
+	 *            The second calendar.
+	 * @return true if the two calendars are representing the same month in
+	 *         time, false otherwise.
+	 */
+	protected static boolean isSameMonthInYear(Calendar cal1, Calendar cal2) {
+		return (cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR))
+				&& (cal1.get(Calendar.MONTH) == cal2.get(Calendar.MONTH));
+	}
 
 	private Set<S> data;
 
@@ -43,46 +91,37 @@ public abstract class AbstractStorer<E extends DiscreteEvent, T, S extends Event
 	}
 
 	/**
-	 * Gets the XML nodes for grouping the event objects by date in a
-	 * {@link EventListType}.
-	 * 
-	 * @param <U>
-	 *            The class type.
-	 * @param events
-	 *            The root element.
-	 * @return A list of groups.
+	 * Writes the data to disk.
 	 */
-	protected abstract <U extends S> List<U> getXmlTypeCategories(EventListType events);
+	public void commit() {
 
-	/**
-	 * Checks whether the given objects has the same id.
-	 * <p>
-	 * Other properties are ignored. In other words, checks to see whether the
-	 * two objects can be merged without loosing its unique identity.
-	 * </p>
-	 * 
-	 * @param x
-	 *            A java object representing an XML element.
-	 * @param e
-	 *            A event object.
-	 * @return true If the two object has the same id.
-	 */
-	protected abstract boolean hasSameId(T x, E e);
+		if (data.isEmpty()) {
+			return;
+		}
 
-	/**
-	 * Checks whether the given objects has the same id.
-	 * <p>
-	 * Other properties are ignored. In other words, checks to see whether the
-	 * two objects can be merged without loosing its unique identity.
-	 * </p>
-	 * 
-	 * @param x1
-	 *            A java object representing an XML element.
-	 * @param x2
-	 *            A java object representing an XML element.
-	 * @return true If the two object has the same id.
-	 */
-	protected abstract boolean hasSameId(T x1, T x2);
+		File f = getDataStore().getDataFile(currentMonth);
+		EventListType events = getDataStore().read(f);
+		List<S> mainList = getXmlTypeCategories(events);
+
+		for (S newList : data) {
+
+			boolean done = false;
+			for (S oldList : mainList) {
+				if (newList.getDate().equals(oldList.getDate())) {
+					merge(oldList, newList);
+					done = true;
+					break;
+				}
+			}
+
+			if (!done) {
+				mainList.add(newList);
+			}
+		}
+
+		getDataStore().write(events, f);
+		data.clear();
+	}
 
 	/**
 	 * Inserts a collection of event data to be stored.
@@ -131,36 +170,53 @@ public abstract class AbstractStorer<E extends DiscreteEvent, T, S extends Event
 	}
 
 	/**
-	 * Checks whether the two calendars are representing the same date in time.
+	 * Gets the data store.
 	 * 
-	 * @param cal
-	 *            The first calendar.
-	 * @param xmlCal
-	 *            The second calendar.
-	 * @return true if the two calendars are representing the same date in time,
-	 *         false otherwise.
+	 * @return The data store.
 	 */
-	protected static boolean isSameDate(Calendar cal, XMLGregorianCalendar xmlCal) {
-
-		return (xmlCal.getYear() == cal.get(Calendar.YEAR))
-				&& (xmlCal.getMonth() == cal.get(Calendar.MONTH) + 1)
-				&& (xmlCal.getDay() == cal.get(Calendar.DAY_OF_MONTH));
-	}
+	protected abstract IDataStore getDataStore();
 
 	/**
-	 * Checks whether the two calendars are representing the same month in time.
+	 * Gets the XML nodes for grouping the event objects by date in a
+	 * {@link EventListType}.
 	 * 
-	 * @param cal1
-	 *            The first calendar.
-	 * @param cal2
-	 *            The second calendar.
-	 * @return true if the two calendars are representing the same month in
-	 *         time, false otherwise.
+	 * @param <U>
+	 *            The class type.
+	 * @param events
+	 *            The root element.
+	 * @return A list of groups.
 	 */
-	protected static boolean isSameMonthInYear(Calendar cal1, Calendar cal2) {
-		return (cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR))
-				&& (cal1.get(Calendar.MONTH) == cal2.get(Calendar.MONTH));
-	}
+	protected abstract <U extends S> List<U> getXmlTypeCategories(EventListType events);
+
+	/**
+	 * Checks whether the given objects has the same id.
+	 * <p>
+	 * Other properties are ignored. In other words, checks to see whether the
+	 * two objects can be merged without loosing its unique identity.
+	 * </p>
+	 * 
+	 * @param x
+	 *            A java object representing an XML element.
+	 * @param e
+	 *            A event object.
+	 * @return true If the two object has the same id.
+	 */
+	protected abstract boolean hasSameId(T x, E e);
+
+	/**
+	 * Checks whether the given objects has the same id.
+	 * <p>
+	 * Other properties are ignored. In other words, checks to see whether the
+	 * two objects can be merged without loosing its unique identity.
+	 * </p>
+	 * 
+	 * @param x1
+	 *            A java object representing an XML element.
+	 * @param x2
+	 *            A java object representing an XML element.
+	 * @return true If the two object has the same id.
+	 */
+	protected abstract boolean hasSameId(T x1, T x2);
 
 	/**
 	 * Merges the event into the list.
@@ -218,26 +274,6 @@ public abstract class AbstractStorer<E extends DiscreteEvent, T, S extends Event
 	 * Merges the data of the second parameter into the first parameter.
 	 * 
 	 * @param main
-	 *            The object to merge into.
-	 * @param e
-	 *            The object to merge from.
-	 */
-	protected abstract void merge(T main, E e);
-
-	/**
-	 * Merges the data of the second parameter into the first parameter.
-	 * 
-	 * @param main
-	 *            The object to merge into.
-	 * @param x
-	 *            The object to merge from.
-	 */
-	protected abstract void merge(T main, T x);
-
-	/**
-	 * Merges the data of the second parameter into the first parameter.
-	 * 
-	 * @param main
 	 *            The XML group to merge into.
 	 * @param e
 	 *            The object to merge from.
@@ -256,6 +292,26 @@ public abstract class AbstractStorer<E extends DiscreteEvent, T, S extends Event
 	protected abstract void merge(S main, S data);
 
 	/**
+	 * Merges the data of the second parameter into the first parameter.
+	 * 
+	 * @param main
+	 *            The object to merge into.
+	 * @param e
+	 *            The object to merge from.
+	 */
+	protected abstract void merge(T main, E e);
+
+	/**
+	 * Merges the data of the second parameter into the first parameter.
+	 * 
+	 * @param main
+	 *            The object to merge into.
+	 * @param x
+	 *            The object to merge from.
+	 */
+	protected abstract void merge(T main, T x);
+
+	/**
 	 * Creates a new XML object type from the given event.
 	 * 
 	 * @param e
@@ -272,44 +328,4 @@ public abstract class AbstractStorer<E extends DiscreteEvent, T, S extends Event
 	 * @return A new XML object group type configured with the date.
 	 */
 	protected abstract S newXmlTypeHolder(XMLGregorianCalendar date);
-
-	/**
-	 * Writes the data to disk.
-	 */
-	public void commit() {
-
-		if (data.isEmpty()) {
-			return;
-		}
-
-		File f = getDataStore().getDataFile(currentMonth);
-		EventListType events = getDataStore().read(f);
-		List<S> mainList = getXmlTypeCategories(events);
-
-		for (S newList : data) {
-
-			boolean done = false;
-			for (S oldList : mainList) {
-				if (newList.getDate().equals(oldList.getDate())) {
-					merge(oldList, newList);
-					done = true;
-					break;
-				}
-			}
-
-			if (!done) {
-				mainList.add(newList);
-			}
-		}
-
-		getDataStore().write(events, f);
-		data.clear();
-	}
-
-	/**
-	 * Gets the data store.
-	 * 
-	 * @return The data store.
-	 */
-	protected abstract IDataStore getDataStore();
 }

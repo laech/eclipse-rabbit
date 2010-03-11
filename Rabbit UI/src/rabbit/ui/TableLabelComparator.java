@@ -1,3 +1,18 @@
+/*
+ * Copyright 2010 The Rabbit Eclipse Plug-in Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package rabbit.ui;
 
 import org.eclipse.jface.viewers.IBaseLabelProvider;
@@ -48,6 +63,31 @@ public class TableLabelComparator extends ViewerComparator implements SelectionL
 	}
 
 	@Override
+	public int compare(Viewer v, Object e1, Object e2) {
+		int cat1 = category(e1);
+		int cat2 = category(e2);
+
+		if (cat1 != cat2) {
+			return cat1 - cat2;
+		}
+
+		int value = doCompare(v, e1, e2);
+		if (sortDirection == SWT.DOWN) {
+			value *= -1;
+		}
+		return value;
+	}
+
+	/**
+	 * Gets the currently selected column.
+	 * 
+	 * @return The selected column.
+	 */
+	public TableColumn getSelectedColumn() {
+		return selectedColumn;
+	}
+
+	@Override
 	public void widgetDefaultSelected(SelectionEvent e) {
 	}
 
@@ -74,22 +114,6 @@ public class TableLabelComparator extends ViewerComparator implements SelectionL
 		viewer.refresh();
 	}
 
-	@Override
-	public int compare(Viewer v, Object e1, Object e2) {
-		int cat1 = category(e1);
-		int cat2 = category(e2);
-
-		if (cat1 != cat2) {
-			return cat1 - cat2;
-		}
-
-		int value = doCompare(v, e1, e2);
-		if (sortDirection == SWT.DOWN) {
-			value *= -1;
-		}
-		return value;
-	}
-
 	protected int doCompare(Viewer v, Object e1, Object e2) {
 		IBaseLabelProvider provider = viewer.getLabelProvider();
 
@@ -111,15 +135,6 @@ public class TableLabelComparator extends ViewerComparator implements SelectionL
 			value = (s1 == null) ? -1 : 1;
 		}
 		return value;
-	}
-
-	/**
-	 * Gets the currently selected column.
-	 * 
-	 * @return The selected column.
-	 */
-	public TableColumn getSelectedColumn() {
-		return selectedColumn;
 	}
 
 }

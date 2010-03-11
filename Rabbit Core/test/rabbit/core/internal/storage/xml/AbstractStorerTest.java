@@ -1,3 +1,18 @@
+/*
+ * Copyright 2010 The Rabbit Eclipse Plug-in Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package rabbit.core.internal.storage.xml;
 
 import static org.junit.Assert.assertEquals;
@@ -35,23 +50,16 @@ import rabbit.core.internal.storage.xml.schema.events.ObjectFactory;
  */
 public abstract class AbstractStorerTest<E extends DiscreteEvent, T, S extends EventGroupType> {
 
+	@BeforeClass
+	public static void setUpBeforeClass() {
+		TestUtil.setUpPathForTesting();
+	}
+
 	protected AbstractStorer<E, T, S> storer = create();
 
 	protected ObjectFactory objectFactory = new ObjectFactory();
 
 	protected File dataFile = storer.getDataStore().getDataFile(Calendar.getInstance());
-
-	@SuppressWarnings("unchecked")
-	protected Collection<S> getDataField(AbstractStorer<E, T, S> s) throws Exception {
-		Field f = AbstractStorer.class.getDeclaredField("data");
-		f.setAccessible(true);
-		return (Collection<S>) f.get(s);
-	}
-
-	@BeforeClass
-	public static void setUpBeforeClass() {
-		TestUtil.setUpPathForTesting();
-	}
 
 	@Before
 	public void setUp() {
@@ -66,6 +74,9 @@ public abstract class AbstractStorerTest<E extends DiscreteEvent, T, S extends E
 	public void testAbstractXmlStorer() {
 		assertNotNull(storer);
 	}
+
+	@Test
+	public abstract void testCommit();
 
 	@Test
 	public void testGetDataFile() {
@@ -112,9 +123,26 @@ public abstract class AbstractStorerTest<E extends DiscreteEvent, T, S extends E
 	}
 
 	@Test
+	public void testGetDataStore() {
+		assertNotNull(storer.getDataStore());
+	}
+
+	@Test
 	public void testGetXmlTypeCategories() {
 		assertNotNull(storer.getXmlTypeCategories(new ObjectFactory().createEventListType()));
 	}
+
+	@Test
+	public abstract void testHasSameId_typeAndEvent();
+
+	@Test
+	public abstract void testHasSameId_typeAndType();
+
+	@Test
+	public abstract void testInsert();
+
+	@Test
+	public abstract void testInsertCollection();
 
 	@Test
 	public void testIsSameDate() {
@@ -122,7 +150,8 @@ public abstract class AbstractStorerTest<E extends DiscreteEvent, T, S extends E
 		try {
 			Calendar cal = Calendar.getInstance();
 
-			XMLGregorianCalendar xmlCal = DatatypeFactory.newInstance().newXMLGregorianCalendarDate(1, 1, 1, 1);
+			XMLGregorianCalendar xmlCal = DatatypeFactory.newInstance()
+					.newXMLGregorianCalendarDate(1, 1, 1, 1);
 			assertFalse(AbstractStorer.isSameDate(cal, xmlCal));
 
 			xmlCal = toXMLGregorianCalendarDate(cal);
@@ -146,10 +175,28 @@ public abstract class AbstractStorerTest<E extends DiscreteEvent, T, S extends E
 	}
 
 	@Test
+	public abstract void testMerge_listTypeAndEvent();
+
+	@Test
+	public abstract void testMerge_listTypeAndlistType();
+
+	@Test
+	public abstract void testMerge_typeAndEvent();
+
+	@Test
+	public abstract void testMerge_typeAndType();
+
+	@Test
 	public void testNewXmlTypeHolder() {
 
 		assertNotNull(storer.newXmlTypeHolder(toXMLGregorianCalendarDate(Calendar.getInstance())));
 	}
+
+	@Test
+	public abstract void testNewXmlTypeHolderXMLGregorianCalendar();
+
+	@Test
+	public abstract void testNewXmlTypeT();
 
 	@Test
 	public void testRead() throws IOException {
@@ -184,43 +231,7 @@ public abstract class AbstractStorerTest<E extends DiscreteEvent, T, S extends E
 		}
 	}
 
-	@Test
-	public void testGetDataStore() {
-		assertNotNull(storer.getDataStore());
-	}
-
-	@Test
-	public abstract void testCommit();
-
-	@Test
-	public abstract void testInsert();
-
-	@Test
-	public abstract void testInsertCollection();
-
-	@Test
-	public abstract void testHasSameId_typeAndEvent();
-
-	@Test
-	public abstract void testHasSameId_typeAndType();
-
-	@Test
-	public abstract void testMerge_listTypeAndEvent();
-
-	@Test
-	public abstract void testMerge_listTypeAndlistType();
-
-	@Test
-	public abstract void testMerge_typeAndEvent();
-
-	@Test
-	public abstract void testMerge_typeAndType();
-
-	@Test
-	public abstract void testNewXmlTypeHolderXMLGregorianCalendar();
-
-	@Test
-	public abstract void testNewXmlTypeT();
+	protected abstract AbstractStorer<E, T, S> create();
 
 	/** Creates an event for testing. */
 	protected abstract E createEvent();
@@ -228,5 +239,10 @@ public abstract class AbstractStorerTest<E extends DiscreteEvent, T, S extends E
 	/** Creates an event that is different to {@link #createEvent()}. */
 	protected abstract E createEvent2();
 
-	protected abstract AbstractStorer<E, T, S> create();
+	@SuppressWarnings("unchecked")
+	protected Collection<S> getDataField(AbstractStorer<E, T, S> s) throws Exception {
+		Field f = AbstractStorer.class.getDeclaredField("data");
+		f.setAccessible(true);
+		return (Collection<S>) f.get(s);
+	}
 }

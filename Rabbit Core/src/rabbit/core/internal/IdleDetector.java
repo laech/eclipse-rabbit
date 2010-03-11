@@ -1,3 +1,18 @@
+/*
+ * Copyright 2010 The Rabbit Eclipse Plug-in Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package rabbit.core.internal;
 
 import java.util.Observable;
@@ -95,6 +110,15 @@ public final class IdleDetector extends Observable implements Listener {
 		display = disp;
 	}
 
+	/**
+	 * Gets the display of this detector.
+	 * 
+	 * @return The display, never null.
+	 */
+	public Display getDisplay() {
+		return display;
+	}
+
 	public long getIdleInterval() {
 		return idleInterval;
 	}
@@ -103,13 +127,38 @@ public final class IdleDetector extends Observable implements Listener {
 		return runDelay;
 	}
 
+	@Override
+	public void handleEvent(Event event) {
+		lastEventTime = now();
+		if (!isActive) {
+			isActive = true;
+			setChanged();
+			notifyObservers();
+		}
+	}
+
 	/**
-	 * Gets the display of this detector.
+	 * Checks whether this detector is running.
 	 * 
-	 * @return The display, never null.
+	 * @return True if running, false otherwise.
 	 */
-	public Display getDisplay() {
-		return display;
+	public boolean isRunning() {
+		return isRunning;
+	}
+
+	/**
+	 * Checks whether this user is active.
+	 * 
+	 * @return True if the user is active, false otherwise. <br />
+	 *         <b>Note</b>: Value returned cannot be trusted if
+	 *         {@link #isRunning()} is false.
+	 * @see #isRunning
+	 */
+	public boolean isUserActive() {
+		if (!isRunning) {
+			return true;
+		}
+		return isActive;
 	}
 
 	/**
@@ -131,7 +180,8 @@ public final class IdleDetector extends Observable implements Listener {
 			lastEventTime = now();
 			display.syncExec(addFilters);
 			timer = new ScheduledThreadPoolExecutor(1);
-			currentTask = timer.scheduleWithFixedDelay(taskCode, runDelay, runDelay, TimeUnit.MILLISECONDS);
+			currentTask = timer.scheduleWithFixedDelay(
+					taskCode, runDelay, runDelay, TimeUnit.MILLISECONDS);
 		} else {
 			display.syncExec(removeFilters);
 			currentTask.cancel(false);
@@ -142,45 +192,11 @@ public final class IdleDetector extends Observable implements Listener {
 	}
 
 	/**
-	 * Checks whether this detector is running.
-	 * 
-	 * @return True if running, false otherwise.
-	 */
-	public boolean isRunning() {
-		return isRunning;
-	}
-
-	@Override
-	public void handleEvent(Event event) {
-		lastEventTime = now();
-		if (!isActive) {
-			isActive = true;
-			setChanged();
-			notifyObservers();
-		}
-	}
-
-	/**
 	 * Gets the current time in milliseconds.
 	 * 
 	 * @return The current time in milliseconds.
 	 */
 	private long now() {
 		return TimeUnit.NANOSECONDS.toMillis(System.nanoTime());
-	}
-
-	/**
-	 * Checks whether this user is active.
-	 * 
-	 * @return True if the user is active, false otherwise. <br />
-	 *         <b>Note</b>: Value returned cannot be trusted if
-	 *         {@link #isRunning()} is false.
-	 * @see #isRunning
-	 */
-	public boolean isUserActive() {
-		if (!isRunning) {
-			return true;
-		}
-		return isActive;
 	}
 }

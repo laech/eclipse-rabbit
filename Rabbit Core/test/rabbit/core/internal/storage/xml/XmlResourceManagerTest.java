@@ -1,3 +1,18 @@
+/*
+ * Copyright 2010 The Rabbit Eclipse Plug-in Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package rabbit.core.internal.storage.xml;
 
 import static org.junit.Assert.assertEquals;
@@ -41,44 +56,103 @@ import rabbit.core.internal.storage.xml.schema.resources.ResourceType;
  */
 public class XmlResourceManagerTest {
 
-	private XmlResourceManager manager = XmlResourceManager.INSTANCE;
-
 	@BeforeClass
 	public static void setUpBeforeClass() {
 		TestUtil.setUpPathForTesting();
 	}
 
+	private XmlResourceManager manager = XmlResourceManager.INSTANCE;
+
 	@Before
 	public void setUp() throws Exception {
-		if (!getDataFile().delete())
+		if (!getDataFile().delete()) {
 			System.err.println("File is not deleted.");
-	}
-
-	private File getDataFile() throws Exception {
-		Method dataFile = XmlResourceManager.class.getDeclaredMethod("getDataFile");
-		dataFile.setAccessible(true);
-		File file = (File) dataFile.invoke(manager);
-		return file;
+		}
 	}
 
 	@SuppressWarnings("unchecked")
-	private Map<String, Set<String>> getResourcesFiled() throws Exception {
-		Field field = XmlResourceManager.class.getDeclaredField("resources");
-		field.setAccessible(true);
-		return (Map<String, Set<String>>) field.get(manager);
+	@Test
+	public void testConvertToMap() throws Exception {
+		Method convert = XmlResourceManager.class.getDeclaredMethod("convert",
+				ResourceListType.class);
+		convert.setAccessible(true);
+
+		ObjectFactory of = new ObjectFactory();
+		ResourceListType resources = of.createResourceListType();
+
+		ResourceType type1 = of.createResourceType();
+		type1.setPath("path1");
+		type1.getResourceId().add("id1.1");
+		type1.getResourceId().add("id1.2");
+		resources.getResource().add(type1);
+
+		ResourceType type2 = of.createResourceType();
+		type2.setPath("path2");
+		type2.getResourceId().add("id2.1");
+		resources.getResource().add(type2);
+
+		Map<String, Set<String>> map = (Map<String, Set<String>>) convert
+				.invoke(manager, resources);
+		assertEquals(2, map.size());
+
+		Set<String> set1 = map.get(type1.getPath());
+		assertNotNull(set1);
+		assertEquals(2, set1.size());
+		assertTrue(set1.contains("id1.1"));
+		assertTrue(set1.contains("id1.2"));
+
+		Set<String> set2 = map.get(type2.getPath());
+		assertNotNull(set2);
+		assertEquals(1, set2.size());
+		assertTrue(set2.contains("id2.1"));
 	}
 
 	@Test
-	public void testGetFilePath() {
-		String id = System.nanoTime() + "" + System.currentTimeMillis();
-		assertNull(manager.getPath(id));
+	public void testConvertToType() throws Exception {
+		Method convert = XmlResourceManager.class.getDeclaredMethod("convert", Map.class);
+		convert.setAccessible(true);
+
+		Map<String, Set<String>> map = new HashMap<String, Set<String>>();
+
+		Set<String> set1 = new HashSet<String>();
+		set1.add("id1.1");
+		set1.add("id1.2");
+		set1.add("id1.3");
+		map.put("path1", set1);
+
+		Set<String> set2 = new HashSet<String>();
+		set2.add("id2.1");
+		set2.add("id2.2");
+		map.put("path2", set2);
+
+		ResourceListType resources = (ResourceListType) convert.invoke(manager, map);
+		assertEquals(2, resources.getResource().size());
+
+		ResourceType type1 = resources.getResource().get(0);
+		if (type1.getPath().equals("path1") == false) {
+			type1 = resources.getResource().get(1);
+		}
+		assertEquals("path1", type1.getPath());
+		assertEquals(3, type1.getResourceId().size());
+		assertTrue(type1.getResourceId().contains("id1.1"));
+		assertTrue(type1.getResourceId().contains("id1.2"));
+		assertTrue(type1.getResourceId().contains("id1.3"));
+
+		ResourceType type2 = resources.getResource().get(1);
+		if (type2.getPath().equals("path2") == false) {
+			type2 = resources.getResource().get(0);
+		}
+		assertEquals("path2", type2.getPath());
+		assertEquals(2, type2.getResourceId().size());
+		assertTrue(type2.getResourceId().contains("id2.1"));
+		assertTrue(type2.getResourceId().contains("id2.2"));
 	}
 
 	@Test
 	public void testGetExternalPath() throws Exception {
 		String path = System.currentTimeMillis() + "";
 		String id = System.nanoTime() + "";
-		
+
 		ObjectFactory of = new ObjectFactory();
 		ResourceType type = of.createResourceType();
 		type.setPath(path);
@@ -86,19 +160,27 @@ public class XmlResourceManagerTest {
 		ResourceListType resources = of.createResourceListType();
 		resources.getResource().add(type);
 
-		IPath filePath = new Path(RabbitCore.getDefault().getPreferenceStore().getString(RabbitCore.STORAGE_LOCATION));
+		IPath filePath = new Path(RabbitCore.getDefault().getPreferenceStore().getString(
+				RabbitCore.STORAGE_LOCATION));
 		filePath = filePath.append(System.currentTimeMillis() + "");
 
 		Method getDataFile = XmlResourceManager.class.getDeclaredMethod("getDataFile", IPath.class);
 		getDataFile.setAccessible(true);
 		File dataFile = (File) getDataFile.invoke(manager, filePath);
 
-		Method marshal = XmlResourceManager.class.getDeclaredMethod("marshal", JAXBElement.class, File.class);
+		Method marshal = XmlResourceManager.class.getDeclaredMethod("marshal", JAXBElement.class,
+				File.class);
 		marshal.setAccessible(true);
 		marshal.invoke(manager, of.createResources(resources), dataFile);
 
 		manager.write(true);
 		assertEquals(path, manager.getExternalPath(id));
+	}
+
+	@Test
+	public void testGetFilePath() {
+		String id = System.nanoTime() + "" + System.currentTimeMillis();
+		assertNull(manager.getPath(id));
 	}
 
 	@Test
@@ -116,51 +198,10 @@ public class XmlResourceManagerTest {
 	}
 
 	@Test
-	public void testRenameEvent_withProject() throws CoreException {
-		IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject("tmp");
-		if (!project.exists()) {
-			project.create(null);
-		}
-		if (!project.isOpen()) {
-			project.open(null);
-		}
-		IPath oldPath = project.getFullPath();
-		manager.insert(oldPath.toString());
-		String id = manager.getId(oldPath.toString());
-		assertNotNull(id);
-
-		IPath newPath = Path.fromPortableString("/" + System.currentTimeMillis());
-		project.move(newPath, true, null);
-		assertEquals(id, manager.getId(newPath.toString()));
-
-		// Old values must be removed:
-		assertNull(manager.getId(oldPath.toString()));
-	}
-
-	@Test
-	public void testRenameEvent_withFolder() throws CoreException {
-		IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject("tmp");
-		if (!project.exists()) {
-			project.create(null);
-		}
-		if (!project.isOpen()) {
-			project.open(null);
-		}
-		IFolder folder = project.getFolder("folder");
-		if (!folder.exists()) {
-			folder.create(true, true, null);
-		}
-		IPath oldPath = folder.getFullPath();
-		manager.insert(oldPath.toString());
-		String id = manager.getId(oldPath.toString());
-		assertNotNull(id);
-
-		IPath newPath = project.getFullPath().append(System.currentTimeMillis() + "");
-		folder.move(newPath, true, null);
-		assertEquals(id, manager.getId(newPath.toString()));
-
-		// Old values must be removed:
-		assertNull(manager.getId(oldPath.toString()));
+	public void testPostShutdown() throws Exception {
+		assertFalse(getDataFile().exists());
+		manager.postShutdown(PlatformUI.getWorkbench());
+		assertTrue(getDataFile().exists());
 	}
 
 	@Test
@@ -196,40 +237,7 @@ public class XmlResourceManagerTest {
 	}
 
 	@Test
-	public void testRenameToDeletedName_withProject() throws Exception {
-		IProject project1 = ResourcesPlugin.getWorkspace().getRoot().getProject("tmp1");
-		if (!project1.exists()) {
-			project1.create(null);
-		}
-		if (!project1.isOpen()) {
-			project1.open(null);
-		}
-
-		IProject project2 = ResourcesPlugin.getWorkspace().getRoot().getProject("tmp2");
-		if (!project2.exists()) {
-			project2.create(null);
-		}
-		if (!project2.isOpen()) {
-			project2.open(null);
-		}
-
-		// Insert project1 into the database, then delete it from workspace:
-		String project1Id = manager.insert(project1.getFullPath().toString());
-		project1.delete(true, null);
-
-		// Insert project2 into the database,
-		// then rename project2 to become the deleted project1:
-		String project2Id = manager.insert(project2.getFullPath().toString());
-		project2.move(project1.getFullPath(), true, null);
-
-		// Now the two IDs should point to the same path:
-		assertEquals(manager.getPath(project1Id), manager.getPath(project2Id));
-		assertEquals(project1.getFullPath().toString(), manager.getPath(project1Id));
-		assertEquals(project1.getFullPath().toString(), manager.getPath(project2Id));
-	}
-
-	@Test
-	public void testRenameToDeletedName_withFolder() throws Exception {
+	public void testRenameEvent_withFolder() throws CoreException {
 		IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject("tmp");
 		if (!project.exists()) {
 			project.create(null);
@@ -237,28 +245,43 @@ public class XmlResourceManagerTest {
 		if (!project.isOpen()) {
 			project.open(null);
 		}
-
-		IFolder folder1 = project.getFolder("folder1");
-		if (!folder1.exists()) {
-			folder1.create(true, true, null);
+		IFolder folder = project.getFolder("folder");
+		if (!folder.exists()) {
+			folder.create(true, true, null);
 		}
-		IFolder folder2 = project.getFolder("folder2");
-		if (!folder2.exists()) {
-			folder2.create(true, true, null);
+		IPath oldPath = folder.getFullPath();
+		manager.insert(oldPath.toString());
+		String id = manager.getId(oldPath.toString());
+		assertNotNull(id);
+
+		IPath newPath = project.getFullPath().append(System.currentTimeMillis() + "");
+		folder.move(newPath, true, null);
+		assertEquals(id, manager.getId(newPath.toString()));
+
+		// Old values must be removed:
+		assertNull(manager.getId(oldPath.toString()));
+	}
+
+	@Test
+	public void testRenameEvent_withProject() throws CoreException {
+		IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject("tmp");
+		if (!project.exists()) {
+			project.create(null);
 		}
+		if (!project.isOpen()) {
+			project.open(null);
+		}
+		IPath oldPath = project.getFullPath();
+		manager.insert(oldPath.toString());
+		String id = manager.getId(oldPath.toString());
+		assertNotNull(id);
 
-		// Insert folder1 into the database, then delete it from workspace:
-		String folder1Id = manager.insert(folder1.getFullPath().toString());
-		folder1.delete(true, null);
+		IPath newPath = Path.fromPortableString("/" + System.currentTimeMillis());
+		project.move(newPath, true, null);
+		assertEquals(id, manager.getId(newPath.toString()));
 
-		// Insert folder2 into the database,
-		// then rename folder2 to become the deleted folder1:
-		String folder2Id = manager.insert(folder2.getFullPath().toString());
-		folder2.move(folder1.getFullPath(), true, null);
-
-		// Now the two IDs should point to the same path:
-		assertEquals(manager.getPath(folder1Id), manager.getPath(folder2Id));
-		assertEquals(folder1.getFullPath().toString(), manager.getPath(folder1Id));
+		// Old values must be removed:
+		assertNull(manager.getId(oldPath.toString()));
 	}
 
 	@Test
@@ -302,80 +325,78 @@ public class XmlResourceManagerTest {
 		assertEquals(file1.getFullPath().toString(), manager.getPath(file1Id));
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
-	public void testConvertToMap() throws Exception {
-		Method convert = XmlResourceManager.class.getDeclaredMethod("convert", ResourceListType.class);
-		convert.setAccessible(true);
+	public void testRenameToDeletedName_withFolder() throws Exception {
+		IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject("tmp");
+		if (!project.exists()) {
+			project.create(null);
+		}
+		if (!project.isOpen()) {
+			project.open(null);
+		}
 
-		ObjectFactory of = new ObjectFactory();
-		ResourceListType resources = of.createResourceListType();
+		IFolder folder1 = project.getFolder("folder1");
+		if (!folder1.exists()) {
+			folder1.create(true, true, null);
+		}
+		IFolder folder2 = project.getFolder("folder2");
+		if (!folder2.exists()) {
+			folder2.create(true, true, null);
+		}
 
-		ResourceType type1 = of.createResourceType();
-		type1.setPath("path1");
-		type1.getResourceId().add("id1.1");
-		type1.getResourceId().add("id1.2");
-		resources.getResource().add(type1);
+		// Insert folder1 into the database, then delete it from workspace:
+		String folder1Id = manager.insert(folder1.getFullPath().toString());
+		folder1.delete(true, null);
 
-		ResourceType type2 = of.createResourceType();
-		type2.setPath("path2");
-		type2.getResourceId().add("id2.1");
-		resources.getResource().add(type2);
+		// Insert folder2 into the database,
+		// then rename folder2 to become the deleted folder1:
+		String folder2Id = manager.insert(folder2.getFullPath().toString());
+		folder2.move(folder1.getFullPath(), true, null);
 
-		Map<String, Set<String>> map = (Map<String, Set<String>>) convert.invoke(manager, resources);
-		assertEquals(2, map.size());
-
-		Set<String> set1 = map.get(type1.getPath());
-		assertNotNull(set1);
-		assertEquals(2, set1.size());
-		assertTrue(set1.contains("id1.1"));
-		assertTrue(set1.contains("id1.2"));
-
-		Set<String> set2 = map.get(type2.getPath());
-		assertNotNull(set2);
-		assertEquals(1, set2.size());
-		assertTrue(set2.contains("id2.1"));
+		// Now the two IDs should point to the same path:
+		assertEquals(manager.getPath(folder1Id), manager.getPath(folder2Id));
+		assertEquals(folder1.getFullPath().toString(), manager.getPath(folder1Id));
 	}
 
 	@Test
-	public void testConvertToType() throws Exception {
-		Method convert = XmlResourceManager.class.getDeclaredMethod("convert", Map.class);
-		convert.setAccessible(true);
+	public void testRenameToDeletedName_withProject() throws Exception {
+		IProject project1 = ResourcesPlugin.getWorkspace().getRoot().getProject("tmp1");
+		if (!project1.exists()) {
+			project1.create(null);
+		}
+		if (!project1.isOpen()) {
+			project1.open(null);
+		}
 
-		Map<String, Set<String>> map = new HashMap<String, Set<String>>();
+		IProject project2 = ResourcesPlugin.getWorkspace().getRoot().getProject("tmp2");
+		if (!project2.exists()) {
+			project2.create(null);
+		}
+		if (!project2.isOpen()) {
+			project2.open(null);
+		}
 
-		Set<String> set1 = new HashSet<String>();
-		set1.add("id1.1");
-		set1.add("id1.2");
-		set1.add("id1.3");
-		map.put("path1", set1);
+		// Insert project1 into the database, then delete it from workspace:
+		String project1Id = manager.insert(project1.getFullPath().toString());
+		project1.delete(true, null);
 
-		Set<String> set2 = new HashSet<String>();
-		set2.add("id2.1");
-		set2.add("id2.2");
-		map.put("path2", set2);
+		// Insert project2 into the database,
+		// then rename project2 to become the deleted project1:
+		String project2Id = manager.insert(project2.getFullPath().toString());
+		project2.move(project1.getFullPath(), true, null);
 
-		ResourceListType resources = (ResourceListType) convert.invoke(manager, map);
-		assertEquals(2, resources.getResource().size());
-
-		ResourceType type1 = resources.getResource().get(0);
-		if (type1.getPath().equals("path1") == false)
-			type1 = resources.getResource().get(1);
-		assertEquals("path1", type1.getPath());
-		assertEquals(3, type1.getResourceId().size());
-		assertTrue(type1.getResourceId().contains("id1.1"));
-		assertTrue(type1.getResourceId().contains("id1.2"));
-		assertTrue(type1.getResourceId().contains("id1.3"));
-
-		ResourceType type2 = resources.getResource().get(1);
-		if (type2.getPath().equals("path2") == false)
-			type2 = resources.getResource().get(0);
-		assertEquals("path2", type2.getPath());
-		assertEquals(2, type2.getResourceId().size());
-		assertTrue(type2.getResourceId().contains("id2.1"));
-		assertTrue(type2.getResourceId().contains("id2.2"));
+		// Now the two IDs should point to the same path:
+		assertEquals(manager.getPath(project1Id), manager.getPath(project2Id));
+		assertEquals(project1.getFullPath().toString(), manager.getPath(project1Id));
+		assertEquals(project1.getFullPath().toString(), manager.getPath(project2Id));
 	}
 
+	@Test
+	public void testShutdown() throws Exception {
+		assertFalse(getDataFile().exists());
+		PlatformUI.getWorkbench().close();
+		assertTrue(getDataFile().exists());
+	}
 
 	@Test
 	public void testWrite() throws Exception {
@@ -418,17 +439,17 @@ public class XmlResourceManagerTest {
 		fail();
 	}
 
-	@Test
-	public void testPostShutdown() throws Exception {
-		assertFalse(getDataFile().exists());
-		manager.postShutdown(PlatformUI.getWorkbench());
-		assertTrue(getDataFile().exists());
+	private File getDataFile() throws Exception {
+		Method dataFile = XmlResourceManager.class.getDeclaredMethod("getDataFile");
+		dataFile.setAccessible(true);
+		File file = (File) dataFile.invoke(manager);
+		return file;
 	}
 
-	@Test
-	public void testShutdown() throws Exception {
-		assertFalse(getDataFile().exists());
-		PlatformUI.getWorkbench().close();
-		assertTrue(getDataFile().exists());
+	@SuppressWarnings("unchecked")
+	private Map<String, Set<String>> getResourcesFiled() throws Exception {
+		Field field = XmlResourceManager.class.getDeclaredField("resources");
+		field.setAccessible(true);
+		return (Map<String, Set<String>>) field.get(manager);
 	}
 }

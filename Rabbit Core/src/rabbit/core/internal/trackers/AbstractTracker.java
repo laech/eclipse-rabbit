@@ -1,3 +1,18 @@
+/*
+ * Copyright 2010 The Rabbit Eclipse Plug-in Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package rabbit.core.internal.trackers;
 
 import java.util.Collection;
@@ -33,21 +48,58 @@ public abstract class AbstractTracker<T> implements ITracker<T> {
 	}
 
 	/**
-	 * Enables this tracker with the necessary operations.
-	 * <p>
-	 * This method will be called by {@link #setEnabled(boolean)} if the
-	 * conditions are satisfied. Subclasses should override this method to
-	 * enable this tracker.
-	 * </p>
-	 * <p>
-	 * Precondition: {@link #isEnabled()} returns false.<br />
-	 * Postconditions: {@link #isEnabled()} returns <tt>true</tt> and this
-	 * tracker is enabled.
-	 * </p>
+	 * Adds an event data to the collection.
 	 * 
-	 * @see #setEnabled(boolean)
+	 * @param o
+	 *            The data.
 	 */
-	protected abstract void doEnable();
+	public void addData(T o) {
+		data.add(o);
+	}
+
+	@Override
+	public void flushData() {
+		data.clear();
+	}
+
+	@Override
+	public Collection<T> getData() {
+		return Collections.unmodifiableSet(data);
+	}
+
+	@Override
+	public boolean isEnabled() {
+		return isEnabled;
+	}
+
+	@Override
+	public void saveData() {
+		if (!getData().isEmpty()) {
+			storer.insert(getData());
+			storer.commit();
+		}
+	}
+
+	@Override
+	public void setEnabled(boolean enable) {
+		if (isEnabled() != enable) {
+			if (enable) {
+				doEnable();
+				flushData();
+			} else {
+				doDisable();
+				saveData();
+			}
+			isEnabled = enable;
+		}
+	}
+
+	/**
+	 * Creates a storer for storing the data.
+	 * 
+	 * @return A data storer.
+	 */
+	protected abstract IStorer<T> createDataStorer();
 
 	/**
 	 * Disables this tracker with the necessary operations..
@@ -66,57 +118,20 @@ public abstract class AbstractTracker<T> implements ITracker<T> {
 	 */
 	protected abstract void doDisable();
 
-	@Override
-	public boolean isEnabled() {
-		return isEnabled;
-	}
-
-	@Override
-	public void setEnabled(boolean enable) {
-		if (isEnabled() != enable) {
-			if (enable) {
-				doEnable();
-				flushData();
-			} else {
-				doDisable();
-				saveData();
-			}
-			isEnabled = enable;
-		}
-	}
-
-	@Override
-	public Collection<T> getData() {
-		return Collections.unmodifiableSet(data);
-	}
-
-	@Override
-	public void flushData() {
-		data.clear();
-	}
-
-	@Override
-	public void saveData() {
-		if (!getData().isEmpty()) {
-			storer.insert(getData());
-			storer.commit();
-		}
-	}
-
 	/**
-	 * Adds an event data to the collection.
+	 * Enables this tracker with the necessary operations.
+	 * <p>
+	 * This method will be called by {@link #setEnabled(boolean)} if the
+	 * conditions are satisfied. Subclasses should override this method to
+	 * enable this tracker.
+	 * </p>
+	 * <p>
+	 * Precondition: {@link #isEnabled()} returns false.<br />
+	 * Postconditions: {@link #isEnabled()} returns <tt>true</tt> and this
+	 * tracker is enabled.
+	 * </p>
 	 * 
-	 * @param o
-	 *            The data.
+	 * @see #setEnabled(boolean)
 	 */
-	public void addData(T o) {
-		data.add(o);
-	}
-
-	/**
-	 * Creates a storer for storing the data.
-	 * 
-	 * @return A data storer.
-	 */
-	protected abstract IStorer<T> createDataStorer();
+	protected abstract void doEnable();
 }

@@ -1,3 +1,18 @@
+/*
+ * Copyright 2010 The Rabbit Eclipse Plug-in Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package rabbit.ui;
 
 import org.eclipse.jface.viewers.ColumnViewer;
@@ -10,37 +25,44 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 
 /**
- * A label provider for a viewer column that paints horizontal bars in the cells.
+ * A label provider for a viewer column that paints horizontal bars in the
+ * cells.
  */
 public class CellPainter extends StyledCellLabelProvider {
-	
+
 	/**
 	 * A value provider that provides values for elements.
 	 */
 	public interface IValueProvider {
 
 		/**
-		 * Gets the value of the given element.
-		 * @param element The element.
-		 * @return The value.
-		 */
-		long getValue(Object element);
-
-		/**
-		 * Gets the maximum value of all the elements.
-		 * @return The maximum value.
-		 */
-		long getMaxValue();
-
-		/**
 		 * Gets the width of the column to be painted.
+		 * 
 		 * @return The width.
 		 */
 		int getColumnWidth();
 
 		/**
+		 * Gets the maximum value of all the elements.
+		 * 
+		 * @return The maximum value.
+		 */
+		long getMaxValue();
+
+		/**
+		 * Gets the value of the given element.
+		 * 
+		 * @param element
+		 *            The element.
+		 * @return The value.
+		 */
+		long getValue(Object element);
+
+		/**
 		 * Checks whether a cell should be painted.
-		 * @param element The element in the cell.
+		 * 
+		 * @param element
+		 *            The element in the cell.
 		 * @return True to paint, false otherwise.
 		 */
 		boolean shouldPaint(Object element);
@@ -54,17 +76,19 @@ public class CellPainter extends StyledCellLabelProvider {
 
 	/**
 	 * Constructor.
-	 * @param valueProvider The provider for getting the values of each cell from.
+	 * 
+	 * @param valueProvider
+	 *            The provider for getting the values of each cell from.
 	 */
 	public CellPainter(IValueProvider valueProvider) {
 		this.valueProvider = valueProvider;
 		isLinux = System.getProperty("os.name").toLowerCase().contains("linux");
 	}
-	
+
 	@Override
 	public void initialize(ColumnViewer viewer, ViewerColumn column) {
 		super.initialize(viewer, column);
-		
+
 		Display display = viewer.getControl().getDisplay();
 		background = display.getSystemColor(SWT.COLOR_TITLE_BACKGROUND);
 		foreground = display.getSystemColor(SWT.COLOR_LIST_BACKGROUND);
@@ -72,8 +96,9 @@ public class CellPainter extends StyledCellLabelProvider {
 
 	@Override
 	public void paint(Event e, Object element) {
-		if (!valueProvider.shouldPaint(element))
+		if (!valueProvider.shouldPaint(element)) {
 			return;
+		}
 
 		int width = getWidth(element);
 		if (width == 0) {
@@ -97,8 +122,8 @@ public class CellPainter extends StyledCellLabelProvider {
 			gc.fillRoundRectangle(x, y, width, height, 4, 4);
 		}
 		gc.setForeground(foreground);
-		gc.drawLine(x - 1, y, x - 1, y + height -1);
-		gc.drawLine(x + width, y, x + width, y + height-1);
+		gc.drawLine(x - 1, y, x - 1, y + height - 1);
+		gc.drawLine(x + width, y, x + width, y + height - 1);
 
 		gc.setBackground(oldBackground);
 		gc.setForeground(oldForeground);

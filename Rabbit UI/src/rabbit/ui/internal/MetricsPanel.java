@@ -1,3 +1,18 @@
+/*
+ * Copyright 2010 The Rabbit Eclipse Plug-in Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package rabbit.ui.internal;
 
 import java.util.Collection;
@@ -59,7 +74,8 @@ public class MetricsPanel {
 
 			@Override
 			public boolean hasChildren(Object o) {
-				return (o instanceof PageDescriptor) && !((PageDescriptor) o).getChildren().isEmpty();
+				return (o instanceof PageDescriptor)
+						&& !((PageDescriptor) o).getChildren().isEmpty();
 			}
 		});
 
@@ -67,6 +83,12 @@ public class MetricsPanel {
 		viewer.setLabelProvider(new ColumnLabelProvider() {
 
 			private ImageRegistry images = new ImageRegistry();
+
+			@Override
+			public void dispose() {
+				super.dispose();
+				images.dispose();
+			}
 
 			@Override
 			public Image getImage(Object element) {
@@ -96,12 +118,6 @@ public class MetricsPanel {
 			public boolean useNativeToolTip(Object object) {
 				return true;
 			}
-
-			@Override
-			public void dispose() {
-				super.dispose();
-				images.dispose();
-			}
 		});
 
 		viewer.addDoubleClickListener(new IDoubleClickListener() {
@@ -120,7 +136,8 @@ public class MetricsPanel {
 			public void selectionChanged(SelectionChangedEvent event) {
 				ISelection selection = event.getSelection();
 				if (selection instanceof IStructuredSelection) {
-					PageDescriptor page = (PageDescriptor) ((IStructuredSelection) selection).getFirstElement();
+					PageDescriptor page = (PageDescriptor) ((IStructuredSelection) selection)
+							.getFirstElement();
 					view.display(page.getPage());
 				}
 			}

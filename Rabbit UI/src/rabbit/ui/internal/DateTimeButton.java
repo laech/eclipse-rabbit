@@ -1,3 +1,18 @@
+/*
+ * Copyright 2010 The Rabbit Eclipse Plug-in Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package rabbit.ui.internal;
 
 import java.text.DateFormat;
@@ -34,13 +49,9 @@ public class DateTimeButton {
 	 *            The button.
 	 * @param calendar
 	 *            The calendar object to manipulate.
-	 * @param prefix
-	 *            The prefix for the button's text.
-	 * @param suffix
-	 *            The suffix for the button's text.
 	 */
-	public static void create(Button button, Calendar calendar, String prefix, String suffix) {
-		new DateTimeButton(button, calendar, prefix, suffix);
+	public static void create(Button button, Calendar calendar) {
+		create(button, calendar, "", "");
 	}
 
 	/**
@@ -51,9 +62,13 @@ public class DateTimeButton {
 	 *            The button.
 	 * @param calendar
 	 *            The calendar object to manipulate.
+	 * @param prefix
+	 *            The prefix for the button's text.
+	 * @param suffix
+	 *            The suffix for the button's text.
 	 */
-	public static void create(Button button, Calendar calendar) {
-		create(button, calendar, "", "");
+	public static void create(Button button, Calendar calendar, String prefix, String suffix) {
+		new DateTimeButton(button, calendar, prefix, suffix);
 	}
 
 	private final Format format = DateFormat.getDateInstance();
@@ -124,14 +139,6 @@ public class DateTimeButton {
 		createContents();
 	}
 
-	private String getFormattedText() {
-		return getFormattedText(calendar);
-	}
-
-	private String getFormattedText(Calendar calendar) {
-		return prefix + format.format(calendar.getTime()) + suffix;
-	}
-
 	private void createContents() {
 		GridLayout layout = new GridLayout();
 		layout.marginHeight = -1; // better looking
@@ -156,7 +163,8 @@ public class DateTimeButton {
 		dateTime.addListener(SWT.Selection, new Listener() {
 			@Override
 			public void handleEvent(Event event) {
-				Calendar date = new GregorianCalendar(dateTime.getYear(), dateTime.getMonth(), dateTime.getDay());
+				Calendar date = new GregorianCalendar(dateTime.getYear(), dateTime.getMonth(),
+						dateTime.getDay());
 				button.setText(getFormattedText(date));
 			}
 		});
@@ -180,5 +188,13 @@ public class DateTimeButton {
 		});
 
 		shell.pack();
+	}
+
+	private String getFormattedText() {
+		return getFormattedText(calendar);
+	}
+
+	private String getFormattedText(Calendar calendar) {
+		return prefix + format.format(calendar.getTime()) + suffix;
 	}
 }

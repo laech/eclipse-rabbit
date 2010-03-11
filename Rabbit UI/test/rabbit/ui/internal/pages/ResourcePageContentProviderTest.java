@@ -1,3 +1,18 @@
+/*
+ * Copyright 2010 The Rabbit Eclipse Plug-in Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package rabbit.ui.internal.pages;
 
 import static org.junit.Assert.assertEquals;
@@ -21,7 +36,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import rabbit.core.RabbitCore;
-import rabbit.core.storage.IResourceManager;
+import rabbit.core.storage.IResourceMapper;
 
 /**
  * Test for {@link ResourcePageContentProvider}
@@ -31,13 +46,18 @@ public class ResourcePageContentProviderTest {
 	private static Shell shell;
 	private static ResourcePage page;
 	private static IWorkspaceRoot root;
-	private static IResourceManager mapper;
+	private static IResourceMapper mapper;
 	private static ResourcePageContentProvider provider;
 
 	private static IProject project;
 	private static IFolder folder;
 	private static IFile file1;
 	private static IFile file2;
+
+	@AfterClass
+	public static void afterClass() {
+		shell.dispose();
+	}
 
 	@BeforeClass
 	public static void beforeClass() {
@@ -54,9 +74,11 @@ public class ResourcePageContentProviderTest {
 		file2 = folder.getFile("b");
 	}
 
-	@AfterClass
-	public static void afterClass() {
-		shell.dispose();
+	@Test
+	public void hasChildren() {
+		assertTrue(provider.hasChildren(project));
+		assertTrue(provider.hasChildren(folder));
+		assertFalse(provider.hasChildren(file1));
 	}
 
 	@Test
@@ -75,12 +97,5 @@ public class ResourcePageContentProviderTest {
 		assertEquals(2, provider.getChildren(folder).length);
 		assertTrue(files.contains(provider.getChildren(folder)[0]));
 		assertTrue(files.contains(provider.getChildren(folder)[1]));
-	}
-
-	@Test
-	public void hasChildren() {
-		assertTrue(provider.hasChildren(project));
-		assertTrue(provider.hasChildren(folder));
-		assertFalse(provider.hasChildren(file1));
 	}
 }

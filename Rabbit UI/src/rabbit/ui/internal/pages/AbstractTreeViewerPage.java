@@ -1,3 +1,18 @@
+/*
+ * Copyright 2010 The Rabbit Eclipse Plug-in Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package rabbit.ui.internal.pages;
 
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -65,19 +80,28 @@ public abstract class AbstractTreeViewerPage extends AbstractValueProviderPage {
 		viewer.setComparator(createComparator(viewer));
 		restoreState();
 	}
-	
+
+	@Override
+	public int getColumnWidth() {
+		return graphCol.getColumn().getWidth();
+	}
+
+	public TreeViewer getViewer() {
+		return viewer;
+	}
+
 	@Override
 	public boolean shouldPaint(Object element) {
 		return true;
 	}
 
-	/** Saves the state of the page. */
-	protected void saveState() {
-		IPreferenceStore store = RabbitUI.getDefault().getPreferenceStore();
-		for (TreeColumn column : getViewer().getTree().getColumns()) {
-			store.setValue(getWidthPreferenceString(column), column.getWidth());
-		}
-	}
+	protected abstract void createColumns(TreeViewer viewer);
+
+	protected abstract ViewerComparator createComparator(TreeViewer viewer);
+
+	protected abstract ITreeContentProvider createContentProvider();
+
+	protected abstract ITableLabelProvider createLabelProvider();
 
 	/** Restores the state of the page. */
 	protected void restoreState() {
@@ -90,25 +114,16 @@ public abstract class AbstractTreeViewerPage extends AbstractValueProviderPage {
 		}
 	}
 
+	/** Saves the state of the page. */
+	protected void saveState() {
+		IPreferenceStore store = RabbitUI.getDefault().getPreferenceStore();
+		for (TreeColumn column : getViewer().getTree().getColumns()) {
+			store.setValue(getWidthPreferenceString(column), column.getWidth());
+		}
+	}
+
 	private String getWidthPreferenceString(TreeColumn column) {
 		return getClass().getSimpleName() + '.' + column.getText() + "Width";
 	}
-
-	public TreeViewer getViewer() {
-		return viewer;
-	}
-
-	@Override
-	public int getColumnWidth() {
-		return graphCol.getColumn().getWidth();
-	}
-
-	protected abstract ViewerComparator createComparator(TreeViewer viewer);
-
-	protected abstract void createColumns(TreeViewer viewer);
-
-	protected abstract ITableLabelProvider createLabelProvider();
-
-	protected abstract ITreeContentProvider createContentProvider();
 
 }

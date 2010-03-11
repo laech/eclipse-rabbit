@@ -1,3 +1,18 @@
+/*
+ * Copyright 2010 The Rabbit Eclipse Plug-in Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package rabbit.ui;
 
 import org.eclipse.jface.viewers.IBaseLabelProvider;
@@ -15,8 +30,8 @@ import org.eclipse.swt.widgets.Widget;
 
 /**
  * <p>
- * A comparator for sorting the a {@link TreeViewer} when the user is clicked
- * on a column.
+ * A comparator for sorting the a {@link TreeViewer} when the user is clicked on
+ * a column.
  * </p>
  * <p>
  * To register a column for sorting, simply call the column's
@@ -25,7 +40,8 @@ import org.eclipse.swt.widgets.Widget;
  * multiple columns of the same viewer.
  * </p>
  * <p>
- * The viewer must have a {@link ITableLabelProvider} or a {@link ILabelProvider}.
+ * The viewer must have a {@link ITableLabelProvider} or a
+ * {@link ILabelProvider}.
  * </p>
  * 
  * @see SelectionListener
@@ -46,6 +62,31 @@ public class TreeLabelComparator extends ViewerComparator implements SelectionLi
 		sortDirection = SWT.NONE;
 		selectedColumn = null;
 		viewer = parent;
+	}
+
+	@Override
+	public int compare(Viewer v, Object e1, Object e2) {
+		int cat1 = category(e1);
+		int cat2 = category(e2);
+
+		if (cat1 != cat2) {
+			return cat1 - cat2;
+		}
+
+		int value = doCompare(v, e1, e2);
+		if (sortDirection == SWT.DOWN) {
+			value *= -1;
+		}
+		return value;
+	}
+
+	/**
+	 * Gets the currently selected column.
+	 * 
+	 * @return The selected column.
+	 */
+	public TreeColumn getSelectedColumn() {
+		return selectedColumn;
 	}
 
 	@Override
@@ -77,22 +118,6 @@ public class TreeLabelComparator extends ViewerComparator implements SelectionLi
 		viewer.setExpandedElements(expandedElements);
 	}
 
-	@Override
-	public int compare(Viewer v, Object e1, Object e2) {
-		int cat1 = category(e1);
-		int cat2 = category(e2);
-
-		if (cat1 != cat2) {
-			return cat1 - cat2;
-		}
-
-		int value = doCompare(v, e1, e2);
-		if (sortDirection == SWT.DOWN) {
-			value *= -1;
-		}
-		return value;
-	}
-
 	protected int doCompare(Viewer v, Object e1, Object e2) {
 		IBaseLabelProvider provider = viewer.getLabelProvider();
 
@@ -119,15 +144,6 @@ public class TreeLabelComparator extends ViewerComparator implements SelectionLi
 			value = (s1 == null) ? -1 : 1;
 		}
 		return value;
-	}
-
-	/**
-	 * Gets the currently selected column.
-	 * 
-	 * @return The selected column.
-	 */
-	public TreeColumn getSelectedColumn() {
-		return selectedColumn;
 	}
 
 }

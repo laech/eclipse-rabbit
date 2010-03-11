@@ -1,3 +1,18 @@
+/*
+ * Copyright 2010 The Rabbit Eclipse Plug-in Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package rabbit.core.internal;
 
 import java.io.File;
@@ -31,7 +46,23 @@ import org.junit.runner.RunWith;
 @RunWith(SWTBotJunit4ClassRunner.class)
 public class IdleDetectorTest {
 
+	private static class ObserverTester implements Observer {
+		private int activeCount = 0;
+		private int inactiveCount = 0;
+
+		@Override
+		public void update(Observable o, Object arg) {
+			IdleDetector detect = (IdleDetector) o;
+			if (detect.isUserActive()) {
+				activeCount++;
+			} else {
+				inactiveCount++;
+			}
+		}
+	}
+
 	private static SWTWorkbenchBot bot;
+
 	private static IWorkbenchPage page;
 
 	@BeforeClass
@@ -46,9 +77,115 @@ public class IdleDetectorTest {
 		bot.sleep(2000);
 	}
 
+	@Test
+	public void testAccuracy_withKeyDown() throws Exception {
+		bot.getDisplay().syncExec(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					page.openEditor(new FileEditorInput(getFileForTesting()),
+							"org.eclipse.ui.DefaultTextEditor", true);
+				} catch (Exception e) {
+					Assert.fail();
+				}
+			}
+		});
+		SWTBotEclipseEditor editor = bot.activeEditor().toTextEditor();
+
+		long idleInterval = 500;
+		long runDelay = 10;
+		IdleDetector d = new IdleDetector(bot.getDisplay(), idleInterval, runDelay);
+		d.setRunning(true);
+
+		TimeUnit.MILLISECONDS.sleep(idleInterval + (runDelay * 2));
+		Assert.assertFalse(d.isUserActive());
+
+		editor.typeText("1");
+		Assert.assertTrue(d.isUserActive());
+	}
+
+	@Test
+	public void testAccuracy_withKeyDownAndObserver() throws InterruptedException {
+		bot.getDisplay().syncExec(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					page.openEditor(new FileEditorInput(getFileForTesting()),
+							"org.eclipse.ui.DefaultTextEditor", true);
+				} catch (Exception e) {
+					Assert.fail();
+				}
+			}
+		});
+		SWTBotEclipseEditor editor = bot.activeEditor().toTextEditor();
+
+		long idleInterval = 500;
+		long runDelay = 10;
+		IdleDetector d = new IdleDetector(bot.getDisplay(), idleInterval, runDelay);
+
+		ObserverTester ob = new ObserverTester();
+		d.addObserver(ob);
+		d.setRunning(true);
+
+		TimeUnit.MILLISECONDS.sleep(idleInterval + (runDelay * 2));
+		TimeUnit.MILLISECONDS.sleep(idleInterval + (runDelay * 2));
+		Assert.assertFalse(d.isUserActive());
+
+		editor.typeText("1");
+		editor.typeText("2");
+
+		Assert.assertEquals(1, ob.inactiveCount);
+		Assert.assertEquals(1, ob.activeCount);
+	}
+
+	@Test
+	public void testAccuracy_withMouseDown() throws InterruptedException {
+		long idleInterval = 500;
+		long runDelay = 10;
+		IdleDetector d = new IdleDetector(bot.getDisplay(), idleInterval, runDelay);
+		d.setRunning(true);
+
+		TimeUnit.MILLISECONDS.sleep(idleInterval + (runDelay * 2));
+		Assert.assertFalse(d.isUserActive());
+
+		bot.menu("Help").menu("About Eclipse Platform").click();
+		// bot.shell("About Eclipse Platform").activate();
+		bot.button("OK").click();
+		Assert.assertTrue(d.isUserActive());
+	}
+
+	@Test
+	public void testAccuracy_withMouseDownAndObserver() throws InterruptedException {
+		long idleInterval = 500;
+		long runDelay = 10;
+		IdleDetector d = new IdleDetector(bot.getDisplay(), idleInterval, runDelay);
+
+		ObserverTester ob = new ObserverTester();
+		d.addObserver(ob);
+		d.setRunning(true);
+
+		TimeUnit.MILLISECONDS.sleep(idleInterval + (runDelay * 2));
+		TimeUnit.MILLISECONDS.sleep(idleInterval + (runDelay * 2));
+		Assert.assertFalse(d.isUserActive());
+
+		for (int i = 0; i < 3; i++) {
+			bot.menu("Help").menu("About Eclipse Platform").click();
+			// bot.shell("About Eclipse Platform").activate();
+			bot.button("OK").click();
+		}
+
+		Assert.assertEquals(1, ob.inactiveCount);
+		Assert.assertEquals(1, ob.activeCount);
+	}
+
 	@Test(expected = NullPointerException.class)
 	public void testConstructor_withDisplayNull() {
 		new IdleDetector(null, 10, 10);
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void testConstructor_withNegativeDelay() {
+		new IdleDetector(PlatformUI.getWorkbench().getDisplay(), 10, -1);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
@@ -56,9 +193,18 @@ public class IdleDetectorTest {
 		new IdleDetector(PlatformUI.getWorkbench().getDisplay(), -1, 10);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
-	public void testConstructor_withNegativeDelay() {
-		new IdleDetector(PlatformUI.getWorkbench().getDisplay(), 10, -1);
+	@Test
+	public void testDisplayDisposed() {
+		Display display = PlatformUI.createDisplay();
+		IdleDetector d = new IdleDetector(display, 10, 10);
+		display.dispose();
+
+		try {
+			d.setRunning(true);
+			d.setRunning(false);
+		} catch (Exception e) {
+			Assert.fail();
+		}
 	}
 
 	@Test
@@ -69,13 +215,6 @@ public class IdleDetectorTest {
 	}
 
 	@Test
-	public void testGetRunDelay() {
-		long runDelay = 1231;
-		Assert.assertEquals(runDelay, new IdleDetector(
-				PlatformUI.getWorkbench().getDisplay(), 101010, runDelay).getRunDelay());
-	}
-
-	@Test
 	public void testGetIdleInterval() {
 		long idleInterval = 1936l;
 		Assert.assertEquals(idleInterval, new IdleDetector(
@@ -83,13 +222,47 @@ public class IdleDetectorTest {
 	}
 
 	@Test
+	public void testGetRunDelay() {
+		long runDelay = 1231;
+		Assert.assertEquals(runDelay, new IdleDetector(
+				PlatformUI.getWorkbench().getDisplay(), 101010, runDelay).getRunDelay());
+	}
+
+	@Test
 	public void testIsRunning() {
-		Assert.assertFalse(new IdleDetector(PlatformUI.getWorkbench().getDisplay(), 10, 10).isRunning());
+		Assert.assertFalse(new IdleDetector(PlatformUI.getWorkbench().getDisplay(), 10, 10)
+				.isRunning());
 	}
 
 	@Test
 	public void testIsUserActive() {
-		Assert.assertTrue(new IdleDetector(PlatformUI.getWorkbench().getDisplay(), 10, 10).isUserActive());
+		Assert.assertTrue(new IdleDetector(PlatformUI.getWorkbench().getDisplay(), 10, 10)
+				.isUserActive());
+	}
+
+	@Test
+	public void testNotRunningNoNotify() throws InterruptedException {
+		// IdleDetector is not running, so no observers should be notified
+
+		long idleInterval = 500;
+		long runDelay = 10;
+		IdleDetector d = new IdleDetector(bot.getDisplay(), idleInterval, runDelay);
+
+		ObserverTester ob = new ObserverTester();
+		d.addObserver(ob);
+		d.setRunning(false);
+
+		TimeUnit.MILLISECONDS.sleep(idleInterval + (runDelay * 2));
+		TimeUnit.MILLISECONDS.sleep(idleInterval + (runDelay * 2));
+
+		for (int i = 0; i < 3; i++) {
+			bot.menu("Help").menu("About Eclipse Platform").click();
+			// bot.shell("About Eclipse Platform").activate();
+			bot.button("OK").click();
+		}
+
+		Assert.assertEquals(0, ob.inactiveCount);
+		Assert.assertEquals(0, ob.activeCount);
 	}
 
 	@Test
@@ -128,150 +301,6 @@ public class IdleDetectorTest {
 		}
 	}
 
-	@Test
-	public void testNotRunningNoNotify() throws InterruptedException {
-		// IdleDetector is not running, so no observers should be notified
-
-		long idleInterval = 500;
-		long runDelay = 10;
-		IdleDetector d = new IdleDetector(bot.getDisplay(), idleInterval, runDelay);
-
-		ObserverTester ob = new ObserverTester();
-		d.addObserver(ob);
-		d.setRunning(false);
-
-		TimeUnit.MILLISECONDS.sleep(idleInterval + (runDelay * 2));
-		TimeUnit.MILLISECONDS.sleep(idleInterval + (runDelay * 2));
-
-		for (int i = 0; i < 3; i++) {
-			bot.menu("Help").menu("About Eclipse Platform").click();
-			//			bot.shell("About Eclipse Platform").activate();
-			bot.button("OK").click();
-		}
-
-		Assert.assertEquals(0, ob.inactiveCount);
-		Assert.assertEquals(0, ob.activeCount);
-	}
-
-	@Test
-	public void testAccuracy_withMouseDown() throws InterruptedException {
-		long idleInterval = 500;
-		long runDelay = 10;
-		IdleDetector d = new IdleDetector(bot.getDisplay(), idleInterval, runDelay);
-		d.setRunning(true);
-
-		TimeUnit.MILLISECONDS.sleep(idleInterval + (runDelay * 2));
-		Assert.assertFalse(d.isUserActive());
-
-		bot.menu("Help").menu("About Eclipse Platform").click();
-		//		bot.shell("About Eclipse Platform").activate();
-		bot.button("OK").click();
-		Assert.assertTrue(d.isUserActive());
-	}
-
-	@Test
-	public void testAccuracy_withMouseDownAndObserver() throws InterruptedException {
-		long idleInterval = 500;
-		long runDelay = 10;
-		IdleDetector d = new IdleDetector(bot.getDisplay(), idleInterval, runDelay);
-
-		ObserverTester ob = new ObserverTester();
-		d.addObserver(ob);
-		d.setRunning(true);
-
-		TimeUnit.MILLISECONDS.sleep(idleInterval + (runDelay * 2));
-		TimeUnit.MILLISECONDS.sleep(idleInterval + (runDelay * 2));
-		Assert.assertFalse(d.isUserActive());
-
-		for (int i = 0; i < 3; i++) {
-			bot.menu("Help").menu("About Eclipse Platform").click();
-			//			bot.shell("About Eclipse Platform").activate();
-			bot.button("OK").click();
-		}
-
-		Assert.assertEquals(1, ob.inactiveCount);
-		Assert.assertEquals(1, ob.activeCount);
-	}
-
-	@Test
-	public void testAccuracy_withKeyDown() throws Exception {
-		bot.getDisplay().syncExec(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					page.openEditor(new FileEditorInput(getFileForTesting()), "org.eclipse.ui.DefaultTextEditor", true);
-				} catch (Exception e) {
-					Assert.fail();
-				}
-			}
-		});
-		SWTBotEclipseEditor editor = bot.activeEditor().toTextEditor();
-
-		long idleInterval = 500;
-		long runDelay = 10;
-		IdleDetector d = new IdleDetector(bot.getDisplay(), idleInterval, runDelay);
-		d.setRunning(true);
-
-		TimeUnit.MILLISECONDS.sleep(idleInterval + (runDelay * 2));
-		Assert.assertFalse(d.isUserActive());
-
-		editor.typeText("1");
-		Assert.assertTrue(d.isUserActive());
-	}
-
-	@Test
-	public void testAccuracy_withKeyDownAndObserver() throws InterruptedException {
-		bot.getDisplay().syncExec(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					page.openEditor(new FileEditorInput(getFileForTesting()), "org.eclipse.ui.DefaultTextEditor", true);
-				} catch (Exception e) {
-					Assert.fail();
-				}
-			}
-		});
-		SWTBotEclipseEditor editor = bot.activeEditor().toTextEditor();
-
-		long idleInterval = 500;
-		long runDelay = 10;
-		IdleDetector d = new IdleDetector(bot.getDisplay(), idleInterval, runDelay);
-
-		ObserverTester ob = new ObserverTester();
-		d.addObserver(ob);
-		d.setRunning(true);
-
-		TimeUnit.MILLISECONDS.sleep(idleInterval + (runDelay * 2));
-		TimeUnit.MILLISECONDS.sleep(idleInterval + (runDelay * 2));
-		Assert.assertFalse(d.isUserActive());
-
-		editor.typeText("1");
-		editor.typeText("2");
-
-		Assert.assertEquals(1, ob.inactiveCount);
-		Assert.assertEquals(1, ob.activeCount);
-	}
-
-	@Test
-	public void testDisplayDisposed() {
-		Display display = PlatformUI.createDisplay();
-		IdleDetector d = new IdleDetector(display, 10, 10);
-		display.dispose();
-
-		try {
-			d.setRunning(true);
-			d.setRunning(false);
-		} catch (Exception e) {
-			Assert.fail();
-		}
-	}
-
-	private ScheduledThreadPoolExecutor getTimer(IdleDetector d) throws Exception {
-		Field field = d.getClass().getDeclaredField("timer");
-		field.setAccessible(true);
-		return (ScheduledThreadPoolExecutor) field.get(d);
-	}
-
 	private IFile getFileForTesting() throws Exception {
 		IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
 		IProject project = root.getProject("Tmp");
@@ -290,18 +319,9 @@ public class IdleDetectorTest {
 		return file;
 	}
 
-	private static class ObserverTester implements Observer {
-		private int activeCount = 0;
-		private int inactiveCount = 0;
-
-		@Override
-		public void update(Observable o, Object arg) {
-			IdleDetector detect = (IdleDetector) o;
-			if (detect.isUserActive()) {
-				activeCount++;
-			} else {
-				inactiveCount++;
-			}
-		}
+	private ScheduledThreadPoolExecutor getTimer(IdleDetector d) throws Exception {
+		Field field = d.getClass().getDeclaredField("timer");
+		field.setAccessible(true);
+		return (ScheduledThreadPoolExecutor) field.get(d);
 	}
 }

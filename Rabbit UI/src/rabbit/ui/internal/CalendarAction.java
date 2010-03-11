@@ -1,3 +1,18 @@
+/*
+ * Copyright 2010 The Rabbit Eclipse Plug-in Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package rabbit.ui.internal;
 
 import java.text.Format;
@@ -20,7 +35,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.ToolItem;
 
 /**
- * A subclass of {@link Action} that is designed for {@link IToolBarManager}. 
+ * A subclass of {@link Action} that is designed for {@link IToolBarManager}.
  * When an action of this kind is clicked, a pop up dialog containing a
  * {@link DateTime} widget will show up below the clicked tool item.
  */
@@ -31,11 +46,15 @@ public class CalendarAction extends Action {
 
 	/**
 	 * Creates and adds a new action on the tool bar.
-	 * @param toolBar  The tool bar.
-	 * @param shell    The parent shell.
-	 * @param calendar The calendar to bind with this action. The changes
-	 *                 made on this action's DateTime widget will be reflected 
-	 *                 on this calendar.
+	 * 
+	 * @param toolBar
+	 *            The tool bar.
+	 * @param shell
+	 *            The parent shell.
+	 * @param calendar
+	 *            The calendar to bind with this action. The changes made on
+	 *            this action's DateTime widget will be reflected on this
+	 *            calendar.
 	 * @return The created action.
 	 */
 	public static CalendarAction create(IToolBarManager toolBar, Shell shell, Calendar calendar) {
@@ -44,16 +63,23 @@ public class CalendarAction extends Action {
 
 	/**
 	 * Creates and adds a new action on the tool bar.
-	 * @param toolBar  The tool bar.
-	 * @param shell    The parent shell.
-	 * @param calendar The calendar to bind with this action. The changes
-	 *                 made on this action's DateTime widget will be reflected 
-	 *                 on this calendar.
-	 * @param prefix   The prefix of the action's text.
-	 * @param suffix   The suffix of the action's text.
+	 * 
+	 * @param toolBar
+	 *            The tool bar.
+	 * @param shell
+	 *            The parent shell.
+	 * @param calendar
+	 *            The calendar to bind with this action. The changes made on
+	 *            this action's DateTime widget will be reflected on this
+	 *            calendar.
+	 * @param prefix
+	 *            The prefix of the action's text.
+	 * @param suffix
+	 *            The suffix of the action's text.
 	 * @return The created action.
 	 */
-	public static CalendarAction create(IToolBarManager toolBar, Shell shell, Calendar calendar, String prefix, String suffix) {
+	public static CalendarAction create(IToolBarManager toolBar, Shell shell, Calendar calendar,
+			String prefix, String suffix) {
 		CalendarAction action = new CalendarAction(shell, calendar, prefix, suffix);
 		toolBar.add(action);
 		return action;
@@ -63,16 +89,21 @@ public class CalendarAction extends Action {
 	private final Format format;
 	private final String prefix;
 	private final String suffix;
-	
+
 	private DateTime dateTime;
 	private Shell shell;
 
 	/**
 	 * Constructor.
-	 * @param parentShell The parent shell.
-	 * @param calendar The calendar to bind with this action.
-	 * @param prefix   The prefix of this action's text.
-	 * @param suffix   The suffix of this action's text.
+	 * 
+	 * @param parentShell
+	 *            The parent shell.
+	 * @param calendar
+	 *            The calendar to bind with this action.
+	 * @param prefix
+	 *            The prefix of this action's text.
+	 * @param suffix
+	 *            The suffix of this action's text.
 	 */
 	private CalendarAction(final Shell parentShell, Calendar calendar, String prefix, String suffix) {
 		super("", IAction.AS_CHECK_BOX);
@@ -90,17 +121,9 @@ public class CalendarAction extends Action {
 		});
 	}
 
-	@Override
-	public void runWithEvent(Event event) {
-		if (!shell.isVisible()) {
-			open(event);
-		} else {
-			close();
-		}
-	}
-
 	/**
 	 * Gets the calendar binded to this action.
+	 * 
 	 * @return The calendar.
 	 */
 	public Calendar getCalendar() {
@@ -109,6 +132,7 @@ public class CalendarAction extends Action {
 
 	/**
 	 * Gets the date time widget.
+	 * 
 	 * @return The widget.
 	 */
 	public DateTime getDateTime() {
@@ -119,31 +143,13 @@ public class CalendarAction extends Action {
 		return shell;
 	}
 
-	/**
-	 * Formats the default calendar to a string.
-	 * @return A formatted string.
-	 */
-	private String getFormattedText() {
-		return getFormattedText(calendar);
-	}
-
-	/**
-	 * Formats the given calendar to a string.
-	 * @param calendar The calendar.
-	 * @return A formatted string.
-	 */
-	private String getFormattedText(Calendar calendar) {
-		return prefix + format.format(calendar.getTime()) + suffix;
-	}
-
-	/**
-	 * Applies the changes and closes the pop up calendar.
-	 */
-	private void ok() {
-		shell.setVisible(false);
-		calendar.set(dateTime.getYear(), dateTime.getMonth(), dateTime.getDay());
-		setText(getFormattedText());
-		setChecked(false);
+	@Override
+	public void runWithEvent(Event event) {
+		if (!shell.isVisible()) {
+			open(event);
+		} else {
+			close();
+		}
 	}
 
 	/**
@@ -155,25 +161,10 @@ public class CalendarAction extends Action {
 	}
 
 	/**
-	 * Opens the pop up calendar.
-	 * @param e The event.
-	 */
-	private void open(Event e) {
-		if (!(e.widget instanceof ToolItem)) {
-			return;
-		}
-		RabbitView.updateDateTime(dateTime, calendar);
-		ToolItem item = ((ToolItem) e.widget);
-		Rectangle bounds = item.getBounds();
-		Point location = item.getParent().toDisplay(bounds.x, bounds.y + bounds.height);
-		shell.setLocation(location);
-		shell.setVisible(true);
-		shell.setActive();
-	}
-
-	/**
 	 * Creates the pop up calendar.
-	 * @param parentShell The parent shell.
+	 * 
+	 * @param parentShell
+	 *            The parent shell.
 	 */
 	private void createCalendar(Shell parentShell) {
 		GridLayout layout = new GridLayout();
@@ -191,7 +182,8 @@ public class CalendarAction extends Action {
 
 		Calendar cal = getCalendar();
 		dateTime = new DateTime(shell, SWT.CALENDAR);
-		dateTime.setDate(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DAY_OF_MONTH));
+		dateTime.setDate(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal
+				.get(Calendar.DAY_OF_MONTH));
 		dateTime.addListener(SWT.MouseDoubleClick, new Listener() {
 			@Override
 			public void handleEvent(Event event) {
@@ -221,5 +213,54 @@ public class CalendarAction extends Action {
 		});
 
 		shell.pack();
+	}
+
+	/**
+	 * Formats the default calendar to a string.
+	 * 
+	 * @return A formatted string.
+	 */
+	private String getFormattedText() {
+		return getFormattedText(calendar);
+	}
+
+	/**
+	 * Formats the given calendar to a string.
+	 * 
+	 * @param calendar
+	 *            The calendar.
+	 * @return A formatted string.
+	 */
+	private String getFormattedText(Calendar calendar) {
+		return prefix + format.format(calendar.getTime()) + suffix;
+	}
+
+	/**
+	 * Applies the changes and closes the pop up calendar.
+	 */
+	private void ok() {
+		shell.setVisible(false);
+		calendar.set(dateTime.getYear(), dateTime.getMonth(), dateTime.getDay());
+		setText(getFormattedText());
+		setChecked(false);
+	}
+
+	/**
+	 * Opens the pop up calendar.
+	 * 
+	 * @param e
+	 *            The event.
+	 */
+	private void open(Event e) {
+		if (!(e.widget instanceof ToolItem)) {
+			return;
+		}
+		RabbitView.updateDateTime(dateTime, calendar);
+		ToolItem item = ((ToolItem) e.widget);
+		Rectangle bounds = item.getBounds();
+		Point location = item.getParent().toDisplay(bounds.x, bounds.y + bounds.height);
+		shell.setLocation(location);
+		shell.setVisible(true);
+		shell.setActive();
 	}
 }

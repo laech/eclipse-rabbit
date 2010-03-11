@@ -1,3 +1,18 @@
+/*
+ * Copyright 2010 The Rabbit Eclipse Plug-in Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package rabbit.core.internal.trackers;
 
 import static org.junit.Assert.assertEquals;
@@ -37,16 +52,12 @@ import rabbit.core.internal.IdleDetector;
  * Test {@link AbstractPartTracker}
  */
 @RunWith(SWTBotJunit4ClassRunner.class)
-public abstract class AbstractPartTrackerTest<E extends ContinuousEvent> extends AbstractTrackerTest<E> {
+public abstract class AbstractPartTrackerTest<E extends ContinuousEvent> extends
+		AbstractTrackerTest<E> {
 
 	protected AbstractPartTracker<E> tracker;
 
 	protected static SWTWorkbenchBot bot;
-
-	/** Do not use in tests. */
-	private IWorkbenchWindow win;
-	/** Do not use in tests. */
-	private IEditorPart editor;
 
 	@BeforeClass
 	public static void setUpBeforeClass() {
@@ -55,158 +66,16 @@ public abstract class AbstractPartTrackerTest<E extends ContinuousEvent> extends
 		// RabbitCore.getDefault().setIdleDetectionEnabled(false);
 	}
 
+	/** Do not use in tests. */
+	private IWorkbenchWindow win;
+
+	/** Do not use in tests. */
+	private IEditorPart editor;
+
 	@Before
 	public void setup() {
 		win = getActiveWindow();
 		tracker = createTracker();
-	}
-
-	@Test
-	public void testChangeEditor() throws Exception {
-		IEditorPart editor = openNewEditor();
-
-		long sleepDuration = 30;
-		long start = System.currentTimeMillis();
-		tracker.setEnabled(true);
-		uiSleep(sleepDuration);
-		openNewEditor();
-		long end = System.currentTimeMillis();
-
-		assertEquals(1, tracker.getData().size());
-		E event = tracker.getData().iterator().next();
-		assertTrue(start <= event.getTime().getTimeInMillis());
-		assertTrue(end >= event.getTime().getTimeInMillis());
-		assertTrue((end - start) >= event.getDuration());
-		assertTrue(sleepDuration <= event.getDuration());
-		assertTrue(hasSamePart(event, editor));
-	}
-
-	@Test
-	public void testEnableThenDisable() throws Exception {
-		IEditorPart editor = openNewEditor();
-
-		final long sleepDuration = 30;
-		long start = System.currentTimeMillis();
-		tracker.setEnabled(true);
-		uiSleep(sleepDuration);
-		tracker.setEnabled(false);
-		long end = System.currentTimeMillis();
-
-		assertEquals(1, tracker.getData().size());
-		E event = tracker.getData().iterator().next();
-		assertTrue(start <= event.getTime().getTimeInMillis());
-		assertTrue(end >= event.getTime().getTimeInMillis());
-		assertTrue((end - start) >= event.getDuration());
-		assertTrue(sleepDuration <= event.getDuration());
-		assertTrue(hasSamePart(event, editor));
-	}
-
-	@Test
-	public void testCloseWindow() throws Exception {
-		openNewWindow();
-		IEditorPart editor = openNewEditor();
-
-		long sleepDuration = 30;
-		long start = System.currentTimeMillis();
-		tracker.setEnabled(true);
-		assertEquals(0, tracker.getData().size());
-		uiSleep(sleepDuration);
-		bot.activeShell().close();
-		long end = System.currentTimeMillis();
-
-		assertEquals(1, tracker.getData().size());
-		E event = tracker.getData().iterator().next();
-		assertTrue(start <= event.getTime().getTimeInMillis());
-		assertTrue(end >= event.getTime().getTimeInMillis());
-		assertTrue((end - start) >= event.getDuration());
-		assertTrue(sleepDuration <= event.getDuration());
-		assertTrue(hasSamePart(event, editor));
-	}
-
-	@Test
-	public void testCloseEditor() throws Exception {
-		IEditorPart editor = openNewEditor();
-
-		long sleepDuration = 30;
-		long start = System.currentTimeMillis();
-		tracker.setEnabled(true);
-		assertEquals(0, tracker.getData().size());
-		uiSleep(sleepDuration);
-		bot.activeEditor().close();
-		long end = System.currentTimeMillis();
-
-		assertEquals(1, tracker.getData().size());
-		E event = tracker.getData().iterator().next();
-		assertTrue(start <= event.getTime().getTimeInMillis());
-		assertTrue(end >= event.getTime().getTimeInMillis());
-		assertTrue((end - start) >= event.getDuration());
-		assertTrue(sleepDuration <= event.getDuration());
-		assertTrue(hasSamePart(event, editor));
-	}
-
-	@Test
-	public void testWindowDeactivated() {
-		IEditorPart editor = openNewEditor();
-
-		long sleepDuration = 30;
-		long start = System.currentTimeMillis();
-		tracker.setEnabled(true);
-		assertEquals(0, tracker.getData().size());
-		uiSleep(sleepDuration);
-		openNewWindow();
-		long end = System.currentTimeMillis();
-
-		assertEquals(1, tracker.getData().size());
-		E event = tracker.getData().iterator().next();
-		assertTrue(start <= event.getTime().getTimeInMillis());
-		assertTrue(end >= event.getTime().getTimeInMillis());
-		assertTrue((end - start) >= event.getDuration());
-		assertTrue(sleepDuration <= event.getDuration());
-		assertTrue(hasSamePart(event, editor));
-
-		bot.activeShell().close();
-	}
-
-	@Test
-	public void testDisabled() throws Exception {
-		tracker.setEnabled(false);
-
-		// Test IPerspectiveListener.
-		uiSleep(30);
-		openNewEditor();
-
-		assertTrue(tracker.getData().isEmpty());
-
-		// Test IWindowListener.
-		uiSleep(20);
-		openNewWindow();
-		assertTrue(tracker.getData().isEmpty());
-		bot.activeShell().close();
-
-		// Test IdleDetector
-		uiSleep(35);
-		callIdleDetectorToNotify();
-		assertTrue(tracker.getData().isEmpty());
-	}
-
-	@Test
-	public void testIdleDetector() throws Exception {
-		IEditorPart editor = openNewEditor();
-
-		long sleepDuration = 30;
-		long start = System.currentTimeMillis();
-		tracker.setEnabled(true);
-		uiSleep(sleepDuration);
-		callIdleDetectorToNotify();
-		long end = System.currentTimeMillis();
-
-		assertEquals(1, tracker.getData().size());
-		E event = tracker.getData().iterator().next();
-		assertTrue(start <= event.getTime().getTimeInMillis());
-		assertTrue(end >= event.getTime().getTimeInMillis());
-		assertTrue((end - start) >= event.getDuration());
-		assertTrue(sleepDuration <= event.getDuration());
-		assertTrue(hasSamePart(event, editor));
 	}
 
 	/*
@@ -335,34 +204,177 @@ public abstract class AbstractPartTrackerTest<E extends ContinuousEvent> extends
 		assertEquals(0, tracker.getData().size());
 	}
 
-	protected IWorkbenchWindow openNewWindow() {
-		Display.getDefault().syncExec(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					win = getActiveWindow().getWorkbench().openWorkbenchWindow(null);
-				} catch (Exception e) {
-					fail();
-				}
-			}
-		});
-		return win;
+	@Test
+	public void testChangeEditor() throws Exception {
+		IEditorPart editor = openNewEditor();
+
+		long sleepDuration = 30;
+		long start = System.currentTimeMillis();
+		tracker.setEnabled(true);
+		uiSleep(sleepDuration);
+		openNewEditor();
+		long end = System.currentTimeMillis();
+
+		assertEquals(1, tracker.getData().size());
+		E event = tracker.getData().iterator().next();
+		assertTrue(start <= event.getTime().getTimeInMillis());
+		assertTrue(end >= event.getTime().getTimeInMillis());
+		assertTrue((end - start) >= event.getDuration());
+		assertTrue(sleepDuration <= event.getDuration());
+		assertTrue(hasSamePart(event, editor));
 	}
 
-	protected IEditorPart openNewEditor() {
-		Display.getDefault().syncExec(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					editor = getActiveWindow().getActivePage().openEditor(
-							new FileEditorInput(getFileForTesting()), "org.eclipse.ui.DefaultTextEditor", true);
-				} catch (Exception e) {
-					fail();
-				}
-			}
-		});
-		return editor;
+	@Test
+	public void testCloseEditor() throws Exception {
+		IEditorPart editor = openNewEditor();
+
+		long sleepDuration = 30;
+		long start = System.currentTimeMillis();
+		tracker.setEnabled(true);
+		assertEquals(0, tracker.getData().size());
+		uiSleep(sleepDuration);
+		bot.activeEditor().close();
+		long end = System.currentTimeMillis();
+
+		assertEquals(1, tracker.getData().size());
+		E event = tracker.getData().iterator().next();
+		assertTrue(start <= event.getTime().getTimeInMillis());
+		assertTrue(end >= event.getTime().getTimeInMillis());
+		assertTrue((end - start) >= event.getDuration());
+		assertTrue(sleepDuration <= event.getDuration());
+		assertTrue(hasSamePart(event, editor));
 	}
+
+	@Test
+	public void testCloseWindow() throws Exception {
+		openNewWindow();
+		IEditorPart editor = openNewEditor();
+
+		long sleepDuration = 30;
+		long start = System.currentTimeMillis();
+		tracker.setEnabled(true);
+		assertEquals(0, tracker.getData().size());
+		uiSleep(sleepDuration);
+		bot.activeShell().close();
+		long end = System.currentTimeMillis();
+
+		assertEquals(1, tracker.getData().size());
+		E event = tracker.getData().iterator().next();
+		assertTrue(start <= event.getTime().getTimeInMillis());
+		assertTrue(end >= event.getTime().getTimeInMillis());
+		assertTrue((end - start) >= event.getDuration());
+		assertTrue(sleepDuration <= event.getDuration());
+		assertTrue(hasSamePart(event, editor));
+	}
+
+	@Test
+	public void testDisabled() throws Exception {
+		tracker.setEnabled(false);
+
+		// Test IPerspectiveListener.
+		uiSleep(30);
+		openNewEditor();
+
+		assertTrue(tracker.getData().isEmpty());
+
+		// Test IWindowListener.
+		uiSleep(20);
+		openNewWindow();
+		assertTrue(tracker.getData().isEmpty());
+		bot.activeShell().close();
+
+		// Test IdleDetector
+		uiSleep(35);
+		callIdleDetectorToNotify();
+		assertTrue(tracker.getData().isEmpty());
+	}
+
+	@Test
+	public void testEnableThenDisable() throws Exception {
+		IEditorPart editor = openNewEditor();
+
+		final long sleepDuration = 30;
+		long start = System.currentTimeMillis();
+		tracker.setEnabled(true);
+		uiSleep(sleepDuration);
+		tracker.setEnabled(false);
+		long end = System.currentTimeMillis();
+
+		assertEquals(1, tracker.getData().size());
+		E event = tracker.getData().iterator().next();
+		assertTrue(start <= event.getTime().getTimeInMillis());
+		assertTrue(end >= event.getTime().getTimeInMillis());
+		assertTrue((end - start) >= event.getDuration());
+		assertTrue(sleepDuration <= event.getDuration());
+		assertTrue(hasSamePart(event, editor));
+	}
+
+	@Test
+	public void testIdleDetector() throws Exception {
+		IEditorPart editor = openNewEditor();
+
+		long sleepDuration = 30;
+		long start = System.currentTimeMillis();
+		tracker.setEnabled(true);
+		uiSleep(sleepDuration);
+		callIdleDetectorToNotify();
+		long end = System.currentTimeMillis();
+
+		assertEquals(1, tracker.getData().size());
+		E event = tracker.getData().iterator().next();
+		assertTrue(start <= event.getTime().getTimeInMillis());
+		assertTrue(end >= event.getTime().getTimeInMillis());
+		assertTrue((end - start) >= event.getDuration());
+		assertTrue(sleepDuration <= event.getDuration());
+		assertTrue(hasSamePart(event, editor));
+	}
+
+	@Test
+	public void testWindowDeactivated() {
+		IEditorPart editor = openNewEditor();
+
+		long sleepDuration = 30;
+		long start = System.currentTimeMillis();
+		tracker.setEnabled(true);
+		assertEquals(0, tracker.getData().size());
+		uiSleep(sleepDuration);
+		openNewWindow();
+		long end = System.currentTimeMillis();
+
+		assertEquals(1, tracker.getData().size());
+		E event = tracker.getData().iterator().next();
+		assertTrue(start <= event.getTime().getTimeInMillis());
+		assertTrue(end >= event.getTime().getTimeInMillis());
+		assertTrue((end - start) >= event.getDuration());
+		assertTrue(sleepDuration <= event.getDuration());
+		assertTrue(hasSamePart(event, editor));
+
+		bot.activeShell().close();
+	}
+
+	protected void callIdleDetectorToNotify() throws Exception {
+		Field isActive = IdleDetector.class.getDeclaredField("isActive");
+		isActive.setAccessible(true);
+
+		Method setChanged = Observable.class.getDeclaredMethod("setChanged");
+		setChanged.setAccessible(true);
+
+		Method notifyObservers = Observable.class.getDeclaredMethod("notifyObservers");
+		notifyObservers.setAccessible(true);
+
+		IdleDetector detector = RabbitCore.getDefault().getIdleDetector();
+		detector.setRunning(true);
+		isActive.set(detector, false);
+		setChanged.invoke(detector);
+		notifyObservers.invoke(detector);
+		detector.setRunning(false);
+	}
+
+	@Override
+	protected abstract E createEvent();
+
+	@Override
+	protected abstract AbstractPartTracker<E> createTracker();
 
 	protected IWorkbenchWindow getActiveWindow() {
 		Display.getDefault().syncExec(new Runnable() {
@@ -392,6 +404,41 @@ public abstract class AbstractPartTrackerTest<E extends ContinuousEvent> extends
 		return file;
 	}
 
+	protected abstract boolean hasSamePart(E event, IWorkbenchPart part);
+
+	protected abstract void internalAssertAccuracy(E event, IWorkbenchPart part,
+			long durationInMillis, int size, Calendar start, Calendar end);
+
+	protected IEditorPart openNewEditor() {
+		Display.getDefault().syncExec(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					editor = getActiveWindow().getActivePage().openEditor(
+							new FileEditorInput(getFileForTesting()),
+							"org.eclipse.ui.DefaultTextEditor", true);
+				} catch (Exception e) {
+					fail();
+				}
+			}
+		});
+		return editor;
+	}
+
+	protected IWorkbenchWindow openNewWindow() {
+		Display.getDefault().syncExec(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					win = getActiveWindow().getWorkbench().openWorkbenchWindow(null);
+				} catch (Exception e) {
+					fail();
+				}
+			}
+		});
+		return win;
+	}
+
 	protected void uiSleep(final long duration) {
 		Display.getDefault().syncExec(new Runnable() {
 			@Override
@@ -404,33 +451,4 @@ public abstract class AbstractPartTrackerTest<E extends ContinuousEvent> extends
 			}
 		});
 	}
-
-	protected void callIdleDetectorToNotify() throws Exception {
-		Field isActive = IdleDetector.class.getDeclaredField("isActive");
-		isActive.setAccessible(true);
-
-		Method setChanged = Observable.class.getDeclaredMethod("setChanged");
-		setChanged.setAccessible(true);
-
-		Method notifyObservers = Observable.class.getDeclaredMethod("notifyObservers");
-		notifyObservers.setAccessible(true);
-
-		IdleDetector detector = RabbitCore.getDefault().getIdleDetector();
-		detector.setRunning(true);
-		isActive.set(detector, false);
-		setChanged.invoke(detector);
-		notifyObservers.invoke(detector);
-		detector.setRunning(false);
-	}
-
-	protected abstract boolean hasSamePart(E event, IWorkbenchPart part);
-
-	protected abstract void internalAssertAccuracy(E event, IWorkbenchPart part,
-			long durationInMillis, int size, Calendar start, Calendar end);
-
-	@Override
-	protected abstract AbstractPartTracker<E> createTracker();
-
-	@Override
-	protected abstract E createEvent();
 }

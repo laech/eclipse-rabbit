@@ -1,3 +1,18 @@
+/*
+ * Copyright 2010 The Rabbit Eclipse Plug-in Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package rabbit.core;
 
 import java.io.File;
@@ -32,7 +47,7 @@ import rabbit.core.internal.storage.xml.FileEventStorer;
 import rabbit.core.internal.storage.xml.PartEventStorer;
 import rabbit.core.internal.storage.xml.PerspectiveEventStorer;
 import rabbit.core.internal.storage.xml.XmlResourceManager;
-import rabbit.core.storage.IResourceManager;
+import rabbit.core.storage.IResourceMapper;
 import rabbit.core.storage.IStorer;
 
 /**
@@ -53,13 +68,7 @@ public class RabbitCore extends AbstractUIPlugin implements IWorkbenchListener {
 	 */
 	public static final String STORAGE_LOCATION = "storageLocation";
 
-	/**
-	 * Identifier for getting/setting whether idleness detection should be
-	 * enabled.
-	 */
-	public static final String IDLE_DETECTOR_ENABLE = "enableIdleDetector";
-
-	/* Map<EventType, EventStorerType> */
+	/** Map<T, IStorer<T> */
 	private static final Map<Class<?>, IStorer<?>> storers;
 
 	/** The shared instance. */
@@ -128,37 +137,14 @@ public class RabbitCore extends AbstractUIPlugin implements IWorkbenchListener {
 	}
 
 	/**
-	 * Creates trackers from the extension point.
+	 * Gets the global idleness detector in use. Clients may attach themselves
+	 * as observers to the detector but must not change the detector's state
+	 * (like calling {@link IdleDetector#setRunning(boolean)}).
 	 * 
-	 * @return A list of tracker objects.
+	 * @return The idleness detector.
 	 */
-	private List<TrackerObject> createTrackers(IConfigurationElement[] elements) {
-		final List<TrackerObject> result = new ArrayList<TrackerObject>(elements.length);
-		for (final IConfigurationElement e : elements) {
-
-			SafeRunner.run(new ISafeRunnable() {
-				@Override
-				public void handleException(Throwable e) {
-					System.err.println(e.getMessage());
-				}
-
-				@Override
-				public void run() throws Exception {
-					Object o = e.createExecutableExtension("class");
-					if (o instanceof ITracker<?>) {
-						String id = e.getAttribute("id");
-						String name = e.getAttribute("name");
-						String description = e.getAttribute("description");
-						ITracker<?> s = (ITracker<?>) o;
-						result.add(new TrackerObject(id, name, description, s));
-					} else {
-						System.err.println("Object is not a tracker: " + e.getName());
-					}
-				}
-
-			});
-		}
-		return result;
+	public IdleDetector getIdleDetector() {
+		return idleDetector;
 	}
 
 	/**
@@ -166,7 +152,7 @@ public class RabbitCore extends AbstractUIPlugin implements IWorkbenchListener {
 	 * 
 	 * @return The resource manager.
 	 */
-	public IResourceManager getResourceManager() {
+	public IResourceMapper getResourceManager() {
 		return XmlResourceManager.INSTANCE;
 	}
 
@@ -185,6 +171,7 @@ public class RabbitCore extends AbstractUIPlugin implements IWorkbenchListener {
 	/**
 	 * Gets the paths to all the workspace storage locations for this plug-in.
 	 * Includes {@link #getStoragePath()}.
+	 * 
 	 * @return The paths to all the workspace storage locations
 	 */
 	public IPath[] getStoragePaths() {
@@ -227,6 +214,63 @@ public class RabbitCore extends AbstractUIPlugin implements IWorkbenchListener {
 		XmlResourceManager.INSTANCE.write(true);
 	}
 
+	@Override
+	public void start(BundleContext context) throws Exception {
+		super.start(context);
+		plugin = this;
+
+		getWorkbench().addWorkbenchListener(this);
+		trackerList = createTrackers(Platform.getExtensionRegistry()
+				.getConfigurationElementsFor(TRACKER_EXTENSION_ID));
+		setEnableTrackers(trackerList, true);
+
+		idleDetector.setRunning(true);
+	}
+
+	@Override
+	public void stop(BundleContext context) throws Exception {
+		idleDetector.setRunning(false);
+		getWorkbench().removeWorkbenchListener(this);
+		setEnableTrackers(trackerList, false);
+
+		plugin = null;
+		super.stop(context);
+	}
+
+	/**
+	 * Creates trackers from the extension point.
+	 * 
+	 * @return A list of tracker objects.
+	 */
+	private List<TrackerObject> createTrackers(IConfigurationElement[] elements) {
+		final List<TrackerObject> result = new ArrayList<TrackerObject>(elements.length);
+		for (final IConfigurationElement e : elements) {
+
+			SafeRunner.run(new ISafeRunnable() {
+				@Override
+				public void handleException(Throwable e) {
+					System.err.println(e.getMessage());
+				}
+
+				@Override
+				public void run() throws Exception {
+					Object o = e.createExecutableExtension("class");
+					if (o instanceof ITracker<?>) {
+						String id = e.getAttribute("id");
+						String name = e.getAttribute("name");
+						String description = e.getAttribute("description");
+						ITracker<?> s = (ITracker<?>) o;
+						result.add(new TrackerObject(id, name, description, s));
+					} else {
+						System.err.println("Object is not a tracker: " + o);
+					}
+				}
+
+			});
+		}
+		return result;
+	}
+
 	/**
 	 * Enables or disables the trackers.
 	 * 
@@ -240,63 +284,4 @@ public class RabbitCore extends AbstractUIPlugin implements IWorkbenchListener {
 			o.getTracker().setEnabled(enable);
 		}
 	}
-
-	@Override
-	public void start(BundleContext context) throws Exception {
-		super.start(context);
-		plugin = this;
-
-		getWorkbench().addWorkbenchListener(this);
-		trackerList = createTrackers(Platform.getExtensionRegistry().getConfigurationElementsFor(TRACKER_EXTENSION_ID));
-		setEnableTrackers(trackerList, true);
-
-		// if (isIdleDetectionEnabled()) {
-		idleDetector.setRunning(true);
-		// } else {
-		// idleDetector.setRunning(false);
-		// }
-	}
-
-	/**
-	 * Gets the global idleness detector in use. Clients may attach themselves
-	 * as observers to the detector but must not change the detector's state
-	 * (like calling {@link IdleDetector#setRunning(boolean)}).
-	 * 
-	 * @return The idleness detector.
-	 */
-	public IdleDetector getIdleDetector() {
-		return idleDetector;
-	}
-
-	@Override
-	public void stop(BundleContext context) throws Exception {
-		idleDetector.setRunning(false);
-		getWorkbench().removeWorkbenchListener(this);
-		setEnableTrackers(trackerList, false);
-
-		plugin = null;
-		super.stop(context);
-	}
-
-	// /**
-	// * Checks to see whether idleness detection is enabled.
-	// *
-	// * @return True if idleness detection is enabled, false otherwise.
-	// */
-	// public boolean isIdleDetectionEnabled() {
-	// return getPreferenceStore().getBoolean(IDLE_DETECTOR_ENABLE);
-	// }
-	//
-	// /**
-	// * Sets whether idleness detection should be enabled. This change is saved
-	// * permanently into the preference store.
-	// *
-	// * @param enable
-	// * True to enable idleness detection, false to disable it. The
-	// * change is applied immediately.
-	// */
-	// public void setIdleDetectionEnabled(boolean enable) {
-	// getPreferenceStore().setValue(IDLE_DETECTOR_ENABLE, enable);
-	// idleDetector.setRunning(enable);
-	// }
 }

@@ -1,3 +1,18 @@
+/*
+ * Copyright 2010 The Rabbit Eclipse Plug-in Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package rabbit.core.internal.trackers;
 
 import java.util.Calendar;
@@ -24,23 +39,15 @@ public class CommandTracker extends AbstractTracker<CommandEvent> implements IEx
 	}
 
 	@Override
-	protected void doEnable() {
-		getCommandService().addExecutionListener(this);
+	public void notHandled(String commandId, NotHandledException exception) {
 	}
 
 	@Override
-	protected void doDisable() {
-		getCommandService().removeExecutionListener(this);
+	public void postExecuteFailure(String commandId, ExecutionException e) {
 	}
 
 	@Override
-	protected IStorer<CommandEvent> createDataStorer() {
-		return RabbitCore.getStorer(CommandEvent.class);
-	}
-
-	private ICommandService getCommandService() {
-		return (ICommandService) PlatformUI.getWorkbench().getService(
-				ICommandService.class);
+	public void postExecuteSuccess(String commandId, Object returnValue) {
 	}
 
 	@Override
@@ -49,15 +56,23 @@ public class CommandTracker extends AbstractTracker<CommandEvent> implements IEx
 	}
 
 	@Override
-	public void postExecuteSuccess(String commandId, Object returnValue) {
+	protected IStorer<CommandEvent> createDataStorer() {
+		return RabbitCore.getStorer(CommandEvent.class);
 	}
 
 	@Override
-	public void notHandled(String commandId, NotHandledException exception) {
+	protected void doDisable() {
+		getCommandService().removeExecutionListener(this);
 	}
 
 	@Override
-	public void postExecuteFailure(String commandId, ExecutionException e) {
+	protected void doEnable() {
+		getCommandService().addExecutionListener(this);
+	}
+
+	private ICommandService getCommandService() {
+		return (ICommandService) PlatformUI.getWorkbench().getService(
+				ICommandService.class);
 	}
 
 }

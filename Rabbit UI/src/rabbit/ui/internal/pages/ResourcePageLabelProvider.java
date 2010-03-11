@@ -1,3 +1,18 @@
+/*
+ * Copyright 2010 The Rabbit Eclipse Plug-in Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package rabbit.ui.internal.pages;
 
 import static rabbit.ui.internal.util.MillisConverter.toDefaultString;
@@ -26,7 +41,8 @@ import rabbit.ui.internal.pages.ResourcePage.ShowMode;
 /**
  * Label provider for a {@link FilePage}.
  */
-public class ResourcePageLabelProvider extends BaseLabelProvider implements ITableLabelProvider, IColorProvider {
+public class ResourcePageLabelProvider extends BaseLabelProvider implements ITableLabelProvider,
+		IColorProvider {
 
 	/** Maps the given path of a resource to an image (may be null). */
 	private final Map<String, Image> resourceMap;
@@ -42,7 +58,8 @@ public class ResourcePageLabelProvider extends BaseLabelProvider implements ITab
 	private ResourcePage page;
 
 	public ResourcePageLabelProvider(ResourcePage parent) {
-		deletedResourceColor = PlatformUI.getWorkbench().getDisplay().getSystemColor(SWT.COLOR_DARK_GRAY);
+		deletedResourceColor = PlatformUI.getWorkbench().getDisplay().getSystemColor(
+				SWT.COLOR_DARK_GRAY);
 
 		ISharedImages images = PlatformUI.getWorkbench().getSharedImages();
 		projectImg = images.getImage(IDE.SharedImages.IMG_OBJ_PROJECT);
@@ -53,6 +70,27 @@ public class ResourcePageLabelProvider extends BaseLabelProvider implements ITab
 		resourceMap = new HashMap<String, Image>();
 
 		page = parent;
+	}
+
+	@Override
+	public void dispose() {
+		for (Image img : resourceMap.values()) {
+			if (img != null && !img.isDisposed()) {
+				img.dispose();
+			}
+		}
+
+		for (Image img : editorMap.values()) {
+			if (img != null && !img.isDisposed()) {
+				img.dispose();
+			}
+		}
+		super.dispose();
+	}
+
+	@Override
+	public Color getBackground(Object element) {
+		return null;
 	}
 
 	@Override
@@ -69,8 +107,9 @@ public class ResourcePageLabelProvider extends BaseLabelProvider implements ITab
 		case IResource.FOLDER:
 			return folderImg;
 		case IResource.FILE:
-			if (resourceMap.containsKey(resource.getFullPath().toString()))
+			if (resourceMap.containsKey(resource.getFullPath().toString())) {
 				return resourceMap.get(resource.getFullPath().toString());
+			}
 
 			IEditorDescriptor editor = IDE.getDefaultEditor((IFile) resource);
 			if (editor == null) {
@@ -78,8 +117,9 @@ public class ResourcePageLabelProvider extends BaseLabelProvider implements ITab
 				return fileImg;
 			}
 
-			if (editorMap.containsKey(editor.getId()))
+			if (editorMap.containsKey(editor.getId())) {
 				return editorMap.get(editor.getId());
+			}
 
 			ImageDescriptor des = editor.getImageDescriptor();
 			Image img = (des == null) ? null : des.createImage();
@@ -98,10 +138,11 @@ public class ResourcePageLabelProvider extends BaseLabelProvider implements ITab
 		IResource resource = (IResource) element;
 		switch (columnIndex) {
 		case 0:
-			if (resource instanceof IFolder)
+			if (resource instanceof IFolder) {
 				return resource.getProjectRelativePath().toString();
-			else
+			} else {
 				return resource.getName();
+			}
 		case 1:
 			if ((resource instanceof IProject && page.getShowMode() == ShowMode.PROJECT)
 					|| (resource instanceof IFolder && page.getShowMode() == ShowMode.FOLDER)
@@ -115,31 +156,11 @@ public class ResourcePageLabelProvider extends BaseLabelProvider implements ITab
 	}
 
 	@Override
-	public Color getBackground(Object element) {
-		return null;
-	}
-
-	@Override
 	public Color getForeground(Object element) {
-		if (element instanceof IResource && !((IResource) element).exists())
+		if (element instanceof IResource && !((IResource) element).exists()) {
 			return deletedResourceColor;
-		else
+		} else {
 			return null;
-	}
-
-	@Override
-	public void dispose() {
-		for (Image img : resourceMap.values()) {
-			if (img != null && !img.isDisposed()) {
-				img.dispose();
-			}
 		}
-
-		for (Image img : editorMap.values()) {
-			if (img != null && !img.isDisposed()) {
-				img.dispose();
-			}
-		}
-		super.dispose();
 	}
 }

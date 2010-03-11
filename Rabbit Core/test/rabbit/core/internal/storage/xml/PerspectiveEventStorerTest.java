@@ -1,3 +1,18 @@
+/*
+ * Copyright 2010 The Rabbit Eclipse Plug-in Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package rabbit.core.internal.storage.xml;
 
 import static org.junit.Assert.assertFalse;
@@ -15,7 +30,8 @@ import rabbit.core.internal.storage.xml.schema.events.PerspectiveEventListType;
 import rabbit.core.internal.storage.xml.schema.events.PerspectiveEventType;
 
 public class PerspectiveEventStorerTest
-		extends AbstractStorerTest2<PerspectiveEvent, PerspectiveEventType, PerspectiveEventListType> {
+		extends
+		AbstractStorerTest2<PerspectiveEvent, PerspectiveEventType, PerspectiveEventListType> {
 
 	private PerspectiveEventStorer storer = create();
 
@@ -53,19 +69,31 @@ public class PerspectiveEventStorerTest
 
 	@Override
 	protected PerspectiveEvent createEvent() {
-		IPerspectiveDescriptor p = PlatformUI.getWorkbench().getPerspectiveRegistry().getPerspectives()[0];
+		IPerspectiveDescriptor p = PlatformUI.getWorkbench().getPerspectiveRegistry()
+				.getPerspectives()[0];
 		return new PerspectiveEvent(Calendar.getInstance(), 194, p);
 	}
 
 	@Override
 	protected PerspectiveEvent createEvent2() {
-		IPerspectiveDescriptor p = PlatformUI.getWorkbench().getPerspectiveRegistry().getPerspectives()[1];
+		IPerspectiveDescriptor p = PlatformUI.getWorkbench().getPerspectiveRegistry()
+				.getPerspectives()[1];
 		return new PerspectiveEvent(Calendar.getInstance(), 11094, p);
 	}
 
 	@Override
 	protected List<PerspectiveEventType> getEventTypes(PerspectiveEventListType type) {
 		return type.getPerspectiveEvent();
+	}
+
+	@Override
+	protected long getValue(PerspectiveEvent event) {
+		return event.getDuration();
+	}
+
+	@Override
+	protected long getValue(PerspectiveEventType type) {
+		return type.getDuration();
 	}
 
 	@Override
@@ -81,16 +109,6 @@ public class PerspectiveEventStorerTest
 	@Override
 	protected void mergeValue(PerspectiveEvent main, PerspectiveEvent tmp) {
 		main.setDuration(main.getDuration() + tmp.getDuration());
-	}
-
-	@Override
-	protected long getValue(PerspectiveEventType type) {
-		return type.getDuration();
-	}
-
-	@Override
-	protected long getValue(PerspectiveEvent event) {
-		return event.getDuration();
 	}
 
 }

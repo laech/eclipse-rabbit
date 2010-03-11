@@ -1,3 +1,18 @@
+/*
+ * Copyright 2010 The Rabbit Eclipse Plug-in Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package rabbit.core.internal.trackers;
 
 import static org.junit.Assert.assertEquals;
@@ -23,42 +38,6 @@ import rabbit.core.events.FileEvent;
  */
 @RunWith(SWTBotJunit4ClassRunner.class)
 public class FileTrackerTest extends AbstractPartTrackerTest<FileEvent> {
-
-	@Override
-	protected void internalAssertAccuracy(FileEvent event, IWorkbenchPart part,
-			long durationInMillis, int size, Calendar start, Calendar end) {
-
-		// 1/10 of a second is acceptable?
-		Assert.assertTrue(durationInMillis - 100 <= event.getDuration());
-		Assert.assertTrue(durationInMillis + 100 >= event.getDuration());
-		Assert.assertTrue(start.compareTo(event.getTime()) <= 0);
-		Assert.assertTrue(end.compareTo(event.getTime()) >= 0);
-		Assert.assertEquals(size, tracker.getData().size());
-		IFile file = (IFile) ((IEditorPart) part).getEditorInput().getAdapter(IFile.class);
-		Assert.assertEquals(event.getFileId(), RabbitCore.getDefault().getResourceManager().getId(file.getFullPath().toString()));
-	}
-
-	@Override
-	protected FileEvent createEvent() {
-		return new FileEvent(Calendar.getInstance(), 10, "someId");
-	}
-
-	@Override
-	protected FileTracker createTracker() {
-		return new FileTracker();
-	}
-
-	@Override
-	protected boolean hasSamePart(FileEvent event, IWorkbenchPart part) {
-		if (part instanceof IEditorPart) {
-			IEditorPart editor = (IEditorPart) part;
-			IFile file = (IFile) editor.getEditorInput().getAdapter(IFile.class);
-			String id = RabbitCore.getDefault().getResourceManager().getId(file.getFullPath().toString());
-			return event.getFileId().equals(id);
-		} else {
-			return false;
-		}
-	}
 
 	@Test
 	public void testNewWindow() {
@@ -86,6 +65,44 @@ public class FileTrackerTest extends AbstractPartTrackerTest<FileEvent> {
 		assertTrue((end - start) >= event.getDuration());
 
 		bot.activeShell().close();
+	}
+
+	@Override
+	protected FileEvent createEvent() {
+		return new FileEvent(Calendar.getInstance(), 10, "someId");
+	}
+
+	@Override
+	protected FileTracker createTracker() {
+		return new FileTracker();
+	}
+
+	@Override
+	protected boolean hasSamePart(FileEvent event, IWorkbenchPart part) {
+		if (part instanceof IEditorPart) {
+			IEditorPart editor = (IEditorPart) part;
+			IFile file = (IFile) editor.getEditorInput().getAdapter(IFile.class);
+			String id = RabbitCore.getDefault().getResourceManager().getId(
+					file.getFullPath().toString());
+			return event.getFileId().equals(id);
+		} else {
+			return false;
+		}
+	}
+
+	@Override
+	protected void internalAssertAccuracy(FileEvent event, IWorkbenchPart part,
+			long durationInMillis, int size, Calendar start, Calendar end) {
+
+		// 1/10 of a second is acceptable?
+		Assert.assertTrue(durationInMillis - 100 <= event.getDuration());
+		Assert.assertTrue(durationInMillis + 100 >= event.getDuration());
+		Assert.assertTrue(start.compareTo(event.getTime()) <= 0);
+		Assert.assertTrue(end.compareTo(event.getTime()) >= 0);
+		Assert.assertEquals(size, tracker.getData().size());
+		IFile file = (IFile) ((IEditorPart) part).getEditorInput().getAdapter(IFile.class);
+		Assert.assertEquals(event.getFileId(), RabbitCore.getDefault().getResourceManager().getId(
+				file.getFullPath().toString()));
 	}
 
 }

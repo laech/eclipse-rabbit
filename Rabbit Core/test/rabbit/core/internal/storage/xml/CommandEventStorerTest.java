@@ -1,3 +1,18 @@
+/*
+ * Copyright 2010 The Rabbit Eclipse Plug-in Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package rabbit.core.internal.storage.xml;
 
 import static org.junit.Assert.assertEquals;
@@ -20,43 +35,13 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.commands.ICommandService;
 
 import rabbit.core.events.CommandEvent;
-import rabbit.core.internal.storage.xml.CommandEventStorer;
 import rabbit.core.internal.storage.xml.schema.events.CommandEventListType;
 import rabbit.core.internal.storage.xml.schema.events.CommandEventType;
 
-public class CommandEventStorerTest extends AbstractStorerTest<CommandEvent, CommandEventType, CommandEventListType> {
+public class CommandEventStorerTest extends
+		AbstractStorerTest<CommandEvent, CommandEventType, CommandEventListType> {
 
 	private CommandEventStorer storer = create();
-
-	/**
-	 * Gets the workbench command service.
-	 * 
-	 * @return The command service.
-	 */
-	private ICommandService getCommandService() {
-		return (ICommandService) PlatformUI.getWorkbench().getService(
-				ICommandService.class);
-	}
-
-	@Override
-	protected CommandEventStorer create() {
-		return new CommandEventStorer();
-	}
-
-	private ExecutionEvent createExecutionEvent(String commandId) {
-		return new ExecutionEvent(getCommandService()
-				.getCommand(commandId), Collections.EMPTY_MAP, null, null);
-	}
-
-	@Override
-	protected CommandEvent createEvent() {
-		return new CommandEvent(Calendar.getInstance(), createExecutionEvent("adnk2o385"));
-	}
-
-	@Override
-	protected CommandEvent createEvent2() {
-		return new CommandEvent(Calendar.getInstance(), createExecutionEvent("23545656"));
-	}
 
 	@Override
 	public void testCommit() {
@@ -67,7 +52,8 @@ public class CommandEventStorerTest extends AbstractStorerTest<CommandEvent, Com
 			storer.commit();
 			assertTrue(dataFile.exists());
 
-			List<CommandEventListType> allEvents = storer.getDataStore().read(dataFile).getCommandEvents();
+			List<CommandEventListType> allEvents = storer.getDataStore().read(dataFile)
+					.getCommandEvents();
 			assertEquals(1, allEvents.size());
 
 			CommandEventListType list = allEvents.get(0);
@@ -277,7 +263,8 @@ public class CommandEventStorerTest extends AbstractStorerTest<CommandEvent, Com
 				assertEquals(2, data.iterator().next().getCommandEvent().size());
 
 				type = data.iterator().next().getCommandEvent().get(0);
-				assertEquals(eWithSameId.getExecutionEvent().getCommand().getId(), type.getCommandId());
+				assertEquals(eWithSameId.getExecutionEvent().getCommand().getId(), type
+						.getCommandId());
 				assertEquals(totalDuration, type.getCount());
 
 				type = data.iterator().next().getCommandEvent().get(1);
@@ -376,6 +363,36 @@ public class CommandEventStorerTest extends AbstractStorerTest<CommandEvent, Com
 		CommandEventType type = storer.newXmlType(e);
 		assertEquals(e.getExecutionEvent().getCommand().getId(), type.getCommandId());
 		assertEquals(1, type.getCount());
+	}
+
+	@Override
+	protected CommandEventStorer create() {
+		return new CommandEventStorer();
+	}
+
+	@Override
+	protected CommandEvent createEvent() {
+		return new CommandEvent(Calendar.getInstance(), createExecutionEvent("adnk2o385"));
+	}
+
+	@Override
+	protected CommandEvent createEvent2() {
+		return new CommandEvent(Calendar.getInstance(), createExecutionEvent("23545656"));
+	}
+
+	private ExecutionEvent createExecutionEvent(String commandId) {
+		return new ExecutionEvent(getCommandService()
+				.getCommand(commandId), Collections.EMPTY_MAP, null, null);
+	}
+
+	/**
+	 * Gets the workbench command service.
+	 * 
+	 * @return The command service.
+	 */
+	private ICommandService getCommandService() {
+		return (ICommandService) PlatformUI.getWorkbench().getService(
+				ICommandService.class);
 	}
 
 }

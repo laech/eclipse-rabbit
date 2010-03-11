@@ -1,3 +1,18 @@
+/*
+ * Copyright 2010 The Rabbit Eclipse Plug-in Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package rabbit.core.events;
 
 import static org.junit.Assert.assertNotNull;
@@ -12,8 +27,6 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.junit.Test;
-
-import rabbit.core.events.PartEvent;
 
 /**
  * Test for {@link PartEvent}
@@ -38,15 +51,9 @@ public class PartEventTest extends ContinuousEventTest {
 		return win;
 	}
 
-	@Override
-	protected PartEvent createEvent(Calendar time, long duration) {
-		return new PartEvent(time, duration, getWorkbenchWindow()
-				.getPartService().getActivePart());
-	}
-
-	@Test
-	public void testWorkbenchEvent() {
-		assertNotNull(event);
+	@Test(expected = NullPointerException.class)
+	public void testContructor_withPartNull() {
+		new PartEvent(Calendar.getInstance(), 10, null);
 	}
 
 	@Test
@@ -70,12 +77,18 @@ public class PartEventTest extends ContinuousEventTest {
 	}
 
 	@Test(expected = NullPointerException.class)
-	public void testContructor_withPartNull() {
-		new PartEvent(Calendar.getInstance(), 10, null);
-	}
-
-	@Test(expected = NullPointerException.class)
 	public void testSetWorkbenchPart_withNull() {
 		event.setWorkbenchPart(null);
+	}
+
+	@Test
+	public void testWorkbenchEvent() {
+		assertNotNull(event);
+	}
+
+	@Override
+	protected PartEvent createEvent(Calendar time, long duration) {
+		return new PartEvent(time, duration, getWorkbenchWindow()
+				.getPartService().getActivePart());
 	}
 }

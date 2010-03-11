@@ -1,3 +1,18 @@
+/*
+ * Copyright 2010 The Rabbit Eclipse Plug-in Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package rabbit.core.internal.trackers;
 
 import java.util.Calendar;
@@ -32,6 +47,80 @@ public class PerspectiveTracker extends AbstractTracker<PerspectiveEvent>
 	 */
 	public PerspectiveTracker() {
 		super();
+	}
+
+	@Override
+	public void perspectiveActivated(IWorkbenchPage page, IPerspectiveDescriptor perspective) {
+		startSession(perspective);
+		/*
+		 * Note: perspectiveActivated is also called when a new perspective is
+		 * opened and become active.
+		 */
+	}
+
+	@Override
+	public void perspectiveChanged(IWorkbenchPage page, IPerspectiveDescriptor perspective,
+			IWorkbenchPartReference partRef, String changeId) {
+	}
+
+	@Override
+	public void perspectiveChanged(IWorkbenchPage page, IPerspectiveDescriptor perspective,
+			String changeId) {
+	}
+
+	@Override
+	public void perspectiveClosed(IWorkbenchPage page, IPerspectiveDescriptor perspective) {
+	}
+
+	@Override
+	public void perspectiveDeactivated(IWorkbenchPage page, IPerspectiveDescriptor perspective) {
+		tryEndSession();
+		/*
+		 * Note: perspectiveDeactivated is also called when an active
+		 * perspective is closed.
+		 */
+	}
+
+	@Override
+	public void perspectiveOpened(IWorkbenchPage page, IPerspectiveDescriptor perspective) {
+	}
+
+	@Override
+	public void perspectiveSavedAs(IWorkbenchPage page, IPerspectiveDescriptor oldPerspective,
+			IPerspectiveDescriptor newPerspective) {
+	}
+
+	@Override
+	public void update(java.util.Observable o, Object arg) {
+		if (o == RabbitCore.getDefault().getIdleDetector() && isEnabled()) {
+			checkState(RabbitCore.getDefault().getIdleDetector().isUserActive());
+		}
+	}
+
+	@Override
+	public void windowActivated(IWorkbenchWindow window) {
+		// Starts tracking if there is an active perspective in this window.
+		tryStartSession(window);
+	}
+
+	@Override
+	public void windowClosed(IWorkbenchWindow window) {
+		window.removePerspectiveListener(this);
+		// Stops tracking if there is an active perspective in this window.
+		tryEndSession();
+	}
+
+	@Override
+	public void windowDeactivated(IWorkbenchWindow window) {
+		// Stops tracking if there is an active perspective in this window.
+		tryEndSession();
+	}
+
+	@Override
+	public void windowOpened(IWorkbenchWindow window) {
+		window.addPerspectiveListener(this);
+		// Starts tracking if there is an active perspective in this window.
+		tryStartSession(window);
 	}
 
 	@Override
@@ -90,13 +179,6 @@ public class PerspectiveTracker extends AbstractTracker<PerspectiveEvent>
 		});
 	}
 
-	@Override
-	public void update(java.util.Observable o, Object arg) {
-		if (o == RabbitCore.getDefault().getIdleDetector() && isEnabled()) {
-			checkState(RabbitCore.getDefault().getIdleDetector().isUserActive());
-		}
-	}
-
 	/**
 	 * Gets all currently opened workbench windows.
 	 * 
@@ -148,70 +230,6 @@ public class PerspectiveTracker extends AbstractTracker<PerspectiveEvent>
 		if (page.getPerspective() != null) {
 			startSession(page.getPerspective());
 		}
-	}
-
-	@Override
-	public void perspectiveActivated(IWorkbenchPage page, IPerspectiveDescriptor perspective) {
-		startSession(perspective);
-		/*
-		 * Note: perspectiveActivated is also called when a new perspective is
-		 * opened and become active.
-		 */
-	}
-
-	@Override
-	public void perspectiveDeactivated(IWorkbenchPage page, IPerspectiveDescriptor perspective) {
-		tryEndSession();
-		/*
-		 * Note: perspectiveDeactivated is also called when an active
-		 * perspective is closed.
-		 */
-	}
-
-	@Override
-	public void windowActivated(IWorkbenchWindow window) {
-		// Starts tracking if there is an active perspective in this window.
-		tryStartSession(window);
-	}
-
-	@Override
-	public void windowDeactivated(IWorkbenchWindow window) {
-		// Stops tracking if there is an active perspective in this window.
-		tryEndSession();
-	}
-
-	@Override
-	public void windowOpened(IWorkbenchWindow window) {
-		window.addPerspectiveListener(this);
-		// Starts tracking if there is an active perspective in this window.
-		tryStartSession(window);
-	}
-
-	@Override
-	public void windowClosed(IWorkbenchWindow window) {
-		window.removePerspectiveListener(this);
-		// Stops tracking if there is an active perspective in this window.
-		tryEndSession();
-	}
-
-	@Override
-	public void perspectiveChanged(IWorkbenchPage page, IPerspectiveDescriptor perspective, String changeId) {
-	}
-
-	@Override
-	public void perspectiveClosed(IWorkbenchPage page, IPerspectiveDescriptor perspective) {
-	}
-
-	@Override
-	public void perspectiveOpened(IWorkbenchPage page, IPerspectiveDescriptor perspective) {
-	}
-
-	@Override
-	public void perspectiveSavedAs(IWorkbenchPage page, IPerspectiveDescriptor oldPerspective, IPerspectiveDescriptor newPerspective) {
-	}
-
-	@Override
-	public void perspectiveChanged(IWorkbenchPage page, IPerspectiveDescriptor perspective, IWorkbenchPartReference partRef, String changeId) {
 	}
 
 }

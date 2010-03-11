@@ -1,3 +1,18 @@
+/*
+ * Copyright 2010 The Rabbit Eclipse Plug-in Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package rabbit.core.internal.trackers;
 
 import java.util.Calendar;
@@ -29,7 +44,6 @@ public abstract class AbstractPartTracker<E> extends AbstractTracker<E>
 
 	private long start;
 	private Map<IWorkbenchPart, Boolean> partStates;
-	// private IWorkbenchPart currentActivePart;
 
 	private Runnable idleDetectorCode;
 
@@ -66,19 +80,80 @@ public abstract class AbstractPartTracker<E> extends AbstractTracker<E>
 	}
 
 	@Override
+	public void partActivated(IWorkbenchPart part) {
+		startSession(part);
+	}
+
+	@Override
+	public void partBroughtToTop(IWorkbenchPart part) {
+	}
+
+	@Override
+	public void partClosed(IWorkbenchPart part) {
+	}
+
+	@Override
+	public void partDeactivated(IWorkbenchPart part) {
+		endSession(part);
+	}
+
+	@Override
+	public void partOpened(IWorkbenchPart p) {
+	}
+
+	@Override
+	public void update(Observable o, Object arg) {
+		if (o == RabbitCore.getDefault().getIdleDetector()) {
+			PlatformUI.getWorkbench().getDisplay().syncExec(idleDetectorCode);
+		}
+	}
+
+	@Override
+	public void windowActivated(IWorkbenchWindow window) {
+		if (window.getPartService().getActivePart() != null) {
+			startSession(window.getPartService().getActivePart());
+		}
+	}
+
+	@Override
+	public void windowClosed(IWorkbenchWindow window) {
+		window.getPartService().removePartListener(this);
+		if (window.getPartService().getActivePart() != null) {
+			endSession(window.getPartService().getActivePart());
+		}
+	}
+
+	@Override
+	public void windowDeactivated(IWorkbenchWindow window) {
+		if (window.getPartService().getActivePart() != null) {
+			endSession(window.getPartService().getActivePart());
+		}
+	}
+
+	@Override
+	public void windowOpened(IWorkbenchWindow window) {
+		window.getPartService().addPartListener(this);
+		if (window.getPartService().getActivePart() != null) {
+			startSession(window.getPartService().getActivePart());
+		}
+	}
+
+	@Override
 	protected void doDisable() {
 		RabbitCore.getDefault().getIdleDetector().deleteObserver(this);
 		PlatformUI.getWorkbench().removeWindowListener(this);
-		for (IPartService s : getPartServices())
+		for (IPartService s : getPartServices()) {
 			s.removePartListener(this);
+		}
 
 		final IWorkbench wb = PlatformUI.getWorkbench();
 		wb.getDisplay().syncExec(new Runnable() {
 			@Override
 			public void run() {
 				IWorkbenchWindow win = wb.getActiveWorkbenchWindow();
-				if (win != null && win.getPartService().getActivePart() != null)
+				if (win != null && win.getPartService().getActivePart() != null) {
 					endSession(win.getPartService().getActivePart());
+				}
 			}
 		});
 	}
@@ -87,8 +162,9 @@ public abstract class AbstractPartTracker<E> extends AbstractTracker<E>
 	protected void doEnable() {
 		RabbitCore.getDefault().getIdleDetector().addObserver(this);
 		PlatformUI.getWorkbench().addWindowListener(this);
-		for (IPartService s : getPartServices())
+		for (IPartService s : getPartServices()) {
 			s.addPartListener(this);
+		}
 
 		final IWorkbench wb = PlatformUI.getWorkbench();
 		wb.getDisplay().syncExec(new Runnable() {
@@ -100,50 +176,6 @@ public abstract class AbstractPartTracker<E> extends AbstractTracker<E>
 				}
 			}
 		});
-	}
-
-	@Override
-	public void update(Observable o, Object arg) {
-		if (o == RabbitCore.getDefault().getIdleDetector()) {
-			PlatformUI.getWorkbench().getDisplay().syncExec(idleDetectorCode);
-		}
-	}
-
-	/**
-	 * Gets all the {@link IPartService} from the currently opened windows.
-	 * 
-	 * @return A Set of IPartService.
-	 */
-	private Set<IPartService> getPartServices() {
-		Set<IPartService> result = new HashSet<IPartService>();
-		IWorkbenchWindow[] ws = PlatformUI.getWorkbench().getWorkbenchWindows();
-		for (IWorkbenchWindow w : ws) {
-			result.add(w.getPartService());
-		}
-		return result;
-	}
-
-	@Override
-	public void partActivated(IWorkbenchPart part) {
-		startSession(part);
-		// System.out.println("act : " + part);
-	}
-
-	@Override
-	public void partDeactivated(IWorkbenchPart part) {
-		endSession(part);
-		// System.out.println("deact : " + part);
-	}
-
-	/**
-	 * Starts a new session.
-	 */
-	protected void startSession(IWorkbenchPart part) {
-		// if (currentActivePart != null) {
-		// partStates.put(currentActivePart, Boolean.FALSE);
-		// }
-		start = System.currentTimeMillis();
-		partStates.put(part, Boolean.TRUE);
 	}
 
 	/**
@@ -159,13 +191,23 @@ public abstract class AbstractPartTracker<E> extends AbstractTracker<E>
 		}
 		partStates.put(part, Boolean.FALSE);
 		long duration = System.currentTimeMillis() - start;
-		if (duration <= 0)
+		if (duration <= 0) {
 			return;
+		}
 
 		start = Long.MAX_VALUE;
 		E event = tryCreateEvent(Calendar.getInstance(), duration, part);
-		if (event != null)
+		if (event != null) {
 			addData(event);
+		}
+	}
+
+	/**
+	 * Starts a new session.
+	 */
+	protected void startSession(IWorkbenchPart part) {
+		start = System.currentTimeMillis();
+		partStates.put(part, Boolean.TRUE);
 	}
 
 	/**
@@ -181,48 +223,17 @@ public abstract class AbstractPartTracker<E> extends AbstractTracker<E>
 	 */
 	protected abstract E tryCreateEvent(Calendar time, long duration, IWorkbenchPart p);
 
-	@Override
-	public void windowActivated(IWorkbenchWindow window) {
-		// System.out.println("act : " + window);
-		if (window.getPartService().getActivePart() != null)
-			startSession(window.getPartService().getActivePart());
-	}
-
-	@Override
-	public void windowClosed(IWorkbenchWindow window) {
-		// System.out.println("clo : " + window);
-		window.getPartService().removePartListener(this);
-		if (window.getPartService().getActivePart() != null)
-			endSession(window.getPartService().getActivePart());
-	}
-
-	@Override
-	public void windowDeactivated(IWorkbenchWindow window) {
-		// System.out.println("deact : " + window);
-		if (window.getPartService().getActivePart() != null)
-			endSession(window.getPartService().getActivePart());
-	}
-
-	@Override
-	public void windowOpened(IWorkbenchWindow window) {
-		// System.out.println("opn : " + window);
-		window.getPartService().addPartListener(this);
-		if (window.getPartService().getActivePart() != null)
-			startSession(window.getPartService().getActivePart());
-	}
-
-	@Override
-	public void partBroughtToTop(IWorkbenchPart part) {
-		// System.out.println("br : " + part);
-	}
-
-	@Override
-	public void partClosed(IWorkbenchPart part) {
-		// System.out.println("clo : " + part);
-	}
-
-	@Override
-	public void partOpened(IWorkbenchPart p) {
-		// System.out.println("opn : " + p);
+	/**
+	 * Gets all the {@link IPartService} from the currently opened windows.
+	 * 
+	 * @return A Set of IPartService.
+	 */
+	private Set<IPartService> getPartServices() {
+		Set<IPartService> result = new HashSet<IPartService>();
+		IWorkbenchWindow[] ws = PlatformUI.getWorkbench().getWorkbenchWindows();
+		for (IWorkbenchWindow w : ws) {
+			result.add(w.getPartService());
+		}
+		return result;
 	}
 }

@@ -1,3 +1,18 @@
+/*
+ * Copyright 2010 The Rabbit Eclipse Plug-in Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package rabbit.core.internal.storage.xml;
 
 import java.io.File;
@@ -31,12 +46,13 @@ import rabbit.core.RabbitCore;
 import rabbit.core.internal.storage.xml.schema.resources.ObjectFactory;
 import rabbit.core.internal.storage.xml.schema.resources.ResourceListType;
 import rabbit.core.internal.storage.xml.schema.resources.ResourceType;
-import rabbit.core.storage.IResourceManager;
+import rabbit.core.storage.IResourceMapper;
 
 /**
- * An XML {@link IResourceManager}.
+ * An XML {@link IResourceMapper}.
  */
-public enum XmlResourceManager implements IResourceManager, IResourceChangeListener, IWorkbenchListener {
+public enum XmlResourceManager implements IResourceMapper, IResourceChangeListener,
+		IWorkbenchListener {
 
 	INSTANCE;
 
@@ -50,7 +66,7 @@ public enum XmlResourceManager implements IResourceManager, IResourceChangeListe
 	private Map<String, Set<String>> resources;
 	/** Set of all the ids in the {@link #resources} field. */
 	private Set<String> resourceIds;
-	
+
 	/** Map of file path to ids, from other workspaces, not for manipulation. */
 	private Map<String, Set<String>> externalResources;
 
@@ -110,105 +126,6 @@ public enum XmlResourceManager implements IResourceManager, IResourceChangeListe
 		externalResources = getExternalResources();
 	}
 
-	private ResourceListType convert(Map<String, Set<String>> v) {
-		ResourceListType resources = objectFactory.createResourceListType();
-		for (Map.Entry<String, Set<String>> entry : v.entrySet()) {
-			ResourceType type = objectFactory.createResourceType();
-			type.setPath(entry.getKey());
-			type.getResourceId().addAll(entry.getValue());
-			resources.getResource().add(type);
-		}
-		return resources;
-	}
-
-	private Map<String, Set<String>> convert(ResourceListType v) {
-		Map<String, Set<String>> data = new TreeMap<String, Set<String>>();
-		for (ResourceType type : v.getResource()) {
-			Set<String> ids = new HashSet<String>(type.getResourceId().size() * 2);
-			ids.addAll(type.getResourceId());
-			data.put(type.getPath(), ids);
-		}
-		return data;
-	}
-
-	/**
-	 * Generates a random id.
-	 * 
-	 * @return A random id.
-	 */
-	private String generateId() {
-		return System.currentTimeMillis() + "" + random.nextInt();
-	}
-
-	/**
-	 * Gets the resource data of the current workspace.
-	 * @return The resource data of the current workspace
-	 */
-	private ResourceListType getData() {
-		ResourceListType database = null;
-		try {
-			if (getDataFile().exists()) {
-				database = unmarshal(ResourceListType.class, getDataFile());
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		} finally {
-			if (database == null) {
-				database = objectFactory.createResourceListType();
-			}
-		}
-		return database;
-	}
-
-	/**
-	 * Gets the data from the given file.
-	 * @param dataFile The file containing the data.
-	 * @return A {@link ResourceListType} with the data. Returns an empty one
-	 * if no data is in the file, or exceptions occur while processing the file.
-	 */
-	private ResourceListType getData(File dataFile) {
-		ResourceListType database = null;
-		try {
-			if (dataFile.exists()) {
-				database = unmarshal(ResourceListType.class, dataFile);
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		} finally {
-			if (database == null) {
-				database = objectFactory.createResourceListType();
-			}
-		}
-		return database;
-	}
-
-	/**
-	 * Gets the data file belongs to the current workspace.
-	 * @return The data file of the current workspace.
-	 */
-	private File getDataFile() {
-		return getDataFile(RabbitCore.getDefault().getStoragePath());
-	}
-
-	/**
-	 * Gets the data file from the given location. Note that the data file
-	 * may not physically exists.
-	 * 
-	 * @param storageLocation The folder location.
-	 * @return The data file.
-	 */
-	private File getDataFile(IPath storageLocation) {
-		File file = storageLocation.append("ResourceDB")
-				.append("Resources").addFileExtension("xml").toFile();
-
-		if (!file.getParentFile().exists()) {
-			if (!file.getParentFile().mkdirs()) {
-				System.err.println(getClass() + ": Cannot create storage location.");
-			}
-		}
-		return file;
-	}
-
 	@Override
 	public String getExternalPath(String fileId) {
 		for (Entry<String, Set<String>> entry : externalResources.entrySet()) {
@@ -219,33 +136,6 @@ public enum XmlResourceManager implements IResourceManager, IResourceChangeListe
 			}
 		}
 		return null;
-	}
-
-	/**
-	 * Gets the file path to ids mapping of other workspaces.
-	 * @return An unmodifiable map containing file path to ids.
-	 */
-	private Map<String, Set<String>> getExternalResources() {
-		Map<String, Set<String>> result = new HashMap<String, Set<String>>();
-		IPath currentPath = RabbitCore.getDefault().getStoragePath();
-		IPath[] paths = RabbitCore.getDefault().getStoragePaths();
-		for (IPath path : paths) {
-			if (path.toOSString().equals(currentPath.toOSString())) {
-				continue;
-			}
-			File file = getDataFile(path);
-
-			for (Entry<String, Set<String>> entry : convert(getData(file)).entrySet()) {
-				Set<String> ids = result.get(entry.getKey());
-				if (ids == null) {
-					ids = new HashSet<String>();
-					result.put(entry.getKey(), ids);
-				}
-				ids.addAll(entry.getValue());
-			}
-		}
-
-		return Collections.unmodifiableMap(result);
 	}
 
 	@Override
@@ -291,10 +181,6 @@ public enum XmlResourceManager implements IResourceManager, IResourceChangeListe
 		return id;
 	}
 
-	private void marshal(JAXBElement<?> e, File f) throws JAXBException {
-		mar.marshal(e, f);
-	}
-
 	@Override
 	public void postShutdown(IWorkbench workbench) {
 		write();
@@ -318,12 +204,6 @@ public enum XmlResourceManager implements IResourceManager, IResourceChangeListe
 		}
 	}
 
-	private <T> T unmarshal(Class<T> type, File f) throws JAXBException {
-		@SuppressWarnings("unchecked")
-		JAXBElement<T> doc = (JAXBElement<T>) unmar.unmarshal(f);
-		return doc.getValue();
-	}
-
 	/**
 	 * Saves the current data to disk. Same as {@link #write(false)}.
 	 */
@@ -337,10 +217,156 @@ public enum XmlResourceManager implements IResourceManager, IResourceChangeListe
 
 	/**
 	 * Saves the current data to disk.
-	 * @param update True to update the references to external resources, false otherwise.
+	 * 
+	 * @param update
+	 *            True to update the references to external resources, false
+	 *            otherwise.
 	 */
 	public void write(boolean update) {
 		write();
 		externalResources = getExternalResources();
+	}
+
+	private ResourceListType convert(Map<String, Set<String>> v) {
+		ResourceListType resources = objectFactory.createResourceListType();
+		for (Map.Entry<String, Set<String>> entry : v.entrySet()) {
+			ResourceType type = objectFactory.createResourceType();
+			type.setPath(entry.getKey());
+			type.getResourceId().addAll(entry.getValue());
+			resources.getResource().add(type);
+		}
+		return resources;
+	}
+
+	private Map<String, Set<String>> convert(ResourceListType v) {
+		Map<String, Set<String>> data = new TreeMap<String, Set<String>>();
+		for (ResourceType type : v.getResource()) {
+			Set<String> ids = new HashSet<String>(type.getResourceId().size() * 2);
+			ids.addAll(type.getResourceId());
+			data.put(type.getPath(), ids);
+		}
+		return data;
+	}
+
+	/**
+	 * Generates a random id.
+	 * 
+	 * @return A random id.
+	 */
+	private String generateId() {
+		return System.currentTimeMillis() + "" + random.nextInt();
+	}
+
+	/**
+	 * Gets the resource data of the current workspace.
+	 * 
+	 * @return The resource data of the current workspace
+	 */
+	private ResourceListType getData() {
+		ResourceListType database = null;
+		try {
+			if (getDataFile().exists()) {
+				database = unmarshal(ResourceListType.class, getDataFile());
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			if (database == null) {
+				database = objectFactory.createResourceListType();
+			}
+		}
+		return database;
+	}
+
+	/**
+	 * Gets the data from the given file.
+	 * 
+	 * @param dataFile
+	 *            The file containing the data.
+	 * @return A {@link ResourceListType} with the data. Returns an empty one if
+	 *         no data is in the file, or exceptions occur while processing the
+	 *         file.
+	 */
+	private ResourceListType getData(File dataFile) {
+		ResourceListType database = null;
+		try {
+			if (dataFile.exists()) {
+				database = unmarshal(ResourceListType.class, dataFile);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			if (database == null) {
+				database = objectFactory.createResourceListType();
+			}
+		}
+		return database;
+	}
+
+	/**
+	 * Gets the data file belongs to the current workspace.
+	 * 
+	 * @return The data file of the current workspace.
+	 */
+	private File getDataFile() {
+		return getDataFile(RabbitCore.getDefault().getStoragePath());
+	}
+
+	/**
+	 * Gets the data file from the given location. Note that the data file may
+	 * not physically exists.
+	 * 
+	 * @param storageLocation
+	 *            The folder location.
+	 * @return The data file.
+	 */
+	private File getDataFile(IPath storageLocation) {
+		File file = storageLocation.append("ResourceDB")
+				.append("Resources").addFileExtension("xml").toFile();
+
+		if (!file.getParentFile().exists()) {
+			if (!file.getParentFile().mkdirs()) {
+				System.err.println(getClass() + ": Cannot create storage location.");
+			}
+		}
+		return file;
+	}
+
+	/**
+	 * Gets the file path to ids mapping of other workspaces.
+	 * 
+	 * @return An unmodifiable map containing file path to ids.
+	 */
+	private Map<String, Set<String>> getExternalResources() {
+		Map<String, Set<String>> result = new HashMap<String, Set<String>>();
+		IPath currentPath = RabbitCore.getDefault().getStoragePath();
+		IPath[] paths = RabbitCore.getDefault().getStoragePaths();
+		for (IPath path : paths) {
+			if (path.toOSString().equals(currentPath.toOSString())) {
+				continue;
+			}
+			File file = getDataFile(path);
+
+			for (Entry<String, Set<String>> entry : convert(getData(file)).entrySet()) {
+				Set<String> ids = result.get(entry.getKey());
+				if (ids == null) {
+					ids = new HashSet<String>();
+					result.put(entry.getKey(), ids);
+				}
+				ids.addAll(entry.getValue());
+			}
+		}
+
+		return Collections.unmodifiableMap(result);
+	}
+
+	private void marshal(JAXBElement<?> e, File f) throws JAXBException {
+		mar.marshal(e, f);
+	}
+
+	private <T> T unmarshal(Class<T> type, File f) throws JAXBException {
+		@SuppressWarnings("unchecked")
+		JAXBElement<T> doc = (JAXBElement<T>) unmar.unmarshal(f);
+		return doc.getValue();
 	}
 }

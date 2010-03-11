@@ -1,4 +1,21 @@
+/*
+ * Copyright 2010 The Rabbit Eclipse Plug-in Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package rabbit.core.storage.xml;
+
+import static rabbit.core.internal.storage.xml.DatatypeConverter.toXMLGregorianCalendarDate;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
@@ -17,20 +34,20 @@ import rabbit.core.internal.storage.xml.schema.events.EventListType;
 import rabbit.core.internal.storage.xml.schema.events.ObjectFactory;
 import rabbit.core.internal.storage.xml.schema.events.PerspectiveEventListType;
 import rabbit.core.internal.storage.xml.schema.events.PerspectiveEventType;
-import static rabbit.core.internal.storage.xml.DatatypeConverter.toXMLGregorianCalendarDate;
 
 /**
  * Test for {@link SessionDataAccessor}
  */
 public class SessionDataAccessorTest {
 
-	private ObjectFactory objectFactory = new ObjectFactory();
-	private SessionDataAccessor accessor = new SessionDataAccessor();
-
 	@BeforeClass
 	public static void setUpBeforeClass() {
 		TestUtil.setUpPathForTesting();
 	}
+
+	private ObjectFactory objectFactory = new ObjectFactory();
+
+	private SessionDataAccessor accessor = new SessionDataAccessor();
 
 	@Test
 	public void testGetData() {
@@ -73,8 +90,10 @@ public class SessionDataAccessorTest {
 		DataStore.PERSPECTIVE_STORE.write(events, f);
 		Map<String, Long> data = accessor.getData(tmp, tmp);
 		Assert.assertEquals(1, data.size());
-		Assert.assertEquals(new SimpleDateFormat(SessionDataAccessor.DATE_FORMAT).format(tmp.getTime()), data.entrySet().iterator().next().getKey());
-		Assert.assertEquals(count1 + count2, data.entrySet().iterator().next().getValue().longValue());
+		Assert.assertEquals(new SimpleDateFormat(SessionDataAccessor.DATE_FORMAT).format(tmp
+				.getTime()), data.entrySet().iterator().next().getKey());
+		Assert.assertEquals(count1 + count2, data.entrySet().iterator().next().getValue()
+				.longValue());
 	}
 
 	/**
@@ -120,7 +139,9 @@ public class SessionDataAccessorTest {
 		DataStore.PERSPECTIVE_STORE.write(events, f);
 		Map<String, Long> data = accessor.getData(date, date);
 		Assert.assertEquals(1, data.size());
-		Assert.assertEquals(new SimpleDateFormat(SessionDataAccessor.DATE_FORMAT).format(date.getTime()), data.entrySet().iterator().next().getKey());
-		Assert.assertEquals(count1 + count2, data.entrySet().iterator().next().getValue().longValue());
+		Assert.assertEquals(new SimpleDateFormat(SessionDataAccessor.DATE_FORMAT).format(date
+				.getTime()), data.entrySet().iterator().next().getKey());
+		Assert.assertEquals(count1 + count2, data.entrySet().iterator().next().getValue()
+				.longValue());
 	}
 }

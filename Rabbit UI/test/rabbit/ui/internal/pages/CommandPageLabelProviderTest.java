@@ -1,3 +1,18 @@
+/*
+ * Copyright 2010 The Rabbit Eclipse Plug-in Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package rabbit.ui.internal.pages;
 
 import static org.junit.Assert.assertEquals;
@@ -28,6 +43,11 @@ public class CommandPageLabelProviderTest {
 	private static Command definedCommand;
 	private static Command undefinedCommand;
 
+	@AfterClass
+	public static void afterClass() {
+		shell.dispose();
+	}
+
 	@BeforeClass
 	public static void beforeClass() {
 		shell = new Shell(PlatformUI.getWorkbench().getDisplay());
@@ -38,9 +58,24 @@ public class CommandPageLabelProviderTest {
 		undefinedCommand = getCommandService().getCommand(System.currentTimeMillis() + "");
 	}
 
-	@AfterClass
-	public static void afterClass() {
-		shell.dispose();
+	private static ICommandService getCommandService() {
+		return (ICommandService) PlatformUI.getWorkbench().getService(ICommandService.class);
+	}
+
+	@Test
+	public void testGetBackground() {
+		assertNull(provider.getBackground(definedCommand));
+		assertNull(provider.getBackground(undefinedCommand));
+	}
+
+	@Test
+	public void testGetColumnImage() {
+		assertNull(provider.getColumnImage(definedCommand, 0));
+		assertNull(provider.getColumnImage(definedCommand, 1));
+		assertNull(provider.getColumnImage(definedCommand, 2));
+		assertNull(provider.getColumnImage(undefinedCommand, 0));
+		assertNull(provider.getColumnImage(undefinedCommand, 1));
+		assertNull(provider.getColumnImage(undefinedCommand, 2));
 	}
 
 	@Test
@@ -65,25 +100,10 @@ public class CommandPageLabelProviderTest {
 	}
 
 	@Test
-	public void testGetColumnImage() {
-		assertNull(provider.getColumnImage(definedCommand, 0));
-		assertNull(provider.getColumnImage(definedCommand, 1));
-		assertNull(provider.getColumnImage(definedCommand, 2));
-		assertNull(provider.getColumnImage(undefinedCommand, 0));
-		assertNull(provider.getColumnImage(undefinedCommand, 1));
-		assertNull(provider.getColumnImage(undefinedCommand, 2));
-	}
-
-	@Test
 	public void testGetForeground() {
 		assertNull(provider.getForeground(definedCommand));
-		assertEquals(Display.getDefault().getSystemColor(SWT.COLOR_DARK_GRAY), provider.getForeground(undefinedCommand));
-	}
-
-	@Test
-	public void testGetBackground() {
-		assertNull(provider.getBackground(definedCommand));
-		assertNull(provider.getBackground(undefinedCommand));
+		assertEquals(Display.getDefault().getSystemColor(SWT.COLOR_DARK_GRAY), provider
+				.getForeground(undefinedCommand));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -91,9 +111,5 @@ public class CommandPageLabelProviderTest {
 		Field field = CommandPage.class.getDeclaredField("dataMapping");
 		field.setAccessible(true);
 		return (Map<Command, Long>) field.get(page);
-	}
-
-	private static ICommandService getCommandService() {
-		return (ICommandService) PlatformUI.getWorkbench().getService(ICommandService.class);
 	}
 }

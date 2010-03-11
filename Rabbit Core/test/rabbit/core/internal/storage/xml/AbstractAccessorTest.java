@@ -1,3 +1,18 @@
+/*
+ * Copyright 2010 The Rabbit Eclipse Plug-in Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package rabbit.core.internal.storage.xml;
 
 import static org.junit.Assert.assertNotNull;
@@ -23,17 +38,22 @@ import rabbit.core.internal.storage.xml.schema.events.ObjectFactory;
  */
 public abstract class AbstractAccessorTest<T, S extends EventGroupType> {
 
-	protected AbstractAccessor<T, S> accessor = create();
-	protected ObjectFactory objectFactory = new ObjectFactory();
-
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 		TestUtil.setUpPathForTesting();
 	}
 
+	protected AbstractAccessor<T, S> accessor = create();
+
+	protected ObjectFactory objectFactory = new ObjectFactory();
+
 	@Test
-	public void testGetDataStore() {
-		assertNotNull(accessor.getDataStore());
+	public void testGetCategories() {
+		EventListType eventList = objectFactory.createEventListType();
+		S list = createListType();
+		accessor.getCategories(eventList).add(list);
+		accessor.getXmlTypes(list).add(createXmlType());
+		Assert.assertEquals(1, accessor.getCategories(eventList).size());
 	}
 
 	@Test
@@ -73,10 +93,12 @@ public abstract class AbstractAccessorTest<T, S extends EventGroupType> {
 
 		File f = accessor.getDataStore().getDataFile(tmp);
 		accessor.getDataStore().write(events, f);
-		Map<String, Long> data = accessor.getData(start.toGregorianCalendar(), end.toGregorianCalendar());
+		Map<String, Long> data = accessor.getData(start.toGregorianCalendar(), end
+				.toGregorianCalendar());
 		Assert.assertEquals(1, data.size());
 		Assert.assertEquals(id, data.entrySet().iterator().next().getKey());
-		Assert.assertEquals(count1 + count2, data.entrySet().iterator().next().getValue().longValue());
+		Assert.assertEquals(count1 + count2, data.entrySet().iterator().next().getValue()
+				.longValue());
 	}
 
 	/**
@@ -119,29 +141,25 @@ public abstract class AbstractAccessorTest<T, S extends EventGroupType> {
 
 		File f = accessor.getDataStore().getDataFile(date);
 		accessor.getDataStore().write(events, f);
-		Map<String, Long> data = accessor.getData(start.toGregorianCalendar(), end.toGregorianCalendar());
+		Map<String, Long> data = accessor.getData(start.toGregorianCalendar(), end
+				.toGregorianCalendar());
 		Assert.assertEquals(1, data.size());
 		Assert.assertEquals(id, data.entrySet().iterator().next().getKey());
-		Assert.assertEquals(count1 + count2, data.entrySet().iterator().next().getValue().longValue());
+		Assert.assertEquals(count1 + count2, data.entrySet().iterator().next().getValue()
+				.longValue());
 	}
 
 	@Test
-	public void testGetXmlTypes() {
-		int size = 5;
-		S list = createListType();
-		for (int i = 0; i < size; i++) {
-			accessor.getXmlTypes(list).add(createXmlType());
-		}
-		Assert.assertEquals(size, accessor.getXmlTypes(list).size());
+	public void testGetDataStore() {
+		assertNotNull(accessor.getDataStore());
 	}
 
 	@Test
-	public void testGetCategories() {
-		EventListType eventList = objectFactory.createEventListType();
-		S list = createListType();
-		accessor.getCategories(eventList).add(list);
-		accessor.getXmlTypes(list).add(createXmlType());
-		Assert.assertEquals(1, accessor.getCategories(eventList).size());
+	public void testGetId() {
+		String id = "2983jncjdkf";
+		T type = createXmlType();
+		setId(type, id);
+		Assert.assertEquals(id, accessor.getId(type));
 	}
 
 	@Test
@@ -153,11 +171,13 @@ public abstract class AbstractAccessorTest<T, S extends EventGroupType> {
 	}
 
 	@Test
-	public void testGetId() {
-		String id = "2983jncjdkf";
-		T type = createXmlType();
-		setId(type, id);
-		Assert.assertEquals(id, accessor.getId(type));
+	public void testGetXmlTypes() {
+		int size = 5;
+		S list = createListType();
+		for (int i = 0; i < size; i++) {
+			accessor.getXmlTypes(list).add(createXmlType());
+		}
+		Assert.assertEquals(size, accessor.getXmlTypes(list).size());
 	}
 
 	/** Creates a subject for testing. */
@@ -171,14 +191,11 @@ public abstract class AbstractAccessorTest<T, S extends EventGroupType> {
 	protected abstract S createListType();
 
 	/**
-	 * Sets the usage of the type.
+	 * Creates a new XML type.
 	 * 
-	 * @param type
-	 *            The type.
-	 * @param usage
-	 *            The usage.
+	 * @return A new XML type.
 	 */
-	protected abstract void setUsage(T type, long usage);
+	protected abstract T createXmlType();
 
 	/**
 	 * Sets the id of the type.
@@ -191,9 +208,12 @@ public abstract class AbstractAccessorTest<T, S extends EventGroupType> {
 	protected abstract void setId(T type, String id);
 
 	/**
-	 * Creates a new XML type.
+	 * Sets the usage of the type.
 	 * 
-	 * @return A new XML type.
+	 * @param type
+	 *            The type.
+	 * @param usage
+	 *            The usage.
 	 */
-	protected abstract T createXmlType();
+	protected abstract void setUsage(T type, long usage);
 }
