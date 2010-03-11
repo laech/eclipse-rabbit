@@ -296,7 +296,11 @@ public class ResourcePage extends AbstractTreeViewerPage {
 	public void update(DisplayPreference p) {
 		Object[] elements = getViewer().getExpandedElements();
 		doUpdate(accessor.getData(p.getStartDate(), p.getEndDate()));
-		getViewer().setExpandedElements(elements);
+		try {
+			getViewer().setExpandedElements(elements);
+		} catch (IllegalArgumentException e) {
+			// Do nothing.
+		}
 	}
 
 	@Override
