@@ -7,23 +7,19 @@ Bundle-Activator: rabbit.core.RabbitCore
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.core.resources,
  org.eclipse.ui,
- org.eclipse.ui.ide
+ org.eclipse.ui.ide,
+ org.junit4;resolution:=optional,
+ org.eclipse.swtbot.eclipse.finder;resolution:=optional,
+ org.eclipse.swtbot.junit4_x;resolution:=optional,
+ org.eclipse.swtbot.swt.finder;resolution:=optional
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: rabbit.core,
  rabbit.core.events;uses:="org.eclipse.ui",
- rabbit.core.internal;x-friends:="rabbit.core.test",
- rabbit.core.internal.storage.xml;x-friends:="rabbit.core.test";
-  uses:="rabbit.core.internal.storage.xml.schema.events,
-   org.eclipse.ui,
-   rabbit.core.events",
- rabbit.core.internal.storage.xml.schema.events;x-friends:="rabbit.core.test";
-  uses:="javax.xml.bind,
-   javax.xml.datatype",
- rabbit.core.internal.storage.xml.schema.resources;x-friends:="rabbit.core.test";uses:="javax.xml.bind",
- rabbit.core.internal.trackers;x-friends:="rabbit.core.test";
-  uses:="org.eclipse.ui,
-   org.eclipse.core.resources,
-   rabbit.core.events",
+ rabbit.core.internal;x-internal:=true,
+ rabbit.core.internal.storage.xml;x-internal:=true;uses:="rabbit.core.internal.storage.xml.schema.events,org.eclipse.ui,rabbit.core.events",
+ rabbit.core.internal.storage.xml.schema.events;x-internal:=true;uses:="javax.xml.bind,javax.xml.datatype",
+ rabbit.core.internal.storage.xml.schema.resources;x-internal:=true;uses:="javax.xml.bind",
+ rabbit.core.internal.trackers;x-internal:=true;uses:="org.eclipse.ui,org.eclipse.core.resources,rabbit.core.events",
  rabbit.core.storage,
  rabbit.core.storage.xml;uses:="rabbit.core.internal.storage.xml.schema.events,rabbit.core.internal.storage.xml"
 Bundle-ActivationPolicy: lazy
