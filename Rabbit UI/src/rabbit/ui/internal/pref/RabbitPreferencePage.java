@@ -32,7 +32,6 @@ import rabbit.ui.internal.RabbitUI;
 
 public class RabbitPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
 
-	// private Button idleFeature;
 	private Spinner daySpinner;
 
 	public RabbitPreferencePage() {
@@ -52,10 +51,6 @@ public class RabbitPreferencePage extends PreferencePage implements IWorkbenchPr
 
 	@Override
 	public boolean performOk() {
-		// if (RabbitCore.getDefault().isIdleDetectionEnabled() !=
-		// idleFeature.getSelection()) {
-		// RabbitCore.getDefault().setIdleDetectionEnabled(idleFeature.getSelection());
-		// }
 		if (RabbitUI.getDefault().getDefaultDisplayDatePeriod() != daySpinner.getSelection()) {
 			RabbitUI.getDefault().setDefaultDisplayDatePeriod(daySpinner.getSelection());
 		}
@@ -81,21 +76,15 @@ public class RabbitPreferencePage extends PreferencePage implements IWorkbenchPr
 			daySpinner.setMinimum(0);
 			daySpinner.setMaximum(9999);
 			daySpinner.setSelection(RabbitUI.getDefault().getDefaultDisplayDatePeriod());
+			daySpinner.setToolTipText("0 to display today's data only");
 			new Label(viewGroup, SWT.HORIZONTAL).setText(" days.");
 		}
-
-		// idleFeature = new Button(cmp, SWT.CHECK);
-		// idleFeature.setSelection(RabbitCore.getDefault().isIdleDetectionEnabled());
-		// idleFeature.setText("Enable idleness detection");
-		// idleFeature.setToolTipText(
-		// "Idleness detection helps to track more accurate data by taking user idleness into account");
 
 		return cmp;
 	}
 
 	@Override
 	protected void performDefaults() {
-		// idleFeature.setSelection(false);
 		daySpinner.setSelection(7);
 		super.performDefaults();
 	}

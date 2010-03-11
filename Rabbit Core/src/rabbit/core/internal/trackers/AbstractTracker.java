@@ -84,8 +84,8 @@ public abstract class AbstractTracker<T> implements ITracker<T> {
 	public void setEnabled(boolean enable) {
 		if (isEnabled() != enable) {
 			if (enable) {
-				doEnable();
 				flushData();
+				doEnable();
 			} else {
 				doDisable();
 				saveData();

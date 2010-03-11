@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
+import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 
 import org.eclipse.core.runtime.IPath;
@@ -48,7 +49,7 @@ public enum DataStore implements IDataStore {
 	/**
 	 * An object factory for creating XML object types.
 	 */
-	private static final ObjectFactory OBJECT_FACTORY = new ObjectFactory();
+	private final ObjectFactory objectFactory = new ObjectFactory();
 
 	private String id;
 
@@ -107,22 +108,31 @@ public enum DataStore implements IDataStore {
 	public EventListType read(File file) {
 		try {
 			if (file.exists()) {
-				return JaxbUtil.unmarshal(EventListType.class, file);
-			} else {
-				return OBJECT_FACTORY.createEventListType();
+				Object obj = JaxbUtil.unmarshal(file);
+				if (obj instanceof JAXBElement<?>) {
+					JAXBElement<?> element = (JAXBElement<?>) obj;
+					if (element.getValue() instanceof EventListType) {
+						return (EventListType) element.getValue();
+					}
+				}
 			}
 
 		} catch (JAXBException e) {
-			return OBJECT_FACTORY.createEventListType();
+			return objectFactory.createEventListType();
 		}
+		return objectFactory.createEventListType();
 	}
 
 	@Override
-	public void write(EventListType doc, File f) {
+	public boolean write(EventListType doc, File f) {
+		if (doc == null || f == null) {
+			throw new NullPointerException();
+		}
 		try {
-			JaxbUtil.marshal(OBJECT_FACTORY.createEvents(doc), f);
+			JaxbUtil.marshal(objectFactory.createEvents(doc), f);
+			return true;
 		} catch (JAXBException e) {
-			e.printStackTrace();
+			return false;
 		}
 	}
 

@@ -256,9 +256,7 @@ public class IdleDetectorTest {
 		TimeUnit.MILLISECONDS.sleep(idleInterval + (runDelay * 2));
 
 		for (int i = 0; i < 3; i++) {
-			bot.menu("Help").menu("About Eclipse Platform").click();
-			// bot.shell("About Eclipse Platform").activate();
-			bot.button("OK").click();
+			bot.activeEditor().toTextEditor().typeText("abc");
 		}
 
 		Assert.assertEquals(0, ob.inactiveCount);

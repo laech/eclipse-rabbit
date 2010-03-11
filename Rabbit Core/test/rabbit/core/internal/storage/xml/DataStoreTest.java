@@ -149,4 +149,14 @@ public class DataStoreTest {
 			System.err.println("File is not deleted.");
 		}
 	}
+
+	@Test(expected = NullPointerException.class)
+	public void testWrite_fileNull() {
+		store.write(new ObjectFactory().createEventListType(), null);
+	}
+
+	@Test(expected = NullPointerException.class)
+	public void testWrite_dataNull() {
+		store.write(null, new File("/"));
+	}
 }

@@ -164,16 +164,26 @@ public class XmlResourceManagerTest {
 				RabbitCore.STORAGE_LOCATION));
 		filePath = filePath.append(System.currentTimeMillis() + "");
 
-		Method getDataFile = XmlResourceManager.class.getDeclaredMethod("getDataFile", IPath.class);
+		Method getDataFile = XmlResourceManager.class.getDeclaredMethod(
+				"getDataFile", IPath.class);
 		getDataFile.setAccessible(true);
 		File dataFile = (File) getDataFile.invoke(manager, filePath);
 
-		Method marshal = XmlResourceManager.class.getDeclaredMethod("marshal", JAXBElement.class,
-				File.class);
+		Method marshal = XmlResourceManager.class.getDeclaredMethod(
+				"marshal", JAXBElement.class, File.class);
 		marshal.setAccessible(true);
 		marshal.invoke(manager, of.createResources(resources), dataFile);
+		
+		// Test not to update the external resource:
+		assertTrue(manager.write(false));
+		assertNull(manager.getExternalPath(id));
 
-		manager.write(true);
+		// Test to make sure write() == write(false):
+		assertTrue(manager.write());
+		assertNull(manager.getExternalPath(id));
+
+		// Test to update the external resource:
+		assertTrue(manager.write(true));
 		assertEquals(path, manager.getExternalPath(id));
 	}
 
@@ -404,7 +414,7 @@ public class XmlResourceManagerTest {
 		assertNull(manager.getId(path));
 		String id = manager.insert(path);
 
-		manager.write();
+		assertTrue(manager.write());
 
 		Method getData = XmlResourceManager.class.getDeclaredMethod("getData");
 		getData.setAccessible(true);
@@ -422,7 +432,7 @@ public class XmlResourceManagerTest {
 
 		getResourcesFiled().clear();
 		id = manager.insert(path);
-		manager.write();
+		assertTrue(manager.write());
 		resources = (ResourceListType) getData.invoke(manager);
 		for (ResourceType type : resources.getResource()) {
 			if (type.getPath().equals(path)) {

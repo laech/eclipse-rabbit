@@ -24,7 +24,6 @@ import org.junit.Test;
 import rabbit.core.internal.storage.xml.schema.events.EventListType;
 import rabbit.core.internal.storage.xml.schema.events.ObjectFactory;
 
-// TODO
 public class JaxbUtilTest {
 
 	private ObjectFactory objectFactory = new ObjectFactory();
@@ -49,6 +48,6 @@ public class JaxbUtilTest {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testUnmarshal_withFileNull() throws Exception {
-		JaxbUtil.unmarshal(Object.class, null);
+		JaxbUtil.unmarshal(null);
 	}
 }

@@ -223,15 +223,17 @@ public class RabbitCoreTest {
 
 	@Test
 	public void testStart() throws Exception {
+		RabbitCore rc = new RabbitCore();
+		rc.start(plugin.getBundle().getBundleContext());
 		// It's already started by now.
-		// Assert.assertTrue(plugin.isIdleDetectionEnabled() ==
-		// plugin.getIdleDetector().isRunning());
-		Assert.assertTrue(plugin.getIdleDetector().isRunning());
-		for (TrackerObject t : getTrackers(plugin)) {
-			Assert.assertTrue(t.getTracker().isEnabled());
-		}
+		Assert.assertTrue(rc.getIdleDetector().isRunning());
 		// Errors or may have loaded the wrong extension point:
-		Assert.assertFalse(getTrackers(plugin).isEmpty());
+		Assert.assertFalse(getTrackers(rc).isEmpty());
+		
+		for (TrackerObject t : getTrackers(rc)) {
+			Assert.assertTrue(t.getTracker().toString(), t.getTracker().isEnabled());
+		}
+		rc.stop(rc.getBundle().getBundleContext());
 	}
 
 	/**

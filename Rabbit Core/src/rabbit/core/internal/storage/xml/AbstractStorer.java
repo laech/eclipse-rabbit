@@ -24,6 +24,10 @@ import java.util.Set;
 
 import javax.xml.datatype.XMLGregorianCalendar;
 
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+
+import rabbit.core.RabbitCore;
 import rabbit.core.events.DiscreteEvent;
 import rabbit.core.internal.storage.xml.schema.events.EventGroupType;
 import rabbit.core.internal.storage.xml.schema.events.EventListType;
@@ -119,7 +123,10 @@ public abstract class AbstractStorer<E extends DiscreteEvent, T, S extends Event
 			}
 		}
 
-		getDataStore().write(events, f);
+		if (!getDataStore().write(events, f)) {
+			RabbitCore.getDefault().getLog().log(new Status(IStatus.ERROR, 
+					RabbitCore.PLUGIN_ID, "Unable to save data."));
+		}
 		data.clear();
 	}
 

@@ -396,6 +396,9 @@ public class ResourcePageTest extends AbstractTreeViewerPageTest {
 		for (Entry<String, Long> entry : data.entrySet()) {
 			String path = mapper.getPath(entry.getKey());
 			if (path == null) {
+				path = mapper.getExternalPath(entry.getKey());
+			}
+			if (path == null) {
 				continue;
 			}
 

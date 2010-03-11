@@ -74,9 +74,10 @@ public interface IDataStore {
 	 * 
 	 * @param f
 	 *            The file to read from.
-	 * @return The root of the document.
+	 * @return An {@link EventListType} object with data, or an empty one if the
+	 *         file does not contain one.
 	 */
-	EventListType read(File f);
+	 EventListType read(File f);
 
 	/**
 	 * Writes the given element to the file.
@@ -86,6 +87,6 @@ public interface IDataStore {
 	 * @param f
 	 *            The file.
 	 */
-	void write(EventListType doc, File f);
+	boolean write(EventListType doc, File f);
 
 }

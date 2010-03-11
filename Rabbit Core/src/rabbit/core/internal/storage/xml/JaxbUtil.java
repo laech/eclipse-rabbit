@@ -71,13 +71,9 @@ public class JaxbUtil {
 	/**
 	 * Unmarshals a file.
 	 * 
-	 * @param <T>
-	 *            The class type of the object to be unmarshaled.
-	 * @param type
-	 *            The class of the object to be unmarsharled.
 	 * @param f
 	 *            The file.
-	 * @return The object specified by the type.
+	 * @return The object unmarshaled.
 	 * @throws JAXBException
 	 *             If any unexpected errors occur while unmarshalling
 	 * @throws UnmarshalException
@@ -87,10 +83,8 @@ public class JaxbUtil {
 	 * @throws IllegalArgumentException
 	 *             If the file parameter is null
 	 */
-	public static <T> T unmarshal(Class<T> type, File f) throws JAXBException {
-		@SuppressWarnings("unchecked")
-		JAXBElement<T> doc = (JAXBElement<T>) unmar.unmarshal(f);
-		return doc.getValue();
+	public static Object unmarshal(File f) throws JAXBException {
+		return unmar.unmarshal(f);
 	}
 
 	private static void initialize() throws JAXBException {

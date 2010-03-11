@@ -28,9 +28,11 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.ISafeRunnable;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.SafeRunner;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchListener;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
@@ -208,10 +210,14 @@ public class RabbitCore extends AbstractUIPlugin implements IWorkbenchListener {
 	 */
 	public void saveCurrentData() {
 		for (TrackerObject t : trackerList) {
-			t.getTracker().saveData();
+			t.getTracker().setEnabled(false);
 			t.getTracker().flushData();
+			t.getTracker().setEnabled(true);
 		}
-		XmlResourceManager.INSTANCE.write(true);
+		if (!XmlResourceManager.INSTANCE.write(true)) {
+			getLog().log(new Status(IStatus.ERROR, PLUGIN_ID, 
+					"Unable to save resource mappings."));
+		}
 	}
 
 	@Override

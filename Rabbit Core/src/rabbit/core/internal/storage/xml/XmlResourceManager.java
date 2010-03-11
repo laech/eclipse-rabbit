@@ -39,6 +39,8 @@ import org.eclipse.core.resources.IResourceDeltaVisitor;
 import org.eclipse.core.runtime.AssertionFailedException;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchListener;
 
@@ -51,8 +53,8 @@ import rabbit.core.storage.IResourceMapper;
 /**
  * An XML {@link IResourceMapper}.
  */
-public enum XmlResourceManager implements IResourceMapper, IResourceChangeListener,
-		IWorkbenchListener {
+public enum XmlResourceManager
+		implements IResourceMapper, IResourceChangeListener, IWorkbenchListener {
 
 	INSTANCE;
 
@@ -183,7 +185,10 @@ public enum XmlResourceManager implements IResourceMapper, IResourceChangeListen
 
 	@Override
 	public void postShutdown(IWorkbench workbench) {
-		write();
+		if (!write()) {
+			RabbitCore.getDefault().getLog().log(new Status(IStatus.ERROR, 
+					RabbitCore.PLUGIN_ID, "Unable to save resource mappings."));
+		}
 	}
 
 	@Override
@@ -206,13 +211,12 @@ public enum XmlResourceManager implements IResourceMapper, IResourceChangeListen
 
 	/**
 	 * Saves the current data to disk. Same as {@link #write(false)}.
+	 * 
+	 * @return {@code true} if data is successfully saved, {@code false}
+	 *         otherwise.
 	 */
-	public void write() {
-		try {
-			marshal(objectFactory.createResources(convert(resources)), getDataFile());
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+	public boolean write() {
+		return marshal(objectFactory.createResources(convert(resources)), getDataFile());
 	}
 
 	/**
@@ -221,10 +225,15 @@ public enum XmlResourceManager implements IResourceMapper, IResourceChangeListen
 	 * @param update
 	 *            True to update the references to external resources, false
 	 *            otherwise.
+	 * @return {@code true} if data is successfully saved, {@code false}
+	 *         otherwise.
 	 */
-	public void write(boolean update) {
-		write();
-		externalResources = getExternalResources();
+	public boolean write(boolean update) {
+		boolean result = write();
+		if (update) {
+			externalResources = getExternalResources();
+		}
+		return result;
 	}
 
 	private ResourceListType convert(Map<String, Set<String>> v) {
@@ -263,19 +272,7 @@ public enum XmlResourceManager implements IResourceMapper, IResourceChangeListen
 	 * @return The resource data of the current workspace
 	 */
 	private ResourceListType getData() {
-		ResourceListType database = null;
-		try {
-			if (getDataFile().exists()) {
-				database = unmarshal(ResourceListType.class, getDataFile());
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		} finally {
-			if (database == null) {
-				database = objectFactory.createResourceListType();
-			}
-		}
-		return database;
+		return getData(getDataFile());
 	}
 
 	/**
@@ -289,16 +286,11 @@ public enum XmlResourceManager implements IResourceMapper, IResourceChangeListen
 	 */
 	private ResourceListType getData(File dataFile) {
 		ResourceListType database = null;
-		try {
-			if (dataFile.exists()) {
-				database = unmarshal(ResourceListType.class, dataFile);
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		} finally {
-			if (database == null) {
-				database = objectFactory.createResourceListType();
-			}
+		if (dataFile.exists()) {
+			database = unmarshal(dataFile);
+		}
+		if (database == null) {
+			database = objectFactory.createResourceListType();
 		}
 		return database;
 	}
@@ -360,13 +352,54 @@ public enum XmlResourceManager implements IResourceMapper, IResourceChangeListen
 		return Collections.unmodifiableMap(result);
 	}
 
-	private void marshal(JAXBElement<?> e, File f) throws JAXBException {
-		mar.marshal(e, f);
+	/**
+	 * Marshals a element to file.
+	 * 
+	 * @param element
+	 *            The element.
+	 * @param file
+	 *            The file to write to.
+	 * @return {@code true} if the element is successfully written to the file,
+	 *         {@code false} otherwise.
+	 * @throws NullPointerException
+	 *             If either parameters is null.
+	 */
+	private boolean marshal(JAXBElement<ResourceListType> element, File file) {
+		if (element == null || file == null) {
+			throw new NullPointerException();
+		}
+		try {
+			mar.marshal(element, file);
+			return true;
+		} catch (JAXBException e1) {
+			return false;
+		}
 	}
 
-	private <T> T unmarshal(Class<T> type, File f) throws JAXBException {
-		@SuppressWarnings("unchecked")
-		JAXBElement<T> doc = (JAXBElement<T>) unmar.unmarshal(f);
-		return doc.getValue();
+	/**
+	 * Unmarshals a file.
+	 * 
+	 * @param file
+	 *            The file containing the data.
+	 * @return The ResourceListType object from the file; or null, if the file
+	 *         does not containing a JAXBElement object, or the JAXBElement
+	 *         object does not contain a ResourceListType object, or error
+	 *         occurs while processing the file.
+	 * @throws NullPointerException
+	 *             If file is null.
+	 */
+	private ResourceListType unmarshal(File file) {
+		try {
+			Object obj = unmar.unmarshal(file);
+			if (obj instanceof JAXBElement<?>) {
+				JAXBElement<?> element = (JAXBElement<?>) obj;
+				if (element.getValue() instanceof ResourceListType) {
+					return (ResourceListType) element.getValue();
+				}
+			}
+		} catch (JAXBException e) {
+			return null;
+		}
+		return null;
 	}
 }

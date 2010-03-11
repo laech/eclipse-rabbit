@@ -42,7 +42,7 @@ import org.junit.runner.RunWith;
 public class CalendarActionTest {
 
 	private static Shell shell;
-	private static ToolBarManager manager;
+	private ToolBarManager manager;
 
 	@AfterClass
 	public static void afterClass() {
