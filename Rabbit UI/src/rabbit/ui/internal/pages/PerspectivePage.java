@@ -38,7 +38,7 @@ import rabbit.ui.internal.util.UndefinedPerspectiveDescriptor;
  */
 public class PerspectivePage extends AbstractTableViewerPage {
 
-	private IAccessor dataStore;
+	private IAccessor<Map<String, Long>> dataStore;
 	private IPerspectiveRegistry registry;
 	private Map<IPerspectiveDescriptor, Long> dataMapping;
 

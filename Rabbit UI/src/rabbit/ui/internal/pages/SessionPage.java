@@ -34,7 +34,7 @@ import rabbit.ui.TableLabelComparator;
  */
 public class SessionPage extends AbstractTableViewerPage {
 
-	private IAccessor dataStore;
+	private IAccessor<Map<String, Long>> dataStore;
 	private Map<String, Long> model;
 
 	/** Constructs a new page. */

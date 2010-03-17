@@ -58,7 +58,7 @@ public class CommandPageTest extends AbstractTableViewerPageTest {
 	@Test
 	public void testUpdate() throws Exception {
 		long max = 0;
-		IAccessor accessor = new CommandDataAccessor();
+		IAccessor<Map<String, Long>> accessor = new CommandDataAccessor();
 
 		DisplayPreference pref = new DisplayPreference();
 		Map<String, Long> data = accessor.getData(pref.getStartDate(), pref.getEndDate());

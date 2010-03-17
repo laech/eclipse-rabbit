@@ -38,7 +38,7 @@ import rabbit.ui.TableLabelComparator;
  */
 public class CommandPage extends AbstractTableViewerPage {
 
-	private IAccessor accessor;
+	private IAccessor<Map<String, Long>> accessor;
 	private ICommandService service;
 
 	/** The data model, the values are usage counts of the commands. */

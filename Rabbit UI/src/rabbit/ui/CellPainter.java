@@ -15,6 +15,7 @@
  */
 package rabbit.ui;
 
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.viewers.ColumnViewer;
 import org.eclipse.jface.viewers.StyledCellLabelProvider;
 import org.eclipse.jface.viewers.ViewerColumn;
@@ -72,6 +73,7 @@ public class CellPainter extends StyledCellLabelProvider {
 	private Color background;
 	private Color foreground;
 	private IValueProvider valueProvider;
+	
 	private final boolean isLinux;
 
 	/**
@@ -82,7 +84,7 @@ public class CellPainter extends StyledCellLabelProvider {
 	 */
 	public CellPainter(IValueProvider valueProvider) {
 		this.valueProvider = valueProvider;
-		isLinux = System.getProperty("os.name").toLowerCase().contains("linux");
+		isLinux = Platform.getOS().equals(Platform.OS_LINUX);
 	}
 
 	@Override
@@ -114,6 +116,10 @@ public class CellPainter extends StyledCellLabelProvider {
 		int oldAnti = gc.getAntialias();
 
 		gc.setBackground(background);
+		/*
+		 * On Linux, enabling GC's antialias will cause the color bar to be
+		 * half drawn.
+		 */
 		if (isLinux) {
 			gc.fillRectangle(x, y, width, height);
 		} else {
@@ -121,13 +127,13 @@ public class CellPainter extends StyledCellLabelProvider {
 			gc.fillRectangle(x, y, 2, height);
 			gc.fillRoundRectangle(x, y, width, height, 4, 4);
 		}
+		gc.setAntialias(oldAnti);
 		gc.setForeground(foreground);
-		gc.drawLine(x - 1, y, x - 1, y + height - 1);
+		gc.drawLine(x, y, x, y + height - 1);
 		gc.drawLine(x + width, y, x + width, y + height - 1);
 
 		gc.setBackground(oldBackground);
 		gc.setForeground(oldForeground);
-		gc.setAntialias(oldAnti);
 	}
 
 	/**

@@ -54,7 +54,7 @@ public class PerspectivePageTest extends AbstractTableViewerPageTest {
 	@Test
 	public void testUpdate() throws Exception {
 		long max = 0;
-		IAccessor accessor = new PerspectiveDataAccessor();
+		IAccessor<Map<String, Long>> accessor = new PerspectiveDataAccessor();
 
 		DisplayPreference pref = new DisplayPreference();
 		Map<String, Long> data = accessor.getData(pref.getStartDate(), pref.getEndDate());

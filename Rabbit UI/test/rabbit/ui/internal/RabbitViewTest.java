@@ -121,9 +121,9 @@ public class RabbitViewTest {
 		view.createPartControl(shell);
 
 		IPage visiblePage = null;
-		for (PageDescriptor des : RabbitUI.getDefault().getPages()) {
-			visiblePage = des.getPage();
-			display(view, des.getPage());
+		for (PageDescriptor des : RabbitUI.getDefault().getRootElements()) {
+			visiblePage = des.page;
+			display(view, des.page);
 		}
 		// All pages have been displayed before, so they should all be updated:
 		Map<IPage, Boolean> status = getPageStatus(view);

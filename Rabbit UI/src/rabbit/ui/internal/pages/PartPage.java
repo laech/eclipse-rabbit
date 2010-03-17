@@ -40,7 +40,7 @@ import rabbit.ui.internal.util.UndefinedWorkbenchPartDescriptor;
 public class PartPage extends AbstractTableViewerPage {
 
 	private Map<IWorkbenchPartDescriptor, Long> dataMapping;
-	private IAccessor dataStore;
+	private IAccessor<Map<String, Long>> dataStore;
 
 	/**
 	 * Constructs a new page.

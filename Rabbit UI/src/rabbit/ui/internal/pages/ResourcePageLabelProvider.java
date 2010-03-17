@@ -15,19 +15,16 @@
  */
 package rabbit.ui.internal.pages;
 
-import static rabbit.ui.internal.util.MillisConverter.toDefaultString;
-
 import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.BaseLabelProvider;
 import org.eclipse.jface.viewers.IColorProvider;
-import org.eclipse.jface.viewers.ITableLabelProvider;
+import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
@@ -36,13 +33,8 @@ import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.ide.IDE;
 
-import rabbit.ui.internal.pages.ResourcePage.ShowMode;
-
-/**
- * Label provider for a {@link FilePage}.
- */
-public class ResourcePageLabelProvider extends BaseLabelProvider implements ITableLabelProvider,
-		IColorProvider {
+public class ResourcePageLabelProvider extends BaseLabelProvider
+		implements ILabelProvider, IColorProvider {
 
 	/** Maps the given path of a resource to an image (may be null). */
 	private final Map<String, Image> resourceMap;
@@ -55,11 +47,9 @@ public class ResourcePageLabelProvider extends BaseLabelProvider implements ITab
 
 	private final Color deletedResourceColor;
 
-	private ResourcePage page;
-
-	public ResourcePageLabelProvider(ResourcePage parent) {
-		deletedResourceColor = PlatformUI.getWorkbench().getDisplay().getSystemColor(
-				SWT.COLOR_DARK_GRAY);
+	public ResourcePageLabelProvider() {
+		deletedResourceColor = PlatformUI.getWorkbench().getDisplay()
+				.getSystemColor(SWT.COLOR_DARK_GRAY);
 
 		ISharedImages images = PlatformUI.getWorkbench().getSharedImages();
 		projectImg = images.getImage(IDE.SharedImages.IMG_OBJ_PROJECT);
@@ -68,8 +58,6 @@ public class ResourcePageLabelProvider extends BaseLabelProvider implements ITab
 
 		editorMap = new HashMap<String, Image>();
 		resourceMap = new HashMap<String, Image>();
-
-		page = parent;
 	}
 
 	@Override
@@ -94,8 +82,8 @@ public class ResourcePageLabelProvider extends BaseLabelProvider implements ITab
 	}
 
 	@Override
-	public Image getColumnImage(Object element, int columnIndex) {
-		if (!(element instanceof IResource) || columnIndex != 0) {
+	public Image getImage(Object element) {
+		if (!(element instanceof IResource)) {
 			return null;
 		}
 
@@ -131,27 +119,15 @@ public class ResourcePageLabelProvider extends BaseLabelProvider implements ITab
 	}
 
 	@Override
-	public String getColumnText(Object element, int columnIndex) {
+	public String getText(Object element) {
 		if (!(element instanceof IResource)) {
 			return null;
 		}
 		IResource resource = (IResource) element;
-		switch (columnIndex) {
-		case 0:
-			if (resource instanceof IFolder) {
-				return resource.getProjectRelativePath().toString();
-			} else {
-				return resource.getName();
-			}
-		case 1:
-			if ((resource instanceof IProject && page.getShowMode() == ShowMode.PROJECT)
-					|| (resource instanceof IFolder && page.getShowMode() == ShowMode.FOLDER)
-					|| (resource instanceof IFile && page.getShowMode() == ShowMode.FILE)) {
-
-				return toDefaultString(page.getValue(resource));
-			}
-		default:
-			return null;
+		if (resource instanceof IFolder) {
+			return resource.getProjectRelativePath().toString();
+		} else {
+			return resource.getName();
 		}
 	}
 

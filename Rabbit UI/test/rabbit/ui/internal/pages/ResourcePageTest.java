@@ -388,7 +388,7 @@ public class ResourcePageTest extends AbstractTreeViewerPageTest {
 		preference.getStartDate().set(end.get(Calendar.YEAR), end.get(Calendar.MONTH) - 2,
 				end.get(Calendar.DAY_OF_MONTH));
 
-		IAccessor accessor = new FileDataAccessor();
+		IAccessor<Map<String, Long>> accessor = new FileDataAccessor();
 		Map<String, Long> data = accessor.getData(preference.getStartDate(), preference
 				.getEndDate());
 

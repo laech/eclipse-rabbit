@@ -15,9 +15,6 @@
  */
 package rabbit.ui.internal.pages;
 
-import static org.eclipse.ui.plugin.AbstractUIPlugin.imageDescriptorFromPlugin;
-import static rabbit.ui.internal.RabbitUI.PLUGIN_ID;
-
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -46,6 +43,9 @@ import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.TreeColumn;
+import org.eclipse.ui.ISharedImages;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.ide.IDE;
 
 import rabbit.core.RabbitCore;
 import rabbit.core.storage.IAccessor;
@@ -53,6 +53,7 @@ import rabbit.core.storage.IResourceMapper;
 import rabbit.core.storage.xml.FileDataAccessor;
 import rabbit.ui.DisplayPreference;
 import rabbit.ui.TreeLabelComparator;
+import rabbit.ui.internal.SharedImages;
 
 /**
  * A page for displaying time spent working on different files.
@@ -65,7 +66,7 @@ public class ResourcePage extends AbstractTreeViewerPage {
 
 	private ShowMode mode = ShowMode.FILE;
 
-	private IAccessor accessor;
+	private IAccessor<Map<String, Long>> accessor;
 	private IResourceMapper resourceMapper;
 	private Map<IProject, Set<IResource>> projectResources;
 	private Map<IFolder, Set<IFile>> folderFiles;
@@ -130,11 +131,11 @@ public class ResourcePage extends AbstractTreeViewerPage {
 			public boolean select(Viewer viewer, Object parentElement, Object element) {
 				switch (getShowMode()) {
 				case PROJECT:
-									return element instanceof IProject;
+					return element instanceof IProject;
 				case FOLDER:
-									return element instanceof IContainer;
+					return element instanceof IContainer;
 				default:
-									return true;
+					return true;
 				}
 			}
 		});
@@ -142,33 +143,33 @@ public class ResourcePage extends AbstractTreeViewerPage {
 
 	@Override
 	public IContributionItem[] createToolBarItems(IToolBarManager toolBar) {
-		ImageDescriptor icon = imageDescriptorFromPlugin(PLUGIN_ID, "resources/expandall.gif");
-		expandAllAction.setImageDescriptor(icon);
+		expandAllAction.setImageDescriptor(SharedImages.EXPAND_ALL);
 		IContributionItem expandAll = new ActionContributionItem(expandAllAction);
 		toolBar.add(expandAll);
-
-		icon = imageDescriptorFromPlugin(PLUGIN_ID, "resources/collapseall.gif");
-		collapseAllAction.setImageDescriptor(icon);
+		
+		ISharedImages images = PlatformUI.getWorkbench().getSharedImages();
+		ImageDescriptor img = images.getImageDescriptor(ISharedImages.IMG_ELCL_COLLAPSEALL);
+		collapseAllAction.setImageDescriptor(img);
 		IContributionItem collapseAll = new ActionContributionItem(collapseAllAction);
 		toolBar.add(collapseAll);
 
 		Separator sep = new Separator();
 		toolBar.add(sep);
 
-		icon = imageDescriptorFromPlugin(PLUGIN_ID, "resources/project.gif");
-		showProjectsAction.setImageDescriptor(icon);
+		img = images.getImageDescriptor(IDE.SharedImages.IMG_OBJ_PROJECT);
+		showProjectsAction.setImageDescriptor(img);
 		showProjectsAction.setChecked(getShowMode() == ShowMode.PROJECT);
 		IContributionItem showProjects = new ActionContributionItem(showProjectsAction);
 		toolBar.add(showProjects);
 
-		icon = imageDescriptorFromPlugin(PLUGIN_ID, "resources/folder.gif");
-		showFoldersAction.setImageDescriptor(icon);
+		img = images.getImageDescriptor(ISharedImages.IMG_OBJ_FOLDER);
+		showFoldersAction.setImageDescriptor(img);
 		showFoldersAction.setChecked(getShowMode() == ShowMode.FOLDER);
 		IContributionItem showFolders = new ActionContributionItem(showFoldersAction);
 		toolBar.add(showFolders);
 
-		icon = imageDescriptorFromPlugin(PLUGIN_ID, "resources/file.gif");
-		showFilesAction.setImageDescriptor(icon);
+		img = images.getImageDescriptor(ISharedImages.IMG_OBJ_FILE);
+		showFilesAction.setImageDescriptor(img);
 		showFilesAction.setChecked(getShowMode() == ShowMode.FILE);
 		IContributionItem showFiles = new ActionContributionItem(showFilesAction);
 		toolBar.add(showFiles);
@@ -347,7 +348,8 @@ public class ResourcePage extends AbstractTreeViewerPage {
 
 	@Override
 	protected ITableLabelProvider createLabelProvider() {
-		return new ResourcePageLabelProvider(this);
+		return new ResourcePageDecoratingLabelProvider(this, new ResourcePageLabelProvider(), 
+				PlatformUI.getWorkbench().getDecoratorManager().getLabelDecorator());
 	};
 
 	private void doUpdate(Map<String, Long> data) {

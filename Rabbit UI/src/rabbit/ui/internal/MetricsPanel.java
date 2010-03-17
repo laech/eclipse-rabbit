@@ -21,13 +21,16 @@ import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.IDoubleClickListener;
+import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.jface.window.ToolTip;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
@@ -60,65 +63,11 @@ public class MetricsPanel {
 	 */
 	public void createContents(Composite parent) {
 		final TreeViewer viewer = new TreeViewer(parent, SWT.SINGLE | SWT.V_SCROLL | SWT.H_SCROLL);
-		viewer.setContentProvider(new AbstractTreeContentProvider() {
-
-			@Override
-			public Object[] getChildren(Object o) {
-				return ((PageDescriptor) o).getChildren().toArray();
-			}
-
-			@Override
-			public Object[] getElements(Object inputElement) {
-				return ((Collection<?>) inputElement).toArray();
-			}
-
-			@Override
-			public boolean hasChildren(Object o) {
-				return (o instanceof PageDescriptor)
-						&& !((PageDescriptor) o).getChildren().isEmpty();
-			}
-		});
+		viewer.setContentProvider(createContentProvider());
+		viewer.setComparator(new ViewerComparator());
 
 		ColumnViewerToolTipSupport.enableFor(viewer, ToolTip.NO_RECREATE);
-		viewer.setLabelProvider(new ColumnLabelProvider() {
-
-			private ImageRegistry images = new ImageRegistry();
-
-			@Override
-			public void dispose() {
-				super.dispose();
-				images.dispose();
-			}
-
-			@Override
-			public Image getImage(Object element) {
-				PageDescriptor page = (PageDescriptor) element;
-				if (page.getImageDescriptor() == null) {
-					return null;
-				}
-				Image image = images.get(page.getName());
-				if (image == null) {
-					image = page.getImageDescriptor().createImage();
-					images.put(page.getName(), image);
-				}
-				return image;
-			}
-
-			@Override
-			public String getText(Object element) {
-				return ((PageDescriptor) element).getName();
-			}
-
-			@Override
-			public String getToolTipText(Object element) {
-				return ((PageDescriptor) element).getDescription();
-			}
-
-			@Override
-			public boolean useNativeToolTip(Object object) {
-				return true;
-			}
-		});
+		viewer.setLabelProvider(createLabelProvider());
 
 		viewer.addDoubleClickListener(new IDoubleClickListener() {
 			@Override
@@ -138,12 +87,75 @@ public class MetricsPanel {
 				if (selection instanceof IStructuredSelection) {
 					PageDescriptor page = (PageDescriptor) ((IStructuredSelection) selection)
 							.getFirstElement();
-					view.display(page.getPage());
+					view.display(page.page);
 				}
 			}
 		});
 
-		viewer.setInput(RabbitUI.getDefault().getPages());
+		viewer.setInput(RabbitUI.getDefault().getRootElements());
 		viewer.expandAll();
+	}
+
+	private IContentProvider createContentProvider() {
+		return new AbstractTreeContentProvider() {
+
+			@Override
+			public Object[] getChildren(Object o) {
+				return ((PageDescriptor) o).pages.toArray();
+			}
+
+			@Override
+			public Object[] getElements(Object inputElement) {
+				return ((Collection<?>) inputElement).toArray();
+			}
+
+			@Override
+			public boolean hasChildren(Object o) {
+				return (o instanceof PageDescriptor)
+						&& !((PageDescriptor) o).pages.isEmpty();
+			}
+		};
+	}
+
+	private ILabelProvider createLabelProvider() {
+		return new ColumnLabelProvider() {
+
+			private ImageRegistry images = new ImageRegistry();
+
+			@Override
+			public void dispose() {
+				super.dispose();
+				images.dispose();
+			}
+
+			@Override
+			public Image getImage(Object element) {
+				PageDescriptor page = (PageDescriptor) element;
+				if (page.image == null) {
+					return null;
+				}
+				Image image = images.get(page.name);
+				if (image == null) {
+					image = page.image.createImage();
+					images.put(page.name, image);
+				}
+				return image;
+			}
+
+			@Override
+			public String getText(Object element) {
+				return ((PageDescriptor) element).name;
+			}
+
+			@Override
+			public String getToolTipText(Object element) {
+				return ((PageDescriptor) element).description;
+			}
+
+			@Override
+			public boolean useNativeToolTip(Object object) {
+				return true;
+			}
+		};
 	}
 }

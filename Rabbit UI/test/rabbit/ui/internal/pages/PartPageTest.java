@@ -55,7 +55,7 @@ public class PartPageTest extends AbstractTableViewerPageTest {
 	@Test
 	public void testUpdate() throws Exception {
 		long max = 0;
-		IAccessor accessor = new PartDataAccessor();
+		IAccessor<Map<String, Long>> accessor = new PartDataAccessor();
 
 		DisplayPreference pref = new DisplayPreference();
 		Map<String, Long> data = accessor.getData(pref.getStartDate(), pref.getEndDate());

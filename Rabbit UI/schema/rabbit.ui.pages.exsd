@@ -17,9 +17,9 @@
          </appinfo>
       </annotation>
       <complexType>
-         <sequence minOccurs="1" maxOccurs="unbounded">
+         <choice minOccurs="1" maxOccurs="unbounded">
             <element ref="page"/>
-         </sequence>
+         </choice>
          <attribute name="point" type="string" use="required">
             <annotation>
                <documentation>
@@ -49,9 +49,6 @@
 
    <element name="page">
       <complexType>
-         <sequence minOccurs="0" maxOccurs="unbounded">
-            <element ref="page"/>
-         </sequence>
          <attribute name="class" type="string" use="required">
             <annotation>
                <documentation>
@@ -84,6 +81,20 @@
                <appinfo>
                   <meta.attribute kind="resource"/>
                </appinfo>
+            </annotation>
+         </attribute>
+         <attribute name="parent" type="string">
+            <annotation>
+               <documentation>
+                  The ID of the parent page.
+               </documentation>
+            </annotation>
+         </attribute>
+         <attribute name="id" type="string" use="required">
+            <annotation>
+               <documentation>
+                  The ID of this page.
+               </documentation>
             </annotation>
          </attribute>
       </complexType>

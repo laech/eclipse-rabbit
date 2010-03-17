@@ -39,9 +39,9 @@ public class RabbitUITest {
 	}
 
 	@Test
-	public void testGetPages() {
-		assertNotNull(RabbitUI.getDefault().getPages());
-		assertFalse(RabbitUI.getDefault().getPages().isEmpty());
+	public void testGetRootElements() {
+		assertNotNull(RabbitUI.getDefault().getRootElements());
+		assertFalse(RabbitUI.getDefault().getRootElements().isEmpty());
 	}
 
 	@Test

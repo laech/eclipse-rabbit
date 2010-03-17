@@ -15,16 +15,18 @@
  */
 package rabbit.ui.internal;
 
-import java.util.Comparator;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
 
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.ISafeRunnable;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.SafeRunner;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.ui.ISharedImages;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
@@ -55,7 +57,7 @@ public class RabbitUI extends AbstractUIPlugin {
 		return plugin;
 	}
 
-	private SortedSet<PageDescriptor> pages;
+	private Set<PageDescriptor> rootElements = new HashSet<PageDescriptor>();
 
 	/**
 	 * The constructor
@@ -73,15 +75,6 @@ public class RabbitUI extends AbstractUIPlugin {
 	}
 
 	/**
-	 * Gets the pages.
-	 * 
-	 * @return The pages.
-	 */
-	public Set<PageDescriptor> getPages() {
-		return pages;
-	}
-
-	/**
 	 * Sets the default number of days to display the data in the main view.
 	 * 
 	 * @param numDays
@@ -96,19 +89,68 @@ public class RabbitUI extends AbstractUIPlugin {
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
+		readExtensions();
+	}
 
-		pages = new TreeSet<PageDescriptor>(new Comparator<PageDescriptor>() {
-			@Override
-			public int compare(PageDescriptor o1, PageDescriptor o2) {
-				return o1.getName().compareTo(o2.getName());
-			}
-		});
-
-		for (IConfigurationElement e : Platform.getExtensionRegistry()
+	private void readExtensions() {
+		rootElements.clear();
+		final Set<PageDescriptor> pages = new HashSet<PageDescriptor>();
+		for (final IConfigurationElement e : Platform.getExtensionRegistry()
 				.getConfigurationElementsFor(UI_PAGE_EXTENSION_ID)) {
-			PageDescriptor p = recursiveGet(e);
-			if (p != null) {
-				pages.add(p);
+
+			SafeRunner.run(new ISafeRunnable() {
+
+				@Override
+				public void handleException(Throwable e) {
+					System.err.println(e.getMessage());
+				}
+
+				@Override
+				public void run() throws Exception {
+					String id = e.getAttribute("id");
+					String name = e.getAttribute("name");
+					String desc = e.getAttribute("description");
+					String imagePath = e.getAttribute("icon");
+					String parent = e.getAttribute("parent");
+
+					Object o = e.createExecutableExtension("class");
+					if (!(o instanceof IPage)) {
+						return;
+					}
+
+					ImageDescriptor image = null;
+					if (imagePath != null) {
+						image = imageDescriptorFromPlugin(e.getContributor()
+								.getName(), imagePath);
+					}
+					if (image == null) {
+						image = PlatformUI.getWorkbench().getSharedImages()
+								.getImageDescriptor(ISharedImages.IMG_OBJ_ELEMENT);
+					}
+					IPage page = (IPage) o;
+					pages.add(new PageDescriptor(id, name, page, desc, image, parent));
+				}
+			});
+
+		}
+
+		// Run through all the elements and
+		// restructure them:
+		for (PageDescriptor child : pages) {
+			if (child.parentId == null) {
+				rootElements.add(child);
+				continue;
+			}
+			boolean added = false;
+			for (PageDescriptor parent : pages) {
+				if (parent.id.equals(child.parentId)) {
+					parent.pages.add(child);
+					added = true;
+					break;
+				}
+			}
+			if (!added) {
+				rootElements.add(child);
 			}
 		}
 	}
@@ -120,44 +162,11 @@ public class RabbitUI extends AbstractUIPlugin {
 	}
 
 	/**
-	 * Recursively builds a tree out of the given element.
+	 * Gets the root pages.
 	 * 
-	 * @param e
-	 *            The element.
-	 * @return A tree, or null if one cannot be created.
+	 * @return The root pages.
 	 */
-	private PageDescriptor recursiveGet(IConfigurationElement e) {
-
-		String name = e.getAttribute("name");
-		String desc = e.getAttribute("description");
-		String imagePath = e.getAttribute("icon");
-
-		Object o = null;
-		try {
-			o = e.createExecutableExtension("class");
-
-		} catch (CoreException ex) {
-			System.err.println(ex.getMessage());
-			return null;
-		}
-
-		if (!(o instanceof IPage)) {
-			return null;
-		}
-
-		ImageDescriptor image = null;
-		if (imagePath != null) {
-			image = imageDescriptorFromPlugin(e.getContributor().getName(), imagePath);
-		}
-		IPage page = (IPage) o;
-		PageDescriptor extension = new PageDescriptor(name, page, desc, image);
-
-		for (IConfigurationElement child : e.getChildren()) {
-			PageDescriptor p = recursiveGet(child);
-			if (p != null) {
-				extension.addChild(p);
-			}
-		}
-		return extension;
+	Set<PageDescriptor> getRootElements() {
+		return Collections.unmodifiableSet(rootElements);
 	}
 }

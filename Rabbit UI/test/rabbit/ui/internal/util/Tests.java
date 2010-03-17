@@ -21,7 +21,6 @@ import org.junit.runners.Suite;
 @RunWith(Suite.class)
 @Suite.SuiteClasses( {
 		MillisConverterTest.class,
-		PageDescriptorTest.class,
 		UndefinedPerspectiveDescriptorTest.class,
 		UndefinedWorkbenchPartDescriptorTest.class,
 //
