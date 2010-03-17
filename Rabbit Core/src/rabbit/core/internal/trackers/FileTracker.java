@@ -18,6 +18,7 @@ package rabbit.core.internal.trackers;
 import java.util.Calendar;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.mylyn.tasks.ui.TasksUi;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPart;
 
@@ -27,8 +28,17 @@ import rabbit.core.storage.IStorer;
 
 public class FileTracker extends AbstractPartTracker<FileEvent> {
 
+	private boolean isMylynInstalled = false;
+
 	public FileTracker() {
 		super();
+
+		try {
+			TasksUi.getTaskActivityManager();
+			isMylynInstalled = true;
+		} catch (NoClassDefFoundError e) {
+			isMylynInstalled = false;
+		}
 	}
 
 	@Override
@@ -38,14 +48,20 @@ public class FileTracker extends AbstractPartTracker<FileEvent> {
 
 	@Override
 	protected FileEvent tryCreateEvent(Calendar time, long duration, IWorkbenchPart p) {
+		FileEvent event = null;
 		if (p instanceof IEditorPart) {
 			IFile f = (IFile) ((IEditorPart) p).getEditorInput().getAdapter(IFile.class);
-			if (f != null) {
-				String id = RabbitCore.getDefault().getResourceManager().insert(
-						f.getFullPath().toString());
-				return new FileEvent(time, duration, id);
+			if (f == null) {
+				return event;
+			}
+
+			String id = RabbitCore.getDefault().getResourceManager().insert(
+					f.getFullPath().toString());
+			event = new FileEvent(time, duration, id);
+			if (isMylynInstalled) {
+				event.setTask(TasksUi.getTaskActivityManager().getActiveTask());
 			}
 		}
-		return null;
+		return event;
 	}
 }

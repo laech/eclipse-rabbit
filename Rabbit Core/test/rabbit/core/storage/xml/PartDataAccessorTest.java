@@ -15,14 +15,15 @@
  */
 package rabbit.core.storage.xml;
 
-import rabbit.core.internal.storage.xml.AbstractAccessorTest;
+import rabbit.core.internal.storage.xml.AbstractIdToValueAccessorTest;
 import rabbit.core.internal.storage.xml.schema.events.PartEventListType;
 import rabbit.core.internal.storage.xml.schema.events.PartEventType;
 
 /**
  * Test for {@link PartDataAccessor}
  */
-public class PartDataAccessorTest extends AbstractAccessorTest<PartEventType, PartEventListType> {
+public class PartDataAccessorTest extends
+		AbstractIdToValueAccessorTest<PartEventType, PartEventListType> {
 
 	@Override
 	protected PartDataAccessor create() {

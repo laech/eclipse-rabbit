@@ -33,12 +33,16 @@ public class PerspectiveEvent extends ContinuousEvent {
 	 *            The end time of the event.
 	 * @param duration
 	 *            The duration in milliseconds.
-	 * @param p
+	 * @param perspective
 	 *            The perspective.
+	 * @throws NullPointerException
+	 *             If time is null or perspective is null.
+	 * @throws IllegalArgumentException
+	 *             If duration is negative.
 	 */
-	public PerspectiveEvent(Calendar time, long duration, IPerspectiveDescriptor p) {
+	public PerspectiveEvent(Calendar time, long duration, IPerspectiveDescriptor perspective) {
 		super(time, duration);
-		setPerspective(p);
+		setPerspective(perspective);
 	}
 
 	/**

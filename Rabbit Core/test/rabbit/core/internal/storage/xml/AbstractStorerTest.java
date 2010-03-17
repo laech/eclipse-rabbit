@@ -233,10 +233,13 @@ public abstract class AbstractStorerTest<E extends DiscreteEvent, T, S extends E
 
 	protected abstract AbstractStorer<E, T, S> create();
 
-	/** Creates an event for testing. */
+	/** Creates an event (with all values filled) for testing. */
 	protected abstract E createEvent();
 
-	/** Creates an event that is different to {@link #createEvent()}. */
+	/**
+	 * Creates an event (with all values filled) that is different to
+	 * {@link #createEvent()}.
+	 */
 	protected abstract E createEvent2();
 
 	@SuppressWarnings("unchecked")

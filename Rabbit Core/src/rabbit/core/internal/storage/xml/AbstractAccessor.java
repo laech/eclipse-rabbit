@@ -20,9 +20,8 @@ import static rabbit.core.internal.storage.xml.DatatypeConverter.toXMLGregorianC
 import java.io.File;
 import java.util.Calendar;
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import javax.xml.datatype.XMLGregorianCalendar;
 
@@ -34,12 +33,12 @@ import rabbit.core.storage.IAccessor;
  * Abstract class provides default behaviors, this class is designed
  * specifically for the schema.
  * 
- * @param <T>
+ * @param <E>
  *            The XML type.
  * @param <S>
  *            The XML category type.
  */
-public abstract class AbstractAccessor<T, S extends EventGroupType> implements IAccessor {
+public abstract class AbstractAccessor<T, E, S extends EventGroupType> implements IAccessor<T> {
 
 	private final IDataStore dataStore;
 
@@ -49,31 +48,19 @@ public abstract class AbstractAccessor<T, S extends EventGroupType> implements I
 	}
 
 	@Override
-	public Map<String, Long> getData(Calendar start, Calendar end) {
-		Map<String, Long> result = new HashMap<String, Long>();
-		XMLGregorianCalendar startXmlCal = toXMLGregorianCalendarDate(start);
-		XMLGregorianCalendar endXmlCal = toXMLGregorianCalendarDate(end);
-
-		List<File> files = dataStore.getDataFiles(start, end);
-		for (File f : files) {
-			for (S list : getCategories(dataStore.read(f))) {
-				if (list.getDate().compare(startXmlCal) >= 0
-						&& list.getDate().compare(endXmlCal) <= 0) {
-
-					for (T e : getXmlTypes(list)) {
-
-						Long usage = result.get(getId(e));
-						if (usage == null) {
-							result.put(getId(e), getUsage(e));
-						} else {
-							result.put(getId(e), getUsage(e) + usage);
-						}
-					}
-				}
-			}
-		}
-		return result;
+	public T getData(Calendar start, Calendar end) {
+		return filter(getXmlData(start, end));
 	}
+
+	/**
+	 * Filters the given data.
+	 * 
+	 * @param data
+	 *            The raw data between the two dates of
+	 *            {@link #getData(Calendar, Calendar)}.
+	 * @return The filtered data.
+	 */
+	protected abstract T filter(List<S> data);
 
 	/**
 	 * Gets the collection of categories from the given parameter.
@@ -98,7 +85,7 @@ public abstract class AbstractAccessor<T, S extends EventGroupType> implements I
 	 *            The type.
 	 * @return The id.
 	 */
-	protected abstract String getId(T e);
+	protected abstract String getId(E e);
 
 	/**
 	 * Gets the usage info from the given type.
@@ -107,7 +94,35 @@ public abstract class AbstractAccessor<T, S extends EventGroupType> implements I
 	 *            The type to get info from.
 	 * @return The usage info.
 	 */
-	protected abstract long getUsage(T e);
+	protected abstract long getUsage(E e);
+
+	/**
+	 * Gets the data from the XML files.
+	 * 
+	 * @param start
+	 *            The start date of the data.
+	 * @param end
+	 *            The end date of the data.
+	 * @return The data between the dates, inclusive.
+	 */
+	protected List<S> getXmlData(Calendar start, Calendar end) {
+		List<S> data = new LinkedList<S>();
+		XMLGregorianCalendar startXmlCal = toXMLGregorianCalendarDate(start);
+		XMLGregorianCalendar endXmlCal = toXMLGregorianCalendarDate(end);
+
+		List<File> files = dataStore.getDataFiles(start, end);
+		for (File f : files) {
+
+			for (S list : getCategories(dataStore.read(f))) {
+				if (list.getDate().compare(startXmlCal) >= 0
+						&& list.getDate().compare(endXmlCal) <= 0) {
+
+					data.add(list);
+				}
+			}
+		}
+		return data;
+	}
 
 	/**
 	 * Gets a collection of types from the given category.
@@ -116,6 +131,6 @@ public abstract class AbstractAccessor<T, S extends EventGroupType> implements I
 	 *            The category.
 	 * @return A collection of objects.
 	 */
-	protected abstract Collection<T> getXmlTypes(S list);
+	protected abstract Collection<E> getXmlTypes(S list);
 
 }

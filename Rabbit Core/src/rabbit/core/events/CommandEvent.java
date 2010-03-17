@@ -34,7 +34,7 @@ public class CommandEvent extends DiscreteEvent {
 	 * @param e
 	 *            The execution event.
 	 * @throws NullPointerException
-	 *             If argument is null.
+	 *             If any of the arguments is null.
 	 */
 	public CommandEvent(Calendar time, ExecutionEvent e) {
 		super(time);

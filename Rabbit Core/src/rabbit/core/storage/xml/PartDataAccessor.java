@@ -19,7 +19,7 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.Map;
 
-import rabbit.core.internal.storage.xml.AbstractAccessor;
+import rabbit.core.internal.storage.xml.AbstractIdToValueAccessor;
 import rabbit.core.internal.storage.xml.DataStore;
 import rabbit.core.internal.storage.xml.IDataStore;
 import rabbit.core.internal.storage.xml.schema.events.EventListType;
@@ -29,7 +29,7 @@ import rabbit.core.internal.storage.xml.schema.events.PartEventType;
 /**
  * Gets data about part usage.
  */
-public class PartDataAccessor extends AbstractAccessor<PartEventType, PartEventListType> {
+public class PartDataAccessor extends AbstractIdToValueAccessor<PartEventType, PartEventListType> {
 
 	/** Constructor. */
 	public PartDataAccessor() {

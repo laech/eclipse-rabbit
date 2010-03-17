@@ -54,7 +54,6 @@ public abstract class AbstractStorerTest2<E extends DiscreteEvent, T, S extends 
 
 			// ...
 
-			e = createEvent();
 			storer.insert(e);
 			storer.commit();
 

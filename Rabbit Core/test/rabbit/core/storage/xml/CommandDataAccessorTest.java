@@ -15,7 +15,7 @@
  */
 package rabbit.core.storage.xml;
 
-import rabbit.core.internal.storage.xml.AbstractAccessorTest;
+import rabbit.core.internal.storage.xml.AbstractIdToValueAccessorTest;
 import rabbit.core.internal.storage.xml.schema.events.CommandEventListType;
 import rabbit.core.internal.storage.xml.schema.events.CommandEventType;
 
@@ -23,7 +23,7 @@ import rabbit.core.internal.storage.xml.schema.events.CommandEventType;
  * Test for {@link CommandDataAccessor}
  */
 public class CommandDataAccessorTest extends
-		AbstractAccessorTest<CommandEventType, CommandEventListType> {
+		AbstractIdToValueAccessorTest<CommandEventType, CommandEventListType> {
 
 	@Override
 	protected CommandDataAccessor create() {

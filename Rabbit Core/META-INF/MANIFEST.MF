@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Rabbit Core
 Bundle-SymbolicName: rabbit.core;singleton:=true
-Bundle-Version: 1.0.0.qualifier
+Bundle-Version: 1.1.0.qualifier
 Bundle-Activator: rabbit.core.RabbitCore
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.core.resources,
@@ -11,15 +11,19 @@ Require-Bundle: org.eclipse.core.runtime,
  org.junit4;resolution:=optional,
  org.eclipse.swtbot.eclipse.finder;resolution:=optional,
  org.eclipse.swtbot.junit4_x;resolution:=optional,
- org.eclipse.swtbot.swt.finder;resolution:=optional
+ org.eclipse.swtbot.swt.finder;resolution:=optional,
+ org.eclipse.mylyn.tasks.ui;resolution:=optional,
+ org.eclipse.mylyn.tasks.core;resolution:=optional
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: rabbit.core,
- rabbit.core.events;uses:="org.eclipse.ui",
- rabbit.core.internal;x-internal:=true,
- rabbit.core.internal.storage.xml;x-internal:=true;uses:="rabbit.core.internal.storage.xml.schema.events,org.eclipse.ui,rabbit.core.events",
- rabbit.core.internal.storage.xml.schema.events;x-internal:=true;uses:="javax.xml.bind,javax.xml.datatype",
- rabbit.core.internal.storage.xml.schema.resources;x-internal:=true;uses:="javax.xml.bind",
- rabbit.core.internal.trackers;x-internal:=true;uses:="org.eclipse.ui,org.eclipse.core.resources,rabbit.core.events",
+ rabbit.core.events,
+ rabbit.core.internal,
+ rabbit.core.internal.storage.xml,
+ rabbit.core.internal.storage.xml.schema.events;x-friends:="rabbit.mylyn.core";
+  uses:="javax.xml.bind,
+   javax.xml.datatype",
+ rabbit.core.internal.storage.xml.schema.resources;x-friends:="rabbit.mylyn.core";uses:="javax.xml.bind",
+ rabbit.core.internal.trackers,
  rabbit.core.storage,
- rabbit.core.storage.xml;uses:="rabbit.core.internal.storage.xml.schema.events,rabbit.core.internal.storage.xml"
+ rabbit.core.storage.xml
 Bundle-ActivationPolicy: lazy

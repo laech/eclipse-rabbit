@@ -33,6 +33,8 @@ public class ContinuousEvent extends DiscreteEvent {
 	 *            The duration in milliseconds.
 	 * @throws IllegalArgumentException
 	 *             If duration is negative.
+	 * @throws NullPointerException
+	 *             If time is null.
 	 */
 	public ContinuousEvent(Calendar time, long duration) {
 		super(time);

@@ -19,7 +19,7 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.Map;
 
-import rabbit.core.internal.storage.xml.AbstractAccessor;
+import rabbit.core.internal.storage.xml.AbstractIdToValueAccessor;
 import rabbit.core.internal.storage.xml.DataStore;
 import rabbit.core.internal.storage.xml.IDataStore;
 import rabbit.core.internal.storage.xml.schema.events.EventListType;
@@ -29,7 +29,7 @@ import rabbit.core.internal.storage.xml.schema.events.FileEventType;
 /**
  * For getting data on file events.
  */
-public class FileDataAccessor extends AbstractAccessor<FileEventType, FileEventListType> {
+public class FileDataAccessor extends AbstractIdToValueAccessor<FileEventType, FileEventListType> {
 
 	/**
 	 * {@inheritDoc}

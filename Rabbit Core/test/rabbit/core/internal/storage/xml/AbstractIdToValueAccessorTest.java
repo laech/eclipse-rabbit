@@ -13,48 +13,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package rabbit.core.storage.xml;
+package rabbit.core.internal.storage.xml;
 
 import static org.junit.Assert.assertEquals;
 
-import java.text.Format;
-import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import rabbit.core.internal.storage.xml.schema.events.EventGroupType;
 import rabbit.core.internal.storage.xml.schema.events.EventListType;
-import rabbit.core.internal.storage.xml.schema.events.PerspectiveEventListType;
-import rabbit.core.internal.storage.xml.schema.events.PerspectiveEventType;
 
 /**
- * Test for {@link SessionDataAccessor}
+ * @see AbstractIdToValueAccessor
  */
-public class SessionDataAccessorTest extends PerspectiveDataAccessorTest {
-	
-	@Override
-	protected SessionDataAccessor create() {
-		return new SessionDataAccessor();
-	}
-	
+public abstract class AbstractIdToValueAccessorTest<E, S extends EventGroupType>
+		extends AbstractAccessorTest<Map<String, Long>, E, S> {
+
 	@Override
 	protected void checkValues(Map<String, Long> data, EventListType events) {
-		Format format = new SimpleDateFormat(SessionDataAccessor.DATE_FORMAT);
-		
 		Map<String, Long> map = new HashMap<String, Long>();
-		for (PerspectiveEventListType list : events.getPerspectiveEvents()) {
-			String dateStr = format.format(list.getDate().toGregorianCalendar().getTime());
-			
-			long value = 0;
-			for (PerspectiveEventType type : list.getPerspectiveEvent()) {
-				value += type.getDuration();
+		for (S list : accessor.getCategories(events)) {
+			for (E e : accessor.getXmlTypes(list)) {
+				Long usage = map.get(accessor.getId(e));
+				if (usage == null) {
+					map.put(accessor.getId(e), accessor.getUsage(e));
+				} else {
+					map.put(accessor.getId(e), accessor.getUsage(e) + usage);
+				}
 			}
-			
-			Long oldValue = map.get(dateStr);
-			if (oldValue == null) {
-				oldValue = Long.valueOf(0);
-			}
-			map.put(dateStr, value + oldValue);
 		}
 		
 		assertEquals(map.size(), data.size());

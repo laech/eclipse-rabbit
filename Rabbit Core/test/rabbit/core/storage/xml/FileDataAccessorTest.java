@@ -15,14 +15,15 @@
  */
 package rabbit.core.storage.xml;
 
-import rabbit.core.internal.storage.xml.AbstractAccessorTest;
+import rabbit.core.internal.storage.xml.AbstractIdToValueAccessorTest;
 import rabbit.core.internal.storage.xml.schema.events.FileEventListType;
 import rabbit.core.internal.storage.xml.schema.events.FileEventType;
 
 /**
  * Test for {@link FileDataAccessor}
  */
-public class FileDataAccessorTest extends AbstractAccessorTest<FileEventType, FileEventListType> {
+public class FileDataAccessorTest extends
+		AbstractIdToValueAccessorTest<FileEventType, FileEventListType> {
 
 	@Override
 	protected FileDataAccessor create() {

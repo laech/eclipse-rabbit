@@ -16,13 +16,14 @@
 package rabbit.core.storage;
 
 import java.util.Calendar;
-import java.util.Map;
 
 /**
- * Represents a simple data accessor to get data out of a data store. Check the
- * implementer's documentation for more information about the returned data.
+ * Represents a data accessor to get data out of a data store.
+ * 
+ * @param <T>
+ *            The data type.
  */
-public interface IAccessor {
+public interface IAccessor<T> {
 
 	/**
 	 * Gets the data between the dates, inclusive.
@@ -33,5 +34,5 @@ public interface IAccessor {
 	 *            The end Date.
 	 * @return A map of data.
 	 */
-	Map<String, Long> getData(Calendar start, Calendar end);
+	T getData(Calendar start, Calendar end);
 }

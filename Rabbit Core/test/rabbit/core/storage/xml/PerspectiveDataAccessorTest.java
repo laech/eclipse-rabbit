@@ -15,12 +15,12 @@
  */
 package rabbit.core.storage.xml;
 
-import rabbit.core.internal.storage.xml.AbstractAccessorTest;
+import rabbit.core.internal.storage.xml.AbstractIdToValueAccessorTest;
 import rabbit.core.internal.storage.xml.schema.events.PerspectiveEventListType;
 import rabbit.core.internal.storage.xml.schema.events.PerspectiveEventType;
 
 public class PerspectiveDataAccessorTest extends
-		AbstractAccessorTest<PerspectiveEventType, PerspectiveEventListType> {
+		AbstractIdToValueAccessorTest<PerspectiveEventType, PerspectiveEventListType> {
 
 	@Override
 	protected PerspectiveDataAccessor create() {

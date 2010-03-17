@@ -17,15 +17,23 @@ package rabbit.core.storage.xml;
 
 import java.util.Collection;
 
-import rabbit.core.internal.storage.xml.AbstractAccessor;
+import rabbit.core.internal.storage.xml.AbstractIdToValueAccessor;
 import rabbit.core.internal.storage.xml.DataStore;
 import rabbit.core.internal.storage.xml.IDataStore;
 import rabbit.core.internal.storage.xml.schema.events.EventListType;
 import rabbit.core.internal.storage.xml.schema.events.PerspectiveEventListType;
 import rabbit.core.internal.storage.xml.schema.events.PerspectiveEventType;
 
-public class PerspectiveDataAccessor
-		extends AbstractAccessor<PerspectiveEventType, PerspectiveEventListType> {
+/**
+ * Gets the data about how much time is spent using different perspectives.
+ * <p>
+ * The data returned by {@link #getData(java.util.Calendar, java.util.Calendar)}
+ * is a map, where the keys are perspective IDs, and the values are durations in
+ * milliseconds.
+ * </p>
+ */
+public class PerspectiveDataAccessor extends
+		AbstractIdToValueAccessor<PerspectiveEventType, PerspectiveEventListType> {
 
 	@Override
 	protected Collection<PerspectiveEventListType> getCategories(EventListType doc) {

@@ -15,36 +15,67 @@
  */
 package rabbit.core.internal.storage.xml;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import java.util.Calendar;
 import java.util.List;
 
-import org.junit.Assert;
+import org.eclipse.mylyn.tasks.core.ITask;
 
 import rabbit.core.events.FileEvent;
 import rabbit.core.internal.storage.xml.schema.events.FileEventListType;
 import rabbit.core.internal.storage.xml.schema.events.FileEventType;
-import rabbit.core.internal.storage.xml.schema.events.ObjectFactory;
 
 public class FileEventStorerTest
 		extends AbstractStorerTest2<FileEvent, FileEventType, FileEventListType> {
 
+	@SuppressWarnings("restriction")
 	@Override
 	public void testHasSameId_typeAndEvent() {
 		String id = "asdfsdf23";
-		FileEventType type = new ObjectFactory().createFileEventType();
+		FileEventType type = objectFactory.createFileEventType();
 		type.setFileId(id);
 		FileEvent event = new FileEvent(Calendar.getInstance(), 10, id);
-		Assert.assertTrue(storer.hasSameId(type, event));
+		assertTrue(storer.hasSameId(type, event));
+
+		event.setFileId(id + id);
+		assertFalse(storer.hasSameId(type, event));
+
+		event.setFileId(id);
+		assertTrue(storer.hasSameId(type, event));
+
+		// Test task:
+		ITask task = new org.eclipse.mylyn.internal.tasks.core.LocalTask("1", "hi");
+		event.setTask(task);
+		assertFalse(storer.hasSameId(type, event));
+
+		type.setTaskHandleId(task.getHandleIdentifier());
+		assertTrue(storer.hasSameId(type, event));
+		
+		type.setTaskHandleId(System.currentTimeMillis() + "");
+		assertFalse(storer.hasSameId(type, event));
 	}
 
 	@Override
 	public void testHasSameId_typeAndType() {
 		String id = "asdfsdf23";
-		FileEventType type1 = new ObjectFactory().createFileEventType();
+		FileEventType type1 = objectFactory.createFileEventType();
 		type1.setFileId(id);
-		FileEventType type2 = new ObjectFactory().createFileEventType();
+		FileEventType type2 = objectFactory.createFileEventType();
 		type2.setFileId(id);
-		Assert.assertTrue(storer.hasSameId(type1, type2));
+		assertTrue(storer.hasSameId(type1, type2));
+
+		
+		String taskHandle = "aknudy2765652tgdhd";
+		type1.setTaskHandleId(taskHandle);
+		assertFalse(storer.hasSameId(type1, type2));
+
+		type2.setTaskHandleId(taskHandle);
+		assertTrue(storer.hasSameId(type1, type2));
+
+		type1.setTaskHandleId(System.nanoTime() + "");
+		assertFalse(storer.hasSameId(type1, type2));
 	}
 
 	@Override
@@ -52,14 +83,22 @@ public class FileEventStorerTest
 		return new FileEventStorer();
 	}
 
+	@SuppressWarnings("restriction")
 	@Override
 	protected FileEvent createEvent() {
-		return new FileEvent(Calendar.getInstance(), 10, "someId");
+		FileEvent event = new FileEvent(Calendar.getInstance(), 10, "someId");
+		event.setTask(new org.eclipse.mylyn.internal.tasks.core.LocalTask(
+				System.currentTimeMillis()+"", System.nanoTime()+""));
+		return event;
 	}
 
+	@SuppressWarnings("restriction")
 	@Override
 	protected FileEvent createEvent2() {
-		return new FileEvent(Calendar.getInstance(), 110, "blah");
+		FileEvent event = new FileEvent(Calendar.getInstance(), 110, "blah");
+		event.setTask(new org.eclipse.mylyn.internal.tasks.core.LocalTask(
+				System.currentTimeMillis()+"", System.nanoTime()+""));
+		return event;
 	}
 
 	@Override
@@ -80,9 +119,18 @@ public class FileEventStorerTest
 	@Override
 	protected boolean isEqual(FileEventType type, FileEvent event) {
 		boolean isEqual = type.getFileId().equals(event.getFileId());
-		if (isEqual) {
-			isEqual = (type.getDuration() == event.getDuration());
+		isEqual &= (type.getDuration() == event.getDuration());
+
+		if (type.getTaskHandleId() != null && event.getTask() != null) {
+			isEqual &= type.getTaskHandleId().equals(event.getTask().getHandleIdentifier());
+
+		} else if (type.getTaskHandleId() == null && event.getTask() == null) {
+			isEqual &= true;
+
+		} else {
+			isEqual = false;
 		}
+
 		return isEqual;
 	}
 

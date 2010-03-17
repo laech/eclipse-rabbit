@@ -39,12 +39,32 @@ public class FileEventStorer extends
 
 	@Override
 	protected boolean hasSameId(FileEventType x, FileEvent e) {
-		return x.getFileId().equals(e.getFileId());
+		boolean result = x.getFileId().equals(e.getFileId());
+		if (result == false) {
+			return result;
+			
+		} else if (x.getTaskHandleId() != null && e.getTask() != null) {
+			result &= x.getTaskHandleId().equals(e.getTask().getHandleIdentifier());
+			
+		} else if (!(x.getTaskHandleId() == null && e.getTask() == null)) {
+			result = false;
+		}
+		return result;
 	}
 
 	@Override
 	protected boolean hasSameId(FileEventType x1, FileEventType x2) {
-		return x1.getFileId().equals(x2.getFileId());
+		boolean result = x1.getFileId().equals(x2.getFileId());
+		if (result == false) {
+			return result;
+			
+		} else if (x1.getTaskHandleId() != null && x2.getTaskHandleId() != null) {
+			result &= x1.getTaskHandleId().equals(x2.getTaskHandleId());
+			
+		} else if (!(x1.getTaskHandleId() == null && x2.getTaskHandleId() == null)) {
+			result = false;
+		}
+		return result;
 	}
 
 	@Override
@@ -72,6 +92,9 @@ public class FileEventStorer extends
 		FileEventType type = OBJECT_FACTORY.createFileEventType();
 		type.setDuration(e.getDuration());
 		type.setFileId(e.getFileId());
+		if (e.getTask() != null) {
+			type.setTaskHandleId(e.getTask().getHandleIdentifier());
+		}
 		return type;
 	}
 

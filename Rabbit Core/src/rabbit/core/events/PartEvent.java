@@ -35,6 +35,10 @@ public class PartEvent extends ContinuousEvent {
 	 *            The duration of the event, in milliseconds.
 	 * @param part
 	 *            The workbench part.
+	 * @throws NullPointerException
+	 *             If time is null or part is null.
+	 * @throws IllegalArgumentException
+	 *             If duration is negative.
 	 */
 	public PartEvent(Calendar time, long duration, IWorkbenchPart part) {
 		super(time, duration);
