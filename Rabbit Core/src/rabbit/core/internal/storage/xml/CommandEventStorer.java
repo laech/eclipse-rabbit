@@ -24,14 +24,21 @@ import rabbit.core.internal.storage.xml.schema.events.CommandEventListType;
 import rabbit.core.internal.storage.xml.schema.events.CommandEventType;
 import rabbit.core.internal.storage.xml.schema.events.EventListType;
 
-public class CommandEventStorer
+public final class CommandEventStorer
 		extends AbstractStorer<CommandEvent, CommandEventType, CommandEventListType> {
 
+	private static final CommandEventStorer INSTANCE = new CommandEventStorer();
+
 	/**
-	 * Constructor.
+	 * Gets the shared instance of this class.
+	 * 
+	 * @return The shared instanceof this class.
 	 */
-	public CommandEventStorer() {
-		super();
+	public static CommandEventStorer getInstance() {
+		return INSTANCE;
+	}
+
+	private CommandEventStorer() {
 	}
 
 	@Override
@@ -78,7 +85,7 @@ public class CommandEventStorer
 
 	@Override
 	protected CommandEventType newXmlType(CommandEvent e) {
-		CommandEventType type = OBJECT_FACTORY.createCommandEventType();
+		CommandEventType type = objectFactory.createCommandEventType();
 		type.setCommandId(e.getExecutionEvent().getCommand().getId());
 		type.setCount(1);
 		return type;
@@ -86,7 +93,7 @@ public class CommandEventStorer
 
 	@Override
 	protected CommandEventListType newXmlTypeHolder(XMLGregorianCalendar date) {
-		CommandEventListType type = OBJECT_FACTORY.createCommandEventListType();
+		CommandEventListType type = objectFactory.createCommandEventListType();
 		type.setDate(date);
 		return type;
 	}

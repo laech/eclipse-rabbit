@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package rabbit.core.storage.xml;
+package rabbit.core.internal.storage.xml;
 
 import java.text.Format;
 import java.text.SimpleDateFormat;

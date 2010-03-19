@@ -13,9 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package rabbit.core.storage.xml;
+package rabbit.core.internal.storage.xml;
 
-import rabbit.core.internal.storage.xml.AbstractIdToValueAccessorTest;
+import java.util.List;
+
+import rabbit.core.internal.storage.xml.FileDataAccessor;
 import rabbit.core.internal.storage.xml.schema.events.FileEventListType;
 import rabbit.core.internal.storage.xml.schema.events.FileEventType;
 
@@ -48,6 +50,11 @@ public class FileDataAccessorTest extends
 	@Override
 	protected void setUsage(FileEventType type, long usage) {
 		type.setDuration(usage);
+	}
+
+	@Override
+	protected List<FileEventType> getXmlTypes(FileEventListType list) {
+		return list.getFileEvent();
 	}
 
 }

@@ -36,15 +36,21 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import rabbit.core.RabbitCore.AccessorType;
 import rabbit.core.events.CommandEvent;
 import rabbit.core.events.FileEvent;
 import rabbit.core.events.PartEvent;
 import rabbit.core.events.PerspectiveEvent;
 import rabbit.core.internal.TrackerObject;
+import rabbit.core.internal.storage.xml.CommandDataAccessor;
 import rabbit.core.internal.storage.xml.CommandEventStorer;
+import rabbit.core.internal.storage.xml.FileDataAccessor;
 import rabbit.core.internal.storage.xml.FileEventStorer;
+import rabbit.core.internal.storage.xml.PartDataAccessor;
 import rabbit.core.internal.storage.xml.PartEventStorer;
+import rabbit.core.internal.storage.xml.PerspectiveDataAccessor;
 import rabbit.core.internal.storage.xml.PerspectiveEventStorer;
+import rabbit.core.internal.storage.xml.SessionDataAccessor;
 
 /**
  * Test for {@link RabbitCore}
@@ -149,6 +155,15 @@ public class RabbitCoreTest {
 		assertTrue(RabbitCore.getStorer(FileEvent.class) instanceof FileEventStorer);
 		assertTrue(RabbitCore.getStorer(PartEvent.class) instanceof PartEventStorer);
 		assertNull(RabbitCore.getStorer(String.class));
+	}
+	
+	@Test
+	public void testGetAccessor() {
+		assertTrue(RabbitCore.getAccessor(AccessorType.PERSPECTIVE) instanceof PerspectiveDataAccessor);
+		assertTrue(RabbitCore.getAccessor(AccessorType.COMMAND) instanceof CommandDataAccessor);
+		assertTrue(RabbitCore.getAccessor(AccessorType.FILE) instanceof FileDataAccessor);
+		assertTrue(RabbitCore.getAccessor(AccessorType.PART) instanceof PartDataAccessor);
+		assertTrue(RabbitCore.getAccessor(AccessorType.SESSION) instanceof SessionDataAccessor);
 	}
 
 	@Test(expected = NullPointerException.class)

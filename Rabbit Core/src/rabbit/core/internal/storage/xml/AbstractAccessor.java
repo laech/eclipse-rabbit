@@ -33,6 +33,8 @@ import rabbit.core.storage.IAccessor;
  * Abstract class provides default behaviors, this class is designed
  * specifically for the schema.
  * 
+ * @param <T>
+ *            The result type.
  * @param <E>
  *            The XML type.
  * @param <S>
@@ -40,11 +42,8 @@ import rabbit.core.storage.IAccessor;
  */
 public abstract class AbstractAccessor<T, E, S extends EventGroupType> implements IAccessor<T> {
 
-	private final IDataStore dataStore;
-
 	/** Constructor. */
 	public AbstractAccessor() {
-		dataStore = getDataStore();
 	}
 
 	@Override
@@ -79,24 +78,6 @@ public abstract class AbstractAccessor<T, E, S extends EventGroupType> implement
 	protected abstract IDataStore getDataStore();
 
 	/**
-	 * Gets the id of the given type.
-	 * 
-	 * @param e
-	 *            The type.
-	 * @return The id.
-	 */
-	protected abstract String getId(E e);
-
-	/**
-	 * Gets the usage info from the given type.
-	 * 
-	 * @param e
-	 *            The type to get info from.
-	 * @return The usage info.
-	 */
-	protected abstract long getUsage(E e);
-
-	/**
 	 * Gets the data from the XML files.
 	 * 
 	 * @param start
@@ -110,10 +91,10 @@ public abstract class AbstractAccessor<T, E, S extends EventGroupType> implement
 		XMLGregorianCalendar startXmlCal = toXMLGregorianCalendarDate(start);
 		XMLGregorianCalendar endXmlCal = toXMLGregorianCalendarDate(end);
 
-		List<File> files = dataStore.getDataFiles(start, end);
+		List<File> files = getDataStore().getDataFiles(start, end);
 		for (File f : files) {
 
-			for (S list : getCategories(dataStore.read(f))) {
+			for (S list : getCategories(getDataStore().read(f))) {
 				if (list.getDate().compare(startXmlCal) >= 0
 						&& list.getDate().compare(endXmlCal) <= 0) {
 
@@ -123,14 +104,5 @@ public abstract class AbstractAccessor<T, E, S extends EventGroupType> implement
 		}
 		return data;
 	}
-
-	/**
-	 * Gets a collection of types from the given category.
-	 * 
-	 * @param list
-	 *            The category.
-	 * @return A collection of objects.
-	 */
-	protected abstract Collection<E> getXmlTypes(S list);
 
 }

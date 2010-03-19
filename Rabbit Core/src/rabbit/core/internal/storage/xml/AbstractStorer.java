@@ -48,7 +48,7 @@ import rabbit.core.storage.IStorer;
 public abstract class AbstractStorer<E extends DiscreteEvent, T, S extends EventGroupType>
 		implements IStorer<E> {
 
-	protected static final ObjectFactory OBJECT_FACTORY = new ObjectFactory();
+	protected final ObjectFactory objectFactory = new ObjectFactory();
 
 	/**
 	 * Checks whether the two calendars are representing the same date in time.

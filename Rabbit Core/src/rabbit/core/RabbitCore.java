@@ -44,11 +44,17 @@ import rabbit.core.events.PartEvent;
 import rabbit.core.events.PerspectiveEvent;
 import rabbit.core.internal.IdleDetector;
 import rabbit.core.internal.TrackerObject;
+import rabbit.core.internal.storage.xml.CommandDataAccessor;
 import rabbit.core.internal.storage.xml.CommandEventStorer;
+import rabbit.core.internal.storage.xml.FileDataAccessor;
 import rabbit.core.internal.storage.xml.FileEventStorer;
+import rabbit.core.internal.storage.xml.PartDataAccessor;
 import rabbit.core.internal.storage.xml.PartEventStorer;
+import rabbit.core.internal.storage.xml.PerspectiveDataAccessor;
 import rabbit.core.internal.storage.xml.PerspectiveEventStorer;
+import rabbit.core.internal.storage.xml.SessionDataAccessor;
 import rabbit.core.internal.storage.xml.XmlResourceManager;
+import rabbit.core.storage.IAccessor;
 import rabbit.core.storage.IResourceMapper;
 import rabbit.core.storage.IStorer;
 
@@ -56,6 +62,10 @@ import rabbit.core.storage.IStorer;
  * The activator class controls the plug-in life cycle
  */
 public class RabbitCore extends AbstractUIPlugin implements IWorkbenchListener {
+
+	public static enum AccessorType {
+		PERSPECTIVE, PART, SESSION, COMMAND, FILE,
+	}
 
 	/** The plug-in ID. **/
 	public static final String PLUGIN_ID = "rabbit.core";
@@ -73,16 +83,44 @@ public class RabbitCore extends AbstractUIPlugin implements IWorkbenchListener {
 	/** Map<T, IStorer<T> */
 	private static final Map<Class<?>, IStorer<?>> storers;
 
+	private static final Map<AccessorType, IAccessor<Map<String, Long>>> accessors;
+
 	/** The shared instance. */
 	private static RabbitCore plugin;
 
 	static {
 		Map<Class<?>, IStorer<?>> map = new HashMap<Class<?>, IStorer<?>>();
-		map.put(PerspectiveEvent.class, new PerspectiveEventStorer());
-		map.put(CommandEvent.class, new CommandEventStorer());
-		map.put(FileEvent.class, new FileEventStorer());
-		map.put(PartEvent.class, new PartEventStorer());
+		map.put(PerspectiveEvent.class, PerspectiveEventStorer.getInstance());
+		map.put(CommandEvent.class, CommandEventStorer.getInstance());
+		map.put(FileEvent.class, FileEventStorer.getInstance());
+		map.put(PartEvent.class, PartEventStorer.getInstance());
 		storers = Collections.unmodifiableMap(map);
+
+		Map<AccessorType, IAccessor<Map<String, Long>>> accessorMap =
+				new HashMap<AccessorType, IAccessor<Map<String, Long>>>();
+		accessorMap.put(AccessorType.PERSPECTIVE, new PerspectiveDataAccessor());
+		accessorMap.put(AccessorType.COMMAND, new CommandDataAccessor());
+		accessorMap.put(AccessorType.FILE, new FileDataAccessor());
+		accessorMap.put(AccessorType.PART, new PartDataAccessor());
+		accessorMap.put(AccessorType.SESSION, new SessionDataAccessor());
+		accessors = Collections.unmodifiableMap(accessorMap);
+	}
+
+	/**
+	 * Gets an accessor that gets the data from the database.
+	 * 
+	 * @param type
+	 *            The type of accessor.
+	 * @return An accessor that can get the data.
+	 * @throws NullPointerException
+	 *             If null is passed in.
+	 */
+	public static IAccessor<Map<String, Long>> getAccessor(AccessorType type) {
+		if (null == type) {
+			throw new NullPointerException();
+		}
+		IAccessor<Map<String, Long>> accessor = accessors.get(type);
+		return (accessor == null) ? null : accessor;
 	}
 
 	/**
@@ -215,7 +253,7 @@ public class RabbitCore extends AbstractUIPlugin implements IWorkbenchListener {
 			t.getTracker().setEnabled(true);
 		}
 		if (!XmlResourceManager.INSTANCE.write(true)) {
-			getLog().log(new Status(IStatus.ERROR, PLUGIN_ID, 
+			getLog().log(new Status(IStatus.ERROR, PLUGIN_ID,
 					"Unable to save resource mappings."));
 		}
 	}

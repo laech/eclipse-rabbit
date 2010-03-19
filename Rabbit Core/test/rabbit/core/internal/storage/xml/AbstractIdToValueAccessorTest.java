@@ -21,6 +21,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.junit.Assert;
+import org.junit.Test;
+
 import rabbit.core.internal.storage.xml.schema.events.EventGroupType;
 import rabbit.core.internal.storage.xml.schema.events.EventListType;
 
@@ -30,8 +33,36 @@ import rabbit.core.internal.storage.xml.schema.events.EventListType;
 public abstract class AbstractIdToValueAccessorTest<E, S extends EventGroupType>
 		extends AbstractAccessorTest<Map<String, Long>, E, S> {
 
+	private AbstractIdToValueAccessor<E, S> accessor = create();
+
+	@Test
+	public void testGetId() {
+		String id = "2983jncjdkf";
+		E type = createXmlType();
+		setId(type, id);
+		Assert.assertEquals(id, accessor.getId(type));
+	}
+
+	@Test
+	public void testGetUsage() {
+		long usage = 100193;
+		E type = createXmlType();
+		setUsage(type, usage);
+		Assert.assertEquals(usage, accessor.getUsage(type));
+	}
+
+	@Test
+	public void testGetXmlTypes() {
+		int size = 5;
+		S list = createListType();
+		for (int i = 0; i < size; i++) {
+			accessor.getXmlTypes(list).add(createXmlType());
+		}
+		Assert.assertEquals(size, accessor.getXmlTypes(list).size());
+	}
+
 	@Override
-	protected void checkValues(Map<String, Long> data, EventListType events) {
+	protected void assertValues(Map<String, Long> data, EventListType events) {
 		Map<String, Long> map = new HashMap<String, Long>();
 		for (S list : accessor.getCategories(events)) {
 			for (E e : accessor.getXmlTypes(list)) {
@@ -43,10 +74,13 @@ public abstract class AbstractIdToValueAccessorTest<E, S extends EventGroupType>
 				}
 			}
 		}
-		
+
 		assertEquals(map.size(), data.size());
-		for (Entry<String, Long > entry : map.entrySet()) {
+		for (Entry<String, Long> entry : map.entrySet()) {
 			assertEquals(entry.getValue(), data.get(entry.getKey()));
 		}
 	}
+
+	@Override
+	protected abstract AbstractIdToValueAccessor<E, S> create();
 }

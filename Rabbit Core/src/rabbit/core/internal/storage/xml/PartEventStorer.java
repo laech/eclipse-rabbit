@@ -24,10 +24,21 @@ import rabbit.core.internal.storage.xml.schema.events.EventListType;
 import rabbit.core.internal.storage.xml.schema.events.PartEventListType;
 import rabbit.core.internal.storage.xml.schema.events.PartEventType;
 
-public class PartEventStorer
+public final class PartEventStorer
 		extends AbstractStorer<PartEvent, PartEventType, PartEventListType> {
 
-	public PartEventStorer() {
+	private static final PartEventStorer INSTANCE = new PartEventStorer();
+
+	/**
+	 * Gets the shared instance of this class.
+	 * 
+	 * @return The shared instanceof this class.
+	 */
+	public static PartEventStorer getInstance() {
+		return INSTANCE;
+	}
+
+	private PartEventStorer() {
 	}
 
 	@Override
@@ -78,7 +89,7 @@ public class PartEventStorer
 	@Override
 	protected PartEventType newXmlType(PartEvent e) {
 
-		PartEventType type = OBJECT_FACTORY.createPartEventType();
+		PartEventType type = objectFactory.createPartEventType();
 		type.setDuration(e.getDuration());
 		type.setPartId(e.getWorkbenchPart().getSite().getId());
 
@@ -88,7 +99,7 @@ public class PartEventStorer
 	@Override
 	protected PartEventListType newXmlTypeHolder(XMLGregorianCalendar date) {
 
-		PartEventListType type = OBJECT_FACTORY.createPartEventListType();
+		PartEventListType type = objectFactory.createPartEventListType();
 		type.setDate(date);
 
 		return type;

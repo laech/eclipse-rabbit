@@ -13,9 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package rabbit.core.storage.xml;
+package rabbit.core.internal.storage.xml;
 
-import rabbit.core.internal.storage.xml.AbstractIdToValueAccessorTest;
+import java.util.List;
+
+import rabbit.core.internal.storage.xml.CommandDataAccessor;
 import rabbit.core.internal.storage.xml.schema.events.CommandEventListType;
 import rabbit.core.internal.storage.xml.schema.events.CommandEventType;
 
@@ -48,6 +50,11 @@ public class CommandDataAccessorTest extends
 	@Override
 	protected void setUsage(CommandEventType type, long usage) {
 		type.setCount((int) usage);
+	}
+
+	@Override
+	protected List<CommandEventType> getXmlTypes(CommandEventListType list) {
+		return list.getCommandEvent();
 	}
 
 }

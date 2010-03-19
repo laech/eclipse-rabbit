@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package rabbit.core.storage.xml;
+package rabbit.core.internal.storage.xml;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
@@ -28,5 +28,5 @@ import org.junit.runners.Suite.SuiteClasses;
 		SessionDataAccessorTest.class,
 //
 })
-public class AllTests {
+public class TestsAccessors {
 }

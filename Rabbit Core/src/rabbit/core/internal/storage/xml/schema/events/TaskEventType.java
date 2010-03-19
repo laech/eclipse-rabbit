@@ -11,18 +11,22 @@ package rabbit.core.internal.storage.xml.schema.events;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for fileEventType complex type.
+ * <p>Java class for taskEventType complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="fileEventType">
+ * &lt;complexType name="taskEventType">
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
+ *       &lt;sequence>
+ *         &lt;element name="taskId" type="{}taskIdType"/>
+ *       &lt;/sequence>
  *       &lt;attribute name="fileId" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
  *       &lt;attribute ref="{}duration use="required""/>
  *     &lt;/restriction>
@@ -33,13 +37,41 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "fileEventType")
-public class FileEventType {
+@XmlType(name = "taskEventType", propOrder = {
+    "taskId"
+})
+public class TaskEventType {
 
+    @XmlElement(required = true)
+    protected TaskIdType taskId;
     @XmlAttribute(required = true)
     protected String fileId;
     @XmlAttribute(required = true)
     protected long duration;
+
+    /**
+     * Gets the value of the taskId property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link TaskIdType }
+     *     
+     */
+    public TaskIdType getTaskId() {
+        return taskId;
+    }
+
+    /**
+     * Sets the value of the taskId property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link TaskIdType }
+     *     
+     */
+    public void setTaskId(TaskIdType value) {
+        this.taskId = value;
+    }
 
     /**
      * Gets the value of the fileId property.

@@ -61,6 +61,8 @@ public abstract class AbstractStorerTest2<E extends DiscreteEvent, T, S extends 
 			assertEquals(1, allEvents.size());
 
 			list = allEvents.get(0);
+			// The two events should have been merged because they are
+			// from the same date, and has the same "id"
 			assertEquals(1, getEventTypes(list).size());
 
 			type = getEventTypes(list).get(0);
@@ -99,6 +101,7 @@ public abstract class AbstractStorerTest2<E extends DiscreteEvent, T, S extends 
 			int day = cal.get(Calendar.DAY_OF_MONTH);
 			day = (day < 15) ? day + 1 : day - 1;
 			cal.set(Calendar.DAY_OF_MONTH, day);
+			e.setTime(cal);
 			storer.insert(e);
 			storer.commit();
 
@@ -130,7 +133,7 @@ public abstract class AbstractStorerTest2<E extends DiscreteEvent, T, S extends 
 			T type = getEventTypes(data.iterator().next()).get(0);
 			assertTrue(isEqual(type, e));
 
-			// Insert an event with the same partId and perspectiveId:
+			// Insert an event
 
 			e = createEvent();
 			storer.insert(e);
@@ -158,6 +161,7 @@ public abstract class AbstractStorerTest2<E extends DiscreteEvent, T, S extends 
 			int day = cal.get(Calendar.DAY_OF_MONTH);
 			day = (day < 15) ? day + 1 : day - 1;
 			cal.set(Calendar.DAY_OF_MONTH, day);
+			e.setTime(cal);
 
 			storer.insert(e);
 
@@ -225,6 +229,7 @@ public abstract class AbstractStorerTest2<E extends DiscreteEvent, T, S extends 
 				int day = cal.get(Calendar.DAY_OF_MONTH);
 				day = (day < 15) ? day + 1 : day - 1;
 				cal.set(Calendar.DAY_OF_MONTH, day);
+				e.setTime(cal);
 
 				list.add(e);
 				storer.insert(list);

@@ -118,6 +118,7 @@ public class CommandEventStorerTest extends
 			int day = cal.get(Calendar.DAY_OF_MONTH);
 			day = (day < 15) ? day + 1 : day - 1;
 			cal.set(Calendar.DAY_OF_MONTH, day);
+			e.setTime(cal);
 			storer.insert(e);
 			storer.commit();
 
@@ -209,6 +210,7 @@ public class CommandEventStorerTest extends
 			int day = cal.get(Calendar.DAY_OF_MONTH);
 			day = (day < 15) ? day + 1 : day - 1;
 			cal.set(Calendar.DAY_OF_MONTH, day);
+			e.setTime(cal);
 
 			storer.insert(e);
 
@@ -279,6 +281,7 @@ public class CommandEventStorerTest extends
 				int day = cal.get(Calendar.DAY_OF_MONTH);
 				day = (day < 15) ? day + 1 : day - 1;
 				cal.set(Calendar.DAY_OF_MONTH, day);
+				e.setTime(cal);
 
 				list.add(e);
 				storer.insert(list);
@@ -367,7 +370,7 @@ public class CommandEventStorerTest extends
 
 	@Override
 	protected CommandEventStorer create() {
-		return new CommandEventStorer();
+		return CommandEventStorer.getInstance();
 	}
 
 	@Override

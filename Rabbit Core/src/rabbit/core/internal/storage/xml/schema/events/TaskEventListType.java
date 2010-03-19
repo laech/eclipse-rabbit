@@ -17,16 +17,16 @@ import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for commandEventListType complex type.
+ * <p>Java class for taskEventListType complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="commandEventListType">
+ * &lt;complexType name="taskEventListType">
  *   &lt;complexContent>
  *     &lt;extension base="{}eventGroupType">
  *       &lt;sequence>
- *         &lt;element name="commandEvent" type="{}commandEventType" maxOccurs="unbounded"/>
+ *         &lt;element name="taskEvent" type="{}taskEventType" maxOccurs="unbounded"/>
  *       &lt;/sequence>
  *     &lt;/extension>
  *   &lt;/complexContent>
@@ -36,43 +36,43 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "commandEventListType", propOrder = {
-    "commandEvent"
+@XmlType(name = "taskEventListType", propOrder = {
+    "taskEvent"
 })
-public class CommandEventListType
+public class TaskEventListType
     extends EventGroupType
 {
 
     @XmlElement(required = true)
-    protected List<CommandEventType> commandEvent;
+    protected List<TaskEventType> taskEvent;
 
     /**
-     * Gets the value of the commandEvent property.
+     * Gets the value of the taskEvent property.
      * 
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
-     * This is why there is not a <CODE>set</CODE> method for the commandEvent property.
+     * This is why there is not a <CODE>set</CODE> method for the taskEvent property.
      * 
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
-     *    getCommandEvent().add(newItem);
+     *    getTaskEvent().add(newItem);
      * </pre>
      * 
      * 
      * <p>
      * Objects of the following type(s) are allowed in the list
-     * {@link CommandEventType }
+     * {@link TaskEventType }
      * 
      * 
      */
-    public List<CommandEventType> getCommandEvent() {
-        if (commandEvent == null) {
-            commandEvent = new ArrayList<CommandEventType>();
+    public List<TaskEventType> getTaskEvent() {
+        if (taskEvent == null) {
+            taskEvent = new ArrayList<TaskEventType>();
         }
-        return this.commandEvent;
+        return this.taskEvent;
     }
 
 }

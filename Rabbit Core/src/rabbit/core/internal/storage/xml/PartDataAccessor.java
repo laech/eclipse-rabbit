@@ -13,28 +13,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package rabbit.core.storage.xml;
+package rabbit.core.internal.storage.xml;
 
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Map;
 
-import rabbit.core.internal.storage.xml.AbstractIdToValueAccessor;
-import rabbit.core.internal.storage.xml.DataStore;
-import rabbit.core.internal.storage.xml.IDataStore;
 import rabbit.core.internal.storage.xml.schema.events.EventListType;
-import rabbit.core.internal.storage.xml.schema.events.FileEventListType;
-import rabbit.core.internal.storage.xml.schema.events.FileEventType;
+import rabbit.core.internal.storage.xml.schema.events.PartEventListType;
+import rabbit.core.internal.storage.xml.schema.events.PartEventType;
 
 /**
- * For getting data on file events.
+ * Gets data about part usage.
  */
-public class FileDataAccessor extends AbstractIdToValueAccessor<FileEventType, FileEventListType> {
+public class PartDataAccessor extends AbstractIdToValueAccessor<PartEventType, PartEventListType> {
+
+	/** Constructor. */
+	public PartDataAccessor() {
+		super();
+	}
 
 	/**
 	 * {@inheritDoc}
-	 * 
-	 * The keys of the map returned are file IDs.
+	 * <p>
+	 * The keys of the map returned are command IDs, and the values are usage
+	 * counts.
+	 * </p>
 	 */
 	@Override
 	public Map<String, Long> getData(Calendar start, Calendar end) {
@@ -42,28 +46,27 @@ public class FileDataAccessor extends AbstractIdToValueAccessor<FileEventType, F
 	}
 
 	@Override
-	protected Collection<FileEventListType> getCategories(EventListType doc) {
-		return doc.getFileEvents();
+	protected Collection<PartEventListType> getCategories(EventListType doc) {
+		return doc.getPartEvents();
 	}
 
 	@Override
 	protected IDataStore getDataStore() {
-		return DataStore.FILE_STORE;
+		return DataStore.PART_STORE;
 	}
 
 	@Override
-	protected String getId(FileEventType e) {
-		return e.getFileId();
+	protected String getId(PartEventType e) {
+		return e.getPartId();
 	}
 
 	@Override
-	protected long getUsage(FileEventType e) {
+	protected long getUsage(PartEventType e) {
 		return e.getDuration();
 	}
 
 	@Override
-	protected Collection<FileEventType> getXmlTypes(FileEventListType list) {
-		return list.getFileEvent();
+	protected Collection<PartEventType> getXmlTypes(PartEventListType list) {
+		return list.getPartEvent();
 	}
-
 }

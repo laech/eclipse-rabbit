@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package rabbit.core.storage.xml;
+package rabbit.core.internal.storage.xml;
 
 import static org.junit.Assert.assertEquals;
 
@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import rabbit.core.internal.storage.xml.SessionDataAccessor;
 import rabbit.core.internal.storage.xml.schema.events.EventListType;
 import rabbit.core.internal.storage.xml.schema.events.PerspectiveEventListType;
 import rabbit.core.internal.storage.xml.schema.events.PerspectiveEventType;
@@ -38,7 +39,7 @@ public class SessionDataAccessorTest extends PerspectiveDataAccessorTest {
 	}
 	
 	@Override
-	protected void checkValues(Map<String, Long> data, EventListType events) {
+	protected void assertValues(Map<String, Long> data, EventListType events) {
 		Format format = new SimpleDateFormat(SessionDataAccessor.DATE_FORMAT);
 		
 		Map<String, Long> map = new HashMap<String, Long>();

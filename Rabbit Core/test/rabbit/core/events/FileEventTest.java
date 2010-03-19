@@ -16,12 +16,9 @@
 package rabbit.core.events;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
 
 import java.util.Calendar;
 
-import org.eclipse.mylyn.tasks.core.ITask;
 import org.junit.Test;
 
 /**
@@ -33,18 +30,22 @@ public class FileEventTest extends ContinuousEventTest {
 	public void testContructor_fileIdNull() {
 		new FileEvent(Calendar.getInstance(), 10, null);
 	}
+	
+	@Test(expected = IllegalArgumentException.class)
+	public void testContructor_fileIdEmpty() {
+		new FileEvent(Calendar.getInstance(), 10, "");
+	}
+	
+	@Test(expected = IllegalArgumentException.class)
+	public void testContructor_fileIdWhitespaceOnly() {
+		new FileEvent(Calendar.getInstance(), 10, " \t");
+	}
 
 	@Test
 	public void testGetFileId() {
 		String fileId = System.currentTimeMillis() + "";
 		FileEvent event = new FileEvent(Calendar.getInstance(), 10, fileId);
 		assertEquals(fileId, event.getFileId());
-	}
-
-	@Test
-	public void testGetTask() {
-		FileEvent event = new FileEvent(Calendar.getInstance(), 1, "");
-		assertNull(event.getTask());
 	}
 
 	@Test
@@ -63,16 +64,17 @@ public class FileEventTest extends ContinuousEventTest {
 		FileEvent event = new FileEvent(Calendar.getInstance(), 1, "abc");
 		event.setFileId(null);
 	}
-
-	@SuppressWarnings("restriction")
-	@Test
-	public void testSetTask() {
-		FileEvent event = new FileEvent(Calendar.getInstance(), 2, "1");
-
-		ITask task = new org.eclipse.mylyn.internal.tasks.core
-				.LocalTask("repo", "task");
-		event.setTask(task);
-		assertSame(task, event.getTask());
+	
+	@Test(expected = IllegalArgumentException.class)
+	public void testSetFileId_empty() {
+		FileEvent event = new FileEvent(Calendar.getInstance(), 1, "abc");
+		event.setFileId("");
+	}
+	
+	@Test(expected = IllegalArgumentException.class)
+	public void testSetFileId_whitespace() {
+		FileEvent event = new FileEvent(Calendar.getInstance(), 1, "abc");
+		event.setFileId(" \t");
 	}
 
 	@Override

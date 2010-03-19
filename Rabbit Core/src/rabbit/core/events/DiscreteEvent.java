@@ -42,7 +42,7 @@ public class DiscreteEvent {
 	 * @return The event time.
 	 */
 	public Calendar getTime() {
-		return time;
+		return (Calendar) time.clone();
 	}
 
 	/**
@@ -58,6 +58,6 @@ public class DiscreteEvent {
 			throw new NullPointerException();
 		}
 
-		this.time = time;
+		this.time = (Calendar) time.clone();
 	}
 }

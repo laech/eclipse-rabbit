@@ -24,8 +24,22 @@ import rabbit.core.internal.storage.xml.schema.events.EventListType;
 import rabbit.core.internal.storage.xml.schema.events.PerspectiveEventListType;
 import rabbit.core.internal.storage.xml.schema.events.PerspectiveEventType;
 
-public class PerspectiveEventStorer
+public final class PerspectiveEventStorer
 		extends AbstractStorer<PerspectiveEvent, PerspectiveEventType, PerspectiveEventListType> {
+
+	private static final PerspectiveEventStorer INSTANCE = new PerspectiveEventStorer();
+
+	/**
+	 * Gets the shared instance of this class.
+	 * 
+	 * @return The shared instanceof this class.
+	 */
+	public static PerspectiveEventStorer getInstance() {
+		return INSTANCE;
+	}
+
+	private PerspectiveEventStorer() {
+	}
 
 	@Override
 	protected IDataStore getDataStore() {
@@ -69,7 +83,7 @@ public class PerspectiveEventStorer
 
 	@Override
 	protected PerspectiveEventType newXmlType(PerspectiveEvent e) {
-		PerspectiveEventType type = OBJECT_FACTORY.createPerspectiveEventType();
+		PerspectiveEventType type = objectFactory.createPerspectiveEventType();
 		type.setDuration(e.getDuration());
 		type.setPerspectiveId(e.getPerspective().getId());
 		return type;
@@ -77,7 +91,7 @@ public class PerspectiveEventStorer
 
 	@Override
 	protected PerspectiveEventListType newXmlTypeHolder(XMLGregorianCalendar date) {
-		PerspectiveEventListType type = OBJECT_FACTORY.createPerspectiveEventListType();
+		PerspectiveEventListType type = objectFactory.createPerspectiveEventListType();
 		type.setDate(date);
 		return type;
 	}

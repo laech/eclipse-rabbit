@@ -16,7 +16,6 @@
 package rabbit.core.internal.trackers;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Calendar;
@@ -25,15 +24,9 @@ import java.util.Iterator;
 import junit.framework.Assert;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.mylyn.internal.tasks.core.LocalTask;
-import org.eclipse.mylyn.tasks.core.ITask;
-import org.eclipse.mylyn.tasks.core.ITaskActivityManager;
-import org.eclipse.mylyn.tasks.ui.TasksUi;
 import org.eclipse.swtbot.swt.finder.junit.SWTBotJunit4ClassRunner;
 import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.IEditorReference;
 import org.eclipse.ui.IWorkbenchPart;
-import org.eclipse.ui.IWorkbenchPartReference;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -43,7 +36,6 @@ import rabbit.core.events.FileEvent;
 /**
  * Test for {@link FileTracker}
  */
-@SuppressWarnings("restriction")
 @RunWith(SWTBotJunit4ClassRunner.class)
 public class FileTrackerTest extends AbstractPartTrackerTest<FileEvent> {
 
@@ -73,33 +65,6 @@ public class FileTrackerTest extends AbstractPartTrackerTest<FileEvent> {
 		assertTrue((end - start) >= event.getDuration());
 
 		bot.activeShell().close();
-	}
-
-	@Test
-	public void testTask() {
-		tracker.setEnabled(false);
-		
-		ITask task = new LocalTask("id", "summary");
-		ITaskActivityManager taskManager = TasksUi.getTaskActivityManager();
-		taskManager.deactivateActiveTask();
-
-		IWorkbenchPartReference ref = getActiveWindow().getPartService().getActivePartReference();
-		if (!(ref instanceof IEditorReference)) {
-			openNewEditor();
-			ref = getActiveWindow().getPartService().getActivePartReference();
-		}
-
-		taskManager.activateTask(task);
-		tracker.setEnabled(true);
-		uiSleep(20);
-		tracker.setEnabled(false);
-		assertEquals(1, tracker.getData().size());
-		
-		FileEvent event = tracker.getData().iterator().next();
-		ITask taskRef = event.getTask();
-		assertNotNull(taskRef);
-		assertEquals(task.getRepositoryUrl(), taskRef.getRepositoryUrl());
-		assertEquals(task.getTaskId(), taskRef.getTaskId());
 	}
 
 	@Override

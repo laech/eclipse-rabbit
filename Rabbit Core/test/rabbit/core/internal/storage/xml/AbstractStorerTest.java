@@ -62,12 +62,13 @@ public abstract class AbstractStorerTest<E extends DiscreteEvent, T, S extends E
 	protected File dataFile = storer.getDataStore().getDataFile(Calendar.getInstance());
 
 	@Before
-	public void setUp() {
+	public void setUp() throws Exception {
 		if (dataFile.exists()) {
 			if (!dataFile.delete()) {
 				System.err.println("File is not deleted.");
 			}
 		}
+		getDataField(storer).clear();
 	}
 
 	@Test

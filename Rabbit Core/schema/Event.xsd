@@ -14,6 +14,7 @@
 			<xs:element name="partEvents" type="partEventListType" maxOccurs="unbounded" />
 			<xs:element name="fileEvents" type="fileEventListType" maxOccurs="unbounded" />
 			<xs:element name="perspectiveEvents" type="perspectiveEventListType" maxOccurs="unbounded" />
+			<xs:element name="taskEvents" type="taskEventListType" maxOccurs="unbounded" />
 		</xs:sequence>
 	</xs:complexType>
 
@@ -75,7 +76,28 @@
 	<xs:complexType name="fileEventType">
 		<xs:attribute name="fileId" type="xs:string" use="required" />
 		<xs:attribute ref="duration" use="required" />
-		<xs:attribute name="taskHandleId" type="xs:string" use="optional" />
+	</xs:complexType>
+	
+	<!-- Task File Events: -->
+	<xs:complexType name="taskEventListType">
+		<xs:complexContent>
+			<xs:extension base="eventGroupType">
+				<xs:sequence>
+					<xs:element name="taskEvent" type="taskEventType" maxOccurs="unbounded" />
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:complexType name="taskEventType">
+		<xs:sequence>
+			<xs:element name="taskId" type="taskIdType" minOccurs="1" maxOccurs="1" />
+		</xs:sequence>
+		<xs:attribute name="fileId" type="xs:string" use="required" />
+		<xs:attribute ref="duration" use="required" />
+	</xs:complexType>
+	<xs:complexType name="taskIdType">
+		<xs:attribute name="handleId" type="xs:string" use="required" />
+		<xs:attribute name="creationDate" type="xs:dateTime" use="required" />
 	</xs:complexType>
 	
 

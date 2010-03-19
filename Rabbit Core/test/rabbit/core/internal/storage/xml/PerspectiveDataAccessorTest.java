@@ -13,9 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package rabbit.core.storage.xml;
+package rabbit.core.internal.storage.xml;
 
-import rabbit.core.internal.storage.xml.AbstractIdToValueAccessorTest;
+import java.util.List;
+
+import rabbit.core.internal.storage.xml.PerspectiveDataAccessor;
 import rabbit.core.internal.storage.xml.schema.events.PerspectiveEventListType;
 import rabbit.core.internal.storage.xml.schema.events.PerspectiveEventType;
 
@@ -45,6 +47,11 @@ public class PerspectiveDataAccessorTest extends
 	@Override
 	protected void setUsage(PerspectiveEventType type, long usage) {
 		type.setDuration(usage);
+	}
+
+	@Override
+	protected List<PerspectiveEventType> getXmlTypes(PerspectiveEventListType list) {
+		return list.getPerspectiveEvent();
 	}
 
 }

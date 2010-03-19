@@ -64,7 +64,7 @@ public class PerspectiveEventStorerTest
 
 	@Override
 	protected PerspectiveEventStorer create() {
-		return new PerspectiveEventStorer();
+		return PerspectiveEventStorer.getInstance();
 	}
 
 	@Override

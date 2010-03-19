@@ -11,19 +11,16 @@ Require-Bundle: org.eclipse.core.runtime,
  org.junit4;resolution:=optional,
  org.eclipse.swtbot.eclipse.finder;resolution:=optional,
  org.eclipse.swtbot.junit4_x;resolution:=optional,
- org.eclipse.swtbot.swt.finder;resolution:=optional,
- org.eclipse.mylyn.tasks.ui;resolution:=optional,
- org.eclipse.mylyn.tasks.core;resolution:=optional
+ org.eclipse.swtbot.swt.finder;resolution:=optional
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: rabbit.core,
  rabbit.core.events,
- rabbit.core.internal,
- rabbit.core.internal.storage.xml,
- rabbit.core.internal.storage.xml.schema.events;x-friends:="rabbit.mylyn.core";
+ rabbit.core.internal;x-friends:="rabbit.tasks.core",
+ rabbit.core.internal.storage.xml;x-friends:="rabbit.tasks.core",
+ rabbit.core.internal.storage.xml.schema.events;x-friends:="rabbit.tasks.core";
   uses:="javax.xml.bind,
    javax.xml.datatype",
- rabbit.core.internal.storage.xml.schema.resources;x-friends:="rabbit.mylyn.core";uses:="javax.xml.bind",
- rabbit.core.internal.trackers,
- rabbit.core.storage,
- rabbit.core.storage.xml
+ rabbit.core.internal.storage.xml.schema.resources;x-friends:="rabbit.tasks.core";uses:="javax.xml.bind",
+ rabbit.core.internal.trackers;x-friends:="rabbit.tasks.core",
+ rabbit.core.storage
 Bundle-ActivationPolicy: lazy

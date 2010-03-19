@@ -16,6 +16,7 @@
 package rabbit.core.events;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 
 import java.util.Calendar;
@@ -33,8 +34,20 @@ public class DiscreteEventTest {
 	private DiscreteEvent event = createEvent(time);
 
 	@Test(expected = NullPointerException.class)
-	public void testConstructor_withTimeNull() {
+	public void testConstructor_null() {
 		new DiscreteEvent(null);
+	}
+
+	/*
+	 * Test the constructor actually clones the date.
+	 */
+	@Test
+	public void testConstructor_clonesTime() {
+		Calendar cal = Calendar.getInstance();
+		DiscreteEvent event = new DiscreteEvent(cal);
+
+		cal.add(Calendar.YEAR, 1);
+		assertFalse(cal.equals(event.getTime()));
 	}
 
 	@Test
@@ -47,6 +60,16 @@ public class DiscreteEventTest {
 		assertEquals(time, event.getTime());
 	}
 
+	/*
+	 * Test the method returns a clone instead of the real thing.
+	 */
+	@Test
+	public void testGetTime_returnCopy() {
+		Calendar cal = event.getTime();
+		cal.add(Calendar.YEAR, 1);
+		assertFalse(cal.equals(event.getTime()));
+	}
+
 	@Test
 	public void testSetTime() {
 
@@ -54,9 +77,22 @@ public class DiscreteEventTest {
 		event.setTime(newTime);
 		assertEquals(newTime, event.getTime());
 	}
+	
+	/*
+	 * Test the method actually clones the date.
+	 */
+	@Test
+	public void testSetTime_clonesTime() {
+		DiscreteEvent event = new DiscreteEvent(Calendar.getInstance());
+
+		Calendar cal = Calendar.getInstance();
+		event.setTime(cal);
+		cal.add(Calendar.YEAR, 1);
+		assertFalse(cal.equals(event.getTime()));
+	}
 
 	@Test(expected = NullPointerException.class)
-	public void testSetTimeNull() {
+	public void testSetTime_null() {
 		event.setTime(null);
 	}
 

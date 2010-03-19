@@ -85,7 +85,7 @@ public class PartEventStorerTest extends
 
 	@Override
 	protected PartEventStorer create() {
-		return new PartEventStorer();
+		return PartEventStorer.getInstance();
 	}
 
 	@Override

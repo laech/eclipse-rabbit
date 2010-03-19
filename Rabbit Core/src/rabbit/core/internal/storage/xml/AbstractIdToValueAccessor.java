@@ -15,12 +15,22 @@
  */
 package rabbit.core.internal.storage.xml;
 
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import rabbit.core.internal.storage.xml.schema.events.EventGroupType;
 
+/**
+ * Represents a accessor that returns a map of data, where the keys of the map
+ * are some kind of IDs, and the values of the map actual values for the keys.
+ * 
+ * @param <E>
+ *            The XML event type.
+ * @param <S>
+ *            The container of the XML event types.
+ */
 public abstract class AbstractIdToValueAccessor<E, S extends EventGroupType>
 		extends AbstractAccessor<Map<String, Long>, E, S> {
 
@@ -39,4 +49,31 @@ public abstract class AbstractIdToValueAccessor<E, S extends EventGroupType>
 		}
 		return result;
 	}
+
+	/**
+	 * Gets the id of the given type.
+	 * 
+	 * @param e
+	 *            The type.
+	 * @return The id.
+	 */
+	protected abstract String getId(E e);
+
+	/**
+	 * Gets the usage info from the given type.
+	 * 
+	 * @param e
+	 *            The type to get info from.
+	 * @return The usage info.
+	 */
+	protected abstract long getUsage(E e);
+
+	/**
+	 * Gets a collection of types from the given category.
+	 * 
+	 * @param list
+	 *            The category.
+	 * @return A collection of objects.
+	 */
+	protected abstract Collection<E> getXmlTypes(S list);
 }

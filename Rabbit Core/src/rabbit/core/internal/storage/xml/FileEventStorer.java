@@ -24,8 +24,22 @@ import rabbit.core.internal.storage.xml.schema.events.EventListType;
 import rabbit.core.internal.storage.xml.schema.events.FileEventListType;
 import rabbit.core.internal.storage.xml.schema.events.FileEventType;
 
-public class FileEventStorer extends
+public final class FileEventStorer extends
 		AbstractStorer<FileEvent, FileEventType, FileEventListType> {
+	
+	private static final FileEventStorer INSTANCE = new FileEventStorer();
+
+	/**
+	 * Gets the shared instance of this class.
+	 * 
+	 * @return The shared instanceof this class.
+	 */
+	public static FileEventStorer getInstance() {
+		return INSTANCE;
+	}
+
+	private FileEventStorer() {
+	}
 
 	@Override
 	protected IDataStore getDataStore() {
@@ -39,32 +53,12 @@ public class FileEventStorer extends
 
 	@Override
 	protected boolean hasSameId(FileEventType x, FileEvent e) {
-		boolean result = x.getFileId().equals(e.getFileId());
-		if (result == false) {
-			return result;
-			
-		} else if (x.getTaskHandleId() != null && e.getTask() != null) {
-			result &= x.getTaskHandleId().equals(e.getTask().getHandleIdentifier());
-			
-		} else if (!(x.getTaskHandleId() == null && e.getTask() == null)) {
-			result = false;
-		}
-		return result;
+		return x.getFileId().equals(e.getFileId());
 	}
 
 	@Override
 	protected boolean hasSameId(FileEventType x1, FileEventType x2) {
-		boolean result = x1.getFileId().equals(x2.getFileId());
-		if (result == false) {
-			return result;
-			
-		} else if (x1.getTaskHandleId() != null && x2.getTaskHandleId() != null) {
-			result &= x1.getTaskHandleId().equals(x2.getTaskHandleId());
-			
-		} else if (!(x1.getTaskHandleId() == null && x2.getTaskHandleId() == null)) {
-			result = false;
-		}
-		return result;
+		return x1.getFileId().equals(x2.getFileId());
 	}
 
 	@Override
@@ -89,18 +83,15 @@ public class FileEventStorer extends
 
 	@Override
 	protected FileEventType newXmlType(FileEvent e) {
-		FileEventType type = OBJECT_FACTORY.createFileEventType();
+		FileEventType type = objectFactory.createFileEventType();
 		type.setDuration(e.getDuration());
 		type.setFileId(e.getFileId());
-		if (e.getTask() != null) {
-			type.setTaskHandleId(e.getTask().getHandleIdentifier());
-		}
 		return type;
 	}
 
 	@Override
 	protected FileEventListType newXmlTypeHolder(XMLGregorianCalendar date) {
-		FileEventListType type = OBJECT_FACTORY.createFileEventListType();
+		FileEventListType type = objectFactory.createFileEventListType();
 		type.setDate(date);
 		return type;
 	}

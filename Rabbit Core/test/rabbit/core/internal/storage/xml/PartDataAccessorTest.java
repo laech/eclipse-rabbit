@@ -13,9 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package rabbit.core.storage.xml;
+package rabbit.core.internal.storage.xml;
 
-import rabbit.core.internal.storage.xml.AbstractIdToValueAccessorTest;
+import java.util.List;
+
+import rabbit.core.internal.storage.xml.PartDataAccessor;
 import rabbit.core.internal.storage.xml.schema.events.PartEventListType;
 import rabbit.core.internal.storage.xml.schema.events.PartEventType;
 
@@ -48,6 +50,11 @@ public class PartDataAccessorTest extends
 	@Override
 	protected void setUsage(PartEventType type, long usage) {
 		type.setDuration(usage);
+	}
+
+	@Override
+	protected List<PartEventType> getXmlTypes(PartEventListType list) {
+		return list.getPartEvent();
 	}
 
 }

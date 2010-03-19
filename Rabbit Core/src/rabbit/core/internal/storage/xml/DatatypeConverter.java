@@ -16,6 +16,7 @@
 package rabbit.core.internal.storage.xml;
 
 import java.util.Calendar;
+import java.util.GregorianCalendar;
 
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeConstants;
@@ -61,5 +62,10 @@ public class DatatypeConverter {
 				cal.get(Calendar.MONTH) + 1,
 				cal.get(Calendar.DAY_OF_MONTH),
 				DatatypeConstants.FIELD_UNDEFINED);
+	}
+	
+	// TODO test
+	public static XMLGregorianCalendar toXMLGregorianCalendarDateTime(GregorianCalendar cal) {
+		return datatypeFactory.newXMLGregorianCalendar(cal);
 	}
 }
