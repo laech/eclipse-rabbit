@@ -24,8 +24,9 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.TableColumn;
 
+import rabbit.core.RabbitCore;
+import rabbit.core.RabbitCore.AccessorType;
 import rabbit.core.storage.IAccessor;
-import rabbit.core.storage.xml.SessionDataAccessor;
 import rabbit.ui.DisplayPreference;
 import rabbit.ui.TableLabelComparator;
 
@@ -39,7 +40,7 @@ public class SessionPage extends AbstractTableViewerPage {
 
 	/** Constructs a new page. */
 	public SessionPage() {
-		dataStore = new SessionDataAccessor();
+		dataStore = RabbitCore.getAccessor(AccessorType.SESSION);
 		model = new LinkedHashMap<String, Long>();
 	}
 

@@ -25,7 +25,6 @@ import org.eclipse.jface.viewers.DecoratingLabelProvider;
 import org.eclipse.jface.viewers.ILabelDecorator;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ITableLabelProvider;
-import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 
 import rabbit.ui.internal.pages.ResourcePage.ShowMode;
@@ -39,11 +38,6 @@ public class ResourcePageDecoratingLabelProvider extends DecoratingLabelProvider
 			ILabelDecorator decorator) {
 		super(provider, decorator);
 		page = parent;
-	}
-
-	@Override
-	public Color getBackground(Object element) {
-		return null;
 	}
 
 	@Override

@@ -18,20 +18,13 @@ package rabbit.ui.internal.pages;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
-import java.lang.reflect.Field;
-import java.util.Map;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.ui.ISharedImages;
-import org.eclipse.ui.PlatformUI;
 import org.junit.Test;
 
 /**
@@ -45,38 +38,8 @@ public class ResourcePageLabelProviderTest {
 	private static IFolder folder = project.getFolder("f");
 	private static IFile file = project.getFile("a");
 
-	@SuppressWarnings("unchecked")
 	@Test
-	public void testDispose() throws Exception {
-		ISharedImages sharedImages = PlatformUI.getWorkbench().getSharedImages();
-
-		Field resourceMapField = ResourcePageLabelProvider.class.getDeclaredField("resourceMap");
-		resourceMapField.setAccessible(true);
-		Map<String, Image> resourceMap = (Map<String, Image>) resourceMapField.get(provider);
-		resourceMap.put("abc", sharedImages.getImageDescriptor(ISharedImages.IMG_OBJ_ELEMENT)
-				.createImage());
-
-		Field editorMapField = ResourcePageLabelProvider.class.getDeclaredField("editorMap");
-		editorMapField.setAccessible(true);
-		Map<String, Image> editorMap = (Map<String, Image>) editorMapField.get(provider);
-		editorMap.put("cde", sharedImages.getImageDescriptor(ISharedImages.IMG_OBJ_FILE)
-				.createImage());
-
-		provider.dispose();
-		for (Image img : resourceMap.values()) {
-			if (img != null) {
-				assertTrue(img.isDisposed());
-			}
-		}
-		for (Image img : editorMap.values()) {
-			if (img != null) {
-				assertTrue(img.isDisposed());
-			}
-		}
-	}
-
-	@Test
-	public void testGetBackgroun() {
+	public void testGetBackground() {
 		assertNull(provider.getBackground(project));
 		assertNull(provider.getBackground(folder));
 		assertNull(provider.getBackground(file));

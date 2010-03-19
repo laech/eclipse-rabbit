@@ -28,7 +28,7 @@
             name="Eclipse Usage">
       </page>
       <page
-            class="rabbit.ui.internal.pages.ResourcesCategory"
+            class="rabbit.ui.internal.pages.ProjectCategory"
             description="Contains pages that display information relating to projects"
             icon="resources/projectclosed.gif"
             id="rabbit.ui.pages.projectRelated"

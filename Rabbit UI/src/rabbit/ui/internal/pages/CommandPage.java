@@ -28,8 +28,9 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.commands.ICommandService;
 
+import rabbit.core.RabbitCore;
+import rabbit.core.RabbitCore.AccessorType;
 import rabbit.core.storage.IAccessor;
-import rabbit.core.storage.xml.CommandDataAccessor;
 import rabbit.ui.DisplayPreference;
 import rabbit.ui.TableLabelComparator;
 
@@ -49,7 +50,7 @@ public class CommandPage extends AbstractTableViewerPage {
 	 */
 	public CommandPage() {
 		super();
-		accessor = new CommandDataAccessor();
+		accessor = RabbitCore.getAccessor(AccessorType.COMMAND);
 		dataMapping = new HashMap<Command, Long>();
 		service = (ICommandService)
 				PlatformUI.getWorkbench().getService(ICommandService.class);

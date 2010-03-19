@@ -13,11 +13,11 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.swtbot.eclipse.finder;resolution:=optional,
  org.eclipse.swtbot.junit4_x;resolution:=optional,
  org.eclipse.swtbot.swt.finder;resolution:=optional,
- org.junit4
+ org.junit4;resolution:=optional
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: rabbit.ui,
- rabbit.ui.internal;x-friends:="rabbit.mylyn.ui",
- rabbit.ui.internal.pages;x-friends:="rabbit.mylyn.ui",
- rabbit.ui.internal.pref;x-friends:="rabbit.mylyn.ui",
- rabbit.ui.internal.util;x-friends:="rabbit.mylyn.ui"
+ rabbit.ui.internal;x-friends:="rabbit.tasks.ui",
+ rabbit.ui.internal.pages;x-friends:="rabbit.tasks.ui",
+ rabbit.ui.internal.pref;x-friends:="rabbit.tasks.ui",
+ rabbit.ui.internal.util;x-friends:="rabbit.tasks.ui"

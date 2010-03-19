@@ -26,9 +26,9 @@ import org.eclipse.swt.widgets.Label;
 import rabbit.ui.DisplayPreference;
 import rabbit.ui.IPage;
 
-public class ResourcesCategory implements IPage {
+public class ProjectCategory implements IPage {
 
-	public ResourcesCategory() {
+	public ProjectCategory() {
 	}
 
 	@Override

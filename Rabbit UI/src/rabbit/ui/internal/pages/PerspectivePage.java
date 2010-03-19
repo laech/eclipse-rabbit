@@ -27,8 +27,9 @@ import org.eclipse.ui.IPerspectiveDescriptor;
 import org.eclipse.ui.IPerspectiveRegistry;
 import org.eclipse.ui.PlatformUI;
 
+import rabbit.core.RabbitCore;
+import rabbit.core.RabbitCore.AccessorType;
 import rabbit.core.storage.IAccessor;
-import rabbit.core.storage.xml.PerspectiveDataAccessor;
 import rabbit.ui.DisplayPreference;
 import rabbit.ui.TableLabelComparator;
 import rabbit.ui.internal.util.UndefinedPerspectiveDescriptor;
@@ -44,7 +45,7 @@ public class PerspectivePage extends AbstractTableViewerPage {
 
 	public PerspectivePage() {
 		super();
-		dataStore = new PerspectiveDataAccessor();
+		dataStore = RabbitCore.getAccessor(AccessorType.PERSPECTIVE);
 		dataMapping = new HashMap<IPerspectiveDescriptor, Long>();
 		registry = PlatformUI.getWorkbench().getPerspectiveRegistry();
 	}

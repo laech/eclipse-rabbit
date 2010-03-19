@@ -48,9 +48,9 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.ide.IDE;
 
 import rabbit.core.RabbitCore;
+import rabbit.core.RabbitCore.AccessorType;
 import rabbit.core.storage.IAccessor;
 import rabbit.core.storage.IResourceMapper;
-import rabbit.core.storage.xml.FileDataAccessor;
 import rabbit.ui.DisplayPreference;
 import rabbit.ui.TreeLabelComparator;
 import rabbit.ui.internal.SharedImages;
@@ -115,7 +115,7 @@ public class ResourcePage extends AbstractTreeViewerPage {
 
 	public ResourcePage() {
 		super();
-		accessor = new FileDataAccessor();
+		accessor = RabbitCore.getAccessor(AccessorType.FILE);
 		resourceMapper = RabbitCore.getDefault().getResourceManager();
 
 		projectResources = new HashMap<IProject, Set<IResource>>();

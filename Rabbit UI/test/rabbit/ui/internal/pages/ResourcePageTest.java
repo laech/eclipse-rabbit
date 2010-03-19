@@ -45,9 +45,9 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import rabbit.core.RabbitCore;
+import rabbit.core.RabbitCore.AccessorType;
 import rabbit.core.storage.IAccessor;
 import rabbit.core.storage.IResourceMapper;
-import rabbit.core.storage.xml.FileDataAccessor;
 import rabbit.ui.DisplayPreference;
 
 public class ResourcePageTest extends AbstractTreeViewerPageTest {
@@ -388,7 +388,7 @@ public class ResourcePageTest extends AbstractTreeViewerPageTest {
 		preference.getStartDate().set(end.get(Calendar.YEAR), end.get(Calendar.MONTH) - 2,
 				end.get(Calendar.DAY_OF_MONTH));
 
-		IAccessor<Map<String, Long>> accessor = new FileDataAccessor();
+		IAccessor<Map<String, Long>> accessor = RabbitCore.getAccessor(AccessorType.FILE);
 		Map<String, Long> data = accessor.getData(preference.getStartDate(), preference
 				.getEndDate());
 

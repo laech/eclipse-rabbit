@@ -29,12 +29,13 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import rabbit.core.storage.xml.SessionDataAccessor;
+import rabbit.core.internal.storage.xml.SessionDataAccessor;
 import rabbit.ui.internal.util.MillisConverter;
 
 /**
  * Test for {@link SessionPageLabelProvider}
  */
+@SuppressWarnings("restriction")
 public class SessionPageLabelProviderTest {
 
 	private static Shell shell;
