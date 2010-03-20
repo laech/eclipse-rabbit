@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="rabbit.ui.pages">
+      <page
+            class="rabbit.tasks.ui.internal.pages.TaskPage"
+            description="Time spent on tasks and resources"
+            icon="resources/task.gif"
+            id="rabbit.ui.pages.task"
+            name="Tasks"
+            parent="rabbit.ui.pages.projectRelated">
+      </page>
+   </extension>
+
+</plugin>

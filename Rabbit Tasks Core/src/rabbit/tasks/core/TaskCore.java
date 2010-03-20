@@ -1,16 +1,53 @@
+/*
+ * Copyright 2010 The Rabbit Eclipse Plug-in Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package rabbit.tasks.core;
 
 import java.util.Map;
 
+import org.eclipse.ui.plugin.AbstractUIPlugin;
+import org.osgi.framework.BundleContext;
+
 import rabbit.core.storage.IAccessor;
+import rabbit.core.storage.IStorer;
+import rabbit.tasks.core.events.TaskEvent;
 import rabbit.tasks.core.internal.storage.xml.TaskDataAccessor;
+import rabbit.tasks.core.internal.storage.xml.TaskEventStorer;
 
 /**
- * 
+ * The activator class controls the plug-in life cycle
  */
-public class TaskCore {
+public class TaskCore extends AbstractUIPlugin {
 
-	private static TaskDataAccessor accessor = new TaskDataAccessor();
+	private static TaskDataAccessor accessor;
+
+	/** The shared instance. */
+	private static TaskCore plugin;
+
+	static {
+		accessor = new TaskDataAccessor();
+	}
+	
+	/**
+	 * Returns the shared instance
+	 * 
+	 * @return the shared instance
+	 */
+	public static TaskCore getDefault() {
+		return plugin;
+	}
 
 	/**
 	 * Gets an accessor to get the data stored.
@@ -19,5 +56,28 @@ public class TaskCore {
 	 */
 	public static IAccessor<Map<TaskId, Map<String, Long>>> getTaskDataAccessor() {
 		return accessor;
+	}
+
+	// TODO
+	public static IStorer<TaskEvent> getTaskEventStorer() {
+		return TaskEventStorer.getInstance();
+	}
+
+	/**
+	 * The constructor.
+	 */
+	public TaskCore() {
+	}
+
+	@Override
+	public void start(BundleContext context) throws Exception {
+		super.start(context);
+		plugin = this;
+	}
+
+	@Override
+	public void stop(BundleContext context) throws Exception {
+		plugin = null;
+		super.stop(context);
 	}
 }

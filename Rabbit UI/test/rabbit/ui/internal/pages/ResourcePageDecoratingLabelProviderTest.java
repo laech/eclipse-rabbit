@@ -63,21 +63,7 @@ public class ResourcePageDecoratingLabelProviderTest {
 	@BeforeClass
 	public static void beforeClass() throws Exception {
 		shell = new Shell(PlatformUI.getWorkbench().getDisplay());
-		page = new ResourcePage() {
-
-			@Override
-			public long getValue(Object o) {
-				if (o instanceof IProject) {
-					return getValueOfProject((IProject) o);
-				} else if (o instanceof IFolder) {
-					return getValueOfFolder((IFolder) o);
-				} else if (o instanceof IFile) {
-					return getValueOfFile((IFile) o);
-				} else {
-					return 0;
-				}
-			}
-		};
+		page = new ResourcePage();
 		page.createContents(shell);
 
 		labeler = new ResourcePageLabelProvider();

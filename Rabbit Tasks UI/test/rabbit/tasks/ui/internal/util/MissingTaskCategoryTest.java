@@ -13,19 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package rabbit.tasks.core;
+package rabbit.tasks.ui.internal.util;
 
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
+
+import java.util.Date;
 
 import org.junit.Test;
 
+import rabbit.tasks.core.TaskId;
+
 /**
- * @see TaskCore
+ * @see MissingTaskCategory
  */
-public class TaskCoreTest {
+public class MissingTaskCategoryTest {
 
 	@Test
-	public void testGetTaskDataAccessor() {
-		assertNotNull(TaskCore.getTaskDataAccessor());
+	public void testGetChildren() {
+		MissingTaskCategory cat = MissingTaskCategory.getCategory();
+		try {
+			cat.getChildren().add(new MissingTask(new TaskId("id", new Date())));
+		} catch (Exception e) {
+			fail();
+		}
 	}
 }
