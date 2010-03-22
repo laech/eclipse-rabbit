@@ -26,8 +26,10 @@ import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 
-import rabbit.core.RabbitCore;
+import rabbit.core.internal.RabbitCorePlugin;
 import rabbit.core.internal.storage.xml.schema.events.EventListType;
 import rabbit.core.internal.storage.xml.schema.events.ObjectFactory;
 
@@ -40,7 +42,7 @@ public enum DataStore implements IDataStore {
 	PART_STORE("partEvents"),
 	PERSPECTIVE_STORE("perspectiveEvents"),
 	FILE_STORE("fileEvents"),
-	
+
 	/**
 	 * @since 1.1
 	 */
@@ -82,7 +84,7 @@ public enum DataStore implements IDataStore {
 		end.set(Calendar.DAY_OF_MONTH, start.get(Calendar.DAY_OF_MONTH));
 
 		List<File> result = new ArrayList<File>();
-		IPath[] storagePaths = RabbitCore.getDefault().getStoragePaths();
+		IPath[] storagePaths = RabbitCorePlugin.getDefault().getStoragePaths();
 		while (start.compareTo(end) <= 0) {
 
 			for (IPath path : storagePaths) {
@@ -99,11 +101,14 @@ public enum DataStore implements IDataStore {
 
 	@Override
 	public IPath getStorageLocation() {
-		IPath path = RabbitCore.getDefault().getStoragePath();
+		IPath path = RabbitCorePlugin.getDefault().getStoragePath();
 		File f = path.toFile();
 		if (!f.exists()) {
 			if (!f.mkdirs()) {
-				System.err.println(getClass() + ": Cannot create storage location.");
+				RabbitCorePlugin.getDefault().getLog().log(
+						new Status(IStatus.ERROR, RabbitCorePlugin.PLUGIN_ID,
+								"Unable to create storage location. Perhaps no write permission?\n"
+										+ f.getAbsolutePath()));
 			}
 		}
 		return path;
@@ -137,6 +142,9 @@ public enum DataStore implements IDataStore {
 			JaxbUtil.marshal(objectFactory.createEvents(doc), f);
 			return true;
 		} catch (JAXBException e) {
+			RabbitCorePlugin.getDefault().getLog().log(
+					new Status(IStatus.ERROR, RabbitCorePlugin.PLUGIN_ID,
+							"Unable to save data.", e));
 			return false;
 		}
 	}

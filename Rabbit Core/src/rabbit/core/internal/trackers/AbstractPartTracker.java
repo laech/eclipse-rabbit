@@ -31,7 +31,7 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 
-import rabbit.core.RabbitCore;
+import rabbit.core.internal.RabbitCorePlugin;
 
 /**
  * Defines common behaviors for part trackers.
@@ -70,7 +70,7 @@ public abstract class AbstractPartTracker<E> extends AbstractTracker<E>
 				if (part == null) {
 					return;
 				}
-				if (RabbitCore.getDefault().getIdleDetector().isUserActive()) {
+				if (RabbitCorePlugin.getDefault().getIdleDetector().isUserActive()) {
 					startSession(part);
 				} else {
 					endSession(part);
@@ -103,7 +103,7 @@ public abstract class AbstractPartTracker<E> extends AbstractTracker<E>
 
 	@Override
 	public void update(Observable o, Object arg) {
-		if (o == RabbitCore.getDefault().getIdleDetector()) {
+		if (o == RabbitCorePlugin.getDefault().getIdleDetector()) {
 			PlatformUI.getWorkbench().getDisplay().syncExec(idleDetectorCode);
 		}
 	}
@@ -140,7 +140,7 @@ public abstract class AbstractPartTracker<E> extends AbstractTracker<E>
 
 	@Override
 	protected void doDisable() {
-		RabbitCore.getDefault().getIdleDetector().deleteObserver(this);
+		RabbitCorePlugin.getDefault().getIdleDetector().deleteObserver(this);
 		PlatformUI.getWorkbench().removeWindowListener(this);
 		for (IPartService s : getPartServices()) {
 			s.removePartListener(this);
@@ -160,7 +160,7 @@ public abstract class AbstractPartTracker<E> extends AbstractTracker<E>
 
 	@Override
 	protected void doEnable() {
-		RabbitCore.getDefault().getIdleDetector().addObserver(this);
+		RabbitCorePlugin.getDefault().getIdleDetector().addObserver(this);
 		PlatformUI.getWorkbench().addWindowListener(this);
 		for (IPartService s : getPartServices()) {
 			s.addPartListener(this);

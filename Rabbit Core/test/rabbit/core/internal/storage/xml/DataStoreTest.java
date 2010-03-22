@@ -30,19 +30,12 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.runtime.IPath;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
-import rabbit.core.RabbitCore;
-import rabbit.core.TestUtil;
+import rabbit.core.internal.RabbitCorePlugin;
 import rabbit.core.internal.storage.xml.schema.events.ObjectFactory;
 
 public class DataStoreTest {
-
-	@BeforeClass
-	public static void setUp() {
-		TestUtil.setUpPathForTesting();
-	}
 
 	private DataStore store = DataStore.PART_STORE;
 
@@ -95,7 +88,7 @@ public class DataStoreTest {
 		start.add(Calendar.YEAR, -1);
 
 		List<File> result = new ArrayList<File>();
-		IPath[] storagePaths = RabbitCore.getDefault().getStoragePaths();
+		IPath[] storagePaths = RabbitCorePlugin.getDefault().getStoragePaths();
 		Calendar date = (Calendar) start.clone();
 		while (date.compareTo(end) <= 0) {
 

@@ -16,7 +16,10 @@
 package rabbit.core.internal.storage.xml;
 
 import java.io.File;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -44,7 +47,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchListener;
 
-import rabbit.core.RabbitCore;
+import rabbit.core.internal.RabbitCorePlugin;
 import rabbit.core.internal.storage.xml.schema.resources.ObjectFactory;
 import rabbit.core.internal.storage.xml.schema.resources.ResourceListType;
 import rabbit.core.internal.storage.xml.schema.resources.ResourceType;
@@ -98,6 +101,11 @@ public enum XmlResourceManager
 			return true;
 		}
 	};
+
+	/**
+	 * Formats a date to the form "yyyy-MM".
+	 */
+	private final DateFormat monthFormat = new SimpleDateFormat("yyyy-MM");
 
 	/** Constructor. */
 	private XmlResourceManager() {
@@ -186,8 +194,8 @@ public enum XmlResourceManager
 	@Override
 	public void postShutdown(IWorkbench workbench) {
 		if (!write()) {
-			RabbitCore.getDefault().getLog().log(new Status(IStatus.ERROR, 
-					RabbitCore.PLUGIN_ID, "Unable to save resource mappings."));
+			RabbitCorePlugin.getDefault().getLog().log(new Status(IStatus.ERROR,
+					RabbitCorePlugin.PLUGIN_ID, "Unable to save resource mappings."));
 		}
 	}
 
@@ -216,7 +224,19 @@ public enum XmlResourceManager
 	 *         otherwise.
 	 */
 	public boolean write() {
-		return marshal(objectFactory.createResources(convert(resources)), getDataFile());
+		try {
+			marshal(objectFactory.createResources(convert(resources)), getDataFile());
+
+			// Creates a backup silently.
+			marshal(objectFactory.createResources(convert(resources)), getBackupFile());
+
+			return true;
+		} catch (JAXBException e) {
+			RabbitCorePlugin.getDefault().getLog().log(
+					new Status(IStatus.ERROR, RabbitCorePlugin.PLUGIN_ID,
+							"Unable to save resource mappings.", e));
+			return false;
+		}
 	}
 
 	/**
@@ -267,6 +287,29 @@ public enum XmlResourceManager
 	}
 
 	/**
+	 * Gets the file for writing a back up.
+	 * 
+	 * @return The back up file.
+	 */
+	private File getBackupFile() {
+
+		StringBuilder builder = new StringBuilder(getDataFile().getParent())
+				.append(File.separator)
+				.append("Backup")
+				.append(File.separator)
+				.append(monthFormat.format(new Date()))
+				.append(".xml");
+
+		File backupFile = new File(builder.toString());
+		if (!backupFile.getParentFile().exists()) {
+			if (!backupFile.getParentFile().mkdirs()) {
+				System.err.println(getClass() + ": Cannot create backup location.");
+			}
+		}
+		return backupFile;
+	}
+
+	/**
 	 * Gets the resource data of the current workspace.
 	 * 
 	 * @return The resource data of the current workspace
@@ -287,7 +330,11 @@ public enum XmlResourceManager
 	private ResourceListType getData(File dataFile) {
 		ResourceListType database = null;
 		if (dataFile.exists()) {
-			database = unmarshal(dataFile);
+			try {
+				database = unmarshal(dataFile);
+			} catch (JAXBException e) {
+				database = objectFactory.createResourceListType();
+			}
 		}
 		if (database == null) {
 			database = objectFactory.createResourceListType();
@@ -301,7 +348,7 @@ public enum XmlResourceManager
 	 * @return The data file of the current workspace.
 	 */
 	private File getDataFile() {
-		return getDataFile(RabbitCore.getDefault().getStoragePath());
+		return getDataFile(RabbitCorePlugin.getDefault().getStoragePath());
 	}
 
 	/**
@@ -318,7 +365,10 @@ public enum XmlResourceManager
 
 		if (!file.getParentFile().exists()) {
 			if (!file.getParentFile().mkdirs()) {
-				System.err.println(getClass() + ": Cannot create storage location.");
+				RabbitCorePlugin.getDefault().getLog().log(
+						new Status(IStatus.ERROR, RabbitCorePlugin.PLUGIN_ID,
+								"Unable to create storage location. Perhaps no write permission?\n"
+										+ file.getParent()));
 			}
 		}
 		return file;
@@ -331,8 +381,8 @@ public enum XmlResourceManager
 	 */
 	private Map<String, Set<String>> getExternalResources() {
 		Map<String, Set<String>> result = new HashMap<String, Set<String>>();
-		IPath currentPath = RabbitCore.getDefault().getStoragePath();
-		IPath[] paths = RabbitCore.getDefault().getStoragePaths();
+		IPath currentPath = RabbitCorePlugin.getDefault().getStoragePath();
+		IPath[] paths = RabbitCorePlugin.getDefault().getStoragePaths();
 		for (IPath path : paths) {
 			if (path.toOSString().equals(currentPath.toOSString())) {
 				continue;
@@ -361,19 +411,16 @@ public enum XmlResourceManager
 	 *            The file to write to.
 	 * @return {@code true} if the element is successfully written to the file,
 	 *         {@code false} otherwise.
+	 * @throws JAXBException
+	 *             If any unexpected problem occurs during the marshalling.
 	 * @throws NullPointerException
 	 *             If either parameters is null.
 	 */
-	private boolean marshal(JAXBElement<ResourceListType> element, File file) {
+	private void marshal(JAXBElement<ResourceListType> element, File file) throws JAXBException {
 		if (element == null || file == null) {
 			throw new NullPointerException();
 		}
-		try {
-			mar.marshal(element, file);
-			return true;
-		} catch (JAXBException e1) {
-			return false;
-		}
+		mar.marshal(element, file);
 	}
 
 	/**
@@ -383,22 +430,19 @@ public enum XmlResourceManager
 	 *            The file containing the data.
 	 * @return The ResourceListType object from the file; or null, if the file
 	 *         does not containing a JAXBElement object, or the JAXBElement
-	 *         object does not contain a ResourceListType object, or error
-	 *         occurs while processing the file.
+	 *         object does not contain a ResourceListType object.
+	 * @throws JAXBException
+	 *             If any unexpected errors occur while unmarshalling .
 	 * @throws NullPointerException
 	 *             If file is null.
 	 */
-	private ResourceListType unmarshal(File file) {
-		try {
-			Object obj = unmar.unmarshal(file);
-			if (obj instanceof JAXBElement<?>) {
-				JAXBElement<?> element = (JAXBElement<?>) obj;
-				if (element.getValue() instanceof ResourceListType) {
-					return (ResourceListType) element.getValue();
-				}
+	private ResourceListType unmarshal(File file) throws JAXBException {
+		Object obj = unmar.unmarshal(file);
+		if (obj instanceof JAXBElement<?>) {
+			JAXBElement<?> element = (JAXBElement<?>) obj;
+			if (element.getValue() instanceof ResourceListType) {
+				return (ResourceListType) element.getValue();
 			}
-		} catch (JAXBException e) {
-			return null;
 		}
 		return null;
 	}

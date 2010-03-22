@@ -82,7 +82,7 @@ public class FileTrackerTest extends AbstractPartTrackerTest<FileEvent> {
 		if (part instanceof IEditorPart) {
 			IEditorPart editor = (IEditorPart) part;
 			IFile file = (IFile) editor.getEditorInput().getAdapter(IFile.class);
-			String id = RabbitCore.getDefault().getResourceManager().getId(
+			String id = RabbitCore.getResourceManager().getId(
 					file.getFullPath().toString());
 			return event.getFileId().equals(id);
 		} else {
@@ -101,7 +101,7 @@ public class FileTrackerTest extends AbstractPartTrackerTest<FileEvent> {
 		Assert.assertTrue(end.compareTo(event.getTime()) >= 0);
 		Assert.assertEquals(size, tracker.getData().size());
 		IFile file = (IFile) ((IEditorPart) part).getEditorInput().getAdapter(IFile.class);
-		Assert.assertEquals(event.getFileId(), RabbitCore.getDefault().getResourceManager().getId(
+		Assert.assertEquals(event.getFileId(), RabbitCore.getResourceManager().getId(
 				file.getFullPath().toString()));
 	}
 

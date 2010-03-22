@@ -116,7 +116,7 @@ public class ResourcePage extends AbstractTreeViewerPage {
 	public ResourcePage() {
 		super();
 		accessor = RabbitCore.getAccessor(AccessorType.FILE);
-		resourceMapper = RabbitCore.getDefault().getResourceManager();
+		resourceMapper = RabbitCore.getResourceManager();
 
 		projectResources = new HashMap<IProject, Set<IResource>>();
 		folderFiles = new HashMap<IFolder, Set<IFile>>();

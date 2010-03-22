@@ -5,14 +5,8 @@
    <extension
          point="org.eclipse.ui.startup">
       <startup
-            class="rabbit.core.internal.ResourceDataAttacher">
+            class="rabbit.core.internal.util.ResourceDataAttacher">
       </startup>
-   </extension>
-   <extension
-         point="org.eclipse.core.runtime.preferences">
-      <initializer
-            class="rabbit.core.internal.PreferenceInitializer">
-      </initializer>
    </extension>
    <extension
          point="rabbit.core.trackers">

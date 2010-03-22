@@ -42,11 +42,9 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.ui.PlatformUI;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
-import rabbit.core.RabbitCore;
-import rabbit.core.TestUtil;
+import rabbit.core.internal.RabbitCorePlugin;
 import rabbit.core.internal.storage.xml.schema.resources.ObjectFactory;
 import rabbit.core.internal.storage.xml.schema.resources.ResourceListType;
 import rabbit.core.internal.storage.xml.schema.resources.ResourceType;
@@ -55,12 +53,7 @@ import rabbit.core.internal.storage.xml.schema.resources.ResourceType;
  * Test {@link XmlResourceManager}
  */
 public class XmlResourceManagerTest {
-
-	@BeforeClass
-	public static void setUpBeforeClass() {
-		TestUtil.setUpPathForTesting();
-	}
-
+	
 	private XmlResourceManager manager = XmlResourceManager.INSTANCE;
 
 	@Before
@@ -160,8 +153,7 @@ public class XmlResourceManagerTest {
 		ResourceListType resources = of.createResourceListType();
 		resources.getResource().add(type);
 
-		IPath filePath = new Path(RabbitCore.getDefault().getPreferenceStore().getString(
-				RabbitCore.STORAGE_LOCATION));
+		IPath filePath = RabbitCorePlugin.getDefault().getStoragePathRoot();
 		filePath = filePath.append(System.currentTimeMillis() + "");
 
 		Method getDataFile = XmlResourceManager.class.getDeclaredMethod(
@@ -447,6 +439,36 @@ public class XmlResourceManagerTest {
 		}
 
 		fail();
+	}
+	
+	@Test
+	public void testWrite_backup() throws Exception {
+		String path = System.nanoTime() + "" + System.currentTimeMillis();
+		assertNull(manager.getId(path));
+		String id = manager.insert(path);
+
+		assertTrue(manager.write());
+
+		Method getData = XmlResourceManager.class.getDeclaredMethod("getData", File.class);
+		getData.setAccessible(true);
+		ResourceListType resources = (ResourceListType) getData.invoke(manager, getBackupFile());
+		for (ResourceType type : resources.getResource()) {
+			if (type.getPath().equals(path)) {
+				if (type.getResourceId().size() != 1) {
+					fail();
+				}
+				if (!type.getResourceId().get(0).equals(id)) {
+					fail();
+				}
+			}
+		}
+	}
+	
+	private File getBackupFile() throws Exception {
+		Method method = XmlResourceManager.class.getDeclaredMethod("getBackupFile");
+		method.setAccessible(true);
+		File file = (File) method.invoke(manager);
+		return file;
 	}
 
 	private File getDataFile() throws Exception {

@@ -66,7 +66,7 @@ public class ResourcePageContentProviderTest {
 		page.createContents(shell);
 		provider = new ResourcePageContentProvider(page);
 		root = ResourcesPlugin.getWorkspace().getRoot();
-		mapper = RabbitCore.getDefault().getResourceManager();
+		mapper = RabbitCore.getResourceManager();
 
 		project = root.getProject("p");
 		folder = project.getFolder("f");

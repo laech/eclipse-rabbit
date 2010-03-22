@@ -30,6 +30,7 @@ import org.eclipse.ui.PlatformUI;
 
 import rabbit.core.RabbitCore;
 import rabbit.core.events.PerspectiveEvent;
+import rabbit.core.internal.RabbitCorePlugin;
 import rabbit.core.storage.IStorer;
 
 /**
@@ -92,8 +93,8 @@ public class PerspectiveTracker extends AbstractTracker<PerspectiveEvent>
 
 	@Override
 	public void update(java.util.Observable o, Object arg) {
-		if (o == RabbitCore.getDefault().getIdleDetector() && isEnabled()) {
-			checkState(RabbitCore.getDefault().getIdleDetector().isUserActive());
+		if (o == RabbitCorePlugin.getDefault().getIdleDetector() && isEnabled()) {
+			checkState(RabbitCorePlugin.getDefault().getIdleDetector().isUserActive());
 		}
 	}
 
@@ -134,7 +135,7 @@ public class PerspectiveTracker extends AbstractTracker<PerspectiveEvent>
 		for (IWorkbenchWindow win : getWorkbenchWindows()) {
 			win.removePerspectiveListener(this);
 		}
-		RabbitCore.getDefault().getIdleDetector().deleteObserver(this);
+		RabbitCorePlugin.getDefault().getIdleDetector().deleteObserver(this);
 		PlatformUI.getWorkbench().removeWindowListener(this);
 	}
 
@@ -144,7 +145,7 @@ public class PerspectiveTracker extends AbstractTracker<PerspectiveEvent>
 		for (IWorkbenchWindow win : getWorkbenchWindows()) {
 			win.addPerspectiveListener(this);
 		}
-		RabbitCore.getDefault().getIdleDetector().addObserver(this);
+		RabbitCorePlugin.getDefault().getIdleDetector().addObserver(this);
 		PlatformUI.getWorkbench().addWindowListener(this);
 	}
 

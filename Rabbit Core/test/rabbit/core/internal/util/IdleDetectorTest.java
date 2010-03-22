@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package rabbit.core.internal;
+package rabbit.core.internal.util;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -39,6 +39,7 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 
 /**
  * Test for {@link IdleDetector}

@@ -25,10 +25,8 @@ import java.util.List;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.junit.Assert;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
-import rabbit.core.TestUtil;
 import rabbit.core.internal.storage.xml.schema.events.EventGroupType;
 import rabbit.core.internal.storage.xml.schema.events.EventListType;
 import rabbit.core.internal.storage.xml.schema.events.ObjectFactory;
@@ -37,11 +35,6 @@ import rabbit.core.internal.storage.xml.schema.events.ObjectFactory;
  * Test for {@link AbstractAccessor}
  */
 public abstract class AbstractAccessorTest<T, E, S extends EventGroupType> {
-
-	@BeforeClass
-	public static void setUpBeforeClass() throws Exception {
-		TestUtil.setUpPathForTesting();
-	}
 
 	private AbstractAccessor<T, E, S> accessor = create();
 

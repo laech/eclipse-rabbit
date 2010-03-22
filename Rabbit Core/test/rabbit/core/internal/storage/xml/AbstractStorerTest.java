@@ -37,10 +37,8 @@ import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
-import rabbit.core.TestUtil;
 import rabbit.core.events.DiscreteEvent;
 import rabbit.core.internal.storage.xml.schema.events.EventGroupType;
 import rabbit.core.internal.storage.xml.schema.events.ObjectFactory;
@@ -49,11 +47,6 @@ import rabbit.core.internal.storage.xml.schema.events.ObjectFactory;
  * Test for {@link AbstractStorer}
  */
 public abstract class AbstractStorerTest<E extends DiscreteEvent, T, S extends EventGroupType> {
-
-	@BeforeClass
-	public static void setUpBeforeClass() {
-		TestUtil.setUpPathForTesting();
-	}
 
 	protected AbstractStorer<E, T, S> storer = create();
 

@@ -34,9 +34,9 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import rabbit.core.RabbitCore;
 import rabbit.core.events.PerspectiveEvent;
-import rabbit.core.internal.IdleDetector;
+import rabbit.core.internal.RabbitCorePlugin;
+import rabbit.core.internal.util.IdleDetector;
 
 /**
  * Test for {@link PerspectiveTracker}
@@ -403,7 +403,7 @@ public class PerspectiveTrackerTest extends AbstractTrackerTest<PerspectiveEvent
 		Method notifyObservers = Observable.class.getDeclaredMethod("notifyObservers");
 		notifyObservers.setAccessible(true);
 
-		IdleDetector detector = RabbitCore.getDefault().getIdleDetector();
+		IdleDetector detector = RabbitCorePlugin.getDefault().getIdleDetector();
 		detector.setRunning(true);
 		isActive.set(detector, false);
 		setChanged.invoke(detector);

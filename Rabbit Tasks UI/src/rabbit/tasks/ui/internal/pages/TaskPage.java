@@ -147,7 +147,7 @@ public class TaskPage extends AbstractTreeViewerPage {
 	public TaskPage() {
 		super();
 		accessor = TaskCore.getTaskDataAccessor();
-		resourceMapper = RabbitCore.getDefault().getResourceManager();
+		resourceMapper = RabbitCore.getResourceManager();
 
 		taskToProjects = new HashMap<ITask, Set<TaskResource>>();
 		projectToResources = new HashMap<TaskResource, Set<TaskResource>>();

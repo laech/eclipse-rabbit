@@ -13,27 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package rabbit.core.internal;
+package rabbit.core.internal.util;
 
-import org.eclipse.jface.preference.IPreferenceStore;
-import org.junit.Assert;
-import org.junit.Test;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.ui.IStartup;
+import org.eclipse.ui.PlatformUI;
 
-import rabbit.core.RabbitCore;
+import rabbit.core.internal.storage.xml.XmlResourceManager;
 
-/**
- * Test for {@link PreferenceInitializer}
- */
-public class PreferenceInitializerTest {
+public class ResourceDataAttacher implements IStartup {
 
-	private PreferenceInitializer pref = new PreferenceInitializer();
-
-	@Test
-	public void testInitializePreference() {
-		IPreferenceStore store = RabbitCore.getDefault().getPreferenceStore();
-		store.setDefault(RabbitCore.STORAGE_LOCATION, "");
-
-		pref.initializeDefaultPreferences();
-		Assert.assertFalse(store.getDefaultString(RabbitCore.STORAGE_LOCATION).equals(""));
+	@Override
+	public void earlyStartup() {
+		PlatformUI.getWorkbench().addWorkbenchListener(XmlResourceManager.INSTANCE);
+		ResourcesPlugin.getWorkspace().addResourceChangeListener(XmlResourceManager.INSTANCE);
 	}
+
 }

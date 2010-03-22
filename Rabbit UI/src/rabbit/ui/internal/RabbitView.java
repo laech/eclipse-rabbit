@@ -54,7 +54,7 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 
-import rabbit.core.RabbitCore;
+import rabbit.core.internal.RabbitCorePlugin;
 import rabbit.ui.DisplayPreference;
 import rabbit.ui.IPage;
 
@@ -427,7 +427,7 @@ public class RabbitView extends ViewPart {
 		// Sync with today's data:
 		Calendar today = Calendar.getInstance();
 		if (isSameDate(today, preferences.getEndDate()) || today.before(preferences.getEndDate())) {
-			RabbitCore.getDefault().saveCurrentData();
+			RabbitCorePlugin.getDefault().saveCurrentData();
 		}
 
 		// Mark all invisible pages as "not yet updated":

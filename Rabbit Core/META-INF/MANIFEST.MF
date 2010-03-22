@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Rabbit Core
 Bundle-SymbolicName: rabbit.core;singleton:=true
 Bundle-Version: 1.1.0.qualifier
-Bundle-Activator: rabbit.core.RabbitCore
+Bundle-Activator: rabbit.core.internal.RabbitCorePlugin
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.core.resources,
  org.eclipse.ui,
@@ -15,7 +15,7 @@ Require-Bundle: org.eclipse.core.runtime,
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: rabbit.core,
  rabbit.core.events,
- rabbit.core.internal;x-friends:="rabbit.tasks.core",
+ rabbit.core.internal;x-friends:="rabbit.tasks.core,rabbit.ui",
  rabbit.core.internal.storage.xml;x-friends:="rabbit.tasks.core",
  rabbit.core.internal.storage.xml.schema.events;x-friends:="rabbit.tasks.core";
   uses:="javax.xml.bind,
