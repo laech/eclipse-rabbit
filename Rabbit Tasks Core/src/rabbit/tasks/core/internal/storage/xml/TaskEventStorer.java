@@ -15,7 +15,7 @@
  */
 package rabbit.tasks.core.internal.storage.xml;
 
-import static rabbit.core.internal.storage.xml.DatatypeConverter.toXMLGregorianCalendarDateTime;
+import static rabbit.core.internal.storage.xml.DatatypeUtil.toXMLGregorianCalendarDateTime;
 
 import java.util.GregorianCalendar;
 import java.util.List;

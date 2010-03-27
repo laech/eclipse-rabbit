@@ -17,7 +17,7 @@ package rabbit.tasks.core.internal.storage.xml;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static rabbit.core.internal.storage.xml.DatatypeConverter.toXMLGregorianCalendarDateTime;
+import static rabbit.core.internal.storage.xml.DatatypeUtil.toXMLGregorianCalendarDateTime;
 
 import java.util.Calendar;
 import java.util.Date;

@@ -36,7 +36,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import rabbit.core.RabbitCore;
-import rabbit.core.storage.IResourceMapper;
+import rabbit.core.storage.IFileMapper;
 
 /**
  * Test for {@link ResourcePageContentProvider}
@@ -46,7 +46,7 @@ public class ResourcePageContentProviderTest {
 	private static Shell shell;
 	private static ResourcePage page;
 	private static IWorkspaceRoot root;
-	private static IResourceMapper mapper;
+	private static IFileMapper mapper;
 	private static ResourcePageContentProvider provider;
 
 	private static IProject project;
@@ -66,7 +66,7 @@ public class ResourcePageContentProviderTest {
 		page.createContents(shell);
 		provider = new ResourcePageContentProvider(page);
 		root = ResourcesPlugin.getWorkspace().getRoot();
-		mapper = RabbitCore.getResourceManager();
+		mapper = RabbitCore.getFileMapper();
 
 		project = root.getProject("p");
 		folder = project.getFolder("f");

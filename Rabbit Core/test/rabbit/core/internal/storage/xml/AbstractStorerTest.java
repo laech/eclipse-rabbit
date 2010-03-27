@@ -19,8 +19,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static rabbit.core.internal.storage.xml.DatatypeConverter.toXMLGregorianCalendarDate;
+import static rabbit.core.internal.storage.xml.DatatypeUtil.toXMLGregorianCalendarDate;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,10 +30,6 @@ import java.util.GregorianCalendar;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
-import javax.xml.datatype.DatatypeConfigurationException;
-import javax.xml.datatype.DatatypeFactory;
-import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -137,36 +132,6 @@ public abstract class AbstractStorerTest<E extends DiscreteEvent, T, S extends E
 
 	@Test
 	public abstract void testInsertCollection();
-
-	@Test
-	public void testIsSameDate() {
-
-		try {
-			Calendar cal = Calendar.getInstance();
-
-			XMLGregorianCalendar xmlCal = DatatypeFactory.newInstance()
-					.newXMLGregorianCalendarDate(1, 1, 1, 1);
-			assertFalse(AbstractStorer.isSameDate(cal, xmlCal));
-
-			xmlCal = toXMLGregorianCalendarDate(cal);
-			assertTrue(AbstractStorer.isSameDate(cal, xmlCal));
-
-		} catch (Exception e) {
-			e.printStackTrace();
-			fail();
-		}
-	}
-
-	@Test
-	public void testIsSameMonthInYear() throws DatatypeConfigurationException {
-
-		Calendar cal1 = Calendar.getInstance();
-		Calendar cal2 = Calendar.getInstance();
-		assertTrue(AbstractStorer.isSameMonthInYear(cal1, cal2));
-
-		cal2.add(Calendar.MONTH, 1);
-		assertFalse(AbstractStorer.isSameMonthInYear(cal1, cal2));
-	}
 
 	@Test
 	public abstract void testMerge_listTypeAndEvent();

@@ -26,7 +26,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
 /**
  * A utility class.
  */
-public class DatatypeConverter {
+public class DatatypeUtil {
 
 	/**
 	 * An data type factory for creating XML data types.
@@ -48,6 +48,39 @@ public class DatatypeConverter {
 	}
 
 	/**
+	 * Checks whether the two calendars are representing the same year, month,
+	 * and day of month.
+	 * 
+	 * @param cal
+	 *            The first calendar.
+	 * @param xmlCal
+	 *            The second calendar.
+	 * @return true if the two calendars are representing the same date in time,
+	 *         false otherwise.
+	 */
+	public static boolean isSameDate(Calendar cal, XMLGregorianCalendar xmlCal) {
+
+		return (xmlCal.getYear() == cal.get(Calendar.YEAR))
+				&& (xmlCal.getMonth() == cal.get(Calendar.MONTH) + 1)
+				&& (xmlCal.getDay() == cal.get(Calendar.DAY_OF_MONTH));
+	}
+
+	/**
+	 * Checks whether the two calendars are representing the same month in time.
+	 * 
+	 * @param cal1
+	 *            The first calendar.
+	 * @param cal2
+	 *            The second calendar.
+	 * @return true if the two calendars are representing the same month in
+	 *         time, false otherwise.
+	 */
+	public static boolean isSameMonthInYear(Calendar cal1, Calendar cal2) {
+		return (cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR))
+				&& (cal1.get(Calendar.MONTH) == cal2.get(Calendar.MONTH));
+	}
+
+	/**
 	 * Converts a {@link Calendar} to {@link XMLGregorianCalendar}. The
 	 * converted calendar is a date, which means only the year, month and day of
 	 * month fields are set.
@@ -63,7 +96,7 @@ public class DatatypeConverter {
 				cal.get(Calendar.DAY_OF_MONTH),
 				DatatypeConstants.FIELD_UNDEFINED);
 	}
-	
+
 	// TODO test
 	public static XMLGregorianCalendar toXMLGregorianCalendarDateTime(GregorianCalendar cal) {
 		return datatypeFactory.newXMLGregorianCalendar(cal);

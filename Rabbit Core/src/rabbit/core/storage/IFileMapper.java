@@ -20,7 +20,7 @@ import org.eclipse.core.resources.IResource;
 /**
  * Manages mapping of file paths to id and vice versa.
  */
-public interface IResourceMapper {
+public interface IFileMapper {
 
 	/**
 	 * Gets the file path of the given file id from an external source. This

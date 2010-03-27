@@ -6,7 +6,7 @@ import org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(Suite.class)
 @SuiteClasses( {
-		DatatypeConverterTest.class,
+		DatatypeUtilTest.class,
 		DataStoreTest.class,
 		CommandEventStorerTest.class,
 		FileEventStorerTest.class,

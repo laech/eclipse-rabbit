@@ -16,6 +16,7 @@
 package rabbit.tasks.core.internal.storage.xml;
 
 import static org.junit.Assert.assertEquals;
+import static rabbit.core.internal.storage.xml.DatatypeUtil.toXMLGregorianCalendarDateTime;
 
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -24,7 +25,6 @@ import java.util.List;
 import java.util.Map;
 
 import rabbit.core.internal.storage.xml.AbstractAccessorTest;
-import rabbit.core.internal.storage.xml.DatatypeConverter;
 import rabbit.core.internal.storage.xml.schema.events.EventListType;
 import rabbit.core.internal.storage.xml.schema.events.TaskEventListType;
 import rabbit.core.internal.storage.xml.schema.events.TaskEventType;
@@ -77,8 +77,7 @@ public class TaskDataAccessorTest extends
 	@Override
 	protected TaskEventType createXmlType() {
 		TaskIdType id = objectFactory.createTaskIdType();
-		id.setCreationDate(DatatypeConverter
-				.toXMLGregorianCalendarDateTime(new GregorianCalendar()));
+		id.setCreationDate(toXMLGregorianCalendarDateTime(new GregorianCalendar()));
 		id.setHandleId("abcdef");
 
 		TaskEventType type = objectFactory.createTaskEventType();

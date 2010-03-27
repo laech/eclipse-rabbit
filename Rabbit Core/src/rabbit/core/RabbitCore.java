@@ -34,12 +34,9 @@ import rabbit.core.internal.storage.xml.PerspectiveEventStorer;
 import rabbit.core.internal.storage.xml.SessionDataAccessor;
 import rabbit.core.internal.storage.xml.XmlResourceManager;
 import rabbit.core.storage.IAccessor;
-import rabbit.core.storage.IResourceMapper;
+import rabbit.core.storage.IFileMapper;
 import rabbit.core.storage.IStorer;
 
-/**
- * The activator class controls the plug-in life cycle
- */
 public class RabbitCore {
 
 	public static enum AccessorType {
@@ -91,7 +88,7 @@ public class RabbitCore {
 	 * 
 	 * @return The resource manager.
 	 */
-	public static IResourceMapper getResourceManager() {
+	public static IFileMapper getFileMapper() {
 		return XmlResourceManager.INSTANCE;
 	}
 

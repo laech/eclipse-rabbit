@@ -53,7 +53,7 @@ public class TaskTracker extends AbstractPartTracker<TaskEvent> {
 			return null;
 		}
 
-		String fileId = RabbitCore.getResourceManager().insert(
+		String fileId = RabbitCore.getFileMapper().insert(
 					f.getFullPath().toString());
 		return new TaskEvent(time, duration, fileId, task);
 	}

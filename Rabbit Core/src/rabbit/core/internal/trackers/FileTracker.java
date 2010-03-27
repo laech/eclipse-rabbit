@@ -41,7 +41,7 @@ public class FileTracker extends AbstractPartTracker<FileEvent> {
 		if (p instanceof IEditorPart) {
 			IFile f = (IFile) ((IEditorPart) p).getEditorInput().getAdapter(IFile.class);
 			if (f != null) {
-				String id = RabbitCore.getResourceManager().insert(
+				String id = RabbitCore.getFileMapper().insert(
 						f.getFullPath().toString());
 				return new FileEvent(time, duration, id);
 			}

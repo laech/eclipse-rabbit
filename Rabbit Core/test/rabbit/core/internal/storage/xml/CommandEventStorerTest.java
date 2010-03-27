@@ -19,8 +19,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static rabbit.core.internal.storage.xml.AbstractStorer.isSameDate;
-import static rabbit.core.internal.storage.xml.DatatypeConverter.toXMLGregorianCalendarDate;
+import static rabbit.core.internal.storage.xml.DatatypeUtil.toXMLGregorianCalendarDate;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -186,7 +185,7 @@ public class CommandEventStorerTest extends
 
 			assertEquals(1, data.size());
 			assertEquals(1, data.iterator().next().getCommandEvent().size());
-			assertTrue(isSameDate(e.getTime(), data.iterator().next().getDate()));
+			assertTrue(DatatypeUtil.isSameDate(e.getTime(), data.iterator().next().getDate()));
 
 			type = data.iterator().next().getCommandEvent().get(0);
 			assertEquals(e.getExecutionEvent().getCommand().getId(), type.getCommandId());

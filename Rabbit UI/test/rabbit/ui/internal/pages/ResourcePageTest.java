@@ -47,7 +47,7 @@ import org.junit.Test;
 import rabbit.core.RabbitCore;
 import rabbit.core.RabbitCore.AccessorType;
 import rabbit.core.storage.IAccessor;
-import rabbit.core.storage.IResourceMapper;
+import rabbit.core.storage.IFileMapper;
 import rabbit.ui.DisplayPreference;
 
 public class ResourcePageTest extends AbstractTreeViewerPageTest {
@@ -126,7 +126,7 @@ public class ResourcePageTest extends AbstractTreeViewerPageTest {
 		// Test two id pointing to same file, getting the value of the file must
 		// return the sum.
 
-		IResourceMapper manager = RabbitCore.getResourceManager();
+		IFileMapper manager = RabbitCore.getFileMapper();
 
 		IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject("tmp");
 		if (!project.exists()) {
@@ -392,7 +392,7 @@ public class ResourcePageTest extends AbstractTreeViewerPageTest {
 		Map<String, Long> data = accessor.getData(preference.getStartDate(), preference
 				.getEndDate());
 
-		IResourceMapper mapper = RabbitCore.getResourceManager();
+		IFileMapper mapper = RabbitCore.getFileMapper();
 		for (Entry<String, Long> entry : data.entrySet()) {
 			String path = mapper.getPath(entry.getKey());
 			if (path == null) {

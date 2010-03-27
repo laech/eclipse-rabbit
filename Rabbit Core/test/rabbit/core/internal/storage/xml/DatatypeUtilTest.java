@@ -16,18 +16,23 @@
 package rabbit.core.internal.storage.xml;
 
 import static org.junit.Assert.assertEquals;
-import static rabbit.core.internal.storage.xml.DatatypeConverter.toXMLGregorianCalendarDate;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static rabbit.core.internal.storage.xml.DatatypeUtil.toXMLGregorianCalendarDate;
 
 import java.util.Calendar;
 
+import javax.xml.datatype.DatatypeConfigurationException;
+import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.junit.Test;
 
 /**
- * Test for {@link DatatypeConverter}
+ * Test for {@link DatatypeUtil}
  */
-public class DatatypeConverterTest {
+public class DatatypeUtilTest {
 
 	@Test
 	public void testToXMLGregorianCalendarDate() {
@@ -39,5 +44,35 @@ public class DatatypeConverterTest {
 		// Calendar.MONTH is zero based.
 		assertEquals(cal.get(Calendar.MONTH) + 1, xmlCal.getMonth());
 		assertEquals(cal.get(Calendar.DAY_OF_MONTH), xmlCal.getDay());
+	}
+
+	@Test
+	public void testIsSameDate() {
+
+		try {
+			Calendar cal = Calendar.getInstance();
+
+			XMLGregorianCalendar xmlCal = DatatypeFactory.newInstance()
+					.newXMLGregorianCalendarDate(1, 1, 1, 1);
+			assertFalse(DatatypeUtil.isSameDate(cal, xmlCal));
+
+			xmlCal = toXMLGregorianCalendarDate(cal);
+			assertTrue(DatatypeUtil.isSameDate(cal, xmlCal));
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail();
+		}
+	}
+
+	@Test
+	public void testIsSameMonthInYear() throws DatatypeConfigurationException {
+
+		Calendar cal1 = Calendar.getInstance();
+		Calendar cal2 = Calendar.getInstance();
+		assertTrue(DatatypeUtil.isSameMonthInYear(cal1, cal2));
+
+		cal2.add(Calendar.MONTH, 1);
+		assertFalse(DatatypeUtil.isSameMonthInYear(cal1, cal2));
 	}
 }

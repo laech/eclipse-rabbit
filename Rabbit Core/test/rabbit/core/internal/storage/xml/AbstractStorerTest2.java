@@ -333,7 +333,7 @@ public abstract class AbstractStorerTest2<E extends DiscreteEvent, T, S extends 
 	protected abstract void mergeValue(E main, E tmp);
 
 	private XMLGregorianCalendar getCalendar() {
-		return DatatypeConverter.toXMLGregorianCalendarDate(Calendar.getInstance());
+		return DatatypeUtil.toXMLGregorianCalendarDate(Calendar.getInstance());
 	}
 
 }

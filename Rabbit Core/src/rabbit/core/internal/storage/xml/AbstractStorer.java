@@ -50,38 +50,6 @@ public abstract class AbstractStorer<E extends DiscreteEvent, T, S extends Event
 
 	protected final ObjectFactory objectFactory = new ObjectFactory();
 
-	/**
-	 * Checks whether the two calendars are representing the same date in time.
-	 * 
-	 * @param cal
-	 *            The first calendar.
-	 * @param xmlCal
-	 *            The second calendar.
-	 * @return true if the two calendars are representing the same date in time,
-	 *         false otherwise.
-	 */
-	protected static boolean isSameDate(Calendar cal, XMLGregorianCalendar xmlCal) {
-
-		return (xmlCal.getYear() == cal.get(Calendar.YEAR))
-				&& (xmlCal.getMonth() == cal.get(Calendar.MONTH) + 1)
-				&& (xmlCal.getDay() == cal.get(Calendar.DAY_OF_MONTH));
-	}
-
-	/**
-	 * Checks whether the two calendars are representing the same month in time.
-	 * 
-	 * @param cal1
-	 *            The first calendar.
-	 * @param cal2
-	 *            The second calendar.
-	 * @return true if the two calendars are representing the same month in
-	 *         time, false otherwise.
-	 */
-	protected static boolean isSameMonthInYear(Calendar cal1, Calendar cal2) {
-		return (cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR))
-				&& (cal1.get(Calendar.MONTH) == cal2.get(Calendar.MONTH));
-	}
-
 	private Set<S> data;
 
 	protected Calendar currentMonth;
@@ -153,7 +121,7 @@ public abstract class AbstractStorer<E extends DiscreteEvent, T, S extends Event
 	@Override
 	public void insert(E e) {
 
-		if (!isSameMonthInYear(e.getTime(), currentMonth)) {
+		if (!DatatypeUtil.isSameMonthInYear(e.getTime(), currentMonth)) {
 			commit();
 			// :
 			currentMonth = e.getTime();
@@ -162,7 +130,7 @@ public abstract class AbstractStorer<E extends DiscreteEvent, T, S extends Event
 		boolean done = false;
 
 		for (S list : data) {
-			if (isSameDate(e.getTime(), list.getDate())) {
+			if (DatatypeUtil.isSameDate(e.getTime(), list.getDate())) {
 				merge(list, e);
 				done = true;
 				break;
@@ -170,7 +138,7 @@ public abstract class AbstractStorer<E extends DiscreteEvent, T, S extends Event
 		}
 
 		if (!done) {
-			S holder = newXmlTypeHolder(DatatypeConverter.toXMLGregorianCalendarDate(e.getTime()));
+			S holder = newXmlTypeHolder(DatatypeUtil.toXMLGregorianCalendarDate(e.getTime()));
 			merge(holder, e);
 			data.add(holder);
 		}

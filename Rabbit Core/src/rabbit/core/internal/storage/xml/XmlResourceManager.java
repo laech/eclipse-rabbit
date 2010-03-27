@@ -51,13 +51,13 @@ import rabbit.core.internal.RabbitCorePlugin;
 import rabbit.core.internal.storage.xml.schema.resources.ObjectFactory;
 import rabbit.core.internal.storage.xml.schema.resources.ResourceListType;
 import rabbit.core.internal.storage.xml.schema.resources.ResourceType;
-import rabbit.core.storage.IResourceMapper;
+import rabbit.core.storage.IFileMapper;
 
 /**
- * An XML {@link IResourceMapper}.
+ * An XML {@link IFileMapper}.
  */
 public enum XmlResourceManager
-		implements IResourceMapper, IResourceChangeListener, IWorkbenchListener {
+		implements IFileMapper, IResourceChangeListener, IWorkbenchListener {
 
 	INSTANCE;
 

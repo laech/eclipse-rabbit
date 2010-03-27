@@ -58,7 +58,7 @@ import org.eclipse.ui.ide.IDE;
 
 import rabbit.core.RabbitCore;
 import rabbit.core.storage.IAccessor;
-import rabbit.core.storage.IResourceMapper;
+import rabbit.core.storage.IFileMapper;
 import rabbit.tasks.core.TaskCore;
 import rabbit.tasks.core.TaskId;
 import rabbit.tasks.ui.internal.util.MissingTask;
@@ -81,7 +81,7 @@ public class TaskPage extends AbstractTreeViewerPage {
 	private ShowMode mode = ShowMode.TASK;
 
 	private IAccessor<Map<TaskId, Map<String, Long>>> accessor;
-	protected final IResourceMapper resourceMapper;
+	protected final IFileMapper resourceMapper;
 
 	protected Map<ITask, Set<TaskResource>> taskToProjects;
 	protected Map<TaskResource, Set<TaskResource>> projectToResources;
@@ -147,7 +147,7 @@ public class TaskPage extends AbstractTreeViewerPage {
 	public TaskPage() {
 		super();
 		accessor = TaskCore.getTaskDataAccessor();
-		resourceMapper = RabbitCore.getResourceManager();
+		resourceMapper = RabbitCore.getFileMapper();
 
 		taskToProjects = new HashMap<ITask, Set<TaskResource>>();
 		projectToResources = new HashMap<TaskResource, Set<TaskResource>>();

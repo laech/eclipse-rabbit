@@ -50,7 +50,7 @@ import org.eclipse.ui.ide.IDE;
 import rabbit.core.RabbitCore;
 import rabbit.core.RabbitCore.AccessorType;
 import rabbit.core.storage.IAccessor;
-import rabbit.core.storage.IResourceMapper;
+import rabbit.core.storage.IFileMapper;
 import rabbit.ui.DisplayPreference;
 import rabbit.ui.TreeLabelComparator;
 import rabbit.ui.internal.SharedImages;
@@ -67,7 +67,7 @@ public class ResourcePage extends AbstractTreeViewerPage {
 	private ShowMode mode = ShowMode.FILE;
 
 	private IAccessor<Map<String, Long>> accessor;
-	private IResourceMapper resourceMapper;
+	private IFileMapper resourceMapper;
 	private Map<IProject, Set<IResource>> projectResources;
 	private Map<IFolder, Set<IFile>> folderFiles;
 	private Map<IFile, Long> fileValues;
@@ -116,7 +116,7 @@ public class ResourcePage extends AbstractTreeViewerPage {
 	public ResourcePage() {
 		super();
 		accessor = RabbitCore.getAccessor(AccessorType.FILE);
-		resourceMapper = RabbitCore.getResourceManager();
+		resourceMapper = RabbitCore.getFileMapper();
 
 		projectResources = new HashMap<IProject, Set<IResource>>();
 		folderFiles = new HashMap<IFolder, Set<IFile>>();

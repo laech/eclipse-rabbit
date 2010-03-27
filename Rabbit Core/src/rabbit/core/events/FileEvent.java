@@ -21,7 +21,7 @@ import java.util.Calendar;
  * Represents a file event. This object stores the file id instead of the file
  * itself.
  * 
- * @see rabbit.core.RabbitCore#getResourceManager()
+ * @see rabbit.core.RabbitCore#getFileMapper()
  */
 public class FileEvent extends ContinuousEvent {
 
@@ -51,7 +51,7 @@ public class FileEvent extends ContinuousEvent {
 	 * Gets the file id.
 	 * 
 	 * @return The file id.
-	 * @see rabbit.core.RabbitCore#getResourceManager()
+	 * @see rabbit.core.RabbitCore#getFileMapper()
 	 */
 	public String getFileId() {
 		return fileId;
@@ -66,7 +66,7 @@ public class FileEvent extends ContinuousEvent {
 	 *             If file id is null.
 	 * @throws IllegalArgumentException
 	 *             If file id is empty string or contain whitespace only.
-	 * @see rabbit.core.RabbitCore#getResourceManager()
+	 * @see rabbit.core.RabbitCore#getFileMapper()
 	 */
 	public void setFileId(String fileId) {
 		if (fileId == null) {

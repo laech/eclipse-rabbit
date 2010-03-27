@@ -43,7 +43,7 @@ public class RabbitCoreTest {
 
 	@Test
 	public void testGetResourceManager() {
-		Assert.assertNotNull(RabbitCore.getResourceManager());
+		Assert.assertNotNull(RabbitCore.getFileMapper());
 	}
 
 	@Test

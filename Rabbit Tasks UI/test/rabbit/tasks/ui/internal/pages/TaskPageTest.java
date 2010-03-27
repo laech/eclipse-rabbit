@@ -57,7 +57,7 @@ import org.junit.Test;
 
 import rabbit.core.RabbitCore;
 import rabbit.core.storage.IAccessor;
-import rabbit.core.storage.IResourceMapper;
+import rabbit.core.storage.IFileMapper;
 import rabbit.tasks.core.TaskCore;
 import rabbit.tasks.core.TaskId;
 import rabbit.tasks.ui.internal.pages.TaskPage.ShowMode;
@@ -145,7 +145,7 @@ public class TaskPageTest extends AbstractTreeViewerPageTest {
 	 */
 	@Test
 	public void testDoUpdate_sameTaskHanldeId() throws Exception {
-		IResourceMapper manager = RabbitCore.getResourceManager();
+		IFileMapper manager = RabbitCore.getFileMapper();
 
 		String handleId = "13iu4ey";
 		String summary = "nvheuihf";
@@ -192,7 +192,7 @@ public class TaskPageTest extends AbstractTreeViewerPageTest {
 		// Test two id pointing to same file, getting the value of the file must
 		// return the sum.
 
-		IResourceMapper manager = RabbitCore.getResourceManager();
+		IFileMapper manager = RabbitCore.getFileMapper();
 		IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject("tmp");
 		if (!project.exists()) {
 			project.create(null);
@@ -533,7 +533,7 @@ public class TaskPageTest extends AbstractTreeViewerPageTest {
 		Map<TaskId, Map<String, Long>> data = accessor.getData(
 				preference.getStartDate(), preference.getEndDate());
 
-		IResourceMapper resourceMapper = RabbitCore.getResourceManager();
+		IFileMapper resourceMapper = RabbitCore.getFileMapper();
 		IRepositoryModel repo = TasksUi.getRepositoryModel();
 
 		for (Entry<TaskId, Map<String, Long>> taskEn : data.entrySet()) {
