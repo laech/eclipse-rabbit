@@ -44,23 +44,6 @@ public class ContinuousEventTest extends DiscreteEventTest {
 		assertEquals(duration, event.getDuration());
 	}
 
-	@Test
-	public void testSetDuration() {
-
-		long newDura = 349850;
-		event.setDuration(newDura);
-		assertEquals(newDura, event.getDuration());
-
-		newDura = 0;
-		event.setDuration(newDura);
-		assertEquals(newDura, event.getDuration());
-	}
-
-	@Test(expected = IllegalArgumentException.class)
-	public void testSetDuration_withNegativeDuration() {
-		event.setDuration(-1);
-	}
-
 	@Override
 	protected ContinuousEvent createEvent(Calendar time) {
 		return createEvent(time, duration);

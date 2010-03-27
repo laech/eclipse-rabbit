@@ -66,7 +66,7 @@ public abstract class AbstractStorerTest2<E extends DiscreteEvent, T, S extends 
 			assertEquals(1, getEventTypes(list).size());
 
 			type = getEventTypes(list).get(0);
-			mergeValue(e, e);
+			e = mergeValue(e, e);
 			assertTrue(isEqual(type, e));
 
 			// ...
@@ -96,12 +96,11 @@ public abstract class AbstractStorerTest2<E extends DiscreteEvent, T, S extends 
 
 			// ..
 
-			e = createEvent();
 			Calendar cal = e.getTime();
 			int day = cal.get(Calendar.DAY_OF_MONTH);
 			day = (day < 15) ? day + 1 : day - 1;
 			cal.set(Calendar.DAY_OF_MONTH, day);
-			e.setTime(cal);
+			e = createEvent(cal);
 			storer.insert(e);
 			storer.commit();
 
@@ -113,6 +112,8 @@ public abstract class AbstractStorerTest2<E extends DiscreteEvent, T, S extends 
 			fail();
 		}
 	}
+
+	protected abstract E createEvent(Calendar eventTime);
 
 	@Override
 	public void testInsert() {
@@ -142,7 +143,7 @@ public abstract class AbstractStorerTest2<E extends DiscreteEvent, T, S extends 
 			assertEquals(1, getEventTypes(data.iterator().next()).size());
 
 			type = getEventTypes(data.iterator().next()).get(0);
-			mergeValue(e, e);
+			e = mergeValue(e, e);
 			assertTrue(isEqual(type, e));
 
 			// Insert an new and different event:
@@ -156,12 +157,11 @@ public abstract class AbstractStorerTest2<E extends DiscreteEvent, T, S extends 
 			type = getEventTypes(data.iterator().next()).get(1);
 			assertTrue(isEqual(type, e));
 
-			e = createEvent();
 			Calendar cal = e.getTime();
 			int day = cal.get(Calendar.DAY_OF_MONTH);
 			day = (day < 15) ? day + 1 : day - 1;
 			cal.set(Calendar.DAY_OF_MONTH, day);
-			e.setTime(cal);
+			e = createEvent(cal);
 
 			storer.insert(e);
 
@@ -215,7 +215,7 @@ public abstract class AbstractStorerTest2<E extends DiscreteEvent, T, S extends 
 				assertEquals(2, getEventTypes(data.iterator().next()).size());
 
 				type = getEventTypes(data.iterator().next()).get(0);
-				mergeValue(eWithSameId, e);
+				eWithSameId = mergeValue(eWithSameId, e);
 				assertTrue(isEqual(type, eWithSameId));
 
 				type = getEventTypes(data.iterator().next()).get(1);
@@ -224,12 +224,11 @@ public abstract class AbstractStorerTest2<E extends DiscreteEvent, T, S extends 
 
 			{// Insert event of a different date:
 				list.clear();
-				e = createEvent();
 				Calendar cal = e.getTime();
 				int day = cal.get(Calendar.DAY_OF_MONTH);
 				day = (day < 15) ? day + 1 : day - 1;
 				cal.set(Calendar.DAY_OF_MONTH, day);
-				e.setTime(cal);
+				e = createEvent(cal);
 
 				list.add(e);
 				storer.insert(list);
@@ -329,8 +328,11 @@ public abstract class AbstractStorerTest2<E extends DiscreteEvent, T, S extends 
 	/** Returns true if the parameters contains the same values. */
 	protected abstract boolean isEqual(T type, E event);
 
-	/** Merges the value form the second parameter into the first. */
-	protected abstract void mergeValue(E main, E tmp);
+	/**
+	 * Returns a new element who's attributes are base on the first parameter,
+	 * and the value is the combination of the two elements.
+	 */
+	protected abstract E mergeValue(E main, E tmp);
 
 	private XMLGregorianCalendar getCalendar() {
 		return DatatypeUtil.toXMLGregorianCalendarDate(Calendar.getInstance());

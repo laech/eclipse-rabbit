@@ -42,7 +42,11 @@ public class PerspectiveEvent extends ContinuousEvent {
 	 */
 	public PerspectiveEvent(Calendar time, long duration, IPerspectiveDescriptor perspective) {
 		super(time, duration);
-		setPerspective(perspective);
+
+		if (perspective == null) {
+			throw new NullPointerException();
+		}
+		this.perspective = perspective;
 	}
 
 	/**
@@ -53,20 +57,4 @@ public class PerspectiveEvent extends ContinuousEvent {
 	public IPerspectiveDescriptor getPerspective() {
 		return perspective;
 	}
-
-	/**
-	 * Sets the perspective.
-	 * 
-	 * @param perspective
-	 *            The perspective.
-	 * @throws NullPointerException
-	 *             If the parameter is null.
-	 */
-	public void setPerspective(IPerspectiveDescriptor perspective) {
-		if (perspective == null) {
-			throw new NullPointerException();
-		}
-		this.perspective = perspective;
-	}
-
 }

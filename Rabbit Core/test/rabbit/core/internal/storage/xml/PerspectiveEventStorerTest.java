@@ -107,8 +107,16 @@ public class PerspectiveEventStorerTest
 	}
 
 	@Override
-	protected void mergeValue(PerspectiveEvent main, PerspectiveEvent tmp) {
-		main.setDuration(main.getDuration() + tmp.getDuration());
+	protected PerspectiveEvent mergeValue(PerspectiveEvent main, PerspectiveEvent tmp) {
+		return new PerspectiveEvent(main.getTime(), main.getDuration() + tmp.getDuration(), main
+				.getPerspective());
+	}
+
+	@Override
+	protected PerspectiveEvent createEvent(Calendar eventTime) {
+		IPerspectiveDescriptor p = PlatformUI.getWorkbench().getPerspectiveRegistry()
+				.getPerspectives()[0];
+		return new PerspectiveEvent(eventTime, 1924, p);
 	}
 
 }

@@ -66,8 +66,8 @@ public class TaskEventStorerTest extends
 	}
 
 	@Override
-	protected void mergeValue(TaskEvent main, TaskEvent tmp) {
-		main.setDuration(main.getDuration() + tmp.getDuration());
+	protected TaskEvent mergeValue(TaskEvent main, TaskEvent tmp) {
+		return new TaskEvent(main.getTime(), main.getDuration() + tmp.getDuration(), main.getFileId(), main.getTask());
 	}
 
 	@Override
@@ -154,6 +154,13 @@ public class TaskEventStorerTest extends
 		type1.getTaskId().setCreationDate(
 				toXMLGregorianCalendarDateTime(new GregorianCalendar(1999, 1, 1)));
 		assertFalse(storer.hasSameId(type1, type2));
+	}
+
+	@Override
+	protected TaskEvent createEvent(Calendar eventTime) {
+		LocalTask task = new LocalTask("tas1kId", "what?1");
+		task.setCreationDate(new Date());
+		return new TaskEvent(eventTime, 1187, "fileId", task);
 	}
 
 }

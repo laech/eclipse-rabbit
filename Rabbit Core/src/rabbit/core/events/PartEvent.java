@@ -42,7 +42,11 @@ public class PartEvent extends ContinuousEvent {
 	 */
 	public PartEvent(Calendar time, long duration, IWorkbenchPart part) {
 		super(time, duration);
-		setWorkbenchPart(part);
+
+		if (part == null) {
+			throw new NullPointerException();
+		}
+		this.workbenchPart = part;
 	}
 
 	/**
@@ -52,20 +56,5 @@ public class PartEvent extends ContinuousEvent {
 	 */
 	public IWorkbenchPart getWorkbenchPart() {
 		return workbenchPart;
-	}
-
-	/**
-	 * Sets the workbench part.
-	 * 
-	 * @param workbenchPart
-	 *            The workbench part.
-	 * @throws NullPointerException
-	 *             If argument is null.
-	 */
-	public void setWorkbenchPart(IWorkbenchPart workbenchPart) {
-		if (workbenchPart == null) {
-			throw new NullPointerException();
-		}
-		this.workbenchPart = workbenchPart;
 	}
 }

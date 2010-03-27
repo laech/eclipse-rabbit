@@ -20,7 +20,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 
 import java.util.Calendar;
-import java.util.GregorianCalendar;
 
 import org.junit.Test;
 
@@ -68,32 +67,6 @@ public class DiscreteEventTest {
 		Calendar cal = event.getTime();
 		cal.add(Calendar.YEAR, 1);
 		assertFalse(cal.equals(event.getTime()));
-	}
-
-	@Test
-	public void testSetTime() {
-
-		Calendar newTime = new GregorianCalendar(10, Calendar.JANUARY, 20);
-		event.setTime(newTime);
-		assertEquals(newTime, event.getTime());
-	}
-	
-	/*
-	 * Test the method actually clones the date.
-	 */
-	@Test
-	public void testSetTime_clonesTime() {
-		DiscreteEvent event = new DiscreteEvent(Calendar.getInstance());
-
-		Calendar cal = Calendar.getInstance();
-		event.setTime(cal);
-		cal.add(Calendar.YEAR, 1);
-		assertFalse(cal.equals(event.getTime()));
-	}
-
-	@Test(expected = NullPointerException.class)
-	public void testSetTime_null() {
-		event.setTime(null);
 	}
 
 	/** Creates an event for testing. */

@@ -17,14 +17,12 @@ package rabbit.core.events;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
-import static org.junit.Assert.fail;
 
 import java.util.Calendar;
 
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
-import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.junit.Test;
 
@@ -59,26 +57,6 @@ public class PartEventTest extends ContinuousEventTest {
 	@Test
 	public void testGetWorkbenchPart() {
 		assertSame(part, event.getWorkbenchPart());
-	}
-
-	@Test
-	public void testSetWorkbenchPart() {
-
-		try {
-			IWorkbenchPart newP = win.getActivePage()
-					.showView("org.eclipse.ui.navigator.ProjectExplorer");
-			event.setWorkbenchPart(newP);
-			assertSame(newP, event.getWorkbenchPart());
-
-		} catch (PartInitException e) {
-			e.printStackTrace();
-			fail();
-		}
-	}
-
-	@Test(expected = NullPointerException.class)
-	public void testSetWorkbenchPart_withNull() {
-		event.setWorkbenchPart(null);
 	}
 
 	@Test

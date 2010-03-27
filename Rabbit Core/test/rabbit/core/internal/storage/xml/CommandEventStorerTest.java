@@ -85,8 +85,8 @@ public class CommandEventStorerTest extends
 
 			// Insert an new and different event:
 
-			CommandEvent eNew = createEvent();
-			eNew.setExecutionEvent(createExecutionEvent("1334850426385"));
+			CommandEvent eNew = new CommandEvent(Calendar.getInstance(),
+					createExecutionEvent("1334850426385"));
 			storer.insert(eNew);
 			storer.commit();
 
@@ -112,12 +112,11 @@ public class CommandEventStorerTest extends
 
 			// ..
 
-			e = createEvent();
 			Calendar cal = e.getTime();
 			int day = cal.get(Calendar.DAY_OF_MONTH);
 			day = (day < 15) ? day + 1 : day - 1;
 			cal.set(Calendar.DAY_OF_MONTH, day);
-			e.setTime(cal);
+			e = new CommandEvent(cal, createExecutionEvent("abc"));
 			storer.insert(e);
 			storer.commit();
 
@@ -193,8 +192,8 @@ public class CommandEventStorerTest extends
 
 			// Insert an new and different event:
 
-			e = createEvent();
-			e.setExecutionEvent(createExecutionEvent("nch1uhcbzysgnvc"));
+			e = new CommandEvent(Calendar.getInstance(),
+					createExecutionEvent("nch1uhcbzysgnvc"));
 			storer.insert(e);
 
 			assertEquals(1, data.size());
@@ -204,12 +203,11 @@ public class CommandEventStorerTest extends
 			assertEquals(e.getExecutionEvent().getCommand().getId(), type.getCommandId());
 			assertEquals(1, type.getCount());
 
-			e = createEvent();
 			Calendar cal = e.getTime();
 			int day = cal.get(Calendar.DAY_OF_MONTH);
 			day = (day < 15) ? day + 1 : day - 1;
 			cal.set(Calendar.DAY_OF_MONTH, day);
-			e.setTime(cal);
+			e = new CommandEvent(cal, createExecutionEvent("nch1uhcbzysgnvc"));
 
 			storer.insert(e);
 
@@ -252,8 +250,8 @@ public class CommandEventStorerTest extends
 
 				// Make a new event with different ids:
 
-				CommandEvent eNew = createEvent();
-				eNew.setExecutionEvent(createExecutionEvent("cn874hdbi000283"));
+				CommandEvent eNew = new CommandEvent(Calendar.getInstance(),
+						createExecutionEvent("cn874hdbi000283"));
 
 				list.clear();
 				list.add(eWithSameId);
@@ -275,12 +273,12 @@ public class CommandEventStorerTest extends
 
 			{// Insert event of a different date:
 				list.clear();
-				e = createEvent();
 				Calendar cal = e.getTime();
 				int day = cal.get(Calendar.DAY_OF_MONTH);
 				day = (day < 15) ? day + 1 : day - 1;
 				cal.set(Calendar.DAY_OF_MONTH, day);
-				e.setTime(cal);
+				e = new CommandEvent(cal,
+						createExecutionEvent("nch1uhcbzysgnvc"));
 
 				list.add(e);
 				storer.insert(list);

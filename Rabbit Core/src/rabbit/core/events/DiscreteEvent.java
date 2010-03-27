@@ -33,7 +33,11 @@ public class DiscreteEvent {
 	 *             If argument is null.
 	 */
 	public DiscreteEvent(Calendar time) {
-		setTime(time);
+		if (time == null) {
+			throw new NullPointerException();
+		}
+
+		this.time = (Calendar) time.clone();
 	}
 
 	/**
@@ -43,21 +47,5 @@ public class DiscreteEvent {
 	 */
 	public Calendar getTime() {
 		return (Calendar) time.clone();
-	}
-
-	/**
-	 * Sets the time of the event.
-	 * 
-	 * @param time
-	 *            The time of the event.
-	 * @throws NullPointerException
-	 *             If argument is null.
-	 */
-	public void setTime(Calendar time) {
-		if (time == null) {
-			throw new NullPointerException();
-		}
-
-		this.time = (Calendar) time.clone();
 	}
 }

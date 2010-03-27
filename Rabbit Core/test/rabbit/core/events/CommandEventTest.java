@@ -57,20 +57,6 @@ public class CommandEventTest extends DiscreteEventTest {
 		assertSame(exe, event.getExecutionEvent());
 	}
 
-	@Test
-	public void testSetExecutionEvent() {
-
-		ExecutionEvent newExe = new ExecutionEvent(getCommandService()
-				.getCommand("blah"), Collections.EMPTY_MAP, null, null);
-		event.setExecutionEvent(newExe);
-		assertSame(newExe, event.getExecutionEvent());
-	}
-
-	@Test(expected = NullPointerException.class)
-	public void testSetExecutionEvent_withNull() {
-		event.setExecutionEvent(null);
-	}
-
 	@Override
 	protected CommandEvent createEvent(Calendar time) {
 		return new CommandEvent(time, new ExecutionEvent(getCommandService()

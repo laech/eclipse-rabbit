@@ -38,7 +38,12 @@ public class ContinuousEvent extends DiscreteEvent {
 	 */
 	public ContinuousEvent(Calendar time, long duration) {
 		super(time);
-		setDuration(duration);
+
+		if (duration < 0) {
+			throw new IllegalArgumentException();
+		}
+
+		this.duration = duration;
 	}
 
 	/**
@@ -48,21 +53,5 @@ public class ContinuousEvent extends DiscreteEvent {
 	 */
 	public long getDuration() {
 		return duration;
-	}
-
-	/**
-	 * Sets the duration.
-	 * 
-	 * @param duration
-	 *            The duration in milliseconds.
-	 * @throws IllegalArgumentException
-	 *             If duration is negative.
-	 */
-	public void setDuration(long duration) {
-		if (duration < 0) {
-			throw new IllegalArgumentException();
-		}
-
-		this.duration = duration;
 	}
 }

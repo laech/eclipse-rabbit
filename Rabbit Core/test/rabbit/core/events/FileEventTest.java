@@ -48,35 +48,6 @@ public class FileEventTest extends ContinuousEventTest {
 		assertEquals(fileId, event.getFileId());
 	}
 
-	@Test
-	public void testSetFileId() {
-		String fileId = System.nanoTime() + "";
-		FileEvent event = new FileEvent(Calendar.getInstance(), 10, fileId);
-		assertEquals(fileId, event.getFileId());
-
-		fileId = "helloWorld";
-		event.setFileId(fileId);
-		assertEquals(fileId, event.getFileId());
-	}
-
-	@Test(expected = NullPointerException.class)
-	public void testSetFileId_null() {
-		FileEvent event = new FileEvent(Calendar.getInstance(), 1, "abc");
-		event.setFileId(null);
-	}
-	
-	@Test(expected = IllegalArgumentException.class)
-	public void testSetFileId_empty() {
-		FileEvent event = new FileEvent(Calendar.getInstance(), 1, "abc");
-		event.setFileId("");
-	}
-	
-	@Test(expected = IllegalArgumentException.class)
-	public void testSetFileId_whitespace() {
-		FileEvent event = new FileEvent(Calendar.getInstance(), 1, "abc");
-		event.setFileId(" \t");
-	}
-
 	@Override
 	protected FileEvent createEvent(Calendar time, long duration) {
 		return new FileEvent(time, duration, System.currentTimeMillis() + "");

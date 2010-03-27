@@ -38,7 +38,11 @@ public class CommandEvent extends DiscreteEvent {
 	 */
 	public CommandEvent(Calendar time, ExecutionEvent e) {
 		super(time);
-		setExecutionEvent(e);
+
+		if (e == null) {
+			throw new NullPointerException();
+		}
+		this.event = e;
 	}
 
 	/**
@@ -49,20 +53,4 @@ public class CommandEvent extends DiscreteEvent {
 	public ExecutionEvent getExecutionEvent() {
 		return event;
 	}
-
-	/**
-	 * Sets the execution event.
-	 * 
-	 * @param event
-	 *            The execution event.
-	 * @throws NullPointerException
-	 *             If argument is null.
-	 */
-	public void setExecutionEvent(ExecutionEvent event) {
-		if (event == null) {
-			throw new NullPointerException();
-		}
-		this.event = event;
-	}
-
 }

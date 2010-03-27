@@ -155,7 +155,28 @@ public class PartEventStorerTest extends
 	}
 
 	@Override
-	protected void mergeValue(PartEvent main, PartEvent tmp) {
-		main.setDuration(main.getDuration() + tmp.getDuration());
+	protected PartEvent mergeValue(PartEvent main, PartEvent tmp) {
+		return new PartEvent(main.getTime(), main.getDuration() + tmp.getDuration(), main
+				.getWorkbenchPart());
+	}
+	
+	@Override
+	protected PartEvent createEvent(final Calendar eventTime) {
+		final IWorkbench wb = PlatformUI.getWorkbench();
+		wb.getDisplay().syncExec(new Runnable() {
+
+			@Override
+			public void run() {
+				try {
+					IViewPart v = wb.getActiveWorkbenchWindow().getActivePage()
+							.showView("org.eclipse.ui.views.TaskList");
+					event = new PartEvent(eventTime, 10, v);
+				} catch (PartInitException e) {
+					e.printStackTrace();
+					event = null;
+				}
+			}
+		});
+		return event;
 	}
 }

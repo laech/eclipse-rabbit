@@ -44,7 +44,14 @@ public class FileEvent extends ContinuousEvent {
 	 */
 	public FileEvent(Calendar time, long duration, String fileId) {
 		super(time, duration);
-		setFileId(fileId);
+
+		if (fileId == null) {
+			throw new NullPointerException();
+		}
+		if (fileId.trim().equals("")) {
+			throw new IllegalArgumentException();
+		}
+		this.fileId = fileId;
 	}
 
 	/**
@@ -56,26 +63,4 @@ public class FileEvent extends ContinuousEvent {
 	public String getFileId() {
 		return fileId;
 	}
-
-	/**
-	 * Sets the file id.
-	 * 
-	 * @param fileId
-	 *            The file id.
-	 * @throws NullPointerException
-	 *             If file id is null.
-	 * @throws IllegalArgumentException
-	 *             If file id is empty string or contain whitespace only.
-	 * @see rabbit.core.RabbitCore#getFileMapper()
-	 */
-	public void setFileId(String fileId) {
-		if (fileId == null) {
-			throw new NullPointerException();
-		}
-		if (fileId.trim().equals("")) {
-			throw new IllegalArgumentException();
-		}
-		this.fileId = fileId;
-	}
-
 }

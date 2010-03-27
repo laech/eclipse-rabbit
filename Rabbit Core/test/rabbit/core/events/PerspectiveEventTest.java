@@ -16,7 +16,6 @@
 package rabbit.core.events;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 
 import java.util.Calendar;
 
@@ -41,21 +40,6 @@ public class PerspectiveEventTest extends ContinuousEventTest {
 	@Test
 	public void testGetPerspective() {
 		assertEquals(pers, event.getPerspective());
-	}
-
-	@Test
-	public void testSetPerspective() {
-		IPerspectiveDescriptor p = PlatformUI.getWorkbench()
-				.getPerspectiveRegistry().getPerspectives()[0];
-		assertFalse(event.getPerspective().equals(p));
-
-		event.setPerspective(p);
-		assertEquals(p, event.getPerspective());
-	}
-
-	@Test(expected = NullPointerException.class)
-	public void testSetPerspective_withNull() {
-		event.setPerspective(null);
 	}
 
 	@Override

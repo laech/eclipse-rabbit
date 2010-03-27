@@ -87,8 +87,13 @@ public class FileEventStorerTest
 	}
 
 	@Override
-	protected void mergeValue(FileEvent main, FileEvent tmp) {
-		main.setDuration(tmp.getDuration() + main.getDuration());
+	protected FileEvent mergeValue(FileEvent main, FileEvent tmp) {
+		return new FileEvent(main.getTime(), tmp.getDuration() + main.getDuration(), main.getFileId());
+	}
+
+	@Override
+	protected FileEvent createEvent(Calendar eventTime) {
+		return new FileEvent(eventTime, 10, "someIdabvc");
 	}
 
 }
