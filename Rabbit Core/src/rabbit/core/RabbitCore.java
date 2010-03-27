@@ -32,7 +32,7 @@ import rabbit.core.internal.storage.xml.PartEventStorer;
 import rabbit.core.internal.storage.xml.PerspectiveDataAccessor;
 import rabbit.core.internal.storage.xml.PerspectiveEventStorer;
 import rabbit.core.internal.storage.xml.SessionDataAccessor;
-import rabbit.core.internal.storage.xml.XmlResourceManager;
+import rabbit.core.internal.storage.xml.XmlFileMapper;
 import rabbit.core.storage.IAccessor;
 import rabbit.core.storage.IFileMapper;
 import rabbit.core.storage.IStorer;
@@ -89,7 +89,7 @@ public class RabbitCore {
 	 * @return The resource manager.
 	 */
 	public static IFileMapper getFileMapper() {
-		return XmlResourceManager.INSTANCE;
+		return XmlFileMapper.INSTANCE;
 	}
 
 	/**

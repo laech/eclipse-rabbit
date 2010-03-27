@@ -154,17 +154,17 @@ public class ResourcePageTest extends AbstractTreeViewerPageTest {
 		}
 
 		// Insert file1 into the database, then delete it from workspace:
-		String file1Id = manager.insert(file1.getFullPath().toString());
+		String file1Id = manager.insert(file1);
 		file1.delete(true, null);
 
 		// Insert file2 into the database,
 		// then rename file2 to become the deleted file1:
-		String file2Id = manager.insert(file2.getFullPath().toString());
+		String file2Id = manager.insert(file2);
 		file2.move(file1.getFullPath(), true, null);
 
 		// Now the two IDs should point to the same path:
-		assertEquals(manager.getPath(file1Id), manager.getPath(file2Id));
-		assertEquals(file1.getFullPath().toString(), manager.getPath(file1Id));
+		assertEquals(manager.getFile(file1Id), manager.getFile(file2Id));
+		assertEquals(file1.getFullPath(), manager.getFile(file1Id).getFullPath());
 
 		long value1 = 19084;
 		long value2 = 28450;
@@ -394,15 +394,14 @@ public class ResourcePageTest extends AbstractTreeViewerPageTest {
 
 		IFileMapper mapper = RabbitCore.getFileMapper();
 		for (Entry<String, Long> entry : data.entrySet()) {
-			String path = mapper.getPath(entry.getKey());
-			if (path == null) {
-				path = mapper.getExternalPath(entry.getKey());
+			IFile file = mapper.getFile(entry.getKey());
+			if (file == null) {
+				file = mapper.getExternalFile(entry.getKey());
 			}
-			if (path == null) {
+			if (file == null) {
 				continue;
 			}
-
-			IFile file = root.getFile(Path.fromPortableString(path));
+			
 			Long oldValue = files.get(file);
 			if (oldValue == null) {
 				oldValue = Long.valueOf(0);

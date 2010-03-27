@@ -39,10 +39,9 @@ public class FileTracker extends AbstractPartTracker<FileEvent> {
 	@Override
 	protected FileEvent tryCreateEvent(Calendar time, long duration, IWorkbenchPart p) {
 		if (p instanceof IEditorPart) {
-			IFile f = (IFile) ((IEditorPart) p).getEditorInput().getAdapter(IFile.class);
-			if (f != null) {
-				String id = RabbitCore.getFileMapper().insert(
-						f.getFullPath().toString());
+			IFile file = (IFile) ((IEditorPart) p).getEditorInput().getAdapter(IFile.class);
+			if (file != null) {
+				String id = RabbitCore.getFileMapper().insert(file);
 				return new FileEvent(time, duration, id);
 			}
 		}

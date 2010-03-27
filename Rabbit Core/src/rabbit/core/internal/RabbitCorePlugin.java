@@ -41,7 +41,7 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
 import rabbit.core.ITracker;
-import rabbit.core.internal.storage.xml.XmlResourceManager;
+import rabbit.core.internal.storage.xml.XmlFileMapper;
 import rabbit.core.internal.util.IdleDetector;
 
 /**
@@ -271,7 +271,7 @@ public class RabbitCorePlugin extends AbstractUIPlugin implements IWorkbenchList
 			tracker.flushData();
 			tracker.setEnabled(true);
 		}
-		XmlResourceManager.INSTANCE.write(true);
+		XmlFileMapper.INSTANCE.write(true);
 	}
 
 	@Override

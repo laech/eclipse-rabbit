@@ -34,15 +34,19 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.IResourceDeltaVisitor;
+import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.AssertionFailedException;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchListener;
@@ -56,7 +60,7 @@ import rabbit.core.storage.IFileMapper;
 /**
  * An XML {@link IFileMapper}.
  */
-public enum XmlResourceManager
+public enum XmlFileMapper
 		implements IFileMapper, IResourceChangeListener, IWorkbenchListener {
 
 	INSTANCE;
@@ -107,8 +111,10 @@ public enum XmlResourceManager
 	 */
 	private final DateFormat monthFormat = new SimpleDateFormat("yyyy-MM");
 
+	private IWorkspaceRoot workspaceRoot =  ResourcesPlugin.getWorkspace().getRoot();
+	
 	/** Constructor. */
-	private XmlResourceManager() {
+	private XmlFileMapper() {
 		try {
 			jaxb = JAXBContext.newInstance(ObjectFactory.class);
 			mar = jaxb.createMarshaller();
@@ -135,62 +141,75 @@ public enum XmlResourceManager
 
 		externalResources = getExternalResources();
 	}
-
+	
 	@Override
-	public String getExternalPath(String fileId) {
+	public IFile getExternalFile(String fileId) {
 		for (Entry<String, Set<String>> entry : externalResources.entrySet()) {
 			for (String id : entry.getValue()) {
 				if (id.equals(fileId)) {
-					return entry.getKey();
+					try {
+						return workspaceRoot.getFile(new Path(entry.getKey()));
+					} catch (Exception e) {
+						System.err.println(e.getMessage());
+						return null;
+					}
 				}
 			}
 		}
 		return null;
 	}
-
+	
 	@Override
-	public String getId(String path) {
-		Set<String> ids = resources.get(path);
-		if (ids != null) {
-			return ids.iterator().next();
-		}
-		return null;
-	}
-
-	@Override
-	public String getPath(String id) {
+	public IFile getFile(String id) {
 		if (!resourceIds.contains(id)) {
 			return null;
 		}
 		for (Map.Entry<String, Set<String>> entry : resources.entrySet()) {
 			for (String str : entry.getValue()) {
 				if (str.equals(id)) {
-					return entry.getKey();
+					try {
+						return workspaceRoot.getFile(new Path(entry.getKey()));
+					} catch (Exception e) {
+						System.err.println(e.getMessage());
+						return null;
+					}
 				}
 			}
 		}
+		// Should not arrive here:
 		throw new AssertionFailedException("Bug?");
 	}
-
+	
 	@Override
-	public String insert(String path) {
-		String id = getId(path);
+	public String getId(IFile file) {
+		Set<String> ids = resources.get(getPathString(file));
+		if (ids != null) {
+			return ids.iterator().next();
+		}
+		return null;
+	}
+	
+	@Override
+	public String insert(IFile file) {
+		String id = getId(file);
 		if (id == null) {
 			id = generateId();
 			while (resourceIds.contains(id)) {
 				id = generateId();
 			}
-			Set<String> ids = resources.get(path.toString());
+			
+			String path = getPathString(file);
+			Set<String> ids = resources.get(path);
 			if (ids == null) {
 				ids = new HashSet<String>();
-				resources.put(path.toString(), ids);
+				resources.put(path, ids);
 			}
 			ids.add(id);
 			resourceIds.add(id);
 		}
 		return id;
 	}
-
+	
 	@Override
 	public void postShutdown(IWorkbench workbench) {
 		if (!write()) {
@@ -400,6 +419,10 @@ public enum XmlResourceManager
 		}
 
 		return Collections.unmodifiableMap(result);
+	}
+
+	private String getPathString(IFile file) {
+		return file.getFullPath().toPortableString();
 	}
 
 	/**

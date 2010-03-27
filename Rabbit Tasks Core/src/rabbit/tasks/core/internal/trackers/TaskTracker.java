@@ -48,13 +48,12 @@ public class TaskTracker extends AbstractPartTracker<TaskEvent> {
 			return null;
 		}
 
-		IFile f = (IFile) ((IEditorPart) p).getEditorInput().getAdapter(IFile.class);
-		if (f == null) {
+		IFile file = (IFile) ((IEditorPart) p).getEditorInput().getAdapter(IFile.class);
+		if (file == null) {
 			return null;
 		}
 
-		String fileId = RabbitCore.getFileMapper().insert(
-					f.getFullPath().toString());
+		String fileId = RabbitCore.getFileMapper().insert(file);
 		return new TaskEvent(time, duration, fileId, task);
 	}
 

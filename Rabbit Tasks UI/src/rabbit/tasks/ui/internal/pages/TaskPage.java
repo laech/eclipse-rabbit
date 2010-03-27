@@ -27,9 +27,6 @@ import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IAction;
@@ -540,7 +537,6 @@ public class TaskPage extends AbstractTreeViewerPage {
 		undefinedCategory.getChildren().clear();
 
 		IRepositoryModel repo = TasksUi.getRepositoryModel();
-		IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
 		for (Entry<TaskId, Map<String, Long>> taskEn : data.entrySet()) {
 
 			TaskId id = taskEn.getKey();
@@ -557,15 +553,14 @@ public class TaskPage extends AbstractTreeViewerPage {
 			}
 
 			for (Entry<String, Long> fileEn : taskEn.getValue().entrySet()) {
-				String pathStr = resourceMapper.getPath(fileEn.getKey());
-				if (pathStr == null) {
-					pathStr = resourceMapper.getExternalPath(fileEn.getKey());
+				IFile file = resourceMapper.getFile(fileEn.getKey());
+				if (file == null) {
+					file = resourceMapper.getExternalFile(fileEn.getKey());
 				}
-				if (pathStr == null) {
+				if (file == null) {
 					continue;
 				}
-
-				IFile file = root.getFile(Path.fromPortableString(pathStr));
+				
 				TaskResource fileElement = new TaskResource(task, file);
 				Long oldValue = fileToValue.get(fileElement);
 				if (oldValue == null) {

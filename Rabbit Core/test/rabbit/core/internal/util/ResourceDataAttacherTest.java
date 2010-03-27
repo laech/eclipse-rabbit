@@ -18,18 +18,20 @@ package rabbit.core.internal.util;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.lang.reflect.Field;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.ListenerList;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.ui.internal.Workbench;
 import org.junit.Assert;
 import org.junit.Test;
 
-import rabbit.core.internal.storage.xml.XmlResourceManager;
+import rabbit.core.internal.storage.xml.XmlFileMapper;
 
 @SuppressWarnings("restriction")
 public class ResourceDataAttacherTest {
@@ -46,17 +48,23 @@ public class ResourceDataAttacherTest {
 		if (!project.isOpen()) {
 			project.open(null);
 		}
+		
+		IFile oldfile = project.getFile("f.txt");
+		if (!oldfile.exists()) {
+			FileInputStream stream = new FileInputStream(File.createTempFile("abc", "def"));
+			oldfile.create(stream, true, null);
+			stream.close();
+		}
+		XmlFileMapper.INSTANCE.insert(oldfile);
 
-		IPath oldPath = project.getFullPath();
-		XmlResourceManager.INSTANCE.insert(oldPath.toString());
+		IFile newfile = project.getFile("f2.txt");
+		IPath newPath = newfile.getFullPath();
+		
+		assertNull(XmlFileMapper.INSTANCE.getId(newfile));
+		oldfile.move(newPath, true, null);
 
-		IPath newPath = Path.fromPortableString(project.getFullPath().toString()
-				+ System.currentTimeMillis());
-		assertNull(XmlResourceManager.INSTANCE.getId(newPath.toString()));
-		project.move(newPath, true, null);
-
-		assertNull(XmlResourceManager.INSTANCE.getId(oldPath.toString()));
-		assertNotNull(XmlResourceManager.INSTANCE.getId(newPath.toString()));
+		assertNull(XmlFileMapper.INSTANCE.getId(oldfile));
+		assertNotNull(XmlFileMapper.INSTANCE.getId(newfile));
 	}
 
 	@Test
@@ -65,7 +73,7 @@ public class ResourceDataAttacherTest {
 		field.setAccessible(true);
 		ListenerList listeners = (ListenerList) field.get(Workbench.getInstance());
 		for (Object listener : listeners.getListeners()) {
-			if (listener == XmlResourceManager.INSTANCE) {
+			if (listener == XmlFileMapper.INSTANCE) {
 				return;
 			}
 		}

@@ -84,8 +84,8 @@ public class ResourcePageContentProviderTest {
 	@Test
 	public void testGetChildren() throws Exception {
 		Map<String, Long> data = new HashMap<String, Long>();
-		data.put(mapper.insert(file1.getFullPath().toString()), 1L);
-		data.put(mapper.insert(file2.getFullPath().toString()), 2L);
+		data.put(mapper.insert(file1), 1L);
+		data.put(mapper.insert(file2), 2L);
 		ResourcePageTest.doUpdate(page, data);
 
 		assertEquals(1, provider.getChildren(project).length);

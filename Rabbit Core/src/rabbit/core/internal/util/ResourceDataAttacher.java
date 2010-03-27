@@ -19,14 +19,14 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.ui.IStartup;
 import org.eclipse.ui.PlatformUI;
 
-import rabbit.core.internal.storage.xml.XmlResourceManager;
+import rabbit.core.internal.storage.xml.XmlFileMapper;
 
 public class ResourceDataAttacher implements IStartup {
 
 	@Override
 	public void earlyStartup() {
-		PlatformUI.getWorkbench().addWorkbenchListener(XmlResourceManager.INSTANCE);
-		ResourcesPlugin.getWorkspace().addResourceChangeListener(XmlResourceManager.INSTANCE);
+		PlatformUI.getWorkbench().addWorkbenchListener(XmlFileMapper.INSTANCE);
+		ResourcesPlugin.getWorkspace().addResourceChangeListener(XmlFileMapper.INSTANCE);
 	}
 
 }

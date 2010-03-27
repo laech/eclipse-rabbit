@@ -40,7 +40,6 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.mylyn.internal.tasks.core.AbstractTask;
 import org.eclipse.mylyn.internal.tasks.core.AbstractTaskContainer;
 import org.eclipse.mylyn.internal.tasks.core.LocalTask;
@@ -169,13 +168,13 @@ public class TaskPageTest extends AbstractTreeViewerPageTest {
 		long value1 = 19873;
 		long value2 = 18734;
 		Map<String, Long> fileData1 = new HashMap<String, Long>();
-		fileData1.put(manager.insert(root.getProject("p").getFile("f").getFullPath().toString()), value1);
-		fileData1.put(manager.insert(root.getProject("p").getFile("ff").getFullPath().toString()), value2);
+		fileData1.put(manager.insert(root.getProject("p").getFile("f")), value1);
+		fileData1.put(manager.insert(root.getProject("p").getFile("ff")), value2);
 		data.put(new TaskId(activeTask.getHandleIdentifier(), activeTask.getCreationDate()), fileData1);
 
 		long value3 = 92374;
 		Map<String, Long> fileData2 = new HashMap<String, Long>();
-		fileData2.put(manager.insert(root.getProject("p").getFile("f12").getFullPath().toString()), value3);
+		fileData2.put(manager.insert(root.getProject("p").getFile("f12")), value3);
 		data.put(new TaskId(missingTask.getHandleIdentifier(), missingTask.getCreationDate()), fileData2);
 
 		doUpdate(page, data);
@@ -219,17 +218,17 @@ public class TaskPageTest extends AbstractTreeViewerPageTest {
 		}
 
 		// Insert file1 into the database, then delete it from workspace:
-		String file1Id = manager.insert(file1.getFullPath().toString());
+		String file1Id = manager.insert(file1);
 		file1.delete(true, null);
 
 		// Insert file2 into the database,
 		// then rename file2 to become the deleted file1:
-		String file2Id = manager.insert(file2.getFullPath().toString());
+		String file2Id = manager.insert(file2);
 		file2.move(file1.getFullPath(), true, null);
 
 		// Now the two IDs should point to the same path:
-		assertEquals(manager.getPath(file1Id), manager.getPath(file2Id));
-		assertEquals(file1.getFullPath().toString(), manager.getPath(file1Id));
+		assertEquals(manager.getFile(file1Id), manager.getFile(file2Id));
+		assertEquals(file1, manager.getFile(file1Id));
 
 		long value1 = 19084;
 		long value2 = 28450;
@@ -551,15 +550,14 @@ public class TaskPageTest extends AbstractTreeViewerPageTest {
 			}
 
 			for (Entry<String, Long> fileEn : taskEn.getValue().entrySet()) {
-				String pathStr = resourceMapper.getPath(fileEn.getKey());
-				if (pathStr == null) {
-					pathStr = resourceMapper.getExternalPath(fileEn.getKey());
+				IFile file = resourceMapper.getFile(fileEn.getKey());
+				if (file == null) {
+					file = resourceMapper.getExternalFile(fileEn.getKey());
 				}
-				if (pathStr == null) {
+				if (file == null) {
 					continue;
 				}
-
-				IFile file = root.getFile(Path.fromPortableString(pathStr));
+				
 				TaskResource fileElement = new TaskResource(task, file);
 				Long oldValue = fileToValue.get(fileElement);
 				if (oldValue == null) {

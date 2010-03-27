@@ -66,8 +66,7 @@ public class TaskTrackerTest extends AbstractPartTrackerTest<TaskEvent> {
 		if (part instanceof IEditorPart) {
 			IEditorPart editor = (IEditorPart) part;
 			IFile file = (IFile) editor.getEditorInput().getAdapter(IFile.class);
-			String id = RabbitCore.getFileMapper().getId(
-					file.getFullPath().toString());
+			String id = RabbitCore.getFileMapper().getId(file);
 			return event.getFileId().equals(id);
 		} else {
 			return false;
@@ -85,8 +84,7 @@ public class TaskTrackerTest extends AbstractPartTrackerTest<TaskEvent> {
 		assertTrue(end.compareTo(event.getTime()) >= 0);
 		assertEquals(size, tracker.getData().size());
 		IFile file = (IFile) ((IEditorPart) part).getEditorInput().getAdapter(IFile.class);
-		assertEquals(event.getFileId(), RabbitCore.getFileMapper().getId(
-				file.getFullPath().toString()));
+		assertEquals(event.getFileId(), RabbitCore.getFileMapper().getId(file));
 		
 		assertEquals(task, event.getTask());
 	}

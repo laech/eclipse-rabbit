@@ -13,7 +13,7 @@ import org.junit.runners.Suite.SuiteClasses;
 		JaxbUtilTest.class,
 		PartEventStorerTest.class,
 		PerspectiveEventStorerTest.class,
-		XmlResourceManagerTest.class,
+		XmlFileMapperTest.class,
 //
 })
 public class TestsOthers {

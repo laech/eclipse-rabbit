@@ -25,9 +25,6 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IAction;
@@ -359,17 +356,15 @@ public class ResourcePage extends AbstractTreeViewerPage {
 		folderFiles.clear();
 		fileValues.clear();
 
-		IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
 		for (Map.Entry<String, Long> entry : data.entrySet()) {
-			String pathString = resourceMapper.getPath(entry.getKey());
-			if (pathString == null) {
-				pathString = resourceMapper.getExternalPath(entry.getKey());
+			IFile file = resourceMapper.getFile(entry.getKey());
+			if (file == null) {
+				file = resourceMapper.getExternalFile(entry.getKey());
 			}
-			if (pathString == null) {
+			if (file == null) {
 				continue;
 			}
-
-			IFile file = root.getFile(Path.fromPortableString(pathString));
+			
 			Long oldValue = fileValues.get(file);
 			if (oldValue == null) {
 				oldValue = Long.valueOf(0);
