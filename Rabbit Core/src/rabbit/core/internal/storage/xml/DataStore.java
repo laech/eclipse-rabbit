@@ -46,7 +46,13 @@ public enum DataStore implements IDataStore {
 	/**
 	 * @since 1.1
 	 */
-	TASK_STORE("taskEvents");
+	TASK_STORE("taskEvents"),
+	
+	/**
+	 * @since 1.1
+	 */
+	LAUNCH_STORE("launchEvents");
+	
 
 	/**
 	 * Formats a date into "yyyy-MM".

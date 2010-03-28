@@ -26,24 +26,21 @@ package rabbit.core.internal.storage.xml.schema.events;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for taskEventType complex type.
+ * <p>Java class for durationEventType complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="taskEventType">
+ * &lt;complexType name="durationEventType">
  *   &lt;complexContent>
- *     &lt;extension base="{}durationEventType">
- *       &lt;sequence>
- *         &lt;element name="taskId" type="{}taskIdType"/>
- *       &lt;/sequence>
- *       &lt;attribute name="fileId" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
- *     &lt;/extension>
+ *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
+ *       &lt;attribute name="duration" use="required" type="{}durationType" />
+ *     &lt;/restriction>
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
@@ -51,64 +48,33 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "taskEventType", propOrder = {
-    "taskId"
+@XmlType(name = "durationEventType")
+@XmlSeeAlso({
+    TaskEventType.class,
+    PartEventType.class,
+    FileEventType.class,
+    PerspectiveEventType.class,
+    LaunchEventType.class
 })
-public class TaskEventType
-    extends DurationEventType
-{
+public class DurationEventType {
 
-    @XmlElement(required = true)
-    protected TaskIdType taskId;
     @XmlAttribute(required = true)
-    protected String fileId;
+    protected long duration;
 
     /**
-     * Gets the value of the taskId property.
+     * Gets the value of the duration property.
      * 
-     * @return
-     *     possible object is
-     *     {@link TaskIdType }
-     *     
      */
-    public TaskIdType getTaskId() {
-        return taskId;
+    public long getDuration() {
+        return duration;
     }
 
     /**
-     * Sets the value of the taskId property.
+     * Sets the value of the duration property.
      * 
-     * @param value
-     *     allowed object is
-     *     {@link TaskIdType }
-     *     
      */
-    public void setTaskId(TaskIdType value) {
-        this.taskId = value;
-    }
-
-    /**
-     * Gets the value of the fileId property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
-     */
-    public String getFileId() {
-        return fileId;
-    }
-
-    /**
-     * Sets the value of the fileId property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
-     */
-    public void setFileId(String value) {
-        this.fileId = value;
+    public void setDuration(long value) {
+        this.duration = value;
     }
 
 }

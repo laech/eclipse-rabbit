@@ -26,7 +26,7 @@ import rabbit.core.internal.storage.xml.schema.events.FileEventType;
 import rabbit.core.internal.storage.xml.schema.events.ObjectFactory;
 
 public class FileEventStorerTest
-		extends AbstractStorerTest2<FileEvent, FileEventType, FileEventListType> {
+		extends AbstractContinuousEventStorerTest<FileEvent, FileEventType, FileEventListType> {
 
 	@Override
 	public void testHasSameId_typeAndEvent() {
@@ -65,16 +65,6 @@ public class FileEventStorerTest
 	@Override
 	protected List<FileEventType> getEventTypes(FileEventListType type) {
 		return type.getFileEvent();
-	}
-
-	@Override
-	protected long getValue(FileEvent event) {
-		return event.getDuration();
-	}
-
-	@Override
-	protected long getValue(FileEventType type) {
-		return type.getDuration();
 	}
 
 	@Override

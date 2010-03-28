@@ -26,11 +26,12 @@ import java.util.List;
 
 import javax.xml.datatype.XMLGregorianCalendar;
 
-import rabbit.core.events.DiscreteEvent;
+import rabbit.core.events.ContinuousEvent;
+import rabbit.core.internal.storage.xml.schema.events.DurationEventType;
 import rabbit.core.internal.storage.xml.schema.events.EventGroupType;
 
-public abstract class AbstractStorerTest2<E extends DiscreteEvent, T, S extends EventGroupType>
-		extends AbstractStorerTest<E, T, S> {
+public abstract class AbstractContinuousEventStorerTest<E extends ContinuousEvent, T extends DurationEventType, S extends EventGroupType>
+		extends AbstractDiscreteEventStorerTest<E, T, S> {
 
 	@Override
 	public void testCommit() {
@@ -243,47 +244,14 @@ public abstract class AbstractStorerTest2<E extends DiscreteEvent, T, S extends 
 	}
 
 	@Override
-	public void testMerge_listTypeAndEvent() {
-
-		E e = createEvent();
-		T x = storer.newXmlType(e);
-
-		S main = storer.newXmlTypeHolder(getCalendar());
-		getEventTypes(main).add(x);
-
-		long totalDuration = getValue(x) * 2;
-		storer.merge(main, e);
-		assertEquals(1, getEventTypes(main).size());
-		assertEquals(totalDuration, getValue(getEventTypes(main).get(0)));
-	}
-
-	@Override
-	public void testMerge_listTypeAndlistType() {
-
-		E e = createEvent();
-		T x = storer.newXmlType(e);
-
-		S main = storer.newXmlTypeHolder(null);
-		storer.merge(main, e);
-
-		S tmp = storer.newXmlTypeHolder(null);
-		storer.merge(tmp, e);
-
-		long totalDuration = getValue(x) * 2;
-		storer.merge(main, tmp);
-		assertEquals(1, getEventTypes(main).size());
-		assertEquals(totalDuration, getValue(getEventTypes(main).get(0)));
-	}
-
-	@Override
 	public void testMerge_typeAndEvent() {
 
 		E e = createEvent();
 		T main = storer.newXmlType(e);
 
-		long totalDuration = getValue(e) + getValue(main);
+		long totalDuration = main.getDuration() + e.getDuration();
 		storer.merge(main, e);
-		assertEquals(totalDuration, getValue(main));
+		assertEquals(totalDuration, main.getDuration());
 	}
 
 	@Override
@@ -293,9 +261,9 @@ public abstract class AbstractStorerTest2<E extends DiscreteEvent, T, S extends 
 		T main = storer.newXmlType(e);
 		T tmp = storer.newXmlType(e);
 
-		long totalDuration = getValue(main) + getValue(tmp);
+		long totalDuration = main.getDuration() + tmp.getDuration();
 		storer.merge(main, tmp);
-		assertEquals(totalDuration, getValue(main));
+		assertEquals(totalDuration, main.getDuration());
 	}
 
 	@Override
@@ -313,17 +281,53 @@ public abstract class AbstractStorerTest2<E extends DiscreteEvent, T, S extends 
 		T xml = storer.newXmlType(e);
 
 		assertTrue(storer.hasSameId(xml, e));
-		assertEquals(getValue(xml), getValue(e));
+		assertEquals(xml.getDuration(), e.getDuration());
 	}
 
 	/** Gets the list of events form the parameter. */
 	protected abstract List<T> getEventTypes(S type);
-
-	/** Gets the value (or usage) of the given event. */
-	protected abstract long getValue(E event);
-
-	/** Gets the value (or usage) of the given type. */
-	protected abstract long getValue(T type);
+	
+	@Override
+	public void testMerge_listOfXmlTypesAndEvent() throws Exception {
+		List<T> list = new ArrayList<T>();
+		E event = createEvent();
+		
+		storer.merge(list, event);
+		assertEquals(1, list.size());
+		T type = list.get(0);
+		assertTrue(storer.hasSameId(type, event));
+		assertEquals(type.getDuration(), event.getDuration());
+		
+		// Repeat, two object in the list should be merged:
+		storer.merge(list, event);
+		assertEquals(1, list.size());
+		type = list.get(0);
+		assertTrue(storer.hasSameId(type, event));
+		// We merged twice, so the duration should have been doubled.
+		assertEquals(type.getDuration(), event.getDuration() * 2);
+	}
+	
+	@Override
+	public void testMerge_listOfXmlTypesAndListOfXmlTypes() throws Exception {
+		List<T> list1 = new ArrayList<T>();
+		List<T> list2 = new ArrayList<T>();
+		E event = createEvent();
+		T type = storer.newXmlType(event);
+		list2.add(type);
+		
+		storer.merge(list1, list2);
+		assertEquals(1, list1.size());
+		assertTrue(storer.hasSameId(list1.get(0), event));
+		assertEquals(event.getDuration(), list1.get(0).getDuration());
+		
+		// Repeat, two object in the list should be merged:
+		storer.merge(list1, list2);
+		assertEquals(1, list1.size());
+		assertTrue(storer.hasSameId(list1.get(0), event));
+		// We merged twice, so the duration should have been doubled.
+		assertEquals(list1.get(0).getDuration(), event.getDuration() * 2);
+	}
+	
 
 	/** Returns true if the parameters contains the same values. */
 	protected abstract boolean isEqual(T type, E event);

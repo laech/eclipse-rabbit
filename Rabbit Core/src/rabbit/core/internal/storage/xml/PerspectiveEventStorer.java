@@ -25,14 +25,14 @@ import rabbit.core.internal.storage.xml.schema.events.PerspectiveEventListType;
 import rabbit.core.internal.storage.xml.schema.events.PerspectiveEventType;
 
 public final class PerspectiveEventStorer
-		extends AbstractStorer<PerspectiveEvent, PerspectiveEventType, PerspectiveEventListType> {
+		extends AbstractContinuousEventStorer<PerspectiveEvent, PerspectiveEventType, PerspectiveEventListType> {
 
 	private static final PerspectiveEventStorer INSTANCE = new PerspectiveEventStorer();
 
 	/**
 	 * Gets the shared instance of this class.
 	 * 
-	 * @return The shared instanceof this class.
+	 * @return The shared instance of this class.
 	 */
 	public static PerspectiveEventStorer getInstance() {
 		return INSTANCE;
@@ -52,6 +52,11 @@ public final class PerspectiveEventStorer
 	}
 
 	@Override
+	protected List<PerspectiveEventType> getXmlTypes(PerspectiveEventListType list) {
+		return list.getPerspectiveEvent();
+	}
+
+	@Override
 	protected boolean hasSameId(PerspectiveEventType x, PerspectiveEvent e) {
 		return x.getPerspectiveId().equals(e.getPerspective().getId());
 	}
@@ -59,26 +64,6 @@ public final class PerspectiveEventStorer
 	@Override
 	protected boolean hasSameId(PerspectiveEventType x1, PerspectiveEventType x2) {
 		return x1.getPerspectiveId().equals(x2.getPerspectiveId());
-	}
-
-	@Override
-	protected void merge(PerspectiveEventListType main, PerspectiveEvent e) {
-		merge(main.getPerspectiveEvent(), e);
-	}
-
-	@Override
-	protected void merge(PerspectiveEventListType main, PerspectiveEventListType data) {
-		merge(main.getPerspectiveEvent(), data.getPerspectiveEvent());
-	}
-
-	@Override
-	protected void merge(PerspectiveEventType main, PerspectiveEvent e) {
-		main.setDuration(main.getDuration() + e.getDuration());
-	}
-
-	@Override
-	protected void merge(PerspectiveEventType main, PerspectiveEventType x) {
-		main.setDuration(main.getDuration() + x.getDuration());
 	}
 
 	@Override

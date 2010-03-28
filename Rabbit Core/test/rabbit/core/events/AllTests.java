@@ -27,6 +27,7 @@ import org.junit.runners.Suite.SuiteClasses;
 		PartEventTest.class,
 		PerspectiveEventTest.class,
 		FileEventTest.class,
+		LaunchEventTest.class,
 //
 })
 public class AllTests {

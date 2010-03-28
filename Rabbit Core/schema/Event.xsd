@@ -15,6 +15,7 @@
 			<xs:element name="fileEvents" type="fileEventListType" maxOccurs="unbounded" />
 			<xs:element name="perspectiveEvents" type="perspectiveEventListType" maxOccurs="unbounded" />
 			<xs:element name="taskEvents" type="taskEventListType" maxOccurs="unbounded" />
+			<xs:element name="launchEvents" type="launchEventListType" maxOccurs="unbounded" />
 		</xs:sequence>
 	</xs:complexType>
 
@@ -44,8 +45,11 @@
 		</xs:complexContent>
 	</xs:complexType>
 	<xs:complexType name="partEventType">
-		<xs:attribute name="partId" type="xs:string" use="required" />
-		<xs:attribute ref="duration" use="required" />
+		<xs:complexContent>
+			<xs:extension base="durationEventType">
+				<xs:attribute name="partId" type="xs:string" use="required" />
+			</xs:extension>
+		</xs:complexContent>
 	</xs:complexType>
 	
 	<!-- Perspective Events: -->
@@ -59,8 +63,11 @@
 		</xs:complexContent>
 	</xs:complexType>
 	<xs:complexType name="perspectiveEventType">
-		<xs:attribute name="perspectiveId" type="xs:string" use="required" />
-		<xs:attribute ref="duration" use="required"></xs:attribute>
+		<xs:complexContent>
+			<xs:extension base="durationEventType">
+				<xs:attribute name="perspectiveId" type="xs:string" use="required" />
+			</xs:extension>
+		</xs:complexContent>
 	</xs:complexType>
 	
 	<!-- File Events: -->
@@ -74,8 +81,11 @@
 		</xs:complexContent>
 	</xs:complexType>
 	<xs:complexType name="fileEventType">
-		<xs:attribute name="fileId" type="xs:string" use="required" />
-		<xs:attribute ref="duration" use="required" />
+		<xs:complexContent>
+			<xs:extension base="durationEventType">
+				<xs:attribute name="fileId" type="xs:string" use="required" />
+			</xs:extension>
+		</xs:complexContent>
 	</xs:complexType>
 	
 	<!-- Task File Events: -->
@@ -89,20 +99,54 @@
 		</xs:complexContent>
 	</xs:complexType>
 	<xs:complexType name="taskEventType">
-		<xs:sequence>
-			<xs:element name="taskId" type="taskIdType" minOccurs="1" maxOccurs="1" />
-		</xs:sequence>
-		<xs:attribute name="fileId" type="xs:string" use="required" />
-		<xs:attribute ref="duration" use="required" />
+		<xs:complexContent>
+			<xs:extension base="durationEventType">
+				<xs:sequence>
+					<xs:element name="taskId" type="taskIdType" minOccurs="1" maxOccurs="1" />
+				</xs:sequence>
+				<xs:attribute name="fileId" type="xs:string" use="required" />
+			</xs:extension>
+		</xs:complexContent>
 	</xs:complexType>
 	<xs:complexType name="taskIdType">
 		<xs:attribute name="handleId" type="xs:string" use="required" />
 		<xs:attribute name="creationDate" type="xs:dateTime" use="required" />
 	</xs:complexType>
 	
-
+	<!-- Launch Events: -->
+	<xs:complexType name="launchEventListType">
+		<xs:complexContent>
+			<xs:extension base="eventGroupType">
+				<xs:sequence>
+					<xs:element name="launchEvent" type="launchEventType" maxOccurs="unbounded" />
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:complexType name="launchEventType">
+		<xs:complexContent>
+			<xs:extension base="durationEventType">
+				<xs:sequence>
+					<xs:element name="fileId" type="xs:string" minOccurs="0" maxOccurs="unbounded" />
+				</xs:sequence>
+				<xs:attribute name="launchName" type="xs:string" use="required" />
+				<xs:attribute name="launchTime" type="xs:dateTime" use="required" />
+				<xs:attribute name="launchMode" type="launchMode" use="required" />
+				<xs:attribute name="launchType" type="xs:string" use="optional" />
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	
+	
+	
+	<!-- Base for event groups: -->
 	<xs:complexType name="eventGroupType">
-		<xs:attribute name="date" type="xs:date" />
+		<xs:attribute name="date" type="xs:date" use="required" />
+	</xs:complexType>
+	
+	<!-- Base for events that have durations: -->
+	<xs:complexType name="durationEventType">
+		<xs:attribute name="duration" type="durationType" use="required" />
 	</xs:complexType>
 	
 	<xs:simpleType name="countType">
@@ -117,6 +161,11 @@
 		</xs:restriction>
 	</xs:simpleType>
 	
-	<xs:attribute name="duration" type="durationType" />
-
+	<xs:simpleType name="launchMode">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="run" />
+			<xs:enumeration value="debug" />
+			<xs:enumeration value="profile" />
+		</xs:restriction>
+	</xs:simpleType>
 </xs:schema>

@@ -23,60 +23,52 @@
 
 package rabbit.core.internal.storage.xml.schema.events;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.XmlEnum;
+import javax.xml.bind.annotation.XmlEnumValue;
 
 
 /**
- * <p>Java class for partEventType complex type.
+ * <p>Java class for launchMode.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ * <p>
  * <pre>
- * &lt;complexType name="partEventType">
- *   &lt;complexContent>
- *     &lt;extension base="{}durationEventType">
- *       &lt;attribute name="partId" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
- *     &lt;/extension>
- *   &lt;/complexContent>
- * &lt;/complexType>
+ * &lt;simpleType name="launchMode">
+ *   &lt;restriction base="{http://www.w3.org/2001/XMLSchema}string">
+ *     &lt;enumeration value="run"/>
+ *     &lt;enumeration value="debug"/>
+ *     &lt;enumeration value="profile"/>
+ *   &lt;/restriction>
+ * &lt;/simpleType>
  * </pre>
  * 
- * 
  */
-@XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "partEventType")
-public class PartEventType
-    extends DurationEventType
-{
+@XmlEnum
+public enum LaunchMode {
 
-    @XmlAttribute(required = true)
-    protected String partId;
+    @XmlEnumValue("run")
+    RUN("run"),
+    @XmlEnumValue("debug")
+    DEBUG("debug"),
+    @XmlEnumValue("profile")
+    PROFILE("profile");
+    private final String value;
 
-    /**
-     * Gets the value of the partId property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
-     */
-    public String getPartId() {
-        return partId;
+    LaunchMode(String v) {
+        value = v;
     }
 
-    /**
-     * Sets the value of the partId property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
-     */
-    public void setPartId(String value) {
-        this.partId = value;
+    public String value() {
+        return value;
+    }
+
+    public static LaunchMode fromValue(String v) {
+        for (LaunchMode c: LaunchMode.values()) {
+            if (c.value.equals(v)) {
+                return c;
+            }
+        }
+        throw new IllegalArgumentException(v);
     }
 
 }

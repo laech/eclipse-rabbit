@@ -29,9 +29,8 @@ import rabbit.core.internal.storage.xml.schema.events.ObjectFactory;
 import rabbit.core.internal.storage.xml.schema.events.PerspectiveEventListType;
 import rabbit.core.internal.storage.xml.schema.events.PerspectiveEventType;
 
-public class PerspectiveEventStorerTest
-		extends
-		AbstractStorerTest2<PerspectiveEvent, PerspectiveEventType, PerspectiveEventListType> {
+public class PerspectiveEventStorerTest extends
+		AbstractContinuousEventStorerTest<PerspectiveEvent, PerspectiveEventType, PerspectiveEventListType> {
 
 	private PerspectiveEventStorer storer = create();
 
@@ -84,16 +83,6 @@ public class PerspectiveEventStorerTest
 	@Override
 	protected List<PerspectiveEventType> getEventTypes(PerspectiveEventListType type) {
 		return type.getPerspectiveEvent();
-	}
-
-	@Override
-	protected long getValue(PerspectiveEvent event) {
-		return event.getDuration();
-	}
-
-	@Override
-	protected long getValue(PerspectiveEventType type) {
-		return type.getDuration();
 	}
 
 	@Override

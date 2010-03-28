@@ -19,9 +19,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static rabbit.core.internal.storage.xml.DatatypeUtil.toXMLGregorianCalendarDate;
+import static rabbit.core.internal.storage.xml.DatatypeUtil.*;
 
 import java.util.Calendar;
+import java.util.GregorianCalendar;
 
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
@@ -41,9 +42,23 @@ public class DatatypeUtilTest {
 		XMLGregorianCalendar xmlCal = toXMLGregorianCalendarDate(cal);
 
 		assertEquals(cal.get(Calendar.YEAR), xmlCal.getYear());
-		// Calendar.MONTH is zero based.
+		// Calendar.MONTH is zero based, xmlCal is one based.
 		assertEquals(cal.get(Calendar.MONTH) + 1, xmlCal.getMonth());
 		assertEquals(cal.get(Calendar.DAY_OF_MONTH), xmlCal.getDay());
+	}
+	
+	@Test
+	public void testToXMLGregorianCalendarDateTime() {
+		GregorianCalendar cal = new GregorianCalendar();
+		XMLGregorianCalendar xmlCal = toXMLGregorianCalendarDateTime(cal);
+		assertEquals(cal.get(Calendar.YEAR), xmlCal.getYear());
+		// Calendar.MONTH is zero based, xmlCal is one based.
+		assertEquals(cal.get(Calendar.MONTH) + 1, xmlCal.getMonth());
+		assertEquals(cal.get(Calendar.DAY_OF_MONTH), xmlCal.getDay());
+		assertEquals(cal.get(Calendar.HOUR_OF_DAY), xmlCal.getHour());
+		assertEquals(cal.get(Calendar.MINUTE), xmlCal.getMinute());
+		assertEquals(cal.get(Calendar.SECOND), xmlCal.getSecond());
+		assertEquals(cal.getTime(), xmlCal.toGregorianCalendar().getTime());
 	}
 
 	@Test

@@ -33,7 +33,7 @@ import rabbit.core.internal.storage.xml.schema.events.PartEventListType;
 import rabbit.core.internal.storage.xml.schema.events.PartEventType;
 
 public class PartEventStorerTest extends
-		AbstractStorerTest2<PartEvent, PartEventType, PartEventListType> {
+		AbstractContinuousEventStorerTest<PartEvent, PartEventType, PartEventListType> {
 
 	private PartEvent event;
 
@@ -135,16 +135,6 @@ public class PartEventStorerTest extends
 	}
 
 	@Override
-	protected long getValue(PartEvent event) {
-		return event.getDuration();
-	}
-
-	@Override
-	protected long getValue(PartEventType type) {
-		return type.getDuration();
-	}
-
-	@Override
 	protected boolean isEqual(PartEventType type, PartEvent event) {
 		boolean isEqual = false;
 		isEqual = type.getPartId().equals(event.getWorkbenchPart().getSite().getId());
@@ -159,7 +149,7 @@ public class PartEventStorerTest extends
 		return new PartEvent(main.getTime(), main.getDuration() + tmp.getDuration(), main
 				.getWorkbenchPart());
 	}
-	
+
 	@Override
 	protected PartEvent createEvent(final Calendar eventTime) {
 		final IWorkbench wb = PlatformUI.getWorkbench();

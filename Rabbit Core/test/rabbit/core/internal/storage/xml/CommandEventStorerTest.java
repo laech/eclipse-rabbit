@@ -38,7 +38,7 @@ import rabbit.core.internal.storage.xml.schema.events.CommandEventListType;
 import rabbit.core.internal.storage.xml.schema.events.CommandEventType;
 
 public class CommandEventStorerTest extends
-		AbstractStorerTest<CommandEvent, CommandEventType, CommandEventListType> {
+		AbstractDiscreteEventStorerTest<CommandEvent, CommandEventType, CommandEventListType> {
 
 	private CommandEventStorer storer = create();
 
@@ -293,35 +293,6 @@ public class CommandEventStorerTest extends
 	}
 
 	@Override
-	public void testMerge_listTypeAndEvent() {
-
-		CommandEvent e = createEvent();
-		CommandEventType main = storer.newXmlType(e);
-
-		long totalCount = 2;
-		storer.merge(main, e);
-		assertEquals(totalCount, main.getCount());
-	}
-
-	@Override
-	public void testMerge_listTypeAndlistType() {
-
-		CommandEvent e = createEvent();
-		CommandEventType x = storer.newXmlType(e);
-
-		CommandEventListType main = objectFactory.createCommandEventListType();
-		main.getCommandEvent().add(x);
-
-		CommandEventListType tmp = objectFactory.createCommandEventListType();
-		tmp.getCommandEvent().add(x);
-
-		long totalCount = x.getCount() * 2;
-		storer.merge(main, tmp);
-		assertEquals(1, main.getCommandEvent().size());
-		assertEquals(totalCount, main.getCommandEvent().get(0).getCount());
-	}
-
-	@Override
 	public void testMerge_typeAndEvent() {
 
 		CommandEvent e = createEvent();
@@ -393,6 +364,47 @@ public class CommandEventStorerTest extends
 	private ICommandService getCommandService() {
 		return (ICommandService) PlatformUI.getWorkbench().getService(
 				ICommandService.class);
+	}
+
+	@Override
+	public void testMerge_listOfXmlTypesAndEvent() throws Exception {
+		List<CommandEventType> list = new ArrayList<CommandEventType>();
+		CommandEvent event = createEvent();
+		
+		storer.merge(list, event);
+		assertEquals(1, list.size());
+		CommandEventType type = list.get(0);
+		assertEquals(event.getExecutionEvent().getCommand().getId(), type.getCommandId());
+		assertEquals(1, type.getCount());
+		
+		// Repeat:
+		storer.merge(list, event);
+		assertEquals(1, list.size());
+		type = list.get(0);
+		assertEquals(event.getExecutionEvent().getCommand().getId(), type.getCommandId());
+		assertEquals(2, type.getCount()); //
+	}
+
+	@Override
+	public void testMerge_listOfXmlTypesAndListOfXmlTypes() throws Exception {
+		List<CommandEventType> list1 = new ArrayList<CommandEventType>();
+		List<CommandEventType> list2 = new ArrayList<CommandEventType>();
+		CommandEvent event = createEvent();
+		CommandEventType type = storer.newXmlType(event);
+		list2.add(type);
+		
+		storer.merge(list1, list2);
+		assertEquals(1, list1.size());
+		type = list1.get(0);
+		assertEquals(event.getExecutionEvent().getCommand().getId(), type.getCommandId());
+		assertEquals(1, type.getCount());
+		
+		// Repeat:
+		storer.merge(list1, list2);
+		assertEquals(1, list1.size());
+		type = list1.get(0);
+		assertEquals(event.getExecutionEvent().getCommand().getId(), type.getCommandId());
+		assertEquals(2, type.getCount()); //
 	}
 
 }

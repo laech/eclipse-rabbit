@@ -23,26 +23,26 @@
 
 package rabbit.core.internal.storage.xml.schema.events;
 
+import java.util.ArrayList;
+import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for taskEventType complex type.
+ * <p>Java class for launchEventListType complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="taskEventType">
+ * &lt;complexType name="launchEventListType">
  *   &lt;complexContent>
- *     &lt;extension base="{}durationEventType">
+ *     &lt;extension base="{}eventGroupType">
  *       &lt;sequence>
- *         &lt;element name="taskId" type="{}taskIdType"/>
+ *         &lt;element name="launchEvent" type="{}launchEventType" maxOccurs="unbounded"/>
  *       &lt;/sequence>
- *       &lt;attribute name="fileId" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
  *     &lt;/extension>
  *   &lt;/complexContent>
  * &lt;/complexType>
@@ -51,64 +51,43 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "taskEventType", propOrder = {
-    "taskId"
+@XmlType(name = "launchEventListType", propOrder = {
+    "launchEvent"
 })
-public class TaskEventType
-    extends DurationEventType
+public class LaunchEventListType
+    extends EventGroupType
 {
 
     @XmlElement(required = true)
-    protected TaskIdType taskId;
-    @XmlAttribute(required = true)
-    protected String fileId;
+    protected List<LaunchEventType> launchEvent;
 
     /**
-     * Gets the value of the taskId property.
+     * Gets the value of the launchEvent property.
      * 
-     * @return
-     *     possible object is
-     *     {@link TaskIdType }
-     *     
-     */
-    public TaskIdType getTaskId() {
-        return taskId;
-    }
-
-    /**
-     * Sets the value of the taskId property.
+     * <p>
+     * This accessor method returns a reference to the live list,
+     * not a snapshot. Therefore any modification you make to the
+     * returned list will be present inside the JAXB object.
+     * This is why there is not a <CODE>set</CODE> method for the launchEvent property.
      * 
-     * @param value
-     *     allowed object is
-     *     {@link TaskIdType }
-     *     
-     */
-    public void setTaskId(TaskIdType value) {
-        this.taskId = value;
-    }
-
-    /**
-     * Gets the value of the fileId property.
+     * <p>
+     * For example, to add a new item, do as follows:
+     * <pre>
+     *    getLaunchEvent().add(newItem);
+     * </pre>
      * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
-     */
-    public String getFileId() {
-        return fileId;
-    }
-
-    /**
-     * Sets the value of the fileId property.
      * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
+     * <p>
+     * Objects of the following type(s) are allowed in the list
+     * {@link LaunchEventType }
+     * 
+     * 
      */
-    public void setFileId(String value) {
-        this.fileId = value;
+    public List<LaunchEventType> getLaunchEvent() {
+        if (launchEvent == null) {
+            launchEvent = new ArrayList<LaunchEventType>();
+        }
+        return this.launchEvent;
     }
 
 }

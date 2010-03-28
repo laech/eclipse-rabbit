@@ -25,14 +25,14 @@ import rabbit.core.internal.storage.xml.schema.events.CommandEventType;
 import rabbit.core.internal.storage.xml.schema.events.EventListType;
 
 public final class CommandEventStorer
-		extends AbstractStorer<CommandEvent, CommandEventType, CommandEventListType> {
+		extends AbstractDiscreteEventStorer<CommandEvent, CommandEventType, CommandEventListType> {
 
 	private static final CommandEventStorer INSTANCE = new CommandEventStorer();
 
 	/**
 	 * Gets the shared instance of this class.
 	 * 
-	 * @return The shared instanceof this class.
+	 * @return The shared instance of this class.
 	 */
 	public static CommandEventStorer getInstance() {
 		return INSTANCE;
@@ -52,6 +52,11 @@ public final class CommandEventStorer
 	}
 
 	@Override
+	protected List<CommandEventType> getXmlTypes(CommandEventListType list) {
+		return list.getCommandEvent();
+	}
+
+	@Override
 	protected boolean hasSameId(CommandEventType x, CommandEvent e) {
 
 		return e.getExecutionEvent().getCommand().getId()
@@ -61,16 +66,6 @@ public final class CommandEventStorer
 	@Override
 	protected boolean hasSameId(CommandEventType x1, CommandEventType x2) {
 		return x1.getCommandId().equals(x2.getCommandId());
-	}
-
-	@Override
-	protected void merge(CommandEventListType main, CommandEvent e) {
-		merge(main.getCommandEvent(), e);
-	}
-
-	@Override
-	protected void merge(CommandEventListType t1, CommandEventListType t2) {
-		merge(t1.getCommandEvent(), t2.getCommandEvent());
 	}
 
 	@Override
@@ -90,7 +85,7 @@ public final class CommandEventStorer
 		type.setCount(1);
 		return type;
 	}
-
+	
 	@Override
 	protected CommandEventListType newXmlTypeHolder(XMLGregorianCalendar date) {
 		CommandEventListType type = objectFactory.createCommandEventListType();

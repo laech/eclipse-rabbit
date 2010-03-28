@@ -25,14 +25,14 @@ import rabbit.core.internal.storage.xml.schema.events.PartEventListType;
 import rabbit.core.internal.storage.xml.schema.events.PartEventType;
 
 public final class PartEventStorer
-		extends AbstractStorer<PartEvent, PartEventType, PartEventListType> {
+		extends AbstractContinuousEventStorer<PartEvent, PartEventType, PartEventListType> {
 
 	private static final PartEventStorer INSTANCE = new PartEventStorer();
 
 	/**
 	 * Gets the shared instance of this class.
 	 * 
-	 * @return The shared instanceof this class.
+	 * @return The shared instance of this class.
 	 */
 	public static PartEventStorer getInstance() {
 		return INSTANCE;
@@ -52,6 +52,11 @@ public final class PartEventStorer
 	}
 
 	@Override
+	protected List<PartEventType> getXmlTypes(PartEventListType list) {
+		return list.getPartEvent();
+	}
+
+	@Override
 	protected boolean hasSameId(PartEventType x, PartEvent e) {
 
 		boolean result = false;
@@ -64,26 +69,6 @@ public final class PartEventStorer
 	@Override
 	protected boolean hasSameId(PartEventType x1, PartEventType x2) {
 		return x1.getPartId().equals(x2.getPartId());
-	}
-
-	@Override
-	protected void merge(PartEventListType main, PartEvent e) {
-		merge(main.getPartEvent(), e);
-	}
-
-	@Override
-	protected void merge(PartEventListType main, PartEventListType data) {
-		merge(main.getPartEvent(), data.getPartEvent());
-	}
-
-	@Override
-	protected void merge(PartEventType main, PartEvent e) {
-		main.setDuration(main.getDuration() + e.getDuration());
-	}
-
-	@Override
-	protected void merge(PartEventType main, PartEventType x2) {
-		main.setDuration(main.getDuration() + x2.getDuration());
 	}
 
 	@Override

@@ -25,14 +25,14 @@ import rabbit.core.internal.storage.xml.schema.events.FileEventListType;
 import rabbit.core.internal.storage.xml.schema.events.FileEventType;
 
 public final class FileEventStorer extends
-		AbstractStorer<FileEvent, FileEventType, FileEventListType> {
-	
+		AbstractContinuousEventStorer<FileEvent, FileEventType, FileEventListType> {
+
 	private static final FileEventStorer INSTANCE = new FileEventStorer();
 
 	/**
 	 * Gets the shared instance of this class.
 	 * 
-	 * @return The shared instanceof this class.
+	 * @return The shared instance of this class.
 	 */
 	public static FileEventStorer getInstance() {
 		return INSTANCE;
@@ -52,6 +52,11 @@ public final class FileEventStorer extends
 	}
 
 	@Override
+	protected List<FileEventType> getXmlTypes(FileEventListType list) {
+		return list.getFileEvent();
+	}
+
+	@Override
 	protected boolean hasSameId(FileEventType x, FileEvent e) {
 		return x.getFileId().equals(e.getFileId());
 	}
@@ -59,26 +64,6 @@ public final class FileEventStorer extends
 	@Override
 	protected boolean hasSameId(FileEventType x1, FileEventType x2) {
 		return x1.getFileId().equals(x2.getFileId());
-	}
-
-	@Override
-	protected void merge(FileEventListType main, FileEvent e) {
-		merge(main.getFileEvent(), e);
-	}
-
-	@Override
-	protected void merge(FileEventListType main, FileEventListType data) {
-		merge(main.getFileEvent(), data.getFileEvent());
-	}
-
-	@Override
-	protected void merge(FileEventType main, FileEvent e) {
-		main.setDuration(main.getDuration() + e.getDuration());
-	}
-
-	@Override
-	protected void merge(FileEventType main, FileEventType x) {
-		main.setDuration(main.getDuration() + x.getDuration());
 	}
 
 	@Override
@@ -95,5 +80,4 @@ public final class FileEventStorer extends
 		type.setDate(date);
 		return type;
 	}
-
 }

@@ -35,36 +35,40 @@ import rabbit.core.internal.storage.xml.schema.events.ObjectFactory;
 import rabbit.core.storage.IStorer;
 
 /**
- * This abstract class is designed specifically for the XML schema.
+ * This abstract class is designed specifically for the XML schema. This class
+ * contains implementations for common behaviors.
  * 
  * @param <E>
- *            The event type. Such as {@link rabbit.core.events.CommandEvent} .
+ *            The event type to be stored. Such as
+ *            {@link rabbit.core.events.CommandEvent} .
  * @param <T>
- *            The corresponding XML object type of the event type.
+ *            The corresponding XML object type of the event type, this is the
+ *            form when the event is stored in XML.
  * @param <S>
- *            A {@link EventGroupType} that separates the XML object types
- *            according to event date.
+ *            A {@link EventGroupType} that groups the XML types according to
+ *            event date.
  */
 public abstract class AbstractStorer<E extends DiscreteEvent, T, S extends EventGroupType>
 		implements IStorer<E> {
 
+	/** Factory object for creating XML schema Java types. */
 	protected final ObjectFactory objectFactory = new ObjectFactory();
 
+	/** Data in memory, not yet saved. */
 	private Set<S> data;
 
-	protected Calendar currentMonth;
+	/** The current month. */
+	private Calendar currentMonth;
 
 	/**
-	 * Sole constructor.
+	 * Constructor.
 	 */
 	public AbstractStorer() {
 		data = new LinkedHashSet<S>();
 		currentMonth = Calendar.getInstance();
 	}
 
-	/**
-	 * Writes the data to disk.
-	 */
+	@Override
 	public void commit() {
 
 		if (data.isEmpty()) {
@@ -80,7 +84,7 @@ public abstract class AbstractStorer<E extends DiscreteEvent, T, S extends Event
 			boolean done = false;
 			for (S oldList : mainList) {
 				if (newList.getDate().equals(oldList.getDate())) {
-					merge(oldList, newList);
+					merge(getXmlTypes(oldList), getXmlTypes(newList));
 					done = true;
 					break;
 				}
@@ -131,7 +135,7 @@ public abstract class AbstractStorer<E extends DiscreteEvent, T, S extends Event
 
 		for (S list : data) {
 			if (DatatypeUtil.isSameDate(e.getTime(), list.getDate())) {
-				merge(list, e);
+				merge(getXmlTypes(list), e);
 				done = true;
 				break;
 			}
@@ -139,10 +143,19 @@ public abstract class AbstractStorer<E extends DiscreteEvent, T, S extends Event
 
 		if (!done) {
 			S holder = newXmlTypeHolder(DatatypeUtil.toXMLGregorianCalendarDate(e.getTime()));
-			merge(holder, e);
+			merge(getXmlTypes(holder), e);
 			data.add(holder);
 		}
 	}
+
+	/**
+	 * Gets the XML types from the given group.
+	 * 
+	 * @param list
+	 *            The group holding the XML types.
+	 * @return A list of XML types.
+	 */
+	protected abstract List<T> getXmlTypes(S list);
 
 	/**
 	 * Gets the data store.
@@ -152,46 +165,14 @@ public abstract class AbstractStorer<E extends DiscreteEvent, T, S extends Event
 	protected abstract IDataStore getDataStore();
 
 	/**
-	 * Gets the XML nodes for grouping the event objects by date in a
+	 * Gets the XML categories for grouping the event objects by date in a
 	 * {@link EventListType}.
 	 * 
-	 * @param <U>
-	 *            The class type.
 	 * @param events
 	 *            The root element.
 	 * @return A list of groups.
 	 */
-	protected abstract <U extends S> List<U> getXmlTypeCategories(EventListType events);
-
-	/**
-	 * Checks whether the given objects has the same id.
-	 * <p>
-	 * Other properties are ignored. In other words, checks to see whether the
-	 * two objects can be merged without loosing its unique identity.
-	 * </p>
-	 * 
-	 * @param x
-	 *            A java object representing an XML element.
-	 * @param e
-	 *            A event object.
-	 * @return true If the two object has the same id.
-	 */
-	protected abstract boolean hasSameId(T x, E e);
-
-	/**
-	 * Checks whether the given objects has the same id.
-	 * <p>
-	 * Other properties are ignored. In other words, checks to see whether the
-	 * two objects can be merged without loosing its unique identity.
-	 * </p>
-	 * 
-	 * @param x1
-	 *            A java object representing an XML element.
-	 * @param x2
-	 *            A java object representing an XML element.
-	 * @return true If the two object has the same id.
-	 */
-	protected abstract boolean hasSameId(T x1, T x2);
+	protected abstract List<S> getXmlTypeCategories(EventListType events);
 
 	/**
 	 * Merges the event into the list.
@@ -201,22 +182,7 @@ public abstract class AbstractStorer<E extends DiscreteEvent, T, S extends Event
 	 * @param event
 	 *            The event for merging.
 	 */
-	protected void merge(List<T> xList, E event) {
-
-		boolean done = false;
-		for (T xmlType : xList) {
-			if (hasSameId(xmlType, event)) {
-				merge(xmlType, event);
-				done = true;
-				break;
-			}
-		}
-
-		if (!done) {
-			T xItem = newXmlType(event);
-			xList.add(xItem);
-		}
-	}
+	protected abstract void merge(List<T> xList, E event);
 
 	/**
 	 * Merges the second list into the first list.
@@ -226,74 +192,7 @@ public abstract class AbstractStorer<E extends DiscreteEvent, T, S extends Event
 	 * @param newList
 	 *            The list for getting data from.
 	 */
-	protected void merge(List<T> mainList, List<T> newList) {
-
-		for (T newType : newList) {
-			boolean done = false;
-
-			for (T mainType : mainList) {
-				if (hasSameId(mainType, newType)) {
-					merge(mainType, newType);
-					done = true;
-					break;
-				}
-			}
-
-			if (!done) {
-				mainList.add(newType);
-			}
-		}
-	}
-
-	/**
-	 * Merges the data of the second parameter into the first parameter.
-	 * 
-	 * @param main
-	 *            The XML group to merge into.
-	 * @param e
-	 *            The object to merge from.
-	 */
-	protected abstract void merge(S main, E e);
-
-	/**
-	 * Merges the two group objects together, use the first parameter as the
-	 * final result.
-	 * 
-	 * @param main
-	 *            The XML group to merge into.
-	 * @param data
-	 *            The XML group to merge from.
-	 */
-	protected abstract void merge(S main, S data);
-
-	/**
-	 * Merges the data of the second parameter into the first parameter.
-	 * 
-	 * @param main
-	 *            The object to merge into.
-	 * @param e
-	 *            The object to merge from.
-	 */
-	protected abstract void merge(T main, E e);
-
-	/**
-	 * Merges the data of the second parameter into the first parameter.
-	 * 
-	 * @param main
-	 *            The object to merge into.
-	 * @param x
-	 *            The object to merge from.
-	 */
-	protected abstract void merge(T main, T x);
-
-	/**
-	 * Creates a new XML object type from the given event.
-	 * 
-	 * @param e
-	 *            The event.
-	 * @return A new XML object type.
-	 */
-	protected abstract T newXmlType(E e);
+	protected abstract void merge(List<T> mainList, List<T> newList);
 
 	/**
 	 * Creates a new XML object group type from the given date.

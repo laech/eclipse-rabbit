@@ -97,7 +97,14 @@ public class DatatypeUtil {
 				DatatypeConstants.FIELD_UNDEFINED);
 	}
 
-	// TODO test
+	/**
+	 * Converts a {@code GregorianCalendar} to a {@code XMLGregorianCalendar}
+	 * date time.
+	 * 
+	 * @param cal
+	 *            The calendar to convert from.
+	 * @return A converted calendar.
+	 */
 	public static XMLGregorianCalendar toXMLGregorianCalendarDateTime(GregorianCalendar cal) {
 		return datatypeFactory.newXMLGregorianCalendar(cal);
 	}
