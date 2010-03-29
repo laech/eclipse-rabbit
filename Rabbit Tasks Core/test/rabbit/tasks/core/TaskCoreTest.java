@@ -28,4 +28,9 @@ public class TaskCoreTest {
 	public void testGetTaskDataAccessor() {
 		assertNotNull(TaskCore.getTaskDataAccessor());
 	}
+	
+	@Test
+	public void testGetTaskEventStorer() {
+		assertNotNull(TaskCore.getTaskEventStorer());
+	}
 }

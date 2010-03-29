@@ -53,18 +53,25 @@ import rabbit.core.internal.storage.xml.schema.events.LaunchMode;
 public class LaunchEventStorerTest extends
 		AbstractStorerTest<LaunchEvent, LaunchEventType, LaunchEventListType> {
 
-	protected LaunchEventStorer storer = create();
+	// Empty class for testing.
+	private static class ConfigurationElementForTest extends ConfigurationElementHandle {
 
-	@Before
-	public void before() throws Exception {
-		getDataField(storer).clear();
+		public ConfigurationElementForTest() {
+			super(null, 0);
+		}
+	
+		@Override
+		public String getAttribute(String propertyName) {
+			return null;
+		}
+		
+		@Override
+		protected ConfigurationElement getConfigurationElement() {
+			return null;
+		}
 	}
 
-	@Override
-	protected LaunchEventStorer create() {
-		return LaunchEventStorer.getInstance();
-	}
-
+	// Empty class for testing.
 	private static class LaunchConfigurationForTest extends LaunchConfiguration {
 
 		private ILaunchConfigurationType type = new LaunchConfigurationTypeForTest();
@@ -79,6 +86,7 @@ public class LaunchEventStorerTest extends
 		}
 	}
 
+	// Empty class for testing.
 	private static class LaunchConfigurationTypeForTest extends LaunchConfigurationType {
 
 		public LaunchConfigurationTypeForTest() {
@@ -90,47 +98,14 @@ public class LaunchEventStorerTest extends
 			return "MyType";
 		}
 	}
-	
-	private static class ConfigurationElementForTest extends ConfigurationElementHandle {
 
-		public ConfigurationElementForTest() {
-			super(null, 0);
-		}
-	
-		@Override
-		protected ConfigurationElement getConfigurationElement() {
-			return null;
-		}
-		
-		@Override
-		public String getAttribute(String propertyName) {
-			return null;
-		}
+	protected LaunchEventStorer storer = create();
+
+	@Before
+	public void before() throws Exception {
+		getDataField(storer).clear();
 	}
-
-	@Test
-	public void testNewXmlType() throws CoreException {
-		Calendar time = new GregorianCalendar();
-		long duration = 9823;
-		ILaunchConfiguration config = new LaunchConfigurationForTest();
-		ILaunch launch = new Launch(config, ILaunchManager.DEBUG_MODE, null);
-		Set<String> fileIds = new HashSet<String>();
-		fileIds.add("abc");
-		fileIds.add("def");
-
-		LaunchEvent event = new LaunchEvent(time, duration, launch, config, fileIds);
-		LaunchEventType type = storer.newXmlType(event);
-
-		assertEquals(time.getTime(), type.getLaunchTime().toGregorianCalendar().getTime());
-		assertEquals(duration, type.getDuration());
-		assertEquals(config.getType().getName(), type.getLaunchType());
-		assertEquals(LaunchMode.DEBUG, type.getLaunchMode());
-		assertEquals(config.getName(), type.getLaunchName());
-		assertEquals(fileIds.size(), type.getFileId().size());
-		fileIds.removeAll(type.getFileId());
-		assertTrue(fileIds.isEmpty());
-	}
-
+	
 	@Override
 	public void testCommit() throws Exception {
 		IDataStore dataStore = storer.getDataStore();
@@ -343,5 +318,33 @@ public class LaunchEventStorerTest extends
 		assertEquals(2, list1.size());
 		assertEquals(type, list1.get(0));
 		assertEquals(type, list1.get(1));
+	}
+
+	@Test
+	public void testNewXmlType() throws CoreException {
+		Calendar time = new GregorianCalendar();
+		long duration = 9823;
+		ILaunchConfiguration config = new LaunchConfigurationForTest();
+		ILaunch launch = new Launch(config, ILaunchManager.DEBUG_MODE, null);
+		Set<String> fileIds = new HashSet<String>();
+		fileIds.add("abc");
+		fileIds.add("def");
+
+		LaunchEvent event = new LaunchEvent(time, duration, launch, config, fileIds);
+		LaunchEventType type = storer.newXmlType(event);
+
+		assertEquals(time.getTime(), type.getLaunchTime().toGregorianCalendar().getTime());
+		assertEquals(duration, type.getDuration());
+		assertEquals(config.getType().getName(), type.getLaunchType());
+		assertEquals(LaunchMode.DEBUG, type.getLaunchMode());
+		assertEquals(config.getName(), type.getLaunchName());
+		assertEquals(fileIds.size(), type.getFileId().size());
+		fileIds.removeAll(type.getFileId());
+		assertTrue(fileIds.isEmpty());
+	}
+
+	@Override
+	protected LaunchEventStorer create() {
+		return LaunchEventStorer.getInstance();
 	}
 }

@@ -22,6 +22,9 @@
       <tracker
             class="rabbit.core.internal.trackers.PartTracker">
       </tracker>
+      <tracker
+            class="rabbit.core.internal.trackers.LaunchTracker">
+      </tracker>
    </extension>
 
 </plugin>

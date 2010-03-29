@@ -39,7 +39,7 @@ public class TaskCore extends AbstractUIPlugin {
 	static {
 		accessor = new TaskDataAccessor();
 	}
-	
+
 	/**
 	 * Returns the shared instance
 	 * 
@@ -58,7 +58,11 @@ public class TaskCore extends AbstractUIPlugin {
 		return accessor;
 	}
 
-	// TODO
+	/**
+	 * Gets an {@code IStorer} that stores {@linkplain TaskEvent}.
+	 * 
+	 * @return The storer.
+	 */
 	public static IStorer<TaskEvent> getTaskEventStorer() {
 		return TaskEventStorer.getInstance();
 	}

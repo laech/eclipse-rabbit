@@ -24,7 +24,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.eclipse.mylyn.tasks.core.ITask;
 
-import rabbit.core.internal.storage.xml.AbstractStorer;
+import rabbit.core.internal.storage.xml.AbstractContinuousEventStorer;
 import rabbit.core.internal.storage.xml.DataStore;
 import rabbit.core.internal.storage.xml.IDataStore;
 import rabbit.core.internal.storage.xml.schema.events.EventListType;
@@ -33,8 +33,11 @@ import rabbit.core.internal.storage.xml.schema.events.TaskEventType;
 import rabbit.core.internal.storage.xml.schema.events.TaskIdType;
 import rabbit.tasks.core.events.TaskEvent;
 
+/**
+ * Stores {@link TaskEvent}.
+ */
 public final class TaskEventStorer extends
-		AbstractStorer<TaskEvent, TaskEventType, TaskEventListType> {
+		AbstractContinuousEventStorer<TaskEvent, TaskEventType, TaskEventListType> {
 
 	private static final TaskEventStorer INSTANCE = new TaskEventStorer();
 
@@ -61,6 +64,11 @@ public final class TaskEventStorer extends
 	}
 
 	@Override
+	protected List<TaskEventType> getXmlTypes(TaskEventListType list) {
+		return list.getTaskEvent();
+	}
+
+	@Override
 	protected boolean hasSameId(TaskEventType x, TaskEvent e) {
 		ITask task = e.getTask();
 		GregorianCalendar creationDate = new GregorianCalendar();
@@ -76,26 +84,6 @@ public final class TaskEventStorer extends
 		return x1.getFileId().equals(x2.getFileId())
 				&& x1.getTaskId().getHandleId().equals(x2.getTaskId().getHandleId())
 				&& x1.getTaskId().getCreationDate().equals(x2.getTaskId().getCreationDate());
-	}
-
-	@Override
-	protected void merge(TaskEventListType main, TaskEvent e) {
-		merge(main.getTaskEvent(), e);
-	}
-
-	@Override
-	protected void merge(TaskEventListType main, TaskEventListType data) {
-		merge(main.getTaskEvent(), data.getTaskEvent());
-	}
-
-	@Override
-	protected void merge(TaskEventType main, TaskEvent e) {
-		main.setDuration(main.getDuration() + e.getDuration());
-	}
-
-	@Override
-	protected void merge(TaskEventType main, TaskEventType x) {
-		main.setDuration(main.getDuration() + x.getDuration());
 	}
 
 	@Override

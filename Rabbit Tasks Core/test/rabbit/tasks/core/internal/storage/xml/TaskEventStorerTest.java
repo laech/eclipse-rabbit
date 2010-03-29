@@ -26,7 +26,7 @@ import java.util.List;
 
 import org.eclipse.mylyn.internal.tasks.core.LocalTask;
 
-import rabbit.core.internal.storage.xml.AbstractStorerTest2;
+import rabbit.core.internal.storage.xml.AbstractContinuousEventStorerTest;
 import rabbit.core.internal.storage.xml.schema.events.TaskEventListType;
 import rabbit.core.internal.storage.xml.schema.events.TaskEventType;
 import rabbit.core.internal.storage.xml.schema.events.TaskIdType;
@@ -37,21 +37,11 @@ import rabbit.tasks.core.events.TaskEvent;
  */
 @SuppressWarnings("restriction")
 public class TaskEventStorerTest extends
-		AbstractStorerTest2<TaskEvent, TaskEventType, TaskEventListType> {
+		AbstractContinuousEventStorerTest<TaskEvent, TaskEventType, TaskEventListType> {
 
 	@Override
 	protected List<TaskEventType> getEventTypes(TaskEventListType type) {
 		return type.getTaskEvent();
-	}
-
-	@Override
-	protected long getValue(TaskEvent event) {
-		return event.getDuration();
-	}
-
-	@Override
-	protected long getValue(TaskEventType type) {
-		return type.getDuration();
 	}
 
 	@Override
