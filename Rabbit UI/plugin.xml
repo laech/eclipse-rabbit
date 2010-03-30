@@ -76,8 +76,11 @@
       </page>
       <page
             class="rabbit.ui.internal.pages.LaunchPage"
-            id="Rabbit UI.page1"
-            name="Rabbit UI.page1">
+            description="Displays information about launch events"
+            icon="icons/full/obj16/launch.gif"
+            id="rabbit.ui.pages.launch"
+            name="Launches"
+            parent="rabbit.ui.pages.projectRelated">
       </page>
    </extension>
    <extension

@@ -35,6 +35,7 @@ import rabbit.tasks.core.events.TaskEvent;
 public class TaskTracker extends AbstractPartTracker<TaskEvent> {
 	
 	public TaskTracker() {
+		super();
 	}
 
 	@Override

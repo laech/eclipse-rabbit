@@ -17,5 +17,3 @@ Export-Package: rabbit.tasks.core,
  rabbit.tasks.core.events,
  rabbit.tasks.core.internal.storage.xml;x-internal:=true,
  rabbit.tasks.core.internal.trackers;x-internal:=true
-Bundle-ActivationPolicy: lazy
-Bundle-Activator: rabbit.tasks.core.TaskCore

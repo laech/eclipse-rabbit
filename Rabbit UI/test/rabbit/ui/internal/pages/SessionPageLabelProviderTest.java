@@ -44,6 +44,7 @@ public class SessionPageLabelProviderTest {
 
 	@AfterClass
 	public static void afterClass() {
+		provider.dispose();
 		shell.dispose();
 	}
 

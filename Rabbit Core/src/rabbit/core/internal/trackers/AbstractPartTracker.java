@@ -54,7 +54,6 @@ public abstract class AbstractPartTracker<E> extends AbstractTracker<E>
 		super();
 		start = Long.MAX_VALUE;
 		partStates = new HashMap<IWorkbenchPart, Boolean>();
-		// currentActivePart = null;
 
 		idleDetectorCode = new Runnable() {
 			@Override

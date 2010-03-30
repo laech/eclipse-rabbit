@@ -1,3 +1,18 @@
+/*
+ * Copyright 2010 The Rabbit Eclipse Plug-in Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package rabbit.ui.internal.pages;
 
 import java.text.DateFormat;
@@ -5,72 +20,64 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
 import org.eclipse.debug.core.DebugPlugin;
-import org.eclipse.debug.core.ILaunchConfigurationType;
+import org.eclipse.debug.core.ILaunchManager;
+import org.eclipse.debug.ui.DebugUITools;
+import org.eclipse.debug.ui.IDebugUIConstants;
 import org.eclipse.jface.viewers.BaseLabelProvider;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.swt.graphics.Image;
 
 import rabbit.core.storage.LaunchDescriptor;
-import rabbit.ui.internal.SharedImages;
 import rabbit.ui.internal.util.LaunchResource;
 import rabbit.ui.internal.util.MillisConverter;
 
+/**
+ * Label provider a {@link LaunchPage}.
+ */
 public class LaunchPageLabelProvider extends BaseLabelProvider implements ITableLabelProvider {
 
-	private final DateFormat format;
-	
-	protected final Image runImg;
-	protected final Image debugImg;
-	protected final Image profileImg;
+	protected final DateFormat format;
 	protected final ResourcePageLabelProvider provider;
-	protected final ILaunchConfigurationType[] configs;
+	protected ILaunchManager manager;
 
+	/**
+	 * Constructs a new label provider.
+	 */
 	public LaunchPageLabelProvider() {
-		format = new SimpleDateFormat("yyyy-MM-dd H:mm:ss");
-		runImg = SharedImages.RUN.createImage();
-		debugImg = SharedImages.DEBUG.createImage();
-		profileImg = SharedImages.PROFILE.createImage();
+		format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		manager = DebugPlugin.getDefault().getLaunchManager();
 		provider = new ResourcePageLabelProvider();
-		
-		configs = DebugPlugin.getDefault().getLaunchManager().getLaunchConfigurationTypes();
 	}
-	
+
 	@Override
 	public void dispose() {
 		super.dispose();
-		runImg.dispose();
-		debugImg.dispose();
-		profileImg.dispose();
 		provider.dispose();
 	}
 
 	@Override
 	public Image getColumnImage(Object element, int columnIndex) {
-		if (columnIndex != 0) {
-			return null;
-		}
-		
-		if (element instanceof LaunchDescriptor) {
-//			switch (((LaunchDescriptor) element).getLaunchModeId()) {
-//			case RUN_MODE:
-//				return runImg;
-//			case DEBUG_MODE:
-//				return debugImg;
-//			case PROFILE_MODE:
-//				return profileImg;
-//			default:
-//				return null;
-//			}
 
-			for (ILaunchConfigurationType type : configs) {
-				if (type.getName().equals(((LaunchDescriptor) element).getLaunchTypeId())) {
+		if (columnIndex == 0) {
+			if (element instanceof LaunchDescriptor) {
+				return DebugUITools.getImage(((LaunchDescriptor) element).getLaunchTypeId());
+
+			} else if (element instanceof LaunchResource) {
+				return provider.getImage(((LaunchResource) element).getResource());
+			}
+			return provider.getImage(element);
+
+		} else if (columnIndex == 1) {
+			if (element instanceof LaunchDescriptor) {
+				String mode = ((LaunchDescriptor) element).getLaunchModeId();
+				if (mode.equals(ILaunchManager.DEBUG_MODE)) {
+					return DebugUITools.getImage(IDebugUIConstants.IMG_OBJS_LAUNCH_DEBUG);
+
+				} else if (mode.equals(ILaunchManager.RUN_MODE)) {
+					return DebugUITools.getImage(IDebugUIConstants.IMG_OBJS_LAUNCH_RUN);
 				}
 			}
-			
-		} else if (element instanceof LaunchResource) {
-			return provider.getImage(((LaunchResource) element).getResource());
 		}
-		
 		return null;
 	}
 
@@ -85,28 +92,22 @@ public class LaunchPageLabelProvider extends BaseLabelProvider implements ITable
 			} else if (element instanceof LaunchResource) {
 				return provider.getText(((LaunchResource) element).getResource());
 			}
-			break;
-			
-		case 1:
-			if (element instanceof LaunchDescriptor) {
-				return ((LaunchDescriptor) element).getLaunchTypeId();
-			}
-			break;
+			return provider.getText(element);
 
-		case 2:
+		case 1:
 			if (element instanceof LaunchDescriptor) {
 				return ((LaunchDescriptor) element).getLaunchModeId().toString();
 			}
 			break;
 
-		case 3:
+		case 2:
 			if (element instanceof LaunchDescriptor) {
 				Calendar time = ((LaunchDescriptor) element).getLaunchTime();
 				return format.format(time.getTime());
 			}
 			break;
 
-		case 4:
+		case 3:
 			if (element instanceof LaunchDescriptor) {
 				return MillisConverter.toDefaultString(
 						((LaunchDescriptor) element).getDuration());
@@ -115,5 +116,4 @@ public class LaunchPageLabelProvider extends BaseLabelProvider implements ITable
 		}
 		return null;
 	}
-
 }

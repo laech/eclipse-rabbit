@@ -25,6 +25,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
+import org.junit.AfterClass;
 import org.junit.Test;
 
 /**
@@ -37,6 +38,11 @@ public class ResourcePageLabelProviderTest {
 	private static IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject("p");
 	private static IFolder folder = project.getFolder("f");
 	private static IFile file = project.getFile("a");
+	
+	@AfterClass
+	public static void afterClass() {
+		provider.dispose();
+	}
 
 	@Test
 	public void testGetBackground() {

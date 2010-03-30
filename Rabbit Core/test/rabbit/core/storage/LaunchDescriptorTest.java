@@ -139,9 +139,9 @@ public class LaunchDescriptorTest {
 		assertEquals(duration, descriptor.getDuration());
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void testSetDuration_negative() {
-		descriptor.setDuration(-1);
+		assertFalse(descriptor.setDuration(-1));
 	}
 
 	@Test
@@ -177,9 +177,9 @@ public class LaunchDescriptorTest {
 				descriptor.getFileIds().isEmpty());
 	}
 
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void testSetFileIds_null() {
-		descriptor.setFileIds(null);
+		assertFalse(descriptor.setFileIds(null));
 	}
 
 	@Test
@@ -193,9 +193,9 @@ public class LaunchDescriptorTest {
 		assertEquals(mode, descriptor.getLaunchModeId());
 	}
 
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void testSetLaunchMode_null() {
-		descriptor.setLaunchModeId(null);
+		assertFalse(descriptor.setLaunchModeId(null));
 	}
 
 	@Test
@@ -209,9 +209,9 @@ public class LaunchDescriptorTest {
 		assertEquals(name, descriptor.getLaunchName());
 	}
 
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void testSetLaunchName_null() {
-		descriptor.setLaunchName(null);
+		assertFalse(descriptor.setLaunchName(null));
 	}
 	
 	@Test
@@ -225,8 +225,8 @@ public class LaunchDescriptorTest {
 		assertEquals(type, descriptor.getLaunchTypeId());
 	}
 	
-	@Test(expected = NullPointerException.class)
+	@Test
 	public void testSetLaunchType_null() {
-		descriptor.setLaunchTypeId(null);
+		assertFalse(descriptor.setLaunchTypeId(null));
 	}
 }

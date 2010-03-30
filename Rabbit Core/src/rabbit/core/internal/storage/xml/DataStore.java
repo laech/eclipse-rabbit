@@ -135,6 +135,12 @@ public enum DataStore implements IDataStore {
 
 		} catch (JAXBException e) {
 			return objectFactory.createEventListType();
+		} catch (Exception e) {
+			// XML file not valid?
+			
+			RabbitCorePlugin.getDefault().getLog().log(
+					new Status(IStatus.ERROR, RabbitCorePlugin.PLUGIN_ID, e.getMessage(), e));
+			return objectFactory.createEventListType();
 		}
 		return objectFactory.createEventListType();
 	}

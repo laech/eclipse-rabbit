@@ -105,7 +105,7 @@ public abstract class AbstractTreeViewerPage extends AbstractValueProviderPage {
 	protected abstract void createColumns(TreeViewer viewer);
 
 	/**
-	 * Creates a comparator for sorting the viewer.
+	 * Creates a default comparator for sorting the viewer.
 	 * 
 	 * @param viewer
 	 *            The viewer.

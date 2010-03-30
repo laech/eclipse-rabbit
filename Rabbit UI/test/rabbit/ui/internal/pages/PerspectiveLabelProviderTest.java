@@ -48,6 +48,7 @@ public class PerspectiveLabelProviderTest {
 
 	@AfterClass
 	public static void afterClass() {
+		provider.dispose();
 		shell.dispose();
 	}
 

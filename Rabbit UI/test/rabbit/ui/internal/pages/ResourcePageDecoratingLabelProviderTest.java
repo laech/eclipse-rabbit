@@ -57,6 +57,7 @@ public class ResourcePageDecoratingLabelProviderTest {
 
 	@AfterClass
 	public static void afterClass() {
+		provider.dispose();
 		shell.dispose();
 	}
 

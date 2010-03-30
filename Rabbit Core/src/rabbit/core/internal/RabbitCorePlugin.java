@@ -315,6 +315,7 @@ public class RabbitCorePlugin extends AbstractUIPlugin implements IWorkbenchList
 				@Override
 				public void handleException(Throwable e) {
 					getLog().log(new Status(IStatus.ERROR, PLUGIN_ID, e.getMessage(), e));
+					System.err.println(getClass().toString() + ": " + e.getMessage());
 				}
 
 				@Override

@@ -29,9 +29,13 @@ import org.junit.runners.Suite;
 		PerspectivePageTest.class,
 		ResourcePageTest.class,
 		ResourcePageContentProviderTest.class,
+		ResourcePageLabelProviderTest.class,
 		ResourcePageDecoratingLabelProviderTest.class,
 		SessionPageLabelProviderTest.class,
 		SessionPageTest.class,
+		LaunchPageContentProviderTest.class,
+		LaunchPageLabelProviderTest.class,
+		LaunchPageTest.class,
 //
 })
 public class AllTests {

@@ -1,3 +1,18 @@
+/*
+ * Copyright 2010 The Rabbit Eclipse Plug-in Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package rabbit.ui.internal.pages;
 
 import java.util.Collection;
@@ -18,18 +33,24 @@ import rabbit.core.storage.LaunchDescriptor;
 import rabbit.ui.internal.AbstractTreeContentProvider;
 import rabbit.ui.internal.util.LaunchResource;
 
+/**
+ * Content provider for a {@link LaunchPage}.
+ */
 public class LaunchPageContentProvider extends AbstractTreeContentProvider {
 
 	private IFileMapper fileMapper;
 	private Map<LaunchDescriptor, Set<LaunchResource>> launchToProjects;
 	private Map<LaunchResource, Set<LaunchResource>> projectToResources;
-	private Map<LaunchResource, Set<LaunchResource>> folderToFiles;
+	private Map<LaunchResource, Set<IFile>> folderToFiles;
 
+	/**
+	 * Constructs a new content provider.
+	 */
 	public LaunchPageContentProvider() {
 		fileMapper = RabbitCore.getFileMapper();
 		launchToProjects = new HashMap<LaunchDescriptor, Set<LaunchResource>>();
 		projectToResources = new HashMap<LaunchResource, Set<LaunchResource>>();
-		folderToFiles = new HashMap<LaunchResource, Set<LaunchResource>>();
+		folderToFiles = new HashMap<LaunchResource, Set<IFile>>();
 	}
 
 	@Override
@@ -45,7 +66,7 @@ public class LaunchPageContentProvider extends AbstractTreeContentProvider {
 				return set == null ? EMPTY_ARRAY : set.toArray();
 
 			} else if (res.getResource() instanceof IFolder) {
-				Set<LaunchResource> set = folderToFiles.get(element);
+				Set<IFile> set = folderToFiles.get(element);
 				return set == null ? EMPTY_ARRAY : set.toArray();
 			}
 		}
@@ -54,31 +75,34 @@ public class LaunchPageContentProvider extends AbstractTreeContentProvider {
 
 	@Override
 	public boolean hasChildren(Object element) {
-/*		if (element instanceof LaunchDescriptor) {
-			return !launchToProjects.get(element).isEmpty();
+		if (element instanceof LaunchDescriptor) {
+			Set<LaunchResource> set = launchToProjects.get(element);
+			return set == null ? false : !set.isEmpty();
 
 		} else if (element instanceof LaunchResource) {
 			LaunchResource res = (LaunchResource) element;
 			if (res.getResource() instanceof IProject) {
-				return !projectToResources.get(element).isEmpty();
+				Set<LaunchResource> set = projectToResources.get(element);
+				return set == null ? false : !set.isEmpty();
 
 			} else if (res.getResource() instanceof IFolder) {
-				return !folderToFiles.get(element).isEmpty();
+				Set<IFile> set = folderToFiles.get(element);
+				return set == null ? false : !set.isEmpty();
 			}
-		}*/
-		return getChildren(element).length > 0;
+		}
+		return false;
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-		if (newInput == null) {
-			return;
-		}
-	
 		launchToProjects.clear();
 		projectToResources.clear();
 		folderToFiles.clear();
+		
+		if (newInput == null) {
+			return;
+		}
 
 		Collection<LaunchDescriptor> input = (Collection<LaunchDescriptor>) newInput;
 		for (LaunchDescriptor launch : input) {
@@ -115,12 +139,12 @@ public class LaunchPageContentProvider extends AbstractTreeContentProvider {
 					resources.add(fileElement);
 				} else {
 					resources.add(folderElement);
-					Set<LaunchResource> fileset = folderToFiles.get(folderElement);
+					Set<IFile> fileset = folderToFiles.get(folderElement);
 					if (fileset == null) {
-						fileset = new HashSet<LaunchResource>();
+						fileset = new HashSet<IFile>();
 						folderToFiles.put(folderElement, fileset);
 					}
-					fileset.add(fileElement);
+					fileset.add(file);
 				}
 			}
 		}

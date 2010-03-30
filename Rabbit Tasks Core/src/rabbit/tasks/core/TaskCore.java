@@ -17,9 +17,6 @@ package rabbit.tasks.core;
 
 import java.util.Map;
 
-import org.eclipse.ui.plugin.AbstractUIPlugin;
-import org.osgi.framework.BundleContext;
-
 import rabbit.core.storage.IAccessor;
 import rabbit.core.storage.IStorer;
 import rabbit.tasks.core.events.TaskEvent;
@@ -27,26 +24,13 @@ import rabbit.tasks.core.internal.storage.xml.TaskDataAccessor;
 import rabbit.tasks.core.internal.storage.xml.TaskEventStorer;
 
 /**
- * The activator class controls the plug-in life cycle
  */
-public class TaskCore extends AbstractUIPlugin {
+public class TaskCore {
 
 	private static TaskDataAccessor accessor;
 
-	/** The shared instance. */
-	private static TaskCore plugin;
-
 	static {
 		accessor = new TaskDataAccessor();
-	}
-
-	/**
-	 * Returns the shared instance
-	 * 
-	 * @return the shared instance
-	 */
-	public static TaskCore getDefault() {
-		return plugin;
 	}
 
 	/**
@@ -67,21 +51,6 @@ public class TaskCore extends AbstractUIPlugin {
 		return TaskEventStorer.getInstance();
 	}
 
-	/**
-	 * The constructor.
-	 */
-	public TaskCore() {
-	}
-
-	@Override
-	public void start(BundleContext context) throws Exception {
-		super.start(context);
-		plugin = this;
-	}
-
-	@Override
-	public void stop(BundleContext context) throws Exception {
-		plugin = null;
-		super.stop(context);
+	private TaskCore() {
 	}
 }
