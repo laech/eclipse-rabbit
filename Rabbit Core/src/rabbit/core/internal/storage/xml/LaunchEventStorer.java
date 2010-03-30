@@ -22,15 +22,12 @@ import java.util.List;
 
 import javax.xml.datatype.XMLGregorianCalendar;
 
-import org.eclipse.core.runtime.AssertionFailedException;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.debug.core.ILaunchManager;
 
 import rabbit.core.events.LaunchEvent;
 import rabbit.core.internal.storage.xml.schema.events.EventListType;
 import rabbit.core.internal.storage.xml.schema.events.LaunchEventListType;
 import rabbit.core.internal.storage.xml.schema.events.LaunchEventType;
-import rabbit.core.internal.storage.xml.schema.events.LaunchMode;
 
 /**
  * Stores {@link LaunchEvent}
@@ -82,22 +79,12 @@ public class LaunchEventStorer extends
 		type.setLaunchName(event.getLaunchConfiguration().getName());
 		type.setLaunchTime(toXMLGregorianCalendarDateTime((GregorianCalendar) event.getTime()));
 		try {
-			type.setLaunchType(event.getLaunchConfiguration().getType().getName());
+			type.setLaunchTypeId(event.getLaunchConfiguration().getType().getIdentifier());
 		} catch (CoreException ex) {
 			ex.printStackTrace();
-			type.setLaunchType(null);
+			type.setLaunchTypeId(null);
 		}
-
-		String mode = event.getLaunch().getLaunchMode();
-		if (mode.equals(ILaunchManager.DEBUG_MODE)) {
-			type.setLaunchMode(LaunchMode.DEBUG);
-		} else if (mode.equals(ILaunchManager.RUN_MODE)) {
-			type.setLaunchMode(LaunchMode.RUN);
-		} else if (mode.equals(ILaunchManager.PROFILE_MODE)) {
-			type.setLaunchMode(LaunchMode.PROFILE);
-		} else {
-			throw new AssertionFailedException("Unknow launch mode.");
-		}
+		type.setLaunchModeId(event.getLaunch().getLaunchMode());
 
 		return type;
 	}

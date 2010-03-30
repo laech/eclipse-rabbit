@@ -23,5 +23,6 @@ Export-Package: rabbit.core,
    javax.xml.datatype",
  rabbit.core.internal.storage.xml.schema.resources;x-friends:="rabbit.tasks.core";uses:="javax.xml.bind",
  rabbit.core.internal.trackers;x-friends:="rabbit.tasks.core",
+ rabbit.core.internal.util;x-internal:=true,
  rabbit.core.storage
 Bundle-ActivationPolicy: lazy

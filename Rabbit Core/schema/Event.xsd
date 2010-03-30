@@ -131,8 +131,8 @@
 				</xs:sequence>
 				<xs:attribute name="launchName" type="xs:string" use="required" />
 				<xs:attribute name="launchTime" type="xs:dateTime" use="required" />
-				<xs:attribute name="launchMode" type="launchMode" use="required" />
-				<xs:attribute name="launchType" type="xs:string" use="optional" />
+				<xs:attribute name="launchModeId" type="xs:string" use="required" />
+				<xs:attribute name="launchTypeId" type="xs:string" use="optional" />
 			</xs:extension>
 		</xs:complexContent>
 	</xs:complexType>
@@ -158,14 +158,6 @@
 	<xs:simpleType name="durationType">
 		<xs:restriction base="xs:long">
 			<xs:minInclusive value="0" />
-		</xs:restriction>
-	</xs:simpleType>
-	
-	<xs:simpleType name="launchMode">
-		<xs:restriction base="xs:string">
-			<xs:enumeration value="run" />
-			<xs:enumeration value="debug" />
-			<xs:enumeration value="profile" />
 		</xs:restriction>
 	</xs:simpleType>
 </xs:schema>

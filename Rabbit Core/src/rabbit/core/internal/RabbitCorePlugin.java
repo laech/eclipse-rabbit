@@ -32,9 +32,11 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.ISafeRunnable;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.SafeRunner;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchListener;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
@@ -312,7 +314,7 @@ public class RabbitCorePlugin extends AbstractUIPlugin implements IWorkbenchList
 			SafeRunner.run(new ISafeRunnable() {
 				@Override
 				public void handleException(Throwable e) {
-					System.err.println(e.getMessage());
+					getLog().log(new Status(IStatus.ERROR, PLUGIN_ID, e.getMessage(), e));
 				}
 
 				@Override

@@ -95,12 +95,36 @@ public abstract class AbstractTreeViewerPage extends AbstractValueProviderPage {
 		return true;
 	}
 
+	/**
+	 * Creates the extra columns for the viewer. The graph column will be
+	 * created after this.
+	 * 
+	 * @param viewer
+	 *            The viewer.
+	 */
 	protected abstract void createColumns(TreeViewer viewer);
 
+	/**
+	 * Creates a comparator for sorting the viewer.
+	 * 
+	 * @param viewer
+	 *            The viewer.
+	 * @return A viewer comparator.
+	 */
 	protected abstract ViewerComparator createComparator(TreeViewer viewer);
 
+	/**
+	 * Creates a content provider for this viewer.
+	 * 
+	 * @return A content provider.
+	 */
 	protected abstract ITreeContentProvider createContentProvider();
 
+	/**
+	 * Creates a label provider for this viewer.
+	 * 
+	 * @return A label provider.
+	 */
 	protected abstract ITableLabelProvider createLabelProvider();
 
 	/** Restores the state of the page. */
@@ -125,5 +149,4 @@ public abstract class AbstractTreeViewerPage extends AbstractValueProviderPage {
 	private String getWidthPreferenceString(TreeColumn column) {
 		return getClass().getSimpleName() + '.' + column.getText() + "Width";
 	}
-
 }

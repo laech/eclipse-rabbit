@@ -31,7 +31,6 @@ import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
-import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.layout.FillLayout;
@@ -52,7 +51,6 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.forms.widgets.Form;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.part.ViewPart;
-import org.eclipse.ui.plugin.AbstractUIPlugin;
 
 import rabbit.core.internal.RabbitCorePlugin;
 import rabbit.ui.DisplayPreference;
@@ -402,22 +400,12 @@ public class RabbitView extends ViewPart {
 		 * icons, so in this case, no icons at all.
 		 */
 		if (!isWindows || isDropDownDateTimeSupported) {
-			refresh.setImageDescriptor(getRefreshImageDescriptor());
+			refresh.setImageDescriptor(SharedImages.REFRESH);
 		}
 
 		//
 		toolBar.add(refresh);
 		toolBar.update(true);
-	}
-
-	/**
-	 * Gets the image descriptor of the refresh image.
-	 * 
-	 * @return The image descriptor, or null if not found.
-	 */
-	private ImageDescriptor getRefreshImageDescriptor() {
-		return AbstractUIPlugin.imageDescriptorFromPlugin(
-				RabbitUI.PLUGIN_ID, "resources/refresh.gif");
 	}
 
 	/**

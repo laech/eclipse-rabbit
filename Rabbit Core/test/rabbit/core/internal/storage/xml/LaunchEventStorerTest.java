@@ -44,7 +44,6 @@ import org.junit.Test;
 import rabbit.core.events.LaunchEvent;
 import rabbit.core.internal.storage.xml.schema.events.LaunchEventListType;
 import rabbit.core.internal.storage.xml.schema.events.LaunchEventType;
-import rabbit.core.internal.storage.xml.schema.events.LaunchMode;
 
 /**
  * @see LaunchEventStorer
@@ -153,8 +152,8 @@ public class LaunchEventStorerTest extends
 		LaunchEventType type = list.getLaunchEvent().iterator().next();
 		assertEquals(time1.getTime(), type.getLaunchTime().toGregorianCalendar().getTime());
 		assertEquals(duration, type.getDuration());
-		assertEquals(config.getType().getName(), type.getLaunchType());
-		assertEquals(LaunchMode.RUN, type.getLaunchMode());
+		assertEquals(config.getType().getName(), type.getLaunchTypeId());
+		assertEquals(ILaunchManager.RUN_MODE, type.getLaunchModeId());
 		assertEquals(config.getName(), type.getLaunchName());
 		assertEquals(fileIds.size(), type.getFileId().size());
 		for (String str : type.getFileId()) {
@@ -172,8 +171,8 @@ public class LaunchEventStorerTest extends
 		type = list.getLaunchEvent().iterator().next();
 		assertEquals(time2.getTime(), type.getLaunchTime().toGregorianCalendar().getTime());
 		assertEquals(duration, type.getDuration());
-		assertEquals(config.getType().getName(), type.getLaunchType());
-		assertEquals(LaunchMode.RUN, type.getLaunchMode());
+		assertEquals(config.getType().getName(), type.getLaunchTypeId());
+		assertEquals(ILaunchManager.RUN_MODE, type.getLaunchModeId());
 		assertEquals(config.getName(), type.getLaunchName());
 		assertEquals(fileIds.size(), type.getFileId().size());
 		for (String str : type.getFileId()) {
@@ -208,8 +207,8 @@ public class LaunchEventStorerTest extends
 		LaunchEventType type = types.iterator().next();
 		assertEquals(time.getTime(), type.getLaunchTime().toGregorianCalendar().getTime());
 		assertEquals(duration, type.getDuration());
-		assertEquals(config.getType().getName(), type.getLaunchType());
-		assertEquals(LaunchMode.RUN, type.getLaunchMode());
+		assertEquals(config.getType().getName(), type.getLaunchTypeId());
+		assertEquals(ILaunchManager.RUN_MODE, type.getLaunchModeId());
 		assertEquals(config.getName(), type.getLaunchName());
 		assertEquals(fileIds.size(), type.getFileId().size());
 		fileIds.removeAll(type.getFileId());
@@ -245,8 +244,8 @@ public class LaunchEventStorerTest extends
 		for (LaunchEventType type : types) {
 			assertEquals(time.getTime(), type.getLaunchTime().toGregorianCalendar().getTime());
 			assertEquals(duration, type.getDuration());
-			assertEquals(config.getType().getName(), type.getLaunchType());
-			assertEquals(LaunchMode.RUN, type.getLaunchMode());
+			assertEquals(config.getType().getName(), type.getLaunchTypeId());
+			assertEquals(ILaunchManager.RUN_MODE, type.getLaunchModeId());
 			assertEquals(config.getName(), type.getLaunchName());
 			assertEquals(fileIds.size(), type.getFileId().size());
 			for (String str : type.getFileId()) {
@@ -273,8 +272,8 @@ public class LaunchEventStorerTest extends
 		LaunchEventType type = list.get(0);
 		assertEquals(time.getTime(), type.getLaunchTime().toGregorianCalendar().getTime());
 		assertEquals(duration, type.getDuration());
-		assertEquals(config.getType().getName(), type.getLaunchType());
-		assertEquals(LaunchMode.RUN, type.getLaunchMode());
+		assertEquals(config.getType().getName(), type.getLaunchTypeId());
+		assertEquals(ILaunchManager.RUN_MODE, type.getLaunchModeId());
 		assertEquals(config.getName(), type.getLaunchName());
 		assertEquals(fileIds.size(), type.getFileId().size());
 		for (String str : type.getFileId()) {
@@ -287,8 +286,8 @@ public class LaunchEventStorerTest extends
 		type = list.get(1); //
 		assertEquals(time.getTime(), type.getLaunchTime().toGregorianCalendar().getTime());
 		assertEquals(duration, type.getDuration());
-		assertEquals(config.getType().getName(), type.getLaunchType());
-		assertEquals(LaunchMode.RUN, type.getLaunchMode());
+		assertEquals(config.getType().getName(), type.getLaunchTypeId());
+		assertEquals(ILaunchManager.RUN_MODE, type.getLaunchModeId());
 		assertEquals(config.getName(), type.getLaunchName());
 		assertEquals(fileIds.size(), type.getFileId().size());
 		for (String str : type.getFileId()) {
@@ -303,10 +302,10 @@ public class LaunchEventStorerTest extends
 		
 		LaunchEventType type = objectFactory.createLaunchEventType();
 		type.setDuration(101);
-		type.setLaunchMode(LaunchMode.PROFILE);
+		type.setLaunchModeId(ILaunchManager.PROFILE_MODE);
 		type.setLaunchName("Name");
 		type.setLaunchTime(DatatypeUtil.toXMLGregorianCalendarDateTime(new GregorianCalendar()));
-		type.setLaunchType("Type");
+		type.setLaunchTypeId("Type");
 		list2.add(type);
 		
 		storer.merge(list1, list2);
@@ -335,8 +334,8 @@ public class LaunchEventStorerTest extends
 
 		assertEquals(time.getTime(), type.getLaunchTime().toGregorianCalendar().getTime());
 		assertEquals(duration, type.getDuration());
-		assertEquals(config.getType().getName(), type.getLaunchType());
-		assertEquals(LaunchMode.DEBUG, type.getLaunchMode());
+		assertEquals(config.getType().getName(), type.getLaunchTypeId());
+		assertEquals(ILaunchManager.DEBUG_MODE, type.getLaunchModeId());
 		assertEquals(config.getName(), type.getLaunchName());
 		assertEquals(fileIds.size(), type.getFileId().size());
 		fileIds.removeAll(type.getFileId());

@@ -18,7 +18,9 @@ package rabbit.core.internal.trackers;
 import java.util.Calendar;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IWorkbenchPart;
 
 import rabbit.core.RabbitCore;
@@ -39,10 +41,13 @@ public class FileTracker extends AbstractPartTracker<FileEvent> {
 	@Override
 	protected FileEvent tryCreateEvent(Calendar time, long duration, IWorkbenchPart p) {
 		if (p instanceof IEditorPart) {
-			IFile file = (IFile) ((IEditorPart) p).getEditorInput().getAdapter(IFile.class);
-			if (file != null) {
+			IEditorInput input = ((IEditorPart) p).getEditorInput();
+			
+			if (input instanceof IFileEditorInput) {
+				IFile file = ((IFileEditorInput) input).getFile();
 				String id = RabbitCore.getFileMapper().insert(file);
 				return new FileEvent(time, duration, id);
+				
 			}
 		}
 		return null;

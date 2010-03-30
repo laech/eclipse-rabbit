@@ -16,8 +16,6 @@ import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 
-import rabbit.core.storage.LaunchDescriptor.Mode;
-
 /**
  * @see LaunchDescriptor
  */
@@ -35,7 +33,7 @@ public class LaunchDescriptorTest {
 		long duration = 102;
 		Calendar launchTime = Calendar.getInstance();
 		Set<String> fileIds = new HashSet<String>(Arrays.asList("1", "2"));
-		Mode launchMode = Mode.DEBUG_MODE;
+		String launchMode = "debug";
 		String launchName = "name";
 		String launchType = "type";
 
@@ -49,19 +47,19 @@ public class LaunchDescriptorTest {
 				des1.equals(des2));
 
 		des1.setFileIds(fileIds);
-		des1.setLaunchMode(launchMode);
+		des1.setLaunchModeId(launchMode);
 		des1.setLaunchName(launchName);
 		des1.getLaunchTime().setTimeInMillis(launchTime.getTimeInMillis());
-		des1.setLaunchType(launchType);
+		des1.setLaunchTypeId(launchType);
 		assertFalse("Should not be equal when fields are different.",
 				des1.equals(des2));
 
 		des2.setDuration(duration);
 		des2.setFileIds(fileIds);
-		des2.setLaunchMode(launchMode);
+		des2.setLaunchModeId(launchMode);
 		des2.setLaunchName(launchName);
 		des2.getLaunchTime().setTimeInMillis(launchTime.getTimeInMillis());
-		des2.setLaunchType(launchType);
+		des2.setLaunchTypeId(launchType);
 		assertTrue("Should be equal when all fields are the same.",
 				des1.equals(des2));
 	}
@@ -89,10 +87,10 @@ public class LaunchDescriptorTest {
 	@Test
 	public void testGetLaunchMode() {
 		assertNotNull("Launch mode should not be null.",
-				descriptor.getLaunchMode());
+				descriptor.getLaunchModeId());
 
-		assertSame("Launch mode should be UNKNOWN by default",
-				Mode.UNKNOWN, descriptor.getLaunchMode());
+		assertSame("Launch mode should be empty string by default",
+				"", descriptor.getLaunchModeId());
 	}
 
 	@Test
@@ -120,15 +118,15 @@ public class LaunchDescriptorTest {
 	@Test
 	public void testGetLaunchType() {
 		assertEquals("Launch type should be empty string by default.",
-				"", descriptor.getLaunchType());
+				"", descriptor.getLaunchTypeId());
 	}
 
 	@Test
 	public void testHashCode() {
 		int hashCode = (descriptor.getFileIds().hashCode()
 				+ descriptor.getLaunchName().hashCode()
-				+ descriptor.getLaunchType().hashCode()
-				+ descriptor.getLaunchMode().hashCode()
+				+ descriptor.getLaunchTypeId().hashCode()
+				+ descriptor.getLaunchModeId().hashCode()
 				+ descriptor.getLaunchTime().hashCode())
 				% 31;
 		assertEquals(hashCode, descriptor.hashCode());
@@ -186,18 +184,18 @@ public class LaunchDescriptorTest {
 
 	@Test
 	public void testSetLaunchMode() {
-		Mode mode = Mode.DEBUG_MODE;
-		descriptor.setLaunchMode(mode);
-		assertSame(mode, descriptor.getLaunchMode());
+		String mode = "run";
+		descriptor.setLaunchModeId(mode);
+		assertEquals(mode, descriptor.getLaunchModeId());
 
-		mode = Mode.PROFILE_MODE;
-		descriptor.setLaunchMode(mode);
-		assertSame(mode, descriptor.getLaunchMode());
+		mode = "debug";
+		descriptor.setLaunchModeId(mode);
+		assertEquals(mode, descriptor.getLaunchModeId());
 	}
 
 	@Test(expected = NullPointerException.class)
 	public void testSetLaunchMode_null() {
-		descriptor.setLaunchMode(null);
+		descriptor.setLaunchModeId(null);
 	}
 
 	@Test
@@ -219,16 +217,16 @@ public class LaunchDescriptorTest {
 	@Test
 	public void testSetLaunchType() {
 		String type = "adfjh298f";
-		descriptor.setLaunchType(type);
-		assertEquals(type, descriptor.getLaunchType());
+		descriptor.setLaunchTypeId(type);
+		assertEquals(type, descriptor.getLaunchTypeId());
 
 		type = "987324iuyfjsdg";
-		descriptor.setLaunchType(type);
-		assertEquals(type, descriptor.getLaunchType());
+		descriptor.setLaunchTypeId(type);
+		assertEquals(type, descriptor.getLaunchTypeId());
 	}
 	
 	@Test(expected = NullPointerException.class)
 	public void testSetLaunchType_null() {
-		descriptor.setLaunchType(null);
+		descriptor.setLaunchTypeId(null);
 	}
 }

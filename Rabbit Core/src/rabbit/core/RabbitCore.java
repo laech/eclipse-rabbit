@@ -18,6 +18,7 @@ package rabbit.core;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import rabbit.core.events.CommandEvent;
 import rabbit.core.events.FileEvent;
@@ -27,6 +28,7 @@ import rabbit.core.internal.storage.xml.CommandDataAccessor;
 import rabbit.core.internal.storage.xml.CommandEventStorer;
 import rabbit.core.internal.storage.xml.FileDataAccessor;
 import rabbit.core.internal.storage.xml.FileEventStorer;
+import rabbit.core.internal.storage.xml.LaunchDataAccessor;
 import rabbit.core.internal.storage.xml.PartDataAccessor;
 import rabbit.core.internal.storage.xml.PartEventStorer;
 import rabbit.core.internal.storage.xml.PerspectiveDataAccessor;
@@ -36,6 +38,7 @@ import rabbit.core.internal.storage.xml.XmlFileMapper;
 import rabbit.core.storage.IAccessor;
 import rabbit.core.storage.IFileMapper;
 import rabbit.core.storage.IStorer;
+import rabbit.core.storage.LaunchDescriptor;
 
 public class RabbitCore {
 
@@ -81,6 +84,12 @@ public class RabbitCore {
 		}
 		IAccessor<Map<String, Long>> accessor = accessors.get(type);
 		return (accessor == null) ? null : accessor;
+	}
+	
+	private final static IAccessor<Set<LaunchDescriptor>> launchDataAccessor = new LaunchDataAccessor();
+	//TODO
+	public static IAccessor<Set<LaunchDescriptor>> getLaunchDataAccessor() {
+		return launchDataAccessor;
 	}
 
 	/**

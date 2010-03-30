@@ -1,18 +1,19 @@
 package rabbit.core.internal.storage.xml;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.GregorianCalendar;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.debug.core.ILaunchManager;
+
 import rabbit.core.internal.storage.xml.schema.events.EventListType;
 import rabbit.core.internal.storage.xml.schema.events.LaunchEventListType;
 import rabbit.core.internal.storage.xml.schema.events.LaunchEventType;
-import rabbit.core.internal.storage.xml.schema.events.LaunchMode;
 import rabbit.core.storage.LaunchDescriptor;
-import rabbit.core.storage.LaunchDescriptor.Mode;
 
 /**
  * @see LaunchDataAccessor
@@ -31,27 +32,16 @@ public class LaunchDataAccessorTest extends
 				des.setLaunchName(type.getLaunchName());
 				des.getLaunchTime().setTimeInMillis(
 						type.getLaunchTime().toGregorianCalendar().getTimeInMillis());
-				des.setLaunchType(type.getLaunchType());
+				des.setLaunchTypeId(type.getLaunchTypeId());
+				des.setLaunchModeId(type.getLaunchModeId());
 
-				switch (type.getLaunchMode()) {
-				case DEBUG:
-					des.setLaunchMode(Mode.DEBUG_MODE);
-					break;
-				case RUN:
-					des.setLaunchMode(Mode.RUN_MODE);
-					break;
-				case PROFILE:
-					des.setLaunchMode(Mode.PROFILE_MODE);
-					break;
-				default:
-					des.setLaunchMode(Mode.UNKNOWN);
-					break;
-				}
+				myData.add(des);
 			}
 		}
 
 		assertEquals(myData.size(), data.size());
-		assertEquals(myData, data);
+		myData.removeAll(data);
+		assertTrue(myData.isEmpty());
 	}
 
 	@Override
@@ -71,11 +61,11 @@ public class LaunchDataAccessorTest extends
 	protected LaunchEventType createXmlType() {
 		LaunchEventType type = objectFactory.createLaunchEventType();
 		type.setDuration(10);
-		type.setLaunchMode(LaunchMode.DEBUG);
+		type.setLaunchModeId(ILaunchManager.RUN_MODE);
 		type.setLaunchName("name");
 		type.setLaunchTime(DatatypeUtil
 				.toXMLGregorianCalendarDateTime(new GregorianCalendar()));
-		type.setLaunchType("type");
+		type.setLaunchTypeId("type");
 		return type;
 	}
 

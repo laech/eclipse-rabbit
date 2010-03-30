@@ -8,7 +8,7 @@
             allowMultiple="true"
             category="rabbit.ui.view"
             class="rabbit.ui.internal.RabbitView"
-            icon="resources/rabbitview.png"
+            icon="icons/full/eview16/rabbitview.png"
             id="rabbit.ui.view.rabbitview"
             name="Rabbit"
             restorable="true">
@@ -23,21 +23,21 @@
       <page
             class="rabbit.ui.internal.pages.EclipseUsageCategory"
             description="Contains pages that display Eclipse usage information"
-            icon="resources/eclipse.gif"
+            icon="icons/full/obj16/eclipse.gif"
             id="rabbit.ui.pages.eclipseUsage"
             name="Eclipse Usage">
       </page>
       <page
             class="rabbit.ui.internal.pages.ProjectCategory"
             description="Contains pages that display information relating to projects"
-            icon="resources/projectclosed.gif"
+            icon="icons/full/obj16/projectclosed.gif"
             id="rabbit.ui.pages.projectRelated"
             name="Project Related">
       </page>
       <page
             class="rabbit.ui.internal.pages.CommandPage"
             description="Command execution counts"
-            icon="resources/cut.gif"
+            icon="icons/full/obj16/cut.gif"
             id="rabbit.ui.pages.command"
             name="Commands"
             parent="rabbit.ui.pages.eclipseUsage">
@@ -45,7 +45,7 @@
       <page
             class="rabbit.ui.internal.pages.PartPage"
             description="Time spent using different views and editors"
-            icon="resources/pin_editor.gif"
+            icon="icons/full/obj16/pin_editor.gif"
             id="rabbit.ui.pages.workbenchPart"
             name="Editors and Views"
             parent="rabbit.ui.pages.eclipseUsage">
@@ -53,7 +53,7 @@
       <page
             class="rabbit.ui.internal.pages.SessionPage"
             description="Time spent within Eclipse"
-            icon="resources/home.gif"
+            icon="icons/full/obj16/home.gif"
             id="rabbit.ui.pages.session"
             name="Sessions"
             parent="rabbit.ui.pages.eclipseUsage">
@@ -61,7 +61,7 @@
       <page
             class="rabbit.ui.internal.pages.PerspectivePage"
             description="Time spent using different perspectives"
-            icon="resources/defaultpersp.gif"
+            icon="icons/full/obj16/defaultpersp.gif"
             id="rabbit.ui.pages.perspective"
             name="Perspectives"
             parent="rabbit.ui.pages.eclipseUsage">
@@ -69,10 +69,15 @@
       <page
             class="rabbit.ui.internal.pages.ResourcePage"
             description="Time spent working on different resources"
-            icon="resources/res.gif"
+            icon="icons/full/obj16/res.gif"
             id="rabbit.ui.pages.resource"
             name="Resources"
             parent="rabbit.ui.pages.projectRelated">
+      </page>
+      <page
+            class="rabbit.ui.internal.pages.LaunchPage"
+            id="Rabbit UI.page1"
+            name="Rabbit UI.page1">
       </page>
    </extension>
    <extension

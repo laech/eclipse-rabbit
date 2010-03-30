@@ -12,16 +12,12 @@ import java.util.Set;
  */
 public class LaunchDescriptor {
 
-	public static enum Mode {
-		DEBUG_MODE, PROFILE_MODE, RUN_MODE, UNKNOWN;
-	}
-
 	private long duration;
-	private Mode launchMode;
+	private String launchModeId;
 	private String launchName;
 	private Calendar launchTime;
 	private Set<String> fileIds;
-	private String launchType;
+	private String launchTypeId;
 
 	/**
 	 * Constructs a new descriptor.
@@ -29,9 +25,9 @@ public class LaunchDescriptor {
 	public LaunchDescriptor() {
 		launchTime = new GregorianCalendar(0, 0, 0);
 		fileIds = Collections.emptySet();
-		launchMode = Mode.UNKNOWN;
+		launchModeId = "";
 		launchName = "";
-		launchType = "";
+		launchTypeId = "";
 		duration = 0;
 	}
 
@@ -59,8 +55,8 @@ public class LaunchDescriptor {
 	 * 
 	 * @return The launch mode.
 	 */
-	public Mode getLaunchMode() {
-		return launchMode;
+	public String getLaunchModeId() {
+		return launchModeId;
 	}
 
 	/**
@@ -116,16 +112,16 @@ public class LaunchDescriptor {
 	/**
 	 * Sets the launch mode of this launch.
 	 * 
-	 * @param launchMode
+	 * @param launchModeId
 	 *            The launch mode.
 	 * @throws NullPointerException
 	 *             If argument is null.
 	 */
-	public void setLaunchMode(Mode launchMode) {
-		if (launchMode == null) {
+	public void setLaunchModeId(String launchModeId) {
+		if (launchModeId == null) {
 			throw new NullPointerException();
 		}
-		this.launchMode = launchMode;
+		this.launchModeId = launchModeId;
 	}
 
 	/**
@@ -144,27 +140,27 @@ public class LaunchDescriptor {
 	}
 
 	/**
-	 * Gets the type of this launch.
+	 * Gets the type ID of this launch.
 	 * 
-	 * @return The type of this launch.
+	 * @return The type ID of this launch.
 	 */
-	public String getLaunchType() {
-		return launchType;
+	public String getLaunchTypeId() {
+		return launchTypeId;
 	}
 
 	/**
-	 * Sets the type of this launch.
+	 * Sets the type ID of this launch.
 	 * 
-	 * @param launchType
-	 *            The type of this launch.
+	 * @param launchTypeId
+	 *            The type ID of this launch.
 	 * @throws NullPointerException
 	 *             If argument is null.
 	 */
-	public void setLaunchType(String launchType) {
-		if (launchType == null) {
+	public void setLaunchTypeId(String launchTypeId) {
+		if (launchTypeId == null) {
 			throw new NullPointerException();
 		}
-		this.launchType = launchType;
+		this.launchTypeId = launchTypeId;
 	}
 
 	@Override
@@ -176,10 +172,10 @@ public class LaunchDescriptor {
 
 		LaunchDescriptor des = (LaunchDescriptor) obj;
 		return getDuration() == des.getDuration()
-				&& getLaunchMode() == des.getLaunchMode()
+				&& getLaunchModeId().equals(des.getLaunchModeId())
 				&& getLaunchName().equals(des.getLaunchName())
 				&& getLaunchTime().getTime().equals(des.getLaunchTime().getTime())
-				&& getLaunchType().equals(des.getLaunchType())
+				&& getLaunchTypeId().equals(des.getLaunchTypeId())
 				// Test to see all fileIds are same:
 				&& getFileIds().containsAll(des.getFileIds())
 				&& des.getFileIds().containsAll(getFileIds());
@@ -187,9 +183,9 @@ public class LaunchDescriptor {
 
 	@Override
 	public int hashCode() {
-		return (getLaunchMode().hashCode()
+		return (getLaunchModeId().hashCode()
 				+ getLaunchName().hashCode()
 				+ getLaunchTime().hashCode()
-				+ getLaunchType().hashCode() + getFileIds().hashCode()) % 31;
+				+ getLaunchTypeId().hashCode() + getFileIds().hashCode()) % 31;
 	}
 }

@@ -24,9 +24,13 @@ import java.util.List;
 
 import javax.xml.datatype.XMLGregorianCalendar;
 
+import org.eclipse.core.runtime.IPath;
+import org.junit.AfterClass;
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
+import rabbit.core.internal.RabbitCorePlugin;
 import rabbit.core.internal.storage.xml.schema.events.EventGroupType;
 import rabbit.core.internal.storage.xml.schema.events.EventListType;
 import rabbit.core.internal.storage.xml.schema.events.ObjectFactory;
@@ -39,6 +43,24 @@ public abstract class AbstractAccessorTest<T, E, S extends EventGroupType> {
 	private AbstractAccessor<T, E, S> accessor = create();
 
 	protected ObjectFactory objectFactory = new ObjectFactory();
+
+	private static final IPath originalRoot = RabbitCorePlugin.getDefault().getStoragePathRoot();
+
+	@BeforeClass
+	public static void beforeClass() {
+		// Set the directory root to a new folder so that we don't mess
+		// with existing data:
+		File dir = originalRoot.append(System.currentTimeMillis() + "").toFile();
+		if (!dir.exists() && !dir.mkdirs()) {
+			Assert.fail();
+		}
+		RabbitCorePlugin.getDefault().setStoragePathRoot(dir);
+	}
+
+	@AfterClass
+	public static void afterClass() {
+		RabbitCorePlugin.getDefault().setStoragePathRoot(originalRoot.toFile());
+	}
 
 	@Test
 	public void testGetCategories() {

@@ -8,9 +8,7 @@ import java.util.Set;
 import rabbit.core.internal.storage.xml.schema.events.EventListType;
 import rabbit.core.internal.storage.xml.schema.events.LaunchEventListType;
 import rabbit.core.internal.storage.xml.schema.events.LaunchEventType;
-import rabbit.core.internal.storage.xml.schema.events.LaunchMode;
 import rabbit.core.storage.LaunchDescriptor;
-import rabbit.core.storage.LaunchDescriptor.Mode;
 
 /**
  * Gets launch event data.
@@ -31,16 +29,10 @@ public class LaunchDataAccessor extends
 				launch.setLaunchName(type.getLaunchName());
 				launch.getLaunchTime().setTimeInMillis(
 						type.getLaunchTime().toGregorianCalendar().getTimeInMillis());
+				launch.setLaunchTypeId(type.getLaunchTypeId());
+				launch.setLaunchModeId(type.getLaunchModeId());
 
-				if (type.getLaunchMode() == LaunchMode.DEBUG) {
-					launch.setLaunchMode(Mode.DEBUG_MODE);
-				} else if (type.getLaunchMode() == LaunchMode.RUN) {
-					launch.setLaunchMode(Mode.RUN_MODE);
-				} else if (type.getLaunchMode() == LaunchMode.PROFILE) {
-					launch.setLaunchMode(Mode.PROFILE_MODE);
-				} else {
-					launch.setLaunchMode(Mode.UNKNOWN);
-				}
+				result.add(launch);
 			}
 		}
 		return result;
