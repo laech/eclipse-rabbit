@@ -24,7 +24,9 @@ import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.ui.DebugUITools;
 import org.eclipse.debug.ui.IDebugUIConstants;
 import org.eclipse.jface.viewers.BaseLabelProvider;
+import org.eclipse.jface.viewers.IColorProvider;
 import org.eclipse.jface.viewers.ITableLabelProvider;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 
 import rabbit.core.storage.LaunchDescriptor;
@@ -34,7 +36,8 @@ import rabbit.ui.internal.util.MillisConverter;
 /**
  * Label provider a {@link LaunchPage}.
  */
-public class LaunchPageLabelProvider extends BaseLabelProvider implements ITableLabelProvider {
+public class LaunchPageLabelProvider extends BaseLabelProvider
+		implements ITableLabelProvider, IColorProvider {
 
 	protected final DateFormat format;
 	protected final ResourcePageLabelProvider provider;
@@ -115,5 +118,18 @@ public class LaunchPageLabelProvider extends BaseLabelProvider implements ITable
 			break;
 		}
 		return null;
+	}
+
+	@Override
+	public Color getBackground(Object element) {
+		return null;
+	}
+
+	@Override
+	public Color getForeground(Object element) {
+		if (element instanceof LaunchResource) {
+			return provider.getForeground(((LaunchResource) element).getResource());
+		}
+		return provider.getForeground(element);
 	}
 }

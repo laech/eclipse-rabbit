@@ -16,10 +16,7 @@
 package rabbit.core.internal.storage.xml;
 
 import java.io.File;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -105,11 +102,6 @@ public enum XmlFileMapper
 			return true;
 		}
 	};
-
-	/**
-	 * Formats a date to the form "yyyy-MM".
-	 */
-	private final DateFormat monthFormat = new SimpleDateFormat("yyyy-MM");
 
 	private IWorkspaceRoot workspaceRoot =  ResourcesPlugin.getWorkspace().getRoot();
 	
@@ -311,15 +303,7 @@ public enum XmlFileMapper
 	 * @return The back up file.
 	 */
 	private File getBackupFile() {
-
-		StringBuilder builder = new StringBuilder(getDataFile().getParent())
-				.append(File.separator)
-				.append("Backup")
-				.append(File.separator)
-				.append(monthFormat.format(new Date()))
-				.append(".xml");
-
-		File backupFile = new File(builder.toString());
+		File backupFile = new File(getDataFile().getAbsolutePath() + ".backup");
 		if (!backupFile.getParentFile().exists()) {
 			if (!backupFile.getParentFile().mkdirs()) {
 				System.err.println(getClass() + ": Cannot create backup location.");
@@ -334,7 +318,13 @@ public enum XmlFileMapper
 	 * @return The resource data of the current workspace
 	 */
 	private ResourceListType getData() {
-		return getData(getDataFile());
+		ResourceListType data = getData(getDataFile());
+		// Try restoring it from a backup:
+		if (data == null) data = getData(getBackupFile());
+		// Backup failed, create a new one:
+		if (data == null) data = objectFactory.createResourceListType();
+		
+		return data;
 	}
 
 	/**
@@ -342,7 +332,7 @@ public enum XmlFileMapper
 	 * 
 	 * @param dataFile
 	 *            The file containing the data.
-	 * @return A {@link ResourceListType} with the data. Returns an empty one if
+	 * @return A {@link ResourceListType} with the data. Returns null if
 	 *         no data is in the file, or exceptions occur while processing the
 	 *         file.
 	 */
@@ -352,11 +342,8 @@ public enum XmlFileMapper
 			try {
 				database = unmarshal(dataFile);
 			} catch (JAXBException e) {
-				database = objectFactory.createResourceListType();
+				database = null;
 			}
-		}
-		if (database == null) {
-			database = objectFactory.createResourceListType();
 		}
 		return database;
 	}
@@ -408,7 +395,10 @@ public enum XmlFileMapper
 			}
 			File file = getDataFile(path);
 
-			for (Entry<String, Set<String>> entry : convert(getData(file)).entrySet()) {
+			ResourceListType data = getData(file);
+			if (data == null) data = objectFactory.createResourceListType();
+			
+			for (Entry<String, Set<String>> entry : convert(data).entrySet()) {
 				Set<String> ids = result.get(entry.getKey());
 				if (ids == null) {
 					ids = new HashSet<String>();

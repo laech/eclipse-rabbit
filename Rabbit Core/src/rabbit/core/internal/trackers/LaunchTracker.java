@@ -152,7 +152,7 @@ public class LaunchTracker extends AbstractTracker<LaunchEvent>
 
 			ILaunchConfiguration config = launchConfigs.get(launch);
 			if (config == null) {
-				System.err.println("Launch configuration is null.");
+				System.err.println("handleProcessEvent: Launch configuration is null.");
 				return;
 			}
 			addData(new LaunchEvent(startTime, duration, launch, config, fileIds));
@@ -177,7 +177,7 @@ public class LaunchTracker extends AbstractTracker<LaunchEvent>
 		ILaunch launch = thread.getLaunch();
 		ILaunchConfiguration config = launchConfigs.get(launch);
 		if (config == null) {
-			System.err.println("Launch configuration is null.");
+			System.err.println("handleThreadEvent: Launch configuration is null.");
 			return;
 		}
 

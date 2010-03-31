@@ -17,12 +17,15 @@ package rabbit.ui.internal.pages;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.ui.DebugUITools;
 import org.eclipse.debug.ui.IDebugUIConstants;
@@ -135,5 +138,15 @@ public class LaunchPageLabelProviderTest {
 		LaunchDescriptor des = new LaunchDescriptor();
 		des.setDuration(duration);
 		assertEquals(MillisConverter.toDefaultString(duration), provider.getColumnText(des, 3));
+	}
+	
+	@Test
+	public void testGetForeground() throws CoreException {
+		IProject project = root.getProject(System.nanoTime() + "");
+		assertNotNull("Should show different color for resources that are not exist",
+				provider.getForeground(project));
+		
+		project.create(null);
+		assertNull(provider.getForeground(project));
 	}
 }
