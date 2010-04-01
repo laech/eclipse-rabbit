@@ -35,7 +35,7 @@ public class LaunchPageTest extends AbstractTreeViewerPageTest {
 		assertEquals(0, page.getValue(null));
 
 		LaunchDescriptor des = new LaunchDescriptor();
-		des.setDuration(19834);
-		assertEquals(des.getDuration(), page.getValue(des));
+		des.setTotalDuration(19834);
+		assertEquals(des.getTotalDuration(), page.getValue(des));
 	}
 }

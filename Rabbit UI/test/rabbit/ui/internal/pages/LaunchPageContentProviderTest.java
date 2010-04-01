@@ -56,7 +56,7 @@ public class LaunchPageContentProviderTest {
 
 		IFile file = root.getProject("p").getFolder("f").getFile("ff");
 		String fileId = fileMapper.insert(file);
-		des.setFileIds(new HashSet<String>(Arrays.asList(fileId)));
+		des.getFileIds().addAll(new HashSet<String>(Arrays.asList(fileId)));
 		provider.inputChanged(null, null, new HashSet<LaunchDescriptor>(Arrays.asList(des)));
 
 		assertTrue(provider.hasChildren(des));
@@ -73,7 +73,7 @@ public class LaunchPageContentProviderTest {
 
 		IFile file = root.getProject("p").getFolder("f").getFile("ff");
 		String fileId = fileMapper.insert(file);
-		des.setFileIds(new HashSet<String>(Arrays.asList(fileId)));
+		des.getFileIds().addAll(new HashSet<String>(Arrays.asList(fileId)));
 		provider.inputChanged(null, null, new HashSet<LaunchDescriptor>(Arrays.asList(des)));
 
 		assertTrue(provider.hasChildren(des));
@@ -95,7 +95,7 @@ public class LaunchPageContentProviderTest {
 
 		IFile file = root.getProject("p").getFolder("f").getFile("ff");
 		String fileId = fileMapper.insert(file);
-		des.setFileIds(new HashSet<String>(Arrays.asList(fileId)));
+		des.getFileIds().addAll(new HashSet<String>(Arrays.asList(fileId)));
 		provider.inputChanged(null, null, new HashSet<LaunchDescriptor>(Arrays.asList(des)));
 
 		LaunchResource projectRes = new LaunchResource(des, file.getProject());

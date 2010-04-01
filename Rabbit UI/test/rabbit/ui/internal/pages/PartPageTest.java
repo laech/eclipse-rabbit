@@ -25,7 +25,6 @@ import org.eclipse.ui.IWorkbenchPartDescriptor;
 import org.junit.Test;
 
 import rabbit.core.RabbitCore;
-import rabbit.core.RabbitCore.AccessorType;
 import rabbit.core.storage.IAccessor;
 import rabbit.ui.DisplayPreference;
 import rabbit.ui.internal.util.UndefinedWorkbenchPartDescriptor;
@@ -56,7 +55,7 @@ public class PartPageTest extends AbstractTableViewerPageTest {
 	@Test
 	public void testUpdate() throws Exception {
 		long max = 0;
-		IAccessor<Map<String, Long>> accessor = RabbitCore.getAccessor(AccessorType.PART);
+		IAccessor<Map<String, Long>> accessor = RabbitCore.getPartDataAccessor();
 
 		DisplayPreference pref = new DisplayPreference();
 		Map<String, Long> data = accessor.getData(pref.getStartDate(), pref.getEndDate());

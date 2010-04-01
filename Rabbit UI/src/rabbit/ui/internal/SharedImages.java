@@ -5,7 +5,6 @@ import static rabbit.ui.internal.RabbitUI.PLUGIN_ID;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 
-// TODO test
 public class SharedImages {
 
 	public static final ImageDescriptor REFRESH =

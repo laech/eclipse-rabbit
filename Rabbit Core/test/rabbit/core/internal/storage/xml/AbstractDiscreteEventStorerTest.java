@@ -111,16 +111,13 @@ public abstract class AbstractDiscreteEventStorerTest<E extends DiscreteEvent, T
 	public abstract void testHasSameId_typeAndType();
 
 	@Test
-	public abstract void testMerge_typeAndEvent();
+	public abstract void testMerge_typeAndEvent() throws Exception;
 
 	@Test
-	public abstract void testMerge_typeAndType();
+	public abstract void testMerge_typeAndType() throws Exception;
 
 	@Test
-	public abstract void testNewXmlTypeHolderXMLGregorianCalendar();
-
-	@Test
-	public abstract void testNewXmlTypeT();
+	public abstract void testNewXmlType() throws Exception;
 
 	@Test
 	public void testRead() throws IOException {

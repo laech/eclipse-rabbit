@@ -267,7 +267,7 @@ public abstract class AbstractContinuousEventStorerTest<E extends ContinuousEven
 	}
 
 	@Override
-	public void testNewXmlTypeHolderXMLGregorianCalendar() {
+	public void testNewXmlTypeHolder() {
 
 		XMLGregorianCalendar cal = getCalendar();
 		S type = storer.newXmlTypeHolder(cal);
@@ -275,7 +275,7 @@ public abstract class AbstractContinuousEventStorerTest<E extends ContinuousEven
 	}
 
 	@Override
-	public void testNewXmlTypeT() {
+	public void testNewXmlType() {
 
 		E e = createEvent();
 		T xml = storer.newXmlType(e);

@@ -2,6 +2,7 @@ package rabbit.core.internal.storage.xml;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static rabbit.core.internal.util.StringUtil.getString;
 
 import java.util.GregorianCalendar;
 import java.util.HashSet;
@@ -26,16 +27,34 @@ public class LaunchDataAccessorTest extends
 		Set<LaunchDescriptor> myData = new HashSet<LaunchDescriptor>();
 		for (LaunchEventListType list : events.getLaunchEvents()) {
 			for (LaunchEventType type : list.getLaunchEvent()) {
-				LaunchDescriptor des = new LaunchDescriptor();
-				des.setDuration(type.getDuration());
-				des.setFileIds(type.getFileId());
-				des.setLaunchName(type.getLaunchName());
-				des.getLaunchTime().setTimeInMillis(
-						type.getLaunchTime().toGregorianCalendar().getTimeInMillis());
-				des.setLaunchTypeId(type.getLaunchTypeId());
-				des.setLaunchModeId(type.getLaunchModeId());
 
-				myData.add(des);
+				boolean done = false;
+
+				for (LaunchDescriptor des : myData) {
+					if (getString(type.getName()).equals(des.getLaunchName())
+							&& getString(type.getLaunchModeId()).equals(des.getLaunchModeId())
+							&& getString(type.getLaunchTypeId()).equals(des.getLaunchTypeId())) {
+
+						des.setCount(des.getCount() + type.getCount());
+						des.setTotalDuration(des.getTotalDuration() + type.getTotalDuration());
+						des.getFileIds().addAll(type.getFileId());
+						
+						done = true;
+						break;
+					}
+				}
+
+				if (!done) {
+					LaunchDescriptor des = new LaunchDescriptor();
+					des.setCount(type.getCount());
+					des.setTotalDuration(type.getTotalDuration());
+					des.getFileIds().addAll(type.getFileId());
+					des.setLaunchName(type.getName());
+					des.setLaunchTypeId(type.getLaunchTypeId());
+					des.setLaunchModeId(type.getLaunchModeId());
+
+					myData.add(des);
+				}
 			}
 		}
 
@@ -60,12 +79,11 @@ public class LaunchDataAccessorTest extends
 	@Override
 	protected LaunchEventType createXmlType() {
 		LaunchEventType type = objectFactory.createLaunchEventType();
-		type.setDuration(10);
+		type.setTotalDuration(10);
 		type.setLaunchModeId(ILaunchManager.RUN_MODE);
-		type.setLaunchName("name");
-		type.setLaunchTime(DatatypeUtil
-				.toXMLGregorianCalendarDateTime(new GregorianCalendar()));
+		type.setName("name");
 		type.setLaunchTypeId("type");
+		type.setCount(1);
 		return type;
 	}
 
@@ -76,12 +94,13 @@ public class LaunchDataAccessorTest extends
 
 	@Override
 	protected void setId(LaunchEventType type, String id) {
-		// Do nothing, unlike other types, all LaunchEventType are
-		// treated unique, so there's no need to set an ID.
+		type.setLaunchModeId(id);
+		type.setLaunchTypeId(id);
+		type.setName(id);
 	}
 
 	@Override
 	protected void setUsage(LaunchEventType type, long usage) {
-		type.setDuration(usage);
+		type.setTotalDuration(usage);
 	}
 }

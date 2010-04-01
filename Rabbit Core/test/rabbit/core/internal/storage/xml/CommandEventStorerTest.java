@@ -320,7 +320,7 @@ public class CommandEventStorerTest extends
 	}
 
 	@Override
-	public void testNewXmlTypeHolderXMLGregorianCalendar() {
+	public void testNewXmlTypeHolder() {
 
 		XMLGregorianCalendar cal = toXMLGregorianCalendarDate(Calendar.getInstance());
 		CommandEventListType list = storer.newXmlTypeHolder(cal);
@@ -328,7 +328,7 @@ public class CommandEventStorerTest extends
 	}
 
 	@Override
-	public void testNewXmlTypeT() {
+	public void testNewXmlType() {
 
 		CommandEvent e = createEvent();
 		CommandEventType type = storer.newXmlType(e);

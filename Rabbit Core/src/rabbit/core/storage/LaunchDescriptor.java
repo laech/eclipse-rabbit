@@ -15,22 +15,18 @@
  */
 package rabbit.core.storage;
 
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.GregorianCalendar;
 import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Describes a launch.
+ * Describes launches.
  */
 public class LaunchDescriptor {
 
-	private long duration;
+	private int count;
+	private long totalDuration;
 	private String launchModeId;
 	private String launchName;
-	private Calendar launchTime;
 	private Set<String> fileIds;
 	private String launchTypeId;
 
@@ -38,12 +34,12 @@ public class LaunchDescriptor {
 	 * Constructs a new descriptor.
 	 */
 	public LaunchDescriptor() {
-		launchTime = new GregorianCalendar(0, 0, 0);
-		fileIds = Collections.emptySet();
+		fileIds = new HashSet<String>();
 		launchModeId = "";
 		launchName = "";
 		launchTypeId = "";
-		duration = 0;
+		totalDuration = 0;
+		count = 0;
 	}
 
 	@Override
@@ -54,10 +50,9 @@ public class LaunchDescriptor {
 			return false;
 
 		LaunchDescriptor des = (LaunchDescriptor) obj;
-		return getDuration() == des.getDuration()
+		return getTotalDuration() == des.getTotalDuration()
 				&& getLaunchModeId().equals(des.getLaunchModeId())
 				&& getLaunchName().equals(des.getLaunchName())
-				&& getLaunchTime().getTime().equals(des.getLaunchTime().getTime())
 				&& getLaunchTypeId().equals(des.getLaunchTypeId())
 				// Test to see all fileIds are same:
 				&& getFileIds().containsAll(des.getFileIds())
@@ -65,18 +60,18 @@ public class LaunchDescriptor {
 	}
 
 	/**
-	 * Gets the duration of the launch.
+	 * Gets the number of time this launch configuration has been launched.
 	 * 
-	 * @return The duration.
+	 * @return The count.
 	 */
-	public long getDuration() {
-		return duration;
+	public int getCount() {
+		return count;
 	}
 
 	/**
 	 * Gets the IDs of the files involved.
 	 * 
-	 * @return The IDs of the files involved.
+	 * @return The IDs of the files involved, a modifiable collection.
 	 * @see {@link rabbit.core.storage.IFileMapper}
 	 */
 	public Set<String> getFileIds() {
@@ -102,16 +97,6 @@ public class LaunchDescriptor {
 	}
 
 	/**
-	 * Gets the time of this launch.
-	 * 
-	 * @return The time of this launch, the calendar object can be manipulated
-	 *         directly to make changes.
-	 */
-	public Calendar getLaunchTime() {
-		return launchTime;
-	}
-
-	/**
 	 * Gets the type ID of this launch.
 	 * 
 	 * @return The type ID of this launch, or an empty string if not set.
@@ -120,43 +105,50 @@ public class LaunchDescriptor {
 		return launchTypeId;
 	}
 
+	/**
+	 * Gets the total duration.
+	 * 
+	 * @return The duration.
+	 */
+	public long getTotalDuration() {
+		return totalDuration;
+	}
+
 	@Override
 	public int hashCode() {
 		return (getLaunchModeId().hashCode()
 				+ getLaunchName().hashCode()
-				+ getLaunchTime().hashCode()
 				+ getLaunchTypeId().hashCode() + getFileIds().hashCode()) % 31;
 	}
 
 	/**
-	 * Sets the duration of the launch.
+	 * Sets the number of time this launch configuration has been launched.
+	 * 
+	 * @param count
+	 *            The count.
+	 * @return True if argument is accepted, false if argument is < 0.
+	 */
+	public boolean setCount(int count) {
+		if (count < 0) {
+			return false;
+		}
+		this.count = count;
+		return true;
+	}
+
+	/**
+	 * Sets the total duration.
 	 * 
 	 * @param duration
 	 *            The duration.
 	 * @return True if the argument is >= 0 then the duration is changed, false
 	 *         if the argument is < 0 then the duration is not changed.
 	 */
-	public boolean setDuration(long duration) {
+	public boolean setTotalDuration(long duration) {
 		if (duration < 0) {
 			return false;
 		}
-		this.duration = duration;
-		return true;
-	}
-
-	/**
-	 * Sets the IDs of the files involved in this launch.
-	 * 
-	 * @param fileIds
-	 *            The IDs of the files.
-	 * @return True if the argument is accepted, false if argument is null.
-	 * @see {@link rabbit.core.storage.IFileMapper}
-	 */
-	public boolean setFileIds(Collection<String> fileIds) {
-		if (fileIds == null) {
-			return false;
-		}
-		this.fileIds = Collections.unmodifiableSet(new HashSet<String>(fileIds));
+		this.totalDuration = duration;
 		return true;
 	}
 

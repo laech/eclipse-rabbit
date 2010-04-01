@@ -19,9 +19,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -125,19 +122,17 @@ public class LaunchPageLabelProviderTest {
 
 	@Test
 	public void testGetText_2() {
-		Calendar time = Calendar.getInstance();
 		LaunchDescriptor des = new LaunchDescriptor();
-		des.getLaunchTime().setTime(time.getTime());
-		assertEquals(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(time.getTime()),
-				provider.getColumnText(des, 2));
+		des.setCount(2);
+		assertEquals(des.getCount(), provider.getColumnText(des, 2));
 	}
 
 	@Test
-	public void testGetText_3() {
+	public void testGetText_4() {
 		long duration = 3493872;
 		LaunchDescriptor des = new LaunchDescriptor();
-		des.setDuration(duration);
-		assertEquals(MillisConverter.toDefaultString(duration), provider.getColumnText(des, 3));
+		des.setTotalDuration(duration);
+		assertEquals(MillisConverter.toDefaultString(duration), provider.getColumnText(des, 4));
 	}
 	
 	@Test

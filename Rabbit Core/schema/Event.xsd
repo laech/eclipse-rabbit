@@ -30,8 +30,11 @@
 		</xs:complexContent>
 	</xs:complexType>
 	<xs:complexType name="commandEventType">
-		<xs:attribute name="commandId" type="xs:string" use="required" />
-		<xs:attribute name="count" type="countType" use="required" />
+		<xs:complexContent>
+			<xs:extension base="countEventType">
+				<xs:attribute name="commandId" type="xs:string" use="required" />
+			</xs:extension>
+		</xs:complexContent>
 	</xs:complexType>
 
 	<!-- WorkbenchPart Events: -->
@@ -125,14 +128,14 @@
 	</xs:complexType>
 	<xs:complexType name="launchEventType">
 		<xs:complexContent>
-			<xs:extension base="durationEventType">
+			<xs:extension base="countEventType">
 				<xs:sequence>
 					<xs:element name="fileId" type="xs:string" minOccurs="0" maxOccurs="unbounded" />
 				</xs:sequence>
-				<xs:attribute name="launchName" type="xs:string" use="required" />
-				<xs:attribute name="launchTime" type="xs:dateTime" use="required" />
+				<xs:attribute name="name" type="xs:string" use="required" />
 				<xs:attribute name="launchModeId" type="xs:string" use="required" />
 				<xs:attribute name="launchTypeId" type="xs:string" use="optional" />
+				<xs:attribute name="totalDuration" type="durationType" use="required" />
 			</xs:extension>
 		</xs:complexContent>
 	</xs:complexType>
@@ -147,6 +150,11 @@
 	<!-- Base for events that have durations: -->
 	<xs:complexType name="durationEventType">
 		<xs:attribute name="duration" type="durationType" use="required" />
+	</xs:complexType>
+	
+	<!-- Base for events that have counts: -->
+	<xs:complexType name="countEventType">
+		<xs:attribute name="count" type="countType" use="required" />
 	</xs:complexType>
 	
 	<xs:simpleType name="countType">

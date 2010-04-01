@@ -280,6 +280,10 @@ public class RabbitCorePlugin extends AbstractUIPlugin implements IWorkbenchList
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
+		
+		if (trackers != null) {
+			setEnableTrackers(trackers, false);
+		}
 
 		getWorkbench().addWorkbenchListener(this);
 		trackers = new HashSet<ITracker<?>>(createTrackers());

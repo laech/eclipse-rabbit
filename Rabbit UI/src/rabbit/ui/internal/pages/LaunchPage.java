@@ -26,6 +26,7 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.jface.viewers.TreeViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.swt.SWT;
@@ -36,8 +37,10 @@ import org.eclipse.ui.PlatformUI;
 import rabbit.core.RabbitCore;
 import rabbit.core.storage.IAccessor;
 import rabbit.core.storage.LaunchDescriptor;
+import rabbit.ui.CellPainter;
 import rabbit.ui.DisplayPreference;
 import rabbit.ui.TreeLabelComparator;
+import rabbit.ui.CellPainter.IValueProvider;
 import rabbit.ui.internal.SharedImages;
 
 /**
@@ -46,6 +49,7 @@ import rabbit.ui.internal.SharedImages;
 public class LaunchPage extends AbstractTreeViewerPage {
 
 	private final IAccessor<Set<LaunchDescriptor>> accessor;
+	private int maxCount = 0;
 
 	private IAction collapseAllAction = new Action("Collapse All") {
 		@Override
@@ -86,7 +90,7 @@ public class LaunchPage extends AbstractTreeViewerPage {
 	@Override
 	public long getValue(Object element) {
 		if (element instanceof LaunchDescriptor) {
-			return ((LaunchDescriptor) element).getDuration();
+			return ((LaunchDescriptor) element).getTotalDuration();
 		}
 		return 0;
 	}
@@ -96,10 +100,14 @@ public class LaunchPage extends AbstractTreeViewerPage {
 		Set<LaunchDescriptor> data = accessor.getData(
 				preference.getStartDate(), preference.getEndDate());
 
+		maxCount = 0;
 		setMaxValue(0);
 		for (LaunchDescriptor des : data) {
-			if (des.getDuration() > getMaxValue()) {
-				setMaxValue(des.getDuration());
+			if (des.getTotalDuration() > getMaxValue()) {
+				setMaxValue(des.getTotalDuration());
+			}
+			if (des.getCount() > maxCount) {
+				maxCount = des.getCount();
 			}
 		}
 
@@ -116,18 +124,69 @@ public class LaunchPage extends AbstractTreeViewerPage {
 	protected void createColumns(TreeViewer viewer) {
 		TreeLabelComparator textSorter = new TreeLabelComparator(viewer);
 		TreeLabelComparator valueSorter = createValueSorterForTree(viewer);
+		TreeLabelComparator countSorter = new TreeLabelComparator(viewer) {
+			@Override
+			protected int doCompare(Viewer v, Object e1, Object e2) {
+				if (e1 instanceof LaunchDescriptor && e2 instanceof LaunchDescriptor) {
+					LaunchDescriptor des1 = (LaunchDescriptor) e1;
+					LaunchDescriptor des2 = (LaunchDescriptor) e2;
+					if (des1.getCount() == des2.getCount())
+						return 0;
+					else
+						return des2.getCount() > des2.getCount() ? 1 : -1;
+				}
+				return super.doCompare(v, e1, e2);
+			}
+		};
 
-		int[] widths = new int[] { 200, 80, 150, 100 };
-		int[] styles = new int[] { SWT.LEFT, SWT.LEFT, SWT.RIGHT, SWT.RIGHT };
-		String[] names = new String[] { "Name", "Mode", "Time", "Total Duration" };
+		TreeColumn column = new TreeColumn(viewer.getTree(), SWT.LEFT);
+		column.setText("Name");
+		column.setWidth(180);
+		column.addSelectionListener(textSorter);
 
-		for (int i = 0; i < names.length; i++) {
-			TreeColumn column = new TreeColumn(viewer.getTree(), styles[i]);
-			column.setText(names[i]);
-			column.setWidth(widths[i]);
-			column.addSelectionListener(
-					(names.length - 1 == i) ? valueSorter : textSorter);
-		}
+		column = new TreeColumn(viewer.getTree(), SWT.LEFT);
+		column.setText("Mode");
+		column.setWidth(80);
+		column.addSelectionListener(textSorter);
+
+		column = new TreeColumn(viewer.getTree(), SWT.RIGHT);
+		column.setText("Count");
+		column.setWidth(80);
+		column.addSelectionListener(countSorter);
+		
+		final TreeViewerColumn countGraphColumn = new TreeViewerColumn(viewer, SWT.LEFT);
+		countGraphColumn.getColumn().setWidth(100);
+		countGraphColumn.getColumn().addSelectionListener(countSorter);
+		countGraphColumn.setLabelProvider(new CellPainter(new IValueProvider() {
+			
+			@Override
+			public boolean shouldPaint(Object element) {
+				return true;
+			}
+			
+			@Override
+			public long getValue(Object element) {
+				if (element instanceof LaunchDescriptor)
+					return ((LaunchDescriptor) element).getCount();
+				
+				return 0;
+			}
+			
+			@Override
+			public long getMaxValue() {
+				return maxCount;
+			}
+			
+			@Override
+			public int getColumnWidth() {
+				return countGraphColumn.getColumn().getWidth();
+			}
+		}));
+		
+		column = new TreeColumn(viewer.getTree(), SWT.RIGHT);
+		column.setWidth(120);
+		column.setText("Total Duration");
+		column.addSelectionListener(valueSorter);
 	}
 
 	@Override
@@ -138,7 +197,7 @@ public class LaunchPage extends AbstractTreeViewerPage {
 				if (e1 instanceof LaunchDescriptor && e2 instanceof LaunchDescriptor) {
 					LaunchDescriptor des1 = (LaunchDescriptor) e1;
 					LaunchDescriptor des2 = (LaunchDescriptor) e2;
-					return des1.getLaunchTime().compareTo(des2.getLaunchTime());
+					return des1.getLaunchName().compareTo(des2.getLaunchName());
 				}
 				return super.compare(v, e1, e2);
 			}

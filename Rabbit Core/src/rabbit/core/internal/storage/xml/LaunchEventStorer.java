@@ -15,10 +15,11 @@
  */
 package rabbit.core.internal.storage.xml;
 
-import static rabbit.core.internal.storage.xml.DatatypeUtil.toXMLGregorianCalendarDateTime;
+import static rabbit.core.internal.util.StringUtil.areEqual;
 
-import java.util.GregorianCalendar;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.xml.datatype.XMLGregorianCalendar;
 
@@ -33,7 +34,7 @@ import rabbit.core.internal.storage.xml.schema.events.LaunchEventType;
  * Stores {@link LaunchEvent}
  */
 public class LaunchEventStorer extends
-		AbstractStorer<LaunchEvent, LaunchEventType, LaunchEventListType> {
+		AbstractDiscreteEventStorer<LaunchEvent, LaunchEventType, LaunchEventListType> {
 
 	private static LaunchEventStorer INSTANCE = new LaunchEventStorer();
 
@@ -64,20 +65,52 @@ public class LaunchEventStorer extends
 		return list.getLaunchEvent();
 	}
 
-	/**
-	 * Creates a {@linkplain LaunchEventType} from the given event.
-	 * 
-	 * @param event
-	 *            The event to get data from.
-	 * @return A {@linkplain LaunchEventType} with the data copied from the
-	 *         parameter.
-	 */
+	@Override
+	protected boolean hasSameId(LaunchEventType type, LaunchEvent event) {
+		String launchTypeId = "";
+		try {
+			launchTypeId = event.getLaunchConfiguration().getType().getIdentifier();
+		} catch (CoreException ex) {
+			launchTypeId = "";
+		}
+		
+		return areEqual(type.getName(), event.getLaunchConfiguration().getName())
+				&& areEqual(type.getLaunchModeId(), event.getLaunch().getLaunchMode())
+				&& areEqual(type.getLaunchTypeId(), launchTypeId);
+	}
+
+	@Override
+	protected boolean hasSameId(LaunchEventType type1, LaunchEventType type2) {
+		return areEqual(type1.getName(), type2.getName())
+				&& areEqual(type1.getLaunchModeId(), type2.getLaunchModeId())
+				&& areEqual(type1.getLaunchTypeId(), type2.getLaunchTypeId());
+	}
+
+	@Override
+	protected void merge(LaunchEventType main, LaunchEvent e) {
+		merge(main, newXmlType(e));
+	}
+
+	@Override
+	protected void merge(LaunchEventType main, LaunchEventType x) {
+		main.setCount(main.getCount() + x.getCount());
+		main.setTotalDuration(main.getTotalDuration() + x.getTotalDuration());
+		
+		if (!x.getFileId().isEmpty()) {
+			Set<String> ids = new HashSet<String>(main.getFileId());
+			ids.addAll(x.getFileId());
+			
+			main.getFileId().clear();
+			main.getFileId().addAll(ids);
+		}
+	}
+
+	@Override
 	protected LaunchEventType newXmlType(LaunchEvent event) {
 		LaunchEventType type = objectFactory.createLaunchEventType();
 		type.getFileId().addAll(event.getFileIds());
-		type.setDuration(event.getDuration());
-		type.setLaunchName(event.getLaunchConfiguration().getName());
-		type.setLaunchTime(toXMLGregorianCalendarDateTime((GregorianCalendar) event.getTime()));
+		type.setTotalDuration(event.getDuration());
+		type.setName(event.getLaunchConfiguration().getName());
 		try {
 			type.setLaunchTypeId(event.getLaunchConfiguration().getType().getIdentifier());
 		} catch (CoreException ex) {
@@ -85,6 +118,7 @@ public class LaunchEventStorer extends
 			type.setLaunchTypeId(null);
 		}
 		type.setLaunchModeId(event.getLaunch().getLaunchMode());
+		type.setCount(1);
 
 		return type;
 	}
@@ -94,15 +128,5 @@ public class LaunchEventStorer extends
 		LaunchEventListType type = objectFactory.createLaunchEventListType();
 		type.setDate(date);
 		return type;
-	}
-
-	@Override
-	protected void merge(List<LaunchEventType> xList, LaunchEvent event) {
-		xList.add(newXmlType(event));
-	}
-
-	@Override
-	protected void merge(List<LaunchEventType> mainList, List<LaunchEventType> newList) {
-		mainList.addAll(newList);
 	}
 }

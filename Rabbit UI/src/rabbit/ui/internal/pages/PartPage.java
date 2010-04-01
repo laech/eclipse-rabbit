@@ -29,7 +29,6 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.views.IViewRegistry;
 
 import rabbit.core.RabbitCore;
-import rabbit.core.RabbitCore.AccessorType;
 import rabbit.core.storage.IAccessor;
 import rabbit.ui.DisplayPreference;
 import rabbit.ui.TableLabelComparator;
@@ -48,7 +47,7 @@ public class PartPage extends AbstractTableViewerPage {
 	 */
 	public PartPage() {
 		super();
-		dataStore = RabbitCore.getAccessor(AccessorType.PART);
+		dataStore = RabbitCore.getPartDataAccessor();
 		dataMapping = new HashMap<IWorkbenchPartDescriptor, Long>();
 	}
 

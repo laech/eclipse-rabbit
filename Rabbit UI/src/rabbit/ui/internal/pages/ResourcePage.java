@@ -45,7 +45,6 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.ide.IDE;
 
 import rabbit.core.RabbitCore;
-import rabbit.core.RabbitCore.AccessorType;
 import rabbit.core.storage.IAccessor;
 import rabbit.core.storage.IFileMapper;
 import rabbit.ui.DisplayPreference;
@@ -112,7 +111,7 @@ public class ResourcePage extends AbstractTreeViewerPage {
 
 	public ResourcePage() {
 		super();
-		accessor = RabbitCore.getAccessor(AccessorType.FILE);
+		accessor = RabbitCore.getFileDataAccessor();
 		resourceMapper = RabbitCore.getFileMapper();
 
 		projectResources = new HashMap<IProject, Set<IResource>>();

@@ -21,7 +21,6 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Assert;
 import org.junit.Test;
 
-import rabbit.core.RabbitCore.AccessorType;
 import rabbit.core.events.CommandEvent;
 import rabbit.core.events.FileEvent;
 import rabbit.core.events.PartEvent;
@@ -30,11 +29,11 @@ import rabbit.core.internal.storage.xml.CommandDataAccessor;
 import rabbit.core.internal.storage.xml.CommandEventStorer;
 import rabbit.core.internal.storage.xml.FileDataAccessor;
 import rabbit.core.internal.storage.xml.FileEventStorer;
+import rabbit.core.internal.storage.xml.LaunchDataAccessor;
 import rabbit.core.internal.storage.xml.PartDataAccessor;
 import rabbit.core.internal.storage.xml.PartEventStorer;
 import rabbit.core.internal.storage.xml.PerspectiveDataAccessor;
 import rabbit.core.internal.storage.xml.PerspectiveEventStorer;
-import rabbit.core.internal.storage.xml.SessionDataAccessor;
 
 /**
  * Test for {@link RabbitCore}
@@ -54,23 +53,34 @@ public class RabbitCoreTest {
 		assertTrue(RabbitCore.getStorer(PartEvent.class) instanceof PartEventStorer);
 		assertNull(RabbitCore.getStorer(String.class));
 	}
-	
+
 	@Test
-	public void testGetAccessor() {
-		assertTrue(RabbitCore.getAccessor(AccessorType.PERSPECTIVE) instanceof PerspectiveDataAccessor);
-		assertTrue(RabbitCore.getAccessor(AccessorType.COMMAND) instanceof CommandDataAccessor);
-		assertTrue(RabbitCore.getAccessor(AccessorType.FILE) instanceof FileDataAccessor);
-		assertTrue(RabbitCore.getAccessor(AccessorType.PART) instanceof PartDataAccessor);
-		assertTrue(RabbitCore.getAccessor(AccessorType.SESSION) instanceof SessionDataAccessor);
+	public void testGetLaunchDataAccessor() {
+		assertTrue(RabbitCore.getLaunchDataAccessor() instanceof LaunchDataAccessor);
+	}
+
+	@Test
+	public void testGetCommandDataAccessor() {
+		assertTrue(RabbitCore.getCommandDataAccessor() instanceof CommandDataAccessor);
+	}
+
+	@Test
+	public void testGetPerspectiveDataAccessor() {
+		assertTrue(RabbitCore.getPerspectiveDataAccessor() instanceof PerspectiveDataAccessor);
+	}
+
+	@Test
+	public void testGetFileDataAccessor() {
+		assertTrue(RabbitCore.getFileDataAccessor() instanceof FileDataAccessor);
+	}
+
+	@Test
+	public void testGetPartDataAccessor() {
+		assertTrue(RabbitCore.getPartDataAccessor() instanceof PartDataAccessor);
 	}
 
 	@Test(expected = NullPointerException.class)
 	public void testGetStorer_withNull() {
 		RabbitCore.getStorer(null);
-	}
-	
-	@Test(expected = NullPointerException.class)
-	public void testGetAccessor_withNull() {
-		RabbitCore.getAccessor(null);
 	}
 }

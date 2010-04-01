@@ -11,20 +11,21 @@ package rabbit.core.internal.storage.xml.schema.events;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for perspectiveEventType complex type.
+ * <p>Java class for countEventType complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="perspectiveEventType">
+ * &lt;complexType name="countEventType">
  *   &lt;complexContent>
- *     &lt;extension base="{}durationEventType">
- *       &lt;attribute name="perspectiveId" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
- *     &lt;/extension>
+ *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
+ *       &lt;attribute name="count" use="required" type="{}countType" />
+ *     &lt;/restriction>
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
@@ -32,36 +33,30 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "perspectiveEventType")
-public class PerspectiveEventType
-    extends DurationEventType
-{
+@XmlType(name = "countEventType")
+@XmlSeeAlso({
+    CommandEventType.class,
+    LaunchEventType.class
+})
+public class CountEventType {
 
     @XmlAttribute(required = true)
-    protected String perspectiveId;
+    protected int count;
 
     /**
-     * Gets the value of the perspectiveId property.
+     * Gets the value of the count property.
      * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
      */
-    public String getPerspectiveId() {
-        return perspectiveId;
+    public int getCount() {
+        return count;
     }
 
     /**
-     * Sets the value of the perspectiveId property.
+     * Sets the value of the count property.
      * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
      */
-    public void setPerspectiveId(String value) {
-        this.perspectiveId = value;
+    public void setCount(int value) {
+        this.count = value;
     }
 
 }

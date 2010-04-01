@@ -27,7 +27,6 @@ import org.eclipse.ui.commands.ICommandService;
 import org.junit.Test;
 
 import rabbit.core.RabbitCore;
-import rabbit.core.RabbitCore.AccessorType;
 import rabbit.core.storage.IAccessor;
 import rabbit.ui.DisplayPreference;
 
@@ -59,7 +58,7 @@ public class CommandPageTest extends AbstractTableViewerPageTest {
 	@Test
 	public void testUpdate() throws Exception {
 		long max = 0;
-		IAccessor<Map<String, Long>> accessor = RabbitCore.getAccessor(AccessorType.COMMAND);
+		IAccessor<Map<String, Long>> accessor = RabbitCore.getCommandDataAccessor();
 
 		DisplayPreference pref = new DisplayPreference();
 		Map<String, Long> data = accessor.getData(pref.getStartDate(), pref.getEndDate());

@@ -15,10 +15,6 @@
  */
 package rabbit.ui.internal.pages;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.ui.DebugUITools;
@@ -39,7 +35,6 @@ import rabbit.ui.internal.util.MillisConverter;
 public class LaunchPageLabelProvider extends BaseLabelProvider
 		implements ITableLabelProvider, IColorProvider {
 
-	protected final DateFormat format;
 	protected final ResourcePageLabelProvider provider;
 	protected ILaunchManager manager;
 
@@ -47,7 +42,6 @@ public class LaunchPageLabelProvider extends BaseLabelProvider
 	 * Constructs a new label provider.
 	 */
 	public LaunchPageLabelProvider() {
-		format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		manager = DebugPlugin.getDefault().getLaunchManager();
 		provider = new ResourcePageLabelProvider();
 	}
@@ -105,15 +99,14 @@ public class LaunchPageLabelProvider extends BaseLabelProvider
 
 		case 2:
 			if (element instanceof LaunchDescriptor) {
-				Calendar time = ((LaunchDescriptor) element).getLaunchTime();
-				return format.format(time.getTime());
+				return ((LaunchDescriptor) element).getCount() + "";
 			}
 			break;
 
-		case 3:
+		case 4:
 			if (element instanceof LaunchDescriptor) {
 				return MillisConverter.toDefaultString(
-						((LaunchDescriptor) element).getDuration());
+						((LaunchDescriptor) element).getTotalDuration());
 			}
 			break;
 		}

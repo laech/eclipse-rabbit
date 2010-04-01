@@ -42,14 +42,15 @@ import rabbit.core.storage.LaunchDescriptor;
 
 public class RabbitCore {
 
-	public static enum AccessorType {
-		PERSPECTIVE, PART, SESSION, COMMAND, FILE,
-	}
-
 	/** Map<T, IStorer<T> */
 	private static final Map<Class<?>, IStorer<?>> storers;
 
-	private static final Map<AccessorType, IAccessor<Map<String, Long>>> accessors;
+	private static final IAccessor<Set<LaunchDescriptor>> launchDataAccessor;
+	private static final IAccessor<Map<String, Long>> perspectiveDataAccessor;
+	private static final IAccessor<Map<String, Long>> commandDataAccessor;
+	private static final IAccessor<Map<String, Long>> sessionDataAccessor;
+	private static final IAccessor<Map<String, Long>> partDataAccessor;
+	private static final IAccessor<Map<String, Long>> fileDataAccessor;
 
 	static {
 		Map<Class<?>, IStorer<?>> map = new HashMap<Class<?>, IStorer<?>>();
@@ -59,39 +60,32 @@ public class RabbitCore {
 		map.put(PartEvent.class, PartEventStorer.getInstance());
 		storers = Collections.unmodifiableMap(map);
 
-		Map<AccessorType, IAccessor<Map<String, Long>>> accessorMap =
-				new HashMap<AccessorType, IAccessor<Map<String, Long>>>();
-		accessorMap.put(AccessorType.PERSPECTIVE, new PerspectiveDataAccessor());
-		accessorMap.put(AccessorType.COMMAND, new CommandDataAccessor());
-		accessorMap.put(AccessorType.FILE, new FileDataAccessor());
-		accessorMap.put(AccessorType.PART, new PartDataAccessor());
-		accessorMap.put(AccessorType.SESSION, new SessionDataAccessor());
-		accessors = Collections.unmodifiableMap(accessorMap);
+		perspectiveDataAccessor = new PerspectiveDataAccessor();
+		commandDataAccessor = new CommandDataAccessor();
+		sessionDataAccessor = new SessionDataAccessor();
+		launchDataAccessor = new LaunchDataAccessor();
+		partDataAccessor = new PartDataAccessor();
+		fileDataAccessor = new FileDataAccessor();
 	}
 
 	/**
-	 * Gets an accessor that gets the data from the database.
+	 * Gets an IAccessor for accessing the command event data.
 	 * 
-	 * @param type
-	 *            The type of accessor.
-	 * @return An accessor that can get the data.
-	 * @throws NullPointerException
-	 *             If null is passed in.
+	 * @return An IAccessor for accessing the command event data.
 	 */
-	public static IAccessor<Map<String, Long>> getAccessor(AccessorType type) {
-		if (null == type) {
-			throw new NullPointerException();
-		}
-		IAccessor<Map<String, Long>> accessor = accessors.get(type);
-		return (accessor == null) ? null : accessor;
-	}
-	
-	private final static IAccessor<Set<LaunchDescriptor>> launchDataAccessor = new LaunchDataAccessor();
-	//TODO
-	public static IAccessor<Set<LaunchDescriptor>> getLaunchDataAccessor() {
-		return launchDataAccessor;
+	public static IAccessor<Map<String, Long>> getCommandDataAccessor() {
+		return commandDataAccessor;
 	}
 
+	/**
+	 * Gets an IAccessor for accessing the file event data.
+	 * 
+	 * @return An IAccessor for accessing the file event data.
+	 */
+	public static IAccessor<Map<String, Long>> getFileDataAccessor() {
+		return fileDataAccessor;
+	}
+	
 	/**
 	 * Gets the resource manager.
 	 * 
@@ -99,6 +93,42 @@ public class RabbitCore {
 	 */
 	public static IFileMapper getFileMapper() {
 		return XmlFileMapper.INSTANCE;
+	}
+
+	/**
+	 * Gets an IAccessor for accessing the launch event data.
+	 * 
+	 * @return An IAccessor for accessing the launch event data.
+	 */
+	public static IAccessor<Set<LaunchDescriptor>> getLaunchDataAccessor() {
+		return launchDataAccessor;
+	}
+
+	/**
+	 * Gets an IAccessor for accessing the part event data.
+	 * 
+	 * @return An IAccessor for accessing the part event data.
+	 */
+	public static IAccessor<Map<String, Long>> getPartDataAccessor() {
+		return partDataAccessor;
+	}
+
+	/**
+	 * Gets an IAccessor for accessing the perspective event data.
+	 * 
+	 * @return An IAccessor for accessing the perspective event data.
+	 */
+	public static IAccessor<Map<String, Long>> getPerspectiveDataAccessor() {
+		return perspectiveDataAccessor;
+	}
+
+	/**
+	 * Gets an IAccessor for accessing the session event data.
+	 * 
+	 * @return An IAccessor for accessing the session event data.
+	 */
+	public static IAccessor<Map<String, Long>> getSessionDataAccessor() {
+		return sessionDataAccessor;
 	}
 
 	/**
