@@ -20,6 +20,8 @@ import org.eclipse.jface.viewers.ColumnViewer;
 import org.eclipse.jface.viewers.StyledCellLabelProvider;
 import org.eclipse.jface.viewers.ViewerColumn;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.widgets.Display;
@@ -92,8 +94,23 @@ public class CellPainter extends StyledCellLabelProvider {
 		super.initialize(viewer, column);
 
 		Display display = viewer.getControl().getDisplay();
-		background = display.getSystemColor(SWT.COLOR_TITLE_BACKGROUND);
+		background = createColor(display);
+		viewer.getControl().addDisposeListener(new DisposeListener() {
+			@Override public void widgetDisposed(DisposeEvent e) {
+				background.dispose();
+			}
+		});
 		foreground = display.getSystemColor(SWT.COLOR_LIST_BACKGROUND);
+	}
+	
+	/**
+	 * Creates the desired color for painting the cells. Callers of this method
+	 * must dispose the returned color themselves.
+	 * @param display The display to create the color for.
+	 * @return A new color.
+	 */
+	protected Color createColor(Display display) {
+		return new Color(display, 84, 141, 212);
 	}
 
 	@Override
@@ -114,8 +131,15 @@ public class CellPainter extends StyledCellLabelProvider {
 		Color oldBackground = gc.getBackground();
 		Color oldForeground = gc.getForeground();
 		int oldAnti = gc.getAntialias();
+		int oldAlpha = gc.getAlpha();
+		
+		// Sets the alpha of the depends on the width:
+		int alpha = (int) (width / (float) valueProvider.getColumnWidth() * 255);
+		if (alpha < 100) {
+			alpha = 100;
+		}
+		gc.setAlpha(alpha);
 
-		gc.setBackground(background);
 		/*
 		 * On Linux, enabling GC's antialias will cause the color bar to be half
 		 * drawn.
@@ -123,9 +147,11 @@ public class CellPainter extends StyledCellLabelProvider {
 		if (!isLinux) {
 			gc.setAntialias(SWT.ON);
 		}
+		gc.setBackground(background);
 		gc.fillRectangle(x, y, 2, height);
 		gc.fillRoundRectangle(x, y, width, height, 4, 4);
 		
+		gc.setAlpha(oldAlpha);
 		gc.setAntialias(oldAnti);
 		
 		gc.setForeground(foreground);

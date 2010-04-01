@@ -16,6 +16,7 @@
 package rabbit.ui.internal.pages;
 
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.viewers.CellLabelProvider;
 import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.TableViewer;
@@ -56,7 +57,7 @@ public abstract class AbstractTableViewerPage extends AbstractValueProviderPage 
 
 		// Special column for painting:
 		graphCol = new TableViewerColumn(viewer, SWT.LEFT);
-		graphCol.setLabelProvider(new CellPainter(this));
+		graphCol.setLabelProvider(createCellPainter());
 		graphCol.getColumn().setWidth(100);
 		graphCol.getColumn().addSelectionListener(createValueSorterForTable(viewer));
 
@@ -66,6 +67,14 @@ public abstract class AbstractTableViewerPage extends AbstractValueProviderPage 
 		}
 		viewer.setComparator(new TableLabelComparator(viewer));
 		restoreState();
+	}
+
+	/**
+	 * Creates a cell painter for painting the graph cells.
+	 * @return A cell painter.
+	 */
+	protected CellLabelProvider createCellPainter() {
+		return new CellPainter(this);
 	}
 
 	@Override

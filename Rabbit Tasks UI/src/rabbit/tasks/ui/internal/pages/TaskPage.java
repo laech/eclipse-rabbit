@@ -34,6 +34,7 @@ import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.viewers.CellLabelProvider;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.TreeViewer;
@@ -47,7 +48,9 @@ import org.eclipse.mylyn.tasks.core.ITaskContainer;
 import org.eclipse.mylyn.tasks.ui.TasksUi;
 import org.eclipse.mylyn.tasks.ui.TasksUiImages;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
@@ -60,6 +63,7 @@ import rabbit.tasks.core.TaskCore;
 import rabbit.tasks.core.TaskId;
 import rabbit.tasks.ui.internal.util.MissingTask;
 import rabbit.tasks.ui.internal.util.MissingTaskCategory;
+import rabbit.ui.CellPainter;
 import rabbit.ui.DisplayPreference;
 import rabbit.ui.TreeLabelComparator;
 import rabbit.ui.internal.SharedImages;
@@ -157,6 +161,16 @@ public class TaskPage extends AbstractTreeViewerPage {
 		checkboxActions.add(showProjectsAction);
 		checkboxActions.add(showTasksAction);
 		checkboxActions.add(showTaskCategoriesAction);
+	}
+	
+	@Override
+	protected CellLabelProvider createCellPainter() {
+		return new CellPainter(this) {
+			@Override
+			protected Color createColor(Display display) {
+				return new Color(display, 75, 172, 98);
+			}
+		};
 	}
 
 	@Override
@@ -463,7 +477,11 @@ public class TaskPage extends AbstractTreeViewerPage {
 	@Override
 	public void update(DisplayPreference p) {
 		Object[] elements = getViewer().getExpandedElements();
+		try {
 		doUpdate(accessor.getData(p.getStartDate(), p.getEndDate()));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		try {
 			getViewer().setExpandedElements(elements);
 		} catch (IllegalArgumentException e) {
@@ -544,7 +562,7 @@ public class TaskPage extends AbstractTreeViewerPage {
 
 			// Same handle id but different creation date, which means different
 			// tasks.
-			if (task != null && !task.getCreationDate().equals(id.getCreationDate())) {
+			if (task != null && !id.getCreationDate().equals(task.getCreationDate())) {
 				task = null;
 			}
 			if (task == null) {

@@ -16,6 +16,7 @@
 package rabbit.ui.internal.pages;
 
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.viewers.CellLabelProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -69,7 +70,7 @@ public abstract class AbstractTreeViewerPage extends AbstractValueProviderPage {
 
 		// Special column for painting:
 		graphCol = new TreeViewerColumn(viewer, SWT.LEFT);
-		graphCol.setLabelProvider(new CellPainter(this));
+		graphCol.setLabelProvider(createCellPainter());
 		graphCol.getColumn().setWidth(100);
 		graphCol.getColumn().addSelectionListener(createValueSorterForTree(viewer));
 
@@ -79,6 +80,14 @@ public abstract class AbstractTreeViewerPage extends AbstractValueProviderPage {
 		}
 		viewer.setComparator(createComparator(viewer));
 		restoreState();
+	}
+
+	/**
+	 * Creates a cell painter for painting the graph cells.
+	 * @return A cell painter.
+	 */
+	protected CellLabelProvider createCellPainter() {
+		return new CellPainter(this);
 	}
 
 	@Override

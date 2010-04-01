@@ -48,6 +48,9 @@ public abstract class AbstractAccessor<T, E, S extends EventGroupType> implement
 
 	@Override
 	public T getData(Calendar start, Calendar end) {
+		if (start == null || end == null) {
+			throw new NullPointerException();
+		}
 		return filter(getXmlData(start, end));
 	}
 
@@ -95,7 +98,12 @@ public abstract class AbstractAccessor<T, E, S extends EventGroupType> implement
 		for (File f : files) {
 
 			for (S list : getCategories(getDataStore().read(f))) {
-				if (list.getDate().compare(startXmlCal) >= 0
+				XMLGregorianCalendar date = list.getDate();
+				if (date == null) {
+					continue;
+				}
+				
+				if (date.compare(startXmlCal) >= 0
 						&& list.getDate().compare(endXmlCal) <= 0) {
 
 					data.add(list);

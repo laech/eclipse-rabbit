@@ -32,13 +32,16 @@ import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.viewers.CellLabelProvider;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
@@ -47,6 +50,7 @@ import org.eclipse.ui.ide.IDE;
 import rabbit.core.RabbitCore;
 import rabbit.core.storage.IAccessor;
 import rabbit.core.storage.IFileMapper;
+import rabbit.ui.CellPainter;
 import rabbit.ui.DisplayPreference;
 import rabbit.ui.TreeLabelComparator;
 import rabbit.ui.internal.SharedImages;
@@ -135,6 +139,16 @@ public class ResourcePage extends AbstractTreeViewerPage {
 				}
 			}
 		});
+	}
+	
+	@Override
+	protected CellLabelProvider createCellPainter() {
+		return new CellPainter(this) {
+			@Override
+			protected Color createColor(Display display) {
+				return new Color(display, 136, 177, 231);
+			}
+		};
 	}
 
 	@Override

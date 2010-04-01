@@ -18,10 +18,13 @@ package rabbit.ui.internal.pages;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.jface.viewers.CellLabelProvider;
 import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.ui.IPerspectiveDescriptor;
 import org.eclipse.ui.IPerspectiveRegistry;
@@ -29,6 +32,7 @@ import org.eclipse.ui.PlatformUI;
 
 import rabbit.core.RabbitCore;
 import rabbit.core.storage.IAccessor;
+import rabbit.ui.CellPainter;
 import rabbit.ui.DisplayPreference;
 import rabbit.ui.TableLabelComparator;
 import rabbit.ui.internal.util.UndefinedPerspectiveDescriptor;
@@ -64,6 +68,16 @@ public class PerspectivePage extends AbstractTableViewerPage {
 			column.addSelectionListener(
 					(names.length - 1 == i) ? valueSorter : textSorter);
 		}
+	}
+	
+	@Override
+	protected CellLabelProvider createCellPainter() {
+		return new CellPainter(this) {
+			@Override
+			protected Color createColor(Display display) {
+				return new Color(display, 218, 176, 0);
+			}
+		};
 	}
 
 	@Override

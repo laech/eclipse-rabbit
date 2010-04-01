@@ -41,7 +41,15 @@ public class TaskDataAccessor extends
 				String handleId = type.getTaskId().getHandleId();
 				Date creationDate = type.getTaskId().getCreationDate()
 						.toGregorianCalendar().getTime();
-				TaskId id = new TaskId(handleId, creationDate);
+				
+				TaskId id = null;
+				try {
+					id = new TaskId(handleId, creationDate);
+				} catch (IllegalArgumentException e) {
+					continue; // Ignore, due to invalid XML entries?
+				} catch (NullPointerException e) {
+					continue; // Ignore, due to invalid XML entries?
+				}
 
 				Map<String, Long> map = result.get(id);
 				if (map == null) {

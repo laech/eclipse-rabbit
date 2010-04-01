@@ -33,6 +33,8 @@ public interface IAccessor<T> {
 	 * @param end
 	 *            The end Date.
 	 * @return A map of data.
+	 * @throws NullPointerException
+	 *             If any of the arguments is null.
 	 */
 	T getData(Calendar start, Calendar end);
 }

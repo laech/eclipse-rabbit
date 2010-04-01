@@ -39,7 +39,12 @@ public abstract class AbstractIdToValueAccessor<E, S extends EventGroupType>
 		Map<String, Long> result = new LinkedHashMap<String, Long>();
 		for (S list : data) {
 			for (E e : getXmlTypes(list)) {
-				Long usage = result.get(getId(e));
+				
+				String id = getId(e);
+				if (id == null)
+					continue;
+				
+				Long usage = result.get(id);
 				if (usage == null) {
 					result.put(getId(e), getUsage(e));
 				} else {

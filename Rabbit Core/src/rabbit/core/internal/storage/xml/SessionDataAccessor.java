@@ -17,6 +17,7 @@ package rabbit.core.internal.storage.xml;
 
 import java.text.Format;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -53,8 +54,11 @@ public class SessionDataAccessor extends PerspectiveDataAccessor {
 		Map<String, Long> result = new LinkedHashMap<String, Long>();
 		for (PerspectiveEventListType list : data) {
 
-			String dateStr = formatter.format(
-					list.getDate().toGregorianCalendar().getTime());
+			Date date = list.getDate().toGregorianCalendar().getTime();
+			if (date == null)
+				continue;
+			
+			String dateStr = formatter.format(date);
 			long value = 0;
 			for (PerspectiveEventType e : list.getPerspectiveEvent()) {
 				value += e.getDuration();

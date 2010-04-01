@@ -69,6 +69,16 @@ public abstract class AbstractAccessorTest<T, E, S extends EventGroupType> {
 		accessor.getCategories(eventList).add(list);
 		Assert.assertEquals(1, accessor.getCategories(eventList).size());
 	}
+	
+	@Test(expected = NullPointerException.class)
+	public void testGetData_startDateNull() {
+		accessor.getData(null, Calendar.getInstance());
+	}
+	
+	@Test(expected = NullPointerException.class)
+	public void testGetData_endDateNull() {
+		accessor.getData(Calendar.getInstance(), null);
+	}
 
 	@Test
 	public void testGetData_listsWithDifferentDates() {

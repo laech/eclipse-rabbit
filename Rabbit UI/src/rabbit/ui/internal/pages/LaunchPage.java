@@ -23,6 +23,7 @@ import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.viewers.CellLabelProvider;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.TreeViewer;
@@ -30,6 +31,8 @@ import org.eclipse.jface.viewers.TreeViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
@@ -86,6 +89,16 @@ public class LaunchPage extends AbstractTreeViewerPage {
 
 		return new IContributionItem[] { expandAll, collapseAll };
 	}
+	
+	@Override
+	protected CellLabelProvider createCellPainter() {
+		return new CellPainter(this) {
+			@Override
+			protected Color createColor(Display display) {
+				return new Color(display, 49, 132, 155);
+			}
+		};
+	}
 
 	@Override
 	public long getValue(Object element) {
@@ -133,7 +146,7 @@ public class LaunchPage extends AbstractTreeViewerPage {
 					if (des1.getCount() == des2.getCount())
 						return 0;
 					else
-						return des2.getCount() > des2.getCount() ? 1 : -1;
+						return des1.getCount() > des2.getCount() ? 1 : -1;
 				}
 				return super.doCompare(v, e1, e2);
 			}
@@ -153,36 +166,42 @@ public class LaunchPage extends AbstractTreeViewerPage {
 		column.setText("Count");
 		column.setWidth(80);
 		column.addSelectionListener(countSorter);
-		
+
 		final TreeViewerColumn countGraphColumn = new TreeViewerColumn(viewer, SWT.LEFT);
 		countGraphColumn.getColumn().setWidth(100);
 		countGraphColumn.getColumn().addSelectionListener(countSorter);
 		countGraphColumn.setLabelProvider(new CellPainter(new IValueProvider() {
-			
+
 			@Override
 			public boolean shouldPaint(Object element) {
-				return true;
+				return element instanceof LaunchDescriptor;
 			}
-			
+
 			@Override
 			public long getValue(Object element) {
 				if (element instanceof LaunchDescriptor)
 					return ((LaunchDescriptor) element).getCount();
-				
+
 				return 0;
 			}
-			
+
 			@Override
 			public long getMaxValue() {
 				return maxCount;
 			}
-			
+
 			@Override
 			public int getColumnWidth() {
 				return countGraphColumn.getColumn().getWidth();
 			}
-		}));
-		
+		}) 
+		{
+			@Override
+			protected Color createColor(Display display) {
+				return new Color(display, 118, 146, 60);
+			}
+		});
+
 		column = new TreeColumn(viewer.getTree(), SWT.RIGHT);
 		column.setWidth(120);
 		column.setText("Total Duration");
