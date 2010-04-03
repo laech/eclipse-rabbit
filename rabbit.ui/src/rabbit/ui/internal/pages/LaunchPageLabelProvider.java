@@ -16,8 +16,8 @@
 package rabbit.ui.internal.pages;
 
 import rabbit.data.access.model.LaunchDescriptor;
+import rabbit.ui.MillisConverter;
 import rabbit.ui.internal.util.LaunchResource;
-import rabbit.ui.internal.util.MillisConverter;
 
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunchManager;

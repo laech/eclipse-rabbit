@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package rabbit.mylyn.tests.internal.trackers;
+package rabbit.mylyn.tests.trackers;
 
 import rabbit.data.handler.DataHandler;
 import rabbit.mylyn.events.TaskEvent;

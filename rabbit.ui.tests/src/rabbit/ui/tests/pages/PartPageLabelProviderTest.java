@@ -15,9 +15,9 @@
  */
 package rabbit.ui.tests.pages;
 
+import rabbit.ui.MillisConverter;
 import rabbit.ui.internal.pages.PartPage;
 import rabbit.ui.internal.pages.PartPageLabelProvider;
-import rabbit.ui.internal.util.MillisConverter;
 import rabbit.ui.internal.util.UndefinedWorkbenchPartDescriptor;
 
 import static org.junit.Assert.assertEquals;

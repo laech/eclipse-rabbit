@@ -85,6 +85,7 @@ public class TaskPageTest extends AbstractTreeViewerPageTest {
   /**
    * Gets the private field "fileToValue".
    */
+  @SuppressWarnings("unchecked")
   static Map<TaskResource, Long> getFileToValueField(TaskPage page)
       throws Exception {
     Field field = TaskPage.class.getDeclaredField("fileToValue");
@@ -95,6 +96,7 @@ public class TaskPageTest extends AbstractTreeViewerPageTest {
   /**
    * Gets the private field "folderToFiles".
    */
+  @SuppressWarnings("unchecked")
   static Map<TaskResource, Set<TaskResource>> getFolderToFilesField(
       TaskPage page) throws Exception {
     Field field = TaskPage.class.getDeclaredField("folderToFiles");
@@ -105,6 +107,7 @@ public class TaskPageTest extends AbstractTreeViewerPageTest {
   /**
    * Gets the private field "projectToResources".
    */
+  @SuppressWarnings("unchecked")
   static Map<TaskResource, Set<TaskResource>> getProjectToResourcesField(
       TaskPage page) throws Exception {
     Field field = TaskPage.class.getDeclaredField("projectToResources");
@@ -115,6 +118,7 @@ public class TaskPageTest extends AbstractTreeViewerPageTest {
   /**
    * Gets the private field "taskToProjects".
    */
+  @SuppressWarnings("unchecked")
   static Map<ITask, Set<TaskResource>> getTaskToProjectsField(TaskPage page)
       throws Exception {
     Field field = TaskPage.class.getDeclaredField("taskToProjects");

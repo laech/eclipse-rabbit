@@ -17,3 +17,5 @@ Require-Bundle: rabbit.data;bundle-version="1.1.0",
  rabbit.mylyn.ui;bundle-version="1.0.0",
  org.junit4,
  rabbit.ui.tests;bundle-version="1.1.0"
+Export-Package: rabbit.mylyn.tests.ui.pages,
+ rabbit.mylyn.tests.ui.util

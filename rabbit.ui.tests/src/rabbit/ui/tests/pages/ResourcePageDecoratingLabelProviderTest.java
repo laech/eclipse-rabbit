@@ -15,11 +15,11 @@
  */
 package rabbit.ui.tests.pages;
 
+import rabbit.ui.MillisConverter;
 import rabbit.ui.internal.pages.ResourcePage;
 import rabbit.ui.internal.pages.ResourcePageDecoratingLabelProvider;
 import rabbit.ui.internal.pages.ResourcePageLabelProvider;
 import rabbit.ui.internal.pages.ResourcePage.ShowMode;
-import rabbit.ui.internal.util.MillisConverter;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;

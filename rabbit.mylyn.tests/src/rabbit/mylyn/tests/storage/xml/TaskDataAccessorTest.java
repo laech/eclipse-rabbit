@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package rabbit.mylyn.tests.internal.storage.xml;
+package rabbit.mylyn.tests.storage.xml;
 
 import static rabbit.data.internal.xml.DatatypeUtil.toXMLGregorianCalendarDateTime;
 

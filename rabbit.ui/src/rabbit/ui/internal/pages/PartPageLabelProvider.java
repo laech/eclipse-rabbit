@@ -15,7 +15,7 @@
  */
 package rabbit.ui.internal.pages;
 
-import rabbit.ui.internal.util.MillisConverter;
+import rabbit.ui.MillisConverter;
 import rabbit.ui.internal.util.UndefinedWorkbenchPartDescriptor;
 
 import org.eclipse.jface.resource.ImageDescriptor;

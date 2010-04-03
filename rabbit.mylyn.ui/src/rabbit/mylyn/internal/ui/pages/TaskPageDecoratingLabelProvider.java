@@ -15,7 +15,7 @@
  */
 package rabbit.mylyn.internal.ui.pages;
 
-import static rabbit.ui.internal.util.MillisConverter.toDefaultString;
+import static rabbit.ui.MillisConverter.toDefaultString;
 
 import rabbit.mylyn.internal.ui.pages.TaskPage.ShowMode;
 
@@ -30,6 +30,9 @@ import org.eclipse.mylyn.tasks.core.ITask;
 import org.eclipse.mylyn.tasks.core.ITaskContainer;
 import org.eclipse.swt.graphics.Image;
 
+/**
+ * A decorating label provider for a {@link TaskPage}.
+ */
 public class TaskPageDecoratingLabelProvider extends DecoratingLabelProvider
     implements ITableLabelProvider {
 

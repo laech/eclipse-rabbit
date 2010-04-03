@@ -15,7 +15,7 @@
  */
 package rabbit.ui.internal.pages;
 
-import rabbit.ui.internal.util.MillisConverter;
+import rabbit.ui.MillisConverter;
 
 import org.eclipse.jface.viewers.BaseLabelProvider;
 import org.eclipse.jface.viewers.ITableLabelProvider;

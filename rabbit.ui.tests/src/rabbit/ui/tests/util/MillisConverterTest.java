@@ -15,7 +15,7 @@
  */
 package rabbit.ui.tests.util;
 
-import rabbit.ui.internal.util.MillisConverter;
+import rabbit.ui.MillisConverter;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;

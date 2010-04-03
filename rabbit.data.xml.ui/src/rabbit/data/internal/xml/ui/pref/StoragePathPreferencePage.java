@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package rabbit.data.xml.ui.pref;
+package rabbit.data.internal.xml.ui.pref;
 
 import rabbit.data.internal.xml.XmlPlugin;
 

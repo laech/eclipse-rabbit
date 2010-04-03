@@ -22,7 +22,7 @@ import rabbit.mylyn.internal.ui.pages.TaskPageLabelProvider;
 import rabbit.mylyn.internal.ui.pages.TaskResource;
 import rabbit.mylyn.internal.ui.pages.TaskPage.ShowMode;
 import rabbit.mylyn.internal.ui.util.MissingTask;
-import rabbit.ui.internal.util.MillisConverter;
+import rabbit.ui.MillisConverter;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;

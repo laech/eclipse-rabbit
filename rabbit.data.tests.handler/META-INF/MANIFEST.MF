@@ -7,3 +7,4 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Require-Bundle: org.junit4,
  rabbit.data.handler;bundle-version="1.1.0",
  rabbit.data;bundle-version="1.1.0"
+Export-Package: rabbit.data.handler.test

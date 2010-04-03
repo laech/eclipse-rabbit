@@ -15,7 +15,7 @@
  */
 package rabbit.ui.internal.pages;
 
-import rabbit.ui.internal.util.MillisConverter;
+import rabbit.ui.MillisConverter;
 import rabbit.ui.internal.util.UndefinedPerspectiveDescriptor;
 
 import org.eclipse.jface.viewers.BaseLabelProvider;

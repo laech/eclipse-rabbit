@@ -17,9 +17,7 @@ package rabbit.mylyn.internal.ui.pages;
 
 import rabbit.mylyn.internal.ui.util.MissingTask;
 import rabbit.mylyn.internal.ui.util.MissingTaskCategory;
-import rabbit.ui.internal.pages.ResourcePageLabelProvider;
 
-import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.IColorProvider;
 import org.eclipse.jface.viewers.IFontProvider;
 import org.eclipse.jface.viewers.LabelProvider;
@@ -28,11 +26,12 @@ import org.eclipse.mylyn.tasks.ui.TasksUiImages;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.ui.model.WorkbenchLabelProvider;
 
 public class TaskPageLabelProvider extends LabelProvider implements
     IColorProvider, IFontProvider {
 
-  private final ResourcePageLabelProvider resourceProvider;
+  private final WorkbenchLabelProvider resourceProvider;
   private final TaskElementLabelProvider taskProvider;
 
   private final Image missingCategoryImg;
@@ -42,25 +41,7 @@ public class TaskPageLabelProvider extends LabelProvider implements
     missingCategoryImg = TasksUiImages.CATEGORY.createImage();
     missingTaskImg = TasksUiImages.TASK.createImage();
     taskProvider = new TaskElementLabelProvider();
-    resourceProvider = new ResourcePageLabelProvider() {
-
-      @Override
-      protected ImageDescriptor decorateImage(ImageDescriptor input,
-          Object element) {
-        if (element instanceof TaskResource) {
-          return super.decorateImage(input, ((TaskResource) element).resource);
-        }
-        return super.decorateImage(input, element);
-      }
-
-      @Override
-      protected String decorateText(String input, Object element) {
-        if (element instanceof TaskResource) {
-          return super.decorateText(input, ((TaskResource) element).resource);
-        }
-        return super.decorateText(input, element);
-      }
-    };
+    resourceProvider = new WorkbenchLabelProvider();
   }
 
   @Override
@@ -87,9 +68,9 @@ public class TaskPageLabelProvider extends LabelProvider implements
 
   @Override
   public Color getForeground(Object element) {
-    if (element instanceof TaskResource) {
+    if (element instanceof TaskResource)
       return resourceProvider.getForeground(((TaskResource) element).resource);
-    }
+    
     return taskProvider.getForeground(element);
   }
 
@@ -98,14 +79,13 @@ public class TaskPageLabelProvider extends LabelProvider implements
     if (element instanceof MissingTaskCategory)
       return missingCategoryImg;
 
-    else if (element instanceof MissingTask)
+    if (element instanceof MissingTask)
       return missingTaskImg;
 
-    else if (element instanceof TaskResource)
+    if (element instanceof TaskResource)
       return resourceProvider.getImage(((TaskResource) element).resource);
 
-    else
-      return taskProvider.getImage(element);
+    return taskProvider.getImage(element);
   }
 
   @Override

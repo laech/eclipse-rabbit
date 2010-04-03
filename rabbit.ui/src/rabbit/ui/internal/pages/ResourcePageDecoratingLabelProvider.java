@@ -15,7 +15,7 @@
  */
 package rabbit.ui.internal.pages;
 
-import static rabbit.ui.internal.util.MillisConverter.toDefaultString;
+import static rabbit.ui.MillisConverter.toDefaultString;
 
 import rabbit.ui.internal.pages.ResourcePage.ShowMode;
 

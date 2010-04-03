@@ -15,9 +15,9 @@
  */
 package rabbit.ui.tests.pages;
 
+import rabbit.ui.MillisConverter;
 import rabbit.ui.internal.pages.PerspectivePage;
 import rabbit.ui.internal.pages.PerspectivePageLabelProvider;
-import rabbit.ui.internal.util.MillisConverter;
 import rabbit.ui.internal.util.UndefinedPerspectiveDescriptor;
 
 import static org.junit.Assert.assertEquals;

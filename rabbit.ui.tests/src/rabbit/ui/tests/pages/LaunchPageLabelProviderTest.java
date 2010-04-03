@@ -16,9 +16,9 @@
 package rabbit.ui.tests.pages;
 
 import rabbit.data.access.model.LaunchDescriptor;
+import rabbit.ui.MillisConverter;
 import rabbit.ui.internal.pages.LaunchPageLabelProvider;
 import rabbit.ui.internal.util.LaunchResource;
-import rabbit.ui.internal.util.MillisConverter;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
