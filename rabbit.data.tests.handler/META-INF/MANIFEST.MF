@@ -1,0 +1,9 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: rabbit.data.tests.handler
+Bundle-SymbolicName: rabbit.data.tests.handler
+Bundle-Version: 1.1.0.qualifier
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Require-Bundle: org.junit4,
+ rabbit.data.handler;bundle-version="1.1.0",
+ rabbit.data;bundle-version="1.1.0"

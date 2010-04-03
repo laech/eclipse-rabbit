@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: rabbit.data.tests
+Bundle-SymbolicName: rabbit.data.tests
+Bundle-Version: 1.0.0.qualifier
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Require-Bundle: rabbit.data;bundle-version="1.1.0",
+ org.junit4,
+ org.eclipse.ui,
+ org.eclipse.debug.core,
+ org.eclipse.core.runtime
+Export-Package: rabbit.data.test.access.model,
+ rabbit.data.test.store.model
