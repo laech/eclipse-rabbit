@@ -1,17 +1,17 @@
 /*
  * Copyright 2010 The Rabbit Eclipse Plug-in Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
  */
 package rabbit.tracking.tests.trackers;
 
@@ -55,148 +55,147 @@ import java.util.HashSet;
 @SuppressWarnings("restriction")
 @RunWith(SWTBotJunit4ClassRunner.class)
 public class LaunchTrackerTest extends AbstractTrackerTest<LaunchEvent> {
-	/*
-	 * This is not a completed test class, need to test launches in debug mode
-	 * and hitting breakpoints to record files, current manual testing is done
-	 * on this.
-	 */
+  /*
+   * This is not a completed test class, need to test launches in debug mode and
+   * hitting breakpoints to record files, current manual testing is done on
+   * this.
+   */
 
-	private static SWTWorkbenchBot bot = new SWTWorkbenchBot();
-	private LaunchTracker tracker;
+  // Empty class for testing.
+  private static class ConfigurationElementForTest extends
+      ConfigurationElementHandle {
 
-	@Before
-	public void before() {
-		tracker = new LaunchTracker();
-	}
+    public ConfigurationElementForTest() {
+      super(null, 0);
+    }
 
-	/*
-	 * Tests the launching in normal mode ("run");
-	 */
-	@Test
-	public void testRun() throws CoreException, IOException, InterruptedException {
-		bot.viewByTitle("Welcome").close();
+    @Override
+    public String getAttribute(String propertyName) {
+      return null;
+    }
 
-		final String projectName = "Enfo";
-		final String className = "name";
-		long duration = 2000;
+    @Override
+    protected ConfigurationElement getConfigurationElement() {
+      return null;
+    }
+  }
+  // Empty class for testing.
+  private static class LaunchConfigurationForTest extends LaunchConfiguration {
 
-		// Create a new Java project:
-		bot.menu("File").menu("New").menu("Project...").click();
-		bot.tree().expandNode("Java").select("Java Project");
-		bot.button("Next >").click();
-		bot.textWithLabel("Project name:").setText(projectName);
-		bot.button("Finish").click();
+    private ILaunchConfigurationType type = new LaunchConfigurationTypeForTest();
 
-		try {
-			// Answer yes to open the Java perspective:
-			bot.button("Yes").click();
-		} catch (WidgetNotFoundException e) {
+    protected LaunchConfigurationForTest() {
+      super("Abc", null);
+    }
 
-		}
+    @Override
+    public ILaunchConfigurationType getType() throws CoreException {
+      return type;
+    }
+  }
 
-		// Create a new Java class:
-		bot.menu("File").menu("New").menu("Class").click();
-		bot.textWithLabel("Source folder:").setText(projectName + "/src");
-		bot.textWithLabel("Name:").setText(className);
-		bot.button("Finish").click();
+  // Empty class for testing.
+  private static class LaunchConfigurationTypeForTest extends
+      LaunchConfigurationType {
 
-		// Open the file:
-		bot.getDisplay().syncExec(new Runnable() {
-			@Override
-			public void run() {
-				IFile file = ResourcesPlugin.getWorkspace().getRoot().getFile(
-						new Path("/" + projectName + "/src/" + className + ".java"));
-				try {
-					PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage()
-							.openEditor(new FileEditorInput(file),
-									"org.eclipse.jdt.ui.CompilationUnitEditor", true);
-				} catch (PartInitException e) {
-					e.printStackTrace();
-				}
-			}
-		});
+    public LaunchConfigurationTypeForTest() {
+      super(new ConfigurationElementForTest());
+    }
 
-		// Write a main method to the class, set the thread sleep time:
-		SWTBotEclipseEditor editor = bot.activeEditor().toTextEditor();
-		editor.setText("public class " + className + " {" +
-				"public static void main(String[] args) {" +
-				"try { Thread.sleep(" + duration + "); }" +
-				"catch (InterruptedException e) {}" +
-				"}" +
-				"}");
-		editor.save();
+    @Override
+    public String getName() {
+      return "MyType";
+    }
+  }
 
-		tracker.setEnabled(true);
-		// Launch the application:
-		bot.menu("Run").menu("Run As").menu("1 Java Application").click();
-		// Wait for the launch to finish:
-		Thread.sleep(duration * 2);
-		tracker.setEnabled(false);
+  private static SWTWorkbenchBot bot = new SWTWorkbenchBot();
 
-		// Check the result:
-		assertEquals(1, tracker.getData().size());
-		LaunchEvent event = tracker.getData().iterator().next();
-		System.out.println(event.getDuration());
-		assertTrue(duration - 200 <= event.getDuration());
-		assertTrue(duration + 200 >= event.getDuration());
-	}
+  private LaunchTracker tracker;
 
-	@Override
-	protected LaunchEvent createEvent() {
-		ILaunch launch = new Launch(new LaunchConfigurationForTest(),
-				ILaunchManager.RUN_MODE, null);
-		return new LaunchEvent(Calendar.getInstance(), 10, launch,
-				launch.getLaunchConfiguration(), new HashSet<String>(Arrays.asList("1", "2")));
-	}
+  @Before
+  public void before() {
+    tracker = new LaunchTracker();
+  }
 
-	@Override
-	protected LaunchTracker createTracker() {
-		return new LaunchTracker();
-	}
+  /*
+   * Tests the launching in normal mode ("run");
+   */
+  @Test
+  public void testRun() throws CoreException, IOException, InterruptedException {
+    bot.viewByTitle("Welcome").close();
 
-	// Empty class for testing.
-	private static class ConfigurationElementForTest extends ConfigurationElementHandle {
+    final String projectName = "Enfo";
+    final String className = "name";
+    long duration = 2000;
 
-		public ConfigurationElementForTest() {
-			super(null, 0);
-		}
+    // Create a new Java project:
+    bot.menu("File").menu("New").menu("Project...").click();
+    bot.tree().expandNode("Java").select("Java Project");
+    bot.button("Next >").click();
+    bot.textWithLabel("Project name:").setText(projectName);
+    bot.button("Finish").click();
 
-		@Override
-		public String getAttribute(String propertyName) {
-			return null;
-		}
+    try {
+      // Answer yes to open the Java perspective:
+      bot.button("Yes").click();
+    } catch (WidgetNotFoundException e) {
 
-		@Override
-		protected ConfigurationElement getConfigurationElement() {
-			return null;
-		}
-	}
+    }
 
-	// Empty class for testing.
-	private static class LaunchConfigurationForTest extends LaunchConfiguration {
+    // Create a new Java class:
+    bot.menu("File").menu("New").menu("Class").click();
+    bot.textWithLabel("Source folder:").setText(projectName + "/src");
+    bot.textWithLabel("Name:").setText(className);
+    bot.button("Finish").click();
 
-		private ILaunchConfigurationType type = new LaunchConfigurationTypeForTest();
+    // Open the file:
+    bot.getDisplay().syncExec(new Runnable() {
+      @Override
+      public void run() {
+        IFile file = ResourcesPlugin.getWorkspace().getRoot().getFile(
+            new Path("/" + projectName + "/src/" + className + ".java"));
+        try {
+          PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage()
+              .openEditor(new FileEditorInput(file),
+                  "org.eclipse.jdt.ui.CompilationUnitEditor", true);
+        } catch (PartInitException e) {
+          e.printStackTrace();
+        }
+      }
+    });
 
-		protected LaunchConfigurationForTest() {
-			super("Abc", null);
-		}
+    // Write a main method to the class, set the thread sleep time:
+    SWTBotEclipseEditor editor = bot.activeEditor().toTextEditor();
+    editor.setText("public class " + className + " {"
+        + "public static void main(String[] args) {" + "try { Thread.sleep("
+        + duration + "); }" + "catch (InterruptedException e) {}" + "}" + "}");
+    editor.save();
 
-		@Override
-		public ILaunchConfigurationType getType() throws CoreException {
-			return type;
-		}
-	}
+    tracker.setEnabled(true);
+    // Launch the application:
+    bot.menu("Run").menu("Run As").menu("1 Java Application").click();
+    // Wait for the launch to finish:
+    Thread.sleep(duration * 2);
+    tracker.setEnabled(false);
 
-	// Empty class for testing.
-	private static class LaunchConfigurationTypeForTest extends LaunchConfigurationType {
+    // Check the result:
+    assertEquals(1, tracker.getData().size());
+    LaunchEvent event = tracker.getData().iterator().next();
+    System.out.println(event.getDuration());
+    assertTrue(duration - 200 <= event.getDuration());
+    assertTrue(duration + 200 >= event.getDuration());
+  }
 
-		public LaunchConfigurationTypeForTest() {
-			super(new ConfigurationElementForTest());
-		}
+  @Override
+  protected LaunchEvent createEvent() {
+    ILaunch launch = new Launch(new LaunchConfigurationForTest(),
+        ILaunchManager.RUN_MODE, null);
+    return new LaunchEvent(Calendar.getInstance(), 10, launch, launch
+        .getLaunchConfiguration(), new HashSet<String>(Arrays.asList("1", "2")));
+  }
 
-		@Override
-		public String getName() {
-			return "MyType";
-		}
-	}
+  @Override
+  protected LaunchTracker createTracker() {
+    return new LaunchTracker();
+  }
 }

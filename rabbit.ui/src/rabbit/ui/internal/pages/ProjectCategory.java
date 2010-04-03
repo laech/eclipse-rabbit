@@ -37,7 +37,8 @@ public class ProjectCategory implements IPage {
     Label label = new Label(parent, SWT.NONE);
     label.setBackground(parent.getBackground());
     label.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
-    label.setText("This category contains pages that display information relating to projects.");
+    label
+        .setText("This category contains pages that display information relating to projects.");
   }
 
   @Override

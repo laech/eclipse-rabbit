@@ -60,9 +60,9 @@ public class PartPage extends AbstractTableViewerPage {
     TableLabelComparator valueSorter = createValueSorterForTable(viewer);
     TableLabelComparator textSorter = new TableLabelComparator(viewer);
 
-    int[] widths = new int[]{200, 150};
-    int[] styles = new int[]{SWT.LEFT, SWT.RIGHT};
-    String[] names = new String[]{"Name", "Usage"};
+    int[] widths = new int[] { 200, 150 };
+    int[] styles = new int[] { SWT.LEFT, SWT.RIGHT };
+    String[] names = new String[] { "Name", "Usage" };
     for (int i = 0; i < names.length; i++) {
       TableColumn column = new TableColumn(viewer.getTable(), styles[i]);
       column.setText(names[i]);
@@ -86,7 +86,8 @@ public class PartPage extends AbstractTableViewerPage {
     IViewRegistry viewReg = PlatformUI.getWorkbench().getViewRegistry();
     IEditorRegistry editReg = PlatformUI.getWorkbench().getEditorRegistry();
 
-    Map<String, Long> data = dataStore.getData(p.getStartDate(), p.getEndDate());
+    Map<String, Long> data = dataStore
+        .getData(p.getStartDate(), p.getEndDate());
     for (Map.Entry<String, Long> entry : data.entrySet()) {
 
       IWorkbenchPartDescriptor part = viewReg.find(entry.getKey());

@@ -40,7 +40,7 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "partEventListType", propOrder = {"partEvent"})
+@XmlType(name = "partEventListType", propOrder = { "partEvent" })
 public class PartEventListType extends EventGroupType {
 
   @XmlElement(required = true)
@@ -59,8 +59,8 @@ public class PartEventListType extends EventGroupType {
    * For example, to add a new item, do as follows:
    * 
    * <pre>
-     *    getPartEvent().add(newItem);
-     * </pre>
+   * getPartEvent().add(newItem);
+   * </pre>
    * 
    * 
    * <p>

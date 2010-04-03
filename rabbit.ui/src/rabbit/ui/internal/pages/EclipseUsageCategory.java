@@ -40,7 +40,8 @@ public class EclipseUsageCategory implements IPage {
     Label label = new Label(parent, SWT.NONE);
     label.setBackground(parent.getBackground());
     label.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
-    label.setText("This category contains pages that display usage information about Eclipse.");
+    label
+        .setText("This category contains pages that display usage information about Eclipse.");
   }
 
   @Override

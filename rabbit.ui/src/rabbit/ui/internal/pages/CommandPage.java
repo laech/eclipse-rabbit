@@ -60,9 +60,9 @@ public class CommandPage extends AbstractTableViewerPage {
     TableLabelComparator textSorter = new TableLabelComparator(viewer);
     TableLabelComparator valueSorter = createValueSorterForTable(viewer);
 
-    int[] widths = new int[]{150, 200, 100};
-    int[] styles = new int[]{SWT.LEFT, SWT.LEFT, SWT.RIGHT};
-    String[] names = new String[]{"Name", "Description", "Usage Count"};
+    int[] widths = new int[] { 150, 200, 100 };
+    int[] styles = new int[] { SWT.LEFT, SWT.LEFT, SWT.RIGHT };
+    String[] names = new String[] { "Name", "Description", "Usage Count" };
     for (int i = 0; i < names.length; i++) {
       TableColumn column = new TableColumn(viewer.getTable(), styles[i]);
       column.setText(names[i]);

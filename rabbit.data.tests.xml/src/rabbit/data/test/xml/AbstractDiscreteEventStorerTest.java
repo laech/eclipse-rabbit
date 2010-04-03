@@ -54,17 +54,6 @@ public abstract class AbstractDiscreteEventStorerTest<E extends DiscreteEvent, T
     }
   }
 
-  /**
-   * Calls the protected method {@code AbstractDiscreteEventStorer.merge(T, T)}
-   */
-  protected void merge(AbstractDiscreteEventStorer<E, T, S> storer, T t1, T t2)
-      throws Exception {
-    Method method = AbstractDiscreteEventStorer.class.getDeclaredMethod(
-        "merge", Object.class, Object.class);
-    method.setAccessible(true);
-    method.invoke(storer, t1, t2);
-  }
-
   @Before
   public void setUp() throws Exception {
     if (dataFile.exists()) {
@@ -192,6 +181,17 @@ public abstract class AbstractDiscreteEventStorerTest<E extends DiscreteEvent, T
         "hasSameId", Object.class, Object.class);
     method.setAccessible(true);
     return (Boolean) method.invoke(storer, t1, t2);
+  }
+
+  /**
+   * Calls the protected method {@code AbstractDiscreteEventStorer.merge(T, T)}
+   */
+  protected void merge(AbstractDiscreteEventStorer<E, T, S> storer, T t1, T t2)
+      throws Exception {
+    Method method = AbstractDiscreteEventStorer.class.getDeclaredMethod(
+        "merge", Object.class, Object.class);
+    method.setAccessible(true);
+    method.invoke(storer, t1, t2);
   }
 
   /**

@@ -1,17 +1,17 @@
 /*
  * Copyright 2010 The Rabbit Eclipse Plug-in Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
  */
 package rabbit.ui.tests.pages;
 
@@ -45,59 +45,59 @@ import java.util.Set;
  */
 public class ResourcePageContentProviderTest {
 
-	private static Shell shell;
-	private static ResourcePage page;
-	private static IWorkspaceRoot root;
-	private static IFileMapper mapper;
-	private static ResourcePageContentProvider provider;
+  private static Shell shell;
+  private static ResourcePage page;
+  private static IWorkspaceRoot root;
+  private static IFileMapper mapper;
+  private static ResourcePageContentProvider provider;
 
-	private static IProject project;
-	private static IFolder folder;
-	private static IFile file1;
-	private static IFile file2;
+  private static IProject project;
+  private static IFolder folder;
+  private static IFile file1;
+  private static IFile file2;
 
-	@AfterClass
-	public static void afterClass() {
-		shell.dispose();
-	}
+  @AfterClass
+  public static void afterClass() {
+    shell.dispose();
+  }
 
-	@BeforeClass
-	public static void beforeClass() {
-		shell = new Shell(PlatformUI.getWorkbench().getDisplay());
-		page = new ResourcePage();
-		page.createContents(shell);
-		provider = new ResourcePageContentProvider(page);
-		root = ResourcesPlugin.getWorkspace().getRoot();
-		mapper = DataHandler.getFileMapper();
+  @BeforeClass
+  public static void beforeClass() {
+    shell = new Shell(PlatformUI.getWorkbench().getDisplay());
+    page = new ResourcePage();
+    page.createContents(shell);
+    provider = new ResourcePageContentProvider(page);
+    root = ResourcesPlugin.getWorkspace().getRoot();
+    mapper = DataHandler.getFileMapper();
 
-		project = root.getProject("p");
-		folder = project.getFolder("f");
-		file1 = folder.getFile("a");
-		file2 = folder.getFile("b");
-	}
+    project = root.getProject("p");
+    folder = project.getFolder("f");
+    file1 = folder.getFile("a");
+    file2 = folder.getFile("b");
+  }
 
-	@Test
-	public void hasChildren() {
-		assertTrue(provider.hasChildren(project));
-		assertTrue(provider.hasChildren(folder));
-		assertFalse(provider.hasChildren(file1));
-	}
+  @Test
+  public void hasChildren() {
+    assertTrue(provider.hasChildren(project));
+    assertTrue(provider.hasChildren(folder));
+    assertFalse(provider.hasChildren(file1));
+  }
 
-	@Test
-	public void testGetChildren() throws Exception {
-		Map<String, Long> data = new HashMap<String, Long>();
-		data.put(mapper.insert(file1), 1L);
-		data.put(mapper.insert(file2), 2L);
-		ResourcePageTest.doUpdate(page, data);
+  @Test
+  public void testGetChildren() throws Exception {
+    Map<String, Long> data = new HashMap<String, Long>();
+    data.put(mapper.insert(file1), 1L);
+    data.put(mapper.insert(file2), 2L);
+    ResourcePageTest.doUpdate(page, data);
 
-		assertEquals(1, provider.getChildren(project).length);
-		assertEquals(folder, provider.getChildren(project)[0]);
+    assertEquals(1, provider.getChildren(project).length);
+    assertEquals(folder, provider.getChildren(project)[0]);
 
-		Set<IFile> files = new HashSet<IFile>(2, 1);
-		files.add(file1);
-		files.add(file2);
-		assertEquals(2, provider.getChildren(folder).length);
-		assertTrue(files.contains(provider.getChildren(folder)[0]));
-		assertTrue(files.contains(provider.getChildren(folder)[1]));
-	}
+    Set<IFile> files = new HashSet<IFile>(2, 1);
+    files.add(file1);
+    files.add(file2);
+    assertEquals(2, provider.getChildren(folder).length);
+    assertTrue(files.contains(provider.getChildren(folder)[0]));
+    assertTrue(files.contains(provider.getChildren(folder)[1]));
+  }
 }

@@ -60,7 +60,6 @@ public final class CommandEventStorer
     return list.getCommandEvent();
   }
 
-
   @Override
   protected boolean hasSameId(CommandEventType x1, CommandEventType x2) {
     return x1.getCommandId().equals(x2.getCommandId());

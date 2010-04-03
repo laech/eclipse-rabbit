@@ -60,7 +60,8 @@ public abstract class AbstractPartTracker<E> extends AbstractTracker<E>
         if (!isEnabled()) {
           return;
         }
-        IWorkbenchWindow win = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+        IWorkbenchWindow win = PlatformUI.getWorkbench()
+            .getActiveWorkbenchWindow();
         if (win == null) {
           return;
         }

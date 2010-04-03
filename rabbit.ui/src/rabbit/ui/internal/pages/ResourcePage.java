@@ -133,12 +133,12 @@ public class ResourcePage extends AbstractTreeViewerPage {
       @Override
       public boolean select(Viewer viewer, Object parentElement, Object element) {
         switch (getShowMode()) {
-          case PROJECT:
-            return element instanceof IProject;
-          case FOLDER:
-            return element instanceof IContainer;
-          default:
-            return true;
+        case PROJECT:
+          return element instanceof IProject;
+        case FOLDER:
+          return element instanceof IContainer;
+        default:
+          return true;
         }
       }
     });
@@ -151,7 +151,8 @@ public class ResourcePage extends AbstractTreeViewerPage {
     toolBar.add(expandAll);
 
     ISharedImages images = PlatformUI.getWorkbench().getSharedImages();
-    ImageDescriptor img = images.getImageDescriptor(ISharedImages.IMG_ELCL_COLLAPSEALL);
+    ImageDescriptor img = images
+        .getImageDescriptor(ISharedImages.IMG_ELCL_COLLAPSEALL);
     collapseAllAction.setImageDescriptor(img);
     IContributionItem collapseAll = new ActionContributionItem(
         collapseAllAction);
@@ -180,8 +181,8 @@ public class ResourcePage extends AbstractTreeViewerPage {
     IContributionItem showFiles = new ActionContributionItem(showFilesAction);
     toolBar.add(showFiles);
 
-    return new IContributionItem[]{
-        expandAll, collapseAll, sep, showProjects, showFolders, showFiles};
+    return new IContributionItem[] { expandAll, collapseAll, sep, showProjects,
+        showFolders, showFiles };
   }
 
   public IFile[] getFiles(IFolder folder) {
@@ -325,9 +326,9 @@ public class ResourcePage extends AbstractTreeViewerPage {
     TreeLabelComparator textSorter = new TreeLabelComparator(viewer);
     TreeLabelComparator valueSorter = createValueSorterForTree(viewer);
 
-    int[] widths = new int[]{200, 150};
-    int[] styles = new int[]{SWT.LEFT, SWT.RIGHT};
-    String[] names = new String[]{"Name", "Time Spent"};
+    int[] widths = new int[] { 200, 150 };
+    int[] styles = new int[] { SWT.LEFT, SWT.RIGHT };
+    String[] names = new String[] { "Name", "Time Spent" };
 
     for (int i = 0; i < names.length; i++) {
       TreeColumn column = new TreeColumn(viewer.getTree(), styles[i]);
@@ -365,8 +366,8 @@ public class ResourcePage extends AbstractTreeViewerPage {
   @Override
   protected ITableLabelProvider createLabelProvider() {
     return new ResourcePageDecoratingLabelProvider(this,
-        new ResourcePageLabelProvider(),
-        PlatformUI.getWorkbench().getDecoratorManager().getLabelDecorator());
+        new ResourcePageLabelProvider(), PlatformUI.getWorkbench()
+            .getDecoratorManager().getLabelDecorator());
   };
 
   private void doUpdate(Map<String, Long> data) {
@@ -418,15 +419,15 @@ public class ResourcePage extends AbstractTreeViewerPage {
 
   private void updateMaxValue() {
     switch (getShowMode()) {
-      case FILE:
-        setMaxValue(getMaxFileValue());
-        break;
-      case FOLDER:
-        setMaxValue(getMaxFolderValue());
-        break;
-      default:
-        setMaxValue(getMaxProjectValue());
-        break;
+    case FILE:
+      setMaxValue(getMaxFileValue());
+      break;
+    case FOLDER:
+      setMaxValue(getMaxFolderValue());
+      break;
+    default:
+      setMaxValue(getMaxProjectValue());
+      break;
     }
   }
 }

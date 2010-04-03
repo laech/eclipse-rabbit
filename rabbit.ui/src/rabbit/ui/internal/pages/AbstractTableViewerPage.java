@@ -59,7 +59,8 @@ public abstract class AbstractTableViewerPage extends AbstractValueProviderPage 
     graphCol = new TableViewerColumn(viewer, SWT.LEFT);
     graphCol.setLabelProvider(createCellPainter());
     graphCol.getColumn().setWidth(100);
-    graphCol.getColumn().addSelectionListener(createValueSorterForTable(viewer));
+    graphCol.getColumn()
+        .addSelectionListener(createValueSorterForTable(viewer));
 
     for (TableColumn column : viewer.getTable().getColumns()) {
       column.setMoveable(true);

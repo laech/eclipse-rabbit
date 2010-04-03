@@ -47,7 +47,8 @@ public class XmlPlugin extends AbstractUIPlugin {
    * @return The full path to the storage location folder.
    */
   public IPath getStoragePath() {
-    String workspace = ResourcesPlugin.getWorkspace().getRoot().getLocation().toOSString();
+    String workspace = ResourcesPlugin.getWorkspace().getRoot().getLocation()
+        .toOSString();
     workspace = workspace.replace(File.separatorChar, '.');
     workspace = workspace.replace(":", "");
     return getStoragePathRoot().append(workspace);

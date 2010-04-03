@@ -39,10 +39,9 @@ import javax.xml.datatype.XMLGregorianCalendar;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "eventGroupType")
-@XmlSeeAlso({
-    CommandEventListType.class, PartEventListType.class,
+@XmlSeeAlso( { CommandEventListType.class, PartEventListType.class,
     LaunchEventListType.class, TaskEventListType.class,
-    FileEventListType.class, PerspectiveEventListType.class})
+    FileEventListType.class, PerspectiveEventListType.class })
 public class EventGroupType {
 
   @XmlAttribute(required = true)

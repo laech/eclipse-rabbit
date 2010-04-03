@@ -94,12 +94,12 @@ public class PartPageLabelProvider extends BaseLabelProvider implements
     }
     IWorkbenchPartDescriptor part = (IWorkbenchPartDescriptor) element;
     switch (columnIndex) {
-      case 0:
-        return part.getLabel();
-      case 1:
-        return MillisConverter.toDefaultString(page.getValue(part));
-      default:
-        return null;
+    case 0:
+      return part.getLabel();
+    case 1:
+      return MillisConverter.toDefaultString(page.getValue(part));
+    default:
+      return null;
     }
   }
 

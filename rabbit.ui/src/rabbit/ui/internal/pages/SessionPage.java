@@ -81,9 +81,9 @@ public class SessionPage extends AbstractTableViewerPage {
     TableLabelComparator valueSorter = createValueSorterForTable(viewer);
     TableLabelComparator textSorter = new TableLabelComparator(viewer);
 
-    int[] widths = new int[]{200, 150};
-    int[] styles = new int[]{SWT.LEFT, SWT.RIGHT};
-    String[] names = new String[]{"Date", "Duration"};
+    int[] widths = new int[] { 200, 150 };
+    int[] styles = new int[] { SWT.LEFT, SWT.RIGHT };
+    String[] names = new String[] { "Date", "Duration" };
     for (int i = 0; i < names.length; i++) {
       TableColumn column = new TableColumn(viewer.getTable(), styles[i]);
       column.setText(names[i]);

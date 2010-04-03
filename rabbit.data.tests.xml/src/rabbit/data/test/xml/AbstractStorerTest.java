@@ -56,8 +56,8 @@ public abstract class AbstractStorerTest<E extends DiscreteEvent, T, S extends E
 
   @Test
   public void testGetXmlTypeCategories() throws Exception {
-    assertNotNull(getXmlTypeCategories(storer,
-        objectFactory.createEventListType()));
+    assertNotNull(getXmlTypeCategories(storer, objectFactory
+        .createEventListType()));
   }
 
   @Test
@@ -81,7 +81,8 @@ public abstract class AbstractStorerTest<E extends DiscreteEvent, T, S extends E
 
   @Test
   public void testNewXmlTypeHolder() throws Exception {
-    XMLGregorianCalendar cal = toXMLGregorianCalendarDate(Calendar.getInstance());
+    XMLGregorianCalendar cal = toXMLGregorianCalendarDate(Calendar
+        .getInstance());
     S s = newXmlTypeHolder(storer, cal);
     assertNotNull(s);
     assertEquals(cal, s.getDate());
@@ -100,7 +101,8 @@ public abstract class AbstractStorerTest<E extends DiscreteEvent, T, S extends E
   /**
    * Calls the protected method {@code AbstractStorer.getDataStore()}.
    */
-  protected IDataStore getDataStore(AbstractStorer<E, T, S> storer) throws Exception {
+  protected IDataStore getDataStore(AbstractStorer<E, T, S> storer)
+      throws Exception {
     Method method = AbstractStorer.class.getDeclaredMethod("getDataStore");
     method.setAccessible(true);
     return (IDataStore) method.invoke(storer);
@@ -148,8 +150,8 @@ public abstract class AbstractStorerTest<E extends DiscreteEvent, T, S extends E
   /**
    * Calls the protected method {@code AbstractStorer.merge(List, List)}.
    */
-  protected void merge(AbstractStorer<E, T, S> storer, List<T> list, List<T> list2)
-      throws Exception {
+  protected void merge(AbstractStorer<E, T, S> storer, List<T> list,
+      List<T> list2) throws Exception {
 
     Method method = AbstractStorer.class.getDeclaredMethod("merge", List.class,
         List.class);

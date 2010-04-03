@@ -75,6 +75,15 @@ public class RabbitUI extends AbstractUIPlugin {
   }
 
   /**
+   * Gets the root pages.
+   * 
+   * @return The root pages.
+   */
+  public Set<PageDescriptor> getRootElements() {
+    return Collections.unmodifiableSet(rootElements);
+  }
+
+  /**
    * Sets the default number of days to display the data in the main view.
    * 
    * @param numDays The number of days.
@@ -97,20 +106,11 @@ public class RabbitUI extends AbstractUIPlugin {
     super.stop(context);
   }
 
-  /**
-   * Gets the root pages.
-   * 
-   * @return The root pages.
-   */
-  public Set<PageDescriptor> getRootElements() {
-    return Collections.unmodifiableSet(rootElements);
-  }
-
   private void readExtensions() {
     rootElements.clear();
     final Set<PageDescriptor> pages = new HashSet<PageDescriptor>();
-    for (final IConfigurationElement e : Platform.getExtensionRegistry().getConfigurationElementsFor(
-        UI_PAGE_EXTENSION_ID)) {
+    for (final IConfigurationElement e : Platform.getExtensionRegistry()
+        .getConfigurationElementsFor(UI_PAGE_EXTENSION_ID)) {
 
       SafeRunner.run(new ISafeRunnable() {
 
@@ -138,8 +138,8 @@ public class RabbitUI extends AbstractUIPlugin {
                 imagePath);
           }
           if (image == null) {
-            image = PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(
-                ISharedImages.IMG_OBJ_ELEMENT);
+            image = PlatformUI.getWorkbench().getSharedImages()
+                .getImageDescriptor(ISharedImages.IMG_OBJ_ELEMENT);
           }
           IPage page = (IPage) o;
           pages.add(new PageDescriptor(id, name, page, desc, image, parent));

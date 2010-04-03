@@ -76,7 +76,8 @@ public final class PerspectiveEventStorer
 
   @Override
   protected PerspectiveEventListType newXmlTypeHolder(XMLGregorianCalendar date) {
-    PerspectiveEventListType type = objectFactory.createPerspectiveEventListType();
+    PerspectiveEventListType type = objectFactory
+        .createPerspectiveEventListType();
     type.setDate(date);
     return type;
   }

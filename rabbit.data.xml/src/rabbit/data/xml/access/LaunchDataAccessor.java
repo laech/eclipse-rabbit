@@ -32,8 +32,10 @@ public class LaunchDataAccessor
         boolean done = false;
         for (LaunchDescriptor des : result) {
           if (getString(type.getName()).equals(des.getLaunchName())
-              && getString(type.getLaunchModeId()).equals(des.getLaunchModeId())
-              && getString(type.getLaunchTypeId()).equals(des.getLaunchTypeId())) {
+              && getString(type.getLaunchModeId())
+                  .equals(des.getLaunchModeId())
+              && getString(type.getLaunchTypeId())
+                  .equals(des.getLaunchTypeId())) {
 
             des.setCount(des.getCount() + type.getCount());
             des.setTotalDuration(des.getTotalDuration()

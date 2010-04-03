@@ -39,7 +39,7 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "taskEventType", propOrder = {"taskId"})
+@XmlType(name = "taskEventType", propOrder = { "taskId" })
 public class TaskEventType extends DurationEventType {
 
   @XmlElement(required = true)

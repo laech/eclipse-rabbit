@@ -44,7 +44,7 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "launchEventType", propOrder = {"fileId"})
+@XmlType(name = "launchEventType", propOrder = { "fileId" })
 public class LaunchEventType extends CountEventType {
 
   protected List<String> fileId;
@@ -70,8 +70,8 @@ public class LaunchEventType extends CountEventType {
    * For example, to add a new item, do as follows:
    * 
    * <pre>
-     *    getFileId().add(newItem);
-     * </pre>
+   * getFileId().add(newItem);
+   * </pre>
    * 
    * 
    * <p>

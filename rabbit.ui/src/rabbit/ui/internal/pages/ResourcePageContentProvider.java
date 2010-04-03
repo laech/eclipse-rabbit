@@ -49,12 +49,12 @@ public class ResourcePageContentProvider extends AbstractTreeContentProvider {
   @Override
   public boolean hasChildren(Object element) {
     switch (page.getShowMode()) {
-      case FILE:
-        return element instanceof IContainer;
-      case FOLDER:
-        return element instanceof IProject;
-      default: // Project
-        return false;
+    case FILE:
+      return element instanceof IContainer;
+    case FOLDER:
+      return element instanceof IProject;
+    default: // Project
+      return false;
     }
   }
 }

@@ -71,12 +71,12 @@ public class PerspectivePageLabelProvider extends BaseLabelProvider implements
     }
     IPerspectiveDescriptor p = (IPerspectiveDescriptor) element;
     switch (columnIndex) {
-      case 0:
-        return provider.getColumnText(element, columnIndex);
-      case 1:
-        return MillisConverter.toDefaultString(parent.getValue(p));
-      default:
-        return null;
+    case 0:
+      return provider.getColumnText(element, columnIndex);
+    case 1:
+      return MillisConverter.toDefaultString(parent.getValue(p));
+    default:
+      return null;
     }
   }
 

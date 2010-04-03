@@ -33,6 +33,31 @@ import org.junit.Test;
 public class DataHandlerTest {
 
   @Test
+  public void testGetCommandDataAccessor() {
+    assertNotNull(DataHandler.getCommandDataAccessor());
+  }
+
+  @Test
+  public void testGetFileDataAccessor() {
+    assertNotNull(DataHandler.getFileDataAccessor());
+  }
+
+  @Test
+  public void testGetLaunchDataAccessor() {
+    assertNotNull(DataHandler.getLaunchDataAccessor());
+  }
+
+  @Test
+  public void testGetPartDataAccessor() {
+    assertNotNull(DataHandler.getPartDataAccessor());
+  }
+
+  @Test
+  public void testGetPerspectiveDataAccessor() {
+    assertNotNull(DataHandler.getPerspectiveDataAccessor());
+  }
+
+  @Test
   public void testGetResourceManager() {
     Assert.assertNotNull(DataHandler.getFileMapper());
   }
@@ -44,31 +69,6 @@ public class DataHandlerTest {
     assertNotNull(DataHandler.getStorer(FileEvent.class));
     assertNotNull(DataHandler.getStorer(PartEvent.class));
     assertNull(DataHandler.getStorer(String.class));
-  }
-
-  @Test
-  public void testGetLaunchDataAccessor() {
-    assertNotNull(DataHandler.getLaunchDataAccessor());
-  }
-
-  @Test
-  public void testGetCommandDataAccessor() {
-    assertNotNull(DataHandler.getCommandDataAccessor());
-  }
-
-  @Test
-  public void testGetPerspectiveDataAccessor() {
-    assertNotNull(DataHandler.getPerspectiveDataAccessor());
-  }
-
-  @Test
-  public void testGetFileDataAccessor() {
-    assertNotNull(DataHandler.getFileDataAccessor());
-  }
-
-  @Test
-  public void testGetPartDataAccessor() {
-    assertNotNull(DataHandler.getPartDataAccessor());
   }
 
   @Test(expected = NullPointerException.class)

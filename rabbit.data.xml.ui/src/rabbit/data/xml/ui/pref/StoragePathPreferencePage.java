@@ -96,9 +96,9 @@ public class StoragePathPreferencePage extends PreferencePage implements
         try {
           copyDirectory(oldRoot, newRoot);
         } catch (IOException e) {
-          ErrorDialog.openError(getShell(), "Error Copying Files",
-              e.getMessage(), new Status(IStatus.ERROR, XmlPlugin.PLUGIN_ID,
-                  e.getMessage(), e));
+          ErrorDialog.openError(getShell(), "Error Copying Files", e
+              .getMessage(), new Status(IStatus.ERROR, XmlPlugin.PLUGIN_ID, e
+              .getMessage(), e));
         }
       }
 
@@ -124,15 +124,18 @@ public class StoragePathPreferencePage extends PreferencePage implements
     pathGroup.setLayout(new GridLayout(3, false));
     {
       Label description = new Label(pathGroup, SWT.WRAP);
-      description.setText("Please use a dedicated folder to prevent Rabbit from messing "
-          + "up your files.\nIt's a rabbit after all.");
+      description
+          .setText("Please use a dedicated folder to prevent Rabbit from messing "
+              + "up your files.\nIt's a rabbit after all.");
       GridDataFactory.fillDefaults().span(3, 1).applyTo(description);
 
       new Label(pathGroup, SWT.NONE).setText("Location:");
 
       storageText = new Text(pathGroup, SWT.BORDER);
-      storageText.setText(XmlPlugin.getDefault().getStoragePathRoot().toOSString());
-      storageText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+      storageText.setText(XmlPlugin.getDefault().getStoragePathRoot()
+          .toOSString());
+      storageText
+          .setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
       storageText.addListener(SWT.KeyUp, new Listener() {
         @Override
         public void handleEvent(Event event) {
@@ -146,7 +149,8 @@ public class StoragePathPreferencePage extends PreferencePage implements
         @Override
         public void handleEvent(Event event) {
           DirectoryDialog dialog = new DirectoryDialog(getShell());
-          dialog.setMessage("Select a folder for storing data collected by Rabbit.");
+          dialog
+              .setMessage("Select a folder for storing data collected by Rabbit.");
 
           String path = dialog.open();
           if (!path.toLowerCase().endsWith("rabbit")) {
@@ -165,7 +169,8 @@ public class StoragePathPreferencePage extends PreferencePage implements
 
   @Override
   protected void performDefaults() {
-    storageText.setText(XmlPlugin.getDefault().getStoragePathRoot().toOSString());
+    storageText.setText(XmlPlugin.getDefault().getStoragePathRoot()
+        .toOSString());
     super.performDefaults();
   }
 

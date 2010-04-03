@@ -52,7 +52,8 @@ public class RabbitPreferencePage extends PreferencePage implements
 
   @Override
   public boolean performOk() {
-    if (RabbitUI.getDefault().getDefaultDisplayDatePeriod() != daySpinner.getSelection()) {
+    if (RabbitUI.getDefault().getDefaultDisplayDatePeriod() != daySpinner
+        .getSelection()) {
       RabbitUI.getDefault().setDefaultDisplayDatePeriod(
           daySpinner.getSelection());
     }
@@ -75,11 +76,13 @@ public class RabbitPreferencePage extends PreferencePage implements
     viewGroup.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
     viewGroup.setLayout(new GridLayout(3, false));
     {
-      new Label(viewGroup, SWT.HORIZONTAL).setText("By default, display data for the last ");
+      new Label(viewGroup, SWT.HORIZONTAL)
+          .setText("By default, display data for the last ");
       daySpinner = new Spinner(viewGroup, SWT.BORDER);
       daySpinner.setMinimum(0);
       daySpinner.setMaximum(9999);
-      daySpinner.setSelection(RabbitUI.getDefault().getDefaultDisplayDatePeriod());
+      daySpinner.setSelection(RabbitUI.getDefault()
+          .getDefaultDisplayDatePeriod());
       daySpinner.setToolTipText("0 to display today's data only");
       new Label(viewGroup, SWT.HORIZONTAL).setText(" days.");
     }

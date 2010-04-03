@@ -129,8 +129,8 @@ public class TrackingPlugin extends AbstractUIPlugin implements
    */
   private Set<ITracker<?>> createTrackers() {
 
-    IConfigurationElement[] elements = Platform.getExtensionRegistry().getConfigurationElementsFor(
-        TRACKER_EXTENSION_ID);
+    IConfigurationElement[] elements = Platform.getExtensionRegistry()
+        .getConfigurationElementsFor(TRACKER_EXTENSION_ID);
 
     final Set<ITracker<?>> result = new HashSet<ITracker<?>>();
     for (final IConfigurationElement e : elements) {

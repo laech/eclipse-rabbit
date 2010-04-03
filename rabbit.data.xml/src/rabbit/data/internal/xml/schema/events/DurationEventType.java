@@ -37,9 +37,8 @@ import javax.xml.bind.annotation.XmlType;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "durationEventType")
-@XmlSeeAlso({
-    TaskEventType.class, PartEventType.class, FileEventType.class,
-    PerspectiveEventType.class})
+@XmlSeeAlso( { TaskEventType.class, PartEventType.class, FileEventType.class,
+    PerspectiveEventType.class })
 public class DurationEventType {
 
   @XmlAttribute(required = true)

@@ -73,8 +73,8 @@ public enum DataStore implements IDataStore {
 
   @Override
   public File getDataFile(Calendar date, IPath location) {
-    return location.append(id + "-" + monthFormatter.format(date.getTime())).addFileExtension(
-        "xml").toFile();
+    return location.append(id + "-" + monthFormatter.format(date.getTime()))
+        .addFileExtension("xml").toFile();
   }
 
   @Override

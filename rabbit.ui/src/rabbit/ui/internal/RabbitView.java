@@ -201,8 +201,8 @@ public class RabbitView extends ViewPart {
     // Header:
     Composite header = toolkit.createComposite(right);
     header.setLayout(new GridLayout(3, false));
-    GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER).grab(true, false).applyTo(
-        header);
+    GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER)
+        .grab(true, false).applyTo(header);
     {
       Label label = toolkit.createLabel(header, "Statistics");
       label.setFont(left.getHead().getFont());
@@ -313,10 +313,10 @@ public class RabbitView extends ViewPart {
    * @param toolBar The tool bar.
    */
   private void createToolBarForNonWindowsOS(IToolBarManager toolBar) {
-    CalendarAction.create(toolBar, getSite().getShell(),
-        preferences.getStartDate(), " From: ", " ");
-    CalendarAction.create(toolBar, getSite().getShell(),
-        preferences.getEndDate(), " To: ", " ");
+    CalendarAction.create(toolBar, getSite().getShell(), preferences
+        .getStartDate(), " From: ", " ");
+    CalendarAction.create(toolBar, getSite().getShell(), preferences
+        .getEndDate(), " To: ", " ");
   }
 
   /**
@@ -331,7 +331,8 @@ public class RabbitView extends ViewPart {
         final Calendar dateToBind = preferences.getStartDate();
         final DateTime fromDateTime = new DateTime(parent, SWT.DROP_DOWN
             | SWT.BORDER);
-        fromDateTime.setToolTipText("Select the start date for the data to be displayed");
+        fromDateTime
+            .setToolTipText("Select the start date for the data to be displayed");
         updateDateTime(fromDateTime, dateToBind);
         fromDateTime.addListener(SWT.Selection, new Listener() {
           @Override
@@ -349,7 +350,8 @@ public class RabbitView extends ViewPart {
         final Calendar dateToBind = preferences.getEndDate();
         final DateTime toDateTime = new DateTime(parent, SWT.DROP_DOWN
             | SWT.BORDER);
-        toDateTime.setToolTipText("Select the end date for the data to be displayed");
+        toDateTime
+            .setToolTipText("Select the end date for the data to be displayed");
         updateDateTime(toDateTime, dateToBind);
         toDateTime.addListener(SWT.Selection, new Listener() {
           @Override
@@ -371,7 +373,8 @@ public class RabbitView extends ViewPart {
     // Only Windows && Eclipse 3.5 has SWT.DROP_DOWN for DateTime.
     // We don't support 3.3 and before anyway:
     boolean isWindows = Platform.getOS().equals(Platform.OS_WIN32);
-    boolean isDropDownDateTimeSupported = !getProductVersion().startsWith("3.4");
+    boolean isDropDownDateTimeSupported = !getProductVersion()
+        .startsWith("3.4");
 
     if (isWindows && isDropDownDateTimeSupported) {
       createToolBarForWindowsOS(toolBar);

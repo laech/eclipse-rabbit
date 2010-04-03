@@ -61,6 +61,13 @@ public class PerspectiveEventStorerTest extends
   }
 
   @Override
+  protected PerspectiveEvent createEvent(Calendar eventTime) {
+    IPerspectiveDescriptor p = PlatformUI.getWorkbench()
+        .getPerspectiveRegistry().getPerspectives()[0];
+    return new PerspectiveEvent(eventTime, 1924, p);
+  }
+
+  @Override
   protected PerspectiveEvent createEvent2() {
     IPerspectiveDescriptor p = PlatformUI.getWorkbench()
         .getPerspectiveRegistry().getPerspectives()[1];
@@ -71,6 +78,11 @@ public class PerspectiveEventStorerTest extends
   protected List<PerspectiveEventType> getEventTypes(
       PerspectiveEventListType type) {
     return type.getPerspectiveEvent();
+  }
+
+  @Override
+  protected boolean hasSameId(PerspectiveEventType xml, PerspectiveEvent e) {
+    return xml.getPerspectiveId().equals(e.getPerspective().getId());
   }
 
   @Override
@@ -88,17 +100,5 @@ public class PerspectiveEventStorerTest extends
       PerspectiveEvent tmp) {
     return new PerspectiveEvent(main.getTime(), main.getDuration()
         + tmp.getDuration(), main.getPerspective());
-  }
-
-  @Override
-  protected PerspectiveEvent createEvent(Calendar eventTime) {
-    IPerspectiveDescriptor p = PlatformUI.getWorkbench()
-        .getPerspectiveRegistry().getPerspectives()[0];
-    return new PerspectiveEvent(eventTime, 1924, p);
-  }
-
-  @Override
-  protected boolean hasSameId(PerspectiveEventType xml, PerspectiveEvent e) {
-    return xml.getPerspectiveId().equals(e.getPerspective().getId());
   }
 }

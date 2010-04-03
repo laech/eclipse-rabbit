@@ -103,7 +103,8 @@ public enum XmlFileMapper implements IFileMapper, IResourceChangeListener,
     }
   };
 
-  private IWorkspaceRoot workspaceRoot = ResourcesPlugin.getWorkspace().getRoot();
+  private IWorkspaceRoot workspaceRoot = ResourcesPlugin.getWorkspace()
+      .getRoot();
 
   /** Constructor. */
   private XmlFileMapper() {
@@ -366,8 +367,8 @@ public enum XmlFileMapper implements IFileMapper, IResourceChangeListener,
    * @return The data file.
    */
   private File getDataFile(IPath storageLocation) {
-    File file = storageLocation.append("ResourceDB").append("Resources").addFileExtension(
-        "xml").toFile();
+    File file = storageLocation.append("ResourceDB").append("Resources")
+        .addFileExtension("xml").toFile();
 
     if (!file.getParentFile().exists()) {
       if (!file.getParentFile().mkdirs()) {

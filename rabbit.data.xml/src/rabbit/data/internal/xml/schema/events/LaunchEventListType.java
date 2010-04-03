@@ -40,7 +40,7 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "launchEventListType", propOrder = {"launchEvent"})
+@XmlType(name = "launchEventListType", propOrder = { "launchEvent" })
 public class LaunchEventListType extends EventGroupType {
 
   @XmlElement(required = true)
@@ -59,8 +59,8 @@ public class LaunchEventListType extends EventGroupType {
    * For example, to add a new item, do as follows:
    * 
    * <pre>
-     *    getLaunchEvent().add(newItem);
-     * </pre>
+   * getLaunchEvent().add(newItem);
+   * </pre>
    * 
    * 
    * <p>

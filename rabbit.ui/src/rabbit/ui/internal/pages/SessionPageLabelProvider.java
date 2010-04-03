@@ -41,12 +41,12 @@ public class SessionPageLabelProvider extends BaseLabelProvider implements
   @Override
   public String getColumnText(Object element, int columnIndex) {
     switch (columnIndex) {
-      case 0:
-        return element.toString();
-      case 1:
-        return MillisConverter.toDefaultString(parent.getValue(element));
-      default:
-        return null;
+    case 0:
+      return element.toString();
+    case 1:
+      return MillisConverter.toDefaultString(parent.getValue(element));
+    default:
+      return null;
     }
   }
 

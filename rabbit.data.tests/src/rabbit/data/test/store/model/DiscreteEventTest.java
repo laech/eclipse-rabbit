@@ -1,17 +1,17 @@
 /*
  * Copyright 2010 The Rabbit Eclipse Plug-in Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
  */
 package rabbit.data.test.store.model;
 
@@ -30,49 +30,49 @@ import java.util.Calendar;
  */
 public class DiscreteEventTest {
 
-	private Calendar time = Calendar.getInstance();
+  private Calendar time = Calendar.getInstance();
 
-	private DiscreteEvent event = createEvent(time);
+  private DiscreteEvent event = createEvent(time);
 
-	@Test(expected = NullPointerException.class)
-	public void testConstructor_null() {
-		new DiscreteEvent(null);
-	}
+  /*
+   * Test the constructor actually clones the date.
+   */
+  @Test
+  public void testConstructor_clonesTime() {
+    Calendar cal = Calendar.getInstance();
+    DiscreteEvent event = new DiscreteEvent(cal);
 
-	/*
-	 * Test the constructor actually clones the date.
-	 */
-	@Test
-	public void testConstructor_clonesTime() {
-		Calendar cal = Calendar.getInstance();
-		DiscreteEvent event = new DiscreteEvent(cal);
+    cal.add(Calendar.YEAR, 1);
+    assertFalse(cal.equals(event.getTime()));
+  }
 
-		cal.add(Calendar.YEAR, 1);
-		assertFalse(cal.equals(event.getTime()));
-	}
+  @Test(expected = NullPointerException.class)
+  public void testConstructor_null() {
+    new DiscreteEvent(null);
+  }
 
-	@Test
-	public void testEvent() {
-		assertNotNull(event);
-	}
+  @Test
+  public void testEvent() {
+    assertNotNull(event);
+  }
 
-	@Test
-	public void testGetTime() {
-		assertEquals(time, event.getTime());
-	}
+  @Test
+  public void testGetTime() {
+    assertEquals(time, event.getTime());
+  }
 
-	/*
-	 * Test the method returns a clone instead of the real thing.
-	 */
-	@Test
-	public void testGetTime_returnCopy() {
-		Calendar cal = event.getTime();
-		cal.add(Calendar.YEAR, 1);
-		assertFalse(cal.equals(event.getTime()));
-	}
+  /*
+   * Test the method returns a clone instead of the real thing.
+   */
+  @Test
+  public void testGetTime_returnCopy() {
+    Calendar cal = event.getTime();
+    cal.add(Calendar.YEAR, 1);
+    assertFalse(cal.equals(event.getTime()));
+  }
 
-	/** Creates an event for testing. */
-	protected DiscreteEvent createEvent(Calendar time) {
-		return new DiscreteEvent(time);
-	}
+  /** Creates an event for testing. */
+  protected DiscreteEvent createEvent(Calendar time) {
+    return new DiscreteEvent(time);
+  }
 }

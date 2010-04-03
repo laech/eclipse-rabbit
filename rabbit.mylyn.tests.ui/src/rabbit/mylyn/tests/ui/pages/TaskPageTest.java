@@ -83,23 +83,13 @@ public class TaskPageTest extends AbstractTreeViewerPageTest {
   }
 
   /**
-   * Gets the private field "taskToProjects".
+   * Gets the private field "fileToValue".
    */
-  static Map<ITask, Set<TaskResource>> getTaskToProjectsField(TaskPage page)
+  static Map<TaskResource, Long> getFileToValueField(TaskPage page)
       throws Exception {
-    Field field = TaskPage.class.getDeclaredField("taskToProjects");
+    Field field = TaskPage.class.getDeclaredField("fileToValue");
     field.setAccessible(true);
-    return (Map<ITask, Set<TaskResource>>) field.get(page);
-  }
-
-  /**
-   * Gets the private field "projectToResources".
-   */
-  static Map<TaskResource, Set<TaskResource>> getProjectToResourcesField(
-      TaskPage page) throws Exception {
-    Field field = TaskPage.class.getDeclaredField("projectToResources");
-    field.setAccessible(true);
-    return (Map<TaskResource, Set<TaskResource>>) field.get(page);
+    return (Map<TaskResource, Long>) field.get(page);
   }
 
   /**
@@ -113,13 +103,23 @@ public class TaskPageTest extends AbstractTreeViewerPageTest {
   }
 
   /**
-   * Gets the private field "fileToValue".
+   * Gets the private field "projectToResources".
    */
-  static Map<TaskResource, Long> getFileToValueField(TaskPage page)
-      throws Exception {
-    Field field = TaskPage.class.getDeclaredField("fileToValue");
+  static Map<TaskResource, Set<TaskResource>> getProjectToResourcesField(
+      TaskPage page) throws Exception {
+    Field field = TaskPage.class.getDeclaredField("projectToResources");
     field.setAccessible(true);
-    return (Map<TaskResource, Long>) field.get(page);
+    return (Map<TaskResource, Set<TaskResource>>) field.get(page);
+  }
+
+  /**
+   * Gets the private field "taskToProjects".
+   */
+  static Map<ITask, Set<TaskResource>> getTaskToProjectsField(TaskPage page)
+      throws Exception {
+    Field field = TaskPage.class.getDeclaredField("taskToProjects");
+    field.setAccessible(true);
+    return (Map<ITask, Set<TaskResource>>) field.get(page);
   }
 
   private static void doUpdate(TaskPage page,
@@ -441,7 +441,8 @@ public class TaskPageTest extends AbstractTreeViewerPageTest {
     resources.add(new TaskResource(task, project.getFolder("folder3")));
     resources.add(new TaskResource(task, project.getFile("file2")));
     resources.add(new TaskResource(task, project.getFile("file3")));
-    getProjectToResourcesField(page).put(new TaskResource(task, project), resources);
+    getProjectToResourcesField(page).put(new TaskResource(task, project),
+        resources);
 
     assertEquals(resources.size(), page.getProjectResources(
         new TaskResource(task, project)).size());
@@ -672,7 +673,8 @@ public class TaskPageTest extends AbstractTreeViewerPageTest {
     assertEquals(taskToProjects.size(), getTaskToProjectsField(page).size());
     for (Entry<ITask, Set<TaskResource>> entry : taskToProjects.entrySet()) {
 
-      Set<TaskResource> resources = getTaskToProjectsField(page).get(entry.getKey());
+      Set<TaskResource> resources = getTaskToProjectsField(page).get(
+          entry.getKey());
       assertNotNull(entry.getKey().toString(), resources);
       assertEquals(entry.getValue().size(), resources.size());
 
@@ -681,11 +683,13 @@ public class TaskPageTest extends AbstractTreeViewerPageTest {
       }
     }
 
-    assertEquals(projectToResources.size(), getProjectToResourcesField(page).size());
+    assertEquals(projectToResources.size(), getProjectToResourcesField(page)
+        .size());
     for (Entry<TaskResource, Set<TaskResource>> entry : projectToResources
         .entrySet()) {
 
-      Set<TaskResource> resources = getProjectToResourcesField(page).get(entry.getKey());
+      Set<TaskResource> resources = getProjectToResourcesField(page).get(
+          entry.getKey());
       assertNotNull(resources);
       assertEquals(entry.getValue().size(), resources.size());
 
@@ -698,7 +702,8 @@ public class TaskPageTest extends AbstractTreeViewerPageTest {
     for (Entry<TaskResource, Set<TaskResource>> entry : folderToFiles
         .entrySet()) {
 
-      Set<TaskResource> resources = getFolderToFilesField(page).get(entry.getKey());
+      Set<TaskResource> resources = getFolderToFilesField(page).get(
+          entry.getKey());
       assertNotNull(resources);
       assertEquals(entry.getValue().size(), resources.size());
 
@@ -709,7 +714,8 @@ public class TaskPageTest extends AbstractTreeViewerPageTest {
 
     assertEquals(fileToValue.size(), getFileToValueField(page).size());
     for (Entry<TaskResource, Long> entry : fileToValue.entrySet()) {
-      assertEquals(entry.getValue(), getFileToValueField(page).get(entry.getKey()));
+      assertEquals(entry.getValue(), getFileToValueField(page).get(
+          entry.getKey()));
     }
   }
 

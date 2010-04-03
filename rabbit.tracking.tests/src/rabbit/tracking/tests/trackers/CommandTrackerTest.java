@@ -1,17 +1,17 @@
 /*
  * Copyright 2010 The Rabbit Eclipse Plug-in Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
  */
 package rabbit.tracking.tests.trackers;
 
@@ -40,78 +40,81 @@ import java.util.Collections;
  */
 public class CommandTrackerTest extends AbstractTrackerTest<CommandEvent> {
 
-	private CommandTracker tracker;
+  private CommandTracker tracker;
 
-	@Before
-	public void setUp() {
-		tracker = createTracker();
-	}
+  @Before
+  public void setUp() {
+    tracker = createTracker();
+  }
 
-	@Test
-	public void testDisabled() throws Exception {
-		tracker.setEnabled(false);
+  @Test
+  public void testDisabled() throws Exception {
+    tracker.setEnabled(false);
 
-		Command command = getCommandService().getCommand(
-				System.currentTimeMillis() + "." + System.nanoTime());
-		command.define("a", "b", getCommandService().getDefinedCategories()[0]);
+    Command command = getCommandService().getCommand(
+        System.currentTimeMillis() + "." + System.nanoTime());
+    command.define("a", "b", getCommandService().getDefinedCategories()[0]);
 
-		getHandlerService().activateHandler(command.getId(), createHandler());
-		getHandlerService().executeCommand(command.getId(), null);
+    getHandlerService().activateHandler(command.getId(), createHandler());
+    getHandlerService().executeCommand(command.getId(), null);
 
-		assertTrue(tracker.getData().isEmpty());
-	}
+    assertTrue(tracker.getData().isEmpty());
+  }
 
-	@Test
-	public void testExecution() throws Exception {
-		tracker.setEnabled(true);
+  @Test
+  public void testExecution() throws Exception {
+    tracker.setEnabled(true);
 
-		String name = "cmdName";
-		String description = "cmdDescription";
-		Command command = getCommandService().getCommand(
-				System.currentTimeMillis() + "." + System.nanoTime());
-		command.define(name, description, getCommandService().getDefinedCategories()[0]);
+    String name = "cmdName";
+    String description = "cmdDescription";
+    Command command = getCommandService().getCommand(
+        System.currentTimeMillis() + "." + System.nanoTime());
+    command.define(name, description, getCommandService()
+        .getDefinedCategories()[0]);
 
-		long start = System.currentTimeMillis();
-		getHandlerService().activateHandler(command.getId(), createHandler());
-		getHandlerService().executeCommand(command.getId(), null);
-		long end = System.currentTimeMillis();
+    long start = System.currentTimeMillis();
+    getHandlerService().activateHandler(command.getId(), createHandler());
+    getHandlerService().executeCommand(command.getId(), null);
+    long end = System.currentTimeMillis();
 
-		assertEquals(1, tracker.getData().size());
-		CommandEvent e = tracker.getData().iterator().next();
-		assertEquals(command, e.getExecutionEvent().getCommand());
-		assertTrue(start <= e.getTime().getTimeInMillis());
-		assertTrue(end >= e.getTime().getTimeInMillis());
-	}
+    assertEquals(1, tracker.getData().size());
+    CommandEvent e = tracker.getData().iterator().next();
+    assertEquals(command, e.getExecutionEvent().getCommand());
+    assertTrue(start <= e.getTime().getTimeInMillis());
+    assertTrue(end >= e.getTime().getTimeInMillis());
+  }
 
-	@Override
-	protected CommandEvent createEvent() {
-		return new CommandEvent(Calendar.getInstance(), createExecutionEvent("1"));
-	}
+  @Override
+  protected CommandEvent createEvent() {
+    return new CommandEvent(Calendar.getInstance(), createExecutionEvent("1"));
+  }
 
-	@Override
-	protected CommandTracker createTracker() {
-		return new CommandTracker();
-	}
+  @Override
+  protected CommandTracker createTracker() {
+    return new CommandTracker();
+  }
 
-	private ExecutionEvent createExecutionEvent(String commandId) {
-		return new ExecutionEvent(getCommandService().getCommand(commandId), Collections.EMPTY_MAP,
-				null, null);
-	}
+  private ExecutionEvent createExecutionEvent(String commandId) {
+    return new ExecutionEvent(getCommandService().getCommand(commandId),
+        Collections.EMPTY_MAP, null, null);
+  }
 
-	private IHandler createHandler() {
-		return new AbstractHandler() {
-			@Override
-			public Object execute(ExecutionEvent event) throws ExecutionException {
-				return null;
-			}
-		};
-	}
+  private IHandler createHandler() {
+    return new AbstractHandler() {
+      @Override
+      public Object execute(ExecutionEvent event) throws ExecutionException {
+        return null;
+      }
+    };
+  }
 
-	private ICommandService getCommandService() {
-		return (ICommandService) PlatformUI.getWorkbench().getService(ICommandService.class);
-	}
+  private ICommandService getCommandService() {
+    return (ICommandService) PlatformUI.getWorkbench().getService(
+        ICommandService.class);
+  }
 
-	private IHandlerService getHandlerService() {
-		return (IHandlerService) PlatformUI.getWorkbench().getService(IHandlerService.class);
-	}
+  private IHandlerService getHandlerService() {
+    return (IHandlerService) PlatformUI.getWorkbench().getService(
+        IHandlerService.class);
+  }
 }

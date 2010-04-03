@@ -31,8 +31,8 @@ public final class DisplayPreference {
   public DisplayPreference() {
     endDate = Calendar.getInstance();
     startDate = (Calendar) endDate.clone();
-    startDate.add(Calendar.DAY_OF_MONTH,
-        -RabbitUI.getDefault().getDefaultDisplayDatePeriod());
+    startDate.add(Calendar.DAY_OF_MONTH, -RabbitUI.getDefault()
+        .getDefaultDisplayDatePeriod());
   }
 
   /**

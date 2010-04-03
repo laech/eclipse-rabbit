@@ -45,9 +45,8 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "eventListType", propOrder = {
-    "commandEvents", "partEvents", "fileEvents", "perspectiveEvents",
-    "taskEvents", "launchEvents"})
+@XmlType(name = "eventListType", propOrder = { "commandEvents", "partEvents",
+    "fileEvents", "perspectiveEvents", "taskEvents", "launchEvents" })
 public class EventListType {
 
   @XmlElement(required = true)
@@ -76,8 +75,8 @@ public class EventListType {
    * For example, to add a new item, do as follows:
    * 
    * <pre>
-     *    getCommandEvents().add(newItem);
-     * </pre>
+   * getCommandEvents().add(newItem);
+   * </pre>
    * 
    * 
    * <p>
@@ -106,8 +105,8 @@ public class EventListType {
    * For example, to add a new item, do as follows:
    * 
    * <pre>
-     *    getFileEvents().add(newItem);
-     * </pre>
+   * getFileEvents().add(newItem);
+   * </pre>
    * 
    * 
    * <p>
@@ -136,8 +135,8 @@ public class EventListType {
    * For example, to add a new item, do as follows:
    * 
    * <pre>
-     *    getLaunchEvents().add(newItem);
-     * </pre>
+   * getLaunchEvents().add(newItem);
+   * </pre>
    * 
    * 
    * <p>
@@ -166,8 +165,8 @@ public class EventListType {
    * For example, to add a new item, do as follows:
    * 
    * <pre>
-     *    getPartEvents().add(newItem);
-     * </pre>
+   * getPartEvents().add(newItem);
+   * </pre>
    * 
    * 
    * <p>
@@ -196,8 +195,8 @@ public class EventListType {
    * For example, to add a new item, do as follows:
    * 
    * <pre>
-     *    getPerspectiveEvents().add(newItem);
-     * </pre>
+   * getPerspectiveEvents().add(newItem);
+   * </pre>
    * 
    * 
    * <p>
@@ -226,8 +225,8 @@ public class EventListType {
    * For example, to add a new item, do as follows:
    * 
    * <pre>
-     *    getTaskEvents().add(newItem);
-     * </pre>
+   * getTaskEvents().add(newItem);
+   * </pre>
    * 
    * 
    * <p>

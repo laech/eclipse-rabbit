@@ -97,7 +97,8 @@ public class LaunchEventStorer
     type.setTotalDuration(event.getDuration());
     type.setName(event.getLaunchConfiguration().getName());
     try {
-      type.setLaunchTypeId(event.getLaunchConfiguration().getType().getIdentifier());
+      type.setLaunchTypeId(event.getLaunchConfiguration().getType()
+          .getIdentifier());
     } catch (CoreException ex) {
       ex.printStackTrace();
       type.setLaunchTypeId(null);

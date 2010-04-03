@@ -54,15 +54,16 @@ public class CommandEventStorerTest
       storer.commit();
       assertTrue(dataFile.exists());
 
-      List<CommandEventListType> allEvents = getDataStore(storer).read(dataFile).getCommandEvents();
+      List<CommandEventListType> allEvents = getDataStore(storer)
+          .read(dataFile).getCommandEvents();
       assertEquals(1, allEvents.size());
 
       CommandEventListType list = allEvents.get(0);
       assertEquals(1, list.getCommandEvent().size());
 
       CommandEventType event = list.getCommandEvent().get(0);
-      assertEquals(e.getExecutionEvent().getCommand().getId(),
-          event.getCommandId());
+      assertEquals(e.getExecutionEvent().getCommand().getId(), event
+          .getCommandId());
       assertEquals(1, event.getCount());
 
       assertTrue(getDataField(storer).isEmpty());
@@ -82,8 +83,8 @@ public class CommandEventStorerTest
 
       event = list.getCommandEvent().get(0);
       assertEquals(totalCount, event.getCount());
-      assertEquals(e.getExecutionEvent().getCommand().getId(),
-          event.getCommandId());
+      assertEquals(e.getExecutionEvent().getCommand().getId(), event
+          .getCommandId());
 
       // ...
 
@@ -108,12 +109,12 @@ public class CommandEventStorerTest
         event = list.getCommandEvent().get(0);
       }
 
-      assertEquals(eNew.getExecutionEvent().getCommand().getId(),
-          type.getCommandId());
+      assertEquals(eNew.getExecutionEvent().getCommand().getId(), type
+          .getCommandId());
       assertEquals(1, type.getCount());
 
-      assertEquals(e.getExecutionEvent().getCommand().getId(),
-          event.getCommandId());
+      assertEquals(e.getExecutionEvent().getCommand().getId(), event
+          .getCommandId());
       assertEquals(totalCount, event.getCount());
 
       // ..
@@ -167,8 +168,8 @@ public class CommandEventStorerTest
       assertEquals(1, data.iterator().next().getCommandEvent().size());
 
       CommandEventType type = data.iterator().next().getCommandEvent().get(0);
-      assertEquals(e.getExecutionEvent().getCommand().getId(),
-          type.getCommandId());
+      assertEquals(e.getExecutionEvent().getCommand().getId(), type
+          .getCommandId());
       assertEquals(1, type.getCount());
 
       // Insert an event with the same partId and perspectiveId:
@@ -179,12 +180,12 @@ public class CommandEventStorerTest
 
       assertEquals(1, data.size());
       assertEquals(1, data.iterator().next().getCommandEvent().size());
-      assertTrue(DatatypeUtil.isSameDate(e.getTime(),
-          data.iterator().next().getDate()));
+      assertTrue(DatatypeUtil.isSameDate(e.getTime(), data.iterator().next()
+          .getDate()));
 
       type = data.iterator().next().getCommandEvent().get(0);
-      assertEquals(e.getExecutionEvent().getCommand().getId(),
-          type.getCommandId());
+      assertEquals(e.getExecutionEvent().getCommand().getId(), type
+          .getCommandId());
       assertEquals(totalCount, type.getCount());
 
       // Insert an new and different event:
@@ -197,8 +198,8 @@ public class CommandEventStorerTest
       assertEquals(2, data.iterator().next().getCommandEvent().size());
 
       type = data.iterator().next().getCommandEvent().get(1);
-      assertEquals(e.getExecutionEvent().getCommand().getId(),
-          type.getCommandId());
+      assertEquals(e.getExecutionEvent().getCommand().getId(), type
+          .getCommandId());
       assertEquals(1, type.getCount());
 
       Calendar cal = e.getTime();
@@ -237,8 +238,8 @@ public class CommandEventStorerTest
         assertEquals(1, data.iterator().next().getCommandEvent().size());
 
         type = data.iterator().next().getCommandEvent().get(0);
-        assertEquals(e.getExecutionEvent().getCommand().getId(),
-            type.getCommandId());
+        assertEquals(e.getExecutionEvent().getCommand().getId(), type
+            .getCommandId());
         assertEquals(1, type.getCount());
       }
 
@@ -261,13 +262,13 @@ public class CommandEventStorerTest
         assertEquals(2, data.iterator().next().getCommandEvent().size());
 
         type = data.iterator().next().getCommandEvent().get(0);
-        assertEquals(eWithSameId.getExecutionEvent().getCommand().getId(),
-            type.getCommandId());
+        assertEquals(eWithSameId.getExecutionEvent().getCommand().getId(), type
+            .getCommandId());
         assertEquals(totalDuration, type.getCount());
 
         type = data.iterator().next().getCommandEvent().get(1);
-        assertEquals(eNew.getExecutionEvent().getCommand().getId(),
-            type.getCommandId());
+        assertEquals(eNew.getExecutionEvent().getCommand().getId(), type
+            .getCommandId());
         assertEquals(1, type.getCount());
       }
 
@@ -292,6 +293,51 @@ public class CommandEventStorerTest
   }
 
   @Override
+  public void testMerge_listOfXmlTypesAndEvent() throws Exception {
+    List<CommandEventType> list = new ArrayList<CommandEventType>();
+    CommandEvent event = createEvent();
+
+    merge(storer, list, event);
+    assertEquals(1, list.size());
+    CommandEventType type = list.get(0);
+    assertEquals(event.getExecutionEvent().getCommand().getId(), type
+        .getCommandId());
+    assertEquals(1, type.getCount());
+
+    // Repeat:
+    merge(storer, list, event);
+    assertEquals(1, list.size());
+    type = list.get(0);
+    assertEquals(event.getExecutionEvent().getCommand().getId(), type
+        .getCommandId());
+    assertEquals(2, type.getCount()); //
+  }
+
+  @Override
+  public void testMerge_listOfXmlTypesAndListOfXmlTypes() throws Exception {
+    List<CommandEventType> list1 = new ArrayList<CommandEventType>();
+    List<CommandEventType> list2 = new ArrayList<CommandEventType>();
+    CommandEvent event = createEvent();
+    CommandEventType type = newXmlType(storer, event);
+    list2.add(type);
+
+    merge(storer, list1, list2);
+    assertEquals(1, list1.size());
+    type = list1.get(0);
+    assertEquals(event.getExecutionEvent().getCommand().getId(), type
+        .getCommandId());
+    assertEquals(1, type.getCount());
+
+    // Repeat:
+    merge(storer, list1, list2);
+    assertEquals(1, list1.size());
+    type = list1.get(0);
+    assertEquals(event.getExecutionEvent().getCommand().getId(), type
+        .getCommandId());
+    assertEquals(2, type.getCount()); //
+  }
+
+  @Override
   public void testMerge_typeAndType() throws Exception {
 
     String id = "id";
@@ -310,21 +356,22 @@ public class CommandEventStorerTest
   }
 
   @Override
-  public void testNewXmlTypeHolder() throws Exception {
-
-    XMLGregorianCalendar cal = DatatypeUtil.toXMLGregorianCalendarDate(Calendar.getInstance());
-    CommandEventListType list = newXmlTypeHolder(storer, cal);
-    assertEquals(cal, list.getDate());
-  }
-
-  @Override
   public void testNewXmlType() throws Exception {
 
     CommandEvent e = createEvent();
     CommandEventType type = newXmlType(storer, e);
-    assertEquals(e.getExecutionEvent().getCommand().getId(),
-        type.getCommandId());
+    assertEquals(e.getExecutionEvent().getCommand().getId(), type
+        .getCommandId());
     assertEquals(1, type.getCount());
+  }
+
+  @Override
+  public void testNewXmlTypeHolder() throws Exception {
+
+    XMLGregorianCalendar cal = DatatypeUtil.toXMLGregorianCalendarDate(Calendar
+        .getInstance());
+    CommandEventListType list = newXmlTypeHolder(storer, cal);
+    assertEquals(cal, list.getDate());
   }
 
   @Override
@@ -357,51 +404,6 @@ public class CommandEventStorerTest
   private ICommandService getCommandService() {
     return (ICommandService) PlatformUI.getWorkbench().getService(
         ICommandService.class);
-  }
-
-  @Override
-  public void testMerge_listOfXmlTypesAndEvent() throws Exception {
-    List<CommandEventType> list = new ArrayList<CommandEventType>();
-    CommandEvent event = createEvent();
-
-    merge(storer, list, event);
-    assertEquals(1, list.size());
-    CommandEventType type = list.get(0);
-    assertEquals(event.getExecutionEvent().getCommand().getId(),
-        type.getCommandId());
-    assertEquals(1, type.getCount());
-
-    // Repeat:
-    merge(storer, list, event);
-    assertEquals(1, list.size());
-    type = list.get(0);
-    assertEquals(event.getExecutionEvent().getCommand().getId(),
-        type.getCommandId());
-    assertEquals(2, type.getCount()); //
-  }
-
-  @Override
-  public void testMerge_listOfXmlTypesAndListOfXmlTypes() throws Exception {
-    List<CommandEventType> list1 = new ArrayList<CommandEventType>();
-    List<CommandEventType> list2 = new ArrayList<CommandEventType>();
-    CommandEvent event = createEvent();
-    CommandEventType type = newXmlType(storer, event);
-    list2.add(type);
-
-    merge(storer, list1, list2);
-    assertEquals(1, list1.size());
-    type = list1.get(0);
-    assertEquals(event.getExecutionEvent().getCommand().getId(),
-        type.getCommandId());
-    assertEquals(1, type.getCount());
-
-    // Repeat:
-    merge(storer, list1, list2);
-    assertEquals(1, list1.size());
-    type = list1.get(0);
-    assertEquals(event.getExecutionEvent().getCommand().getId(),
-        type.getCommandId());
-    assertEquals(2, type.getCount()); //
   }
 
 }

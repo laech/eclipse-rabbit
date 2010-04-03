@@ -82,13 +82,14 @@ public class LaunchPage extends AbstractTreeViewerPage {
     toolBar.add(expandAll);
 
     ISharedImages images = PlatformUI.getWorkbench().getSharedImages();
-    ImageDescriptor img = images.getImageDescriptor(ISharedImages.IMG_ELCL_COLLAPSEALL);
+    ImageDescriptor img = images
+        .getImageDescriptor(ISharedImages.IMG_ELCL_COLLAPSEALL);
     collapseAllAction.setImageDescriptor(img);
     IContributionItem collapseAll = new ActionContributionItem(
         collapseAllAction);
     toolBar.add(collapseAll);
 
-    return new IContributionItem[]{expandAll, collapseAll};
+    return new IContributionItem[] { expandAll, collapseAll };
   }
 
   @Override

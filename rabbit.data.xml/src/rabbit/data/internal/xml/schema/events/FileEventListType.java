@@ -40,7 +40,7 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "fileEventListType", propOrder = {"fileEvent"})
+@XmlType(name = "fileEventListType", propOrder = { "fileEvent" })
 public class FileEventListType extends EventGroupType {
 
   @XmlElement(required = true)
@@ -59,8 +59,8 @@ public class FileEventListType extends EventGroupType {
    * For example, to add a new item, do as follows:
    * 
    * <pre>
-     *    getFileEvent().add(newItem);
-     * </pre>
+   * getFileEvent().add(newItem);
+   * </pre>
    * 
    * 
    * <p>

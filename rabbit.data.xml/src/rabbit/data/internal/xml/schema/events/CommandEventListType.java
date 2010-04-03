@@ -40,7 +40,7 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "commandEventListType", propOrder = {"commandEvent"})
+@XmlType(name = "commandEventListType", propOrder = { "commandEvent" })
 public class CommandEventListType extends EventGroupType {
 
   @XmlElement(required = true)
@@ -59,8 +59,8 @@ public class CommandEventListType extends EventGroupType {
    * For example, to add a new item, do as follows:
    * 
    * <pre>
-     *    getCommandEvent().add(newItem);
-     * </pre>
+   * getCommandEvent().add(newItem);
+   * </pre>
    * 
    * 
    * <p>

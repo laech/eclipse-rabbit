@@ -43,8 +43,8 @@ public abstract class AbstractContinuousEventStorerTest<E extends ContinuousEven
       storer.commit();
       assertTrue(dataFile.exists());
 
-      List<S> allEvents = getXmlTypeCategories(storer,
-          getDataStore(storer).read(dataFile));
+      List<S> allEvents = getXmlTypeCategories(storer, getDataStore(storer)
+          .read(dataFile));
       assertEquals(1, allEvents.size());
 
       S list = allEvents.get(0);
@@ -118,8 +118,6 @@ public abstract class AbstractContinuousEventStorerTest<E extends ContinuousEven
       fail();
     }
   }
-
-  protected abstract E createEvent(Calendar eventTime);
 
   @Override
   public void testInsert() {
@@ -249,44 +247,6 @@ public abstract class AbstractContinuousEventStorerTest<E extends ContinuousEven
   }
 
   @Override
-  public void testMerge_typeAndType() throws Exception {
-
-    E e = createEvent();
-    T main = newXmlType(storer, e);
-    T tmp = newXmlType(storer, e);
-
-    long totalDuration = main.getDuration() + tmp.getDuration();
-    merge(storer, main, tmp);
-    assertEquals(totalDuration, main.getDuration());
-  }
-
-  @Override
-  public void testNewXmlTypeHolder() throws Exception {
-
-    XMLGregorianCalendar cal = getCalendar();
-    S type = newXmlTypeHolder(storer, cal);
-    assertEquals(cal, type.getDate());
-  }
-
-  @Override
-  public void testNewXmlType() throws Exception {
-
-    E e = createEvent();
-    T xml = newXmlType(storer, e);
-
-    assertTrue(hasSameId(xml, e));
-    assertEquals(xml.getDuration(), e.getDuration());
-  }
-
-  /**
-   * Checks whether the two has the same ID.
-   */
-  protected abstract boolean hasSameId(T xml, E e);
-
-  /** Gets the list of events form the parameter. */
-  protected abstract List<T> getEventTypes(S type);
-
-  @Override
   public void testMerge_listOfXmlTypesAndEvent() throws Exception {
     List<T> list = new ArrayList<T>();
     E event = createEvent();
@@ -326,6 +286,46 @@ public abstract class AbstractContinuousEventStorerTest<E extends ContinuousEven
     // We merged twice, so the duration should have been doubled.
     assertEquals(list1.get(0).getDuration(), event.getDuration() * 2);
   }
+
+  @Override
+  public void testMerge_typeAndType() throws Exception {
+
+    E e = createEvent();
+    T main = newXmlType(storer, e);
+    T tmp = newXmlType(storer, e);
+
+    long totalDuration = main.getDuration() + tmp.getDuration();
+    merge(storer, main, tmp);
+    assertEquals(totalDuration, main.getDuration());
+  }
+
+  @Override
+  public void testNewXmlType() throws Exception {
+
+    E e = createEvent();
+    T xml = newXmlType(storer, e);
+
+    assertTrue(hasSameId(xml, e));
+    assertEquals(xml.getDuration(), e.getDuration());
+  }
+
+  @Override
+  public void testNewXmlTypeHolder() throws Exception {
+
+    XMLGregorianCalendar cal = getCalendar();
+    S type = newXmlTypeHolder(storer, cal);
+    assertEquals(cal, type.getDate());
+  }
+
+  protected abstract E createEvent(Calendar eventTime);
+
+  /** Gets the list of events form the parameter. */
+  protected abstract List<T> getEventTypes(S type);
+
+  /**
+   * Checks whether the two has the same ID.
+   */
+  protected abstract boolean hasSameId(T xml, E e);
 
   /** Returns true if the parameters contains the same values. */
   protected abstract boolean isEqual(T type, E event);

@@ -42,15 +42,15 @@ public class StoragePathPreferencePageTest {
   /** Path to restore after the test. */
   private static IPath storageLocation;
 
+  @AfterClass
+  public static void afterClass() {
+    XmlPlugin.getDefault().setStoragePathRoot(storageLocation.toFile());
+  }
+
   @BeforeClass
   public static void beforeClass() {
     bot = new SWTWorkbenchBot();
     storageLocation = XmlPlugin.getDefault().getStoragePathRoot();
-  }
-
-  @AfterClass
-  public static void afterClass() {
-    XmlPlugin.getDefault().setStoragePathRoot(storageLocation.toFile());
   }
 
   @Test
@@ -114,7 +114,8 @@ public class StoragePathPreferencePageTest {
         .toOSString());
 
     openRabbitPreferences();
-    storagePath = System.getProperty("user.home") + File.separator + "123";
+    storagePath = System.getProperty("user.home") + File.separator
+        + System.nanoTime() + "";
     text = bot.textWithLabel("Location:");
     text.setText(storagePath);
     bot.button("OK").click();
@@ -129,7 +130,7 @@ public class StoragePathPreferencePageTest {
 
   private void openRabbitPreferences() {
     bot.menu("Window").menu("Preferences").click();
-    bot.tree().select("Rabbit");
+    bot.tree().expandNode("Rabbit").select("Storage Location");
   }
 
 }

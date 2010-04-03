@@ -64,14 +64,14 @@ public class CommandPageLabelProvider extends LabelProvider implements
     Command cmd = (Command) element;
     try {
       switch (columnIndex) {
-        case 0:
-          return cmd.getName();
-        case 1:
-          return cmd.getDescription();
-        case 2:
-          return (int) page.getValue(cmd) + "";
-        default:
-          return null;
+      case 0:
+        return cmd.getName();
+      case 1:
+        return cmd.getDescription();
+      case 2:
+        return (int) page.getValue(cmd) + "";
+      default:
+        return null;
       }
     } catch (NotDefinedException e) {
       return (columnIndex == 0) ? cmd.getId() : null;

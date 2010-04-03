@@ -40,8 +40,20 @@ public class XmlPluginTest {
   private static XmlPlugin plugin = XmlPlugin.getDefault();
 
   @Test
+  public void testGetStoragePath() {
+    assertNotNull(plugin.getStoragePath());
+    assertTrue(plugin.getStoragePath().toFile().exists());
+    assertTrue(plugin.getStoragePath().toFile().isDirectory());
+  }
+
+  @Test
   public void testGetStoragePathRoot() {
     assertNotNull(plugin.getStoragePathRoot());
+  }
+
+  @Test
+  public void testPluginId() {
+    assertEquals(XmlPlugin.PLUGIN_ID, plugin.getBundle().getSymbolicName());
   }
 
   @Test
@@ -62,18 +74,6 @@ public class XmlPluginTest {
     assertTrue(plugin.setStoragePathRoot(file));
 
     plugin.setStoragePathRoot(oldPath.toFile());
-  }
-
-  @Test
-  public void testGetStoragePath() {
-    assertNotNull(plugin.getStoragePath());
-    assertTrue(plugin.getStoragePath().toFile().exists());
-    assertTrue(plugin.getStoragePath().toFile().isDirectory());
-  }
-
-  @Test
-  public void testPluginId() {
-    assertEquals(XmlPlugin.PLUGIN_ID, plugin.getBundle().getSymbolicName());
   }
 
   @Test

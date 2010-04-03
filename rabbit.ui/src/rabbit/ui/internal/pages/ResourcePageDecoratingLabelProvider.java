@@ -51,24 +51,24 @@ public class ResourcePageDecoratingLabelProvider extends
   @Override
   public String getColumnText(Object element, int columnIndex) {
     switch (columnIndex) {
-      case 0:
-        if (element instanceof IFile) {
-          return ((IFile) element).getName();
-        }
-        return super.getText(element);
-      case 1:
-        if (!(element instanceof IResource)) {
-          return null;
-        }
-        IResource resource = (IResource) element;
-        if ((resource instanceof IProject && page.getShowMode() == ShowMode.PROJECT)
-            || (resource instanceof IFolder && page.getShowMode() == ShowMode.FOLDER)
-            || (resource instanceof IFile && page.getShowMode() == ShowMode.FILE)) {
-
-          return toDefaultString(page.getValue(resource));
-        }
-      default:
+    case 0:
+      if (element instanceof IFile) {
+        return ((IFile) element).getName();
+      }
+      return super.getText(element);
+    case 1:
+      if (!(element instanceof IResource)) {
         return null;
+      }
+      IResource resource = (IResource) element;
+      if ((resource instanceof IProject && page.getShowMode() == ShowMode.PROJECT)
+          || (resource instanceof IFolder && page.getShowMode() == ShowMode.FOLDER)
+          || (resource instanceof IFile && page.getShowMode() == ShowMode.FILE)) {
+
+        return toDefaultString(page.getValue(resource));
+      }
+    default:
+      return null;
     }
   }
 }

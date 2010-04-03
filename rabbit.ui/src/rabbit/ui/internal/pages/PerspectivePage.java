@@ -58,9 +58,9 @@ public class PerspectivePage extends AbstractTableViewerPage {
     TableLabelComparator textSorter = new TableLabelComparator(viewer);
     TableLabelComparator valueSorter = createValueSorterForTable(viewer);
 
-    int[] widths = new int[]{150, 150};
-    int[] styles = new int[]{SWT.LEFT, SWT.RIGHT};
-    String[] names = new String[]{"Name", "Usage"};
+    int[] widths = new int[] { 150, 150 };
+    int[] styles = new int[] { SWT.LEFT, SWT.RIGHT };
+    String[] names = new String[] { "Name", "Usage" };
     for (int i = 0; i < names.length; i++) {
       TableColumn column = new TableColumn(viewer.getTable(), styles[i]);
       column.setText(names[i]);
@@ -83,7 +83,8 @@ public class PerspectivePage extends AbstractTableViewerPage {
 
     Map<String, Long> map = dataStore.getData(p.getStartDate(), p.getEndDate());
     for (Map.Entry<String, Long> entry : map.entrySet()) {
-      IPerspectiveDescriptor pd = registry.findPerspectiveWithId(entry.getKey());
+      IPerspectiveDescriptor pd = registry
+          .findPerspectiveWithId(entry.getKey());
       if (pd == null) {
         pd = new UndefinedPerspectiveDescriptor(entry.getKey());
       }

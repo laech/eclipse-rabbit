@@ -40,7 +40,7 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "perspectiveEventListType", propOrder = {"perspectiveEvent"})
+@XmlType(name = "perspectiveEventListType", propOrder = { "perspectiveEvent" })
 public class PerspectiveEventListType extends EventGroupType {
 
   @XmlElement(required = true)
@@ -59,8 +59,8 @@ public class PerspectiveEventListType extends EventGroupType {
    * For example, to add a new item, do as follows:
    * 
    * <pre>
-     *    getPerspectiveEvent().add(newItem);
-     * </pre>
+   * getPerspectiveEvent().add(newItem);
+   * </pre>
    * 
    * 
    * <p>

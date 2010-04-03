@@ -55,7 +55,7 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "resourceListType", propOrder = {"resource"})
+@XmlType(name = "resourceListType", propOrder = { "resource" })
 public class ResourceListType {
 
   @XmlElement(required = true)
@@ -74,8 +74,8 @@ public class ResourceListType {
    * For example, to add a new item, do as follows:
    * 
    * <pre>
-	 * getResource().add(newItem);
-	 * </pre>
+   * getResource().add(newItem);
+   * </pre>
    * 
    * 
    * <p>

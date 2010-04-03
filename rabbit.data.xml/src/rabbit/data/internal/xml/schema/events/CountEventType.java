@@ -37,7 +37,7 @@ import javax.xml.bind.annotation.XmlType;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "countEventType")
-@XmlSeeAlso({CommandEventType.class, LaunchEventType.class})
+@XmlSeeAlso( { CommandEventType.class, LaunchEventType.class })
 public class CountEventType {
 
   @XmlAttribute(required = true)

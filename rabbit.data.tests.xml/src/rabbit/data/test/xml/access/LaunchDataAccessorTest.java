@@ -23,88 +23,92 @@ import java.util.Set;
 /**
  * @see LaunchDataAccessor
  */
-public class LaunchDataAccessorTest extends
-		AbstractAccessorTest<Set<LaunchDescriptor>, LaunchEventType, LaunchEventListType> {
+public class LaunchDataAccessorTest
+    extends
+    AbstractAccessorTest<Set<LaunchDescriptor>, LaunchEventType, LaunchEventListType> {
 
-	@Override
-	protected void assertValues(Set<LaunchDescriptor> data, EventListType events) {
-		Set<LaunchDescriptor> myData = new HashSet<LaunchDescriptor>();
-		for (LaunchEventListType list : events.getLaunchEvents()) {
-			for (LaunchEventType type : list.getLaunchEvent()) {
+  @Override
+  protected void assertValues(Set<LaunchDescriptor> data, EventListType events) {
+    Set<LaunchDescriptor> myData = new HashSet<LaunchDescriptor>();
+    for (LaunchEventListType list : events.getLaunchEvents()) {
+      for (LaunchEventType type : list.getLaunchEvent()) {
 
-				boolean done = false;
+        boolean done = false;
 
-				for (LaunchDescriptor des : myData) {
-					if (getString(type.getName()).equals(des.getLaunchName())
-							&& getString(type.getLaunchModeId()).equals(des.getLaunchModeId())
-							&& getString(type.getLaunchTypeId()).equals(des.getLaunchTypeId())) {
+        for (LaunchDescriptor des : myData) {
+          if (getString(type.getName()).equals(des.getLaunchName())
+              && getString(type.getLaunchModeId())
+                  .equals(des.getLaunchModeId())
+              && getString(type.getLaunchTypeId())
+                  .equals(des.getLaunchTypeId())) {
 
-						des.setCount(des.getCount() + type.getCount());
-						des.setTotalDuration(des.getTotalDuration() + type.getTotalDuration());
-						des.getFileIds().addAll(type.getFileId());
-						
-						done = true;
-						break;
-					}
-				}
+            des.setCount(des.getCount() + type.getCount());
+            des.setTotalDuration(des.getTotalDuration()
+                + type.getTotalDuration());
+            des.getFileIds().addAll(type.getFileId());
 
-				if (!done) {
-					LaunchDescriptor des = new LaunchDescriptor();
-					des.setCount(type.getCount());
-					des.setTotalDuration(type.getTotalDuration());
-					des.getFileIds().addAll(type.getFileId());
-					des.setLaunchName(type.getName());
-					des.setLaunchTypeId(type.getLaunchTypeId());
-					des.setLaunchModeId(type.getLaunchModeId());
+            done = true;
+            break;
+          }
+        }
 
-					myData.add(des);
-				}
-			}
-		}
+        if (!done) {
+          LaunchDescriptor des = new LaunchDescriptor();
+          des.setCount(type.getCount());
+          des.setTotalDuration(type.getTotalDuration());
+          des.getFileIds().addAll(type.getFileId());
+          des.setLaunchName(type.getName());
+          des.setLaunchTypeId(type.getLaunchTypeId());
+          des.setLaunchModeId(type.getLaunchModeId());
 
-		assertEquals(myData.size(), data.size());
-		myData.removeAll(data);
-		assertTrue(myData.isEmpty());
-	}
+          myData.add(des);
+        }
+      }
+    }
 
-	@Override
-	protected LaunchDataAccessor create() {
-		return new LaunchDataAccessor();
-	}
+    assertEquals(myData.size(), data.size());
+    myData.removeAll(data);
+    assertTrue(myData.isEmpty());
+  }
 
-	@Override
-	protected LaunchEventListType createListType() {
-		LaunchEventListType type = objectFactory.createLaunchEventListType();
-		type.setDate(DatatypeUtil
-				.toXMLGregorianCalendarDateTime(new GregorianCalendar()));
-		return type;
-	}
+  @Override
+  protected LaunchDataAccessor create() {
+    return new LaunchDataAccessor();
+  }
 
-	@Override
-	protected LaunchEventType createXmlType() {
-		LaunchEventType type = objectFactory.createLaunchEventType();
-		type.setTotalDuration(10);
-		type.setLaunchModeId(ILaunchManager.RUN_MODE);
-		type.setName("name");
-		type.setLaunchTypeId("type");
-		type.setCount(1);
-		return type;
-	}
+  @Override
+  protected LaunchEventListType createListType() {
+    LaunchEventListType type = objectFactory.createLaunchEventListType();
+    type.setDate(DatatypeUtil
+        .toXMLGregorianCalendarDateTime(new GregorianCalendar()));
+    return type;
+  }
 
-	@Override
-	protected List<LaunchEventType> getXmlTypes(LaunchEventListType list) {
-		return list.getLaunchEvent();
-	}
+  @Override
+  protected LaunchEventType createXmlType() {
+    LaunchEventType type = objectFactory.createLaunchEventType();
+    type.setTotalDuration(10);
+    type.setLaunchModeId(ILaunchManager.RUN_MODE);
+    type.setName("name");
+    type.setLaunchTypeId("type");
+    type.setCount(1);
+    return type;
+  }
 
-	@Override
-	protected void setId(LaunchEventType type, String id) {
-		type.setLaunchModeId(id);
-		type.setLaunchTypeId(id);
-		type.setName(id);
-	}
+  @Override
+  protected List<LaunchEventType> getXmlTypes(LaunchEventListType list) {
+    return list.getLaunchEvent();
+  }
 
-	@Override
-	protected void setUsage(LaunchEventType type, long usage) {
-		type.setTotalDuration(usage);
-	}
+  @Override
+  protected void setId(LaunchEventType type, String id) {
+    type.setLaunchModeId(id);
+    type.setLaunchTypeId(id);
+    type.setName(id);
+  }
+
+  @Override
+  protected void setUsage(LaunchEventType type, long usage) {
+    type.setTotalDuration(usage);
+  }
 }

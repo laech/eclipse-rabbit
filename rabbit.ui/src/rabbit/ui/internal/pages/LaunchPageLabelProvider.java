@@ -62,7 +62,8 @@ public class LaunchPageLabelProvider extends BaseLabelProvider implements
 
     if (columnIndex == 0) {
       if (element instanceof LaunchDescriptor) {
-        return DebugUITools.getImage(((LaunchDescriptor) element).getLaunchTypeId());
+        return DebugUITools.getImage(((LaunchDescriptor) element)
+            .getLaunchTypeId());
 
       } else if (element instanceof LaunchResource) {
         return provider.getImage(((LaunchResource) element).getResource());
@@ -87,32 +88,33 @@ public class LaunchPageLabelProvider extends BaseLabelProvider implements
   public String getColumnText(Object element, int columnIndex) {
 
     switch (columnIndex) {
-      case 0:
-        if (element instanceof LaunchDescriptor) {
-          return ((LaunchDescriptor) element).getLaunchName();
+    case 0:
+      if (element instanceof LaunchDescriptor) {
+        return ((LaunchDescriptor) element).getLaunchName();
 
-        } else if (element instanceof LaunchResource) {
-          return provider.getText(((LaunchResource) element).getResource());
-        }
-        return provider.getText(element);
+      } else if (element instanceof LaunchResource) {
+        return provider.getText(((LaunchResource) element).getResource());
+      }
+      return provider.getText(element);
 
-      case 1:
-        if (element instanceof LaunchDescriptor) {
-          return ((LaunchDescriptor) element).getLaunchModeId().toString();
-        }
-        break;
+    case 1:
+      if (element instanceof LaunchDescriptor) {
+        return ((LaunchDescriptor) element).getLaunchModeId().toString();
+      }
+      break;
 
-      case 2:
-        if (element instanceof LaunchDescriptor) {
-          return ((LaunchDescriptor) element).getCount() + "";
-        }
-        break;
+    case 2:
+      if (element instanceof LaunchDescriptor) {
+        return ((LaunchDescriptor) element).getCount() + "";
+      }
+      break;
 
-      case 4:
-        if (element instanceof LaunchDescriptor) {
-          return MillisConverter.toDefaultString(((LaunchDescriptor) element).getTotalDuration());
-        }
-        break;
+    case 4:
+      if (element instanceof LaunchDescriptor) {
+        return MillisConverter.toDefaultString(((LaunchDescriptor) element)
+            .getTotalDuration());
+      }
+      break;
     }
     return null;
   }

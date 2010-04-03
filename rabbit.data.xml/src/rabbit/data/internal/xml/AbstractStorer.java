@@ -92,8 +92,10 @@ public abstract class AbstractStorer<E extends DiscreteEvent, T, S extends Event
     }
 
     if (!getDataStore().write(events, f)) {
-      XmlPlugin.getDefault().getLog().log(
-          new Status(IStatus.ERROR, XmlPlugin.PLUGIN_ID, "Unable to save data."));
+      XmlPlugin.getDefault().getLog()
+          .log(
+              new Status(IStatus.ERROR, XmlPlugin.PLUGIN_ID,
+                  "Unable to save data."));
     }
     data.clear();
   }
@@ -136,7 +138,8 @@ public abstract class AbstractStorer<E extends DiscreteEvent, T, S extends Event
     }
 
     if (!done) {
-      S holder = newXmlTypeHolder(DatatypeUtil.toXMLGregorianCalendarDate(e.getTime()));
+      S holder = newXmlTypeHolder(DatatypeUtil.toXMLGregorianCalendarDate(e
+          .getTime()));
       merge(getXmlTypes(holder), e);
       data.add(holder);
     }

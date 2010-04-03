@@ -51,6 +51,11 @@ public abstract class AbstractAccessorTest<T, E, S extends EventGroupType> {
   private static final IPath originalRoot = XmlPlugin.getDefault()
       .getStoragePathRoot();
 
+  @AfterClass
+  public static void afterClass() {
+    XmlPlugin.getDefault().setStoragePathRoot(originalRoot.toFile());
+  }
+
   @BeforeClass
   public static void beforeClass() {
     // Set the directory root to a new folder so that we don't mess
@@ -62,22 +67,12 @@ public abstract class AbstractAccessorTest<T, E, S extends EventGroupType> {
     XmlPlugin.getDefault().setStoragePathRoot(dir);
   }
 
-  @AfterClass
-  public static void afterClass() {
-    XmlPlugin.getDefault().setStoragePathRoot(originalRoot.toFile());
-  }
-
   @Test
   public void testGetCategories() throws Exception {
     EventListType eventList = objectFactory.createEventListType();
     S list = createListType();
     getCategories(accessor, eventList).add(list);
     Assert.assertEquals(1, getCategories(accessor, eventList).size());
-  }
-
-  @Test(expected = NullPointerException.class)
-  public void testGetData_startDateNull() {
-    accessor.getData(null, Calendar.getInstance());
   }
 
   @Test(expected = NullPointerException.class)
@@ -172,26 +167,39 @@ public abstract class AbstractAccessorTest<T, E, S extends EventGroupType> {
         .toGregorianCalendar()), events);
   }
 
-  /**
-   * Calls the protected method {@code AbstractgetDataStore(accessor)}.
-   */
-  @SuppressWarnings("unchecked")
-  protected List<S> getXmlData(AbstractAccessor accessor, Calendar start,
-      Calendar end) throws Exception {
-    Method method = AbstractAccessor.class.getDeclaredMethod("getXmlData",
-        Calendar.class, Calendar.class);
-    method.setAccessible(true);
-    return (List<S>) method.invoke(accessor, start, end);
+  @Test(expected = NullPointerException.class)
+  public void testGetData_startDateNull() {
+    accessor.getData(null, Calendar.getInstance());
+  }
+
+  @Test
+  public void testGetDataStore() throws Exception {
+    assertNotNull(getDataStore(accessor));
   }
 
   /**
-   * Calls the protected method {@code AbstractgetDataStore(accessor)}.
+   * Checks the values are OK against the two parameters, one is returned by the
+   * IAccessor, one is the raw data.
    */
-  protected IDataStore getDataStore(AbstractAccessor<T, E, S> accessor) throws Exception {
-    Method method = AbstractAccessor.class.getDeclaredMethod("getDataStore");
-    method.setAccessible(true);
-    return (IDataStore) method.invoke(accessor);
-  }
+  protected abstract void assertValues(T data, EventListType events)
+      throws Exception;
+
+  /** Creates a subject for testing. */
+  protected abstract AbstractAccessor<T, E, S> create();
+
+  /**
+   * Creates a new list type.
+   * 
+   * @return A new list type.
+   */
+  protected abstract S createListType();
+
+  /**
+   * Creates a new XML type with fields filled.
+   * 
+   * @return A new XML type.
+   */
+  protected abstract E createXmlType();
 
   /**
    * Calls the protected method {@code AbstractAccessor.filter(List<S>)}.
@@ -218,37 +226,31 @@ public abstract class AbstractAccessorTest<T, E, S extends EventGroupType> {
   }
 
   /**
-   * Gets the list of XML event types.
+   * Calls the protected method {@code AbstractgetDataStore(accessor)}.
    */
-  protected abstract List<E> getXmlTypes(S list);
-
-  @Test
-  public void testGetDataStore() throws Exception {
-    assertNotNull(getDataStore(accessor));
+  protected IDataStore getDataStore(AbstractAccessor<T, E, S> accessor)
+      throws Exception {
+    Method method = AbstractAccessor.class.getDeclaredMethod("getDataStore");
+    method.setAccessible(true);
+    return (IDataStore) method.invoke(accessor);
   }
 
   /**
-   * Checks the values are OK against the two parameters, one is returned by the
-   * IAccessor, one is the raw data.
+   * Calls the protected method {@code AbstractgetDataStore(accessor)}.
    */
-  protected abstract void assertValues(T data, EventListType events) throws Exception;
-
-  /** Creates a subject for testing. */
-  protected abstract AbstractAccessor<T, E, S> create();
-
-  /**
-   * Creates a new list type.
-   * 
-   * @return A new list type.
-   */
-  protected abstract S createListType();
+  @SuppressWarnings("unchecked")
+  protected List<S> getXmlData(AbstractAccessor accessor, Calendar start,
+      Calendar end) throws Exception {
+    Method method = AbstractAccessor.class.getDeclaredMethod("getXmlData",
+        Calendar.class, Calendar.class);
+    method.setAccessible(true);
+    return (List<S>) method.invoke(accessor, start, end);
+  }
 
   /**
-   * Creates a new XML type with fields filled.
-   * 
-   * @return A new XML type.
+   * Gets the list of XML event types.
    */
-  protected abstract E createXmlType();
+  protected abstract List<E> getXmlTypes(S list);
 
   /**
    * Sets the id of the type.

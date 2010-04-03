@@ -13,18 +13,18 @@ import org.junit.Test;
  */
 public class StringUtilTest {
 
-	@Test
-	public void testGetString() {
-		assertEquals("", StringUtil.getString(null));
-	}
+  @Test
+  public void testAreEqual() {
+    assertTrue(StringUtil.areEqual(null, null));
+    assertTrue(StringUtil.areEqual("", null));
+    assertTrue(StringUtil.areEqual(null, ""));
+    assertTrue(StringUtil.areEqual("abc", "abc"));
+    assertFalse(StringUtil.areEqual("abc", null));
+  }
 
-	@Test
-	public void testAreEqual() {
-		assertTrue(StringUtil.areEqual(null, null));
-		assertTrue(StringUtil.areEqual("", null));
-		assertTrue(StringUtil.areEqual(null, ""));
-		assertTrue(StringUtil.areEqual("abc", "abc"));
-		assertFalse(StringUtil.areEqual("abc", null));
-	}
+  @Test
+  public void testGetString() {
+    assertEquals("", StringUtil.getString(null));
+  }
 
 }

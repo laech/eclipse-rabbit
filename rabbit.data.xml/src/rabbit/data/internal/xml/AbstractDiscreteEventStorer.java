@@ -57,7 +57,7 @@ public abstract class AbstractDiscreteEventStorer<E extends DiscreteEvent, T, S 
   protected void merge(List<T> xList, E event) {
 
     T newType = newXmlType(event);
-    
+
     boolean done = false;
     for (T xmlType : xList) {
       if (hasSameId(xmlType, newType)) {

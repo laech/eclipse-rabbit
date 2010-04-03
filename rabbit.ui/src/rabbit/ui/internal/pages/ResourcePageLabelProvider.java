@@ -27,8 +27,8 @@ public class ResourcePageLabelProvider extends WorkbenchLabelProvider {
   private final Color deletedResourceColor;
 
   public ResourcePageLabelProvider() {
-    deletedResourceColor = PlatformUI.getWorkbench().getDisplay().getSystemColor(
-        SWT.COLOR_DARK_GRAY);
+    deletedResourceColor = PlatformUI.getWorkbench().getDisplay()
+        .getSystemColor(SWT.COLOR_DARK_GRAY);
   }
 
   @Override
