@@ -22,8 +22,7 @@ import rabbit.data.store.model.PartEvent;
 import org.eclipse.ui.IPartListener;
 import org.eclipse.ui.IWindowListener;
 import org.eclipse.ui.IWorkbenchPart;
-
-import java.util.Calendar;
+import org.joda.time.DateTime;
 
 /**
  * Tracks workbench part usage.
@@ -41,9 +40,9 @@ public class PartTracker extends AbstractPartTracker<PartEvent> implements
   }
 
   @Override
-  protected PartEvent tryCreateEvent(Calendar time, long duration,
-      IWorkbenchPart p) {
-    return new PartEvent(time, duration, p);
+  protected PartEvent tryCreateEvent(DateTime endTime, long duration,
+      IWorkbenchPart part) {
+    return new PartEvent(endTime, duration, part);
   }
 
 }

@@ -23,6 +23,11 @@ import rabbit.data.store.model.LaunchEvent;
 import rabbit.data.test.xml.AbstractDiscreteEventStorerTest;
 import rabbit.data.xml.store.LaunchEventStorer;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import org.eclipse.core.internal.registry.ConfigurationElement;
 import org.eclipse.core.internal.registry.ConfigurationElementHandle;
 import org.eclipse.core.runtime.CoreException;
@@ -33,15 +38,14 @@ import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.core.Launch;
 import org.eclipse.debug.internal.core.LaunchConfiguration;
 import org.eclipse.debug.internal.core.LaunchConfigurationType;
+import org.joda.time.DateTime;
+import org.joda.time.LocalDate;
 import org.junit.Before;
-import static org.junit.Assert.*;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Collection;
-import java.util.GregorianCalendar;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -118,15 +122,15 @@ public class LaunchEventStorerTest
   public void testCommit() throws Exception {
     IDataStore dataStore = getDataStore(storer);
 
-    Calendar time1 = new GregorianCalendar();
-    time1.add(Calendar.YEAR, -1);
+    LocalDate time1 = new LocalDate();
+    time1 = time1.minusWeeks(1);
     File file1 = dataStore.getDataFile(time1);
     if (file1.exists() && !file1.delete()) {
       fail("File is not deleted");
     }
 
-    Calendar time2 = new GregorianCalendar();
-    time2.add(Calendar.YEAR, 1);
+    LocalDate time2 = new LocalDate();
+    time2 = time2.plusYears(1);
     File file2 = dataStore.getDataFile(time2);
     if (file2.exists() && !file2.delete()) {
       fail("File is not deleted");
@@ -139,10 +143,10 @@ public class LaunchEventStorerTest
     fileIds.add("123111");
     fileIds.add("456111");
 
-    LaunchEvent event1 = new LaunchEvent(time1, duration, launch, config,
-        fileIds);
-    LaunchEvent event2 = new LaunchEvent(time2, duration, launch, config,
-        fileIds);
+    LaunchEvent event1 = new LaunchEvent(time1.toDateTimeAtCurrentTime(),
+        duration, launch, config, fileIds);
+    LaunchEvent event2 = new LaunchEvent(time2.toDateTimeAtCurrentTime(),
+        duration, launch, config, fileIds);
     storer.insert(event1);
     storer.insert(event2);
 
@@ -231,7 +235,7 @@ public class LaunchEventStorerTest
 
   @Override
   public void testInsert() throws Exception {
-    Calendar time = new GregorianCalendar();
+    DateTime time = new DateTime();
     long duration = 198123;
     ILaunchConfiguration config = new LaunchConfigurationForTest();
     ILaunch launch = new Launch(config, ILaunchManager.RUN_MODE, null);
@@ -266,7 +270,7 @@ public class LaunchEventStorerTest
 
   @Override
   public void testInsertCollection() throws Exception {
-    Calendar time = new GregorianCalendar();
+    DateTime time = new DateTime();
     long duration = 19823;
     ILaunchConfiguration config = new LaunchConfigurationForTest();
     ILaunch launch = new Launch(config, ILaunchManager.RUN_MODE, null);
@@ -308,7 +312,7 @@ public class LaunchEventStorerTest
 
   @Override
   public void testMerge_listOfXmlTypesAndEvent() throws Exception {
-    Calendar time = new GregorianCalendar();
+    DateTime time = new DateTime();
     long duration = 19823;
     ILaunchConfiguration config = new LaunchConfigurationForTest();
     ILaunch launch = new Launch(config, ILaunchManager.RUN_MODE, null);
@@ -422,7 +426,7 @@ public class LaunchEventStorerTest
 
   @Override
   public void testNewXmlType() throws Exception {
-    Calendar time = new GregorianCalendar();
+    DateTime time = new DateTime();
     long duration = 9823;
     ILaunchConfiguration config = new LaunchConfigurationForTest();
     ILaunch launch = new Launch(config, ILaunchManager.DEBUG_MODE, null);
@@ -450,7 +454,7 @@ public class LaunchEventStorerTest
 
   @Override
   protected LaunchEvent createEvent() {
-    Calendar time = new GregorianCalendar();
+    DateTime time = new DateTime();
     long duration = 19823;
     ILaunchConfiguration config = new LaunchConfigurationForTest();
     ILaunch launch = new Launch(config, ILaunchManager.DEBUG_MODE, null);
@@ -463,7 +467,7 @@ public class LaunchEventStorerTest
 
   @Override
   protected LaunchEvent createEvent2() {
-    Calendar time = new GregorianCalendar(1999, 1, 1);
+    DateTime time = new DateTime(1999, 1, 1, 0, 0, 0, 0);
     long duration = 119823;
     ILaunchConfiguration config = new LaunchConfigurationForTest();
     ILaunch launch = new Launch(config, ILaunchManager.PROFILE_MODE, null);

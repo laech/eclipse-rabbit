@@ -15,7 +15,8 @@
  */
 package rabbit.mylyn.tests.storage.xml;
 
-import static rabbit.data.internal.xml.DatatypeUtil.*;
+import static rabbit.data.internal.xml.DatatypeUtil.toXMLGregorianCalendarDateTime;
+
 import rabbit.data.internal.xml.schema.events.TaskEventListType;
 import rabbit.data.internal.xml.schema.events.TaskEventType;
 import rabbit.data.internal.xml.schema.events.TaskIdType;
@@ -27,8 +28,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import org.eclipse.mylyn.internal.tasks.core.LocalTask;
+import org.joda.time.DateTime;
 
-import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
@@ -78,11 +79,11 @@ public class TaskEventStorerTest
   protected TaskEvent createEvent() {
     LocalTask task = new LocalTask("taskId", "what?");
     task.setCreationDate(new Date());
-    return new TaskEvent(Calendar.getInstance(), 187, "fileId", task);
+    return new TaskEvent(new DateTime(), 187, "fileId", task);
   }
 
   @Override
-  protected TaskEvent createEvent(Calendar eventTime) {
+  protected TaskEvent createEvent(DateTime eventTime) {
     LocalTask task = new LocalTask("tas1kId", "what?1");
     task.setCreationDate(new Date());
     return new TaskEvent(eventTime, 1187, "fileId", task);
@@ -92,7 +93,7 @@ public class TaskEventStorerTest
   protected TaskEvent createEvent2() {
     LocalTask task = new LocalTask("tttttt", "22222222");
     task.setCreationDate(new Date());
-    return new TaskEvent(Calendar.getInstance(), 233, "bbbbbbb", task);
+    return new TaskEvent(new DateTime(), 233, "bbbbbbb", task);
   }
 
   protected TaskEventType createFrom(TaskEvent event) {

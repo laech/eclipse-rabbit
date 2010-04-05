@@ -19,9 +19,8 @@ import rabbit.data.store.model.ContinuousEvent;
 
 import static org.junit.Assert.assertEquals;
 
+import org.joda.time.DateTime;
 import org.junit.Test;
-
-import java.util.Calendar;
 
 /**
  * Test for {@link ContinuousEvent}
@@ -33,12 +32,12 @@ public class ContinuousEventTest extends DiscreteEventTest {
   private ContinuousEvent event;
 
   public ContinuousEventTest() {
-    event = createEvent(Calendar.getInstance());
+    event = createEvent(new DateTime());
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void testConstructor_withNegativeDuration() {
-    new ContinuousEvent(Calendar.getInstance(), -1);
+    new ContinuousEvent(new DateTime(), -1);
   }
 
   @Test
@@ -47,11 +46,11 @@ public class ContinuousEventTest extends DiscreteEventTest {
   }
 
   @Override
-  protected ContinuousEvent createEvent(Calendar time) {
+  protected ContinuousEvent createEvent(DateTime time) {
     return createEvent(time, duration);
   }
 
-  protected ContinuousEvent createEvent(Calendar time, long duration) {
+  protected ContinuousEvent createEvent(DateTime time, long duration) {
     return new ContinuousEvent(time, duration);
   }
 }

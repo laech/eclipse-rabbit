@@ -25,8 +25,7 @@ import org.eclipse.core.commands.IExecutionListener;
 import org.eclipse.core.commands.NotHandledException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.commands.ICommandService;
-
-import java.util.Calendar;
+import org.joda.time.DateTime;
 
 /**
  * Tracks command executions.
@@ -53,7 +52,7 @@ public class CommandTracker extends AbstractTracker<CommandEvent> implements
 
   @Override
   public void preExecute(String commandId, ExecutionEvent event) {
-    addData(new CommandEvent(Calendar.getInstance(), event));
+    addData(new CommandEvent(new DateTime(), event));
   }
 
   @Override

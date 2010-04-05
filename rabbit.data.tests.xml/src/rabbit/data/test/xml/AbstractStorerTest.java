@@ -27,11 +27,11 @@ import rabbit.data.store.model.DiscreteEvent;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
+import org.joda.time.DateTime;
 import org.junit.Test;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.List;
 
@@ -81,8 +81,7 @@ public abstract class AbstractStorerTest<E extends DiscreteEvent, T, S extends E
 
   @Test
   public void testNewXmlTypeHolder() throws Exception {
-    XMLGregorianCalendar cal = toXMLGregorianCalendarDate(Calendar
-        .getInstance());
+    XMLGregorianCalendar cal = toXMLGregorianCalendarDate(new DateTime());
     S s = newXmlTypeHolder(storer, cal);
     assertNotNull(s);
     assertEquals(cal, s.getDate());

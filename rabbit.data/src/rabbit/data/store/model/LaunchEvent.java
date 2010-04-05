@@ -17,11 +17,9 @@ package rabbit.data.store.model;
 
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
+import org.joda.time.DateTime;
 
-import java.util.Calendar;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -38,7 +36,7 @@ public class LaunchEvent extends ContinuousEvent {
   /**
    * Constructs a new event.
    * 
-   * @param startTime The start time of the event.
+   * @param endTime The end time of the event.
    * @param duration The duration of the event, in milliseconds.
    * @param config The launch configuration.
    * @param fileIds The IDs of the files associated with the launch, or an empty
@@ -48,18 +46,21 @@ public class LaunchEvent extends ContinuousEvent {
    *           is null.
    * @see {@link rabbit.core.storage.IFileMapper}
    */
-  public LaunchEvent(Calendar startTime, long duration, ILaunch launch,
-      ILaunchConfiguration config, Collection<String> fileIds) {
+  public LaunchEvent(DateTime endTime, long duration, ILaunch launch,
+      ILaunchConfiguration config, Set<String> fileIds) {
 
-    super(startTime, duration);
+    super(endTime, duration);
 
-    if (launch == null || config == null || fileIds == null) {
-      throw new NullPointerException();
-    }
+    if (launch == null)
+      throw new NullPointerException("Launch cannot be null");
+    if (config == null)
+      throw new NullPointerException("Launch configuration cannot be null");
+    if (fileIds == null)
+      throw new NullPointerException("File IDs cannot be null");
 
     this.config = config;
     this.launch = launch;
-    this.fileIds = Collections.unmodifiableSet(new HashSet<String>(fileIds));
+    this.fileIds = Collections.unmodifiableSet(fileIds);
   }
 
   /**

@@ -25,9 +25,9 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.core.Launch;
 import org.eclipse.debug.internal.core.LaunchConfiguration;
+import org.joda.time.DateTime;
 import org.junit.Test;
 
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -50,7 +50,7 @@ public class LaunchEventTest extends ContinuousEventTest {
     fileIds.add("a");
     fileIds.add("b");
     fileIds.add("c");
-    LaunchEvent event = new LaunchEvent(Calendar.getInstance(), 18, new Launch(
+    LaunchEvent event = new LaunchEvent(new DateTime(), 18, new Launch(
         new LaunchConfigurationForTest("a"), ILaunchManager.DEBUG_MODE, null),
         new LaunchConfigurationForTest("asdf"), fileIds);
 
@@ -65,28 +65,28 @@ public class LaunchEventTest extends ContinuousEventTest {
 
   @Test(expected = NullPointerException.class)
   public void testConstructor_fileIdsNull() {
-    new LaunchEvent(Calendar.getInstance(), 1, new Launch(
+    new LaunchEvent(new DateTime(), 1, new Launch(
         new LaunchConfigurationForTest("asdfdsf"), ILaunchManager.DEBUG_MODE,
         null), new LaunchConfigurationForTest("adfsdfdsf"), null);
   }
 
   @Test(expected = NullPointerException.class)
   public void testConstructor_launchConfigNull() {
-    new LaunchEvent(Calendar.getInstance(), 10, new Launch(
+    new LaunchEvent(new DateTime(), 10, new Launch(
         new LaunchConfigurationForTest("a"), ILaunchManager.DEBUG_MODE, null),
-        null, Collections.<String> emptyList());
+        null, Collections.<String> emptySet());
   }
 
   @Test(expected = NullPointerException.class)
   public void testConstructor_launchNull() {
-    new LaunchEvent(Calendar.getInstance(), 10, null,
+    new LaunchEvent(new DateTime(), 10, null,
         new LaunchConfigurationForTest("Adfd222"), Collections
-            .<String> emptyList());
+            .<String> emptySet());
   }
 
   @Test(expected = UnsupportedOperationException.class)
   public void testGetFileIds_unmodifiable() {
-    LaunchEvent event = new LaunchEvent(Calendar.getInstance(), 32, new Launch(
+    LaunchEvent event = new LaunchEvent(new DateTime(), 32, new Launch(
         new LaunchConfigurationForTest("a"), ILaunchManager.DEBUG_MODE, null),
         new LaunchConfigurationForTest("a"), new HashSet<String>());
     event.getFileIds().add("Should throw exception.");
@@ -96,8 +96,8 @@ public class LaunchEventTest extends ContinuousEventTest {
   public void testGetLaunch() {
     ILaunch launch = new Launch(new LaunchConfigurationForTest("a"),
         ILaunchManager.DEBUG_MODE, null);
-    LaunchEvent event = new LaunchEvent(Calendar.getInstance(), 10, launch,
-        new LaunchConfigurationForTest("bbb"), Collections.<String> emptyList());
+    LaunchEvent event = new LaunchEvent(new DateTime(), 10, launch,
+        new LaunchConfigurationForTest("bbb"), Collections.<String> emptySet());
 
     assertSame(launch, event.getLaunch());
   }
@@ -105,9 +105,9 @@ public class LaunchEventTest extends ContinuousEventTest {
   @Test
   public void testGetLaunchConfiguration() {
     ILaunchConfiguration config = new LaunchConfigurationForTest("b");
-    LaunchEvent event = new LaunchEvent(Calendar.getInstance(), 101,
+    LaunchEvent event = new LaunchEvent(new DateTime(), 101,
         new Launch(config, ILaunchManager.DEBUG_MODE, null), config,
-        Collections.<String> emptyList());
+        Collections.<String> emptySet());
 
     assertSame(config, event.getLaunchConfiguration());
   }

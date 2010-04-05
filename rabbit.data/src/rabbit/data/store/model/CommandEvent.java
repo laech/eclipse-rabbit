@@ -16,30 +16,28 @@
 package rabbit.data.store.model;
 
 import org.eclipse.core.commands.ExecutionEvent;
-
-import java.util.Calendar;
+import org.joda.time.DateTime;
 
 /**
  * A command execution event.
  */
 public class CommandEvent extends DiscreteEvent {
 
-  private ExecutionEvent event;
+  private final ExecutionEvent event;
 
   /**
    * Constructs a new event.
    * 
    * @param time The time of the event.
-   * @param e The execution event.
+   * @param event The execution event.
    * @throws NullPointerException If any of the arguments is null.
    */
-  public CommandEvent(Calendar time, ExecutionEvent e) {
+  public CommandEvent(DateTime time, ExecutionEvent event) {
     super(time);
+    if (event == null)
+      throw new NullPointerException("Execution event cannot be null");
 
-    if (e == null) {
-      throw new NullPointerException();
-    }
-    this.event = e;
+    this.event = event;
   }
 
   /**

@@ -40,13 +40,13 @@ import org.eclipse.swtbot.swt.finder.junit.SWTBotJunit4ClassRunner;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.FileEditorInput;
+import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.HashSet;
 
 /**
@@ -190,7 +190,7 @@ public class LaunchTrackerTest extends AbstractTrackerTest<LaunchEvent> {
   protected LaunchEvent createEvent() {
     ILaunch launch = new Launch(new LaunchConfigurationForTest(),
         ILaunchManager.RUN_MODE, null);
-    return new LaunchEvent(Calendar.getInstance(), 10, launch, launch
+    return new LaunchEvent(new DateTime(), 10, launch, launch
         .getLaunchConfiguration(), new HashSet<String>(Arrays.asList("1", "2")));
   }
 

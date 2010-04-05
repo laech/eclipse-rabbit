@@ -36,6 +36,7 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.FileEditorInput;
+import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -45,7 +46,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.Calendar;
 import java.util.Observable;
 import java.util.concurrent.TimeUnit;
 
@@ -91,11 +91,11 @@ public abstract class AbstractPartTrackerTest<E extends ContinuousEvent>
 
     // Test enable then disable:
 
-    Calendar start = Calendar.getInstance();
+    DateTime start = new DateTime();
     tracker.setEnabled(true);
     TimeUnit.MILLISECONDS.sleep(35);
     tracker.setEnabled(false);
-    Calendar end = Calendar.getInstance();
+    DateTime end = new DateTime();
     E event = tracker.getData().iterator().next();
     internalAssertAccuracy(event, newPart, 35, 1, start, end);
 
@@ -103,88 +103,88 @@ public abstract class AbstractPartTrackerTest<E extends ContinuousEvent>
     // these two methods are always called when changing views.
 
     tracker.flushData();
-    start = Calendar.getInstance();
+    start = new DateTime();
     tracker.partActivated(newPart);
     TimeUnit.MILLISECONDS.sleep(25);
     tracker.partDeactivated(newPart);
-    end = Calendar.getInstance();
+    end = new DateTime();
     event = tracker.getData().iterator().next();
     internalAssertAccuracy(event, newPart, 25, 1, start, end);
 
     // Test partActivated then windowClosed:
 
     tracker.flushData();
-    start = Calendar.getInstance();
+    start = new DateTime();
     tracker.partActivated(newPart);
     TimeUnit.MILLISECONDS.sleep(70);
     tracker.windowClosed(win);
-    end = Calendar.getInstance();
+    end = new DateTime();
     event = tracker.getData().iterator().next();
     internalAssertAccuracy(event, newPart, 70, 1, start, end);
 
     // Test windowOpened then partDeactivated:
 
     tracker.flushData();
-    start = Calendar.getInstance();
+    start = new DateTime();
     tracker.windowOpened(win);
     TimeUnit.MILLISECONDS.sleep(60);
     tracker.partDeactivated(newPart);
-    end = Calendar.getInstance();
+    end = new DateTime();
     event = tracker.getData().iterator().next();
     internalAssertAccuracy(event, newPart, 60, 1, start, end);
 
     // Test windowOpened then windowClosed:
 
     tracker.flushData();
-    start = Calendar.getInstance();
+    start = new DateTime();
     tracker.windowOpened(win);
     TimeUnit.MILLISECONDS.sleep(10);
     tracker.windowClosed(win);
-    end = Calendar.getInstance();
+    end = new DateTime();
     event = tracker.getData().iterator().next();
     internalAssertAccuracy(event, newPart, 10, 1, start, end);
 
     // Test windowOpened then windowDeactivated:
 
     tracker.flushData();
-    start = Calendar.getInstance();
+    start = new DateTime();
     tracker.windowOpened(win);
     TimeUnit.MILLISECONDS.sleep(20);
     tracker.windowDeactivated(win);
-    end = Calendar.getInstance();
+    end = new DateTime();
     event = tracker.getData().iterator().next();
     internalAssertAccuracy(event, newPart, 20, 1, start, end);
 
     // Test windowActivated then windowDeactivated:
 
     tracker.flushData();
-    start = Calendar.getInstance();
+    start = new DateTime();
     tracker.windowActivated(win);
     TimeUnit.MILLISECONDS.sleep(30);
     tracker.windowDeactivated(win);
-    end = Calendar.getInstance();
+    end = new DateTime();
     event = tracker.getData().iterator().next();
     internalAssertAccuracy(event, newPart, 30, 1, start, end);
 
     // Test windowActivated then windowClosed:
 
     tracker.flushData();
-    start = Calendar.getInstance();
+    start = new DateTime();
     tracker.windowActivated(win);
     TimeUnit.MILLISECONDS.sleep(40);
     tracker.windowClosed(win);
-    end = Calendar.getInstance();
+    end = new DateTime();
     event = tracker.getData().iterator().next();
     internalAssertAccuracy(event, newPart, 40, 1, start, end);
 
     // Test windowActivated then partDeactivated:
 
     tracker.flushData();
-    start = Calendar.getInstance();
+    start = new DateTime();
     tracker.windowActivated(win);
     TimeUnit.MILLISECONDS.sleep(50);
     tracker.partDeactivated(newPart);
-    end = Calendar.getInstance();
+    end = new DateTime();
     event = tracker.getData().iterator().next();
     internalAssertAccuracy(event, newPart, 50, 1, start, end);
   }
@@ -218,8 +218,8 @@ public abstract class AbstractPartTrackerTest<E extends ContinuousEvent>
 
     assertEquals(1, tracker.getData().size());
     E event = tracker.getData().iterator().next();
-    assertTrue(start <= event.getTime().getTimeInMillis());
-    assertTrue(end >= event.getTime().getTimeInMillis());
+    assertTrue(start <= event.getTime().getMillis());
+    assertTrue(end >= event.getTime().getMillis());
     assertTrue((end - start) >= event.getDuration());
     assertTrue(sleepDuration <= event.getDuration());
     assertTrue(hasSamePart(event, editor));
@@ -239,8 +239,8 @@ public abstract class AbstractPartTrackerTest<E extends ContinuousEvent>
 
     assertEquals(1, tracker.getData().size());
     E event = tracker.getData().iterator().next();
-    assertTrue(start <= event.getTime().getTimeInMillis());
-    assertTrue(end >= event.getTime().getTimeInMillis());
+    assertTrue(start <= event.getTime().getMillis());
+    assertTrue(end >= event.getTime().getMillis());
     assertTrue((end - start) >= event.getDuration());
     assertTrue(sleepDuration <= event.getDuration());
     assertTrue(hasSamePart(event, editor));
@@ -261,8 +261,8 @@ public abstract class AbstractPartTrackerTest<E extends ContinuousEvent>
 
     assertEquals(1, tracker.getData().size());
     E event = tracker.getData().iterator().next();
-    assertTrue(start <= event.getTime().getTimeInMillis());
-    assertTrue(end >= event.getTime().getTimeInMillis());
+    assertTrue(start <= event.getTime().getMillis());
+    assertTrue(end >= event.getTime().getMillis());
     assertTrue((end - start) >= event.getDuration());
     assertTrue(sleepDuration <= event.getDuration());
     assertTrue(hasSamePart(event, editor));
@@ -303,8 +303,8 @@ public abstract class AbstractPartTrackerTest<E extends ContinuousEvent>
 
     assertEquals(1, tracker.getData().size());
     E event = tracker.getData().iterator().next();
-    assertTrue(start <= event.getTime().getTimeInMillis());
-    assertTrue(end >= event.getTime().getTimeInMillis());
+    assertTrue(start <= event.getTime().getMillis());
+    assertTrue(end >= event.getTime().getMillis());
     assertTrue((end - start) >= event.getDuration());
     assertTrue(sleepDuration <= event.getDuration());
     assertTrue(hasSamePart(event, editor));
@@ -323,8 +323,8 @@ public abstract class AbstractPartTrackerTest<E extends ContinuousEvent>
 
     assertEquals(1, tracker.getData().size());
     E event = tracker.getData().iterator().next();
-    assertTrue(start <= event.getTime().getTimeInMillis());
-    assertTrue(end >= event.getTime().getTimeInMillis());
+    assertTrue(start <= event.getTime().getMillis());
+    assertTrue(end >= event.getTime().getMillis());
     assertTrue((end - start) >= event.getDuration());
     assertTrue(sleepDuration <= event.getDuration());
     assertTrue(hasSamePart(event, editor));
@@ -344,8 +344,8 @@ public abstract class AbstractPartTrackerTest<E extends ContinuousEvent>
 
     assertEquals(1, tracker.getData().size());
     E event = tracker.getData().iterator().next();
-    assertTrue(start <= event.getTime().getTimeInMillis());
-    assertTrue(end >= event.getTime().getTimeInMillis());
+    assertTrue(start <= event.getTime().getMillis());
+    assertTrue(end >= event.getTime().getMillis());
     assertTrue((end - start) >= event.getDuration());
     assertTrue(sleepDuration <= event.getDuration());
     assertTrue(hasSamePart(event, editor));
@@ -410,7 +410,7 @@ public abstract class AbstractPartTrackerTest<E extends ContinuousEvent>
   protected abstract boolean hasSamePart(E event, IWorkbenchPart part);
 
   protected abstract void internalAssertAccuracy(E event, IWorkbenchPart part,
-      long durationInMillis, int size, Calendar start, Calendar end);
+      long durationInMillis, int size, DateTime start, DateTime end);
 
   protected IEditorPart openNewEditor() {
     Display.getDefault().syncExec(new Runnable() {

@@ -29,10 +29,10 @@ import org.eclipse.core.commands.IHandler;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.commands.ICommandService;
 import org.eclipse.ui.handlers.IHandlerService;
+import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.Calendar;
 import java.util.Collections;
 
 /**
@@ -80,13 +80,13 @@ public class CommandTrackerTest extends AbstractTrackerTest<CommandEvent> {
     assertEquals(1, tracker.getData().size());
     CommandEvent e = tracker.getData().iterator().next();
     assertEquals(command, e.getExecutionEvent().getCommand());
-    assertTrue(start <= e.getTime().getTimeInMillis());
-    assertTrue(end >= e.getTime().getTimeInMillis());
+    assertTrue(start <= e.getTime().getMillis());
+    assertTrue(end >= e.getTime().getMillis());
   }
 
   @Override
   protected CommandEvent createEvent() {
-    return new CommandEvent(Calendar.getInstance(), createExecutionEvent("1"));
+    return new CommandEvent(new DateTime(), createExecutionEvent("1"));
   }
 
   @Override

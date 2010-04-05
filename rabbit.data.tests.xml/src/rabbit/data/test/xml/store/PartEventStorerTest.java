@@ -30,8 +30,8 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
+import org.joda.time.DateTime;
 
-import java.util.Calendar;
 import java.util.List;
 
 public class PartEventStorerTest
@@ -84,7 +84,7 @@ public class PartEventStorerTest
         try {
           IViewPart v = wb.getActiveWorkbenchWindow().getActivePage().showView(
               "org.eclipse.ui.views.TaskList");
-          event = new PartEvent(Calendar.getInstance(), 10, v);
+          event = new PartEvent(new DateTime(), 10, v);
         } catch (PartInitException e) {
           e.printStackTrace();
           event = null;
@@ -95,7 +95,7 @@ public class PartEventStorerTest
   }
 
   @Override
-  protected PartEvent createEvent(final Calendar eventTime) {
+  protected PartEvent createEvent(final DateTime eventTime) {
     final IWorkbench wb = PlatformUI.getWorkbench();
     wb.getDisplay().syncExec(new Runnable() {
 
@@ -125,7 +125,7 @@ public class PartEventStorerTest
         try {
           IViewPart v = wb.getActiveWorkbenchWindow().getActivePage().showView(
               "org.eclipse.ui.navigator.ProjectExplorer");
-          event = new PartEvent(Calendar.getInstance(), 10, v);
+          event = new PartEvent(new DateTime(), 10, v);
         } catch (PartInitException e) {
           e.printStackTrace();
           event = null;

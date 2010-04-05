@@ -24,8 +24,8 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
+import org.joda.time.DateTime;
 
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -194,7 +194,7 @@ public abstract class AbstractPartTracker<E> extends AbstractTracker<E>
     }
 
     start = Long.MAX_VALUE;
-    E event = tryCreateEvent(Calendar.getInstance(), duration, part);
+    E event = tryCreateEvent(new DateTime(), duration, part);
     if (event != null) {
       addData(event);
     }
@@ -211,13 +211,13 @@ public abstract class AbstractPartTracker<E> extends AbstractTracker<E>
   /**
    * Try to create an event. This method is called when a session ends.
    * 
-   * @param time The time of the event.
+   * @param endTime The end time of the event.
    * @param duration The duration of the event.
-   * @param p The workbench part of the event.
+   * @param part The workbench part of the event.
    * @return An event, or null if one should not be created.
    */
-  protected abstract E tryCreateEvent(Calendar time, long duration,
-      IWorkbenchPart p);
+  protected abstract E tryCreateEvent(DateTime endTime, long duration,
+      IWorkbenchPart part);
 
   /**
    * Gets all the {@link IPartService} from the currently opened windows.

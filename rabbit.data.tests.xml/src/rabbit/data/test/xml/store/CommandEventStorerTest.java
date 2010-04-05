@@ -30,9 +30,9 @@ import static org.junit.Assert.fail;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.commands.ICommandService;
+import org.joda.time.DateTime;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -90,7 +90,7 @@ public class CommandEventStorerTest
 
       // Insert an new and different event:
 
-      CommandEvent eNew = new CommandEvent(Calendar.getInstance(),
+      CommandEvent eNew = new CommandEvent(new DateTime(),
           createExecutionEvent("1334850426385"));
       storer.insert(eNew);
       storer.commit();
@@ -119,10 +119,10 @@ public class CommandEventStorerTest
 
       // ..
 
-      Calendar cal = e.getTime();
-      int day = cal.get(Calendar.DAY_OF_MONTH);
+      DateTime cal = e.getTime();
+      int day = cal.getDayOfMonth();
       day = (day < 15) ? day + 1 : day - 1;
-      cal.set(Calendar.DAY_OF_MONTH, day);
+      cal = cal.withDayOfMonth(day);
       e = new CommandEvent(cal, createExecutionEvent("abc"));
       storer.insert(e);
       storer.commit();
@@ -190,7 +190,7 @@ public class CommandEventStorerTest
 
       // Insert an new and different event:
 
-      e = new CommandEvent(Calendar.getInstance(),
+      e = new CommandEvent(new DateTime(),
           createExecutionEvent("nch1uhcbzysgnvc"));
       storer.insert(e);
 
@@ -202,10 +202,10 @@ public class CommandEventStorerTest
           .getCommandId());
       assertEquals(1, type.getCount());
 
-      Calendar cal = e.getTime();
-      int day = cal.get(Calendar.DAY_OF_MONTH);
+      DateTime cal = e.getTime();
+      int day = cal.getDayOfMonth();
       day = (day < 15) ? day + 1 : day - 1;
-      cal.set(Calendar.DAY_OF_MONTH, day);
+      cal = cal.withDayOfMonth(day);
       e = new CommandEvent(cal, createExecutionEvent("nch1uhcbzysgnvc"));
 
       storer.insert(e);
@@ -250,7 +250,7 @@ public class CommandEventStorerTest
 
         // Make a new event with different ids:
 
-        CommandEvent eNew = new CommandEvent(Calendar.getInstance(),
+        CommandEvent eNew = new CommandEvent(new DateTime(),
             createExecutionEvent("cn874hdbi000283"));
 
         list.clear();
@@ -274,10 +274,10 @@ public class CommandEventStorerTest
 
       {// Insert event of a different date:
         list.clear();
-        Calendar cal = e.getTime();
-        int day = cal.get(Calendar.DAY_OF_MONTH);
+        DateTime cal = e.getTime();
+        int day = cal.getDayOfMonth();
         day = (day < 15) ? day + 1 : day - 1;
-        cal.set(Calendar.DAY_OF_MONTH, day);
+        cal = cal.withDayOfMonth(day);
         e = new CommandEvent(cal, createExecutionEvent("nch1uhcbzysgnvc"));
 
         list.add(e);
@@ -368,8 +368,8 @@ public class CommandEventStorerTest
   @Override
   public void testNewXmlTypeHolder() throws Exception {
 
-    XMLGregorianCalendar cal = DatatypeUtil.toXMLGregorianCalendarDate(Calendar
-        .getInstance());
+    XMLGregorianCalendar cal = DatatypeUtil
+        .toXMLGregorianCalendarDate(new DateTime());
     CommandEventListType list = newXmlTypeHolder(storer, cal);
     assertEquals(cal, list.getDate());
   }
@@ -381,14 +381,12 @@ public class CommandEventStorerTest
 
   @Override
   protected CommandEvent createEvent() {
-    return new CommandEvent(Calendar.getInstance(),
-        createExecutionEvent("adnk2o385"));
+    return new CommandEvent(new DateTime(), createExecutionEvent("adnk2o385"));
   }
 
   @Override
   protected CommandEvent createEvent2() {
-    return new CommandEvent(Calendar.getInstance(),
-        createExecutionEvent("23545656"));
+    return new CommandEvent(new DateTime(), createExecutionEvent("23545656"));
   }
 
   private ExecutionEvent createExecutionEvent(String commandId) {

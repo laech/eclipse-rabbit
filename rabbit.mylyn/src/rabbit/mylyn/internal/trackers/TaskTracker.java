@@ -26,8 +26,7 @@ import org.eclipse.mylyn.tasks.core.ITask;
 import org.eclipse.mylyn.tasks.ui.TasksUi;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPart;
-
-import java.util.Calendar;
+import org.joda.time.DateTime;
 
 /**
  * Tracks task events.
@@ -44,25 +43,25 @@ public class TaskTracker extends AbstractPartTracker<TaskEvent> {
   }
 
   @Override
-  protected TaskEvent tryCreateEvent(Calendar time, long duration,
-      IWorkbenchPart p) {
+  protected TaskEvent tryCreateEvent(DateTime endTime, long duration,
+      IWorkbenchPart part) {
     ITask task = TasksUi.getTaskActivityManager().getActiveTask();
     if (task == null) {
       return null;
     }
 
-    if (p instanceof IEditorPart == false) {
+    if (part instanceof IEditorPart == false) {
       return null;
     }
 
-    IFile file = (IFile) ((IEditorPart) p).getEditorInput().getAdapter(
+    IFile file = (IFile) ((IEditorPart) part).getEditorInput().getAdapter(
         IFile.class);
     if (file == null) {
       return null;
     }
 
     String fileId = DataHandler.getFileMapper().insert(file);
-    return new TaskEvent(time, duration, fileId, task);
+    return new TaskEvent(endTime, duration, fileId, task);
   }
 
 }

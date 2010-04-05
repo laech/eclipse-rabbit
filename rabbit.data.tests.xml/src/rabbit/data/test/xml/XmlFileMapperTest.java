@@ -53,6 +53,7 @@ import javax.xml.bind.JAXBElement;
 /**
  * Test {@link XmlFileMapper}
  */
+@SuppressWarnings("restriction")
 public class XmlFileMapperTest {
 
   private XmlFileMapper manager = XmlFileMapper.INSTANCE;
@@ -302,16 +303,31 @@ public class XmlFileMapperTest {
     }
   }
 
+  @Test(expected = NullPointerException.class)
+  public void testGetExternalFile_null() {
+    manager.getExternalFile(null);
+  }
+
   @Test
   public void testGetFile() {
     String id = System.nanoTime() + "" + System.currentTimeMillis();
     assertNull(manager.getFile(id));
   }
 
+  @Test(expected = NullPointerException.class)
+  public void testGetFile_null() {
+    manager.getFile(null);
+  }
+
   @Test
   public void testGetId() {
     IFile file = root.getProject("p").getFile(System.currentTimeMillis() + "");
     assertNull(manager.getId(file));
+  }
+
+  @Test(expected = NullPointerException.class)
+  public void testGetId_null() {
+    manager.getId(null);
   }
 
   @Test
@@ -322,6 +338,11 @@ public class XmlFileMapperTest {
     String id = manager.insert(file);
     assertNotNull(id);
     assertEquals(id, manager.getId(file));
+  }
+
+  @Test(expected = NullPointerException.class)
+  public void testInsert_null() {
+    manager.insert(null);
   }
 
   @Test

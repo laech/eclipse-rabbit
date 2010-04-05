@@ -17,7 +17,7 @@ package rabbit.data.xml.access;
 
 import static rabbit.data.internal.xml.util.StringUtil.getString;
 
-import rabbit.data.access.model.LaunchDescriptor;
+import rabbit.data.access.model.ZLaunchDescriptor;
 import rabbit.data.internal.xml.AbstractAccessor;
 import rabbit.data.internal.xml.DataStore;
 import rabbit.data.internal.xml.IDataStore;
@@ -35,17 +35,17 @@ import java.util.Set;
  */
 public class LaunchDataAccessor
     extends
-    AbstractAccessor<Set<LaunchDescriptor>, LaunchEventType, LaunchEventListType> {
+    AbstractAccessor<Set<ZLaunchDescriptor>, LaunchEventType, LaunchEventListType> {
 
   @Override
-  protected Set<LaunchDescriptor> filter(List<LaunchEventListType> data) {
-    Set<LaunchDescriptor> result = new HashSet<LaunchDescriptor>();
+  protected Set<ZLaunchDescriptor> filter(List<LaunchEventListType> data) {
+    Set<ZLaunchDescriptor> result = new HashSet<ZLaunchDescriptor>();
 
     for (LaunchEventListType list : data) {
       for (LaunchEventType type : list.getLaunchEvent()) {
 
         boolean done = false;
-        for (LaunchDescriptor des : result) {
+        for (ZLaunchDescriptor des : result) {
           if (getString(type.getName()).equals(des.getLaunchName())
               && getString(type.getLaunchModeId())
                   .equals(des.getLaunchModeId())
@@ -63,7 +63,7 @@ public class LaunchDataAccessor
         }
 
         if (!done) {
-          LaunchDescriptor launch = new LaunchDescriptor();
+          ZLaunchDescriptor launch = new ZLaunchDescriptor();
           launch.setTotalDuration(type.getTotalDuration());
           launch.getFileIds().addAll(type.getFileId());
           launch.setLaunchName(type.getName());

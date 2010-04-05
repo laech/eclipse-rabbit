@@ -21,7 +21,7 @@ import java.util.Set;
 /**
  * Describes launches.
  */
-public class LaunchDescriptor {
+public class ZLaunchDescriptor {
 
   private int count;
   private long totalDuration;
@@ -33,7 +33,7 @@ public class LaunchDescriptor {
   /**
    * Constructs a new descriptor.
    */
-  public LaunchDescriptor() {
+  public ZLaunchDescriptor() {
     fileIds = new HashSet<String>();
     launchModeId = "";
     launchName = "";
@@ -49,7 +49,7 @@ public class LaunchDescriptor {
     if (obj.getClass() != getClass())
       return false;
 
-    LaunchDescriptor des = (LaunchDescriptor) obj;
+    ZLaunchDescriptor des = (ZLaunchDescriptor) obj;
     return getTotalDuration() == des.getTotalDuration()
         && getLaunchModeId().equals(des.getLaunchModeId())
         && getLaunchName().equals(des.getLaunchName())

@@ -22,9 +22,9 @@ import rabbit.data.store.model.FileEvent;
 import rabbit.data.test.xml.AbstractContinuousEventStorerTest;
 import rabbit.data.xml.store.FileEventStorer;
 
+import org.joda.time.DateTime;
 import org.junit.Assert;
 
-import java.util.Calendar;
 import java.util.List;
 
 public class FileEventStorerTest
@@ -48,17 +48,17 @@ public class FileEventStorerTest
 
   @Override
   protected FileEvent createEvent() {
-    return new FileEvent(Calendar.getInstance(), 10, "someId");
+    return new FileEvent(new DateTime(), 10, "someId");
   }
 
   @Override
-  protected FileEvent createEvent(Calendar eventTime) {
+  protected FileEvent createEvent(DateTime eventTime) {
     return new FileEvent(eventTime, 10, "someIdabvc");
   }
 
   @Override
   protected FileEvent createEvent2() {
-    return new FileEvent(Calendar.getInstance(), 110, "blah");
+    return new FileEvent(new DateTime(), 110, "blah");
   }
 
   @Override

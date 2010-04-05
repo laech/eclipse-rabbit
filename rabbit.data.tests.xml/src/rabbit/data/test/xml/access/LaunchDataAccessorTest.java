@@ -17,7 +17,7 @@ package rabbit.data.test.xml.access;
 
 import static rabbit.data.internal.xml.util.StringUtil.getString;
 
-import rabbit.data.access.model.LaunchDescriptor;
+import rabbit.data.access.model.ZLaunchDescriptor;
 import rabbit.data.internal.xml.DatatypeUtil;
 import rabbit.data.internal.xml.schema.events.EventListType;
 import rabbit.data.internal.xml.schema.events.LaunchEventListType;
@@ -40,17 +40,17 @@ import java.util.Set;
  */
 public class LaunchDataAccessorTest
     extends
-    AbstractAccessorTest<Set<LaunchDescriptor>, LaunchEventType, LaunchEventListType> {
+    AbstractAccessorTest<Set<ZLaunchDescriptor>, LaunchEventType, LaunchEventListType> {
 
   @Override
-  protected void assertValues(Set<LaunchDescriptor> data, EventListType events) {
-    Set<LaunchDescriptor> myData = new HashSet<LaunchDescriptor>();
+  protected void assertValues(Set<ZLaunchDescriptor> data, EventListType events) {
+    Set<ZLaunchDescriptor> myData = new HashSet<ZLaunchDescriptor>();
     for (LaunchEventListType list : events.getLaunchEvents()) {
       for (LaunchEventType type : list.getLaunchEvent()) {
 
         boolean done = false;
 
-        for (LaunchDescriptor des : myData) {
+        for (ZLaunchDescriptor des : myData) {
           if (getString(type.getName()).equals(des.getLaunchName())
               && getString(type.getLaunchModeId())
                   .equals(des.getLaunchModeId())
@@ -68,7 +68,7 @@ public class LaunchDataAccessorTest
         }
 
         if (!done) {
-          LaunchDescriptor des = new LaunchDescriptor();
+          ZLaunchDescriptor des = new ZLaunchDescriptor();
           des.setCount(type.getCount());
           des.setTotalDuration(type.getTotalDuration());
           des.getFileIds().addAll(type.getFileId());

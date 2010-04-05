@@ -23,7 +23,7 @@ import rabbit.mylyn.TaskId;
 import rabbit.mylyn.internal.ui.util.MissingTask;
 import rabbit.mylyn.internal.ui.util.MissingTaskCategory;
 import rabbit.ui.CellPainter;
-import rabbit.ui.DisplayPreference;
+import rabbit.ui.Preferences;
 import rabbit.ui.TreeLabelComparator;
 import rabbit.ui.internal.SharedImages;
 import rabbit.ui.internal.pages.AbstractTreeViewerPage;
@@ -60,6 +60,7 @@ import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.ide.IDE;
+import org.joda.time.LocalDate;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -434,10 +435,12 @@ public class TaskPage extends AbstractTreeViewerPage {
   }
 
   @Override
-  public void update(DisplayPreference p) {
+  public void update(Preferences p) {
     Object[] elements = getViewer().getExpandedElements();
     try {
-      doUpdate(accessor.getData(p.getStartDate(), p.getEndDate()));
+      LocalDate start = LocalDate.fromCalendarFields(p.getStartDate());
+      LocalDate end = LocalDate.fromCalendarFields(p.getEndDate());
+      doUpdate(accessor.getData(start, end));
     } catch (Exception e) {
       e.printStackTrace();
     }

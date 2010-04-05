@@ -28,13 +28,13 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
+import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.Calendar;
 import java.util.Iterator;
 import java.util.Observable;
 import java.util.concurrent.TimeUnit;
@@ -74,8 +74,8 @@ public class PerspectiveTrackerTest extends
   @Test
   public void testAccuracy() throws InterruptedException {
     PerspectiveEvent e = null;
-    Calendar start = null;
-    Calendar end = null;
+    DateTime start = null;
+    DateTime end = null;
     long duration = 0;
     int size = 0;
 
@@ -84,9 +84,9 @@ public class PerspectiveTrackerTest extends
     IWorkbenchWindow activeWindow = getActiveWindow();
 
     tracker.setEnabled(true);
-    start = Calendar.getInstance();
+    start = new DateTime();
     TimeUnit.MILLISECONDS.sleep((duration = 30));
-    end = Calendar.getInstance();
+    end = new DateTime();
     tracker.setEnabled(false);
     size = 1;
     e = tracker.getData().iterator().next();
@@ -98,9 +98,9 @@ public class PerspectiveTrackerTest extends
     tracker.flushData();
     tracker.perspectiveActivated(activeWindow.getActivePage(), activeWindow
         .getActivePage().getPerspective());
-    start = Calendar.getInstance();
+    start = new DateTime();
     TimeUnit.MILLISECONDS.sleep((duration = 25));
-    end = Calendar.getInstance();
+    end = new DateTime();
     tracker.perspectiveDeactivated(activeWindow.getActivePage(), activeWindow
         .getActivePage().getPerspective());
     size = 1;
@@ -113,9 +113,9 @@ public class PerspectiveTrackerTest extends
     tracker.flushData();
     tracker.perspectiveActivated(activeWindow.getActivePage(), activeWindow
         .getActivePage().getPerspective());
-    start = Calendar.getInstance();
+    start = new DateTime();
     TimeUnit.MILLISECONDS.sleep((duration = 12));
-    end = Calendar.getInstance();
+    end = new DateTime();
     tracker.windowClosed(activeWindow);
     size = 1;
     e = tracker.getData().iterator().next();
@@ -126,9 +126,9 @@ public class PerspectiveTrackerTest extends
 
     tracker.flushData();
     tracker.windowOpened(activeWindow);
-    start = Calendar.getInstance();
+    start = new DateTime();
     TimeUnit.MILLISECONDS.sleep((duration = 21));
-    end = Calendar.getInstance();
+    end = new DateTime();
     tracker.perspectiveDeactivated(activeWindow.getActivePage(), activeWindow
         .getActivePage().getPerspective());
     size = 1;
@@ -140,9 +140,9 @@ public class PerspectiveTrackerTest extends
 
     tracker.flushData();
     tracker.windowOpened(activeWindow);
-    start = Calendar.getInstance();
+    start = new DateTime();
     TimeUnit.MILLISECONDS.sleep((duration = 10));
-    end = Calendar.getInstance();
+    end = new DateTime();
     tracker.windowClosed(activeWindow);
     size = 1;
     e = tracker.getData().iterator().next();
@@ -153,9 +153,9 @@ public class PerspectiveTrackerTest extends
 
     tracker.flushData();
     tracker.windowOpened(activeWindow);
-    start = Calendar.getInstance();
+    start = new DateTime();
     TimeUnit.MILLISECONDS.sleep((duration = 49));
-    end = Calendar.getInstance();
+    end = new DateTime();
     tracker.windowDeactivated(activeWindow);
     size = 1;
     e = tracker.getData().iterator().next();
@@ -166,9 +166,9 @@ public class PerspectiveTrackerTest extends
 
     tracker.flushData();
     tracker.windowActivated(activeWindow);
-    start = Calendar.getInstance();
+    start = new DateTime();
     TimeUnit.MILLISECONDS.sleep((duration = 25));
-    end = Calendar.getInstance();
+    end = new DateTime();
     tracker.windowDeactivated(activeWindow);
     size = 1;
     e = tracker.getData().iterator().next();
@@ -179,9 +179,9 @@ public class PerspectiveTrackerTest extends
 
     tracker.flushData();
     tracker.windowActivated(activeWindow);
-    start = Calendar.getInstance();
+    start = new DateTime();
     TimeUnit.MILLISECONDS.sleep((duration = 9));
-    end = Calendar.getInstance();
+    end = new DateTime();
     tracker.windowClosed(activeWindow);
     size = 1;
     e = tracker.getData().iterator().next();
@@ -192,9 +192,9 @@ public class PerspectiveTrackerTest extends
 
     tracker.flushData();
     tracker.windowActivated(activeWindow);
-    start = Calendar.getInstance();
+    start = new DateTime();
     TimeUnit.MILLISECONDS.sleep((duration = 6));
-    end = Calendar.getInstance();
+    end = new DateTime();
     tracker.perspectiveDeactivated(activeWindow.getActivePage(), activeWindow
         .getActivePage().getPerspective());
     size = 1;
@@ -218,18 +218,18 @@ public class PerspectiveTrackerTest extends
     }
 
     long duration = 30;
-    Calendar start = Calendar.getInstance();
+    DateTime start = new DateTime();
     tracker.setEnabled(true);
     TimeUnit.MILLISECONDS.sleep(duration);
     win.getActivePage().setPerspective(newPers);
-    Calendar end = Calendar.getInstance();
+    DateTime end = new DateTime();
 
     assertEquals(1, tracker.getData().size());
     PerspectiveEvent event = tracker.getData().iterator().next();
     assertEquals(oldPers, event.getPerspective());
     assertTrue(start.compareTo(event.getTime()) <= 0);
     assertTrue(end.compareTo(event.getTime()) >= 0);
-    assertTrue(end.getTimeInMillis() - start.getTimeInMillis() >= event
+    assertTrue(end.getMillis() - start.getMillis() >= event
         .getDuration());
     assertTrue(duration <= event.getDuration());
   }
@@ -239,7 +239,7 @@ public class PerspectiveTrackerTest extends
     final IWorkbenchPage page = getActiveWindow().getActivePage();
     IPerspectiveDescriptor oldPers = page.getPerspective();
     long duration = 20;
-    Calendar start = Calendar.getInstance();
+    DateTime start = new DateTime();
     tracker.setEnabled(true);
     TimeUnit.MILLISECONDS.sleep(duration);
     page.getWorkbenchWindow().getShell().getDisplay().syncExec(new Runnable() {
@@ -248,7 +248,7 @@ public class PerspectiveTrackerTest extends
         page.closeAllPerspectives(false, false);
       }
     });
-    Calendar end = Calendar.getInstance();
+    DateTime end = new DateTime();
     PerspectiveEvent e = tracker.getData().iterator().next();
     internalAssertAccuracy(e, start, end, duration, 1, oldPers);
   }
@@ -260,7 +260,7 @@ public class PerspectiveTrackerTest extends
     IPerspectiveDescriptor perspective = win.getActivePage().getPerspective();
 
     long duration = 10;
-    Calendar start = Calendar.getInstance();
+    DateTime start = new DateTime();
     tracker.setEnabled(true);
     TimeUnit.MILLISECONDS.sleep(duration);
     win.getWorkbench().getDisplay().syncExec(new Runnable() {
@@ -269,7 +269,7 @@ public class PerspectiveTrackerTest extends
         win.close();
       }
     });
-    Calendar end = Calendar.getInstance();
+    DateTime end = new DateTime();
     PerspectiveEvent e = tracker.getData().iterator().next();
     internalAssertAccuracy(e, start, end, duration, 1, perspective);
   }
@@ -305,11 +305,11 @@ public class PerspectiveTrackerTest extends
   @Test
   public void testEnableThenDisable() throws InterruptedException {
     long duration = 20;
-    Calendar start = Calendar.getInstance();
+    DateTime start = new DateTime();
     tracker.setEnabled(true);
     TimeUnit.MILLISECONDS.sleep(duration);
     tracker.setEnabled(false);
-    Calendar end = Calendar.getInstance();
+    DateTime end = new DateTime();
     PerspectiveEvent e = tracker.getData().iterator().next();
     internalAssertAccuracy(e, start, end, duration, 1, getActiveWindow()
         .getActivePage().getPerspective());
@@ -321,11 +321,11 @@ public class PerspectiveTrackerTest extends
         .getPerspective();
 
     long duration = 30;
-    Calendar start = Calendar.getInstance();
+    DateTime start = new DateTime();
     tracker.setEnabled(true);
     TimeUnit.MILLISECONDS.sleep(duration);
     callIdleDetectorToNotify();
-    Calendar end = Calendar.getInstance();
+    DateTime end = new DateTime();
 
     PerspectiveEvent event = tracker.getData().iterator().next();
     internalAssertAccuracy(event, start, end, duration, 1, perspective);
@@ -365,8 +365,8 @@ public class PerspectiveTrackerTest extends
     }
 
     assertEquals(perspective2, event.getPerspective());
-    assertTrue(start <= event.getTime().getTimeInMillis());
-    assertTrue(end >= event.getTime().getTimeInMillis());
+    assertTrue(start <= event.getTime().getMillis());
+    assertTrue(end >= event.getTime().getMillis());
     assertTrue(sleepDuration <= event.getDuration());
     assertTrue((end - start) >= event.getDuration());
   }
@@ -386,15 +386,15 @@ public class PerspectiveTrackerTest extends
     assertEquals(1, tracker.getData().size());
     PerspectiveEvent e = tracker.getData().iterator().next();
     assertEquals(page.getPerspective(), e.getPerspective());
-    assertTrue(start <= e.getTime().getTimeInMillis());
-    assertTrue(end >= e.getTime().getTimeInMillis());
+    assertTrue(start <= e.getTime().getMillis());
+    assertTrue(end >= e.getTime().getMillis());
     assertTrue(sleepDuration <= e.getDuration());
     assertTrue((end - start) >= e.getDuration());
   }
 
   @Override
   protected PerspectiveEvent createEvent() {
-    return new PerspectiveEvent(Calendar.getInstance(), 101, getActiveWindow()
+    return new PerspectiveEvent(new DateTime(), 101, getActiveWindow()
         .getActivePage().getPerspective());
   }
 
@@ -433,8 +433,8 @@ public class PerspectiveTrackerTest extends
     return activeWindow;
   }
 
-  private void internalAssertAccuracy(PerspectiveEvent e, Calendar start,
-      Calendar end, long duration, int size, IPerspectiveDescriptor per) {
+  private void internalAssertAccuracy(PerspectiveEvent e, DateTime start,
+      DateTime end, long duration, int size, IPerspectiveDescriptor per) {
 
     assertEquals(per, e.getPerspective());
     assertEquals(size, tracker.getData().size());

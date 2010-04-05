@@ -22,25 +22,13 @@ import rabbit.data.internal.xml.schema.events.EventListType;
 import rabbit.data.internal.xml.schema.events.FileEventListType;
 import rabbit.data.internal.xml.schema.events.FileEventType;
 
-import java.util.Calendar;
 import java.util.Collection;
-import java.util.Map;
 
 /**
  * For getting data on file events.
  */
 public class FileDataAccessor extends
     AbstractIdToValueAccessor<FileEventType, FileEventListType> {
-
-  /**
-   * {@inheritDoc}
-   * 
-   * The keys of the map returned are file IDs.
-   */
-  @Override
-  public Map<String, Long> getData(Calendar start, Calendar end) {
-    return super.getData(start, end);
-  }
 
   @Override
   protected Collection<FileEventListType> getCategories(EventListType doc) {

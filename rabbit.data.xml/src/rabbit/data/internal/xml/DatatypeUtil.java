@@ -15,7 +15,9 @@
  */
 package rabbit.data.internal.xml;
 
-import java.util.Calendar;
+import org.joda.time.DateTime;
+import org.joda.time.LocalDate;
+
 import java.util.GregorianCalendar;
 
 import javax.xml.datatype.DatatypeConfigurationException;
@@ -48,46 +50,66 @@ public class DatatypeUtil {
   }
 
   /**
-   * Checks whether the two calendars are representing the same year, month, and
-   * day of month.
+   * TODO test Checks whether the two dates are representing the same year,
+   * month, and day of month.
    * 
-   * @param cal The first calendar.
-   * @param xmlCal The second calendar.
-   * @return true if the two calendars are representing the same date in time,
-   *         false otherwise.
+   * @param date1 The first date.
+   * @param date2 The second date.
+   * @return true if the two dates are representing the same date in time, false
+   *         otherwise.
    */
-  public static boolean isSameDate(Calendar cal, XMLGregorianCalendar xmlCal) {
+  public static boolean isSameDate(DateTime date1, XMLGregorianCalendar date2) {
 
-    return (xmlCal.getYear() == cal.get(Calendar.YEAR))
-        && (xmlCal.getMonth() == cal.get(Calendar.MONTH) + 1)
-        && (xmlCal.getDay() == cal.get(Calendar.DAY_OF_MONTH));
+    return (date2.getYear() == date1.getYear())
+        && (date2.getMonth() == date1.getMonthOfYear())
+        && (date2.getDay() == date1.getDayOfMonth());
   }
 
   /**
-   * Checks whether the two calendars are representing the same month in time.
+   * TODO test Checks whether the two calendars are representing the same month
+   * in time.
    * 
    * @param cal1 The first calendar.
    * @param cal2 The second calendar.
    * @return true if the two calendars are representing the same month in time,
    *         false otherwise.
    */
-  public static boolean isSameMonthInYear(Calendar cal1, Calendar cal2) {
-    return (cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR))
-        && (cal1.get(Calendar.MONTH) == cal2.get(Calendar.MONTH));
+  public static boolean isSameMonthInYear(DateTime cal1, DateTime cal2) {
+    return (cal1.getYear() == cal2.getYear())
+        && (cal1.getMonthOfYear() == cal2.getMonthOfYear());
   }
 
   /**
-   * Converts a {@link Calendar} to {@link XMLGregorianCalendar}. The converted
-   * calendar is a date, which means only the year, month and day of month
-   * fields are set.
+   * TODO test Converts a {@link DateTime} to {@link XMLGregorianCalendar}. The
+   * converted calendar is a date, which means only the year, month and day of
+   * month fields are set.
    * 
    * @param cal The calendar to convert from.
    * @return The converted calendar.
    */
-  public static XMLGregorianCalendar toXMLGregorianCalendarDate(Calendar cal) {
-    return datatypeFactory.newXMLGregorianCalendarDate(cal.get(Calendar.YEAR),
-        cal.get(Calendar.MONTH) + 1, cal.get(Calendar.DAY_OF_MONTH),
+  public static XMLGregorianCalendar toXMLGregorianCalendarDate(DateTime cal) {
+    return datatypeFactory.newXMLGregorianCalendarDate(cal.getYear(), cal
+        .getMonthOfYear(), cal.getDayOfMonth(),
         DatatypeConstants.FIELD_UNDEFINED);
+  }
+
+  /**
+   * TODO test Converts a {@link LocalDate} to {@link XMLGregorianCalendar}. The
+   * converted calendar is a date, which means only the year, month and day of
+   * month fields are set.
+   * 
+   * @param cal The calendar to convert from.
+   * @return The converted calendar.
+   */
+  public static XMLGregorianCalendar toXMLGregorianCalendarDate(LocalDate cal) {
+    return datatypeFactory.newXMLGregorianCalendarDate(cal.getYear(), cal
+        .getMonthOfYear(), cal.getDayOfMonth(),
+        DatatypeConstants.FIELD_UNDEFINED);
+  }
+  
+  //TODO 
+  public static LocalDate toLocalDate(XMLGregorianCalendar cal) {
+    return new LocalDate(cal.getYear(), cal.getMonth(), cal.getDay());
   }
 
   /**
@@ -100,5 +122,11 @@ public class DatatypeUtil {
   public static XMLGregorianCalendar toXMLGregorianCalendarDateTime(
       GregorianCalendar cal) {
     return datatypeFactory.newXMLGregorianCalendar(cal);
+  }
+
+  // TODO
+  public static boolean isSameMonthInYear(DateTime cal1, LocalDate cal2) {
+    return (cal1.getYear() == cal2.getYear())
+        && (cal1.getMonthOfYear() == cal2.getMonthOfYear());
   }
 }

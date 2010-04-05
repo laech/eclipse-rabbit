@@ -21,6 +21,10 @@ import rabbit.data.access.IAccessor;
 import rabbit.data.internal.xml.schema.events.EventGroupType;
 import rabbit.data.internal.xml.schema.events.EventListType;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
+import org.joda.time.LocalDate;
+
 import java.io.File;
 import java.util.Calendar;
 import java.util.Collection;
@@ -45,10 +49,10 @@ public abstract class AbstractAccessor<T, E, S extends EventGroupType>
   }
 
   @Override
-  public T getData(Calendar start, Calendar end) {
-    if (start == null || end == null) {
-      throw new NullPointerException();
-    }
+  public T getData(LocalDate start, LocalDate end) {
+    checkNotNull(start);
+    checkNotNull(end);
+    
     return filter(getXmlData(start, end));
   }
 
@@ -79,23 +83,21 @@ public abstract class AbstractAccessor<T, E, S extends EventGroupType>
   /**
    * Gets the data from the XML files.
    * 
-   * @param start The start date of the data.
-   * @param end The end date of the data.
+   * @param start The start date of the data to get.
+   * @param end The end date of the data to get.
    * @return The data between the dates, inclusive.
    */
-  protected List<S> getXmlData(Calendar start, Calendar end) {
+  protected List<S> getXmlData(LocalDate start, LocalDate end) {
     List<S> data = new LinkedList<S>();
     XMLGregorianCalendar startXmlCal = toXMLGregorianCalendarDate(start);
     XMLGregorianCalendar endXmlCal = toXMLGregorianCalendarDate(end);
 
     List<File> files = getDataStore().getDataFiles(start, end);
     for (File f : files) {
-
       for (S list : getCategories(getDataStore().read(f))) {
+        
         XMLGregorianCalendar date = list.getDate();
-        if (date == null) {
-          continue;
-        }
+        if (date == null) continue;
 
         if (date.compare(startXmlCal) >= 0
             && list.getDate().compare(endXmlCal) <= 0) {

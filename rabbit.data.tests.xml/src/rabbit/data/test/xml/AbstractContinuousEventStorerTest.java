@@ -24,8 +24,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import org.joda.time.DateTime;
+
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.List;
 
@@ -101,11 +102,10 @@ public abstract class AbstractContinuousEventStorerTest<E extends ContinuousEven
 
       // ..
 
-      Calendar cal = e.getTime();
-      int day = cal.get(Calendar.DAY_OF_MONTH);
+      DateTime cal = e.getTime();
+      int day = cal.getDayOfMonth();
       day = (day < 15) ? day + 1 : day - 1;
-      cal.set(Calendar.DAY_OF_MONTH, day);
-      e = createEvent(cal);
+      e = createEvent(cal.withDayOfMonth(day));
       storer.insert(e);
       storer.commit();
 
@@ -161,12 +161,10 @@ public abstract class AbstractContinuousEventStorerTest<E extends ContinuousEven
       type = getEventTypes(data.iterator().next()).get(1);
       assertTrue(isEqual(type, e));
 
-      Calendar cal = e.getTime();
-      int day = cal.get(Calendar.DAY_OF_MONTH);
+      DateTime cal = e.getTime();
+      int day = cal.getDayOfMonth();
       day = (day < 15) ? day + 1 : day - 1;
-      cal.set(Calendar.DAY_OF_MONTH, day);
-      e = createEvent(cal);
-
+      e = createEvent(cal.withDayOfMonth(day));
       storer.insert(e);
 
       assertEquals(2, data.size());
@@ -228,11 +226,10 @@ public abstract class AbstractContinuousEventStorerTest<E extends ContinuousEven
 
       {// Insert event of a different date:
         list.clear();
-        Calendar cal = e.getTime();
-        int day = cal.get(Calendar.DAY_OF_MONTH);
+        DateTime cal = e.getTime();
+        int day = cal.getDayOfMonth();
         day = (day < 15) ? day + 1 : day - 1;
-        cal.set(Calendar.DAY_OF_MONTH, day);
-        e = createEvent(cal);
+        e = createEvent(cal.withDayOfMonth(day));
 
         list.add(e);
         storer.insert(list);
@@ -317,7 +314,7 @@ public abstract class AbstractContinuousEventStorerTest<E extends ContinuousEven
     assertEquals(cal, type.getDate());
   }
 
-  protected abstract E createEvent(Calendar eventTime);
+  protected abstract E createEvent(DateTime eventTime);
 
   /** Gets the list of events form the parameter. */
   protected abstract List<T> getEventTypes(S type);
@@ -337,7 +334,7 @@ public abstract class AbstractContinuousEventStorerTest<E extends ContinuousEven
   protected abstract E mergeValue(E main, E tmp);
 
   private XMLGregorianCalendar getCalendar() {
-    return DatatypeUtil.toXMLGregorianCalendarDate(Calendar.getInstance());
+    return DatatypeUtil.toXMLGregorianCalendarDate(new DateTime());
   }
 
 }

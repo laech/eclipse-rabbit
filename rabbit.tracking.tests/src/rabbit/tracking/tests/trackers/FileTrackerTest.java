@@ -28,10 +28,10 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.swtbot.swt.finder.junit.SWTBotJunit4ClassRunner;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPart;
+import org.joda.time.DateTime;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.util.Calendar;
 import java.util.Iterator;
 
 /**
@@ -60,8 +60,8 @@ public class FileTrackerTest extends AbstractPartTrackerTest<FileEvent> {
     Iterator<FileEvent> it = tracker.getData().iterator();
     FileEvent event = it.next();
     assertTrue(hasSamePart(event, editor));
-    assertTrue(start <= event.getTime().getTimeInMillis());
-    assertTrue(end >= event.getTime().getTimeInMillis());
+    assertTrue(start <= event.getTime().getMillis());
+    assertTrue(end >= event.getTime().getMillis());
     assertTrue(sleepDuration <= event.getDuration());
     assertTrue((end - start) >= event.getDuration());
 
@@ -70,7 +70,7 @@ public class FileTrackerTest extends AbstractPartTrackerTest<FileEvent> {
 
   @Override
   protected FileEvent createEvent() {
-    return new FileEvent(Calendar.getInstance(), 10, "someId");
+    return new FileEvent(new DateTime(), 10, "someId");
   }
 
   @Override
@@ -92,7 +92,7 @@ public class FileTrackerTest extends AbstractPartTrackerTest<FileEvent> {
 
   @Override
   protected void internalAssertAccuracy(FileEvent event, IWorkbenchPart part,
-      long durationInMillis, int size, Calendar start, Calendar end) {
+      long durationInMillis, int size, DateTime start, DateTime end) {
 
     // 1/10 of a second is acceptable?
     Assert.assertTrue(durationInMillis - 100 <= event.getDuration());

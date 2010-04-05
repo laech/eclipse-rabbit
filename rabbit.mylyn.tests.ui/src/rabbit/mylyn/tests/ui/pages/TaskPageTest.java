@@ -25,7 +25,7 @@ import rabbit.mylyn.internal.ui.pages.TaskResource;
 import rabbit.mylyn.internal.ui.pages.TaskPage.ShowMode;
 import rabbit.mylyn.internal.ui.util.MissingTask;
 import rabbit.mylyn.internal.ui.util.MissingTaskCategory;
-import rabbit.ui.DisplayPreference;
+import rabbit.ui.Preferences;
 import rabbit.ui.tests.pages.AbstractTreeViewerPageTest;
 
 import static org.junit.Assert.assertEquals;
@@ -51,6 +51,7 @@ import org.eclipse.mylyn.tasks.core.ITaskContainer;
 import org.eclipse.mylyn.tasks.ui.TasksUi;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
+import org.joda.time.LocalDate;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
@@ -597,15 +598,16 @@ public class TaskPageTest extends AbstractTreeViewerPageTest {
     Map<TaskResource, Set<TaskResource>> folderToFiles = new HashMap<TaskResource, Set<TaskResource>>();
     Map<TaskResource, Long> fileToValue = new HashMap<TaskResource, Long>();
 
-    DisplayPreference preference = new DisplayPreference();
+    Preferences preference = new Preferences();
     Calendar end = preference.getEndDate();
     preference.getStartDate().setTime(end.getTime());
     preference.getStartDate().add(Calendar.MONTH, -3);
 
     IAccessor<Map<TaskId, Map<String, Long>>> accessor = TaskCore
         .getTaskDataAccessor();
-    Map<TaskId, Map<String, Long>> data = accessor.getData(preference
-        .getStartDate(), preference.getEndDate());
+    Map<TaskId, Map<String, Long>> data = accessor.getData(new LocalDate(
+        preference.getStartDate().getTimeInMillis()), new LocalDate(preference
+        .getEndDate().getTimeInMillis()));
 
     IFileMapper resourceMapper = DataHandler.getFileMapper();
     IRepositoryModel repo = TasksUi.getRepositoryModel();

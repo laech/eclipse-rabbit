@@ -15,30 +15,28 @@
  */
 package rabbit.data.store.model;
 
-import java.util.Calendar;
+import static com.google.common.base.Preconditions.checkArgument;
+
+import org.joda.time.DateTime;
 
 /**
  * An event that has a duration.
  */
 public class ContinuousEvent extends DiscreteEvent {
 
-  private long duration;
+  private final long duration;
 
   /**
    * Constructs a new event.
    * 
-   * @param time The end time of the event.
+   * @param endTime The end time of the event.
    * @param duration The duration in milliseconds.
    * @throws IllegalArgumentException If duration is negative.
    * @throws NullPointerException If time is null.
    */
-  public ContinuousEvent(Calendar time, long duration) {
-    super(time);
-
-    if (duration < 0) {
-      throw new IllegalArgumentException();
-    }
-
+  public ContinuousEvent(DateTime endTime, long duration) {
+    super(endTime);
+    checkArgument(duration >= 0, "Duration cannot be negative");
     this.duration = duration;
   }
 

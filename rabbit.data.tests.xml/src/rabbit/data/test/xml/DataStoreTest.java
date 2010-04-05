@@ -25,13 +25,14 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import org.eclipse.core.runtime.IPath;
+import org.joda.time.LocalDate;
+import org.joda.time.LocalTime;
+import org.joda.time.MutableDateTime;
 import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -42,20 +43,17 @@ public class DataStoreTest {
 
   @Test
   public void testGetDataFile() {
-    assertNotNull(store.getDataFile(Calendar.getInstance()));
+    assertNotNull(store.getDataFile(new LocalDate()));
   }
 
   @Test
   public void testGetDataFiles() throws IOException {
 
-    Calendar lowerBound = new GregorianCalendar(1, 1, 1);
-    Calendar upperBound = new GregorianCalendar(3, 1, 1);
+    LocalDate lowerBound = new LocalDate(1, 1, 1);
+    LocalDate upperBound = new LocalDate(3, 1, 1);
 
-    Calendar insideLowerBound = (Calendar) lowerBound.clone();
-    insideLowerBound.add(Calendar.MONTH, 1);
-
-    Calendar insideUpperBound = (Calendar) upperBound.clone();
-    insideUpperBound.add(Calendar.MONTH, -1);
+    LocalDate insideLowerBound = lowerBound.plusMonths(1);
+    LocalDate insideUpperBound = upperBound.minusMonths(1);
 
     Set<File> files = new HashSet<File>();
     files.add(store.getDataFile(lowerBound));
@@ -84,22 +82,21 @@ public class DataStoreTest {
     assertEquals(0, store.getDataFiles(lowerBound, upperBound).size());
 
     // Temporary test for testing files across multiple workspaces:
-    Calendar end = Calendar.getInstance();
-    Calendar start = (Calendar) end.clone();
-    start.add(Calendar.YEAR, -1);
+    LocalDate end = new LocalDate();
+    LocalDate start = end.minusYears(1);
 
     List<File> result = new ArrayList<File>();
     IPath[] storagePaths = XmlPlugin.getDefault().getStoragePaths();
-    Calendar date = (Calendar) start.clone();
+    MutableDateTime date = start.toDateTime(new LocalTime(0, 0, 0)).toMutableDateTime();
     while (date.compareTo(end) <= 0) {
 
       for (IPath path : storagePaths) {
-        File f = store.getDataFile(date, path);
+        File f = store.getDataFile(new LocalDate(date.getMillis()), path);
         if (f.exists()) {
           result.add(f);
         }
       }
-      date.add(Calendar.MONTH, 1);
+      date.addMonths(1);
     }
     assertEquals(result.size(), store.getDataFiles(start, end).size());
   }
@@ -112,7 +109,7 @@ public class DataStoreTest {
   @Test
   public void testRead() throws IOException {
 
-    Calendar cal = new GregorianCalendar(1, 1, 1);
+    LocalDate cal = new LocalDate(1, 1, 1);
     File f = store.getDataFile(cal);
 
     if (f.exists()) {

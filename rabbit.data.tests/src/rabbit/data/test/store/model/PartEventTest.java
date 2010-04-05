@@ -24,9 +24,8 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
+import org.joda.time.DateTime;
 import org.junit.Test;
-
-import java.util.Calendar;
 
 /**
  * Test for {@link PartEvent}
@@ -37,7 +36,7 @@ public class PartEventTest extends ContinuousEventTest {
   private IWorkbenchPart part = getWorkbenchWindow().getPartService()
       .getActivePart();
 
-  private PartEvent event = createEvent(Calendar.getInstance(), 10);
+  private PartEvent event = createEvent(new DateTime(), 10);
 
   /** Gets the currently active workbench window. */
   public IWorkbenchWindow getWorkbenchWindow() {
@@ -54,7 +53,7 @@ public class PartEventTest extends ContinuousEventTest {
 
   @Test(expected = NullPointerException.class)
   public void testContructor_withPartNull() {
-    new PartEvent(Calendar.getInstance(), 10, null);
+    new PartEvent(new DateTime(), 10, null);
   }
 
   @Test
@@ -68,7 +67,7 @@ public class PartEventTest extends ContinuousEventTest {
   }
 
   @Override
-  protected PartEvent createEvent(Calendar time, long duration) {
+  protected PartEvent createEvent(DateTime time, long duration) {
     return new PartEvent(time, duration, getWorkbenchWindow().getPartService()
         .getActivePart());
   }

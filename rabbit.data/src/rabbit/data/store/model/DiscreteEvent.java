@@ -15,27 +15,26 @@
  */
 package rabbit.data.store.model;
 
-import java.util.Calendar;
+import static com.google.common.base.Preconditions.checkNotNull;
+
+import org.joda.time.DateTime;
 
 /**
- * Represents an event with no duration.
+ * Represents an event that happened at a particular time.
  */
 public class DiscreteEvent {
 
-  private Calendar time;
+  private final DateTime time;
 
   /**
    * Constructs a new event.
    * 
    * @param time The event time.
-   * @throws NullPointerException If argument is null.
+   * @throws NullPointerException If time is null.
    */
-  public DiscreteEvent(Calendar time) {
-    if (time == null) {
-      throw new NullPointerException();
-    }
-
-    this.time = (Calendar) time.clone();
+  public DiscreteEvent(DateTime time) {
+    checkNotNull(time, "Time cannot be null.");
+    this.time = time;
   }
 
   /**
@@ -43,7 +42,7 @@ public class DiscreteEvent {
    * 
    * @return The event time.
    */
-  public Calendar getTime() {
-    return (Calendar) time.clone();
+  public DateTime getTime() {
+    return time;
   }
 }

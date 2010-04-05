@@ -15,6 +15,8 @@
  */
 package rabbit.data.internal.xml;
 
+import static rabbit.data.internal.xml.DatatypeUtil.isSameMonthInYear;
+
 import rabbit.data.internal.xml.schema.events.EventGroupType;
 import rabbit.data.internal.xml.schema.events.EventListType;
 import rabbit.data.internal.xml.schema.events.ObjectFactory;
@@ -23,9 +25,10 @@ import rabbit.data.store.model.DiscreteEvent;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.joda.time.DateTime;
+import org.joda.time.LocalDate;
 
 import java.io.File;
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -54,14 +57,14 @@ public abstract class AbstractStorer<E extends DiscreteEvent, T, S extends Event
   private Set<S> data;
 
   /** The current month. */
-  private Calendar currentMonth;
+  private LocalDate currentMonth;
 
   /**
    * Constructor.
    */
   public AbstractStorer() {
     data = new LinkedHashSet<S>();
-    currentMonth = Calendar.getInstance();
+    currentMonth = new LocalDate();
   }
 
   @Override
@@ -121,10 +124,10 @@ public abstract class AbstractStorer<E extends DiscreteEvent, T, S extends Event
   @Override
   public void insert(E e) {
 
-    if (!DatatypeUtil.isSameMonthInYear(e.getTime(), currentMonth)) {
+    DateTime time = e.getTime();
+    if (!isSameMonthInYear(e.getTime(), currentMonth)) {
       commit();
-      // :
-      currentMonth = e.getTime();
+      currentMonth = time.toLocalDate();
     }
 
     boolean done = false;

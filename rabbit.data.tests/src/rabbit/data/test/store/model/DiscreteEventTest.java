@@ -18,33 +18,19 @@ package rabbit.data.test.store.model;
 import rabbit.data.store.model.DiscreteEvent;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 
+import org.joda.time.DateTime;
 import org.junit.Test;
-
-import java.util.Calendar;
 
 /**
  * Test for {@link DiscreteEvent}
  */
 public class DiscreteEventTest {
 
-  private Calendar time = Calendar.getInstance();
+  private DateTime time = new DateTime();
 
   private DiscreteEvent event = createEvent(time);
-
-  /*
-   * Test the constructor actually clones the date.
-   */
-  @Test
-  public void testConstructor_clonesTime() {
-    Calendar cal = Calendar.getInstance();
-    DiscreteEvent event = new DiscreteEvent(cal);
-
-    cal.add(Calendar.YEAR, 1);
-    assertFalse(cal.equals(event.getTime()));
-  }
 
   @Test(expected = NullPointerException.class)
   public void testConstructor_null() {
@@ -61,18 +47,8 @@ public class DiscreteEventTest {
     assertEquals(time, event.getTime());
   }
 
-  /*
-   * Test the method returns a clone instead of the real thing.
-   */
-  @Test
-  public void testGetTime_returnCopy() {
-    Calendar cal = event.getTime();
-    cal.add(Calendar.YEAR, 1);
-    assertFalse(cal.equals(event.getTime()));
-  }
-
   /** Creates an event for testing. */
-  protected DiscreteEvent createEvent(Calendar time) {
+  protected DiscreteEvent createEvent(DateTime time) {
     return new DiscreteEvent(time);
   }
 }

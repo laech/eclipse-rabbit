@@ -15,8 +15,9 @@
  */
 package rabbit.data.test.xml;
 
+import static rabbit.data.internal.xml.DatatypeUtil.toXMLGregorianCalendarDate;
+
 import rabbit.data.internal.xml.AbstractAccessor;
-import rabbit.data.internal.xml.DatatypeUtil;
 import rabbit.data.internal.xml.IDataStore;
 import rabbit.data.internal.xml.XmlPlugin;
 import rabbit.data.internal.xml.schema.events.EventGroupType;
@@ -26,6 +27,9 @@ import rabbit.data.internal.xml.schema.events.ObjectFactory;
 import static org.junit.Assert.assertNotNull;
 
 import org.eclipse.core.runtime.IPath;
+import org.joda.time.DateTime;
+import org.joda.time.LocalDate;
+import org.joda.time.MutableDateTime;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -77,7 +81,7 @@ public abstract class AbstractAccessorTest<T, E, S extends EventGroupType> {
 
   @Test(expected = NullPointerException.class)
   public void testGetData_endDateNull() {
-    accessor.getData(Calendar.getInstance(), null);
+    accessor.getData(new LocalDate(), null);
   }
 
   @Test
@@ -92,9 +96,9 @@ public abstract class AbstractAccessorTest<T, E, S extends EventGroupType> {
     setUsage(type1, count1);
 
     S list1 = createListType();
-    Calendar tmp = Calendar.getInstance();
-    tmp.set(Calendar.DAY_OF_MONTH, 1);
-    XMLGregorianCalendar start = DatatypeUtil.toXMLGregorianCalendarDate(tmp);
+    MutableDateTime tmp = new MutableDateTime();
+    tmp.setDayOfMonth(1);
+    XMLGregorianCalendar start = toXMLGregorianCalendarDate(tmp.toDateTime());
     list1.setDate(start);
     getXmlTypes(list1).add(type1);
 
@@ -106,8 +110,8 @@ public abstract class AbstractAccessorTest<T, E, S extends EventGroupType> {
     setUsage(type2, count2);
 
     S list2 = createListType();
-    tmp.set(Calendar.DAY_OF_MONTH, 3);
-    XMLGregorianCalendar end = DatatypeUtil.toXMLGregorianCalendarDate(tmp);
+    tmp.setDayOfMonth(3);
+    XMLGregorianCalendar end = toXMLGregorianCalendarDate(tmp.toDateTime());
     list2.setDate(end);
     getXmlTypes(list2).add(type2);
 
@@ -115,11 +119,12 @@ public abstract class AbstractAccessorTest<T, E, S extends EventGroupType> {
     getCategories(accessor, events).add(list1);
     getCategories(accessor, events).add(list2);
 
-    File f = getDataStore(accessor).getDataFile(tmp);
+    File f = getDataStore(accessor).getDataFile(tmp.toDateTime().toLocalDate());
     getDataStore(accessor).write(events, f);
 
-    assertValues(accessor.getData(start.toGregorianCalendar(), end
-        .toGregorianCalendar()), events);
+    assertValues(accessor.getData(new LocalDate(start.toGregorianCalendar()
+        .getTimeInMillis()), new LocalDate(end.toGregorianCalendar()
+        .getTimeInMillis())), events);
   }
 
   /**
@@ -129,7 +134,7 @@ public abstract class AbstractAccessorTest<T, E, S extends EventGroupType> {
    */
   @Test
   public void testGetData_listsWithSameDate() throws Exception {
-    Calendar date = Calendar.getInstance();
+    DateTime date = new DateTime();
     String id = "qfnnvkfde877thfg";
 
     // 1:
@@ -140,7 +145,7 @@ public abstract class AbstractAccessorTest<T, E, S extends EventGroupType> {
     setUsage(type1, count1);
 
     S list1 = createListType();
-    XMLGregorianCalendar start = DatatypeUtil.toXMLGregorianCalendarDate(date);
+    XMLGregorianCalendar start = toXMLGregorianCalendarDate(date);
     list1.setDate(start);
     getXmlTypes(list1).add(type1);
 
@@ -152,7 +157,7 @@ public abstract class AbstractAccessorTest<T, E, S extends EventGroupType> {
     setUsage(type2, count2);
 
     S list2 = createListType();
-    XMLGregorianCalendar end = DatatypeUtil.toXMLGregorianCalendarDate(date);
+    XMLGregorianCalendar end = toXMLGregorianCalendarDate(date);
     list2.setDate(end);
     getXmlTypes(list2).add(type2);
 
@@ -160,16 +165,17 @@ public abstract class AbstractAccessorTest<T, E, S extends EventGroupType> {
     getCategories(accessor, events).add(list1);
     getCategories(accessor, events).add(list2);
 
-    File f = getDataStore(accessor).getDataFile(date);
+    File f = getDataStore(accessor).getDataFile(date.toLocalDate());
     getDataStore(accessor).write(events, f);
 
-    assertValues(accessor.getData(start.toGregorianCalendar(), end
-        .toGregorianCalendar()), events);
+    assertValues(accessor.getData(new LocalDate(start.toGregorianCalendar()
+        .getTimeInMillis()), new LocalDate(end.toGregorianCalendar()
+        .getTimeInMillis())), events);
   }
 
   @Test(expected = NullPointerException.class)
   public void testGetData_startDateNull() {
-    accessor.getData(null, Calendar.getInstance());
+    accessor.getData(null, new LocalDate());
   }
 
   @Test

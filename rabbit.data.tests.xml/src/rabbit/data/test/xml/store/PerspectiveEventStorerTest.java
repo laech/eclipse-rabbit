@@ -27,8 +27,8 @@ import static org.junit.Assert.assertTrue;
 
 import org.eclipse.ui.IPerspectiveDescriptor;
 import org.eclipse.ui.PlatformUI;
+import org.joda.time.DateTime;
 
-import java.util.Calendar;
 import java.util.List;
 
 public class PerspectiveEventStorerTest extends
@@ -57,11 +57,11 @@ public class PerspectiveEventStorerTest extends
   protected PerspectiveEvent createEvent() {
     IPerspectiveDescriptor p = PlatformUI.getWorkbench()
         .getPerspectiveRegistry().getPerspectives()[0];
-    return new PerspectiveEvent(Calendar.getInstance(), 194, p);
+    return new PerspectiveEvent(new DateTime(), 194, p);
   }
 
   @Override
-  protected PerspectiveEvent createEvent(Calendar eventTime) {
+  protected PerspectiveEvent createEvent(DateTime eventTime) {
     IPerspectiveDescriptor p = PlatformUI.getWorkbench()
         .getPerspectiveRegistry().getPerspectives()[0];
     return new PerspectiveEvent(eventTime, 1924, p);
@@ -71,7 +71,7 @@ public class PerspectiveEventStorerTest extends
   protected PerspectiveEvent createEvent2() {
     IPerspectiveDescriptor p = PlatformUI.getWorkbench()
         .getPerspectiveRegistry().getPerspectives()[1];
-    return new PerspectiveEvent(Calendar.getInstance(), 11094, p);
+    return new PerspectiveEvent(new DateTime(), 11094, p);
   }
 
   @Override

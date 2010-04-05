@@ -1,5 +1,3 @@
-package rabbit.data;
-
 /*
  * Copyright 2010 The Rabbit Eclipse Plug-in Project
  * 
@@ -15,8 +13,13 @@ package rabbit.data;
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+package rabbit.data;
 
 import org.eclipse.core.resources.IFile;
+
+import javax.annotation.CheckForNull;
+import javax.annotation.CheckReturnValue;
+import javax.annotation.Nonnull;
 
 /**
  * Manages mapping of file to id and vice versa.
@@ -29,24 +32,30 @@ public interface IFileMapper {
    * 
    * @param fileId The id of the file.
    * @return The file, or null if not found.
+   * @throws NullPointerException If null is passed in.
    */
-  IFile getExternalFile(String fileId);
+  @CheckForNull
+  IFile getExternalFile(@Nonnull String fileId);
 
   /**
    * Gets the file which has the given id.
    * 
    * @param fileId The id of the file.
    * @return The file, or null if not found.
+   * @throws NullPointerException If null is passed in.
    */
-  IFile getFile(String fileId);
+  @CheckForNull
+  IFile getFile(@Nonnull String fileId);
 
   /**
    * Gets the id of the given file.
    * 
    * @param file The file.
    * @return The id, or null if not found.
+   * @throws NullPointerException If null is passed in.
    */
-  String getId(IFile file);
+  @CheckForNull
+  String getId(@Nonnull IFile file);
 
   /**
    * Inserts the given file into the database, if the path already exists, an
@@ -55,10 +64,13 @@ public interface IFileMapper {
    * @param file The file.
    * @return An existing id if the file already exists in the database, a new id
    *         if the file is new.
+   * @throws NullPointerException If null is passed in.
    */
-  String insert(IFile file);
+  @Nonnull
+  String insert(@Nonnull IFile file);
 
   // TODO
+  @CheckReturnValue
   boolean write(boolean updateExternalDb);
 
 }

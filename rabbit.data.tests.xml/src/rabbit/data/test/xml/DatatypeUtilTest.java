@@ -27,6 +27,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import org.joda.time.DateTime;
 import org.junit.Test;
 
 import java.util.Calendar;
@@ -45,7 +46,7 @@ public class DatatypeUtilTest {
   public void testIsSameDate() {
 
     try {
-      Calendar cal = Calendar.getInstance();
+      DateTime cal = new DateTime();
 
       XMLGregorianCalendar xmlCal = DatatypeFactory.newInstance()
           .newXMLGregorianCalendarDate(1, 1, 1, 1);
@@ -63,24 +64,24 @@ public class DatatypeUtilTest {
   @Test
   public void testIsSameMonthInYear() throws DatatypeConfigurationException {
 
-    Calendar cal1 = Calendar.getInstance();
-    Calendar cal2 = Calendar.getInstance();
+    DateTime cal1 = new DateTime();
+    DateTime cal2 = new DateTime();
     assertTrue(isSameMonthInYear(cal1, cal2));
 
-    cal2.add(Calendar.MONTH, 1);
+    cal2 = cal2.plusMonths(1);
     assertFalse(isSameMonthInYear(cal1, cal2));
   }
 
   @Test
   public void testToXMLGregorianCalendarDate() {
 
-    Calendar cal = Calendar.getInstance();
+    DateTime cal = new DateTime();
     XMLGregorianCalendar xmlCal = toXMLGregorianCalendarDate(cal);
 
-    assertEquals(cal.get(Calendar.YEAR), xmlCal.getYear());
+    assertEquals(cal.getYear(), xmlCal.getYear());
     // Calendar.MONTH is zero based, xmlCal is one based.
-    assertEquals(cal.get(Calendar.MONTH) + 1, xmlCal.getMonth());
-    assertEquals(cal.get(Calendar.DAY_OF_MONTH), xmlCal.getDay());
+    assertEquals(cal.getMonthOfYear(), xmlCal.getMonth());
+    assertEquals(cal.getDayOfMonth(), xmlCal.getDay());
   }
 
   @Test

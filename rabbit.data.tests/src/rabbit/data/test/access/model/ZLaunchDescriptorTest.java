@@ -15,7 +15,7 @@
  */
 package rabbit.data.test.access.model;
 
-import rabbit.data.access.model.LaunchDescriptor;
+import rabbit.data.access.model.ZLaunchDescriptor;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -32,15 +32,15 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * @see LaunchDescriptor
+ * @see ZLaunchDescriptor
  */
-public class LaunchDescriptorTest {
+public class ZLaunchDescriptorTest {
 
-  private LaunchDescriptor descriptor;
+  private ZLaunchDescriptor descriptor;
 
   @Before
   public void before() {
-    descriptor = new LaunchDescriptor();
+    descriptor = new ZLaunchDescriptor();
   }
 
   @Test
@@ -51,8 +51,8 @@ public class LaunchDescriptorTest {
     String launchName = "name";
     String launchType = "type";
 
-    LaunchDescriptor des1 = new LaunchDescriptor();
-    LaunchDescriptor des2 = new LaunchDescriptor();
+    ZLaunchDescriptor des1 = new ZLaunchDescriptor();
+    ZLaunchDescriptor des2 = new ZLaunchDescriptor();
     assertTrue("Should be equal when first created.", des1.equals(des2));
 
     des1.setTotalDuration(duration);

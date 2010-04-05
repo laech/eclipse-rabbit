@@ -21,6 +21,8 @@ import rabbit.data.internal.xml.schema.resources.ObjectFactory;
 import rabbit.data.internal.xml.schema.resources.ResourceListType;
 import rabbit.data.internal.xml.schema.resources.ResourceType;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceChangeEvent;
@@ -137,6 +139,8 @@ public enum XmlFileMapper implements IFileMapper, IResourceChangeListener,
 
   @Override
   public IFile getExternalFile(String fileId) {
+    checkNotNull(fileId);
+
     for (Entry<String, Set<String>> entry : externalResources.entrySet()) {
       for (String id : entry.getValue()) {
         if (id.equals(fileId)) {
@@ -154,6 +158,8 @@ public enum XmlFileMapper implements IFileMapper, IResourceChangeListener,
 
   @Override
   public IFile getFile(String id) {
+    checkNotNull(id);
+
     if (!resourceIds.contains(id)) {
       return null;
     }
@@ -175,6 +181,8 @@ public enum XmlFileMapper implements IFileMapper, IResourceChangeListener,
 
   @Override
   public String getId(IFile file) {
+    checkNotNull(file);
+
     Set<String> ids = resources.get(getPathString(file));
     if (ids != null) {
       return ids.iterator().next();
@@ -184,6 +192,8 @@ public enum XmlFileMapper implements IFileMapper, IResourceChangeListener,
 
   @Override
   public String insert(IFile file) {
+    checkNotNull(file);
+
     String id = getId(file);
     if (id == null) {
       id = generateId();

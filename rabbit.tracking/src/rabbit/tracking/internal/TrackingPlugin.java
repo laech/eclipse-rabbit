@@ -154,7 +154,7 @@ public class TrackingPlugin extends AbstractUIPlugin implements
         @Override
         public void handleException(Throwable e) {
           getLog().log(new Status(IStatus.ERROR, PLUGIN_ID, e.getMessage(), e));
-          System.err.println(getClass().toString() + ": " + e.getMessage());
+          e.printStackTrace();
         }
 
         @Override

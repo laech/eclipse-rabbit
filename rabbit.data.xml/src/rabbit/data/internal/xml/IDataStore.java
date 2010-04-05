@@ -18,9 +18,9 @@ package rabbit.data.internal.xml;
 import rabbit.data.internal.xml.schema.events.EventListType;
 
 import org.eclipse.core.runtime.IPath;
+import org.joda.time.LocalDate;
 
 import java.io.File;
-import java.util.Calendar;
 import java.util.List;
 
 /**
@@ -34,7 +34,7 @@ public interface IDataStore {
    * @param date The date.
    * @return The file, this file may not be physically existing.
    */
-  File getDataFile(Calendar date);
+  File getDataFile(LocalDate date);
 
   /**
    * Gets the data file for the given date in the given location.
@@ -43,7 +43,7 @@ public interface IDataStore {
    * @param location The folder location.
    * @return The file, this file may not be physically existing.
    */
-  File getDataFile(Calendar date, IPath location);
+  File getDataFile(LocalDate date, IPath location);
 
   /**
    * Gets the data files for between the given dates, inclusively, of all the
@@ -53,7 +53,7 @@ public interface IDataStore {
    * @param end The end date.
    * @return A list of files that are physically existing across all workspaces.
    */
-  List<File> getDataFiles(Calendar start, Calendar end);
+  List<File> getDataFiles(LocalDate start, LocalDate end);
 
   /**
    * Gets the storage location, if the location does not exist, it will be

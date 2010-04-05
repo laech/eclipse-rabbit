@@ -16,8 +16,7 @@
 package rabbit.data.store.model;
 
 import org.eclipse.ui.IPerspectiveDescriptor;
-
-import java.util.Calendar;
+import org.joda.time.DateTime;
 
 /**
  * Represents a perspective event.
@@ -29,19 +28,19 @@ public class PerspectiveEvent extends ContinuousEvent {
   /**
    * Constructs a perspective event.
    * 
-   * @param time The end time of the event.
+   * @param endTime The end time of the event.
    * @param duration The duration in milliseconds.
    * @param perspective The perspective.
    * @throws NullPointerException If time is null or perspective is null.
    * @throws IllegalArgumentException If duration is negative.
    */
-  public PerspectiveEvent(Calendar time, long duration,
+  public PerspectiveEvent(DateTime endTime, long duration,
       IPerspectiveDescriptor perspective) {
-    super(time, duration);
+    
+    super(endTime, duration);
+    if (perspective == null)
+      throw new NullPointerException("Perspective cannot be null");
 
-    if (perspective == null) {
-      throw new NullPointerException();
-    }
     this.perspective = perspective;
   }
 

@@ -25,13 +25,12 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import org.joda.time.LocalDate;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
 import java.lang.reflect.Method;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -48,7 +47,7 @@ public abstract class AbstractDiscreteEventStorerTest<E extends DiscreteEvent, T
 
   public AbstractDiscreteEventStorerTest() {
     try {
-      dataFile = getDataStore(storer).getDataFile(Calendar.getInstance());
+      dataFile = getDataStore(storer).getDataFile(new LocalDate());
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -71,20 +70,17 @@ public abstract class AbstractDiscreteEventStorerTest<E extends DiscreteEvent, T
 
   @Test
   public void testGetDataFile() throws Exception {
-    assertNotNull(getDataStore(storer).getDataFile(Calendar.getInstance()));
+    assertNotNull(getDataStore(storer).getDataFile(new LocalDate()));
   }
 
   @Test
   public void testGetDataFiles() throws Exception {
 
-    Calendar lowerBound = new GregorianCalendar(1, 1, 1);
-    Calendar upperBound = new GregorianCalendar(3, 1, 1);
+    LocalDate lowerBound = new LocalDate(1, 1, 1);
+    LocalDate upperBound = new LocalDate(3, 1, 1);
 
-    Calendar insideLowerBound = (Calendar) lowerBound.clone();
-    insideLowerBound.add(Calendar.MONTH, 1);
-
-    Calendar insideUpperBound = (Calendar) upperBound.clone();
-    insideUpperBound.add(Calendar.MONTH, -1);
+    LocalDate insideLowerBound = lowerBound.plusMonths(1);
+    LocalDate insideUpperBound = upperBound.minusMonths(1);
 
     Set<File> files = new HashSet<File>();
     files.add(getDataStore(storer).getDataFile(lowerBound));
@@ -128,7 +124,7 @@ public abstract class AbstractDiscreteEventStorerTest<E extends DiscreteEvent, T
   @Test
   public void testRead() throws Exception {
 
-    Calendar cal = new GregorianCalendar(1, 1, 1);
+    LocalDate cal = new LocalDate(1, 1, 1);
     File f = getDataStore(storer).getDataFile(cal);
 
     if (f.exists()) {

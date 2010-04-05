@@ -15,45 +15,37 @@
  */
 package rabbit.data.store.model;
 
-import java.util.Calendar;
+import static com.google.common.base.Preconditions.checkNotNull;
+
+import org.joda.time.DateTime;
 
 /**
  * Represents a file event. This object stores the file id instead of the file
  * itself.
- * 
- * @see rabbit.core.RabbitCore#getFileMapper()
  */
 public class FileEvent extends ContinuousEvent {
 
-  private String fileId;
+  private final String fileId;
 
   /**
    * Constructs a new event.
    * 
-   * @param time The end time of the event.
+   * @param endTime The end time of the event.
    * @param duration The duration of the event, in milliseconds.
    * @param fileId The id of the file.
-   * @throws IllegalArgumentException If duration is negative, or file Id is an
-   *           empty string or contains whitespace only.
+   * @throws IllegalArgumentException If duration is negative.
    * @throws NullPointerException If time is null or file id is null.
    */
-  public FileEvent(Calendar time, long duration, String fileId) {
-    super(time, duration);
-
-    if (fileId == null) {
-      throw new NullPointerException();
-    }
-    if (fileId.trim().equals("")) {
-      throw new IllegalArgumentException();
-    }
+  public FileEvent(DateTime endTime, long duration, String fileId) {
+    super(endTime, duration);
+    checkNotNull(fileId);
     this.fileId = fileId;
   }
 
   /**
    * Gets the file id.
    * 
-   * @return The file id.
-   * @see rabbit.core.RabbitCore#getFileMapper()
+   * @return The file id, never null.
    */
   public String getFileId() {
     return fileId;

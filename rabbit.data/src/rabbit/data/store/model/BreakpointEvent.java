@@ -15,21 +15,22 @@
  */
 package rabbit.data.store.model;
 
-import org.eclipse.debug.core.model.IBreakpoint;
+import static com.google.common.base.Preconditions.checkNotNull;
 
-import java.util.Calendar;
+import org.eclipse.debug.core.model.IBreakpoint;
+import org.joda.time.DateTime;
 
 /**
  * Represents a breakpoint event.
  */
 public class BreakpointEvent extends DiscreteEvent {
-  
+
   /**
    * Enum to indicate the status of a breakpoint.
    */
   public static enum Status {
     /** Indicates a breakpoint has been added. */
-    ADDED, 
+    ADDED,
     /** Indicates a breakpoint has been removed. */
     REMOVED,
     /** Indicates a breakpoint has been enabled. */
@@ -37,20 +38,31 @@ public class BreakpointEvent extends DiscreteEvent {
     /** Indicates a breakpoint has been disabled. */
     DISABLED;
   }
-  
-  private IBreakpoint breakpoint;
-  private Status status;
-  
-  public BreakpointEvent(Calendar time, IBreakpoint breakpoint, Status status) {
+
+  private final IBreakpoint breakpoint;
+  private final Status status;
+
+  /**
+   * Constructs a new event.
+   * 
+   * @param time The time of event.
+   * @param breakpoint The breakpoint.
+   * @param status The status of this event.
+   * @throws NullPointerException If any of the arguments is null.
+   */
+  public BreakpointEvent(DateTime time, IBreakpoint breakpoint, Status status) {
     super(time);
-    if (breakpoint == null || status == null) throw new NullPointerException();
-    
+
+    checkNotNull(breakpoint, "Breakpoint cannot be null");
+    checkNotNull(status, "Status cannot be null");
+
     this.breakpoint = breakpoint;
     this.status = status;
   }
-  
+
   /**
    * Gets the breakpoint of this event.
+   * 
    * @return The breakpoint.
    */
   public IBreakpoint getBreakpoint() {
@@ -59,6 +71,7 @@ public class BreakpointEvent extends DiscreteEvent {
 
   /**
    * Gets the status of the breakpoint of this event.
+   * 
    * @return The breakpoint status.
    */
   public Status getStatus() {

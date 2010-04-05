@@ -22,9 +22,7 @@ import rabbit.data.internal.xml.schema.events.EventListType;
 import rabbit.data.internal.xml.schema.events.PartEventListType;
 import rabbit.data.internal.xml.schema.events.PartEventType;
 
-import java.util.Calendar;
 import java.util.Collection;
-import java.util.Map;
 
 /**
  * Gets data about part usage.
@@ -35,18 +33,6 @@ public class PartDataAccessor extends
   /** Constructor. */
   public PartDataAccessor() {
     super();
-  }
-
-  /**
-   * {@inheritDoc}
-   * <p>
-   * The keys of the map returned are command IDs, and the values are usage
-   * counts.
-   * </p>
-   */
-  @Override
-  public Map<String, Long> getData(Calendar start, Calendar end) {
-    return super.getData(start, end);
   }
 
   @Override

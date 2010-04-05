@@ -31,8 +31,8 @@ import org.eclipse.debug.core.model.IProcess;
 import org.eclipse.debug.core.model.ISourceLocator;
 import org.eclipse.debug.core.model.IStackFrame;
 import org.eclipse.debug.core.model.IThread;
+import org.joda.time.DateTime;
 
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -57,7 +57,7 @@ public class LaunchTracker extends AbstractTracker<LaunchEvent> implements
   private Map<ILaunch, ILaunchConfiguration> launchConfigs;
 
   /** A map of launches and their start time. */
-  private Map<ILaunch, Calendar> launchTimes;
+  private Map<ILaunch, Long> launchTimes;
 
   /** A map of launches and the files involved (for debug launches). */
   private Map<ILaunch, Set<String>> launchFiles;
@@ -67,7 +67,7 @@ public class LaunchTracker extends AbstractTracker<LaunchEvent> implements
    */
   public LaunchTracker() {
     fileMapper = DataHandler.getFileMapper();
-    launchTimes = new HashMap<ILaunch, Calendar>();
+    launchTimes = new HashMap<ILaunch, Long>();
     launchFiles = new HashMap<ILaunch, Set<String>>();
     launchConfigs = new HashMap<ILaunch, ILaunchConfiguration>();
   }
@@ -123,20 +123,21 @@ public class LaunchTracker extends AbstractTracker<LaunchEvent> implements
 
     // Records the start time of this launch:
     if (event.getKind() == DebugEvent.CREATE) {
-      launchTimes.put(launch, Calendar.getInstance());
+      launchTimes.put(launch, System.currentTimeMillis());
       launchConfigs.put(launch, launch.getLaunchConfiguration());
     }
 
     // Calculate duration of this launch:
     else if (event.getKind() == DebugEvent.TERMINATE) {
 
-      Calendar startTime = launchTimes.get(launch);
+      Long startTime = launchTimes.get(launch);
       if (startTime == null) {
         System.err.println("Launch start time not recorded.");
         return;
       }
 
-      long duration = System.currentTimeMillis() - startTime.getTimeInMillis();
+      DateTime endTime = new DateTime();
+      long duration = endTime.getMillis() - startTime;
       if (duration <= 0) {
         System.err.println("Launch duration is <= 0.");
         return;
@@ -152,7 +153,7 @@ public class LaunchTracker extends AbstractTracker<LaunchEvent> implements
         System.err.println("handleProcessEvent: Launch configuration is null.");
         return;
       }
-      addData(new LaunchEvent(startTime, duration, launch, config, fileIds));
+      addData(new LaunchEvent(endTime, duration, launch, config, fileIds));
     }
   }
 

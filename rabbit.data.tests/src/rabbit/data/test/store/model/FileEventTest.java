@@ -19,9 +19,8 @@ import rabbit.data.store.model.FileEvent;
 
 import static org.junit.Assert.assertEquals;
 
+import org.joda.time.DateTime;
 import org.junit.Test;
-
-import java.util.Calendar;
 
 /**
  * @see FileEvent
@@ -30,28 +29,28 @@ public class FileEventTest extends ContinuousEventTest {
 
   @Test(expected = IllegalArgumentException.class)
   public void testContructor_fileIdEmpty() {
-    new FileEvent(Calendar.getInstance(), 10, "");
+    new FileEvent(new DateTime(), 10, "");
   }
 
   @Test(expected = NullPointerException.class)
   public void testContructor_fileIdNull() {
-    new FileEvent(Calendar.getInstance(), 10, null);
+    new FileEvent(new DateTime(), 10, null);
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void testContructor_fileIdWhitespaceOnly() {
-    new FileEvent(Calendar.getInstance(), 10, " \t");
+    new FileEvent(new DateTime(), 10, " \t");
   }
 
   @Test
   public void testGetFileId() {
     String fileId = System.currentTimeMillis() + "";
-    FileEvent event = new FileEvent(Calendar.getInstance(), 10, fileId);
+    FileEvent event = new FileEvent(new DateTime(), 10, fileId);
     assertEquals(fileId, event.getFileId());
   }
 
   @Override
-  protected FileEvent createEvent(Calendar time, long duration) {
+  protected FileEvent createEvent(DateTime time, long duration) {
     return new FileEvent(time, duration, System.currentTimeMillis() + "");
   }
 }

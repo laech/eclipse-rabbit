@@ -15,12 +15,14 @@
  */
 package rabbit.data.access;
 
-import java.util.Calendar;
+import org.joda.time.LocalDate;
+
+import javax.annotation.Nonnull;
 
 /**
  * Represents a data accessor to get data out of a data store.
  * 
- * @param <T> The data type.
+ * @param <T> The return data type.
  */
 public interface IAccessor<T> {
 
@@ -32,5 +34,6 @@ public interface IAccessor<T> {
    * @return A map of data.
    * @throws NullPointerException If any of the arguments is null.
    */
-  T getData(Calendar start, Calendar end);
+  @Nonnull
+  T getData(@Nonnull LocalDate start, @Nonnull LocalDate end);
 }

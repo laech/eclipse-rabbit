@@ -25,10 +25,10 @@ import static org.junit.Assert.fail;
 import org.eclipse.swtbot.swt.finder.junit.SWTBotJunit4ClassRunner;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPart;
+import org.joda.time.DateTime;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.util.Calendar;
 import java.util.Iterator;
 
 /**
@@ -62,8 +62,8 @@ public class PartTrackerTest extends AbstractPartTrackerTest<PartEvent> {
       event = it.next();
     }
     assertTrue(hasSamePart(event, editor));
-    assertTrue(start <= event.getTime().getTimeInMillis());
-    assertTrue(end >= event.getTime().getTimeInMillis());
+    assertTrue(start <= event.getTime().getMillis());
+    assertTrue(end >= event.getTime().getMillis());
     assertTrue(sleepDuration <= event.getDuration());
     assertTrue((end - start) >= event.getDuration());
 
@@ -72,7 +72,7 @@ public class PartTrackerTest extends AbstractPartTrackerTest<PartEvent> {
 
   @Override
   protected PartEvent createEvent() {
-    return new PartEvent(Calendar.getInstance(), 10, getActiveWindow()
+    return new PartEvent(new DateTime(), 10, getActiveWindow()
         .getPartService().getActivePart());
   }
 
@@ -88,7 +88,7 @@ public class PartTrackerTest extends AbstractPartTrackerTest<PartEvent> {
 
   @Override
   protected void internalAssertAccuracy(PartEvent event, IWorkbenchPart part,
-      long durationInMillis, int size, Calendar start, Calendar end) {
+      long durationInMillis, int size, DateTime start, DateTime end) {
 
     assertEquals(size, tracker.getData().size());
     assertEquals(part, event.getWorkbenchPart());

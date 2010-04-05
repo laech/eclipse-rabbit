@@ -21,9 +21,8 @@ import static org.junit.Assert.assertEquals;
 
 import org.eclipse.mylyn.internal.tasks.core.LocalTask;
 import org.eclipse.mylyn.tasks.core.ITask;
+import org.joda.time.DateTime;
 import org.junit.Test;
-
-import java.util.Calendar;
 
 /**
  * @see TaskEvent
@@ -33,20 +32,20 @@ public class TaskEventTest {
 
   @Test(expected = NullPointerException.class)
   public void testConstructor_taskNull() {
-    new TaskEvent(Calendar.getInstance(), 1, "Abc", null);
+    new TaskEvent(new DateTime(), 1, "Abc", null);
   }
 
   @Test
   public void testGetTask() {
     ITask task = new LocalTask("abc", "def");
-    assertEquals(task, new TaskEvent(Calendar.getInstance(), 1, "abcd", task)
+    assertEquals(task, new TaskEvent(new DateTime(), 1, "abcd", task)
         .getTask());
   }
 
   @Test
   public void testSetTask() {
     ITask task = new LocalTask("abc", "def");
-    TaskEvent event = new TaskEvent(Calendar.getInstance(), 1, "abcd", task);
+    TaskEvent event = new TaskEvent(new DateTime(), 1, "abcd", task);
 
     task = new LocalTask("124", "567");
     event.setTask(task);
@@ -56,6 +55,6 @@ public class TaskEventTest {
   @Test(expected = NullPointerException.class)
   public void testSetTask_null() {
     ITask task = new LocalTask("abc", "def");
-    new TaskEvent(Calendar.getInstance(), 1, "abcd", task).setTask(null);
+    new TaskEvent(new DateTime(), 1, "abcd", task).setTask(null);
   }
 }

@@ -21,12 +21,11 @@ import rabbit.data.internal.xml.schema.events.ObjectFactory;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.joda.time.LocalDate;
+import org.joda.time.MutableDateTime;
 
 import java.io.File;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 
 import javax.xml.bind.JAXBElement;
@@ -51,11 +50,6 @@ public enum DataStore implements IDataStore {
   LAUNCH_STORE("launchEvents");
 
   /**
-   * Formats a date into "yyyy-MM".
-   */
-  private final DateFormat monthFormatter = new SimpleDateFormat("yyyy-MM");
-
-  /**
    * An object factory for creating XML object types.
    */
   private final ObjectFactory objectFactory = new ObjectFactory();
@@ -67,36 +61,37 @@ public enum DataStore implements IDataStore {
   }
 
   @Override
-  public File getDataFile(Calendar date) {
+  public File getDataFile(LocalDate date) {
     return getDataFile(date, getStorageLocation());
   }
 
   @Override
-  public File getDataFile(Calendar date, IPath location) {
-    return location.append(id + "-" + monthFormatter.format(date.getTime()))
+  public File getDataFile(LocalDate date, IPath location) {
+    return location.append(id + "-" + date.toString("yyyy-MM"))
         .addFileExtension("xml").toFile();
   }
+  
+  private MutableDateTime dateHelper = new MutableDateTime(0);
 
   @Override
-  public List<File> getDataFiles(Calendar startDate, Calendar endDate) {
-    Calendar start = (Calendar) startDate.clone();
-    start.set(Calendar.DAY_OF_MONTH, 1);
-
-    Calendar end = (Calendar) endDate.clone();
-    end.set(Calendar.DAY_OF_MONTH, start.get(Calendar.DAY_OF_MONTH));
+  public List<File> getDataFiles(LocalDate startDate, LocalDate endDate) {
+    // Note that the dayOfMonth doesn't matter here as we are only comparing
+    // the year and monthOfYear.
+    dateHelper.setDate(startDate.getYear(), startDate.getMonthOfYear(), 1);
 
     List<File> result = new ArrayList<File>();
     IPath[] storagePaths = XmlPlugin.getDefault().getStoragePaths();
-    while (start.compareTo(end) <= 0) {
-
+    while (dateHelper.getYear() <= endDate.getYear()
+        && dateHelper.getMonthOfYear() <= endDate.getMonthOfYear()) {
+      
       for (IPath path : storagePaths) {
-        File f = getDataFile(start, path);
+        File f = getDataFile(new LocalDate(dateHelper.getMillis()), path);
         if (f.exists()) {
           result.add(f);
         }
       }
-
-      start.add(Calendar.MONTH, 1);
+      
+      dateHelper.addMonths(1);
     }
     return result;
   }

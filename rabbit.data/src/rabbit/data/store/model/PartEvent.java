@@ -16,8 +16,7 @@
 package rabbit.data.store.model;
 
 import org.eclipse.ui.IWorkbenchPart;
-
-import java.util.Calendar;
+import org.joda.time.DateTime;
 
 /**
  * Represents a workbench part event.
@@ -29,18 +28,17 @@ public class PartEvent extends ContinuousEvent {
   /**
    * Constructs a new event.
    * 
-   * @param time The end time of the event.
+   * @param endTime The end time of the event.
    * @param duration The duration of the event, in milliseconds.
    * @param part The workbench part.
    * @throws NullPointerException If time is null or part is null.
    * @throws IllegalArgumentException If duration is negative.
    */
-  public PartEvent(Calendar time, long duration, IWorkbenchPart part) {
-    super(time, duration);
-
-    if (part == null) {
-      throw new NullPointerException();
-    }
+  public PartEvent(DateTime endTime, long duration, IWorkbenchPart part) {
+    super(endTime, duration);
+    if (part == null)
+      throw new NullPointerException("WorkbenchPart cannot be null");
+    
     this.workbenchPart = part;
   }
 

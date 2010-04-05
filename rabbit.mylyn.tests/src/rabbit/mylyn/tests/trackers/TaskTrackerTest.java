@@ -30,10 +30,10 @@ import org.eclipse.mylyn.tasks.ui.TasksUi;
 import org.eclipse.swtbot.swt.finder.junit.SWTBotJunit4ClassRunner;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPart;
+import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 
-import java.util.Calendar;
 import java.util.Date;
 
 /**
@@ -54,7 +54,7 @@ public class TaskTrackerTest extends AbstractPartTrackerTest<TaskEvent> {
 
   @Override
   protected TaskEvent createEvent() {
-    return new TaskEvent(Calendar.getInstance(), 187, "fileId", task);
+    return new TaskEvent(new DateTime(), 187, "fileId", task);
   }
 
   @Override
@@ -76,7 +76,7 @@ public class TaskTrackerTest extends AbstractPartTrackerTest<TaskEvent> {
 
   @Override
   protected void internalAssertAccuracy(TaskEvent event, IWorkbenchPart part,
-      long durationInMillis, int size, Calendar start, Calendar end) {
+      long durationInMillis, int size, DateTime start, DateTime end) {
 
     // 1/10 of a second is acceptable?
     assertTrue(durationInMillis - 100 <= event.getDuration());

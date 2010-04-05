@@ -17,7 +17,7 @@ package rabbit.data.handler;
 
 import rabbit.data.IFileMapper;
 import rabbit.data.access.IAccessor;
-import rabbit.data.access.model.LaunchDescriptor;
+import rabbit.data.access.model.ZLaunchDescriptor;
 import rabbit.data.store.IStorer;
 import rabbit.data.store.model.CommandEvent;
 import rabbit.data.store.model.FileEvent;
@@ -50,7 +50,7 @@ public class DataHandler {
   /** Map<T, IStorer<T> */
   private static final Map<Class<?>, IStorer<?>> storers;
 
-  private static final IAccessor<Set<LaunchDescriptor>> launchDataAccessor;
+  private static final IAccessor<Set<ZLaunchDescriptor>> launchDataAccessor;
   private static final IAccessor<Map<String, Long>> perspectiveDataAccessor;
   private static final IAccessor<Map<String, Long>> commandDataAccessor;
   private static final IAccessor<Map<String, Long>> sessionDataAccessor;
@@ -106,7 +106,7 @@ public class DataHandler {
    * 
    * @return An IAccessor for accessing the launch event data.
    */
-  public static IAccessor<Set<LaunchDescriptor>> getLaunchDataAccessor() {
+  public static IAccessor<Set<ZLaunchDescriptor>> getLaunchDataAccessor() {
     return launchDataAccessor;
   }
 

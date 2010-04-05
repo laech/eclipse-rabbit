@@ -28,8 +28,8 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
+import org.joda.time.DateTime;
 
-import java.util.Calendar;
 import java.util.Observer;
 import java.util.concurrent.TimeUnit;
 
@@ -219,7 +219,7 @@ public class PerspectiveTracker extends AbstractTracker<PerspectiveEvent>
     }
     long duration = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - start);
     if (duration > 0) {
-      addData(new PerspectiveEvent(Calendar.getInstance(), duration,
+      addData(new PerspectiveEvent(new DateTime(), duration,
           currentPerspective));
     }
     start = Long.MAX_VALUE;

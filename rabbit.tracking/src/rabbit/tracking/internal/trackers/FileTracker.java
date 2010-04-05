@@ -24,9 +24,11 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IWorkbenchPart;
+import org.joda.time.DateTime;
 
-import java.util.Calendar;
-
+/**
+ * Tracks time spent on files.
+ */
 public class FileTracker extends AbstractPartTracker<FileEvent> {
 
   public FileTracker() {
@@ -39,15 +41,15 @@ public class FileTracker extends AbstractPartTracker<FileEvent> {
   }
 
   @Override
-  protected FileEvent tryCreateEvent(Calendar time, long duration,
-      IWorkbenchPart p) {
-    if (p instanceof IEditorPart) {
-      IEditorInput input = ((IEditorPart) p).getEditorInput();
+  protected FileEvent tryCreateEvent(DateTime endTime, long duration,
+      IWorkbenchPart part) {
+    if (part instanceof IEditorPart) {
+      IEditorInput input = ((IEditorPart) part).getEditorInput();
 
       if (input instanceof IFileEditorInput) {
         IFile file = ((IFileEditorInput) input).getFile();
         String id = DataHandler.getFileMapper().insert(file);
-        return new FileEvent(time, duration, id);
+        return new FileEvent(endTime, duration, id);
 
       }
     }

@@ -15,11 +15,14 @@
  */
 package rabbit.tracking.internal.trackers;
 
+import static rabbit.data.store.model.BreakpointEvent.Status.ADDED;
+import static rabbit.data.store.model.BreakpointEvent.Status.DISABLED;
+import static rabbit.data.store.model.BreakpointEvent.Status.ENABLED;
+import static rabbit.data.store.model.BreakpointEvent.Status.REMOVED;
+
 import rabbit.data.store.IStorer;
 import rabbit.data.store.model.BreakpointEvent;
 import rabbit.data.store.model.BreakpointEvent.Status;
-
-import static rabbit.data.store.model.BreakpointEvent.Status.*;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IMarkerDelta;
@@ -27,8 +30,8 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.IBreakpointListener;
 import org.eclipse.debug.core.model.IBreakpoint;
+import org.joda.time.DateTime;
 
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -78,7 +81,7 @@ public class BreakpointTracker extends AbstractTracker<BreakpointEvent>
       boolean enabled = breakpoint.isEnabled();
       status.put(marker.getId(), enabled);
       
-      addData(new BreakpointEvent(Calendar.getInstance(), breakpoint, ADDED));
+      addData(new BreakpointEvent(new DateTime(), breakpoint, ADDED));
     } catch (CoreException e) {
       // Just ignore this breakpoint.
     }
@@ -99,7 +102,7 @@ public class BreakpointTracker extends AbstractTracker<BreakpointEvent>
       boolean isEnabledNow = breakpoint.isEnabled();
       if (isEnabledBefore.booleanValue() != isEnabledNow) {
         Status stat = isEnabledNow ? ENABLED : DISABLED;
-        addData(new BreakpointEvent(Calendar.getInstance(), breakpoint, stat));
+        addData(new BreakpointEvent(new DateTime(), breakpoint, stat));
         
         status.put(markerId, isEnabledNow);
       }
@@ -112,7 +115,7 @@ public class BreakpointTracker extends AbstractTracker<BreakpointEvent>
   public void breakpointRemoved(IBreakpoint breakpoint, IMarkerDelta delta) {
     IMarker marker = breakpoint.getMarker();
     if (marker != null) {
-      addData(new BreakpointEvent(Calendar.getInstance(), breakpoint, REMOVED));
+      addData(new BreakpointEvent(new DateTime(), breakpoint, REMOVED));
       
       status.remove(marker.getId());
     }

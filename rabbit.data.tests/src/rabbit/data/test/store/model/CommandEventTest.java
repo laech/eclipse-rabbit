@@ -23,10 +23,10 @@ import static org.junit.Assert.assertSame;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.commands.ICommandService;
+import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.Calendar;
 import java.util.Collections;
 
 /**
@@ -41,7 +41,7 @@ public class CommandEventTest extends DiscreteEventTest {
   public void setUp() {
     exe = new ExecutionEvent(getCommandService().getCommand("something"),
         Collections.EMPTY_MAP, null, null);
-    event = new CommandEvent(Calendar.getInstance(), exe);
+    event = new CommandEvent(new DateTime(), exe);
   }
 
   @Test
@@ -51,7 +51,7 @@ public class CommandEventTest extends DiscreteEventTest {
 
   @Test(expected = NullPointerException.class)
   public void testConstructor_withNull() {
-    new CommandEvent(Calendar.getInstance(), null);
+    new CommandEvent(new DateTime(), null);
   }
 
   @Test
@@ -60,7 +60,7 @@ public class CommandEventTest extends DiscreteEventTest {
   }
 
   @Override
-  protected CommandEvent createEvent(Calendar time) {
+  protected CommandEvent createEvent(DateTime time) {
     return new CommandEvent(time, new ExecutionEvent(getCommandService()
         .getCommand("something"), Collections.EMPTY_MAP, null, null));
   }
