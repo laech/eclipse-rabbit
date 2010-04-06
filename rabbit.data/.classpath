@@ -2,18 +2,6 @@
 <classpath>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
-	<classpathentry exported="true" kind="lib" path="lib/joda-time-1.6.jar">
-		<attributes>
-			<attribute name="javadoc_location" value="jar:file:/D:/Downloads/joda-time-1.6/joda-time-1.6/joda-time-1.6-javadoc.jar!/"/>
-		</attributes>
-	</classpathentry>
-	<classpathentry exported="true" kind="lib" path="lib/google-collect-1.0.jar">
-		<attributes>
-			<attribute name="javadoc_location" value="file:/C:/Users/o-o/Documents/Downloads/google-collect-1.0/javadoc/"/>
-		</attributes>
-	</classpathentry>
-	<classpathentry kind="lib" path="lib/annotations.jar"/>
-	<classpathentry kind="lib" path="lib/jsr305.jar"/>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

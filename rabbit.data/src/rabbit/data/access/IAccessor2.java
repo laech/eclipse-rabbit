@@ -19,6 +19,7 @@ import org.joda.time.LocalDate;
 
 import java.util.Collection;
 
+import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 
 /**
@@ -36,5 +37,7 @@ public interface IAccessor2<T> {
    * @return A collection of data, or an empty collection if no data is found.
    * @throws NullPointerException If any of the arguments is null.
    */
+  @Nonnull
+  @CheckReturnValue
   Collection<T> getData(@Nonnull LocalDate start, @Nonnull LocalDate end);
 }

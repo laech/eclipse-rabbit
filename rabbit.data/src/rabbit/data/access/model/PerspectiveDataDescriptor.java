@@ -2,13 +2,18 @@ package rabbit.data.access.model;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.base.Objects;
+
 import org.joda.time.LocalDate;
+
+import javax.annotation.Nonnull;
 
 /**
  * Data descriptor for perspective events.
  */
 public class PerspectiveDataDescriptor extends ValueDescriptor {
 
+  @Nonnull
   private final String perspectiveId;
 
   /**
@@ -20,8 +25,8 @@ public class PerspectiveDataDescriptor extends ValueDescriptor {
    * @throws NullPointerException If date is null, or perspectiveId is null.
    * @throws IllegalArgumentException If duration < 0.
    */
-  public PerspectiveDataDescriptor(LocalDate date, long duration,
-      String perspectiveId) {
+  public PerspectiveDataDescriptor(@Nonnull LocalDate date, long duration,
+      @Nonnull String perspectiveId) {
     super(date, duration);
     checkNotNull(perspectiveId, "Perspective ID cannot be null");
     this.perspectiveId = perspectiveId;
@@ -29,8 +34,7 @@ public class PerspectiveDataDescriptor extends ValueDescriptor {
 
   @Override
   public int hashCode() {
-    return (getDate().hashCode() + (int) getValue() + getPerspectiveId()
-        .hashCode()) % 31;
+    return Objects.hashCode(getDate(), getPerspectiveId());
   }
 
   @Override
@@ -51,8 +55,9 @@ public class PerspectiveDataDescriptor extends ValueDescriptor {
   /**
    * Gets the ID of the perspective.
    * 
-   * @return The ID of the perspective.
+   * @return The ID of the perspective, never null.
    */
+  @Nonnull
   public String getPerspectiveId() {
     return perspectiveId;
   }

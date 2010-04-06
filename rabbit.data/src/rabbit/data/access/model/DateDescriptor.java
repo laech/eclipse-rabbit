@@ -4,11 +4,14 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.joda.time.LocalDate;
 
+import javax.annotation.Nonnull;
+
 /**
  * Data descriptor with a date.
  */
 public class DateDescriptor {
 
+  @Nonnull
   private final LocalDate date;
 
   /**
@@ -17,7 +20,7 @@ public class DateDescriptor {
    * @param date The date of the data.
    * @throws NullPointerException If date is null.
    */
-  public DateDescriptor(LocalDate date) {
+  public DateDescriptor(@Nonnull LocalDate date) {
     checkNotNull(date, "Date cannot be null.");
     this.date = date;
   }
@@ -43,8 +46,9 @@ public class DateDescriptor {
   /**
    * Gets the date of the data.
    * 
-   * @return The date.
+   * @return The date, never null.
    */
+  @Nonnull
   public LocalDate getDate() {
     return date;
   }

@@ -2,7 +2,11 @@ package rabbit.data.access.model;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
+import com.google.common.base.Objects;
+
 import org.joda.time.LocalDate;
+
+import javax.annotation.Nonnull;
 
 /**
  * A data descriptor with a value.
@@ -19,23 +23,26 @@ public class ValueDescriptor extends DateDescriptor {
    * @throws NullPointerException If date is null.
    * @throws IllegalArgumentException If value < 0.
    */
-  public ValueDescriptor(LocalDate date, long value) {
+  public ValueDescriptor(@Nonnull LocalDate date, long value) {
     super(date);
     checkArgument(value >= 0, "Duration cannot be negative");
     this.value = value;
   }
-  
+
   @Override
   public int hashCode() {
-    return (getDate().hashCode() + (int) getValue()) % 31;
+    return Objects.hashCode(getDate());
   }
-  
+
   @Override
   public boolean equals(Object obj) {
-    if (null == obj) return false;
-    if (this == obj) return true;
-    if (getClass() != obj.getClass()) return false;
-    
+    if (null == obj)
+      return false;
+    if (this == obj)
+      return true;
+    if (getClass() != obj.getClass())
+      return false;
+
     ValueDescriptor des = (ValueDescriptor) obj;
     return des.getDate().equals(getDate()) && des.getValue() == getValue();
   }

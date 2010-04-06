@@ -2,13 +2,18 @@ package rabbit.data.access.model;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.base.Objects;
+
 import org.joda.time.LocalDate;
+
+import javax.annotation.Nonnull;
 
 /**
  * Data descriptor for a file event.
  */
 public class FileDataDescriptor extends ValueDescriptor {
 
+  @Nonnull
   private final String fileId;
 
   /**
@@ -19,7 +24,8 @@ public class FileDataDescriptor extends ValueDescriptor {
    * @throws NullPointerException If date is null, or fileId is null.
    * @throws IllegalArgumentException If value < 0;
    */
-  public FileDataDescriptor(LocalDate date, long value, String fileId) {
+  public FileDataDescriptor(@Nonnull LocalDate date, long value,
+      @Nonnull String fileId) {
     super(date, value);
     checkNotNull(fileId, "File ID cannot be null");
     this.fileId = fileId;
@@ -27,7 +33,7 @@ public class FileDataDescriptor extends ValueDescriptor {
 
   @Override
   public int hashCode() {
-    return (getDate().hashCode() + (int) getValue() + getFileId().hashCode()) % 31;
+    return Objects.hashCode(getDate(), getFileId());
   }
 
   @Override
@@ -47,8 +53,9 @@ public class FileDataDescriptor extends ValueDescriptor {
   /**
    * Gets the ID of the file.
    * 
-   * @return The ID.
+   * @return The ID, never null.
    */
+  @Nonnull
   public String getFileId() {
     return fileId;
   }

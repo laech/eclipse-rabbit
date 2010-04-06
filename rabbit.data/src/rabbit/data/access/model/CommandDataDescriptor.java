@@ -2,13 +2,18 @@ package rabbit.data.access.model;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.base.Objects;
+
 import org.joda.time.LocalDate;
+
+import javax.annotation.Nonnull;
 
 /**
  * Data descriptor for command events.
  */
 public class CommandDataDescriptor extends ValueDescriptor {
 
+  @Nonnull
   private final String commandId;
 
   /**
@@ -18,7 +23,8 @@ public class CommandDataDescriptor extends ValueDescriptor {
    * @throws NullPointerException If date is null, or commandId is null.
    * @throws IllegalArgumentException If count is < 0.
    */
-  public CommandDataDescriptor(LocalDate date, long count, String commandId) {
+  public CommandDataDescriptor(@Nonnull LocalDate date, @Nonnull long count,
+      @Nonnull String commandId) {
     super(date, count);
     checkNotNull(commandId, "Command ID cannot be null");
     this.commandId = commandId;
@@ -26,7 +32,7 @@ public class CommandDataDescriptor extends ValueDescriptor {
 
   @Override
   public int hashCode() {
-    return (getDate().hashCode() + (int) getValue() + getCommandId().hashCode()) % 31;
+    return Objects.hashCode(getDate(), getCommandId());
   }
 
   @Override
@@ -46,8 +52,9 @@ public class CommandDataDescriptor extends ValueDescriptor {
   /**
    * Gets the command ID of the command.
    * 
-   * @return The command ID.
+   * @return The command ID, never null.
    */
+  @Nonnull
   public String getCommandId() {
     return commandId;
   }

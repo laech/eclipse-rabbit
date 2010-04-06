@@ -7,12 +7,16 @@ import com.google.common.collect.ImmutableSet;
 
 import org.joda.time.LocalDate;
 
+import javax.annotation.Nonnull;
+
 /**
  * Date descriptor for launch events.
  */
 public class LaunchDataDescriptor extends DateDescriptor {
 
+  @Nonnull
   private final ImmutableSet<String> fileIds;
+  @Nonnull
   private final LaunchConfigurationDescriptor launch;
   private final long totalDuration;
   private final int count;
@@ -28,9 +32,9 @@ public class LaunchDataDescriptor extends DateDescriptor {
    * @throws NullPointerException If date, or launch, or fileIds is null.
    * @throws IllegalArgumentException If count < 0, or totalDuration < 0.
    */
-  public LaunchDataDescriptor(LocalDate dt,
-      LaunchConfigurationDescriptor launch, int count, long totalDuration,
-      Iterable<String> fileIds) {
+  public LaunchDataDescriptor(@Nonnull LocalDate dt,
+      @Nonnull LaunchConfigurationDescriptor launch, int count,
+      long totalDuration, @Nonnull Iterable<String> fileIds) {
 
     super(dt);
     checkNotNull(launch);
@@ -69,8 +73,9 @@ public class LaunchDataDescriptor extends DateDescriptor {
   /**
    * Gets the file IDs of this launch.
    * 
-   * @return The IDs of the files involved.
+   * @return The IDs of the files involved, never null.
    */
+  @Nonnull
   public ImmutableSet<String> getFileIds() {
     return fileIds;
   }
@@ -78,8 +83,9 @@ public class LaunchDataDescriptor extends DateDescriptor {
   /**
    * Gets the launch configuration description.
    * 
-   * @return The launch configuration description.
+   * @return The launch configuration description, never null.
    */
+  @Nonnull
   public LaunchConfigurationDescriptor getLaunchDescriptor() {
     return launch;
   }

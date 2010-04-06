@@ -19,6 +19,8 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 import org.joda.time.DateTime;
 
+import javax.annotation.Nonnull;
+
 /**
  * An event that has a duration.
  */
@@ -34,7 +36,7 @@ public class ContinuousEvent extends DiscreteEvent {
    * @throws IllegalArgumentException If duration is negative.
    * @throws NullPointerException If time is null.
    */
-  public ContinuousEvent(DateTime endTime, long duration) {
+  public ContinuousEvent(@Nonnull DateTime endTime, long duration) {
     super(endTime);
     checkArgument(duration >= 0, "Duration cannot be negative");
     this.duration = duration;

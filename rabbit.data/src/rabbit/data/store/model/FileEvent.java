@@ -19,12 +19,15 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.joda.time.DateTime;
 
+import javax.annotation.Nonnull;
+
 /**
  * Represents a file event. This object stores the file id instead of the file
  * itself.
  */
 public class FileEvent extends ContinuousEvent {
 
+  @Nonnull
   private final String fileId;
 
   /**
@@ -36,7 +39,8 @@ public class FileEvent extends ContinuousEvent {
    * @throws IllegalArgumentException If duration is negative.
    * @throws NullPointerException If time is null or file id is null.
    */
-  public FileEvent(DateTime endTime, long duration, String fileId) {
+  public FileEvent(@Nonnull DateTime endTime, long duration,
+      @Nonnull String fileId) {
     super(endTime, duration);
     checkNotNull(fileId);
     this.fileId = fileId;
@@ -47,6 +51,7 @@ public class FileEvent extends ContinuousEvent {
    * 
    * @return The file id, never null.
    */
+  @Nonnull
   public String getFileId() {
     return fileId;
   }

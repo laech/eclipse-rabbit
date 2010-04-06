@@ -15,23 +15,31 @@
  */
 package rabbit.data.store.model;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
+import com.google.common.collect.ImmutableSet;
+
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.joda.time.DateTime;
 
-import java.util.Collections;
 import java.util.Set;
+
+import javax.annotation.Nonnull;
 
 /**
  * Represents a launch event such as a debug launch.
  */
 public class LaunchEvent extends ContinuousEvent {
 
+  @Nonnull
   private final ILaunch launch;
+  @Nonnull
   private final ILaunchConfiguration config;
 
   /** Unmodifiable set of IDs. */
-  private final Set<String> fileIds;
+  @Nonnull
+  private final ImmutableSet<String> fileIds;
 
   /**
    * Constructs a new event.
@@ -46,21 +54,19 @@ public class LaunchEvent extends ContinuousEvent {
    *           is null.
    * @see {@link rabbit.core.storage.IFileMapper}
    */
-  public LaunchEvent(DateTime endTime, long duration, ILaunch launch,
-      ILaunchConfiguration config, Set<String> fileIds) {
+  public LaunchEvent(@Nonnull DateTime endTime, long duration,
+      @Nonnull ILaunch launch, @Nonnull ILaunchConfiguration config,
+      @Nonnull Set<String> fileIds) {
 
     super(endTime, duration);
 
-    if (launch == null)
-      throw new NullPointerException("Launch cannot be null");
-    if (config == null)
-      throw new NullPointerException("Launch configuration cannot be null");
-    if (fileIds == null)
-      throw new NullPointerException("File IDs cannot be null");
+    checkNotNull(launch, "Launch cannot be null");
+    checkNotNull(config, "Launch configuration cannot be null");
+    checkNotNull(fileIds, "File IDs cannot be null");
 
     this.config = config;
     this.launch = launch;
-    this.fileIds = Collections.unmodifiableSet(fileIds);
+    this.fileIds = ImmutableSet.copyOf(fileIds);
   }
 
   /**
@@ -69,7 +75,8 @@ public class LaunchEvent extends ContinuousEvent {
    * @return A collection of IDs of the files involved, or an empty collection.
    * @see {@link rabbit.core.storage.IFileMapper}
    */
-  public Set<String> getFileIds() {
+  @Nonnull
+  public ImmutableSet<String> getFileIds() {
     return fileIds;
   }
 
@@ -78,6 +85,7 @@ public class LaunchEvent extends ContinuousEvent {
    * 
    * @return The launch.
    */
+  @Nonnull
   public ILaunch getLaunch() {
     return launch;
   }
@@ -87,6 +95,7 @@ public class LaunchEvent extends ContinuousEvent {
    * 
    * @return The launch configuration.
    */
+  @Nonnull
   public ILaunchConfiguration getLaunchConfiguration() {
     return config;
   }

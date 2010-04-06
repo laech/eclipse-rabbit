@@ -5,30 +5,11 @@ Bundle-SymbolicName: rabbit.data
 Bundle-Version: 1.1.0.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Require-Bundle: org.eclipse.debug.core,
- org.eclipse.ui
-Export-Package: com.google.common.annotations,
- com.google.common.base,
- com.google.common.base.internal,
- com.google.common.collect,
- edu.umd.cs.findbugs.annotations,
- javax.annotation,
- javax.annotation.concurrent,
- javax.annotation.meta,
- net.jcip.annotations,
- org.joda.time,
- org.joda.time.base,
- org.joda.time.chrono,
- org.joda.time.convert,
- org.joda.time.field,
- org.joda.time.format,
- org.joda.time.tz,
- rabbit.data,
+ org.eclipse.ui,
+ rabbit.common;bundle-version="1.0.0"
+Export-Package: rabbit.data,
  rabbit.data.access,
  rabbit.data.access.model,
  rabbit.data.store,
  rabbit.data.store.model
-Bundle-ClassPath: .,
- lib/google-collect-1.0.jar,
- lib/joda-time-1.6.jar,
- lib/annotations.jar,
- lib/jsr305.jar
+Bundle-ClassPath: .

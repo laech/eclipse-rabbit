@@ -17,6 +17,7 @@ package rabbit.data.access;
 
 import org.joda.time.LocalDate;
 
+import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 
 /**
@@ -35,5 +36,6 @@ public interface IAccessor<T> {
    * @throws NullPointerException If any of the arguments is null.
    */
   @Nonnull
+  @CheckReturnValue
   T getData(@Nonnull LocalDate start, @Nonnull LocalDate end);
 }
