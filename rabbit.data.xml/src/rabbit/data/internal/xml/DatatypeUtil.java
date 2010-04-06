@@ -87,7 +87,7 @@ public class DatatypeUtil {
    * @param cal The calendar to convert from.
    * @return The converted calendar.
    */
-  public static XMLGregorianCalendar toXMLGregorianCalendarDate(DateTime cal) {
+  public static XMLGregorianCalendar toXmlDate(DateTime cal) {
     return datatypeFactory.newXMLGregorianCalendarDate(cal.getYear(), cal
         .getMonthOfYear(), cal.getDayOfMonth(),
         DatatypeConstants.FIELD_UNDEFINED);
@@ -101,7 +101,7 @@ public class DatatypeUtil {
    * @param cal The calendar to convert from.
    * @return The converted calendar.
    */
-  public static XMLGregorianCalendar toXMLGregorianCalendarDate(LocalDate cal) {
+  public static XMLGregorianCalendar toXmlDate(LocalDate cal) {
     return datatypeFactory.newXMLGregorianCalendarDate(cal.getYear(), cal
         .getMonthOfYear(), cal.getDayOfMonth(),
         DatatypeConstants.FIELD_UNDEFINED);
@@ -119,7 +119,7 @@ public class DatatypeUtil {
    * @param cal The calendar to convert from.
    * @return A converted calendar.
    */
-  public static XMLGregorianCalendar toXMLGregorianCalendarDateTime(
+  public static XMLGregorianCalendar toXmlDateTime(
       GregorianCalendar cal) {
     return datatypeFactory.newXMLGregorianCalendar(cal);
   }

@@ -15,9 +15,13 @@
  */
 package rabbit.data.xml.store;
 
-import rabbit.data.internal.xml.AbstractContinuousEventStorer;
+import rabbit.data.internal.xml.AbstractStorer;
 import rabbit.data.internal.xml.DataStore;
 import rabbit.data.internal.xml.IDataStore;
+import rabbit.data.internal.xml.convert.FileEventConverter;
+import rabbit.data.internal.xml.convert.IConverter;
+import rabbit.data.internal.xml.merge.FileEventTypeMerger;
+import rabbit.data.internal.xml.merge.IMerger;
 import rabbit.data.internal.xml.schema.events.EventListType;
 import rabbit.data.internal.xml.schema.events.FileEventListType;
 import rabbit.data.internal.xml.schema.events.FileEventType;
@@ -25,10 +29,14 @@ import rabbit.data.store.model.FileEvent;
 
 import java.util.List;
 
+import javax.annotation.Nonnull;
 import javax.xml.datatype.XMLGregorianCalendar;
 
+/**
+ * Stores {@link FileEvent}
+ */
 public final class FileEventStorer extends
-    AbstractContinuousEventStorer<FileEvent, FileEventType, FileEventListType> {
+    AbstractStorer<FileEvent, FileEventType, FileEventListType> {
 
   private static final FileEventStorer INSTANCE = new FileEventStorer();
 
@@ -41,7 +49,14 @@ public final class FileEventStorer extends
     return INSTANCE;
   }
 
+  @Nonnull
+  private final FileEventConverter converter;
+  @Nonnull
+  private final FileEventTypeMerger merger;
+
   private FileEventStorer() {
+    converter = new FileEventConverter();
+    merger = new FileEventTypeMerger();
   }
 
   @Override
@@ -50,32 +65,29 @@ public final class FileEventStorer extends
   }
 
   @Override
-  protected List<FileEventListType> getXmlTypeCategories(EventListType events) {
+  protected List<FileEventListType> getCategories(EventListType events) {
     return events.getFileEvents();
   }
 
   @Override
-  protected List<FileEventType> getXmlTypes(FileEventListType list) {
+  protected List<FileEventType> getElements(FileEventListType list) {
     return list.getFileEvent();
   }
 
   @Override
-  protected boolean hasSameId(FileEventType x1, FileEventType x2) {
-    return x1.getFileId().equals(x2.getFileId());
-  }
-
-  @Override
-  protected FileEventType newXmlType(FileEvent e) {
-    FileEventType type = objectFactory.createFileEventType();
-    type.setDuration(e.getDuration());
-    type.setFileId(e.getFileId());
-    return type;
-  }
-
-  @Override
-  protected FileEventListType newXmlTypeHolder(XMLGregorianCalendar date) {
+  protected FileEventListType newCategory(XMLGregorianCalendar date) {
     FileEventListType type = objectFactory.createFileEventListType();
     type.setDate(date);
     return type;
+  }
+
+  @Override
+  protected IConverter<FileEvent, FileEventType> getConverter() {
+    return converter;
+  }
+
+  @Override
+  protected IMerger<FileEventType> getMerger() {
+    return merger;
   }
 }

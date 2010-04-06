@@ -18,14 +18,24 @@ package rabbit.data.internal.xml;
 import static rabbit.data.internal.xml.DatatypeUtil.toLocalDate;
 
 import rabbit.data.access.IAccessor;
+import rabbit.data.internal.xml.merge.IMerger;
+import rabbit.data.internal.xml.merge.Mergers;
 import rabbit.data.internal.xml.schema.events.EventGroupType;
+
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.ImmutableCollection;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.SetMultimap;
 
 import org.joda.time.LocalDate;
 
 import java.util.Calendar;
 import java.util.Collection;
-import java.util.LinkedList;
 import java.util.List;
+import java.util.Map.Entry;
+
+import javax.annotation.CheckForNull;
+import javax.xml.datatype.XMLGregorianCalendar;
 
 /**
  * TODO test A simple implementation of an {@link IAccessor} that calls
@@ -40,21 +50,47 @@ import java.util.List;
 public abstract class AbstractDataNodeAccessor<E, T, S extends EventGroupType>
     extends AbstractAccessor2<E, T, S> {
 
-  @Override
-  protected List<E> filter(List<S> data) {
-    List<E> result = new LinkedList<E>();
-    for (S list : data) {
-      LocalDate cal = toLocalDate(list.getDate());
-      for (T type : getXmlTypes(list)) {
+  @CheckForNull
+  protected final IMerger<T> merger;
 
-        E element = createDataNode(cal, type);
-        if (element != null) {
+  public AbstractDataNodeAccessor() {
+    merger = createMerger();
+  }
+
+  @Override
+  protected ImmutableCollection<E> filter(List<S> data) {
+    IMerger<T> merger = createMerger();
+
+    SetMultimap<XMLGregorianCalendar, T> multimap = HashMultimap.create();
+    for (S category : data) {
+
+      if (merger != null)
+        Mergers.merge(merger, multimap.get(category.getDate()),
+            getElements(category));
+      else
+        multimap.get(category.getDate()).addAll(getElements(category));
+    }
+
+    ImmutableSet.Builder<E> result = ImmutableSet.builder();
+    for (Entry<XMLGregorianCalendar, Collection<T>> entry : multimap.asMap()
+        .entrySet()) {
+
+      LocalDate date = toLocalDate(entry.getKey());
+      for (T type : entry.getValue()) {
+        E element = createDataNode(date, type);
+        if (element != null)
           result.add(element);
-        }
       }
     }
-    return result;
+    return result.build();
   }
+
+  /**
+   * TODO test Creates a merger for merging identical elements.
+   * 
+   * @return A merger, or null if all elements are to be treated uniquely.
+   */
+  protected abstract IMerger<T> createMerger();
 
   /**
    * Creates a data node.
@@ -63,13 +99,14 @@ public abstract class AbstractDataNodeAccessor<E, T, S extends EventGroupType>
    * @param type The XML type.
    * @return A data node, or null if one cannot be created.
    */
+  @CheckForNull
   protected abstract E createDataNode(LocalDate cal, T type);
 
   /**
    * Gets a collection of types from the given category.
    * 
-   * @param list The category.
+   * @param category The category.
    * @return A collection of objects.
    */
-  protected abstract Collection<T> getXmlTypes(S list);
+  protected abstract Collection<T> getElements(S category);
 }

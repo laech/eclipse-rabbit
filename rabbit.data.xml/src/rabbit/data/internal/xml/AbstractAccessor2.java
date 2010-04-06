@@ -15,7 +15,7 @@
  */
 package rabbit.data.internal.xml;
 
-import static rabbit.data.internal.xml.DatatypeUtil.toXMLGregorianCalendarDate;
+import static rabbit.data.internal.xml.DatatypeUtil.toXmlDate;
 
 import rabbit.data.access.IAccessor2;
 import rabbit.data.internal.xml.schema.events.EventGroupType;
@@ -87,8 +87,8 @@ public abstract class AbstractAccessor2<T, E, S extends EventGroupType>
    */
   protected List<S> getXmlData(LocalDate start, LocalDate end) {
     List<S> data = new LinkedList<S>();
-    XMLGregorianCalendar startXmlCal = toXMLGregorianCalendarDate(start);
-    XMLGregorianCalendar endXmlCal = toXMLGregorianCalendarDate(end);
+    XMLGregorianCalendar startXmlCal = toXmlDate(start);
+    XMLGregorianCalendar endXmlCal = toXmlDate(end);
 
     List<File> files = getDataStore().getDataFiles(start, end);
     for (File f : files) {

@@ -15,7 +15,7 @@
  */
 package rabbit.data.test.xml;
 
-import static rabbit.data.internal.xml.DatatypeUtil.toXMLGregorianCalendarDate;
+import static rabbit.data.internal.xml.DatatypeUtil.toXmlDate;
 
 import rabbit.data.internal.xml.AbstractAccessor;
 import rabbit.data.internal.xml.AbstractAccessor2;
@@ -100,7 +100,7 @@ public abstract class AbstractAccessorTest2<T, E, S extends EventGroupType> {
     S list1 = createListType();
     MutableDateTime tmp = new MutableDateTime();
     tmp.setDayOfMonth(1);
-    XMLGregorianCalendar start = toXMLGregorianCalendarDate(tmp.toDateTime());
+    XMLGregorianCalendar start = toXmlDate(tmp.toDateTime());
     list1.setDate(start);
     getXmlTypes(list1).add(type1);
 
@@ -113,7 +113,7 @@ public abstract class AbstractAccessorTest2<T, E, S extends EventGroupType> {
 
     S list2 = createListType();
     tmp.setDayOfMonth(3);
-    XMLGregorianCalendar end = toXMLGregorianCalendarDate(tmp.toDateTime());
+    XMLGregorianCalendar end = toXmlDate(tmp.toDateTime());
     list2.setDate(end);
     getXmlTypes(list2).add(type2);
 
@@ -147,7 +147,7 @@ public abstract class AbstractAccessorTest2<T, E, S extends EventGroupType> {
     setUsage(type1, count1);
 
     S list1 = createListType();
-    XMLGregorianCalendar start = toXMLGregorianCalendarDate(date);
+    XMLGregorianCalendar start = toXmlDate(date);
     list1.setDate(start);
     getXmlTypes(list1).add(type1);
 
@@ -159,7 +159,7 @@ public abstract class AbstractAccessorTest2<T, E, S extends EventGroupType> {
     setUsage(type2, count2);
 
     S list2 = createListType();
-    XMLGregorianCalendar end = toXMLGregorianCalendarDate(date);
+    XMLGregorianCalendar end = toXmlDate(date);
     list2.setDate(end);
     getXmlTypes(list2).add(type2);
 

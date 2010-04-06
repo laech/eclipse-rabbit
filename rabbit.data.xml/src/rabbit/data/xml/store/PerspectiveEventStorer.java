@@ -15,9 +15,13 @@
  */
 package rabbit.data.xml.store;
 
-import rabbit.data.internal.xml.AbstractContinuousEventStorer;
+import rabbit.data.internal.xml.AbstractStorer;
 import rabbit.data.internal.xml.DataStore;
 import rabbit.data.internal.xml.IDataStore;
+import rabbit.data.internal.xml.convert.IConverter;
+import rabbit.data.internal.xml.convert.PerspectiveEventConverter;
+import rabbit.data.internal.xml.merge.IMerger;
+import rabbit.data.internal.xml.merge.PerspectiveEventTypeMerger;
 import rabbit.data.internal.xml.schema.events.EventListType;
 import rabbit.data.internal.xml.schema.events.PerspectiveEventListType;
 import rabbit.data.internal.xml.schema.events.PerspectiveEventType;
@@ -25,11 +29,15 @@ import rabbit.data.store.model.PerspectiveEvent;
 
 import java.util.List;
 
+import javax.annotation.Nonnull;
 import javax.xml.datatype.XMLGregorianCalendar;
 
+/**
+ * Stores {@link PerspectiveEvent}.
+ */
 public final class PerspectiveEventStorer
     extends
-    AbstractContinuousEventStorer<PerspectiveEvent, PerspectiveEventType, PerspectiveEventListType> {
+    AbstractStorer<PerspectiveEvent, PerspectiveEventType, PerspectiveEventListType> {
 
   private static final PerspectiveEventStorer INSTANCE = new PerspectiveEventStorer();
 
@@ -42,7 +50,24 @@ public final class PerspectiveEventStorer
     return INSTANCE;
   }
 
+  @Nonnull
+  private final PerspectiveEventConverter converter;
+  @Nonnull
+  private final PerspectiveEventTypeMerger merger;
+
   private PerspectiveEventStorer() {
+    converter = new PerspectiveEventConverter();
+    merger = new PerspectiveEventTypeMerger();
+  }
+
+  @Override
+  protected List<PerspectiveEventListType> getCategories(EventListType events) {
+    return events.getPerspectiveEvents();
+  }
+
+  @Override
+  protected IConverter<PerspectiveEvent, PerspectiveEventType> getConverter() {
+    return converter;
   }
 
   @Override
@@ -51,35 +76,19 @@ public final class PerspectiveEventStorer
   }
 
   @Override
-  protected List<PerspectiveEventListType> getXmlTypeCategories(
-      EventListType events) {
-    return events.getPerspectiveEvents();
-  }
-
-  @Override
-  protected List<PerspectiveEventType> getXmlTypes(PerspectiveEventListType list) {
+  protected List<PerspectiveEventType> getElements(PerspectiveEventListType list) {
     return list.getPerspectiveEvent();
   }
 
   @Override
-  protected boolean hasSameId(PerspectiveEventType x1, PerspectiveEventType x2) {
-    return x1.getPerspectiveId().equals(x2.getPerspectiveId());
+  protected IMerger<PerspectiveEventType> getMerger() {
+    return merger;
   }
 
   @Override
-  protected PerspectiveEventType newXmlType(PerspectiveEvent e) {
-    PerspectiveEventType type = objectFactory.createPerspectiveEventType();
-    type.setDuration(e.getDuration());
-    type.setPerspectiveId(e.getPerspective().getId());
-    return type;
+  protected PerspectiveEventListType newCategory(XMLGregorianCalendar date) {
+    PerspectiveEventListType t = objectFactory.createPerspectiveEventListType();
+    t.setDate(date);
+    return t;
   }
-
-  @Override
-  protected PerspectiveEventListType newXmlTypeHolder(XMLGregorianCalendar date) {
-    PerspectiveEventListType type = objectFactory
-        .createPerspectiveEventListType();
-    type.setDate(date);
-    return type;
-  }
-
 }

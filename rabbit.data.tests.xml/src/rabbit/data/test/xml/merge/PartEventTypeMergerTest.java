@@ -1,3 +1,18 @@
+/*
+ * Copyright 2010 The Rabbit Eclipse Plug-in Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package rabbit.data.test.xml.merge;
 
 import rabbit.data.internal.xml.merge.PartEventTypeMerger;
@@ -5,6 +20,7 @@ import rabbit.data.internal.xml.schema.events.PartEventType;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -103,6 +119,28 @@ public class PartEventTypeMergerTest extends AbstractMergerTest<PartEventType> {
     PartEventType result = merger.merge(t1, t2);
     assertEquals(partId, result.getPartId());
     assertEquals(totalDuration, result.getDuration());
+  }
+  
+  @Override
+  public void testMerge_notModifyParam() throws Exception {
+    String partId = "amAnCommandId";
+    int duration1 = 10010;
+    int duration2 = 187341;
+    
+    PartEventType type1 = new PartEventType();
+    type1.setPartId(partId);
+    type1.setDuration(duration1);
+    PartEventType type2 = new PartEventType();
+    type2.setPartId(partId);
+    type2.setDuration(duration2);
+    
+    PartEventType result = merger.merge(type1, type2);
+    assertNotSame(type1, result);
+    assertNotSame(type2, result);
+    assertEquals(partId, type1.getPartId());
+    assertEquals(duration1, type1.getDuration());
+    assertEquals(partId, type2.getPartId());
+    assertEquals(duration2, type2.getDuration());
   }
 
   @Override

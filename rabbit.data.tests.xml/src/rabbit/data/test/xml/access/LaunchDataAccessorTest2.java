@@ -50,7 +50,7 @@ public class LaunchDataAccessorTest2
   protected LaunchEventListType createListType() {
     LaunchEventListType type = objectFactory.createLaunchEventListType();
     type.setDate(DatatypeUtil
-        .toXMLGregorianCalendarDateTime(new GregorianCalendar()));
+        .toXmlDateTime(new GregorianCalendar()));
     return type;
   }
 

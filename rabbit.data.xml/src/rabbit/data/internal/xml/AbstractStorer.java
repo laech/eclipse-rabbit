@@ -15,8 +15,13 @@
  */
 package rabbit.data.internal.xml;
 
+import static rabbit.data.internal.xml.DatatypeUtil.isSameDate;
 import static rabbit.data.internal.xml.DatatypeUtil.isSameMonthInYear;
+import static rabbit.data.internal.xml.DatatypeUtil.toXmlDate;
 
+import rabbit.data.internal.xml.convert.IConverter;
+import rabbit.data.internal.xml.merge.IMerger;
+import rabbit.data.internal.xml.merge.Mergers;
 import rabbit.data.internal.xml.schema.events.EventGroupType;
 import rabbit.data.internal.xml.schema.events.EventListType;
 import rabbit.data.internal.xml.schema.events.ObjectFactory;
@@ -40,18 +45,16 @@ import javax.xml.datatype.XMLGregorianCalendar;
  * This abstract class is designed specifically for the XML schema. This class
  * contains implementations for common behaviors.
  * 
- * @param <E> The event type to be stored. Such as
- *          {@link rabbit.core.events.CommandEvent} .
+ * @param <E> The event type.
  * @param <T> The corresponding XML object type of the event type, this is the
  *          form when the event is stored in XML.
- * @param <S> A {@link EventGroupType} that groups the XML types according to
- *          event date.
+ * @param <S> A category type that holds the XML types according to event date.
  */
 public abstract class AbstractStorer<E extends DiscreteEvent, T, S extends EventGroupType>
     implements IStorer<E> {
 
   /** Factory object for creating XML schema Java types. */
-  protected final ObjectFactory objectFactory = new ObjectFactory();
+  protected final ObjectFactory objectFactory;
 
   /** Data in memory, not yet saved. */
   private Set<S> data;
@@ -65,32 +68,36 @@ public abstract class AbstractStorer<E extends DiscreteEvent, T, S extends Event
   public AbstractStorer() {
     data = new LinkedHashSet<S>();
     currentMonth = new LocalDate();
+    objectFactory = new ObjectFactory();
   }
 
   @Override
   public void commit() {
-
-    if (data.isEmpty()) {
+    if (data.isEmpty())
       return;
-    }
 
     File f = getDataStore().getDataFile(currentMonth);
     EventListType events = getDataStore().read(f);
-    List<S> mainList = getXmlTypeCategories(events);
+    List<S> categories = getCategories(events);
 
-    for (S newList : data) {
+    IMerger<T> merger = getMerger();
+    for (S mergeFrom : data) {
 
       boolean done = false;
-      for (S oldList : mainList) {
-        if (newList.getDate().equals(oldList.getDate())) {
-          merge(getXmlTypes(oldList), getXmlTypes(newList));
+      for (S mergeTo : categories) {
+        if (mergeFrom.getDate().equals(mergeTo.getDate())) {
+          if (merger != null)
+            Mergers.merge(merger, getElements(mergeTo), getElements(mergeFrom));
+          else
+            getElements(mergeTo).addAll(getElements(mergeFrom));
+
           done = true;
           break;
         }
       }
 
       if (!done) {
-        mainList.add(newList);
+        categories.add(mergeFrom);
       }
     }
 
@@ -103,50 +110,54 @@ public abstract class AbstractStorer<E extends DiscreteEvent, T, S extends Event
     data.clear();
   }
 
-  /**
-   * Inserts a collection of event data to be stored.
-   * 
-   * @param col The collection of events.
-   */
   @Override
-  public void insert(Collection<? extends E> col) {
-
-    for (E e : col) {
-      insert(e);
-    }
+  public void insert(Collection<? extends E> collection) {
+    for (E elements : collection)
+      insert(elements);
   }
 
-  /**
-   * Inserts an event to be stored.
-   * 
-   * @param e The event.
-   */
   @Override
-  public void insert(E e) {
+  public void insert(E event) {
 
-    DateTime time = e.getTime();
-    if (!isSameMonthInYear(e.getTime(), currentMonth)) {
+    DateTime time = event.getTime();
+    if (!isSameMonthInYear(event.getTime(), currentMonth)) {
       commit();
       currentMonth = time.toLocalDate();
     }
 
-    boolean done = false;
+    IMerger<T> merger = getMerger();
+    T element = getConverter().convert(event);
+    for (S category : data) {
+      if (isSameDate(event.getTime(), category.getDate())) {
 
-    for (S list : data) {
-      if (DatatypeUtil.isSameDate(e.getTime(), list.getDate())) {
-        merge(getXmlTypes(list), e);
-        done = true;
-        break;
+        if (merger != null)
+          Mergers.merge(merger, getElements(category), element);
+        else
+          getElements(category).add(element);
+
+        return;
       }
     }
 
-    if (!done) {
-      S holder = newXmlTypeHolder(DatatypeUtil.toXMLGregorianCalendarDate(e
-          .getTime()));
-      merge(getXmlTypes(holder), e);
-      data.add(holder);
-    }
+    S category = newCategory(toXmlDate(event.getTime()));
+    getElements(category).add(element);
+    data.add(category);
   }
+
+  /**
+   * Gets the merger for merging identical elements.
+   * 
+   * @return An {@linkplain IMerger}, or null if all elements are to be treated
+   *         uniquely.
+   */
+  protected abstract IMerger<T> getMerger();
+
+  /**
+   * Gets a converter for converting events to XML types.
+   * 
+   * @return A converter, must not be null.
+   */
+  protected abstract IConverter<E, T> getConverter();
 
   /**
    * Gets the data store.
@@ -162,37 +173,21 @@ public abstract class AbstractStorer<E extends DiscreteEvent, T, S extends Event
    * @param events The root element.
    * @return A list of groups.
    */
-  protected abstract List<S> getXmlTypeCategories(EventListType events);
+  protected abstract List<S> getCategories(EventListType events);
 
   /**
-   * Gets the XML types from the given group.
+   * Gets the XML elements from the given group.
    * 
    * @param list The group holding the XML types.
-   * @return A list of XML types.
+   * @return A list of XML elements.
    */
-  protected abstract List<T> getXmlTypes(S list);
+  protected abstract List<T> getElements(S list);
 
   /**
-   * Merges the event into the list.
-   * 
-   * @param xList The list for merging the event into.
-   * @param event The event for merging.
-   */
-  protected abstract void merge(List<T> xList, E event);
-
-  /**
-   * Merges the second list into the first list.
-   * 
-   * @param mainList The list for merging into.
-   * @param newList The list for getting data from.
-   */
-  protected abstract void merge(List<T> mainList, List<T> newList);
-
-  /**
-   * Creates a new XML object group type from the given date.
+   * Creates a new category from the given date.
    * 
    * @param date The date.
-   * @return A new XML object group type configured with the date.
+   * @return A new category configured with the date.
    */
-  protected abstract S newXmlTypeHolder(XMLGregorianCalendar date);
+  protected abstract S newCategory(XMLGregorianCalendar date);
 }

@@ -1,3 +1,18 @@
+/*
+ * Copyright 2010 The Rabbit Eclipse Plug-in Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package rabbit.data.test.xml.merge;
 
 import rabbit.data.internal.xml.merge.LaunchEventTypeMerger;
@@ -5,6 +20,7 @@ import rabbit.data.internal.xml.schema.events.LaunchEventType;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -192,6 +208,52 @@ public class LaunchEventTypeMergerTest extends
     assertEquals(totalDuration, result.getTotalDuration());
     assertEquals(allFileIds.size(), result.getFileId().size());
     assertTrue(allFileIds.containsAll(result.getFileId()));
+  }
+  
+  @Override
+  public void testMerge_notModifyParam() throws Exception {
+    String name = "noName";
+    String type = "abc2";
+    String mode = "amAnId";
+    int count1 = 238;
+    int count2 = 9823;
+    int duration1 = 10010;
+    int duration2 = 187341;
+    Set<String> fileIds1 = new HashSet<String>(Arrays.asList("a", "b"));
+    Set<String> fileIds2 = new HashSet<String>(Arrays.asList("1"));
+    
+    LaunchEventType type1 = new LaunchEventType();
+    type1.setName(name);
+    type1.setLaunchTypeId(type);
+    type1.setLaunchModeId(mode);
+    type1.setCount(count1);
+    type1.setTotalDuration(duration1);
+    type1.getFileId().addAll(fileIds1);
+    LaunchEventType type2 = new LaunchEventType();
+    type2.setName(name);
+    type2.setLaunchTypeId(type);
+    type2.setLaunchModeId(mode);
+    type2.setCount(count2);
+    type2.setTotalDuration(duration2);
+    type2.getFileId().addAll(fileIds2);
+    
+    LaunchEventType result = merger.merge(type1, type2);
+    assertNotSame(type1, result);
+    assertNotSame(type2, result);
+    assertEquals(name, type1.getName());
+    assertEquals(mode, type1.getLaunchModeId());
+    assertEquals(type, type1.getLaunchTypeId());
+    assertEquals(count1, type1.getCount());
+    assertEquals(duration1, type1.getTotalDuration());
+    assertEquals(fileIds1.size(), type1.getFileId().size());
+    assertTrue(fileIds1.containsAll(type1.getFileId()));
+    assertEquals(name, type2.getName());
+    assertEquals(mode, type2.getLaunchModeId());
+    assertEquals(type, type2.getLaunchTypeId());
+    assertEquals(count2, type2.getCount());
+    assertEquals(duration2, type2.getTotalDuration());
+    assertEquals(fileIds2.size(), type2.getFileId().size());
+    assertTrue(fileIds2.containsAll(type2.getFileId()));
   }
 
   @Override

@@ -15,90 +15,48 @@
  */
 package rabbit.data.test.xml.store;
 
-import rabbit.data.internal.xml.schema.events.ObjectFactory;
 import rabbit.data.internal.xml.schema.events.PerspectiveEventListType;
 import rabbit.data.internal.xml.schema.events.PerspectiveEventType;
 import rabbit.data.store.model.PerspectiveEvent;
-import rabbit.data.test.xml.AbstractContinuousEventStorerTest;
+import rabbit.data.test.xml.AbstractStorerTest;
 import rabbit.data.xml.store.PerspectiveEventStorer;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import com.google.common.base.Objects;
 
 import org.eclipse.ui.IPerspectiveDescriptor;
 import org.eclipse.ui.PlatformUI;
 import org.joda.time.DateTime;
 
-import java.util.List;
-
-public class PerspectiveEventStorerTest extends
-    AbstractContinuousEventStorerTest //
-    <PerspectiveEvent, PerspectiveEventType, PerspectiveEventListType> {
+/**
+ * @see PerspectiveEventStorer
+ */
+@SuppressWarnings("restriction")
+public class PerspectiveEventStorerTest
+    extends
+    AbstractStorerTest<PerspectiveEvent, PerspectiveEventType, PerspectiveEventListType> {
 
   @Override
-  public void testHasSameId_typeAndType() {
-    PerspectiveEvent e = createEvent();
-
-    PerspectiveEventType x = new ObjectFactory().createPerspectiveEventType();
-    x.setPerspectiveId(e.getPerspective().getId());
-
-    assertTrue(hasSameId(x, e));
-
-    x.setPerspectiveId("");
-    assertFalse(hasSameId(x, e));
+  protected PerspectiveEvent createEvent(DateTime dateTime) {
+    IPerspectiveDescriptor p = PlatformUI.getWorkbench()
+        .getPerspectiveRegistry().getPerspectives()[0];
+    return new PerspectiveEvent(dateTime, 1924, p);
   }
 
   @Override
-  protected PerspectiveEventStorer create() {
+  protected PerspectiveEvent createEventDiff(DateTime dateTime) {
+    IPerspectiveDescriptor p = PlatformUI.getWorkbench()
+        .getPerspectiveRegistry().getPerspectives()[1];
+    return new PerspectiveEvent(dateTime, 11094, p);
+  }
+
+  @Override
+  protected PerspectiveEventStorer createStorer() {
     return PerspectiveEventStorer.getInstance();
   }
 
   @Override
-  protected PerspectiveEvent createEvent() {
-    IPerspectiveDescriptor p = PlatformUI.getWorkbench()
-        .getPerspectiveRegistry().getPerspectives()[0];
-    return new PerspectiveEvent(new DateTime(), 194, p);
-  }
-
-  @Override
-  protected PerspectiveEvent createEvent(DateTime eventTime) {
-    IPerspectiveDescriptor p = PlatformUI.getWorkbench()
-        .getPerspectiveRegistry().getPerspectives()[0];
-    return new PerspectiveEvent(eventTime, 1924, p);
-  }
-
-  @Override
-  protected PerspectiveEvent createEvent2() {
-    IPerspectiveDescriptor p = PlatformUI.getWorkbench()
-        .getPerspectiveRegistry().getPerspectives()[1];
-    return new PerspectiveEvent(new DateTime(), 11094, p);
-  }
-
-  @Override
-  protected List<PerspectiveEventType> getEventTypes(
-      PerspectiveEventListType type) {
-    return type.getPerspectiveEvent();
-  }
-
-  @Override
-  protected boolean hasSameId(PerspectiveEventType xml, PerspectiveEvent e) {
-    return xml.getPerspectiveId().equals(e.getPerspective().getId());
-  }
-
-  @Override
-  protected boolean isEqual(PerspectiveEventType type, PerspectiveEvent event) {
-    boolean isEqual = false;
-    isEqual = type.getPerspectiveId().equals(event.getPerspective().getId());
-    if (isEqual) {
-      isEqual = (type.getDuration() == event.getDuration());
-    }
-    return isEqual;
-  }
-
-  @Override
-  protected PerspectiveEvent mergeValue(PerspectiveEvent main,
-      PerspectiveEvent tmp) {
-    return new PerspectiveEvent(main.getTime(), main.getDuration()
-        + tmp.getDuration(), main.getPerspective());
+  protected boolean equal(PerspectiveEventType t1, PerspectiveEventType t2) {
+    return Objects.equal(t1.getPerspectiveId(), t2.getPerspectiveId())
+        && t1.getDuration() == t2.getDuration();
   }
 }

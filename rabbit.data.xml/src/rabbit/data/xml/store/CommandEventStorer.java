@@ -15,9 +15,12 @@
  */
 package rabbit.data.xml.store;
 
-import rabbit.data.internal.xml.AbstractDiscreteEventStorer;
+import rabbit.data.internal.xml.AbstractStorer;
 import rabbit.data.internal.xml.DataStore;
 import rabbit.data.internal.xml.IDataStore;
+import rabbit.data.internal.xml.convert.CommandEventConverter;
+import rabbit.data.internal.xml.merge.CommandEventTypeMerger;
+import rabbit.data.internal.xml.merge.IMerger;
 import rabbit.data.internal.xml.schema.events.CommandEventListType;
 import rabbit.data.internal.xml.schema.events.CommandEventType;
 import rabbit.data.internal.xml.schema.events.EventListType;
@@ -25,11 +28,14 @@ import rabbit.data.store.model.CommandEvent;
 
 import java.util.List;
 
+import javax.annotation.Nonnull;
 import javax.xml.datatype.XMLGregorianCalendar;
 
-public final class CommandEventStorer
-    extends
-    AbstractDiscreteEventStorer<CommandEvent, CommandEventType, CommandEventListType> {
+/**
+ * Stores {@link CommandEvent}
+ */
+public final class CommandEventStorer extends
+    AbstractStorer<CommandEvent, CommandEventType, CommandEventListType> {
 
   private static final CommandEventStorer INSTANCE = new CommandEventStorer();
 
@@ -42,7 +48,24 @@ public final class CommandEventStorer
     return INSTANCE;
   }
 
+  @Nonnull
+  private final CommandEventConverter converter;
+  @Nonnull
+  private final CommandEventTypeMerger merger;
+
   private CommandEventStorer() {
+    converter = new CommandEventConverter();
+    merger = new CommandEventTypeMerger();
+  }
+
+  @Override
+  protected List<CommandEventListType> getCategories(EventListType events) {
+    return events.getCommandEvents();
+  }
+
+  @Override
+  protected CommandEventConverter getConverter() {
+    return converter;
   }
 
   @Override
@@ -51,35 +74,17 @@ public final class CommandEventStorer
   }
 
   @Override
-  protected List<CommandEventListType> getXmlTypeCategories(EventListType events) {
-    return events.getCommandEvents();
-  }
-
-  @Override
-  protected List<CommandEventType> getXmlTypes(CommandEventListType list) {
+  protected List<CommandEventType> getElements(CommandEventListType list) {
     return list.getCommandEvent();
   }
 
   @Override
-  protected boolean hasSameId(CommandEventType x1, CommandEventType x2) {
-    return x1.getCommandId().equals(x2.getCommandId());
+  protected IMerger<CommandEventType> getMerger() {
+    return merger;
   }
 
   @Override
-  protected void merge(CommandEventType x1, CommandEventType x2) {
-    x1.setCount(x1.getCount() + x2.getCount());
-  }
-
-  @Override
-  protected CommandEventType newXmlType(CommandEvent e) {
-    CommandEventType type = objectFactory.createCommandEventType();
-    type.setCommandId(e.getExecutionEvent().getCommand().getId());
-    type.setCount(1);
-    return type;
-  }
-
-  @Override
-  protected CommandEventListType newXmlTypeHolder(XMLGregorianCalendar date) {
+  protected CommandEventListType newCategory(XMLGregorianCalendar date) {
     CommandEventListType type = objectFactory.createCommandEventListType();
     type.setDate(date);
     return type;

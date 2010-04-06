@@ -15,150 +15,61 @@
  */
 package rabbit.data.test.xml.store;
 
-import rabbit.data.internal.xml.schema.events.ObjectFactory;
 import rabbit.data.internal.xml.schema.events.PartEventListType;
 import rabbit.data.internal.xml.schema.events.PartEventType;
 import rabbit.data.store.model.PartEvent;
-import rabbit.data.test.xml.AbstractContinuousEventStorerTest;
+import rabbit.data.test.xml.AbstractStorerTest;
 import rabbit.data.xml.store.PartEventStorer;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import com.google.common.base.Objects;
 
 import org.eclipse.ui.IViewPart;
-import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.joda.time.DateTime;
 
-import java.util.List;
+/**
+ * @see PartEventStorer
+ */
+@SuppressWarnings("restriction")
+public class PartEventStorerTest extends
+    AbstractStorerTest<PartEvent, PartEventType, PartEventListType> {
 
-public class PartEventStorerTest
-    extends
-    AbstractContinuousEventStorerTest<PartEvent, PartEventType, PartEventListType> {
+  @Override
+  protected PartEvent createEvent(DateTime dateTime) throws Exception {
+    try {
+      IViewPart view = PlatformUI.getWorkbench().getActiveWorkbenchWindow()
+          .getActivePage().showView("org.eclipse.ui.views.TaskList");
+      return new PartEvent(dateTime, 11110, view);
 
-  private PartEvent event;
-
-  private IWorkbenchWindow win = getWorkbenchWindow();
-
-  public IWorkbenchWindow getWorkbenchWindow() {
-
-    final IWorkbench wb = PlatformUI.getWorkbench();
-    wb.getDisplay().syncExec(new Runnable() {
-
-      @Override
-      public void run() {
-        win = wb.getActiveWorkbenchWindow();
-      }
-    });
-    return win;
+    } catch (PartInitException e) {
+      e.printStackTrace();
+      return null;
+    }
   }
 
   @Override
-  public void testHasSameId_typeAndType() {
+  protected PartEvent createEventDiff(final DateTime eventTime)
+      throws Exception {
+    try {
+      IViewPart view = PlatformUI.getWorkbench().getActiveWorkbenchWindow()
+          .getActivePage().showView("org.eclipse.ui.navigator.ProjectExplorer");
+      return new PartEvent(eventTime, 110, view);
 
-    PartEvent e = createEvent();
-
-    PartEventType x = new ObjectFactory().createPartEventType();
-    x.setPartId(e.getWorkbenchPart().getSite().getId());
-
-    assertTrue(hasSameId(x, e));
-
-    x.setPartId("");
-    assertFalse(hasSameId(x, e));
+    } catch (PartInitException e) {
+      e.printStackTrace();
+      return null;
+    }
   }
 
   @Override
-  protected PartEventStorer create() {
+  protected PartEventStorer createStorer() {
     return PartEventStorer.getInstance();
   }
 
   @Override
-  protected PartEvent createEvent() {
-    final IWorkbench wb = PlatformUI.getWorkbench();
-    wb.getDisplay().syncExec(new Runnable() {
-
-      @Override
-      public void run() {
-        try {
-          IViewPart v = wb.getActiveWorkbenchWindow().getActivePage().showView(
-              "org.eclipse.ui.views.TaskList");
-          event = new PartEvent(new DateTime(), 10, v);
-        } catch (PartInitException e) {
-          e.printStackTrace();
-          event = null;
-        }
-      }
-    });
-    return event;
-  }
-
-  @Override
-  protected PartEvent createEvent(final DateTime eventTime) {
-    final IWorkbench wb = PlatformUI.getWorkbench();
-    wb.getDisplay().syncExec(new Runnable() {
-
-      @Override
-      public void run() {
-        try {
-          IViewPart v = wb.getActiveWorkbenchWindow().getActivePage().showView(
-              "org.eclipse.ui.views.TaskList");
-          event = new PartEvent(eventTime, 10, v);
-        } catch (PartInitException e) {
-          e.printStackTrace();
-          event = null;
-        }
-      }
-    });
-    return event;
-  }
-
-  @Override
-  protected PartEvent createEvent2() {
-    final IWorkbench wb = PlatformUI.getWorkbench();
-    wb.getDisplay().syncExec(new Runnable() {
-
-      @Override
-      public void run() {
-
-        try {
-          IViewPart v = wb.getActiveWorkbenchWindow().getActivePage().showView(
-              "org.eclipse.ui.navigator.ProjectExplorer");
-          event = new PartEvent(new DateTime(), 10, v);
-        } catch (PartInitException e) {
-          e.printStackTrace();
-          event = null;
-        }
-      }
-    });
-    return event;
-  }
-
-  @Override
-  protected List<PartEventType> getEventTypes(PartEventListType type) {
-    return type.getPartEvent();
-  }
-
-  @Override
-  protected boolean hasSameId(PartEventType xml, PartEvent e) {
-    return xml.getPartId().equals(e.getWorkbenchPart().getSite().getId());
-  }
-
-  @Override
-  protected boolean isEqual(PartEventType type, PartEvent event) {
-    boolean isEqual = false;
-    isEqual = type.getPartId().equals(
-        event.getWorkbenchPart().getSite().getId());
-    if (isEqual) {
-      isEqual = (type.getDuration() == event.getDuration());
-    }
-    return isEqual;
-  }
-
-  @Override
-  protected PartEvent mergeValue(PartEvent main, PartEvent tmp) {
-    return new PartEvent(main.getTime(),
-        main.getDuration() + tmp.getDuration(), main.getWorkbenchPart());
+  protected boolean equal(PartEventType t1, PartEventType t2) {
+    return Objects.equal(t1.getPartId(), t2.getPartId())
+        && t1.getDuration() == t2.getDuration();
   }
 }

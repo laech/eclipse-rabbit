@@ -15,9 +15,13 @@
  */
 package rabbit.data.xml.store;
 
-import rabbit.data.internal.xml.AbstractContinuousEventStorer;
+import rabbit.data.internal.xml.AbstractStorer;
 import rabbit.data.internal.xml.DataStore;
 import rabbit.data.internal.xml.IDataStore;
+import rabbit.data.internal.xml.convert.IConverter;
+import rabbit.data.internal.xml.convert.PartEventConverter;
+import rabbit.data.internal.xml.merge.IMerger;
+import rabbit.data.internal.xml.merge.PartEventTypeMerger;
 import rabbit.data.internal.xml.schema.events.EventListType;
 import rabbit.data.internal.xml.schema.events.PartEventListType;
 import rabbit.data.internal.xml.schema.events.PartEventType;
@@ -25,10 +29,14 @@ import rabbit.data.store.model.PartEvent;
 
 import java.util.List;
 
+import javax.annotation.Nonnull;
 import javax.xml.datatype.XMLGregorianCalendar;
 
+/**
+ * Stores {@link PartEvent}
+ */
 public final class PartEventStorer extends
-    AbstractContinuousEventStorer<PartEvent, PartEventType, PartEventListType> {
+    AbstractStorer<PartEvent, PartEventType, PartEventListType> {
 
   private static final PartEventStorer INSTANCE = new PartEventStorer();
 
@@ -41,7 +49,24 @@ public final class PartEventStorer extends
     return INSTANCE;
   }
 
+  @Nonnull
+  private final PartEventConverter converter;
+  @Nonnull
+  private final PartEventTypeMerger merger;
+
   private PartEventStorer() {
+    converter = new PartEventConverter();
+    merger = new PartEventTypeMerger();
+  }
+
+  @Override
+  protected List<PartEventListType> getCategories(EventListType events) {
+    return events.getPartEvents();
+  }
+
+  @Override
+  protected IConverter<PartEvent, PartEventType> getConverter() {
+    return converter;
   }
 
   @Override
@@ -50,36 +75,19 @@ public final class PartEventStorer extends
   }
 
   @Override
-  protected List<PartEventListType> getXmlTypeCategories(EventListType events) {
-    return events.getPartEvents();
-  }
-
-  @Override
-  protected List<PartEventType> getXmlTypes(PartEventListType list) {
+  protected List<PartEventType> getElements(PartEventListType list) {
     return list.getPartEvent();
   }
 
   @Override
-  protected boolean hasSameId(PartEventType x1, PartEventType x2) {
-    return x1.getPartId().equals(x2.getPartId());
+  protected IMerger<PartEventType> getMerger() {
+    return merger;
   }
 
   @Override
-  protected PartEventType newXmlType(PartEvent e) {
-
-    PartEventType type = objectFactory.createPartEventType();
-    type.setDuration(e.getDuration());
-    type.setPartId(e.getWorkbenchPart().getSite().getId());
-
-    return type;
-  }
-
-  @Override
-  protected PartEventListType newXmlTypeHolder(XMLGregorianCalendar date) {
-
+  protected PartEventListType newCategory(XMLGregorianCalendar date) {
     PartEventListType type = objectFactory.createPartEventListType();
     type.setDate(date);
-
     return type;
   }
 }
