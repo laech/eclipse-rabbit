@@ -15,11 +15,11 @@
  */
 package rabbit.ui.tests.pages;
 
-import rabbit.data.access.model.PerspectiveDataDescriptor;
+import rabbit.data.access.model.PartDataDescriptor;
 import rabbit.ui.internal.pages.AbstractDateCategoryContentProvider;
 import rabbit.ui.internal.pages.AbstractTreeViewerPage;
-import rabbit.ui.internal.pages.PerspectivePage;
-import rabbit.ui.internal.pages.PerspectivePageContentProvider;
+import rabbit.ui.internal.pages.PartPage;
+import rabbit.ui.internal.pages.PartPageContentProvider;
 
 import com.google.common.collect.Sets;
 
@@ -29,7 +29,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import org.eclipse.ui.IPerspectiveDescriptor;
+import org.eclipse.ui.IWorkbenchPartDescriptor;
 import org.joda.time.LocalDate;
 import org.junit.Test;
 
@@ -37,21 +37,31 @@ import java.util.Arrays;
 import java.util.Set;
 
 /**
- * @see PerspectivePageContentProvider
+ * @see PartPageContentProvider
  */
 @SuppressWarnings("restriction")
-public class PerspectivePageContentProviderTest extends
-    AbstractDateCategoryContentProviderTest {
+public class PartPageContentProviderTest extends AbstractDateCategoryContentProviderTest {
+
+  @Override
+  protected AbstractDateCategoryContentProvider createContentProvider(
+      AbstractTreeViewerPage page, boolean displayByDate) {
+    return new PartPageContentProvider((PartPage) page, displayByDate);
+  }
+
+  @Override
+  protected PartPage createPage() {
+    return new PartPage();
+  }
 
   @Test
   public void testGetChildren() {
-    PerspectiveDataDescriptor des1 = new PerspectiveDataDescriptor(
+    PartDataDescriptor des1 = new PartDataDescriptor(
         new LocalDate(), 8723, "123");
-    PerspectiveDataDescriptor des2 = new PerspectiveDataDescriptor(des1
+    PartDataDescriptor des2 = new PartDataDescriptor(des1
         .getDate(), 18723, "12343");
 
     page.getViewer().setInput(Arrays.asList(des1, des2));
-    Set<PerspectiveDataDescriptor> set = Sets.newHashSet(des1, des2);
+    Set<PartDataDescriptor> set = Sets.newHashSet(des1, des2);
 
     Object[] elements = contentProvider.getChildren(des1.getDate());
     assertEquals(2, elements.length);
@@ -59,41 +69,41 @@ public class PerspectivePageContentProviderTest extends
   }
 
   @Test
-  public void testGetPerspective_nonExistId() {
-    PerspectivePageContentProvider contents = (PerspectivePageContentProvider) contentProvider;
-    PerspectiveDataDescriptor des = new PerspectiveDataDescriptor(
+  public void testGetPart_nonExistId() {
+    PartPageContentProvider contents = (PartPageContentProvider) contentProvider;
+    PartDataDescriptor des = new PartDataDescriptor(
         new LocalDate(), 8723, System.currentTimeMillis() + "");
-    IPerspectiveDescriptor perspective = contents.getPerspective(des);
-    // A custom perspective descriptor is returned, never null:
-    assertNotNull(perspective);
-    assertEquals(des.getPerspectiveId(), perspective.getId());
+    IWorkbenchPartDescriptor part = contents.getPart(des);
+    // A custom part descriptor is returned, never null:
+    assertNotNull(part);
+    assertEquals(des.getPartId(), part.getId());
   }
 
   @Test
-  public void testGetValueOfPerspective_oneElement() {
-    PerspectivePageContentProvider contents = (PerspectivePageContentProvider) contentProvider;
-    PerspectiveDataDescriptor des = new PerspectiveDataDescriptor(
+  public void testGetValueOfPart_oneElement() {
+    PartPageContentProvider contents = (PartPageContentProvider) contentProvider;
+    PartDataDescriptor des = new PartDataDescriptor(
         new LocalDate(), 8723, "24");
     page.getViewer().setInput(Arrays.asList(des));
-    assertEquals(des.getValue(), contents.getValueOfPerspective(contents
-        .getPerspective(des)));
+    assertEquals(des.getValue(), contents.getValueOfPart(contents
+        .getPart(des)));
   }
 
   @Test
-  public void testGetValueOfPerspective_twoElements() {
-    PerspectivePageContentProvider contents = (PerspectivePageContentProvider) contentProvider;
-    PerspectiveDataDescriptor des1 = new PerspectiveDataDescriptor(
+  public void testGetValueOfPart_twoElements() {
+    PartPageContentProvider contents = (PartPageContentProvider) contentProvider;
+    PartDataDescriptor des1 = new PartDataDescriptor(
         new LocalDate(), 8723, "24");
-    PerspectiveDataDescriptor des2 = new PerspectiveDataDescriptor(des1
-        .getDate().plusDays(1), 83276723, des1.getPerspectiveId());
+    PartDataDescriptor des2 = new PartDataDescriptor(des1
+        .getDate().plusDays(1), 83276723, des1.getPartId());
     page.getViewer().setInput(Arrays.asList(des1, des2));
     assertEquals(des1.getValue() + des2.getValue(), contents
-        .getValueOfPerspective(contents.getPerspective(des1)));
+        .getValueOfPart(contents.getPart(des1)));
   }
 
   @Test
   public void testHasChildren() {
-    PerspectiveDataDescriptor des = new PerspectiveDataDescriptor(
+    PartDataDescriptor des = new PartDataDescriptor(
         new LocalDate(), 187, "a.b");
     page.getViewer().setInput(Arrays.asList(des));
     assertTrue(contentProvider.hasChildren(des.getDate()));
@@ -103,9 +113,9 @@ public class PerspectivePageContentProviderTest extends
 
   @Test
   public void testInputChanged_newInputNull_clearsExistingData() {
-    PerspectiveDataDescriptor des1 = new PerspectiveDataDescriptor(
+    PartDataDescriptor des1 = new PartDataDescriptor(
         new LocalDate(), 8723, "123");
-    Set<PerspectiveDataDescriptor> set = Sets.newHashSet(des1);
+    Set<PartDataDescriptor> set = Sets.newHashSet(des1);
     page.getViewer().setInput(set);
     assertTrue(contentProvider.hasChildren(des1.getDate()));
 
@@ -124,9 +134,9 @@ public class PerspectivePageContentProviderTest extends
 
   @Test
   public void testGetElement_isDisplayingByDateTrue() {
-    PerspectiveDataDescriptor des1 = new PerspectiveDataDescriptor(
+    PartDataDescriptor des1 = new PartDataDescriptor(
         new LocalDate(), 8723, "123");
-    Set<PerspectiveDataDescriptor> set = Sets.newHashSet(des1);
+    Set<PartDataDescriptor> set = Sets.newHashSet(des1);
     page.getViewer().setInput(set);
 
     // Enable for testing:
@@ -141,9 +151,9 @@ public class PerspectivePageContentProviderTest extends
 
   @Test
   public void testGetElement_isDisplayingByDateFalse() {
-    PerspectiveDataDescriptor des1 = new PerspectiveDataDescriptor(
+    PartDataDescriptor des1 = new PartDataDescriptor(
         new LocalDate(), 8723, "123");
-    Set<PerspectiveDataDescriptor> set = Sets.newHashSet(des1);
+    Set<PartDataDescriptor> set = Sets.newHashSet(des1);
     page.getViewer().setInput(set);
 
     // Disable for testing:
@@ -152,19 +162,7 @@ public class PerspectivePageContentProviderTest extends
     // Null is OK, the content provider is not using it...
     Object[] elements = contentProvider.getElements(null);
     assertEquals(1, elements.length);
-    // We disabled displaying by date, so it should return perspectives as roots
-    assertTrue(elements[0] instanceof IPerspectiveDescriptor);
-  }
-
-  @Override
-  protected AbstractDateCategoryContentProvider createContentProvider(
-      AbstractTreeViewerPage page, boolean displayByDate) {
-    return new PerspectivePageContentProvider((PerspectivePage) page,
-        displayByDate);
-  }
-
-  @Override
-  protected PerspectivePage createPage() {
-    return new PerspectivePage();
+    // We disabled displaying by date, so it should return parts as roots
+    assertTrue(elements[0] instanceof IWorkbenchPartDescriptor);
   }
 }

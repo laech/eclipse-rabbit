@@ -18,7 +18,7 @@ package rabbit.ui.tests.pages;
 import rabbit.data.access.IAccessor;
 import rabbit.data.handler.DataHandler;
 import rabbit.ui.Preferences;
-import rabbit.ui.internal.pages.AbstractTableViewerPage;
+import rabbit.ui.internal.pages.AbstractTreeViewerPage;
 import rabbit.ui.internal.pages.PartPage;
 import rabbit.ui.internal.util.UndefinedWorkbenchPartDescriptor;
 
@@ -35,7 +35,7 @@ import java.util.Map;
 /**
  * Test for {@link PartPage}
  */
-public class PartPageTest extends AbstractTableViewerPageTest {
+public class PartPageTest extends AbstractTreeViewerPageTest {
 
   @SuppressWarnings("unchecked")
   static Map<IWorkbenchPartDescriptor, Long> getData(PartPage page)
@@ -87,7 +87,7 @@ public class PartPageTest extends AbstractTableViewerPageTest {
   }
 
   @Override
-  protected AbstractTableViewerPage createPage() {
+  protected AbstractTreeViewerPage createPage() {
     return new PartPage();
   }
 }

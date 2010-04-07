@@ -1,10 +1,22 @@
+/*
+ * Copyright 2010 The Rabbit Eclipse Plug-in Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package rabbit.ui.internal.pages;
 
 import rabbit.data.access.model.PerspectiveDataDescriptor;
-import rabbit.ui.internal.AbstractTreeContentProvider;
 import rabbit.ui.internal.util.UndefinedPerspectiveDescriptor;
-
-import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.Function;
 import com.google.common.collect.BiMap;
@@ -27,9 +39,10 @@ import javax.annotation.Nonnull;
 
 /**
  * Content provider for a {@link PerspectivePage}. Accepts input as {@code
- * Collection<PerspectiveDataDescriptor>}.
+ * Iterable<PerspectiveDataDescriptor>}.
  */
-public class PerspectivePageContentProvider extends AbstractTreeContentProvider {
+public class PerspectivePageContentProvider extends
+    AbstractDateCategoryContentProvider {
 
   /** Function to categories the data by dates. */
   @Nonnull
@@ -39,11 +52,6 @@ public class PerspectivePageContentProvider extends AbstractTreeContentProvider 
   @Nonnull
   private ImmutableMultimap<LocalDate, PerspectiveDataDescriptor> dateToPerspectives;
 
-  private boolean displayByDate;
-
-  @Nonnull
-  private PerspectivePage page;
-
   /** Maps from perspective ID to IPerspectiveDescriptor. */
   @Nonnull
   private final BiMap<String, IPerspectiveDescriptor> perspectives;
@@ -52,10 +60,15 @@ public class PerspectivePageContentProvider extends AbstractTreeContentProvider 
   @Nonnull
   private ImmutableMap<IPerspectiveDescriptor, Long> perspectveSummaries;
 
-  public PerspectivePageContentProvider(PerspectivePage page) {
-    checkNotNull(page);
-    this.page = page;
-    displayByDate = true;
+  /**
+   * Constructor.
+   * 
+   * @param page The parent page.
+   * @param displayByDate True to display data by date.
+   */
+  public PerspectivePageContentProvider(@Nonnull PerspectivePage page,
+      boolean displayByDate) {
+    super(page, displayByDate);
     perspectveSummaries = ImmutableMap.of();
     dateToPerspectives = ImmutableMultimap.of();
 
@@ -154,32 +167,8 @@ public class PerspectivePageContentProvider extends AbstractTreeContentProvider 
     updatePageMaxValue();
   }
 
-  /**
-   * Checks whether the data is categorized by dates.
-   * 
-   * @return True if the data is categorized by dates, false otherwise.
-   */
-  public boolean isDisplayingByDate() {
-    return displayByDate;
-  }
-
-  /**
-   * Sets whether the data is categorized by dates.
-   * 
-   * @param displayByDate True to set to display by dates, false otherwise.
-   */
-  public void setDisplayByDate(boolean displayByDate) {
-    if (isDisplayingByDate() == displayByDate)
-      return;
-    this.displayByDate = displayByDate;
-    updatePageMaxValue();
-
-    page.getViewer().getTree().setRedraw(false);
-    page.getViewer().refresh(true);
-    page.getViewer().getTree().setRedraw(true);
-  }
-
-  private void updatePageMaxValue() {
+  @Override
+  protected void updatePageMaxValue() {
     long maxValue = 0;
     if (isDisplayingByDate()) {
       for (PerspectiveDataDescriptor des : dateToPerspectives.values()) {

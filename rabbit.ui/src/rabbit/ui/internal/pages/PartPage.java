@@ -15,97 +15,97 @@
  */
 package rabbit.ui.internal.pages;
 
-import rabbit.data.access.IAccessor;
-import rabbit.data.handler.DataHandler;
+import rabbit.data.access.IAccessor2;
+import rabbit.data.access.model.PartDataDescriptor;
+import rabbit.data.handler.DataHandler2;
 import rabbit.ui.CellPainter;
 import rabbit.ui.Preferences;
-import rabbit.ui.TableLabelComparator;
-import rabbit.ui.internal.util.UndefinedWorkbenchPartDescriptor;
+import rabbit.ui.TreeLabelComparator;
+import rabbit.ui.internal.actions.CollapseAllAction;
+import rabbit.ui.internal.actions.ExpandAllAction;
+import rabbit.ui.internal.actions.ViewByDatesAction;
 
+import org.eclipse.jface.action.ActionContributionItem;
+import org.eclipse.jface.action.IContributionItem;
+import org.eclipse.jface.action.IToolBarManager;
+import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.viewers.CellLabelProvider;
-import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.ITableLabelProvider;
-import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.TableColumn;
-import org.eclipse.ui.IEditorRegistry;
-import org.eclipse.ui.IWorkbenchPartDescriptor;
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.views.IViewRegistry;
+import org.eclipse.swt.widgets.TreeColumn;
 import org.joda.time.LocalDate;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * A page displays workbench part usage.
  */
-public class PartPage extends AbstractTableViewerPage {
+public class PartPage extends AbstractTreeViewerPage {
 
-  private Map<IWorkbenchPartDescriptor, Long> dataMapping;
-  private IAccessor<Map<String, Long>> dataStore;
+  private final IAccessor2<PartDataDescriptor> accessor;
+  private final PartPageContentProvider contents;
 
   /**
    * Constructs a new page.
    */
   public PartPage() {
     super();
-    dataStore = DataHandler.getPartDataAccessor();
-    dataMapping = new HashMap<IWorkbenchPartDescriptor, Long>();
+    accessor = DataHandler2.getPartDataAccessor();
+    contents = new PartPageContentProvider(this, true);
   }
 
   @Override
-  public void createColumns(TableViewer viewer) {
-    TableLabelComparator valueSorter = createValueSorterForTable(viewer);
-    TableLabelComparator textSorter = new TableLabelComparator(viewer);
+  public void createColumns(TreeViewer viewer) {
+    TreeLabelComparator valueSorter = createValueSorterForTree(viewer);
+    TreeLabelComparator textSorter = new TreeLabelComparator(viewer);
 
     int[] widths = new int[] { 200, 150 };
     int[] styles = new int[] { SWT.LEFT, SWT.RIGHT };
     String[] names = new String[] { "Name", "Usage" };
     for (int i = 0; i < names.length; i++) {
-      TableColumn column = new TableColumn(viewer.getTable(), styles[i]);
+      TreeColumn column = new TreeColumn(viewer.getTree(), styles[i]);
       column.setText(names[i]);
       column.setWidth(widths[i]);
       column.addSelectionListener((names.length - 1 == i) ? valueSorter
           : textSorter);
     }
+    getViewer().setLabelProvider(createLabelProvider());
+  }
+
+  @Override
+  public IContributionItem[] createToolBarItems(IToolBarManager toolBar) {
+    IContributionItem expand = new ActionContributionItem(new ExpandAllAction(
+        getViewer()));
+    toolBar.add(expand);
+
+    IContributionItem collapse = new ActionContributionItem(
+        new CollapseAllAction(getViewer()));
+    toolBar.add(collapse);
+
+    Separator sep = new Separator();
+    toolBar.add(sep);
+
+    IContributionItem viewByDates = new ActionContributionItem(
+        new ViewByDatesAction(contents));
+    toolBar.add(viewByDates);
+
+    return new IContributionItem[] { expand, collapse, sep, viewByDates };
   }
 
   @Override
   public long getValue(Object o) {
-    Long value = dataMapping.get(o);
-    return (value == null) ? 0 : value;
+    return 0;
   }
 
   @Override
   public void update(Preferences p) {
-    dataMapping.clear();
     setMaxValue(0);
-
-    IViewRegistry viewReg = PlatformUI.getWorkbench().getViewRegistry();
-    IEditorRegistry editReg = PlatformUI.getWorkbench().getEditorRegistry();
-
     LocalDate start = LocalDate.fromCalendarFields(p.getStartDate());
     LocalDate end = LocalDate.fromCalendarFields(p.getEndDate());
-    Map<String, Long> data = dataStore.getData(start, end);
-    for (Map.Entry<String, Long> entry : data.entrySet()) {
-
-      IWorkbenchPartDescriptor part = viewReg.find(entry.getKey());
-      if (part == null) {
-        part = editReg.findEditor(entry.getKey());
-      }
-      if (part == null) {
-        part = new UndefinedWorkbenchPartDescriptor(entry.getKey());
-      }
-
-      if (entry.getValue() > getMaxValue()) {
-        setMaxValue(entry.getValue());
-      }
-      dataMapping.put(part, entry.getValue());
-    }
-    getViewer().setInput(dataMapping.keySet());
+    getViewer().setInput(accessor.getData(start, end));
   }
 
   @Override
@@ -119,12 +119,16 @@ public class PartPage extends AbstractTableViewerPage {
   }
 
   @Override
-  protected IContentProvider createContentProvider() {
-    return new CollectionContentProvider();
+  protected ITreeContentProvider createContentProvider() {
+    return contents;
+  }
+
+  protected ITableLabelProvider createLabelProvider() {
+    return new PartPageLabelProvider(this);
   }
 
   @Override
-  protected ITableLabelProvider createLabelProvider() {
-    return new PartPageLabelProvider(this);
+  protected ViewerComparator createInitialComparator(TreeViewer viewer) {
+    return new TreeLabelComparator(viewer);
   }
 }

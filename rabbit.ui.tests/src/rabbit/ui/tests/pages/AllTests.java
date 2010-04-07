@@ -29,6 +29,7 @@ CollectionContentProviderTest.class, //
     CommandPageTest.class, //
 
     // Part page related:
+    PartPageContentProviderTest.class, //
     PartPageLabelProviderTest.class, // 
     PartPageTest.class, //
 

@@ -21,15 +21,14 @@ import rabbit.data.handler.DataHandler2;
 import rabbit.ui.CellPainter;
 import rabbit.ui.Preferences;
 import rabbit.ui.TreeViewerSorter;
-import rabbit.ui.internal.SharedImages;
+import rabbit.ui.internal.actions.CollapseAllAction;
+import rabbit.ui.internal.actions.ExpandAllAction;
+import rabbit.ui.internal.actions.ViewByDatesAction;
 
-import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
-import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.Separator;
-import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.CellLabelProvider;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
@@ -40,8 +39,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IPerspectiveDescriptor;
-import org.eclipse.ui.ISharedImages;
-import org.eclipse.ui.PlatformUI;
 import org.joda.time.LocalDate;
 
 /**
@@ -53,19 +50,11 @@ public class PerspectivePage extends AbstractTreeViewerPage {
   private final PerspectivePageContentProvider contents;
   private final PerspectivePageNameLabelProvider labels;
 
-  private final IAction expandAllAction;
-  private final IAction collapseAllAction;
-  private final IAction viewByDayAction;
-
   public PerspectivePage() {
     super();
     accessor = DataHandler2.getPerspectiveDataAccessor();
-    contents = new PerspectivePageContentProvider(this);
+    contents = new PerspectivePageContentProvider(this, true);
     labels = new PerspectivePageNameLabelProvider(contents);
-
-    expandAllAction = createExpandAllAction();
-    collapseAllAction = createCollapseAllAction();
-    viewByDayAction = createViewByDateAction();
   }
 
   @Override
@@ -89,19 +78,22 @@ public class PerspectivePage extends AbstractTreeViewerPage {
 
   @Override
   public IContributionItem[] createToolBarItems(IToolBarManager toolBar) {
-    IContributionItem expand = new ActionContributionItem(expandAllAction);
+    IContributionItem expand = new ActionContributionItem(new ExpandAllAction(
+        getViewer()));
     toolBar.add(expand);
 
-    IContributionItem collapse = new ActionContributionItem(collapseAllAction);
+    IContributionItem collapse = new ActionContributionItem(
+        new CollapseAllAction(getViewer()));
     toolBar.add(collapse);
 
     Separator sep = new Separator();
     toolBar.add(sep);
 
-    IContributionItem view = new ActionContributionItem(viewByDayAction);
-    toolBar.add(view);
+    IContributionItem viewByDates = new ActionContributionItem(
+        new ViewByDatesAction(contents));
+    toolBar.add(viewByDates);
 
-    return new IContributionItem[] { expand, collapse, sep, view };
+    return new IContributionItem[] { expand, collapse, sep, viewByDates };
   }
 
   @Override
@@ -182,39 +174,5 @@ public class PerspectivePage extends AbstractTreeViewerPage {
   @Override
   protected ITreeContentProvider createContentProvider() {
     return contents;
-  }
-
-  private IAction createCollapseAllAction() {
-    ImageDescriptor img = PlatformUI.getWorkbench().getSharedImages()
-        .getImageDescriptor(ISharedImages.IMG_ELCL_COLLAPSEALL);
-    return new Action("Collapse All", img) {
-      @Override
-      public void run() {
-        getViewer().collapseAll();
-      }
-    };
-  }
-
-  private IAction createExpandAllAction() {
-    return new Action("Expand All", SharedImages.EXPAND_ALL) {
-      @Override
-      public void run() {
-        getViewer().expandAll();
-      }
-    };
-  }
-
-  private IAction createViewByDateAction() {
-    IAction viewByDay = new Action("View by Date", IAction.AS_CHECK_BOX) {
-      @Override
-      public void run() {
-        contents.setDisplayByDate(isChecked());
-        expandAllAction.setEnabled(isEnabled());
-        collapseAllAction.setEnabled(isEnabled());
-      }
-    };
-    viewByDay.setImageDescriptor(SharedImages.TIME_HIERARCHY);
-    viewByDay.setChecked(contents.isDisplayingByDate());
-    return viewByDay;
   }
 }

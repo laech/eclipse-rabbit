@@ -54,4 +54,5 @@ public class UndefinedWorkbenchPartDescriptor implements
     return id;
   }
 
+  // TODO equals and hashCode
 }
