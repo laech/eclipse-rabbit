@@ -22,7 +22,6 @@ import java.util.Iterator;
 
 import javax.annotation.Nonnull;
 
-// TODO test
 /**
  * Utility class for working with {@link IMerger}.
  */
@@ -43,7 +42,7 @@ public class Mergers {
     checkNotNull(merger);
     checkNotNull(mergeTo);
     checkNotNull(elementsToMerge);
-
+    
     for (T element : elementsToMerge) {
       merge(merger, mergeTo, element);
     }

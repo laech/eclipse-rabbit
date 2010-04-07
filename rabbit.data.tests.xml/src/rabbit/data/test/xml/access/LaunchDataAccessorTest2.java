@@ -47,7 +47,7 @@ public class LaunchDataAccessorTest2
   }
 
   @Override
-  protected LaunchEventListType createListType() {
+  protected LaunchEventListType createCategory() {
     LaunchEventListType type = objectFactory.createLaunchEventListType();
     type.setDate(DatatypeUtil
         .toXmlDateTime(new GregorianCalendar()));
@@ -55,7 +55,7 @@ public class LaunchDataAccessorTest2
   }
 
   @Override
-  protected LaunchEventType createXmlType() {
+  protected LaunchEventType createElement() {
     LaunchEventType type = objectFactory.createLaunchEventType();
     type.setTotalDuration(10);
     type.setLaunchModeId(ILaunchManager.RUN_MODE);
@@ -66,7 +66,7 @@ public class LaunchDataAccessorTest2
   }
 
   @Override
-  protected List<LaunchEventType> getXmlTypes(LaunchEventListType list) {
+  protected List<LaunchEventType> getElements(LaunchEventListType list) {
     return list.getLaunchEvent();
   }
 
@@ -85,7 +85,7 @@ public class LaunchDataAccessorTest2
   @Override
   public void testCreateDataNode() throws Exception {
     LocalDate date = new LocalDate();
-    LaunchEventType e = createXmlType();
+    LaunchEventType e = createElement();
     LaunchDataDescriptor des = createDataNode(accessor, date, e);
     
     assertEquals(date, des.getDate());

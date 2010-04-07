@@ -38,7 +38,7 @@ import javax.annotation.CheckForNull;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 /**
- * TODO test A simple implementation of an {@link IAccessor} that calls
+ * A simple implementation of an {@link IAccessor} that calls
  * {@link #createDataNode(Calendar, Object)} every time it encounters a data
  * leaf node. Then returns a collection of created data nodes.
  * 
@@ -59,7 +59,6 @@ public abstract class AbstractDataNodeAccessor<E, T, S extends EventGroupType>
 
   @Override
   protected ImmutableCollection<E> filter(List<S> data) {
-    IMerger<T> merger = createMerger();
 
     SetMultimap<XMLGregorianCalendar, T> multimap = HashMultimap.create();
     for (S category : data) {
@@ -86,7 +85,7 @@ public abstract class AbstractDataNodeAccessor<E, T, S extends EventGroupType>
   }
 
   /**
-   * TODO test Creates a merger for merging identical elements.
+   * Creates a merger for merging identical elements.
    * 
    * @return A merger, or null if all elements are to be treated uniquely.
    */

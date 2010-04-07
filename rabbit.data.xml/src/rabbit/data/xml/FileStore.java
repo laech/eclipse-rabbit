@@ -15,7 +15,7 @@
  */
 package rabbit.data.xml;
 
-import rabbit.data.IFileMapper;
+import rabbit.data.IFileStore;
 import rabbit.data.internal.xml.XmlPlugin;
 import rabbit.data.internal.xml.schema.resources.ObjectFactory;
 import rabbit.data.internal.xml.schema.resources.ResourceListType;
@@ -57,9 +57,9 @@ import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 
 /**
- * An XML {@link IFileMapper}.
+ * An XML {@link IFileStore}.
  */
-public enum XmlFileMapper implements IFileMapper, IResourceChangeListener,
+public enum FileStore implements IFileStore, IResourceChangeListener,
     IWorkbenchListener {
 
   INSTANCE;
@@ -109,7 +109,7 @@ public enum XmlFileMapper implements IFileMapper, IResourceChangeListener,
       .getRoot();
 
   /** Constructor. */
-  private XmlFileMapper() {
+  private FileStore() {
     try {
       jaxb = JAXBContext.newInstance(ObjectFactory.class);
       mar = jaxb.createMarshaller();
@@ -215,7 +215,7 @@ public enum XmlFileMapper implements IFileMapper, IResourceChangeListener,
 
   @Override
   public void postShutdown(IWorkbench workbench) {
-    if (!write()) {
+    if (!save()) {
       XmlPlugin.getDefault().getLog().log(
           new Status(IStatus.ERROR, XmlPlugin.PLUGIN_ID,
               "Unable to save resource mappings."));
@@ -246,7 +246,7 @@ public enum XmlFileMapper implements IFileMapper, IResourceChangeListener,
    * @return {@code true} if data is successfully saved, {@code false}
    *         otherwise.
    */
-  public boolean write() {
+  public boolean save() {
     try {
       marshal(objectFactory.createResources(convert(resources)), getDataFile());
 
@@ -263,16 +263,9 @@ public enum XmlFileMapper implements IFileMapper, IResourceChangeListener,
     }
   }
 
-  /**
-   * Saves the current data to disk.
-   * 
-   * @param update True to update the references to external resources, false
-   *          otherwise.
-   * @return {@code true} if data is successfully saved, {@code false}
-   *         otherwise.
-   */
-  public boolean write(boolean update) {
-    boolean result = write();
+  @Override
+  public boolean save(boolean update) {
+    boolean result = save();
     if (update) {
       externalResources = getExternalResources();
     }

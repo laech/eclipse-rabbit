@@ -76,7 +76,7 @@ public abstract class AbstractAccessorTest2<T, E, S extends EventGroupType> {
   @Test
   public void testGetCategories() throws Exception {
     EventListType eventList = objectFactory.createEventListType();
-    S list = createListType();
+    S list = createCategory();
     getCategories(accessor, eventList).add(list);
     Assert.assertEquals(1, getCategories(accessor, eventList).size());
   }
@@ -93,29 +93,29 @@ public abstract class AbstractAccessorTest2<T, E, S extends EventGroupType> {
     // 1:
 
     int count1 = 298;
-    E type1 = createXmlType();
+    E type1 = createElement();
     setId(type1, id);
     setUsage(type1, count1);
 
-    S list1 = createListType();
+    S list1 = createCategory();
     MutableDateTime tmp = new MutableDateTime();
     tmp.setDayOfMonth(1);
     XMLGregorianCalendar start = toXmlDate(tmp.toDateTime());
     list1.setDate(start);
-    getXmlTypes(list1).add(type1);
+    getElements(list1).add(type1);
 
     // 2:
 
     int count2 = 22817;
-    E type2 = createXmlType();
+    E type2 = createElement();
     setId(type2, id);
     setUsage(type2, count2);
 
-    S list2 = createListType();
+    S list2 = createCategory();
     tmp.setDayOfMonth(3);
     XMLGregorianCalendar end = toXmlDate(tmp.toDateTime());
     list2.setDate(end);
-    getXmlTypes(list2).add(type2);
+    getElements(list2).add(type2);
 
     EventListType events = objectFactory.createEventListType();
     getCategories(accessor, events).add(list1);
@@ -142,26 +142,26 @@ public abstract class AbstractAccessorTest2<T, E, S extends EventGroupType> {
     // 1:
 
     int count1 = 1232948;
-    E type1 = createXmlType();
+    E type1 = createElement();
     setId(type1, id);
     setUsage(type1, count1);
 
-    S list1 = createListType();
+    S list1 = createCategory();
     XMLGregorianCalendar start = toXmlDate(date);
     list1.setDate(start);
-    getXmlTypes(list1).add(type1);
+    getElements(list1).add(type1);
 
     // 2:
 
     int count2 = 2342817;
-    E type2 = createXmlType();
+    E type2 = createElement();
     setId(type2, id);
     setUsage(type2, count2);
 
-    S list2 = createListType();
+    S list2 = createCategory();
     XMLGregorianCalendar end = toXmlDate(date);
     list2.setDate(end);
-    getXmlTypes(list2).add(type2);
+    getElements(list2).add(type2);
 
     EventListType events = objectFactory.createEventListType();
     getCategories(accessor, events).add(list1);
@@ -200,14 +200,14 @@ public abstract class AbstractAccessorTest2<T, E, S extends EventGroupType> {
    * 
    * @return A new list type.
    */
-  protected abstract S createListType();
+  protected abstract S createCategory();
 
   /**
    * Creates a new XML type with fields filled.
    * 
    * @return A new XML type.
    */
-  protected abstract E createXmlType();
+  protected abstract E createElement();
 
   /**
    * Calls the protected method {@code AbstractAccessor.filter(List<S>)}.
@@ -258,7 +258,7 @@ public abstract class AbstractAccessorTest2<T, E, S extends EventGroupType> {
   /**
    * Gets the list of XML event types.
    */
-  protected abstract List<E> getXmlTypes(S list);
+  protected abstract List<E> getElements(S list);
 
   /**
    * Sets the id of the type.

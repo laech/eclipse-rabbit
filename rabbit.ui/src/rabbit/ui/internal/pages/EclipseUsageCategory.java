@@ -15,7 +15,7 @@
  */
 package rabbit.ui.internal.pages;
 
-import rabbit.ui.DisplayPreference;
+import rabbit.ui.Preferences;
 import rabbit.ui.IPage;
 
 import org.eclipse.jface.action.IContributionItem;
@@ -50,7 +50,7 @@ public class EclipseUsageCategory implements IPage {
   }
 
   @Override
-  public void update(DisplayPreference preference) {
+  public void update(Preferences preference) {
   }
 
 }

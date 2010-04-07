@@ -23,11 +23,15 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.viewers.CellLabelProvider;
 import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.ITableLabelProvider;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
+import org.eclipse.swt.events.MouseAdapter;
+import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.TableColumn;
 
@@ -50,6 +54,16 @@ public abstract class AbstractTableViewerPage extends AbstractValueProviderPage 
       @Override
       public void widgetDisposed(DisposeEvent e) {
         saveState();
+      }
+    });
+    
+    // Hide selection when user clicks on none selectable area:
+    viewer.getTable().addMouseListener(new MouseAdapter() {
+      @Override
+      public void mouseDown(MouseEvent e) {
+        super.mouseDown(e);
+        if (viewer.getTable().getItem(new Point(e.x, e.y)) == null)
+          viewer.setSelection(StructuredSelection.EMPTY);
       }
     });
 

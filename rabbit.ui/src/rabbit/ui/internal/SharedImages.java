@@ -28,4 +28,10 @@ public class SharedImages {
 
   public static final ImageDescriptor EXPAND_ALL = imageDescriptorFromPlugin(
       PLUGIN_ID, "icons/full/obj16/expandall.gif");
+
+  public static final ImageDescriptor CALENDAR = imageDescriptorFromPlugin(
+      PLUGIN_ID, "/icons/full/obj16/calendar.png");
+
+  public static final ImageDescriptor TIME_HIERARCHY = imageDescriptorFromPlugin(
+      PLUGIN_ID, "/icons/full/obj16/time-hierarchy.png");
 }

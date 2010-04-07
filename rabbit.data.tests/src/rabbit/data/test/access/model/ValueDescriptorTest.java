@@ -2,6 +2,8 @@ package rabbit.data.test.access.model;
 
 import rabbit.data.access.model.ValueDescriptor;
 
+import com.google.common.base.Objects;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -36,15 +38,15 @@ public class ValueDescriptorTest extends DateDescriptorTest {
     assertEquals(value, des.getValue());
   }
   
-  @Test
+  @Override
   public void testHashCode() {
     LocalDate date = new LocalDate();
     long value = 1000;
-    int hashCode = (date.hashCode() + (int) value) % 31;
+    int hashCode = Objects.hashCode(date);
     assertEquals(hashCode, createDescriptor(date, value).hashCode());
   }
   
-  @Test
+  @Override
   public void testEquals() {
     LocalDate date = new LocalDate();
     long value = 1000;

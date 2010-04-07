@@ -48,6 +48,7 @@ public abstract class AbstractValueProviderPage implements IValueProvider,
     maxValue = value;
   }
 
+  // TODO
   protected TableLabelComparator createValueSorterForTable(TableViewer viewer) {
     return new TableLabelComparator(viewer) {
       @Override
@@ -56,7 +57,7 @@ public abstract class AbstractValueProviderPage implements IValueProvider,
       }
     };
   }
-
+  // TODO
   protected TreeLabelComparator createValueSorterForTree(TreeViewer viewer) {
     return new TreeLabelComparator(viewer) {
       @Override

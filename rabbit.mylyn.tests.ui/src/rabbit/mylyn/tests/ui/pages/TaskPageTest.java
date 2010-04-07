@@ -15,7 +15,7 @@
  */
 package rabbit.mylyn.tests.ui.pages;
 
-import rabbit.data.IFileMapper;
+import rabbit.data.IFileStore;
 import rabbit.data.access.IAccessor;
 import rabbit.data.handler.DataHandler;
 import rabbit.mylyn.TaskCore;
@@ -196,7 +196,7 @@ public class TaskPageTest extends AbstractTreeViewerPageTest {
    */
   @Test
   public void testDoUpdate_sameTaskHanldeId() throws Exception {
-    IFileMapper manager = DataHandler.getFileMapper();
+    IFileStore manager = DataHandler.getFileMapper();
 
     String handleId = "13iu4ey";
     String summary = "nvheuihf";
@@ -245,7 +245,7 @@ public class TaskPageTest extends AbstractTreeViewerPageTest {
     // Test two id pointing to same file, getting the value of the file must
     // return the sum.
 
-    IFileMapper manager = DataHandler.getFileMapper();
+    IFileStore manager = DataHandler.getFileMapper();
     IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(
         "tmp");
     if (!project.exists()) {
@@ -609,7 +609,7 @@ public class TaskPageTest extends AbstractTreeViewerPageTest {
         preference.getStartDate().getTimeInMillis()), new LocalDate(preference
         .getEndDate().getTimeInMillis()));
 
-    IFileMapper resourceMapper = DataHandler.getFileMapper();
+    IFileStore resourceMapper = DataHandler.getFileMapper();
     IRepositoryModel repo = TasksUi.getRepositoryModel();
 
     for (Entry<TaskId, Map<String, Long>> taskEn : data.entrySet()) {

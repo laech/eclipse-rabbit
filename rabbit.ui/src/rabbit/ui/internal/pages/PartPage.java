@@ -18,7 +18,7 @@ package rabbit.ui.internal.pages;
 import rabbit.data.access.IAccessor;
 import rabbit.data.handler.DataHandler;
 import rabbit.ui.CellPainter;
-import rabbit.ui.DisplayPreference;
+import rabbit.ui.Preferences;
 import rabbit.ui.TableLabelComparator;
 import rabbit.ui.internal.util.UndefinedWorkbenchPartDescriptor;
 
@@ -34,6 +34,7 @@ import org.eclipse.ui.IEditorRegistry;
 import org.eclipse.ui.IWorkbenchPartDescriptor;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.views.IViewRegistry;
+import org.joda.time.LocalDate;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -79,15 +80,16 @@ public class PartPage extends AbstractTableViewerPage {
   }
 
   @Override
-  public void update(DisplayPreference p) {
+  public void update(Preferences p) {
     dataMapping.clear();
     setMaxValue(0);
 
     IViewRegistry viewReg = PlatformUI.getWorkbench().getViewRegistry();
     IEditorRegistry editReg = PlatformUI.getWorkbench().getEditorRegistry();
 
-    Map<String, Long> data = dataStore
-        .getData(p.getStartDate(), p.getEndDate());
+    LocalDate start = LocalDate.fromCalendarFields(p.getStartDate());
+    LocalDate end = LocalDate.fromCalendarFields(p.getEndDate());
+    Map<String, Long> data = dataStore.getData(start, end);
     for (Map.Entry<String, Long> entry : data.entrySet()) {
 
       IWorkbenchPartDescriptor part = viewReg.find(entry.getKey());

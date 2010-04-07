@@ -15,7 +15,7 @@
  */
 package rabbit.ui.tests.pages;
 
-import rabbit.data.access.model.LaunchDescriptor;
+import rabbit.data.access.model.ZLaunchDescriptor;
 import rabbit.ui.MillisConverter;
 import rabbit.ui.internal.pages.LaunchPageLabelProvider;
 import rabbit.ui.internal.util.LaunchResource;
@@ -49,7 +49,7 @@ public class LaunchPageLabelProviderTest {
 
   @Test
   public void testGetColumnImage_0_file() {
-    LaunchDescriptor des = new LaunchDescriptor();
+    ZLaunchDescriptor des = new ZLaunchDescriptor();
     LaunchResource resource = new LaunchResource(des, root.getProject("p")
         .getFile("ff"));
     assertNotNull(provider.getColumnImage(resource, 0));
@@ -57,7 +57,7 @@ public class LaunchPageLabelProviderTest {
 
   @Test
   public void testGetColumnImage_0_folder() {
-    LaunchDescriptor des = new LaunchDescriptor();
+    ZLaunchDescriptor des = new ZLaunchDescriptor();
     LaunchResource resource = new LaunchResource(des, root.getProject("p")
         .getFolder("f"));
     assertNotNull(provider.getColumnImage(resource, 0));
@@ -66,21 +66,21 @@ public class LaunchPageLabelProviderTest {
   @Test
   public void testGetColumnImage_0_launchDescriptor() {
     String id = "org.eclipse.jdt.launching.localJavaApplication";
-    LaunchDescriptor des = new LaunchDescriptor();
+    ZLaunchDescriptor des = new ZLaunchDescriptor();
     des.setLaunchTypeId(id);
     assertEquals(DebugUITools.getImage(id), provider.getColumnImage(des, 0));
   }
 
   @Test
   public void testGetColumnImage_0_project() {
-    LaunchDescriptor des = new LaunchDescriptor();
+    ZLaunchDescriptor des = new ZLaunchDescriptor();
     LaunchResource resource = new LaunchResource(des, root.getProject("p"));
     assertNotNull(provider.getColumnImage(resource, 0));
   }
 
   @Test
   public void testGetColumnImage_1() {
-    LaunchDescriptor des = new LaunchDescriptor();
+    ZLaunchDescriptor des = new ZLaunchDescriptor();
     des.setLaunchModeId(ILaunchManager.RUN_MODE);
     assertEquals(DebugUITools.getImage(IDebugUIConstants.IMG_OBJS_LAUNCH_RUN),
         provider.getColumnImage(des, 1));
@@ -99,7 +99,7 @@ public class LaunchPageLabelProviderTest {
 
   @Test
   public void testGetText_0_file() {
-    LaunchDescriptor des = new LaunchDescriptor();
+    ZLaunchDescriptor des = new ZLaunchDescriptor();
     LaunchResource resource = new LaunchResource(des, root.getProject("p")
         .getFile("fff"));
     assertEquals(resource.getResource().getName(), provider.getColumnText(
@@ -108,7 +108,7 @@ public class LaunchPageLabelProviderTest {
 
   @Test
   public void testGetText_0_folder() {
-    LaunchDescriptor des = new LaunchDescriptor();
+    ZLaunchDescriptor des = new ZLaunchDescriptor();
     LaunchResource resource = new LaunchResource(des, root.getProject("p")
         .getFolder("f"));
     assertEquals(resource.getResource().getProjectRelativePath().toString(),
@@ -118,14 +118,14 @@ public class LaunchPageLabelProviderTest {
   @Test
   public void testGetText_0_launchDescriptor() {
     String name = "aName";
-    LaunchDescriptor des = new LaunchDescriptor();
+    ZLaunchDescriptor des = new ZLaunchDescriptor();
     des.setLaunchName(name);
     assertEquals(name, provider.getColumnText(des, 0));
   }
 
   @Test
   public void testGetText_0_project() {
-    LaunchDescriptor des = new LaunchDescriptor();
+    ZLaunchDescriptor des = new ZLaunchDescriptor();
     LaunchResource resource = new LaunchResource(des, root.getProject("p"));
     assertEquals(resource.getResource().getName(), provider.getColumnText(
         resource, 0));
@@ -133,14 +133,14 @@ public class LaunchPageLabelProviderTest {
 
   @Test
   public void testGetText_1() {
-    LaunchDescriptor des = new LaunchDescriptor();
+    ZLaunchDescriptor des = new ZLaunchDescriptor();
     des.setLaunchModeId(ILaunchManager.RUN_MODE);
     assertEquals(ILaunchManager.RUN_MODE, provider.getColumnText(des, 1));
   }
 
   @Test
   public void testGetText_2() {
-    LaunchDescriptor des = new LaunchDescriptor();
+    ZLaunchDescriptor des = new ZLaunchDescriptor();
     des.setCount(2);
     assertEquals(des.getCount() + "", provider.getColumnText(des, 2));
   }
@@ -148,7 +148,7 @@ public class LaunchPageLabelProviderTest {
   @Test
   public void testGetText_4() {
     long duration = 3493872;
-    LaunchDescriptor des = new LaunchDescriptor();
+    ZLaunchDescriptor des = new ZLaunchDescriptor();
     des.setTotalDuration(duration);
     assertEquals(MillisConverter.toDefaultString(duration), provider
         .getColumnText(des, 4));

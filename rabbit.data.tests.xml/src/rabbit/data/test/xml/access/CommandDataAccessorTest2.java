@@ -42,12 +42,12 @@ public class CommandDataAccessorTest2
   }
 
   @Override
-  protected CommandEventListType createListType() {
+  protected CommandEventListType createCategory() {
     return objectFactory.createCommandEventListType();
   }
 
   @Override
-  protected CommandEventType createXmlType() {
+  protected CommandEventType createElement() {
     CommandEventType type = objectFactory.createCommandEventType();
     type.setCommandId("abc");
     type.setCount(10);
@@ -55,7 +55,7 @@ public class CommandDataAccessorTest2
   }
 
   @Override
-  protected List<CommandEventType> getXmlTypes(CommandEventListType list) {
+  protected List<CommandEventType> getElements(CommandEventListType list) {
     return list.getCommandEvent();
   }
 
@@ -72,7 +72,7 @@ public class CommandDataAccessorTest2
   @Override
   public void testCreateDataNode() throws Exception {
     LocalDate date = new LocalDate();
-    CommandEventType type = createXmlType();
+    CommandEventType type = createElement();
     CommandDataDescriptor des = createDataNode(accessor, date, type);
     
     assertEquals(date, des.getDate());

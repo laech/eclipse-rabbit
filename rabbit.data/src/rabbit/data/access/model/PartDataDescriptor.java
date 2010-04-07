@@ -50,13 +50,11 @@ public class PartDataDescriptor extends ValueDescriptor {
     return super.getValue();
   }
 
-  // TODO test
   @Override
   public int hashCode() {
     return Objects.hashCode(getDate(), getPartId());
   }
 
-  // TODO test
   @Override
   public boolean equals(Object obj) {
     if (null == obj)

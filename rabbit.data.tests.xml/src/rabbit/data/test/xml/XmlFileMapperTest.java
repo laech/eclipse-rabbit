@@ -19,7 +19,7 @@ import rabbit.data.internal.xml.XmlPlugin;
 import rabbit.data.internal.xml.schema.resources.ObjectFactory;
 import rabbit.data.internal.xml.schema.resources.ResourceListType;
 import rabbit.data.internal.xml.schema.resources.ResourceType;
-import rabbit.data.xml.XmlFileMapper;
+import rabbit.data.xml.FileStore;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -51,12 +51,12 @@ import java.util.Set;
 import javax.xml.bind.JAXBElement;
 
 /**
- * Test {@link XmlFileMapper}
+ * Test {@link FileStore}
  */
 @SuppressWarnings("restriction")
 public class XmlFileMapperTest {
 
-  private XmlFileMapper manager = XmlFileMapper.INSTANCE;
+  private FileStore manager = FileStore.INSTANCE;
 
   private IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
 
@@ -70,7 +70,7 @@ public class XmlFileMapperTest {
   @SuppressWarnings("unchecked")
   @Test
   public void testConvertToMap() throws Exception {
-    Method convert = XmlFileMapper.class.getDeclaredMethod("convert",
+    Method convert = FileStore.class.getDeclaredMethod("convert",
         ResourceListType.class);
     convert.setAccessible(true);
 
@@ -106,7 +106,7 @@ public class XmlFileMapperTest {
 
   @Test
   public void testConvertToType() throws Exception {
-    Method convert = XmlFileMapper.class
+    Method convert = FileStore.class
         .getDeclaredMethod("convert", Map.class);
     convert.setAccessible(true);
 
@@ -241,26 +241,26 @@ public class XmlFileMapperTest {
     IPath filePath = XmlPlugin.getDefault().getStoragePathRoot();
     filePath = filePath.append(System.currentTimeMillis() + "");
 
-    Method getDataFile = XmlFileMapper.class.getDeclaredMethod("getDataFile",
+    Method getDataFile = FileStore.class.getDeclaredMethod("getDataFile",
         IPath.class);
     getDataFile.setAccessible(true);
     File dataFile = (File) getDataFile.invoke(manager, filePath);
 
-    Method marshal = XmlFileMapper.class.getDeclaredMethod("marshal",
+    Method marshal = FileStore.class.getDeclaredMethod("marshal",
         JAXBElement.class, File.class);
     marshal.setAccessible(true);
     marshal.invoke(manager, of.createResources(resources), dataFile);
 
     // Test not to update the external resource:
-    assertTrue(manager.write(false));
+    assertTrue(manager.save(false));
     assertNull(manager.getExternalFile(id));
 
     // Test to make sure write() == write(false):
-    assertTrue(manager.write());
+    assertTrue(manager.save());
     assertNull(manager.getExternalFile(id));
 
     // Test to update the external resource:
-    assertTrue(manager.write(true));
+    assertTrue(manager.save(true));
     assertEquals(file, manager.getExternalFile(id));
   }
 
@@ -282,18 +282,18 @@ public class XmlFileMapperTest {
     IPath filePath = XmlPlugin.getDefault().getStoragePathRoot();
     filePath = filePath.append(System.currentTimeMillis() + "");
 
-    Method getDataFile = XmlFileMapper.class.getDeclaredMethod("getDataFile",
+    Method getDataFile = FileStore.class.getDeclaredMethod("getDataFile",
         IPath.class);
     getDataFile.setAccessible(true);
     File dataFile = (File) getDataFile.invoke(manager, filePath);
 
-    Method marshal = XmlFileMapper.class.getDeclaredMethod("marshal",
+    Method marshal = FileStore.class.getDeclaredMethod("marshal",
         JAXBElement.class, File.class);
     marshal.setAccessible(true);
     marshal.invoke(manager, of.createResources(resources), dataFile);
 
     // Set true to update:
-    assertTrue(manager.write(true));
+    assertTrue(manager.save(true));
     // Should return null instead of throwing an exception when an illegal path
     // is met:
     try {
@@ -365,9 +365,9 @@ public class XmlFileMapperTest {
     assertNull(manager.getId(file));
     String id = manager.insert(file);
 
-    assertTrue(manager.write());
+    assertTrue(manager.save());
 
-    Method getData = XmlFileMapper.class.getDeclaredMethod("getData");
+    Method getData = FileStore.class.getDeclaredMethod("getData");
     getData.setAccessible(true);
     ResourceListType resources = (ResourceListType) getData.invoke(manager);
 
@@ -384,7 +384,7 @@ public class XmlFileMapperTest {
 
     getResourcesFiled().clear();
     id = manager.insert(file);
-    assertTrue(manager.write());
+    assertTrue(manager.save());
     resources = (ResourceListType) getData.invoke(manager);
 
     for (ResourceType type : resources.getResource()) {
@@ -408,9 +408,9 @@ public class XmlFileMapperTest {
     assertNull(manager.getId(file));
     String id = manager.insert(file);
 
-    assertTrue(manager.write());
+    assertTrue(manager.save());
 
-    Method getData = XmlFileMapper.class.getDeclaredMethod("getData",
+    Method getData = FileStore.class.getDeclaredMethod("getData",
         File.class);
     getData.setAccessible(true);
     ResourceListType resources = (ResourceListType) getData.invoke(manager,
@@ -428,14 +428,14 @@ public class XmlFileMapperTest {
   }
 
   private File getBackupFile() throws Exception {
-    Method method = XmlFileMapper.class.getDeclaredMethod("getBackupFile");
+    Method method = FileStore.class.getDeclaredMethod("getBackupFile");
     method.setAccessible(true);
     File file = (File) method.invoke(manager);
     return file;
   }
 
   private File getDataFile() throws Exception {
-    Method dataFile = XmlFileMapper.class.getDeclaredMethod("getDataFile");
+    Method dataFile = FileStore.class.getDeclaredMethod("getDataFile");
     dataFile.setAccessible(true);
     File file = (File) dataFile.invoke(manager);
     return file;
@@ -443,7 +443,7 @@ public class XmlFileMapperTest {
 
   @SuppressWarnings("unchecked")
   private Map<String, Set<String>> getResourcesFiled() throws Exception {
-    Field field = XmlFileMapper.class.getDeclaredField("resources");
+    Field field = FileStore.class.getDeclaredField("resources");
     field.setAccessible(true);
     return (Map<String, Set<String>>) field.get(manager);
   }

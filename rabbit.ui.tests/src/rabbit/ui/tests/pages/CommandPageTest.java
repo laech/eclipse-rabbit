@@ -17,7 +17,7 @@ package rabbit.ui.tests.pages;
 
 import rabbit.data.access.IAccessor;
 import rabbit.data.handler.DataHandler;
-import rabbit.ui.DisplayPreference;
+import rabbit.ui.Preferences;
 import rabbit.ui.internal.pages.AbstractTableViewerPage;
 import rabbit.ui.internal.pages.CommandPage;
 
@@ -26,6 +26,7 @@ import static org.junit.Assert.assertEquals;
 import org.eclipse.core.commands.Command;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.commands.ICommandService;
+import org.joda.time.LocalDate;
 import org.junit.Test;
 
 import java.lang.reflect.Field;
@@ -65,9 +66,9 @@ public class CommandPageTest extends AbstractTableViewerPageTest {
     IAccessor<Map<String, Long>> accessor = DataHandler
         .getCommandDataAccessor();
 
-    DisplayPreference pref = new DisplayPreference();
-    Map<String, Long> data = accessor.getData(pref.getStartDate(), pref
-        .getEndDate());
+    Preferences pref = new Preferences();
+    Map<String, Long> data = accessor.getData(
+        new LocalDate(pref.getStartDate()), new LocalDate(pref.getEndDate()));
     for (long value : data.values()) {
       if (value > max) {
         max = value;
@@ -78,7 +79,8 @@ public class CommandPageTest extends AbstractTableViewerPageTest {
 
     pref.getStartDate().add(Calendar.MONTH, -1);
     pref.getEndDate().add(Calendar.DAY_OF_MONTH, -5);
-    data = accessor.getData(pref.getStartDate(), pref.getEndDate());
+    data = accessor.getData(new LocalDate(pref.getStartDate()), new LocalDate(
+        pref.getEndDate()));
     max = 0;
     for (long value : data.values()) {
       if (value > max) {

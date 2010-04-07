@@ -211,7 +211,7 @@ public class LaunchEventTypeMergerTest extends
   }
   
   @Override
-  public void testMerge_notModifyParam() throws Exception {
+  public void testMerge_notModifyParams() throws Exception {
     String name = "noName";
     String type = "abc2";
     String mode = "amAnId";

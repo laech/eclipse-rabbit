@@ -15,8 +15,8 @@
  */
 package rabbit.ui.internal.pages;
 
-import rabbit.data.IFileMapper;
-import rabbit.data.access.model.LaunchDescriptor;
+import rabbit.data.IFileStore;
+import rabbit.data.access.model.ZLaunchDescriptor;
 import rabbit.data.handler.DataHandler;
 import rabbit.ui.internal.AbstractTreeContentProvider;
 import rabbit.ui.internal.util.LaunchResource;
@@ -38,8 +38,8 @@ import java.util.Set;
  */
 public class LaunchPageContentProvider extends AbstractTreeContentProvider {
 
-  private IFileMapper fileMapper;
-  private Map<LaunchDescriptor, Set<LaunchResource>> launchToProjects;
+  private IFileStore fileMapper;
+  private Map<ZLaunchDescriptor, Set<LaunchResource>> launchToProjects;
   private Map<LaunchResource, Set<LaunchResource>> projectToResources;
   private Map<LaunchResource, Set<IFile>> folderToFiles;
 
@@ -48,14 +48,14 @@ public class LaunchPageContentProvider extends AbstractTreeContentProvider {
    */
   public LaunchPageContentProvider() {
     fileMapper = DataHandler.getFileMapper();
-    launchToProjects = new HashMap<LaunchDescriptor, Set<LaunchResource>>();
+    launchToProjects = new HashMap<ZLaunchDescriptor, Set<LaunchResource>>();
     projectToResources = new HashMap<LaunchResource, Set<LaunchResource>>();
     folderToFiles = new HashMap<LaunchResource, Set<IFile>>();
   }
 
   @Override
   public Object[] getChildren(Object element) {
-    if (element instanceof LaunchDescriptor) {
+    if (element instanceof ZLaunchDescriptor) {
       Set<LaunchResource> set = launchToProjects.get(element);
       return set == null ? EMPTY_ARRAY : set.toArray();
 
@@ -80,7 +80,7 @@ public class LaunchPageContentProvider extends AbstractTreeContentProvider {
 
   @Override
   public boolean hasChildren(Object element) {
-    if (element instanceof LaunchDescriptor) {
+    if (element instanceof ZLaunchDescriptor) {
       Set<LaunchResource> set = launchToProjects.get(element);
       return set == null ? false : !set.isEmpty();
 
@@ -109,8 +109,8 @@ public class LaunchPageContentProvider extends AbstractTreeContentProvider {
       return;
     }
 
-    Collection<LaunchDescriptor> input = (Collection<LaunchDescriptor>) newInput;
-    for (LaunchDescriptor launch : input) {
+    Collection<ZLaunchDescriptor> input = (Collection<ZLaunchDescriptor>) newInput;
+    for (ZLaunchDescriptor launch : input) {
       for (String fileId : launch.getFileIds()) {
         IFile file = fileMapper.getFile(fileId);
         if (file == null) {

@@ -42,12 +42,12 @@ public class FileDataAccessorTest2
   }
 
   @Override
-  protected FileEventListType createListType() {
+  protected FileEventListType createCategory() {
     return objectFactory.createFileEventListType();
   }
 
   @Override
-  protected FileEventType createXmlType() {
+  protected FileEventType createElement() {
     FileEventType type = objectFactory.createFileEventType();
     type.setDuration(1000);
     type.setFileId("ab");
@@ -55,7 +55,7 @@ public class FileDataAccessorTest2
   }
 
   @Override
-  protected List<FileEventType> getXmlTypes(FileEventListType list) {
+  protected List<FileEventType> getElements(FileEventListType list) {
     return list.getFileEvent();
   }
 
@@ -72,7 +72,7 @@ public class FileDataAccessorTest2
   @Override
   public void testCreateDataNode() throws Exception {
     LocalDate date = new LocalDate();
-    FileEventType type = createXmlType();
+    FileEventType type = createElement();
     FileDataDescriptor des = createDataNode(accessor, date, type);
 
     assertEquals(date, des.getDate());

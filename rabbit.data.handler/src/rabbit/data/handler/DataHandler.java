@@ -15,7 +15,7 @@
  */
 package rabbit.data.handler;
 
-import rabbit.data.IFileMapper;
+import rabbit.data.IFileStore;
 import rabbit.data.access.IAccessor;
 import rabbit.data.access.model.ZLaunchDescriptor;
 import rabbit.data.store.IStorer;
@@ -24,7 +24,7 @@ import rabbit.data.store.model.FileEvent;
 import rabbit.data.store.model.LaunchEvent;
 import rabbit.data.store.model.PartEvent;
 import rabbit.data.store.model.PerspectiveEvent;
-import rabbit.data.xml.XmlFileMapper;
+import rabbit.data.xml.FileStore;
 import rabbit.data.xml.access.CommandDataAccessor;
 import rabbit.data.xml.access.FileDataAccessor;
 import rabbit.data.xml.access.LaunchDataAccessor;
@@ -97,8 +97,8 @@ public class DataHandler {
    * 
    * @return The resource manager.
    */
-  public static IFileMapper getFileMapper() {
-    return XmlFileMapper.INSTANCE;
+  public static IFileStore getFileMapper() {
+    return FileStore.INSTANCE;
   }
 
   /**

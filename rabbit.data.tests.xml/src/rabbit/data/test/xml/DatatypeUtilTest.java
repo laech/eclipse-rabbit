@@ -17,6 +17,7 @@ package rabbit.data.test.xml;
 
 import static rabbit.data.internal.xml.DatatypeUtil.isSameDate;
 import static rabbit.data.internal.xml.DatatypeUtil.isSameMonthInYear;
+import static rabbit.data.internal.xml.DatatypeUtil.toLocalDate;
 import static rabbit.data.internal.xml.DatatypeUtil.toXmlDate;
 import static rabbit.data.internal.xml.DatatypeUtil.toXmlDateTime;
 
@@ -25,44 +26,37 @@ import rabbit.data.internal.xml.DatatypeUtil;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import org.joda.time.DateTime;
+import org.joda.time.LocalDate;
 import org.junit.Test;
 
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
-import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 /**
  * Test for {@link DatatypeUtil}
  */
+@SuppressWarnings("restriction")
 public class DatatypeUtilTest {
 
   @Test
-  public void testIsSameDate() {
+  public void testIsSameDate() throws Exception {
+    DateTime cal = new DateTime();
 
-    try {
-      DateTime cal = new DateTime();
+    XMLGregorianCalendar xmlCal = DatatypeFactory.newInstance()
+        .newXMLGregorianCalendarDate(1, 1, 1, 1);
+    assertFalse(isSameDate(cal, xmlCal));
 
-      XMLGregorianCalendar xmlCal = DatatypeFactory.newInstance()
-          .newXMLGregorianCalendarDate(1, 1, 1, 1);
-      assertFalse(isSameDate(cal, xmlCal));
-
-      xmlCal = toXmlDate(cal);
-      assertTrue(isSameDate(cal, xmlCal));
-
-    } catch (Exception e) {
-      e.printStackTrace();
-      fail();
-    }
+    cal = new DateTime(1, 1, 1, 0, 0, 0, 0);
+    assertTrue(isSameDate(cal, xmlCal));
   }
 
   @Test
-  public void testIsSameMonthInYear() throws DatatypeConfigurationException {
+  public void testIsSameMonthInYear_DateTimeAndDateTime() {
 
     DateTime cal1 = new DateTime();
     DateTime cal2 = new DateTime();
@@ -73,7 +67,25 @@ public class DatatypeUtilTest {
   }
 
   @Test
-  public void testToXMLGregorianCalendarDate() {
+  public void testIsSameMonthInYear_DateTimeAndLocalDate() {
+    DateTime dateTime = new DateTime();
+    assertTrue(isSameMonthInYear(dateTime, dateTime.toLocalDate()));
+    assertFalse(isSameMonthInYear(dateTime, dateTime.toLocalDate()
+        .plusMonths(1)));
+    assertFalse(isSameMonthInYear(dateTime, dateTime.toLocalDate().plusYears(1)));
+  }
+
+  @Test
+  public void testToLocalDate() {
+    XMLGregorianCalendar cal = toXmlDate(new DateTime());
+    LocalDate date = toLocalDate(cal);
+    assertEquals(cal.getYear(), date.getYear());
+    assertEquals(cal.getMonth(), date.getMonthOfYear());
+    assertEquals(cal.getDay(), date.getDayOfMonth());
+  }
+
+  @Test
+  public void testToXmlDate_fromDateTime() {
 
     DateTime cal = new DateTime();
     XMLGregorianCalendar xmlCal = toXmlDate(cal);
@@ -85,7 +97,19 @@ public class DatatypeUtilTest {
   }
 
   @Test
-  public void testToXMLGregorianCalendarDateTime() {
+  public void testToXmlDate_fromLocalDate() {
+
+    LocalDate cal = new LocalDate();
+    XMLGregorianCalendar xmlCal = toXmlDate(cal);
+
+    assertEquals(cal.getYear(), xmlCal.getYear());
+    // Calendar.MONTH is zero based, xmlCal is one based.
+    assertEquals(cal.getMonthOfYear(), xmlCal.getMonth());
+    assertEquals(cal.getDayOfMonth(), xmlCal.getDay());
+  }
+
+  @Test
+  public void testToXmlDateTime() {
     GregorianCalendar cal = new GregorianCalendar();
     XMLGregorianCalendar xmlCal = toXmlDateTime(cal);
     assertEquals(cal.get(Calendar.YEAR), xmlCal.getYear());

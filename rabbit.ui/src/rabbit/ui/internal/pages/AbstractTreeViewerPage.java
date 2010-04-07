@@ -23,14 +23,17 @@ import org.eclipse.jface.viewers.CellLabelProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.TreeViewerColumn;
 import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
+import org.eclipse.swt.events.MouseAdapter;
+import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.TreeColumn;
 
@@ -46,7 +49,6 @@ public abstract class AbstractTreeViewerPage extends AbstractValueProviderPage {
   public void createContents(Composite parent) {
     viewer = new TreeViewer(parent, SWT.VIRTUAL | SWT.V_SCROLL | SWT.H_SCROLL);
     viewer.setContentProvider(createContentProvider());
-    viewer.setLabelProvider(createLabelProvider());
     viewer.setUseHashlookup(true);
     viewer.getTree().setHeaderVisible(true);
     viewer.getTree().addDisposeListener(new DisposeListener() {
@@ -55,14 +57,25 @@ public abstract class AbstractTreeViewerPage extends AbstractValueProviderPage {
         saveState();
       }
     });
+    
+    // Expand tree node on double click:
     viewer.addDoubleClickListener(new IDoubleClickListener() {
       @Override
       public void doubleClick(DoubleClickEvent e) {
         IStructuredSelection select = (IStructuredSelection) e.getSelection();
         Object o = select.getFirstElement();
-        if (((ITreeContentProvider) viewer.getContentProvider()).hasChildren(o)) {
+        if (((ITreeContentProvider) viewer.getContentProvider()).hasChildren(o))
           viewer.setExpandedState(o, !viewer.getExpandedState(o));
-        }
+      }
+    });
+    
+    // Hide selection when user clicks on none selectable area:
+    viewer.getTree().addMouseListener(new MouseAdapter() {
+      @Override
+      public void mouseDown(MouseEvent e) {
+        super.mouseDown(e);
+        if (viewer.getTree().getItem(new Point(e.x, e.y)) == null)
+          viewer.setSelection(StructuredSelection.EMPTY);
       }
     });
 
@@ -78,7 +91,7 @@ public abstract class AbstractTreeViewerPage extends AbstractValueProviderPage {
       column.setMoveable(true);
       column.setResizable(true);
     }
-    viewer.setComparator(createComparator(viewer));
+    viewer.setComparator(createInitialComparator(viewer));
     restoreState();
   }
 
@@ -119,7 +132,7 @@ public abstract class AbstractTreeViewerPage extends AbstractValueProviderPage {
    * @param viewer The viewer.
    * @return A viewer comparator.
    */
-  protected abstract ViewerComparator createComparator(TreeViewer viewer);
+  protected abstract ViewerComparator createInitialComparator(TreeViewer viewer);
 
   /**
    * Creates a content provider for this viewer.
@@ -127,13 +140,6 @@ public abstract class AbstractTreeViewerPage extends AbstractValueProviderPage {
    * @return A content provider.
    */
   protected abstract ITreeContentProvider createContentProvider();
-
-  /**
-   * Creates a label provider for this viewer.
-   * 
-   * @return A label provider.
-   */
-  protected abstract ITableLabelProvider createLabelProvider();
 
   /** Restores the state of the page. */
   protected void restoreState() {

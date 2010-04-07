@@ -2,6 +2,8 @@ package rabbit.data.test.access.model;
 
 import rabbit.data.access.model.LaunchConfigurationDescriptor;
 
+import com.google.common.base.Objects;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -51,7 +53,7 @@ public class LaunchConfigurationDescriptorTest {
     String name = "name";
     String mode = "mode";
     String type = "type";
-    int hashcode = (name.hashCode() + mode.hashCode() + type.hashCode()) % 31;
+    int hashcode = Objects.hashCode(name, mode, type);
     
     LaunchConfigurationDescriptor des = createDescriptor(name, mode, type);
     assertEquals(hashcode, des.hashCode());

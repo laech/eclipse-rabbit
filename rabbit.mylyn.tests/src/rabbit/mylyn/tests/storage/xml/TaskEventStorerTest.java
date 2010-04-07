@@ -15,132 +15,50 @@
  */
 package rabbit.mylyn.tests.storage.xml;
 
-import static rabbit.data.internal.xml.DatatypeUtil.toXMLGregorianCalendarDateTime;
-
 import rabbit.data.internal.xml.schema.events.TaskEventListType;
 import rabbit.data.internal.xml.schema.events.TaskEventType;
-import rabbit.data.internal.xml.schema.events.TaskIdType;
-import rabbit.data.test.xml.AbstractContinuousEventStorerTest;
+import rabbit.data.test.xml.AbstractStorerTest;
 import rabbit.mylyn.events.TaskEvent;
 import rabbit.mylyn.internal.storage.xml.TaskEventStorer;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import com.google.common.base.Objects;
 
 import org.eclipse.mylyn.internal.tasks.core.LocalTask;
 import org.joda.time.DateTime;
-
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.List;
 
 /**
  * @see TaskEventStorer
  */
 @SuppressWarnings("restriction")
-public class TaskEventStorerTest
-    extends
-    AbstractContinuousEventStorerTest<TaskEvent, TaskEventType, TaskEventListType> {
+public class TaskEventStorerTest extends
+    AbstractStorerTest<TaskEvent, TaskEventType, TaskEventListType> {
 
   @Override
-  public void testHasSameId_typeAndType() throws Exception {
-    TaskEventStorer storer = create();
-
-    TaskEvent event = createEvent();
-    TaskEventType type1 = createFrom(event);
-    TaskEventType type2 = createFrom(event);
-    assertTrue(hasSameId(storer, type1, type2));
-
-    type1.setFileId("adfnckuhq397y398rhfsadf");
-    assertFalse(hasSameId(storer, type1, type2));
-
-    // /
-    type1 = createFrom(event);
-    type2 = createFrom(event);
-    assertTrue(hasSameId(storer, type1, type2));
-    type1.getTaskId().setHandleId("ajnvhe2");
-    assertFalse(hasSameId(storer, type1, type2));
-
-    // /
-    type1 = createFrom(event);
-    type2 = createFrom(event);
-    assertTrue(hasSameId(storer, type1, type2));
-    type1.getTaskId().setCreationDate(
-        toXMLGregorianCalendarDateTime(new GregorianCalendar(1999, 1, 1)));
-    assertFalse(hasSameId(storer, type1, type2));
-  }
-
-  @Override
-  protected TaskEventStorer create() {
+  protected TaskEventStorer createStorer() {
     return TaskEventStorer.getInstance();
   }
 
   @Override
-  protected TaskEvent createEvent() {
+  protected TaskEvent createEventDiff(DateTime dateTime) {
     LocalTask task = new LocalTask("taskId", "what?");
-    task.setCreationDate(new Date());
-    return new TaskEvent(new DateTime(), 187, "fileId", task);
+    task.setCreationDate(dateTime.toDate());
+    return new TaskEvent(dateTime, 187, "fileId", task);
   }
 
   @Override
-  protected TaskEvent createEvent(DateTime eventTime) {
+  protected TaskEvent createEvent(DateTime dateTime) {
     LocalTask task = new LocalTask("tas1kId", "what?1");
-    task.setCreationDate(new Date());
-    return new TaskEvent(eventTime, 1187, "fileId", task);
+    task.setCreationDate(dateTime.toDate());
+    return new TaskEvent(dateTime, 1187, "fileId", task);
   }
 
   @Override
-  protected TaskEvent createEvent2() {
-    LocalTask task = new LocalTask("tttttt", "22222222");
-    task.setCreationDate(new Date());
-    return new TaskEvent(new DateTime(), 233, "bbbbbbb", task);
+  protected boolean equal(TaskEventType t1, TaskEventType t2) {
+    return t1.getDuration() == t2.getDuration()
+        && Objects.equal(t1.getFileId(), t2.getFileId())
+        && Objects.equal(t1.getTaskId().getHandleId(), t2.getTaskId()
+            .getHandleId())
+        && Objects.equal(t1.getTaskId().getCreationDate(), t2.getTaskId()
+            .getCreationDate());
   }
-
-  protected TaskEventType createFrom(TaskEvent event) {
-    GregorianCalendar creationDate = new GregorianCalendar();
-    creationDate.setTimeInMillis(event.getTask().getCreationDate().getTime());
-    TaskIdType id = objectFactory.createTaskIdType();
-    id.setCreationDate(toXMLGregorianCalendarDateTime(creationDate));
-    id.setHandleId(event.getTask().getHandleIdentifier());
-
-    TaskEventType type = objectFactory.createTaskEventType();
-    type.setDuration(event.getDuration());
-    type.setFileId(event.getFileId());
-    type.setTaskId(id);
-    return type;
-  }
-
-  @Override
-  protected List<TaskEventType> getEventTypes(TaskEventListType type) {
-    return type.getTaskEvent();
-  }
-
-  @Override
-  protected boolean hasSameId(TaskEventType xml, TaskEvent e) {
-    return xml.getFileId().equals(e.getFileId())
-        && xml.getTaskId().getHandleId().equals(
-            e.getTask().getHandleIdentifier())
-        && xml.getTaskId().getCreationDate().toGregorianCalendar().getTime()
-            .equals(e.getTask().getCreationDate());
-  }
-
-  @Override
-  protected boolean isEqual(TaskEventType type, TaskEvent event) {
-    GregorianCalendar creationDate = new GregorianCalendar();
-    creationDate.setTime(event.getTask().getCreationDate());
-    return type.getDuration() == event.getDuration()
-        && type.getFileId().equals(event.getFileId())
-        && type.getTaskId().getHandleId().equals(
-            event.getTask().getHandleIdentifier())
-        && type.getTaskId().getCreationDate().equals(
-            toXMLGregorianCalendarDateTime(creationDate));
-  }
-
-  @Override
-  protected TaskEvent mergeValue(TaskEvent main, TaskEvent tmp) {
-    return new TaskEvent(main.getTime(),
-        main.getDuration() + tmp.getDuration(), main.getFileId(), main
-            .getTask());
-  }
-
 }

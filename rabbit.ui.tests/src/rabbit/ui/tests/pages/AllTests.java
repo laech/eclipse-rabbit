@@ -19,23 +19,40 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
 @RunWith(Suite.class)
-@Suite.SuiteClasses( { CollectionContentProviderTest.class,
+@Suite.SuiteClasses( { // 
+//
+
+CollectionContentProviderTest.class, //
+
+    // Command page related:
     CommandPageLabelProviderTest.class, //
     CommandPageTest.class, //
+
+    // Part page related:
     PartPageLabelProviderTest.class, // 
     PartPageTest.class, //
-    PerspectiveLabelProviderTest.class, //
+
+    // Perspective page related:
+    PerspectivePageNameLabelProviderTest.class, //
+    PerspectivePageDurationLabelProviderTest.class, //
+    PerspectivePageContentProviderTest.class, //
     PerspectivePageTest.class, //
+
+    // Resource page related:
     ResourcePageTest.class, //
     ResourcePageContentProviderTest.class, //
     ResourcePageLabelProviderTest.class, //
     ResourcePageDecoratingLabelProviderTest.class, //
-    SessionPageLabelProviderTest.class,  //
+
+    // Session page related:
+    SessionPageLabelProviderTest.class, //
     SessionPageTest.class, //
+
+    // Launch page related:
     LaunchPageContentProviderTest.class, // 
     LaunchPageLabelProviderTest.class, //
     LaunchPageTest.class, //
-//
+    //
 })
 public class AllTests {
 

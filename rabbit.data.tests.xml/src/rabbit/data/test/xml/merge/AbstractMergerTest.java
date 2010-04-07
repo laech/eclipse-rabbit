@@ -61,7 +61,7 @@ public abstract class AbstractMergerTest<T> {
    * content of the parameters.
    */
   @Test
-  public abstract void testMerge_notModifyParam() throws Exception;
+  public abstract void testMerge_notModifyParams() throws Exception;
 
   @Test(expected = NullPointerException.class)
   public void testMerge_bothParamNull() {

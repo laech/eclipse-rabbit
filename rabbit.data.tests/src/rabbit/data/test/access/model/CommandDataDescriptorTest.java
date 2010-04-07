@@ -2,6 +2,8 @@ package rabbit.data.test.access.model;
 
 import rabbit.data.access.model.CommandDataDescriptor;
 
+import com.google.common.base.Objects;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -24,7 +26,7 @@ public class CommandDataDescriptorTest extends ValueDescriptorTest {
     long val = 1983;
     String id = "asd";
     LocalDate date = new LocalDate();
-    int hashCode = (id.hashCode() + (int) val + date.hashCode()) % 31;
+    int hashCode = Objects.hashCode(date, id);
     assertEquals(hashCode, createDescriptor(date, val, id).hashCode());
   }
 

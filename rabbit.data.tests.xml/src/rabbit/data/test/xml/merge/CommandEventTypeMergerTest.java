@@ -123,7 +123,7 @@ public class CommandEventTypeMergerTest extends
   }
 
   @Override
-  public void testMerge_notModifyParam() throws Exception {
+  public void testMerge_notModifyParams() throws Exception {
     String commandId = "amAnCommandId";
     int count1 = 10010;
     int count2 = 187341;

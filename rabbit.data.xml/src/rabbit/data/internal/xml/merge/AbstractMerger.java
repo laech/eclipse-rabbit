@@ -59,15 +59,14 @@ public abstract class AbstractMerger<T> implements IMerger<T> {
    * This method will be called from {@link #merge(Object, Object)} by the super
    * class after checking {@link #isMergeable(Object, Object)} return true on
    * the two objects, subclasses can safely merge the two objects without
-   * further checking. If the two parameter objects are modifiable, they may be
-   * modified during the operation. *
+   * further checking.
    * <p>
    * This method should not be invoked by subclasses.
    * </p>
    * 
    * @param t1 The first object.
    * @param t2 The second object.
-   * @return An object as a result of the two objects merging.
+   * @return A new object as a result of the two objects being merged.
    */
   protected abstract T doMerge(T t1, T t2);
 }

@@ -15,8 +15,8 @@
  */
 package rabbit.ui.tests.pages;
 
-import rabbit.data.IFileMapper;
-import rabbit.data.access.model.LaunchDescriptor;
+import rabbit.data.IFileStore;
+import rabbit.data.access.model.ZLaunchDescriptor;
 import rabbit.data.handler.DataHandler;
 import rabbit.ui.internal.pages.LaunchPageContentProvider;
 import rabbit.ui.internal.util.LaunchResource;
@@ -41,7 +41,7 @@ import java.util.HashSet;
 public class LaunchPageContentProviderTest {
 
   private LaunchPageContentProvider provider;
-  private IFileMapper fileMapper = DataHandler.getFileMapper();
+  private IFileStore fileMapper = DataHandler.getFileMapper();
   private IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
 
   @Before
@@ -51,12 +51,12 @@ public class LaunchPageContentProviderTest {
 
   @Test
   public void testGetChildren() {
-    LaunchDescriptor des = new LaunchDescriptor();
+    ZLaunchDescriptor des = new ZLaunchDescriptor();
 
     IFile file = root.getProject("p").getFolder("f").getFile("ff");
     String fileId = fileMapper.insert(file);
     des.getFileIds().addAll(new HashSet<String>(Arrays.asList(fileId)));
-    provider.inputChanged(null, null, new HashSet<LaunchDescriptor>(Arrays
+    provider.inputChanged(null, null, new HashSet<ZLaunchDescriptor>(Arrays
         .asList(des)));
 
     LaunchResource projectRes = new LaunchResource(des, file.getProject());
@@ -76,15 +76,15 @@ public class LaunchPageContentProviderTest {
 
   @Test
   public void testHasChildren() {
-    LaunchDescriptor des = new LaunchDescriptor();
-    provider.inputChanged(null, null, new HashSet<LaunchDescriptor>(Arrays
+    ZLaunchDescriptor des = new ZLaunchDescriptor();
+    provider.inputChanged(null, null, new HashSet<ZLaunchDescriptor>(Arrays
         .asList(des)));
     assertFalse(provider.hasChildren(des));
 
     IFile file = root.getProject("p").getFolder("f").getFile("ff");
     String fileId = fileMapper.insert(file);
     des.getFileIds().addAll(new HashSet<String>(Arrays.asList(fileId)));
-    provider.inputChanged(null, null, new HashSet<LaunchDescriptor>(Arrays
+    provider.inputChanged(null, null, new HashSet<ZLaunchDescriptor>(Arrays
         .asList(des)));
 
     assertTrue(provider.hasChildren(des));
@@ -96,15 +96,15 @@ public class LaunchPageContentProviderTest {
 
   @Test
   public void testInputChanged() {
-    LaunchDescriptor des = new LaunchDescriptor();
-    provider.inputChanged(null, null, new HashSet<LaunchDescriptor>(Arrays
+    ZLaunchDescriptor des = new ZLaunchDescriptor();
+    provider.inputChanged(null, null, new HashSet<ZLaunchDescriptor>(Arrays
         .asList(des)));
     assertFalse(provider.hasChildren(des));
 
     IFile file = root.getProject("p").getFolder("f").getFile("ff");
     String fileId = fileMapper.insert(file);
     des.getFileIds().addAll(new HashSet<String>(Arrays.asList(fileId)));
-    provider.inputChanged(null, null, new HashSet<LaunchDescriptor>(Arrays
+    provider.inputChanged(null, null, new HashSet<ZLaunchDescriptor>(Arrays
         .asList(des)));
 
     assertTrue(provider.hasChildren(des));

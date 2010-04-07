@@ -52,7 +52,7 @@ public class LaunchEvent extends ContinuousEvent {
    * @throws IllegalArgumentException If duration is negative.
    * @throws NullPointerException If startTime, or launch, or config, or fileIds
    *           is null.
-   * @see {@link rabbit.core.storage.IFileMapper}
+   * @see {@link rabbit.IFileStore.storage.IFileMapper}
    */
   public LaunchEvent(@Nonnull DateTime endTime, long duration,
       @Nonnull ILaunch launch, @Nonnull ILaunchConfiguration config,
@@ -73,7 +73,7 @@ public class LaunchEvent extends ContinuousEvent {
    * Gets the IDs of the files involved.
    * 
    * @return A collection of IDs of the files involved, or an empty collection.
-   * @see {@link rabbit.core.storage.IFileMapper}
+   * @see {@link rabbit.IFileStore.storage.IFileMapper}
    */
   @Nonnull
   public ImmutableSet<String> getFileIds() {

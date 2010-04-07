@@ -141,7 +141,7 @@ public class PerspectiveEventTypeMergerTest extends
   }
   
   @Override
-  public void testMerge_notModifyParam() throws Exception {
+  public void testMerge_notModifyParams() throws Exception {
     String perspectiveId = "amAnCommandId";
     int duration1 = 10010;
     int duration2 = 187341;

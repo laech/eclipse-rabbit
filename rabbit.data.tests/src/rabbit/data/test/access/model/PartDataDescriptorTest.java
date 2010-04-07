@@ -2,6 +2,8 @@ package rabbit.data.test.access.model;
 
 import rabbit.data.access.model.PartDataDescriptor;
 
+import com.google.common.base.Objects;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -24,7 +26,7 @@ public class PartDataDescriptorTest extends ValueDescriptorTest {
     LocalDate date = new LocalDate();
     long value = 98213;
     String id = "a.id";
-    int hashCode = (date.hashCode() + (int) value + id.hashCode()) % 31;
+    int hashCode = Objects.hashCode(date, id);
     assertEquals(hashCode, createDescriptor(date, value, id).hashCode());
   }
 
@@ -38,16 +40,16 @@ public class PartDataDescriptorTest extends ValueDescriptorTest {
     assertTrue(des1.equals(des1));
     assertFalse(des1.equals(null));
     assertFalse(des1.equals(""));
-    
+
     PartDataDescriptor des2 = createDescriptor(date, value, id);
     assertTrue(des1.equals(des2));
-    
+
     des2 = createDescriptor(date.plusDays(1), value, id);
     assertFalse(des1.equals(des2));
-    
+
     des2 = createDescriptor(date, 1 + value, id);
     assertFalse(des1.equals(des2));
-    
+
     des2 = createDescriptor(date, value, id + '.');
     assertFalse(des1.equals(des2));
   }

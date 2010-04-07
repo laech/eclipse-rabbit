@@ -18,7 +18,7 @@ package rabbit.ui.internal.pages;
 import rabbit.data.access.IAccessor;
 import rabbit.data.handler.DataHandler;
 import rabbit.ui.CellPainter;
-import rabbit.ui.DisplayPreference;
+import rabbit.ui.Preferences;
 import rabbit.ui.TableLabelComparator;
 
 import org.eclipse.jface.viewers.CellLabelProvider;
@@ -29,6 +29,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.TableColumn;
+import org.joda.time.LocalDate;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -54,10 +55,13 @@ public class SessionPage extends AbstractTableViewerPage {
   }
 
   @Override
-  public void update(DisplayPreference p) {
+  public void update(Preferences p) {
     setMaxValue(0);
     model.clear();
-    model = dataStore.getData(p.getStartDate(), p.getEndDate());
+    
+    LocalDate start = LocalDate.fromCalendarFields(p.getStartDate());
+    LocalDate end = LocalDate.fromCalendarFields(p.getEndDate());
+    model = dataStore.getData(start, end);
     for (long value : model.values()) {
       if (value > getMaxValue()) {
         setMaxValue(value);

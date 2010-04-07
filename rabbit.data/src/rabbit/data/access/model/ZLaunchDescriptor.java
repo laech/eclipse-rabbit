@@ -44,6 +44,8 @@ public class ZLaunchDescriptor {
 
   @Override
   public boolean equals(Object obj) {
+    if (obj == null)
+      return false;
     if (obj == this)
       return true;
     if (obj.getClass() != getClass())
@@ -72,7 +74,7 @@ public class ZLaunchDescriptor {
    * Gets the IDs of the files involved.
    * 
    * @return The IDs of the files involved, a modifiable collection.
-   * @see {@link rabbit.core.storage.IFileMapper}
+   * @see {@link rabbit.IFileStore.storage.IFileMapper}
    */
   public Set<String> getFileIds() {
     return fileIds;

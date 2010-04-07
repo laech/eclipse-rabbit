@@ -50,8 +50,8 @@ public class DatatypeUtil {
   }
 
   /**
-   * TODO test Checks whether the two dates are representing the same year,
-   * month, and day of month.
+   * Checks whether the two dates are representing the same year, month, and day
+   * of month.
    * 
    * @param date1 The first date.
    * @param date2 The second date.
@@ -66,8 +66,7 @@ public class DatatypeUtil {
   }
 
   /**
-   * TODO test Checks whether the two calendars are representing the same month
-   * in time.
+   * Checks whether the two calendars are representing the same month in time.
    * 
    * @param cal1 The first calendar.
    * @param cal2 The second calendar.
@@ -80,9 +79,31 @@ public class DatatypeUtil {
   }
 
   /**
-   * TODO test Converts a {@link DateTime} to {@link XMLGregorianCalendar}. The
-   * converted calendar is a date, which means only the year, month and day of
-   * month fields are set.
+   * Checks whether the two dates are representing the same year and same month.
+   * 
+   * @param cal1 The first date.
+   * @param cal2 The second date.
+   * @return True if both dates are representing the same year and same month.
+   */
+  public static boolean isSameMonthInYear(DateTime cal1, LocalDate cal2) {
+    return (cal1.getYear() == cal2.getYear())
+        && (cal1.getMonthOfYear() == cal2.getMonthOfYear());
+  }
+
+  /**
+   * Converts the given calendar to a {@link LocalDate}.
+   * 
+   * @param cal The calendar to convert.
+   * @return A converted {@linkplain LocalDate}.
+   */
+  public static LocalDate toLocalDate(XMLGregorianCalendar cal) {
+    return new LocalDate(cal.getYear(), cal.getMonth(), cal.getDay());
+  }
+
+  /**
+   * Converts a {@link DateTime} to {@link XMLGregorianCalendar}. The converted
+   * calendar is a date, which means only the year, month and day of month
+   * fields are set.
    * 
    * @param cal The calendar to convert from.
    * @return The converted calendar.
@@ -94,7 +115,7 @@ public class DatatypeUtil {
   }
 
   /**
-   * TODO test Converts a {@link LocalDate} to {@link XMLGregorianCalendar}. The
+   * Converts a {@link LocalDate} to {@link XMLGregorianCalendar}. The
    * converted calendar is a date, which means only the year, month and day of
    * month fields are set.
    * 
@@ -106,11 +127,6 @@ public class DatatypeUtil {
         .getMonthOfYear(), cal.getDayOfMonth(),
         DatatypeConstants.FIELD_UNDEFINED);
   }
-  
-  //TODO 
-  public static LocalDate toLocalDate(XMLGregorianCalendar cal) {
-    return new LocalDate(cal.getYear(), cal.getMonth(), cal.getDay());
-  }
 
   /**
    * Converts a {@code GregorianCalendar} to a {@code XMLGregorianCalendar} date
@@ -119,14 +135,7 @@ public class DatatypeUtil {
    * @param cal The calendar to convert from.
    * @return A converted calendar.
    */
-  public static XMLGregorianCalendar toXmlDateTime(
-      GregorianCalendar cal) {
+  public static XMLGregorianCalendar toXmlDateTime(GregorianCalendar cal) {
     return datatypeFactory.newXMLGregorianCalendar(cal);
-  }
-
-  // TODO
-  public static boolean isSameMonthInYear(DateTime cal1, LocalDate cal2) {
-    return (cal1.getYear() == cal2.getYear())
-        && (cal1.getMonthOfYear() == cal2.getMonthOfYear());
   }
 }

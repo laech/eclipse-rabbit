@@ -15,7 +15,7 @@
  */
 package rabbit.mylyn.internal.ui.pages;
 
-import rabbit.data.IFileMapper;
+import rabbit.data.IFileStore;
 import rabbit.data.access.IAccessor;
 import rabbit.data.handler.DataHandler;
 import rabbit.mylyn.TaskCore;
@@ -83,7 +83,7 @@ public class TaskPage extends AbstractTreeViewerPage {
   private ShowMode mode = ShowMode.TASK;
 
   private IAccessor<Map<TaskId, Map<String, Long>>> accessor;
-  protected final IFileMapper resourceMapper;
+  protected final IFileStore resourceMapper;
 
   private Map<ITask, Set<TaskResource>> taskToProjects;
   private Map<TaskResource, Set<TaskResource>> projectToResources;
@@ -480,7 +480,7 @@ public class TaskPage extends AbstractTreeViewerPage {
   }
 
   @Override
-  protected TreeLabelComparator createComparator(TreeViewer viewer) {
+  protected TreeLabelComparator createInitialComparator(TreeViewer viewer) {
     return new TreeLabelComparator(viewer) {
 
       @Override

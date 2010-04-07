@@ -15,10 +15,10 @@
  */
 package rabbit.ui.tests.pages;
 
-import rabbit.data.IFileMapper;
+import rabbit.data.IFileStore;
 import rabbit.data.access.IAccessor;
 import rabbit.data.handler.DataHandler;
-import rabbit.ui.DisplayPreference;
+import rabbit.ui.Preferences;
 import rabbit.ui.internal.pages.AbstractTreeViewerPage;
 import rabbit.ui.internal.pages.ResourcePage;
 
@@ -35,6 +35,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
+import org.joda.time.LocalDate;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -131,7 +132,7 @@ public class ResourcePageTest extends AbstractTreeViewerPageTest {
     // Test two id pointing to same file, getting the value of the file must
     // return the sum.
 
-    IFileMapper manager = DataHandler.getFileMapper();
+    IFileStore manager = DataHandler.getFileMapper();
 
     IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(
         "tmp");
@@ -392,16 +393,16 @@ public class ResourcePageTest extends AbstractTreeViewerPageTest {
     Map<IFolder, Long> folders = new HashMap<IFolder, Long>();
     Map<IFile, Long> files = new HashMap<IFile, Long>();
 
-    DisplayPreference preference = new DisplayPreference();
-    Calendar end = preference.getEndDate();
-    preference.getStartDate().set(end.get(Calendar.YEAR),
+    Preferences pref = new Preferences();
+    Calendar end = pref.getEndDate();
+    pref.getStartDate().set(end.get(Calendar.YEAR),
         end.get(Calendar.MONTH) - 2, end.get(Calendar.DAY_OF_MONTH));
 
     IAccessor<Map<String, Long>> accessor = DataHandler.getFileDataAccessor();
-    Map<String, Long> data = accessor.getData(preference.getStartDate(),
-        preference.getEndDate());
+    Map<String, Long> data = accessor.getData(
+        new LocalDate(pref.getStartDate()), new LocalDate(pref.getEndDate()));
 
-    IFileMapper mapper = DataHandler.getFileMapper();
+    IFileStore mapper = DataHandler.getFileMapper();
     for (Entry<String, Long> entry : data.entrySet()) {
       IFile file = mapper.getFile(entry.getKey());
       if (file == null) {
@@ -435,7 +436,7 @@ public class ResourcePageTest extends AbstractTreeViewerPageTest {
       }
     }
 
-    page.update(preference);
+    page.update(pref);
     for (Entry<IProject, Long> entry : projects.entrySet()) {
       assertEquals(entry.getValue().longValue(), page.getValueOfProject(entry
           .getKey()));

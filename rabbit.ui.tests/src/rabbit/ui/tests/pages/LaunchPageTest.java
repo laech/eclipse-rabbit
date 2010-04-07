@@ -15,7 +15,7 @@
  */
 package rabbit.ui.tests.pages;
 
-import rabbit.data.access.model.LaunchDescriptor;
+import rabbit.data.access.model.ZLaunchDescriptor;
 import rabbit.ui.internal.pages.LaunchPage;
 
 import static org.junit.Assert.assertEquals;
@@ -30,7 +30,7 @@ public class LaunchPageTest extends AbstractTreeViewerPageTest {
     assertEquals(0, page.getValue(new Object()));
     assertEquals(0, page.getValue(null));
 
-    LaunchDescriptor des = new LaunchDescriptor();
+    ZLaunchDescriptor des = new ZLaunchDescriptor();
     des.setTotalDuration(19834);
     assertEquals(des.getTotalDuration(), page.getValue(des));
   }

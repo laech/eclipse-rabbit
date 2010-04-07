@@ -15,7 +15,7 @@
  */
 package rabbit.tracking.internal.trackers;
 
-import rabbit.data.IFileMapper;
+import rabbit.data.IFileStore;
 import rabbit.data.handler.DataHandler;
 import rabbit.data.store.IStorer;
 import rabbit.data.store.model.LaunchEvent;
@@ -46,7 +46,7 @@ import java.util.Set;
 public class LaunchTracker extends AbstractTracker<LaunchEvent> implements
     IDebugEventSetListener {
 
-  private IFileMapper fileMapper;
+  private IFileStore fileMapper;
 
   /**
    * A map of launches and launch configurations. The configuration should be

@@ -15,7 +15,7 @@
  */
 package rabbit.mylyn.tests.storage.xml;
 
-import static rabbit.data.internal.xml.DatatypeUtil.toXMLGregorianCalendarDateTime;
+import static rabbit.data.internal.xml.DatatypeUtil.toXmlDateTime;
 
 import rabbit.data.internal.xml.schema.events.EventListType;
 import rabbit.data.internal.xml.schema.events.TaskEventListType;
@@ -81,7 +81,7 @@ public class TaskDataAccessorTest
   @Override
   protected TaskEventType createXmlType() {
     TaskIdType id = objectFactory.createTaskIdType();
-    id.setCreationDate(toXMLGregorianCalendarDateTime(new GregorianCalendar()));
+    id.setCreationDate(toXmlDateTime(new GregorianCalendar()));
     id.setHandleId("abcdef");
 
     TaskEventType type = objectFactory.createTaskEventType();

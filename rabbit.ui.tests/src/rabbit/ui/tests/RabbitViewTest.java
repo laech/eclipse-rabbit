@@ -15,7 +15,7 @@
  */
 package rabbit.ui.tests;
 
-import rabbit.ui.DisplayPreference;
+import rabbit.ui.Preferences;
 import rabbit.ui.IPage;
 import rabbit.ui.internal.RabbitUI;
 import rabbit.ui.internal.RabbitView;
@@ -96,7 +96,7 @@ public class RabbitViewTest {
     RabbitView view = new RabbitView();
     view.createPartControl(shell);
 
-    DisplayPreference pref = getPreference(view);
+    Preferences pref = getPreference(view);
 
     Calendar fromDate = new GregorianCalendar(1999, 1, 1);
     pref.getStartDate().setTimeInMillis(fromDate.getTimeInMillis());
@@ -186,10 +186,10 @@ public class RabbitViewTest {
     return (Map<IPage, Boolean>) pageStatus.get(view);
   }
 
-  private DisplayPreference getPreference(RabbitView view) throws Exception {
+  private Preferences getPreference(RabbitView view) throws Exception {
     Field pref = RabbitView.class.getDeclaredField("preferences");
     pref.setAccessible(true);
-    return (DisplayPreference) pref.get(view);
+    return (Preferences) pref.get(view);
   }
 
   private void update(RabbitView view) throws Exception {

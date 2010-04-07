@@ -15,7 +15,7 @@
  */
 package rabbit.data.test.xml.startup;
 
-import rabbit.data.xml.XmlFileMapper;
+import rabbit.data.xml.FileStore;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -56,16 +56,16 @@ public class ResourceDataAttacherTest {
       oldfile.create(in, true, null);
       in.close();
     }
-    XmlFileMapper.INSTANCE.insert(oldfile);
+    FileStore.INSTANCE.insert(oldfile);
 
     IFile newfile = proj.getFile(System.nanoTime() + "");
     IPath newPath = newfile.getFullPath();
 
-    assertNull(XmlFileMapper.INSTANCE.getId(newfile));
+    assertNull(FileStore.INSTANCE.getId(newfile));
     oldfile.move(newPath, true, null);
 
-    assertNull(XmlFileMapper.INSTANCE.getId(oldfile));
-    assertNotNull(XmlFileMapper.INSTANCE.getId(newfile));
+    assertNull(FileStore.INSTANCE.getId(oldfile));
+    assertNotNull(FileStore.INSTANCE.getId(newfile));
   }
 
   @Test
@@ -74,7 +74,7 @@ public class ResourceDataAttacherTest {
     field.setAccessible(true);
     ListenerList listeners = (ListenerList) field.get(Workbench.getInstance());
     for (Object listener : listeners.getListeners()) {
-      if (listener == XmlFileMapper.INSTANCE) {
+      if (listener == FileStore.INSTANCE) {
         return;
       }
     }

@@ -54,4 +54,22 @@ public class UndefinedPerspectiveDescriptor implements IPerspectiveDescriptor {
     return id;
   }
 
+  // TODO test
+  @Override
+  public boolean equals(Object obj) {
+    if (obj == null)
+      return false;
+    if (obj == this)
+      return true;
+    if (obj.getClass() != getClass())
+      return false;
+
+    return ((UndefinedPerspectiveDescriptor) obj).getId().equals(getId());
+  }
+
+  // TODO test
+  @Override
+  public int hashCode() {
+    return getId().hashCode();
+  }
 }

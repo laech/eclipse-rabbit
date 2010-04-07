@@ -38,12 +38,12 @@ public class PerspectiveDataAccessorTest2
   }
 
   @Override
-  protected PerspectiveEventListType createListType() {
+  protected PerspectiveEventListType createCategory() {
     return objectFactory.createPerspectiveEventListType();
   }
 
   @Override
-  protected PerspectiveEventType createXmlType() {
+  protected PerspectiveEventType createElement() {
     PerspectiveEventType type = objectFactory.createPerspectiveEventType();
     type.setDuration(11);
     type.setPerspectiveId("abc");
@@ -51,7 +51,7 @@ public class PerspectiveDataAccessorTest2
   }
 
   @Override
-  protected List<PerspectiveEventType> getXmlTypes(PerspectiveEventListType list) {
+  protected List<PerspectiveEventType> getElements(PerspectiveEventListType list) {
     return list.getPerspectiveEvent();
   }
 
@@ -68,7 +68,7 @@ public class PerspectiveDataAccessorTest2
   @Override
   public void testCreateDataNode() throws Exception {
     LocalDate date = new LocalDate();
-    PerspectiveEventType e = createXmlType();
+    PerspectiveEventType e = createElement();
     PerspectiveDataDescriptor des = createDataNode(accessor, date, e);
 
     assertEquals(date, des.getDate());

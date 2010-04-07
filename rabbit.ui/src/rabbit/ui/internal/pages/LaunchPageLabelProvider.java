@@ -15,7 +15,7 @@
  */
 package rabbit.ui.internal.pages;
 
-import rabbit.data.access.model.LaunchDescriptor;
+import rabbit.data.access.model.ZLaunchDescriptor;
 import rabbit.ui.MillisConverter;
 import rabbit.ui.internal.util.LaunchResource;
 
@@ -61,8 +61,8 @@ public class LaunchPageLabelProvider extends BaseLabelProvider implements
   public Image getColumnImage(Object element, int columnIndex) {
 
     if (columnIndex == 0) {
-      if (element instanceof LaunchDescriptor) {
-        return DebugUITools.getImage(((LaunchDescriptor) element)
+      if (element instanceof ZLaunchDescriptor) {
+        return DebugUITools.getImage(((ZLaunchDescriptor) element)
             .getLaunchTypeId());
 
       } else if (element instanceof LaunchResource) {
@@ -71,8 +71,8 @@ public class LaunchPageLabelProvider extends BaseLabelProvider implements
       return provider.getImage(element);
 
     } else if (columnIndex == 1) {
-      if (element instanceof LaunchDescriptor) {
-        String mode = ((LaunchDescriptor) element).getLaunchModeId();
+      if (element instanceof ZLaunchDescriptor) {
+        String mode = ((ZLaunchDescriptor) element).getLaunchModeId();
         if (mode.equals(ILaunchManager.DEBUG_MODE)) {
           return DebugUITools.getImage(IDebugUIConstants.IMG_OBJS_LAUNCH_DEBUG);
 
@@ -89,8 +89,8 @@ public class LaunchPageLabelProvider extends BaseLabelProvider implements
 
     switch (columnIndex) {
     case 0:
-      if (element instanceof LaunchDescriptor) {
-        return ((LaunchDescriptor) element).getLaunchName();
+      if (element instanceof ZLaunchDescriptor) {
+        return ((ZLaunchDescriptor) element).getLaunchName();
 
       } else if (element instanceof LaunchResource) {
         return provider.getText(((LaunchResource) element).getResource());
@@ -98,20 +98,20 @@ public class LaunchPageLabelProvider extends BaseLabelProvider implements
       return provider.getText(element);
 
     case 1:
-      if (element instanceof LaunchDescriptor) {
-        return ((LaunchDescriptor) element).getLaunchModeId().toString();
+      if (element instanceof ZLaunchDescriptor) {
+        return ((ZLaunchDescriptor) element).getLaunchModeId().toString();
       }
       break;
 
     case 2:
-      if (element instanceof LaunchDescriptor) {
-        return ((LaunchDescriptor) element).getCount() + "";
+      if (element instanceof ZLaunchDescriptor) {
+        return ((ZLaunchDescriptor) element).getCount() + "";
       }
       break;
 
     case 4:
-      if (element instanceof LaunchDescriptor) {
-        return MillisConverter.toDefaultString(((LaunchDescriptor) element)
+      if (element instanceof ZLaunchDescriptor) {
+        return MillisConverter.toDefaultString(((ZLaunchDescriptor) element)
             .getTotalDuration());
       }
       break;

@@ -42,12 +42,12 @@ public class PartDataAccessorTest2
   }
 
   @Override
-  protected PartEventListType createListType() {
+  protected PartEventListType createCategory() {
     return objectFactory.createPartEventListType();
   }
 
   @Override
-  protected PartEventType createXmlType() {
+  protected PartEventType createElement() {
     PartEventType type = objectFactory.createPartEventType();
     type.setDuration(11);
     type.setPartId("am.an.id");
@@ -55,7 +55,7 @@ public class PartDataAccessorTest2
   }
 
   @Override
-  protected List<PartEventType> getXmlTypes(PartEventListType list) {
+  protected List<PartEventType> getElements(PartEventListType list) {
     return list.getPartEvent();
   }
 
@@ -72,7 +72,7 @@ public class PartDataAccessorTest2
   @Override
   public void testCreateDataNode() throws Exception {
     LocalDate date = new LocalDate();
-    PartEventType type = createXmlType();
+    PartEventType type = createElement();
     PartDataDescriptor des = createDataNode(accessor, date, type);
     
     assertEquals(date, des.getDate());

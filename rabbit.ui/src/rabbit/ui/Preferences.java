@@ -22,13 +22,13 @@ import java.util.Calendar;
 /**
  * Contains preferences for displaying data.
  */
-public final class DisplayPreference {
+public final class Preferences {
 
   private Calendar startDate;
   private Calendar endDate;
 
   /** Constructor. */
-  public DisplayPreference() {
+  public Preferences() {
     endDate = Calendar.getInstance();
     startDate = (Calendar) endDate.clone();
     startDate.add(Calendar.DAY_OF_MONTH, -RabbitUI.getDefault()

@@ -122,7 +122,7 @@ public class PartEventTypeMergerTest extends AbstractMergerTest<PartEventType> {
   }
   
   @Override
-  public void testMerge_notModifyParam() throws Exception {
+  public void testMerge_notModifyParams() throws Exception {
     String partId = "amAnCommandId";
     int duration1 = 10010;
     int duration2 = 187341;

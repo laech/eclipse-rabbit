@@ -15,78 +15,40 @@
  */
 package rabbit.ui.tests.pages;
 
-import rabbit.data.access.IAccessor;
-import rabbit.data.handler.DataHandler;
-import rabbit.ui.DisplayPreference;
-import rabbit.ui.internal.pages.AbstractTableViewerPage;
+import rabbit.data.access.model.PerspectiveDataDescriptor;
 import rabbit.ui.internal.pages.PerspectivePage;
 import rabbit.ui.internal.util.UndefinedPerspectiveDescriptor;
 
 import static org.junit.Assert.assertEquals;
 
-import org.eclipse.ui.IPerspectiveDescriptor;
+import org.joda.time.LocalDate;
 import org.junit.Test;
 
-import java.lang.reflect.Field;
-import java.util.Calendar;
-import java.util.Map;
+import java.util.Arrays;
 
 /**
  * Test for {@link PerspectivePage}
  */
-public class PerspectivePageTest extends AbstractTableViewerPageTest {
-  @SuppressWarnings("unchecked")
-  static Map<IPerspectiveDescriptor, Long> getData(PerspectivePage page)
-      throws Exception {
-    Field field = PerspectivePage.class.getDeclaredField("dataMapping");
-    field.setAccessible(true);
-    return (Map<IPerspectiveDescriptor, Long>) field.get(page);
-  }
+@SuppressWarnings("restriction")
+public class PerspectivePageTest extends AbstractTreeViewerPageTest {
 
   @Test
-  public void testGetValue() throws Exception {
-    long value = 9823;
-    IPerspectiveDescriptor perspective = new UndefinedPerspectiveDescriptor(
-        "abc");
-    Map<IPerspectiveDescriptor, Long> data = getData((PerspectivePage) page);
-    data.put(perspective, value);
+  public void testGetValue() {
+    PerspectiveDataDescriptor des1 = new PerspectiveDataDescriptor(
+        new LocalDate(), 19834, "abc");
+    PerspectiveDataDescriptor des2 = new PerspectiveDataDescriptor(des1
+        .getDate().minusDays(1), 14, des1.getPerspectiveId());
 
-    assertEquals(value, page.getValue(perspective));
-    assertEquals(0, page.getValue(new Object()));
-  }
-
-  @Test
-  public void testUpdate() throws Exception {
-    long max = 0;
-    IAccessor<Map<String, Long>> accessor = DataHandler
-        .getPerspectiveDataAccessor();
-
-    DisplayPreference pref = new DisplayPreference();
-    Map<String, Long> data = accessor.getData(pref.getStartDate(), pref
-        .getEndDate());
-    for (long value : data.values()) {
-      if (value > max) {
-        max = value;
-      }
-    }
-    page.update(pref);
-    assertEquals(max, page.getMaxValue());
-
-    pref.getStartDate().add(Calendar.MONTH, -1);
-    pref.getEndDate().add(Calendar.DAY_OF_MONTH, -5);
-    data = accessor.getData(pref.getStartDate(), pref.getEndDate());
-    max = 0;
-    for (long value : data.values()) {
-      if (value > max) {
-        max = value;
-      }
-    }
-    page.update(pref);
-    assertEquals(max, page.getMaxValue());
+    page.getViewer().setInput(Arrays.asList(des1, des2));
+    assertEquals(des1.getValue(), page.getValue(des1));
+    assertEquals(des2.getValue(), page.getValue(des2));
+    assertEquals(des1.getValue() + des2.getValue(), page
+        .getValue(new UndefinedPerspectiveDescriptor(des1.getPerspectiveId())));
   }
 
   @Override
-  protected AbstractTableViewerPage createPage() {
+  protected PerspectivePage createPage() {
     return new PerspectivePage();
   }
+
 }

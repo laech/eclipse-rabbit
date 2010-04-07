@@ -15,15 +15,14 @@
  */
 package rabbit.ui.tests.pages;
 
-import rabbit.ui.TreeLabelComparator;
 import rabbit.ui.internal.pages.AbstractTreeViewerPage;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 import org.eclipse.jface.viewers.IContentProvider;
-import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.ui.PlatformUI;
 import org.junit.Before;
@@ -34,10 +33,11 @@ import java.lang.reflect.Method;
 /**
  * @see AbstractTreeViewerPage
  */
+@SuppressWarnings("restriction")
 public abstract class AbstractTreeViewerPageTest extends
     AbstractValueProviderPageTest {
 
-  private AbstractTreeViewerPage page;
+  protected AbstractTreeViewerPage page;
 
   @Before
   public void setUp() {
@@ -52,18 +52,13 @@ public abstract class AbstractTreeViewerPageTest extends
   }
 
   @Test
-  public void testCreateComparator() throws Exception {
-    assertNotNull(createComparator(page, page.getViewer()));
+  public void testCreateInitialComparator() throws Exception {
+    assertNotNull(createInitialComparator(page, page.getViewer()));
   }
 
   @Test
   public void testCreateContentProvider() throws Exception {
     assertNotNull(createContentProvider(page));
-  }
-
-  @Test
-  public void testCreateLabelProvider() throws Exception {
-    assertNotNull(createLabelProvider(page));
   }
 
   @Test
@@ -89,12 +84,12 @@ public abstract class AbstractTreeViewerPageTest extends
     }
   }
 
-  protected TreeLabelComparator createComparator(AbstractTreeViewerPage page,
+  protected ViewerComparator createInitialComparator(AbstractTreeViewerPage page,
       TreeViewer viewer) throws Exception {
     Method createComparator = AbstractTreeViewerPage.class.getDeclaredMethod(
-        "createComparator", TreeViewer.class);
+        "createInitialComparator", TreeViewer.class);
     createComparator.setAccessible(true);
-    return (TreeLabelComparator) createComparator.invoke(page, viewer);
+    return (ViewerComparator) createComparator.invoke(page, viewer);
   }
 
   protected IContentProvider createContentProvider(AbstractTreeViewerPage page)
@@ -103,14 +98,6 @@ public abstract class AbstractTreeViewerPageTest extends
         .getDeclaredMethod("createContentProvider");
     createContentProvider.setAccessible(true);
     return (IContentProvider) createContentProvider.invoke(page);
-  }
-
-  protected ITableLabelProvider createLabelProvider(AbstractTreeViewerPage page)
-      throws Exception {
-    Method createLabelProvider = AbstractTreeViewerPage.class
-        .getDeclaredMethod("createLabelProvider");
-    createLabelProvider.setAccessible(true);
-    return (ITableLabelProvider) createLabelProvider.invoke(page);
   }
 
   @Override

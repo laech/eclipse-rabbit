@@ -24,7 +24,7 @@ import javax.annotation.Nonnull;
 /**
  * Manages mapping of file to id and vice versa.
  */
-public interface IFileMapper {
+public interface IFileStore {
 
   /**
    * Gets the file of the given file id from an external source. This method may
@@ -69,8 +69,15 @@ public interface IFileMapper {
   @Nonnull
   String insert(@Nonnull IFile file);
 
-  // TODO
+  /**
+   * Saves the current data.
+   * 
+   * @param update True to update the references to external resources, false
+   *          otherwise.
+   * @return {@code true} if data is successfully saved, {@code false}
+   *         otherwise.
+   */
   @CheckReturnValue
-  boolean write(boolean updateExternalDb);
+  boolean save(boolean updateExternalDb);
 
 }

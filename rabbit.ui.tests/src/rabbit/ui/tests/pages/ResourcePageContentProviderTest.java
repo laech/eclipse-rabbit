@@ -15,7 +15,7 @@
  */
 package rabbit.ui.tests.pages;
 
-import rabbit.data.IFileMapper;
+import rabbit.data.IFileStore;
 import rabbit.data.handler.DataHandler;
 import rabbit.ui.internal.pages.ResourcePage;
 import rabbit.ui.internal.pages.ResourcePageContentProvider;
@@ -48,7 +48,7 @@ public class ResourcePageContentProviderTest {
   private static Shell shell;
   private static ResourcePage page;
   private static IWorkspaceRoot root;
-  private static IFileMapper mapper;
+  private static IFileStore mapper;
   private static ResourcePageContentProvider provider;
 
   private static IProject project;

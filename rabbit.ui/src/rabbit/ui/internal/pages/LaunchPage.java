@@ -16,10 +16,10 @@
 package rabbit.ui.internal.pages;
 
 import rabbit.data.access.IAccessor;
-import rabbit.data.access.model.LaunchDescriptor;
+import rabbit.data.access.model.ZLaunchDescriptor;
 import rabbit.data.handler.DataHandler;
 import rabbit.ui.CellPainter;
-import rabbit.ui.DisplayPreference;
+import rabbit.ui.Preferences;
 import rabbit.ui.TreeLabelComparator;
 import rabbit.ui.CellPainter.IValueProvider;
 import rabbit.ui.internal.SharedImages;
@@ -43,6 +43,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
+import org.joda.time.LocalDate;
 
 import java.util.Set;
 
@@ -51,7 +52,7 @@ import java.util.Set;
  */
 public class LaunchPage extends AbstractTreeViewerPage {
 
-  private final IAccessor<Set<LaunchDescriptor>> accessor;
+  private final IAccessor<Set<ZLaunchDescriptor>> accessor;
   private int maxCount = 0;
 
   private IAction collapseAllAction = new Action("Collapse All") {
@@ -94,20 +95,21 @@ public class LaunchPage extends AbstractTreeViewerPage {
 
   @Override
   public long getValue(Object element) {
-    if (element instanceof LaunchDescriptor) {
-      return ((LaunchDescriptor) element).getTotalDuration();
+    if (element instanceof ZLaunchDescriptor) {
+      return ((ZLaunchDescriptor) element).getTotalDuration();
     }
     return 0;
   }
 
   @Override
-  public void update(DisplayPreference preference) {
-    Set<LaunchDescriptor> data = accessor.getData(preference.getStartDate(),
-        preference.getEndDate());
+  public void update(Preferences p) {
+    LocalDate start = LocalDate.fromCalendarFields(p.getStartDate());
+    LocalDate end = LocalDate.fromCalendarFields(p.getEndDate());
+    Set<ZLaunchDescriptor> data = accessor.getData(start, end);
 
     maxCount = 0;
     setMaxValue(0);
-    for (LaunchDescriptor des : data) {
+    for (ZLaunchDescriptor des : data) {
       if (des.getTotalDuration() > getMaxValue()) {
         setMaxValue(des.getTotalDuration());
       }
@@ -142,9 +144,9 @@ public class LaunchPage extends AbstractTreeViewerPage {
     TreeLabelComparator countSorter = new TreeLabelComparator(viewer) {
       @Override
       protected int doCompare(Viewer v, Object e1, Object e2) {
-        if (e1 instanceof LaunchDescriptor && e2 instanceof LaunchDescriptor) {
-          LaunchDescriptor des1 = (LaunchDescriptor) e1;
-          LaunchDescriptor des2 = (LaunchDescriptor) e2;
+        if (e1 instanceof ZLaunchDescriptor && e2 instanceof ZLaunchDescriptor) {
+          ZLaunchDescriptor des1 = (ZLaunchDescriptor) e1;
+          ZLaunchDescriptor des2 = (ZLaunchDescriptor) e2;
           if (des1.getCount() == des2.getCount())
             return 0;
           else
@@ -187,15 +189,15 @@ public class LaunchPage extends AbstractTreeViewerPage {
 
       @Override
       public long getValue(Object element) {
-        if (element instanceof LaunchDescriptor)
-          return ((LaunchDescriptor) element).getCount();
+        if (element instanceof ZLaunchDescriptor)
+          return ((ZLaunchDescriptor) element).getCount();
 
         return 0;
       }
 
       @Override
       public boolean shouldPaint(Object element) {
-        return element instanceof LaunchDescriptor;
+        return element instanceof ZLaunchDescriptor;
       }
     }) {
       @Override
@@ -211,13 +213,13 @@ public class LaunchPage extends AbstractTreeViewerPage {
   }
 
   @Override
-  protected ViewerComparator createComparator(TreeViewer viewer) {
+  protected ViewerComparator createInitialComparator(TreeViewer viewer) {
     return new TreeLabelComparator(viewer) {
       @Override
       public int compare(Viewer v, Object e1, Object e2) {
-        if (e1 instanceof LaunchDescriptor && e2 instanceof LaunchDescriptor) {
-          LaunchDescriptor des1 = (LaunchDescriptor) e1;
-          LaunchDescriptor des2 = (LaunchDescriptor) e2;
+        if (e1 instanceof ZLaunchDescriptor && e2 instanceof ZLaunchDescriptor) {
+          ZLaunchDescriptor des1 = (ZLaunchDescriptor) e1;
+          ZLaunchDescriptor des2 = (ZLaunchDescriptor) e2;
           return des1.getLaunchName().compareTo(des2.getLaunchName());
         }
         return super.compare(v, e1, e2);
@@ -230,7 +232,6 @@ public class LaunchPage extends AbstractTreeViewerPage {
     return new LaunchPageContentProvider();
   }
 
-  @Override
   protected ITableLabelProvider createLabelProvider() {
     return new LaunchPageLabelProvider();
   }

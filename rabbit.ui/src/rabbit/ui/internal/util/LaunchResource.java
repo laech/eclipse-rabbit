@@ -15,16 +15,16 @@
  */
 package rabbit.ui.internal.util;
 
-import rabbit.data.access.model.LaunchDescriptor;
+import rabbit.data.access.model.ZLaunchDescriptor;
 
 import org.eclipse.core.resources.IResource;
 
 public final class LaunchResource {
 
-  private final LaunchDescriptor launchDescriptor;
+  private final ZLaunchDescriptor launchDescriptor;
   private final IResource resource;
 
-  public LaunchResource(LaunchDescriptor des, IResource res) {
+  public LaunchResource(ZLaunchDescriptor des, IResource res) {
     this.launchDescriptor = des;
     this.resource = res;
   }
@@ -39,7 +39,7 @@ public final class LaunchResource {
     return false;
   }
 
-  public LaunchDescriptor getLaunchDescriptor() {
+  public ZLaunchDescriptor getLaunchDescriptor() {
     return launchDescriptor;
   }
 

@@ -16,7 +16,7 @@
 package rabbit.ui.internal;
 
 import rabbit.tracking.internal.TrackingPlugin;
-import rabbit.ui.DisplayPreference;
+import rabbit.ui.Preferences;
 import rabbit.ui.IPage;
 
 import org.eclipse.core.runtime.IProduct;
@@ -138,7 +138,7 @@ public class RabbitView extends ViewPart {
 
   private Composite displayPanel;
 
-  private final DisplayPreference preferences;
+  private final Preferences preferences;
 
   /**
    * Constructs a new view.
@@ -150,7 +150,7 @@ public class RabbitView extends ViewPart {
 
     toolkit = new FormToolkit(PlatformUI.getWorkbench().getDisplay());
     stackLayout = new StackLayout();
-    preferences = new DisplayPreference();
+    preferences = new Preferences();
   }
 
   @Override

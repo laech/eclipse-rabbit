@@ -15,11 +15,11 @@
  */
 package rabbit.ui.internal.pages;
 
-import rabbit.data.IFileMapper;
+import rabbit.data.IFileStore;
 import rabbit.data.access.IAccessor;
 import rabbit.data.handler.DataHandler;
 import rabbit.ui.CellPainter;
-import rabbit.ui.DisplayPreference;
+import rabbit.ui.Preferences;
 import rabbit.ui.TreeLabelComparator;
 import rabbit.ui.internal.SharedImages;
 
@@ -49,6 +49,7 @@ import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.ide.IDE;
+import org.joda.time.LocalDate;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -67,7 +68,7 @@ public class ResourcePage extends AbstractTreeViewerPage {
   private ShowMode mode = ShowMode.FILE;
 
   private IAccessor<Map<String, Long>> accessor;
-  private IFileMapper resourceMapper;
+  private IFileStore resourceMapper;
   private Map<IProject, Set<IResource>> projectResources;
   private Map<IFolder, Set<IFile>> folderFiles;
   private Map<IFile, Long> fileValues;
@@ -301,9 +302,12 @@ public class ResourcePage extends AbstractTreeViewerPage {
   }
 
   @Override
-  public void update(DisplayPreference p) {
+  public void update(Preferences p) {
     Object[] elements = getViewer().getExpandedElements();
-    doUpdate(accessor.getData(p.getStartDate(), p.getEndDate()));
+    
+    LocalDate start = LocalDate.fromCalendarFields(p.getStartDate());
+    LocalDate end = LocalDate.fromCalendarFields(p.getEndDate());
+    doUpdate(accessor.getData(start, end));
     try {
       getViewer().setExpandedElements(elements);
     } catch (IllegalArgumentException e) {
@@ -340,7 +344,7 @@ public class ResourcePage extends AbstractTreeViewerPage {
   }
 
   @Override
-  protected TreeLabelComparator createComparator(TreeViewer viewer) {
+  protected TreeLabelComparator createInitialComparator(TreeViewer viewer) {
     return new TreeLabelComparator(viewer) {
 
       @Override
@@ -363,7 +367,6 @@ public class ResourcePage extends AbstractTreeViewerPage {
     return new ResourcePageContentProvider(this);
   }
 
-  @Override
   protected ITableLabelProvider createLabelProvider() {
     return new ResourcePageDecoratingLabelProvider(this,
         new ResourcePageLabelProvider(), PlatformUI.getWorkbench()

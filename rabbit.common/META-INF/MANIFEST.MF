@@ -20,3 +20,8 @@ Export-Package: com.google.common.annotations,
  org.joda.time.field,
  org.joda.time.format,
  org.joda.time.tz
+Bundle-ClassPath: lib/annotations.jar,
+ lib/google-collect-1.0.jar,
+ lib/joda-time-1.6.jar,
+ lib/jsr305.jar,
+ .

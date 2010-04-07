@@ -32,8 +32,11 @@ public interface IPage {
   void createContents(Composite parent);
 
   /**
-	 * 
-	 */
+   * Creates the tool bar items of this page.
+   * 
+   * @return All tool bat items that have been created for this page, including
+   *         the separators.
+   */
   IContributionItem[] createToolBarItems(IToolBarManager toolBar);
 
   /**
@@ -41,6 +44,6 @@ public interface IPage {
    * 
    * @param preference The object containing the update preferences.
    */
-  void update(DisplayPreference preference);
+  void update(Preferences preference);
 
 }

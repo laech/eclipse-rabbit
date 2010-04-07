@@ -17,7 +17,7 @@ package rabbit.ui.internal.pages;
 
 import rabbit.data.access.IAccessor;
 import rabbit.data.handler.DataHandler;
-import rabbit.ui.DisplayPreference;
+import rabbit.ui.Preferences;
 import rabbit.ui.TableLabelComparator;
 
 import org.eclipse.core.commands.Command;
@@ -28,6 +28,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.commands.ICommandService;
+import org.joda.time.LocalDate;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -79,11 +80,13 @@ public class CommandPage extends AbstractTableViewerPage {
   }
 
   @Override
-  public void update(DisplayPreference p) {
+  public void update(Preferences p) {
     setMaxValue(0);
     dataMapping.clear();
 
-    Map<String, Long> map = accessor.getData(p.getStartDate(), p.getEndDate());
+    LocalDate start = LocalDate.fromCalendarFields(p.getStartDate());
+    LocalDate end = LocalDate.fromCalendarFields(p.getEndDate());
+    Map<String, Long> map = accessor.getData(start, end);
     for (Entry<String, Long> item : map.entrySet()) {
       dataMapping.put(service.getCommand(item.getKey()), item.getValue());
 

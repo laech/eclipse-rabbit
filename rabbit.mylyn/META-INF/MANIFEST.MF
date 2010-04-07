@@ -12,7 +12,8 @@ Require-Bundle: org.eclipse.mylyn.tasks.core,
  org.eclipse.ui,
  org.eclipse.core.runtime,
  org.eclipse.mylyn.tasks.ui,
- rabbit.data.xml;bundle-version="1.1.0"
+ rabbit.data.xml;bundle-version="1.1.0",
+ rabbit.common;bundle-version="1.0.0"
 Export-Package: rabbit.mylyn,
  rabbit.mylyn.events,
  rabbit.mylyn.internal.storage.xml;x-internal:=true,

@@ -2,6 +2,8 @@ package rabbit.data.test.access.model;
 
 import rabbit.data.access.model.PerspectiveDataDescriptor;
 
+import com.google.common.base.Objects;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -31,7 +33,7 @@ public class PerspectiveDataDescriptorTest extends ValueDescriptorTest {
     LocalDate date = new LocalDate();
     long duration = 11;
     String id = "id";
-    int hashCode = (date.hashCode() + (int) duration + id.hashCode()) % 31;
+    int hashCode = Objects.hashCode(date, id);
     assertEquals(hashCode, createDescriptor(date, duration, id).hashCode());
   }
 

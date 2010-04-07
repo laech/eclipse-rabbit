@@ -28,7 +28,9 @@ import org.joda.time.LocalDate;
 
 import java.util.Collection;
 
-// TODO test
+/**
+ * Accesses workbench part event data.
+ */
 public class PartDataAccessor2
     extends
     AbstractDataNodeAccessor<PartDataDescriptor, PartEventType, PartEventListType> {
