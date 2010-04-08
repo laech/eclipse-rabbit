@@ -15,47 +15,44 @@
  */
 package rabbit.ui.internal.pages;
 
-import rabbit.data.access.model.PerspectiveDataDescriptor;
-import rabbit.ui.internal.util.UndefinedPerspectiveDescriptor;
+import rabbit.data.access.model.PartDataDescriptor;
+import rabbit.ui.internal.util.UndefinedWorkbenchPartDescriptor;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
-import org.eclipse.ui.IPerspectiveDescriptor;
+import org.eclipse.ui.IWorkbenchPartDescriptor;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.model.PerspectiveLabelProvider;
 
 /**
- * Label provider for providing labels for a {@link PerspectivePage}'s name
- * column.
+ * Label provider for providing labels for a {@link PartPage}'s name column.
  */
-public class PerspectivePageNameLabelProvider extends
-    DateStyledCellLabelProvider {
+public class PartPageNameLabelProvider extends DateStyledCellLabelProvider {
 
   private final Color gray;
-  private final PerspectiveLabelProvider provider;
-  private final PerspectivePageContentProvider content;
+  private final WorkbenchPartLabelProvider partLabels;
+  private final PartPageContentProvider content;
 
   /**
    * Constructor.
    * 
    * @param content The content provider for the page.
    */
-  public PerspectivePageNameLabelProvider(PerspectivePageContentProvider content) {
+  public PartPageNameLabelProvider(PartPageContentProvider content) {
     checkNotNull(content);
 
     gray = PlatformUI.getWorkbench().getDisplay().getSystemColor(
         SWT.COLOR_DARK_GRAY);
 
-    provider = new PerspectiveLabelProvider(false);
+    partLabels = new WorkbenchPartLabelProvider();
     this.content = content;
   }
 
   @Override
   public void dispose() {
-    provider.dispose();
+    partLabels.dispose();
     super.dispose();
   }
 
@@ -65,27 +62,29 @@ public class PerspectivePageNameLabelProvider extends
 
     Object element = cell.getElement();
 
-    if (element instanceof IPerspectiveDescriptor) {
-      cell.setText(provider.getText(element));
-      cell.setImage(provider.getImage(element));
+    if (element instanceof IWorkbenchPartDescriptor) {
+      cell.setText(partLabels.getText(element));
+      cell.setImage(partLabels.getImage(element));
 
-    } else if (element instanceof PerspectiveDataDescriptor) {
-      IPerspectiveDescriptor des = content
-          .getPerspective((PerspectiveDataDescriptor) element);
-      cell.setText(provider.getText(des));
-      cell.setImage(provider.getImage(des));
+    } else if (element instanceof PartDataDescriptor) {
+      IWorkbenchPartDescriptor des = content
+          .getPart((PartDataDescriptor) element);
+      cell.setText(partLabels.getText(des));
+      cell.setImage(partLabels.getImage(des));
     }
 
-    if (element instanceof UndefinedPerspectiveDescriptor)
+    if (element instanceof UndefinedWorkbenchPartDescriptor)
       cell.setForeground(gray);
     else
       cell.setForeground(null);
   }
 
   /**
-   * Gets the foreground color for undefined perspectives.
+   * Gets the foreground color for undefined workbench parts.
+   * 
+   * @return The foreground color.
    */
-  public Color getUndefinedPerspectiveForeground() {
+  public Color getUndefindWorkbenchPartForeground() {
     return gray;
   }
 }

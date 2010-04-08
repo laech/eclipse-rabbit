@@ -1,17 +1,17 @@
 /*
  * Copyright 2010 The Rabbit Eclipse Plug-in Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
  */
 package rabbit.ui.internal.pages;
 
@@ -34,6 +34,7 @@ import org.joda.time.LocalDate;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.Nonnull;
 
@@ -104,10 +105,12 @@ public class PartPageContentProvider extends
 
   @Override
   public Object[] getElements(Object input) {
-    if (isDisplayingByDate())
-      return dateToParts.keySet().toArray(new Object[dateToParts.size()]);
-    else
+    if (isDisplayingByDate()) {
+      Set<LocalDate> dates = dateToParts.keySet();
+      return dates.toArray(new Object[dates.size()]);
+    } else {
       return partSummaries.keySet().toArray(new Object[partSummaries.size()]);
+    }
   }
 
   @SuppressWarnings("unchecked")
@@ -128,6 +131,8 @@ public class PartPageContentProvider extends
       sums.put(part, (value == null) ? des.getValue() : des.getValue() + value);
     }
     partSummaries = ImmutableMap.copyOf(sums);
+    
+    updatePageMaxValue();
   }
 
   @Override

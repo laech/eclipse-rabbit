@@ -29,13 +29,12 @@ CollectionContentProviderTest.class, //
     CommandPageTest.class, //
 
     // Part page related:
+    PartPageNameLabelProviderTest.class, //
     PartPageContentProviderTest.class, //
-    PartPageLabelProviderTest.class, // 
     PartPageTest.class, //
 
     // Perspective page related:
     PerspectivePageNameLabelProviderTest.class, //
-    PerspectivePageDurationLabelProviderTest.class, //
     PerspectivePageContentProviderTest.class, //
     PerspectivePageTest.class, //
 
@@ -53,7 +52,12 @@ CollectionContentProviderTest.class, //
     LaunchPageContentProviderTest.class, // 
     LaunchPageLabelProviderTest.class, //
     LaunchPageTest.class, //
+
     //
+    WorkbenchPartLabelProviderTest.class, //
+    LocalDateLabelProviderTest.class, //
+    DateStyledCellLabelProviderTest.class, //
+    ValueColumnLabelProviderTest.class, //
 })
 public class AllTests {
 

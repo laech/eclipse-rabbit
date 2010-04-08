@@ -15,16 +15,16 @@
  */
 package rabbit.ui.tests.pages;
 
-import rabbit.data.access.model.PerspectiveDataDescriptor;
-import rabbit.ui.internal.pages.PerspectivePage;
-import rabbit.ui.internal.pages.PerspectivePageContentProvider;
-import rabbit.ui.internal.pages.PerspectivePageNameLabelProvider;
-import rabbit.ui.internal.util.UndefinedPerspectiveDescriptor;
+import rabbit.data.access.model.PartDataDescriptor;
+import rabbit.ui.internal.pages.PartPage;
+import rabbit.ui.internal.pages.PartPageContentProvider;
+import rabbit.ui.internal.pages.PartPageNameLabelProvider;
+import rabbit.ui.internal.util.UndefinedWorkbenchPartDescriptor;
 
 import static org.junit.Assert.assertEquals;
 
 import org.eclipse.swt.widgets.TreeItem;
-import org.eclipse.ui.IPerspectiveDescriptor;
+import org.eclipse.ui.IWorkbenchPartDescriptor;
 import org.joda.time.LocalDate;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -33,23 +33,26 @@ import org.junit.Test;
 import java.util.Arrays;
 
 /**
- * @see PerspectivePageNameLabelProvider
+ * @see PartPageNameLabelProvider
  */
 @SuppressWarnings("restriction")
-public class PerspectivePageNameLabelProviderTest extends
+public class PartPageNameLabelProviderTest extends
     DateStyledCellLabelProviderTest {
 
-  private static PerspectivePage page;
-  private static PerspectivePageContentProvider contents;
+  private static PartPage page;
+  private static PartPageContentProvider contents;
+  private static PartPageNameLabelProvider labels;
 
   @BeforeClass
-  public static void setup() {
-    page = new PerspectivePage();
+  public static void beforeClass() {
+    page = new PartPage();
     page.createContents(shell);
-    contents = new PerspectivePageContentProvider(page, true);
+
+    contents = new PartPageContentProvider(page, true);
+    labels = new PartPageNameLabelProvider(contents);
+
     page.getViewer().setContentProvider(contents);
-    page.getViewer().setLabelProvider(
-        new PerspectivePageNameLabelProvider(contents));
+    page.getViewer().setLabelProvider(labels);
   }
 
   @Before
@@ -57,18 +60,13 @@ public class PerspectivePageNameLabelProviderTest extends
     page.getViewer().getTree().removeAll();
   }
 
-  @Override
-  protected PerspectivePageNameLabelProvider createLabelProvider() {
-    return new PerspectivePageNameLabelProvider(contents);
-  }
-
   @Test
   public void testUpdate_labelOfPerspective_displayByDateDisabled() {
-    IPerspectiveDescriptor persp = new UndefinedPerspectiveDescriptor("abc");
+    IWorkbenchPartDescriptor part = new UndefinedWorkbenchPartDescriptor("abc");
 
     // COnstruct a data descriptor using the perspective Id:
-    PerspectiveDataDescriptor data = new PerspectiveDataDescriptor(
-        new LocalDate(), 121, persp.getId());
+    PartDataDescriptor data = new PartDataDescriptor(new LocalDate(), 121, part
+        .getId());
 
     // Disable it so that there is no tree items created for the date:
     contents.setDisplayByDate(false);
@@ -76,13 +74,13 @@ public class PerspectivePageNameLabelProviderTest extends
 
     // The only item in the tree:
     TreeItem item = page.getViewer().getTree().getItem(0);
-    assertEquals(persp.getLabel(), item.getText());
+    assertEquals(part.getLabel(), item.getText());
   }
 
   @Test
   public void testUpdate_labelOfPerspectiveDataDescriptor_displayByDateEnabled() {
-    PerspectiveDataDescriptor des = new PerspectiveDataDescriptor(
-        new LocalDate(), 11, "a.b.c");
+    PartDataDescriptor des = new PartDataDescriptor(new LocalDate(), 11,
+        "a.b.c");
 
     // Enable for testing:
     contents.setDisplayByDate(true);
@@ -92,6 +90,6 @@ public class PerspectivePageNameLabelProviderTest extends
     // The 0th item is the date because displayByDate is enable, so the child of
     // this item is our perspective:
     TreeItem item = page.getViewer().getTree().getItem(0).getItem(0);
-    assertEquals(contents.getPerspective(des).getLabel(), item.getText());
+    assertEquals(contents.getPart(des).getLabel(), item.getText());
   }
 }

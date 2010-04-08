@@ -24,6 +24,7 @@ import rabbit.ui.TreeViewerSorter;
 import rabbit.ui.internal.actions.CollapseAllAction;
 import rabbit.ui.internal.actions.ExpandAllAction;
 import rabbit.ui.internal.actions.ViewByDatesAction;
+import rabbit.ui.internal.util.UndefinedPerspectiveDescriptor;
 
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IContributionItem;
@@ -35,6 +36,7 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.TreeViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Display;
@@ -59,21 +61,26 @@ public class PerspectivePage extends AbstractTreeViewerPage {
 
   @Override
   public void createColumns(TreeViewer viewer) {
-    TreeViewerSorter nameSorter = createInitialComparator(viewer);
-
     TreeViewerColumn column = new TreeViewerColumn(viewer, SWT.LEFT);
     column.setLabelProvider(new PerspectivePageNameLabelProvider(contents));
     column.getColumn().setText("Name");
     column.getColumn().setWidth(200);
-    column.getColumn().addSelectionListener(nameSorter);
+    column.getColumn().addSelectionListener(createInitialComparator(viewer));
 
     column = new TreeViewerColumn(viewer, SWT.RIGHT);
-    column.setLabelProvider(new PerspectivePageDurationLabelProvider(contents));
     column.getColumn().setText("Usage");
     column.getColumn().setWidth(200);
     column.getColumn().addSelectionListener(createValueSorterForTree(viewer));
-
-    viewer.setComparator(nameSorter);
+    column.setLabelProvider(new ValueColumnLabelProvider(this) {
+      @Override
+      public void update(ViewerCell cell) {
+        super.update(cell);
+        if (cell.getElement() instanceof UndefinedPerspectiveDescriptor)
+          cell.setForeground(labels.getUndefinedPerspectiveForeground());
+        else
+          cell.setForeground(null);
+      }
+    });
   }
 
   @Override
@@ -127,8 +134,7 @@ public class PerspectivePage extends AbstractTreeViewerPage {
       getViewer().setExpandedElements(elements);
       getViewer().setSelection(selection);
     } catch (Exception e) {
-      // Just in case something went wrong while restoring the
-      // viewer's state
+      // Just in case something goes wrong while restoring the viewer's state
     }
   }
 

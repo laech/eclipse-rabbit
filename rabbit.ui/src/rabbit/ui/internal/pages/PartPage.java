@@ -20,24 +20,27 @@ import rabbit.data.access.model.PartDataDescriptor;
 import rabbit.data.handler.DataHandler2;
 import rabbit.ui.CellPainter;
 import rabbit.ui.Preferences;
-import rabbit.ui.TreeLabelComparator;
+import rabbit.ui.TreeViewerSorter;
 import rabbit.ui.internal.actions.CollapseAllAction;
 import rabbit.ui.internal.actions.ExpandAllAction;
 import rabbit.ui.internal.actions.ViewByDatesAction;
+import rabbit.ui.internal.util.UndefinedWorkbenchPartDescriptor;
 
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.viewers.CellLabelProvider;
-import org.eclipse.jface.viewers.ITableLabelProvider;
+import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.TreeViewer;
-import org.eclipse.jface.viewers.ViewerComparator;
+import org.eclipse.jface.viewers.TreeViewerColumn;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.TreeColumn;
+import org.eclipse.ui.IWorkbenchPartDescriptor;
 import org.joda.time.LocalDate;
 
 /**
@@ -47,6 +50,7 @@ public class PartPage extends AbstractTreeViewerPage {
 
   private final IAccessor2<PartDataDescriptor> accessor;
   private final PartPageContentProvider contents;
+  private final PartPageNameLabelProvider nameLabels;
 
   /**
    * Constructs a new page.
@@ -55,24 +59,31 @@ public class PartPage extends AbstractTreeViewerPage {
     super();
     accessor = DataHandler2.getPartDataAccessor();
     contents = new PartPageContentProvider(this, true);
+    nameLabels = new PartPageNameLabelProvider(contents);
   }
 
   @Override
   public void createColumns(TreeViewer viewer) {
-    TreeLabelComparator valueSorter = createValueSorterForTree(viewer);
-    TreeLabelComparator textSorter = new TreeLabelComparator(viewer);
+    TreeViewerColumn column = new TreeViewerColumn(viewer, SWT.LEFT);
+    column.getColumn().addSelectionListener(createInitialComparator(viewer));
+    column.getColumn().setText("Name");
+    column.getColumn().setWidth(200);
+    column.setLabelProvider(nameLabels);
 
-    int[] widths = new int[] { 200, 150 };
-    int[] styles = new int[] { SWT.LEFT, SWT.RIGHT };
-    String[] names = new String[] { "Name", "Usage" };
-    for (int i = 0; i < names.length; i++) {
-      TreeColumn column = new TreeColumn(viewer.getTree(), styles[i]);
-      column.setText(names[i]);
-      column.setWidth(widths[i]);
-      column.addSelectionListener((names.length - 1 == i) ? valueSorter
-          : textSorter);
-    }
-    getViewer().setLabelProvider(createLabelProvider());
+    column = new TreeViewerColumn(viewer, SWT.RIGHT);
+    column.getColumn().addSelectionListener(createValueSorterForTree(viewer));
+    column.getColumn().setText("Usage");
+    column.getColumn().setWidth(200);
+    column.setLabelProvider(new ValueColumnLabelProvider(this) {
+      @Override
+      public void update(ViewerCell cell) {
+        super.update(cell);
+        if (cell.getElement() instanceof UndefinedWorkbenchPartDescriptor)
+          cell.setForeground(nameLabels.getUndefindWorkbenchPartForeground());
+        else
+          cell.setForeground(null);
+      }
+    });
   }
 
   @Override
@@ -96,16 +107,38 @@ public class PartPage extends AbstractTreeViewerPage {
   }
 
   @Override
-  public long getValue(Object o) {
+  public long getValue(Object element) {
+    if (element instanceof IWorkbenchPartDescriptor)
+      return contents.getValueOfPart((IWorkbenchPartDescriptor) element);
+
+    if (element instanceof PartDataDescriptor)
+      return ((PartDataDescriptor) element).getValue();
+
     return 0;
+  }
+
+  @Override
+  public boolean shouldPaint(Object element) {
+    return !(element instanceof LocalDate);
   }
 
   @Override
   public void update(Preferences p) {
     setMaxValue(0);
+    nameLabels.updateState();
+
+    Object[] elements = getViewer().getExpandedElements();
+    ISelection selection = getViewer().getSelection();
+
     LocalDate start = LocalDate.fromCalendarFields(p.getStartDate());
     LocalDate end = LocalDate.fromCalendarFields(p.getEndDate());
     getViewer().setInput(accessor.getData(start, end));
+    try {
+      getViewer().setExpandedElements(elements);
+      getViewer().setSelection(selection);
+    } catch (Exception e) {
+      // Just in case something goes wrong while restoring the viewer's state
+    }
   }
 
   @Override
@@ -123,12 +156,29 @@ public class PartPage extends AbstractTreeViewerPage {
     return contents;
   }
 
-  protected ITableLabelProvider createLabelProvider() {
-    return new PartPageLabelProvider(this);
-  }
-
   @Override
-  protected ViewerComparator createInitialComparator(TreeViewer viewer) {
-    return new TreeLabelComparator(viewer);
+  protected TreeViewerSorter createInitialComparator(TreeViewer viewer) {
+    return new TreeViewerSorter(viewer) {
+
+      @Override
+      protected int doCompare(Viewer v, Object x, Object y) {
+        if (x instanceof LocalDate && y instanceof LocalDate) {
+          return x.toString().compareTo(y.toString());
+
+        } else if (x instanceof IWorkbenchPartDescriptor
+            && y instanceof IWorkbenchPartDescriptor) {
+          IWorkbenchPartDescriptor a = (IWorkbenchPartDescriptor) x;
+          IWorkbenchPartDescriptor b = (IWorkbenchPartDescriptor) y;
+          return a.getLabel().compareToIgnoreCase(b.getLabel());
+
+        } else if (x instanceof PartDataDescriptor
+            && y instanceof PartDataDescriptor) {
+          IWorkbenchPartDescriptor a = contents.getPart((PartDataDescriptor) x);
+          IWorkbenchPartDescriptor b = contents.getPart((PartDataDescriptor) y);
+          return a.getLabel().compareToIgnoreCase(b.getLabel());
+        }
+        return 0;
+      }
+    };
   }
 }
