@@ -34,4 +34,7 @@ public class SharedImages {
 
   public static final ImageDescriptor TIME_HIERARCHY = imageDescriptorFromPlugin(
       PLUGIN_ID, "/icons/full/obj16/time-hierarchy.png");
+
+  public static final ImageDescriptor GENERIC_ELEMENT = imageDescriptorFromPlugin(
+      PLUGIN_ID, "/icons/full/obj16/generic-element.gif");
 }

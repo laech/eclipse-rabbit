@@ -15,34 +15,54 @@
  */
 package rabbit.ui.internal.pages;
 
+import rabbit.data.access.model.CommandDataDescriptor;
+import rabbit.ui.internal.SharedImages;
+
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import org.eclipse.core.commands.Command;
 import org.eclipse.core.commands.common.NotDefinedException;
+import org.eclipse.jface.viewers.BaseLabelProvider;
 import org.eclipse.jface.viewers.IColorProvider;
 import org.eclipse.jface.viewers.ITableLabelProvider;
-import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.PlatformUI;
 
+import javax.annotation.Nonnull;
+import javax.annotation.OverridingMethodsMustInvokeSuper;
+
 /**
- * Label provider for a command page.
+ * Label provider for a {@link CommandPage}.
  */
-public class CommandPageLabelProvider extends LabelProvider implements
+public class CommandPageLabelProvider extends BaseLabelProvider implements
     ITableLabelProvider, IColorProvider {
 
-  private CommandPage page;
-  private final Color undefinedColor;
+  private final Color gray;
+  private final Image commandImage;
+  private final DateLabelProvider dateLabels;
+  private final CommandPageContentProvider contentProvider;
 
   /**
-   * Constructs a new label provider.
+   * Constructor.
    * 
-   * @param page The parent.
+   * @param contents The content provider of the page.
    */
-  public CommandPageLabelProvider(CommandPage page) {
-    this.page = page;
-    undefinedColor = PlatformUI.getWorkbench().getDisplay().getSystemColor(
+  public CommandPageLabelProvider(@Nonnull CommandPageContentProvider contents) {
+    checkNotNull(contents);
+    contentProvider = contents;
+    commandImage = SharedImages.GENERIC_ELEMENT.createImage();
+    dateLabels = new DateLabelProvider();
+    gray = PlatformUI.getWorkbench().getDisplay().getSystemColor(
         SWT.COLOR_DARK_GRAY);
+  }
+
+  @Override
+  public void dispose() {
+    super.dispose();
+    dateLabels.dispose();
+    commandImage.dispose();
   }
 
   @Override
@@ -52,37 +72,78 @@ public class CommandPageLabelProvider extends LabelProvider implements
 
   @Override
   public Image getColumnImage(Object element, int columnIndex) {
-    return null;
+    if (columnIndex != 0)
+      return null;
+
+    else if (element instanceof Command
+        || element instanceof CommandDataDescriptor)
+      return commandImage;
+    else
+      return dateLabels.getImage(element);
   }
 
   @Override
   public String getColumnText(Object element, int columnIndex) {
-    if (!(element instanceof Command)) {
-      return null;
-    }
-
-    Command cmd = (Command) element;
     try {
       switch (columnIndex) {
       case 0:
-        return cmd.getName();
+        if (element instanceof Command)
+          return ((Command) element).getName();
+
+        else if (element instanceof CommandDataDescriptor)
+          return contentProvider.getCommand((CommandDataDescriptor) element)
+              .getName();
+        else
+          return dateLabels.getText(element);
+
       case 1:
-        return cmd.getDescription();
+        if (element instanceof Command)
+          return ((Command) element).getDescription();
+
+        else if (element instanceof CommandDataDescriptor)
+          return contentProvider.getCommand((CommandDataDescriptor) element)
+              .getDescription();
+        else
+          return null;
+
       case 2:
-        return (int) page.getValue(cmd) + "";
+        if (element instanceof Command)
+          return contentProvider.getValueOfCommand((Command) element) + "";
+
+        else if (element instanceof CommandDataDescriptor)
+          return ((CommandDataDescriptor) element).getValue() + "";
+        else
+          return null;
+
       default:
         return null;
       }
     } catch (NotDefinedException e) {
-      return (columnIndex == 0) ? cmd.getId() : null;
+      if (columnIndex == 0) {
+        if (element instanceof Command)
+          return ((Command) element).getId();
+        else if (element instanceof CommandDataDescriptor)
+          return contentProvider.getCommand((CommandDataDescriptor) element)
+              .getId();
+      }
+      return null;
     }
   }
 
   @Override
   public Color getForeground(Object element) {
-    if ((element instanceof Command) && !((Command) element).isDefined()) {
-      return undefinedColor;
-    }
-    return null;
+    if ((element instanceof Command) && !((Command) element).isDefined())
+      return gray;
+    else
+      return null;
+  }
+
+  /**
+   * Updates the state of this label provider, this method should be called when
+   * the input of the viewer is changed.
+   */
+  @OverridingMethodsMustInvokeSuper
+  public void updateState() {
+    dateLabels.updateState();
   }
 }

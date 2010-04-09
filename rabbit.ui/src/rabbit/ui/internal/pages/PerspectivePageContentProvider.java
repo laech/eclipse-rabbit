@@ -65,6 +65,7 @@ public class PerspectivePageContentProvider extends
    * 
    * @param page The parent page.
    * @param displayByDate True to display data by date.
+   * @throws NullPointerException If page is null.
    */
   public PerspectivePageContentProvider(@Nonnull PerspectivePage page,
       boolean displayByDate) {

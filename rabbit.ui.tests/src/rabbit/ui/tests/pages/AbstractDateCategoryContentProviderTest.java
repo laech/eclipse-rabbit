@@ -24,6 +24,7 @@ import static org.junit.Assert.assertTrue;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
@@ -39,9 +40,10 @@ public abstract class AbstractDateCategoryContentProviderTest {
   protected final AbstractDateCategoryContentProvider contentProvider;
   /** Page created by {@link #createPage()}. */
   protected final AbstractTreeViewerPage page;
-  private static final Shell shell;
+  private static Shell shell;
 
-  static {
+  @BeforeClass
+  public static void beforeClass() {
     shell = new Shell(PlatformUI.getWorkbench().getDisplay());
   }
 

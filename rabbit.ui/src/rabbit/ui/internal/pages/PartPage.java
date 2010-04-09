@@ -21,89 +21,86 @@ import rabbit.data.handler.DataHandler2;
 import rabbit.ui.CellPainter;
 import rabbit.ui.Preferences;
 import rabbit.ui.TreeViewerSorter;
+import rabbit.ui.internal.RabbitUI;
 import rabbit.ui.internal.actions.CollapseAllAction;
 import rabbit.ui.internal.actions.ExpandAllAction;
 import rabbit.ui.internal.actions.ViewByDatesAction;
-import rabbit.ui.internal.util.UndefinedWorkbenchPartDescriptor;
+
+import com.google.common.collect.Lists;
 
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.viewers.CellLabelProvider;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.TreeViewer;
-import org.eclipse.jface.viewers.TreeViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.ui.IWorkbenchPartDescriptor;
 import org.joda.time.LocalDate;
+
+import java.util.List;
 
 /**
  * A page displays workbench part usage.
  */
 public class PartPage extends AbstractTreeViewerPage {
 
+  /**
+   * Preference constants for displaying the data by date.
+   */
+  private static final String DISPLAY_BY_DATE_PREF = "PartPage.displayByDates";
+
   private final IAccessor2<PartDataDescriptor> accessor;
   private final PartPageContentProvider contents;
-  private final PartPageNameLabelProvider nameLabels;
+  private final PartPageLabelProvider labels;
 
   /**
    * Constructs a new page.
    */
   public PartPage() {
     super();
+    IPreferenceStore store = RabbitUI.getDefault().getPreferenceStore();
+    store.setDefault(DISPLAY_BY_DATE_PREF, true);
+
+    boolean displayByDate = store.getBoolean(DISPLAY_BY_DATE_PREF);
+    contents = new PartPageContentProvider(this, displayByDate);
+    labels = new PartPageLabelProvider(contents);
     accessor = DataHandler2.getPartDataAccessor();
-    contents = new PartPageContentProvider(this, true);
-    nameLabels = new PartPageNameLabelProvider(contents);
   }
 
   @Override
   public void createColumns(TreeViewer viewer) {
-    TreeViewerColumn column = new TreeViewerColumn(viewer, SWT.LEFT);
-    column.getColumn().addSelectionListener(createInitialComparator(viewer));
-    column.getColumn().setText("Name");
-    column.getColumn().setWidth(200);
-    column.setLabelProvider(nameLabels);
+    TreeColumn column = new TreeColumn(viewer.getTree(), SWT.LEFT);
+    column.addSelectionListener(createInitialComparator(viewer));
+    column.setText("Name");
+    column.setWidth(200);
 
-    column = new TreeViewerColumn(viewer, SWT.RIGHT);
-    column.getColumn().addSelectionListener(createValueSorterForTree(viewer));
-    column.getColumn().setText("Usage");
-    column.getColumn().setWidth(200);
-    column.setLabelProvider(new ValueColumnLabelProvider(this) {
-      @Override
-      public void update(ViewerCell cell) {
-        super.update(cell);
-        if (cell.getElement() instanceof UndefinedWorkbenchPartDescriptor)
-          cell.setForeground(nameLabels.getUndefindWorkbenchPartForeground());
-        else
-          cell.setForeground(null);
-      }
-    });
+    column = new TreeColumn(viewer.getTree(), SWT.RIGHT);
+    column.addSelectionListener(createValueSorterForTree(viewer));
+    column.setText("Usage");
+    column.setWidth(200);
   }
 
   @Override
   public IContributionItem[] createToolBarItems(IToolBarManager toolBar) {
-    IContributionItem expand = new ActionContributionItem(new ExpandAllAction(
-        getViewer()));
-    toolBar.add(expand);
+    List<? extends IContributionItem> items = Lists.newArrayList(
+        new ActionContributionItem(new ExpandAllAction(getViewer())),
+        new ActionContributionItem(new CollapseAllAction(getViewer())),
+        new Separator(), // 
+        new ActionContributionItem(new ViewByDatesAction(contents)));
 
-    IContributionItem collapse = new ActionContributionItem(
-        new CollapseAllAction(getViewer()));
-    toolBar.add(collapse);
+    for (IContributionItem item : items)
+      toolBar.add(item);
 
-    Separator sep = new Separator();
-    toolBar.add(sep);
-
-    IContributionItem viewByDates = new ActionContributionItem(
-        new ViewByDatesAction(contents));
-    toolBar.add(viewByDates);
-
-    return new IContributionItem[] { expand, collapse, sep, viewByDates };
+    return items.toArray(new IContributionItem[items.size()]);
   }
 
   @Override
@@ -111,10 +108,11 @@ public class PartPage extends AbstractTreeViewerPage {
     if (element instanceof IWorkbenchPartDescriptor)
       return contents.getValueOfPart((IWorkbenchPartDescriptor) element);
 
-    if (element instanceof PartDataDescriptor)
+    else if (element instanceof PartDataDescriptor)
       return ((PartDataDescriptor) element).getValue();
 
-    return 0;
+    else
+      return 0;
   }
 
   @Override
@@ -125,7 +123,7 @@ public class PartPage extends AbstractTreeViewerPage {
   @Override
   public void update(Preferences p) {
     setMaxValue(0);
-    nameLabels.updateState();
+    labels.updateState();
 
     Object[] elements = getViewer().getExpandedElements();
     ISelection selection = getViewer().getSelection();
@@ -163,7 +161,7 @@ public class PartPage extends AbstractTreeViewerPage {
       @Override
       protected int doCompare(Viewer v, Object x, Object y) {
         if (x instanceof LocalDate && y instanceof LocalDate) {
-          return x.toString().compareTo(y.toString());
+          return ((LocalDate) x).compareTo((LocalDate) y);
 
         } else if (x instanceof IWorkbenchPartDescriptor
             && y instanceof IWorkbenchPartDescriptor) {
@@ -180,5 +178,17 @@ public class PartPage extends AbstractTreeViewerPage {
         return 0;
       }
     };
+  }
+
+  @Override
+  protected ITableLabelProvider createLabelProvider() {
+    return labels;
+  }
+
+  @Override
+  protected void saveState() {
+    super.saveState();
+    RabbitUI.getDefault().getPreferenceStore().setValue(DISPLAY_BY_DATE_PREF,
+        contents.isDisplayingByDate());
   }
 }

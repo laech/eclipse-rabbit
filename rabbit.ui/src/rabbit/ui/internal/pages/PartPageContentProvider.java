@@ -24,9 +24,11 @@ import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimaps;
 
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.ui.IEditorDescriptor;
-import org.eclipse.ui.IFileEditorMapping;
+import org.eclipse.ui.IEditorRegistry;
 import org.eclipse.ui.IWorkbenchPartDescriptor;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.views.IViewDescriptor;
@@ -58,17 +60,27 @@ public class PartPageContentProvider extends
   @Nonnull
   private Function<PartDataDescriptor, LocalDate> categorizeByDateFunction;
 
-  public PartPageContentProvider(PartPage page, boolean displayByDate) {
+  /**
+   * Constructor.
+   * 
+   * @param page The parent page.
+   * @param displayByDate True the display by dates, false otherwise.
+   * @throws NullPointerException If page is null.
+   */
+  public PartPageContentProvider(@Nonnull PartPage page, boolean displayByDate) {
     super(page, displayByDate);
     resetData();
 
     // Loads all the editors and views:
     parts = Maps.newLinkedHashMap();
-    for (IFileEditorMapping mapping : PlatformUI.getWorkbench()
-        .getEditorRegistry().getFileEditorMappings()) {
-      for (IEditorDescriptor editor : mapping.getEditors())
+    IEditorRegistry registry = PlatformUI.getWorkbench().getEditorRegistry();
+    for (IConfigurationElement e : Platform.getExtensionRegistry()
+        .getConfigurationElementsFor("org.eclipse.ui.editors")) {
+      IEditorDescriptor editor = registry.findEditor(e.getAttribute("id"));
+      if (editor != null)
         parts.put(editor.getId(), editor);
     }
+
     for (IViewDescriptor des : PlatformUI.getWorkbench().getViewRegistry()
         .getViews()) {
       parts.put(des.getId(), des);
@@ -131,7 +143,7 @@ public class PartPageContentProvider extends
       sums.put(part, (value == null) ? des.getValue() : des.getValue() + value);
     }
     partSummaries = ImmutableMap.copyOf(sums);
-    
+
     updatePageMaxValue();
   }
 

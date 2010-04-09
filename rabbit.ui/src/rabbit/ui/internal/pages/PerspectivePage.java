@@ -21,86 +21,86 @@ import rabbit.data.handler.DataHandler2;
 import rabbit.ui.CellPainter;
 import rabbit.ui.Preferences;
 import rabbit.ui.TreeViewerSorter;
+import rabbit.ui.internal.RabbitUI;
 import rabbit.ui.internal.actions.CollapseAllAction;
 import rabbit.ui.internal.actions.ExpandAllAction;
 import rabbit.ui.internal.actions.ViewByDatesAction;
-import rabbit.ui.internal.util.UndefinedPerspectiveDescriptor;
+
+import com.google.common.collect.Lists;
 
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.viewers.CellLabelProvider;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.TreeViewer;
-import org.eclipse.jface.viewers.TreeViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.ui.IPerspectiveDescriptor;
 import org.joda.time.LocalDate;
+
+import java.util.List;
 
 /**
  * A page displays perspective usage.
  */
 public class PerspectivePage extends AbstractTreeViewerPage {
 
+  /**
+   * Preference constants for displaying the data by date.
+   */
+  private static final String DISPLAY_BY_DATE_PREF = "PerspectivePage.displayByDates";
+
   private final IAccessor2<PerspectiveDataDescriptor> accessor;
   private final PerspectivePageContentProvider contents;
-  private final PerspectivePageNameLabelProvider labels;
+  private final PerspectivePageLabelProvider labels;
 
+  /**
+   * Constructs a new page.
+   */
   public PerspectivePage() {
     super();
+    IPreferenceStore store = RabbitUI.getDefault().getPreferenceStore();
+    store.setDefault(DISPLAY_BY_DATE_PREF, true);
+
+    boolean displayByDate = store.getBoolean(DISPLAY_BY_DATE_PREF);
+    contents = new PerspectivePageContentProvider(this, displayByDate);
+    labels = new PerspectivePageLabelProvider(contents);
     accessor = DataHandler2.getPerspectiveDataAccessor();
-    contents = new PerspectivePageContentProvider(this, true);
-    labels = new PerspectivePageNameLabelProvider(contents);
   }
 
   @Override
   public void createColumns(TreeViewer viewer) {
-    TreeViewerColumn column = new TreeViewerColumn(viewer, SWT.LEFT);
-    column.setLabelProvider(new PerspectivePageNameLabelProvider(contents));
-    column.getColumn().setText("Name");
-    column.getColumn().setWidth(200);
-    column.getColumn().addSelectionListener(createInitialComparator(viewer));
+    TreeColumn column = new TreeColumn(viewer.getTree(), SWT.LEFT);
+    column.setText("Name");
+    column.setWidth(200);
+    column.addSelectionListener(createInitialComparator(viewer));
 
-    column = new TreeViewerColumn(viewer, SWT.RIGHT);
-    column.getColumn().setText("Usage");
-    column.getColumn().setWidth(200);
-    column.getColumn().addSelectionListener(createValueSorterForTree(viewer));
-    column.setLabelProvider(new ValueColumnLabelProvider(this) {
-      @Override
-      public void update(ViewerCell cell) {
-        super.update(cell);
-        if (cell.getElement() instanceof UndefinedPerspectiveDescriptor)
-          cell.setForeground(labels.getUndefinedPerspectiveForeground());
-        else
-          cell.setForeground(null);
-      }
-    });
+    column = new TreeColumn(viewer.getTree(), SWT.RIGHT);
+    column.setText("Usage");
+    column.setWidth(200);
+    column.addSelectionListener(createValueSorterForTree(viewer));
   }
 
   @Override
   public IContributionItem[] createToolBarItems(IToolBarManager toolBar) {
-    IContributionItem expand = new ActionContributionItem(new ExpandAllAction(
-        getViewer()));
-    toolBar.add(expand);
+    List<? extends IContributionItem> items = Lists.newArrayList(
+        new ActionContributionItem(new ExpandAllAction(getViewer())),
+        new ActionContributionItem(new CollapseAllAction(getViewer())),
+        new Separator(), // 
+        new ActionContributionItem(new ViewByDatesAction(contents)));
 
-    IContributionItem collapse = new ActionContributionItem(
-        new CollapseAllAction(getViewer()));
-    toolBar.add(collapse);
+    for (IContributionItem item : items)
+      toolBar.add(item);
 
-    Separator sep = new Separator();
-    toolBar.add(sep);
-
-    IContributionItem viewByDates = new ActionContributionItem(
-        new ViewByDatesAction(contents));
-    toolBar.add(viewByDates);
-
-    return new IContributionItem[] { expand, collapse, sep, viewByDates };
+    return items.toArray(new IContributionItem[items.size()]);
   }
 
   @Override
@@ -149,13 +149,18 @@ public class PerspectivePage extends AbstractTreeViewerPage {
   }
 
   @Override
+  protected ITreeContentProvider createContentProvider() {
+    return contents;
+  }
+
+  @Override
   protected TreeViewerSorter createInitialComparator(TreeViewer viewer) {
     return new TreeViewerSorter(viewer) {
 
       @Override
       protected int doCompare(Viewer v, Object e1, Object e2) {
         if (e1 instanceof LocalDate && e2 instanceof LocalDate)
-          return e1.toString().compareToIgnoreCase(e2.toString());
+          return ((LocalDate) e1).compareTo((LocalDate) e2);
 
         if (e1 instanceof IPerspectiveDescriptor
             && e2 instanceof IPerspectiveDescriptor) {
@@ -178,7 +183,14 @@ public class PerspectivePage extends AbstractTreeViewerPage {
   }
 
   @Override
-  protected ITreeContentProvider createContentProvider() {
-    return contents;
+  protected ITableLabelProvider createLabelProvider() {
+    return labels;
+  }
+
+  @Override
+  protected void saveState() {
+    super.saveState();
+    RabbitUI.getDefault().getPreferenceStore().setValue(DISPLAY_BY_DATE_PREF,
+        contents.isDisplayingByDate());
   }
 }

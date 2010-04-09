@@ -23,6 +23,7 @@ import org.eclipse.jface.viewers.CellLabelProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
@@ -49,6 +50,7 @@ public abstract class AbstractTreeViewerPage extends AbstractValueProviderPage {
   public void createContents(Composite parent) {
     viewer = new TreeViewer(parent, SWT.VIRTUAL | SWT.V_SCROLL | SWT.H_SCROLL);
     viewer.setContentProvider(createContentProvider());
+    viewer.setLabelProvider(createLabelProvider());
     viewer.setUseHashlookup(true);
     viewer.getTree().setHeaderVisible(true);
     viewer.getTree().addDisposeListener(new DisposeListener() {
@@ -57,7 +59,7 @@ public abstract class AbstractTreeViewerPage extends AbstractValueProviderPage {
         saveState();
       }
     });
-    
+
     // Expand tree node on double click:
     viewer.addDoubleClickListener(new IDoubleClickListener() {
       @Override
@@ -68,7 +70,7 @@ public abstract class AbstractTreeViewerPage extends AbstractValueProviderPage {
           viewer.setExpandedState(o, !viewer.getExpandedState(o));
       }
     });
-    
+
     // Hide selection when user clicks on none selectable area:
     viewer.getTree().addMouseListener(new MouseAdapter() {
       @Override
@@ -163,4 +165,11 @@ public abstract class AbstractTreeViewerPage extends AbstractValueProviderPage {
   private String getWidthPreferenceString(TreeColumn column) {
     return getClass().getSimpleName() + '.' + column.getText() + "Width";
   }
+
+  /**
+   * Creates a label provider for the viewer.
+   * 
+   * @return A label provider.
+   */
+  protected abstract ITableLabelProvider createLabelProvider();
 }

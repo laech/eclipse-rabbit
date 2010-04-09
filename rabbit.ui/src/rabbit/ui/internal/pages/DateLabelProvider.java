@@ -21,22 +21,29 @@ import org.eclipse.jface.viewers.BaseLabelProvider;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.swt.graphics.Image;
 import org.joda.time.LocalDate;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 
 import javax.annotation.Nullable;
+import javax.annotation.OverridingMethodsMustInvokeSuper;
 
 /**
  * Label provider for {@link LocalDate} elements.
  */
-public class LocalDateLabelProvider extends BaseLabelProvider implements
+public class DateLabelProvider extends BaseLabelProvider implements
     ILabelProvider {
 
   private final Image dateImage;
+  private final DateTimeFormatter formatter;
+  private LocalDate today;
 
   /**
    * Constructor.
    */
-  public LocalDateLabelProvider() {
+  public DateLabelProvider() {
+    formatter = DateTimeFormat.longDate();
     dateImage = SharedImages.CALENDAR.createImage();
+    today = new LocalDate();
   }
 
   @Override
@@ -49,15 +56,31 @@ public class LocalDateLabelProvider extends BaseLabelProvider implements
 
   @Override
   public String getText(@Nullable Object element) {
-    if (element instanceof LocalDate)
-      return element.toString();
-    else
-      return null;
+    if (element instanceof LocalDate) {
+      LocalDate date = (LocalDate) element;
+      if (date.isEqual(today))
+        return "Today";
+      else if (date.getYear() == today.getYear()
+          && date.getDayOfYear() == today.getDayOfYear() - 1)
+        return "Yesterday";
+      else
+        return formatter.print((LocalDate) element);
+    }
+    return null;
   }
 
   @Override
   public void dispose() {
     super.dispose();
     dateImage.dispose();
+  }
+
+  /**
+   * Updates the state of this label provider, this method should be called when
+   * the input of the viewer is changed.
+   */
+  @OverridingMethodsMustInvokeSuper
+  public void updateState() {
+    today = new LocalDate();
   }
 }

@@ -15,22 +15,23 @@
  */
 package rabbit.ui.tests.pages;
 
-import rabbit.ui.internal.pages.LocalDateLabelProvider;
+import rabbit.ui.internal.pages.DateLabelProvider;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 import org.joda.time.LocalDate;
+import org.joda.time.format.DateTimeFormat;
 import org.junit.AfterClass;
 import org.junit.Test;
 
 /**
- * @see LocalDateLabelProvider
+ * @see DateLabelProvider
  */
 @SuppressWarnings("restriction")
 public class LocalDateLabelProviderTest {
 
-  private static final LocalDateLabelProvider labels = new LocalDateLabelProvider();
+  private static final DateLabelProvider labels = new DateLabelProvider();
 
   @AfterClass
   public static void afterClass() {
@@ -40,7 +41,13 @@ public class LocalDateLabelProviderTest {
   @Test
   public void testGetText() {
     LocalDate date = new LocalDate();
-    assertEquals(date.toString(), labels.getText(date));
+    assertEquals("Today", labels.getText(date));
+    
+    date = date.minusDays(1);
+    assertEquals("Yesterday", labels.getText(date));
+    
+    date = date.minusDays(2);
+    assertEquals(DateTimeFormat.longDate().print(date), labels.getText(date));
   }
 
   @Test

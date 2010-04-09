@@ -15,84 +15,60 @@
  */
 package rabbit.ui.tests.pages;
 
-import rabbit.data.access.IAccessor;
-import rabbit.data.handler.DataHandler;
-import rabbit.ui.Preferences;
-import rabbit.ui.internal.pages.AbstractTableViewerPage;
+import rabbit.data.access.model.CommandDataDescriptor;
 import rabbit.ui.internal.pages.CommandPage;
+import rabbit.ui.internal.pages.CommandPageContentProvider;
 
 import static org.junit.Assert.assertEquals;
 
-import org.eclipse.core.commands.Command;
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.commands.ICommandService;
 import org.joda.time.LocalDate;
 import org.junit.Test;
 
-import java.lang.reflect.Field;
-import java.util.Calendar;
-import java.util.Map;
+import java.util.Arrays;
 
 /**
  * Test for {@link CommandPage}
  */
-public class CommandPageTest extends AbstractTableViewerPageTest {
+@SuppressWarnings("restriction")
+public class CommandPageTest extends AbstractTreeViewerPageTest {
 
-  private static ICommandService getCommandService() {
-    return (ICommandService) PlatformUI.getWorkbench().getService(
-        ICommandService.class);
-  }
-
-  @SuppressWarnings("unchecked")
   @Test
   public void testGetValue() throws Exception {
-    Field field = CommandPage.class.getDeclaredField("dataMapping");
-    field.setAccessible(true);
-    Map<Command, Long> data = (Map<Command, Long>) field.get(page);
+    CommandDataDescriptor des1;
+    CommandDataDescriptor des2;
+    des1 = new CommandDataDescriptor(new LocalDate(), 101, "123");
+    des2 = new CommandDataDescriptor(new LocalDate(), 9823, des1.getCommandId());
 
-    Command command = getCommandService().getDefinedCommands()[0];
-    long value = 1989;
-    data.put(command, value);
-    assertEquals(value, page.getValue(command));
+    assertEquals(des1.getValue(), page.getValue(des1));
+    assertEquals(des2.getValue(), page.getValue(des2));
 
-    Command noValueCommand = getCommandService().getCommand(
-        System.currentTimeMillis() + "");
-    assertEquals(0, page.getValue(noValueCommand));
+    page.getViewer().setInput(Arrays.asList(des1, des2));
+    CommandPageContentProvider cp;
+    cp = (CommandPageContentProvider) page.getViewer().getContentProvider();
+    assertEquals(des1.getValue() + des2.getValue(), page.getValue(cp
+        .getCommand(des1)));
   }
 
   @Test
   public void testUpdate() throws Exception {
-    long max = 0;
-    IAccessor<Map<String, Long>> accessor = DataHandler
-        .getCommandDataAccessor();
+    CommandPageContentProvider cp;
+    cp = (CommandPageContentProvider) page.getViewer().getContentProvider();
+    cp.setDisplayByDate(true);
 
-    Preferences pref = new Preferences();
-    Map<String, Long> data = accessor.getData(
-        new LocalDate(pref.getStartDate()), new LocalDate(pref.getEndDate()));
-    for (long value : data.values()) {
-      if (value > max) {
-        max = value;
-      }
-    }
-    page.update(pref);
-    assertEquals(max, page.getMaxValue());
+    CommandDataDescriptor des1;
+    CommandDataDescriptor des2;
+    des1 = new CommandDataDescriptor(new LocalDate(), 101, "123");
+    des2 = new CommandDataDescriptor(new LocalDate(), 9823, des1.getCommandId());
+    page.getViewer().setInput(Arrays.asList(des1, des2));
 
-    pref.getStartDate().add(Calendar.MONTH, -1);
-    pref.getEndDate().add(Calendar.DAY_OF_MONTH, -5);
-    data = accessor.getData(new LocalDate(pref.getStartDate()), new LocalDate(
-        pref.getEndDate()));
-    max = 0;
-    for (long value : data.values()) {
-      if (value > max) {
-        max = value;
-      }
-    }
-    page.update(pref);
-    assertEquals(max, page.getMaxValue());
+    assertEquals(des2.getValue(), page.getMaxValue());
+
+    cp.setDisplayByDate(false);
+    assertEquals(des1.getValue() + des2.getValue(), page.getMaxValue());
   }
 
   @Override
-  protected AbstractTableViewerPage createPage() {
+  protected CommandPage createPage() {
     return new CommandPage();
   }
 

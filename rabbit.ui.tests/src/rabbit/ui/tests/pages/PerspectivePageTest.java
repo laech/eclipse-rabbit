@@ -17,6 +17,7 @@ package rabbit.ui.tests.pages;
 
 import rabbit.data.access.model.PerspectiveDataDescriptor;
 import rabbit.ui.internal.pages.PerspectivePage;
+import rabbit.ui.internal.pages.PerspectivePageContentProvider;
 import rabbit.ui.internal.util.UndefinedPerspectiveDescriptor;
 
 import static org.junit.Assert.assertEquals;
@@ -44,6 +45,24 @@ public class PerspectivePageTest extends AbstractTreeViewerPageTest {
     assertEquals(des2.getValue(), page.getValue(des2));
     assertEquals(des1.getValue() + des2.getValue(), page
         .getValue(new UndefinedPerspectiveDescriptor(des1.getPerspectiveId())));
+  }
+
+  @Test
+  public void testUpdate() throws Exception {
+    PerspectivePageContentProvider cp;
+    cp = (PerspectivePageContentProvider) page.getViewer().getContentProvider();
+    cp.setDisplayByDate(true);
+
+    PerspectiveDataDescriptor des1;
+    PerspectiveDataDescriptor des2;
+    des1 = new PerspectiveDataDescriptor(new LocalDate(), 101, "123");
+    des2 = new PerspectiveDataDescriptor(new LocalDate(), 9823, des1.getPerspectiveId());
+    page.getViewer().setInput(Arrays.asList(des1, des2));
+
+    assertEquals(des2.getValue(), page.getMaxValue());
+
+    cp.setDisplayByDate(false);
+    assertEquals(des1.getValue() + des2.getValue(), page.getMaxValue());
   }
 
   @Override

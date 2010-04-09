@@ -15,95 +15,179 @@
  */
 package rabbit.ui.internal.pages;
 
-import rabbit.data.access.IAccessor;
-import rabbit.data.handler.DataHandler;
+import rabbit.data.access.IAccessor2;
+import rabbit.data.access.model.CommandDataDescriptor;
+import rabbit.data.handler.DataHandler2;
 import rabbit.ui.Preferences;
-import rabbit.ui.TableLabelComparator;
+import rabbit.ui.TreeLabelComparator;
+import rabbit.ui.TreeViewerSorter;
+import rabbit.ui.internal.RabbitUI;
+import rabbit.ui.internal.actions.CollapseAllAction;
+import rabbit.ui.internal.actions.ExpandAllAction;
+import rabbit.ui.internal.actions.ViewByDatesAction;
+
+import com.google.common.collect.Lists;
 
 import org.eclipse.core.commands.Command;
-import org.eclipse.jface.viewers.IContentProvider;
+import org.eclipse.core.commands.common.NotDefinedException;
+import org.eclipse.jface.action.ActionContributionItem;
+import org.eclipse.jface.action.IContributionItem;
+import org.eclipse.jface.action.IToolBarManager;
+import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ITableLabelProvider;
-import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.TableColumn;
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.commands.ICommandService;
+import org.eclipse.swt.widgets.TreeColumn;
 import org.joda.time.LocalDate;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
+import java.util.List;
 
 /**
  * A page for displaying command usage.
  */
-public class CommandPage extends AbstractTableViewerPage {
+public class CommandPage extends AbstractTreeViewerPage {
 
-  private IAccessor<Map<String, Long>> accessor;
-  private ICommandService service;
+  /**
+   * Preference constants for displaying the data by date.
+   */
+  private static final String DISPLAY_BY_DATE_PREF = "PartPage.displayByDates";
 
-  /** The data model, the values are usage counts of the commands. */
-  private Map<Command, Long> dataMapping;
+  private final IAccessor2<CommandDataDescriptor> accessor;
+  private final CommandPageContentProvider contents;
+  private final CommandPageLabelProvider labels;
 
   /**
    * Constructor.
    */
   public CommandPage() {
     super();
-    accessor = DataHandler.getCommandDataAccessor();
-    dataMapping = new HashMap<Command, Long>();
-    service = (ICommandService) PlatformUI.getWorkbench().getService(
-        ICommandService.class);
+    IPreferenceStore store = RabbitUI.getDefault().getPreferenceStore();
+    store.setDefault(DISPLAY_BY_DATE_PREF, true);
+
+    boolean displayByDate = store.getBoolean(DISPLAY_BY_DATE_PREF);
+    contents = new CommandPageContentProvider(this, displayByDate);
+    labels = new CommandPageLabelProvider(contents);
+    accessor = DataHandler2.getCommandDataAccessor();
   }
 
   @Override
-  public void createColumns(TableViewer viewer) {
-    TableLabelComparator textSorter = new TableLabelComparator(viewer);
-    TableLabelComparator valueSorter = createValueSorterForTable(viewer);
+  public void createColumns(TreeViewer viewer) {
+    TreeColumn column = new TreeColumn(viewer.getTree(), SWT.LEFT);
+    column.addSelectionListener(createInitialComparator(viewer));
+    column.setText("Name");
+    column.setWidth(150);
 
-    int[] widths = new int[] { 150, 200, 100 };
-    int[] styles = new int[] { SWT.LEFT, SWT.LEFT, SWT.RIGHT };
-    String[] names = new String[] { "Name", "Description", "Usage Count" };
-    for (int i = 0; i < names.length; i++) {
-      TableColumn column = new TableColumn(viewer.getTable(), styles[i]);
-      column.setText(names[i]);
-      column.setWidth(widths[i]);
-      column.addSelectionListener((names.length - 1 == i) ? valueSorter
-          : textSorter);
-    }
+    column = new TreeColumn(viewer.getTree(), SWT.LEFT);
+    column.addSelectionListener(new TreeLabelComparator(viewer));
+    column.setText("Description");
+    column.setWidth(200);
+
+    column = new TreeColumn(viewer.getTree(), SWT.RIGHT);
+    column.addSelectionListener(createValueSorterForTree(viewer));
+    column.setText("Usage Count");
+    column.setWidth(100);
+  }
+
+  @Override
+  public IContributionItem[] createToolBarItems(IToolBarManager toolBar) {
+    List<? extends IContributionItem> items = Lists.newArrayList(
+        new ActionContributionItem(new ExpandAllAction(getViewer())),
+        new ActionContributionItem(new CollapseAllAction(getViewer())),
+        new Separator(),// 
+        new ActionContributionItem(new ViewByDatesAction(contents)));
+
+    for (IContributionItem item : items)
+      toolBar.add(item);
+
+    return items.toArray(new IContributionItem[items.size()]);
   }
 
   @Override
   public long getValue(Object o) {
-    Long value = dataMapping.get(o);
-    return (value == null) ? 0 : value;
+    if (o instanceof Command)
+      return contents.getValueOfCommand((Command) o);
+
+    if (o instanceof CommandDataDescriptor)
+      return ((CommandDataDescriptor) o).getValue();
+
+    return 0;
   }
 
   @Override
   public void update(Preferences p) {
     setMaxValue(0);
-    dataMapping.clear();
+    labels.updateState();
+
+    Object[] elements = getViewer().getExpandedElements();
+    ISelection selection = getViewer().getSelection();
 
     LocalDate start = LocalDate.fromCalendarFields(p.getStartDate());
     LocalDate end = LocalDate.fromCalendarFields(p.getEndDate());
-    Map<String, Long> map = accessor.getData(start, end);
-    for (Entry<String, Long> item : map.entrySet()) {
-      dataMapping.put(service.getCommand(item.getKey()), item.getValue());
-
-      if (item.getValue() > getMaxValue()) {
-        setMaxValue(item.getValue());
-      }
+    getViewer().setInput(accessor.getData(start, end));
+    try {
+      getViewer().setExpandedElements(elements);
+      getViewer().setSelection(selection);
+    } catch (Exception e) {
+      // Just in case something goes wrong while restoring the viewer's state
     }
-    getViewer().setInput(dataMapping.keySet());
   }
 
   @Override
-  protected IContentProvider createContentProvider() {
-    return new CollectionContentProvider();
+  protected ITreeContentProvider createContentProvider() {
+    return contents;
+  }
+
+  @Override
+  protected TreeViewerSorter createInitialComparator(TreeViewer viewer) {
+    return new TreeViewerSorter(viewer) {
+
+      @Override
+      protected int doCompare(Viewer v, Object e1, Object e2) {
+        if (e1 instanceof LocalDate && e2 instanceof LocalDate)
+          return ((LocalDate) e1).compareTo((LocalDate) e2);
+
+        if (e1 instanceof Command && e2 instanceof Command)
+          return compareCommands((Command) e1, (Command) e2);
+
+        if (e1 instanceof CommandDataDescriptor
+            && e2 instanceof CommandDataDescriptor) {
+          Command cmd1 = contents.getCommand((CommandDataDescriptor) e1);
+          Command cmd2 = contents.getCommand((CommandDataDescriptor) e2);
+          return compareCommands(cmd1, cmd2);
+        }
+
+        return 0;
+      }
+
+      private int compareCommands(Command e1, Command e2) {
+        String a = ((Command) e1).getId();
+        String b = ((Command) e2).getId();
+        try {
+          a = ((Command) e1).getName();
+        } catch (NotDefinedException e) {
+        }
+        try {
+          b = ((Command) e2).getName();
+        } catch (NotDefinedException e) {
+        }
+        return a.compareToIgnoreCase(b);
+      }
+    };
   }
 
   @Override
   protected ITableLabelProvider createLabelProvider() {
-    return new CommandPageLabelProvider(this);
+    return labels;
+  }
+
+  @Override
+  protected void saveState() {
+    super.saveState();
+    RabbitUI.getDefault().getPreferenceStore().setValue(DISPLAY_BY_DATE_PREF,
+        contents.isDisplayingByDate());
   }
 }

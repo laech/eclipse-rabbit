@@ -25,12 +25,13 @@ import org.junit.runners.Suite;
 CollectionContentProviderTest.class, //
 
     // Command page related:
+    CommandPageContentProviderTest.class, //
     CommandPageLabelProviderTest.class, //
     CommandPageTest.class, //
 
     // Part page related:
-    PartPageNameLabelProviderTest.class, //
     PartPageContentProviderTest.class, //
+    PartPageLabelProviderTest.class, //
     PartPageTest.class, //
 
     // Perspective page related:
@@ -56,8 +57,6 @@ CollectionContentProviderTest.class, //
     //
     WorkbenchPartLabelProviderTest.class, //
     LocalDateLabelProviderTest.class, //
-    DateStyledCellLabelProviderTest.class, //
-    ValueColumnLabelProviderTest.class, //
 })
 public class AllTests {
 
