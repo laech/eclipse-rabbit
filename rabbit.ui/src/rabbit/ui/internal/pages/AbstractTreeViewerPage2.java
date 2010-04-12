@@ -16,10 +16,11 @@
 package rabbit.ui.internal.pages;
 
 import rabbit.ui.CellPainter;
+import rabbit.ui.IPage;
+import rabbit.ui.TreeViewerSorter;
 import rabbit.ui.internal.RabbitUI;
 
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.viewers.CellLabelProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -28,6 +29,7 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.TreeViewerColumn;
+import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
@@ -38,12 +40,13 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.TreeColumn;
 
-public abstract class AbstractTreeViewerPage extends AbstractValueProviderPage {
+public abstract class AbstractTreeViewerPage2 implements IPage {
 
   private TreeViewer viewer;
   private TreeViewerColumn graphCol;
+  private TreeViewerSorter valueSorter;
 
-  public AbstractTreeViewerPage() {
+  public AbstractTreeViewerPage2() {
   }
 
   @Override
@@ -80,14 +83,28 @@ public abstract class AbstractTreeViewerPage extends AbstractValueProviderPage {
           viewer.setSelection(StructuredSelection.EMPTY);
       }
     });
+    
+    final CellPainter painter = createCellPainter();
+    valueSorter = new TreeViewerSorter(viewer) {
+
+      @Override
+      protected int doCompare(Viewer v, Object e1, Object e2) {
+        long value1 = painter.getValueProvider().getValue(e1);
+        long value2 = painter.getValueProvider().getValue(e2);
+        if (value1 == value2)
+          return 0;
+        else
+          return (value1 > value2) ? 1 : -1;
+      }
+    };
 
     createColumns(viewer);
 
     // Special column for painting:
     graphCol = new TreeViewerColumn(viewer, SWT.LEFT);
-    graphCol.setLabelProvider(createCellPainter());
+    graphCol.setLabelProvider(painter);
     graphCol.getColumn().setWidth(100);
-    graphCol.getColumn().addSelectionListener(createValueSorterForTree(viewer));
+    graphCol.getColumn().addSelectionListener(valueSorter);
 
     for (TreeColumn column : viewer.getTree().getColumns()) {
       column.setMoveable(true);
@@ -96,23 +113,26 @@ public abstract class AbstractTreeViewerPage extends AbstractValueProviderPage {
     viewer.setComparator(createInitialComparator(viewer));
     restoreState();
   }
-
-  public TreeViewer getViewer() {
-    return viewer;
-  }
-
-  @Override
-  public boolean shouldPaint(Object element) {
-    return true;
+  
+  // TODO
+  protected TreeViewerSorter getValueSorter() {
+    return valueSorter;
   }
 
   /**
-   * Creates a cell painter for painting the graph cells.
+   * Creates the cell painting for painting the graph column.
    * 
    * @return A cell painter.
    */
-  protected CellLabelProvider createCellPainter() {
-    return new CellPainter(this);
+  protected abstract CellPainter createCellPainter();
+
+  /**
+   * Gets the viewer.
+   * 
+   * @return The viewer.
+   */
+  public TreeViewer getViewer() {
+    return viewer;
   }
 
   /**

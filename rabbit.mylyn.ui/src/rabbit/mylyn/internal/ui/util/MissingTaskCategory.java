@@ -29,11 +29,12 @@ public class MissingTaskCategory implements ITaskContainer, IRepositoryElement {
   private final Set<ITask> children = new HashSet<ITask>();
   private static final MissingTaskCategory INSTANCE = new MissingTaskCategory();
 
+  // TODO remove;
   public static MissingTaskCategory getCategory() {
     return INSTANCE;
   }
 
-  private MissingTaskCategory() {
+  public MissingTaskCategory() {
   }
 
   @Override

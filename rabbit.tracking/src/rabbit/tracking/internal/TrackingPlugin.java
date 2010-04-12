@@ -18,6 +18,9 @@ package rabbit.tracking.internal;
 import rabbit.data.handler.DataHandler;
 import rabbit.tracking.ITracker;
 
+import com.google.common.collect.ImmutableCollection;
+import com.google.common.collect.ImmutableSet;
+
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.ISafeRunnable;
 import org.eclipse.core.runtime.IStatus;
@@ -29,9 +32,6 @@ import org.eclipse.ui.IWorkbenchListener;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -61,7 +61,7 @@ public class TrackingPlugin extends AbstractUIPlugin implements
   private IdleDetector idleDetector;
 
   /** An set of trackers. */
-  private Set<ITracker<?>> trackers;
+  private ImmutableSet<ITracker<?>> trackers;
 
   /**
    * The constructor
@@ -70,7 +70,7 @@ public class TrackingPlugin extends AbstractUIPlugin implements
     long oneSec = TimeUnit.SECONDS.toMillis(1);
     long oneMin = TimeUnit.MINUTES.toMillis(1);
     idleDetector = new IdleDetector(getWorkbench().getDisplay(), oneMin, oneSec);
-    trackers = new HashSet<ITracker<?>>();
+    trackers = ImmutableSet.of();
   }
 
   /**
@@ -116,12 +116,11 @@ public class TrackingPlugin extends AbstractUIPlugin implements
     super.start(context);
     plugin = this;
 
-    if (trackers != null) {
+    if (trackers != null)
       setEnableTrackers(trackers, false);
-    }
 
     getWorkbench().addWorkbenchListener(this);
-    trackers = new HashSet<ITracker<?>>(createTrackers());
+    trackers = createTrackers();
     setEnableTrackers(trackers, true);
 
     idleDetector.setRunning(true);
@@ -142,12 +141,12 @@ public class TrackingPlugin extends AbstractUIPlugin implements
    * 
    * @return A list of tracker objects.
    */
-  private Set<ITracker<?>> createTrackers() {
+  private ImmutableSet<ITracker<?>> createTrackers() {
 
     IConfigurationElement[] elements = Platform.getExtensionRegistry()
         .getConfigurationElementsFor(TRACKER_EXTENSION_ID);
 
-    final Set<ITracker<?>> result = new HashSet<ITracker<?>>();
+    final ImmutableSet.Builder<ITracker<?>> builder = ImmutableSet.builder();
     for (final IConfigurationElement e : elements) {
 
       SafeRunner.run(new ISafeRunnable() {
@@ -161,7 +160,7 @@ public class TrackingPlugin extends AbstractUIPlugin implements
         public void run() throws Exception {
           Object o = e.createExecutableExtension("class");
           if (o instanceof ITracker<?>) {
-            result.add((ITracker<?>) o);
+            builder.add((ITracker<?>) o);
           } else {
             System.err.println("Object is not a tracker: " + o);
           }
@@ -169,7 +168,7 @@ public class TrackingPlugin extends AbstractUIPlugin implements
 
       });
     }
-    return result;
+    return builder.build();
   }
 
   /**
@@ -178,7 +177,7 @@ public class TrackingPlugin extends AbstractUIPlugin implements
    * @param trackers The trackers to perform actions on.
    * @param enable True to enable, false to disable.
    */
-  private void setEnableTrackers(Collection<ITracker<?>> trackers,
+  private void setEnableTrackers(ImmutableCollection<ITracker<?>> trackers,
       boolean enable) {
     for (ITracker<?> tracker : trackers) {
       tracker.setEnabled(enable);

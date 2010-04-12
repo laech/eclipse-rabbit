@@ -15,59 +15,61 @@
  */
 package rabbit.ui.internal.pages;
 
-import rabbit.data.access.IAccessor;
-import rabbit.data.handler.DataHandler;
+import rabbit.data.access.IAccessor2;
+import rabbit.data.access.model.SessionDataDescriptor;
+import rabbit.data.handler.DataHandler2;
 import rabbit.ui.CellPainter;
 import rabbit.ui.Preferences;
-import rabbit.ui.TableLabelComparator;
+import rabbit.ui.TableViewerSorter;
 
 import org.eclipse.jface.viewers.CellLabelProvider;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.TableColumn;
 import org.joda.time.LocalDate;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.Collection;
 
 /**
  * A page displaying how much time is spent on using Eclipse every day.
  */
 public class SessionPage extends AbstractTableViewerPage {
 
-  private IAccessor<Map<String, Long>> dataStore;
-  private Map<String, Long> model;
+  private final IAccessor2<SessionDataDescriptor> accessor;
+  private final SessionPageLabelProvider labels;
 
   /** Constructs a new page. */
   public SessionPage() {
-    dataStore = DataHandler.getSessionDataAccessor();
-    model = new LinkedHashMap<String, Long>();
+    accessor = DataHandler2.getSessionDataAccessor();
+    labels = new SessionPageLabelProvider();
   }
 
   @Override
   public long getValue(Object o) {
-    Long value = model.get(o);
-    return (value == null) ? 0 : value;
+    if (o instanceof SessionDataDescriptor)
+      return ((SessionDataDescriptor) o).getValue();
+    else
+      return 0;
   }
 
   @Override
   public void update(Preferences p) {
     setMaxValue(0);
-    model.clear();
-    
+    labels.updateState();
+
     LocalDate start = LocalDate.fromCalendarFields(p.getStartDate());
     LocalDate end = LocalDate.fromCalendarFields(p.getEndDate());
-    model = dataStore.getData(start, end);
-    for (long value : model.values()) {
-      if (value > getMaxValue()) {
-        setMaxValue(value);
-      }
+    Collection<SessionDataDescriptor> data = accessor.getData(start, end);
+    for (SessionDataDescriptor des : data) {
+      if (des.getValue() > getMaxValue())
+        setMaxValue(des.getValue());
     }
-    getViewer().setInput(model.keySet());
+    getViewer().setInput(data);
   }
 
   @Override
@@ -82,21 +84,32 @@ public class SessionPage extends AbstractTableViewerPage {
 
   @Override
   protected void createColumns(TableViewer viewer) {
-    TableLabelComparator valueSorter = createValueSorterForTable(viewer);
-    TableLabelComparator textSorter = new TableLabelComparator(viewer);
-
-    int[] widths = new int[] { 200, 150 };
-    int[] styles = new int[] { SWT.LEFT, SWT.RIGHT };
-    String[] names = new String[] { "Date", "Duration" };
-    for (int i = 0; i < names.length; i++) {
-      TableColumn column = new TableColumn(viewer.getTable(), styles[i]);
-      column.setText(names[i]);
-      column.setWidth(widths[i]);
-      column.addSelectionListener((names.length - 1 == i) ? valueSorter
-          : textSorter);
-    }
+    TableViewerSorter sorter = new TableViewerSorter(viewer) {
+      @Override
+      protected int doCompare(Viewer v, Object e1, Object e2) {
+        if (e1 instanceof SessionDataDescriptor
+            && e2 instanceof SessionDataDescriptor) {
+          SessionDataDescriptor des1 = (SessionDataDescriptor) e1;
+          SessionDataDescriptor des2 = (SessionDataDescriptor) e2;
+          return des1.getDate().compareTo(des2.getDate());
+        }
+        return 0;
+      }
+    };
+    
+    TableColumn column = new TableColumn(viewer.getTable(), SWT.LEFT);
+    column.setText("Date");
+    column.setWidth(200);
+    column.addSelectionListener(sorter);
+    
+    column = new TableColumn(viewer.getTable(), SWT.RIGHT);
+    column.setText("Duration");
+    column.setWidth(150);
+    column.addSelectionListener(createValueSorterForTable(viewer));
+    
+    getViewer().setComparator(sorter);
   }
-
+  
   @Override
   protected ITreeContentProvider createContentProvider() {
     return new CollectionContentProvider();
@@ -104,6 +117,6 @@ public class SessionPage extends AbstractTableViewerPage {
 
   @Override
   protected ITableLabelProvider createLabelProvider() {
-    return new SessionPageLabelProvider(this);
+    return new SessionPageLabelProvider();
   }
 }

@@ -18,6 +18,10 @@ package rabbit.ui.internal;
 import rabbit.ui.IPage;
 import rabbit.ui.internal.util.PageDescriptor;
 
+import com.google.common.collect.ImmutableCollection;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
+
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.ISafeRunnable;
 import org.eclipse.core.runtime.Platform;
@@ -29,8 +33,6 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -57,8 +59,6 @@ public class RabbitUI extends AbstractUIPlugin {
     return plugin;
   }
 
-  private Set<PageDescriptor> rootElements = new HashSet<PageDescriptor>();
-
   /**
    * The constructor
    */
@@ -75,15 +75,6 @@ public class RabbitUI extends AbstractUIPlugin {
   }
 
   /**
-   * Gets the root pages.
-   * 
-   * @return The root pages.
-   */
-  public Set<PageDescriptor> getRootElements() {
-    return Collections.unmodifiableSet(rootElements);
-  }
-
-  /**
    * Sets the default number of days to display the data in the main view.
    * 
    * @param numDays The number of days.
@@ -97,7 +88,6 @@ public class RabbitUI extends AbstractUIPlugin {
   public void start(BundleContext context) throws Exception {
     super.start(context);
     plugin = this;
-    readExtensions();
   }
 
   @Override
@@ -105,10 +95,14 @@ public class RabbitUI extends AbstractUIPlugin {
     plugin = null;
     super.stop(context);
   }
-
-  private void readExtensions() {
-    rootElements.clear();
-    final Set<PageDescriptor> pages = new HashSet<PageDescriptor>();
+  
+  /**
+   * Loads the root pages.
+   * 
+   * @return The root pages.
+   */
+  public ImmutableCollection<PageDescriptor> loadRootPages() {
+    final Set<PageDescriptor> pages = Sets.newLinkedHashSet();
     for (final IConfigurationElement e : Platform.getExtensionRegistry()
         .getConfigurationElementsFor(UI_PAGE_EXTENSION_ID)) {
 
@@ -150,9 +144,10 @@ public class RabbitUI extends AbstractUIPlugin {
 
     // Run through all the elements and
     // restructure them:
+    ImmutableSet.Builder<PageDescriptor> builder = ImmutableSet.builder();
     for (PageDescriptor child : pages) {
       if (child.parentId == null) {
-        rootElements.add(child);
+        builder.add(child);
         continue;
       }
       boolean added = false;
@@ -164,8 +159,9 @@ public class RabbitUI extends AbstractUIPlugin {
         }
       }
       if (!added) {
-        rootElements.add(child);
+        builder.add(child);
       }
     }
+    return builder.build();
   }
 }

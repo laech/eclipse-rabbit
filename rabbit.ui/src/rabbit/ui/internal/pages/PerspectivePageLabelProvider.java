@@ -37,8 +37,8 @@ import javax.annotation.OverridingMethodsMustInvokeSuper;
 /**
  * Label provider for a {@link PerspectivePage}.
  */
-public class PerspectivePageLabelProvider extends BaseLabelProvider
-    implements ITableLabelProvider, IColorProvider {
+public class PerspectivePageLabelProvider extends BaseLabelProvider implements
+    ITableLabelProvider, IColorProvider {
 
   private final Color gray;
   private final DateLabelProvider dateLabels;
@@ -120,8 +120,15 @@ public class PerspectivePageLabelProvider extends BaseLabelProvider
   public Color getForeground(Object element) {
     if (element instanceof UndefinedPerspectiveDescriptor)
       return gray;
-    else
-      return null;
+
+    else if (element instanceof PerspectiveDataDescriptor) {
+      IPerspectiveDescriptor p = contentProvider
+          .getPerspective((PerspectiveDataDescriptor) element);
+      if (p instanceof UndefinedPerspectiveDescriptor)
+        return gray;
+    }
+
+    return null;
   }
 
   /**

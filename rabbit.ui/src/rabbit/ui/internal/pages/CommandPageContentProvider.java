@@ -143,11 +143,11 @@ public class CommandPageContentProvider extends
     }
     commandSummaries = ImmutableMap.copyOf(sums);
 
-    updatePageMaxValue();
+    updateMaxValue();
   }
 
   @Override
-  protected void updatePageMaxValue() {
+  protected void updateMaxValue() {
     long max = 0;
     if (isDisplayingByDate()) {
       for (CommandDataDescriptor des : dateToCommands.values()) {

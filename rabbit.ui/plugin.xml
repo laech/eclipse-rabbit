@@ -17,6 +17,13 @@
             id="rabbit.ui.view"
             name="Rabbit">
       </category>
+      <view
+            category="rabbit.ui.view"
+            class="rabbit.ui.internal.CopyOfRabbitView"
+            id="CopyOfRabbitView"
+            name="CopyOfRabbitView"
+            restorable="true">
+      </view>
    </extension>
    <extension
          point="rabbit.ui.pages">
@@ -81,6 +88,11 @@
             id="rabbit.ui.pages.launch"
             name="Launches"
             parent="rabbit.ui.pages.projectRelated">
+      </page>
+      <page
+            class="rabbit.ui.internal.pages.Z"
+            id="rabbit.ui.page1"
+            name="Z">
       </page>
    </extension>
    <extension

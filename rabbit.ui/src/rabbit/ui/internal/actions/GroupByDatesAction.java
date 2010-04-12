@@ -29,7 +29,7 @@ import org.eclipse.jface.action.IAction;
  * @see AbstractDateCategoryContentProvider#isDisplayingByDate()
  * @see AbstractDateCategoryContentProvider#setDisplayByDate(boolean)
  */
-public class ViewByDatesAction extends Action {
+public class GroupByDatesAction extends Action {
 
   private AbstractDateCategoryContentProvider provider;
 
@@ -38,8 +38,8 @@ public class ViewByDatesAction extends Action {
    * 
    * @param provider The target to perform action on.
    */
-  public ViewByDatesAction(AbstractDateCategoryContentProvider provider) {
-    super("View by Dates", IAction.AS_CHECK_BOX);
+  public GroupByDatesAction(AbstractDateCategoryContentProvider provider) {
+    super("Group by Dates", IAction.AS_CHECK_BOX);
     checkNotNull(provider);
     this.provider = provider;
 

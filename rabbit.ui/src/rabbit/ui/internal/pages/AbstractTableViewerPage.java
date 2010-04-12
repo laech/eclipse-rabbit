@@ -16,7 +16,6 @@
 package rabbit.ui.internal.pages;
 
 import rabbit.ui.CellPainter;
-import rabbit.ui.TableLabelComparator;
 import rabbit.ui.internal.RabbitUI;
 
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -80,13 +79,7 @@ public abstract class AbstractTableViewerPage extends AbstractValueProviderPage 
       column.setMoveable(true);
       column.setResizable(true);
     }
-    viewer.setComparator(new TableLabelComparator(viewer));
     restoreState();
-  }
-
-  @Override
-  public int getColumnWidth() {
-    return graphCol.getColumn().getWidth();
   }
 
   public TableViewer getViewer() {

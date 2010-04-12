@@ -16,13 +16,13 @@
 package rabbit.data.handler;
 
 import rabbit.data.IFileStore;
-import rabbit.data.access.IAccessor;
 import rabbit.data.access.IAccessor2;
 import rabbit.data.access.model.CommandDataDescriptor;
 import rabbit.data.access.model.FileDataDescriptor;
 import rabbit.data.access.model.LaunchDataDescriptor;
 import rabbit.data.access.model.PartDataDescriptor;
 import rabbit.data.access.model.PerspectiveDataDescriptor;
+import rabbit.data.access.model.SessionDataDescriptor;
 import rabbit.data.store.IStorer;
 import rabbit.data.store.model.CommandEvent;
 import rabbit.data.store.model.FileEvent;
@@ -34,9 +34,8 @@ import rabbit.data.xml.access.CommandDataAccessor2;
 import rabbit.data.xml.access.FileDataAccessor2;
 import rabbit.data.xml.access.LaunchDataAccessor2;
 import rabbit.data.xml.access.PartDataAccessor2;
-import rabbit.data.xml.access.PerspectiveDataAccessor;
 import rabbit.data.xml.access.PerspectiveDataAccessor2;
-import rabbit.data.xml.access.SessionDataAccessor;
+import rabbit.data.xml.access.SessionDataAccessor2;
 import rabbit.data.xml.store.CommandEventStorer;
 import rabbit.data.xml.store.FileEventStorer;
 import rabbit.data.xml.store.LaunchEventStorer;
@@ -58,7 +57,7 @@ public class DataHandler2 {
   private static final IAccessor2<LaunchDataDescriptor> launchDataAccessor;
   private static final PerspectiveDataAccessor2 perspectiveDataAccessor;
   private static final IAccessor2<CommandDataDescriptor> commandDataAccessor;
-  private static final IAccessor<Map<String, Long>> sessionDataAccessor;
+  private static final IAccessor2<SessionDataDescriptor> sessionDataAccessor;
   private static final IAccessor2<PartDataDescriptor> partDataAccessor;
   private static final IAccessor2<FileDataDescriptor> fileDataAccessor;
 
@@ -73,7 +72,7 @@ public class DataHandler2 {
 
     perspectiveDataAccessor = new PerspectiveDataAccessor2();
     commandDataAccessor = new CommandDataAccessor2();
-    sessionDataAccessor = new SessionDataAccessor();
+    sessionDataAccessor = new SessionDataAccessor2();
     launchDataAccessor = new LaunchDataAccessor2();
     partDataAccessor = new PartDataAccessor2();
     fileDataAccessor = new FileDataAccessor2();
@@ -138,7 +137,7 @@ public class DataHandler2 {
    * 
    * @return An IAccessor for accessing the session event data.
    */
-  public static IAccessor<Map<String, Long>> getSessionDataAccessor() {
+  public static IAccessor2<SessionDataDescriptor> getSessionDataAccessor() {
     return sessionDataAccessor;
   }
 

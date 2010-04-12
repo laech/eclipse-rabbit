@@ -23,7 +23,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Represents a page extension descriptor.
+ * Represents a page extension descriptor. TODO clean up
  */
 public class PageDescriptor {
 

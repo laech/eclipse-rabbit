@@ -41,16 +41,16 @@ import java.util.Collection;
 /**
  * A panel containing a collection of available metrics.
  */
-public class MetricsPanel {
+public class CopyOfMetricsPanel {
 
-  private RabbitView view;
+  private CopyOfRabbitView view;
 
   /**
    * Constructor.
    * 
    * @param v The parent view.
    */
-  public MetricsPanel(RabbitView v) {
+  public CopyOfMetricsPanel(CopyOfRabbitView v) {
     view = v;
   }
 

@@ -66,7 +66,7 @@ public abstract class AbstractDateCategoryContentProvider extends
       return;
 
     this.displayByDate = displayByDate;
-    updatePageMaxValue();
+    updateMaxValue();
 
     page.getViewer().getTree().setRedraw(false);
     page.getViewer().refresh(true);
@@ -74,7 +74,7 @@ public abstract class AbstractDateCategoryContentProvider extends
   }
 
   /**
-   * Updates the max value of the page for painting the cells.
+   * Updates the max value for painting the cells.
    */
-  protected abstract void updatePageMaxValue();
+  protected abstract void updateMaxValue();
 }

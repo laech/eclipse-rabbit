@@ -42,7 +42,7 @@ import java.util.Arrays;
  * @see PerspectivePageLabelProvider
  */
 @SuppressWarnings("restriction")
-public class PerspectivePageNameLabelProviderTest {
+public class PerspectivePageLabelProviderTest {
 
   private static final Shell shell;
   private static final PerspectivePage page;
@@ -127,5 +127,14 @@ public class PerspectivePageNameLabelProviderTest {
     assertNull(labels.getForeground(defined));
     assertEquals(Display.getDefault().getSystemColor(SWT.COLOR_DARK_GRAY),
         labels.getForeground(undefined));
+
+    PerspectiveDataDescriptor d1;
+    PerspectiveDataDescriptor d2;
+    d1 = new PerspectiveDataDescriptor(new LocalDate(), 1, defined.getId());
+    d2 = new PerspectiveDataDescriptor(new LocalDate(), 1, undefined.getId());
+    
+    page.getViewer().setInput(Arrays.asList(d1, d2));
+    assertNull(labels.getForeground(d1));
+    assertNotNull(labels.getForeground(d2));
   }
 }

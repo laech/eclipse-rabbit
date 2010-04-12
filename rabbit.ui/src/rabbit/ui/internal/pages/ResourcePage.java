@@ -15,19 +15,17 @@
  */
 package rabbit.ui.internal.pages;
 
-import rabbit.data.IFileStore;
-import rabbit.data.access.IAccessor;
-import rabbit.data.handler.DataHandler;
+import rabbit.data.access.IAccessor2;
+import rabbit.data.access.model.FileDataDescriptor;
+import rabbit.data.handler.DataHandler2;
 import rabbit.ui.CellPainter;
 import rabbit.ui.Preferences;
-import rabbit.ui.TreeLabelComparator;
-import rabbit.ui.internal.SharedImages;
+import rabbit.ui.TreeViewerSorter;
+import rabbit.ui.internal.actions.CollapseAllAction;
+import rabbit.ui.internal.actions.ExpandAllAction;
 
 import org.eclipse.core.resources.IContainer;
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IAction;
@@ -35,9 +33,9 @@ import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.viewers.CellLabelProvider;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.viewers.TreeNode;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
@@ -51,15 +49,10 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.ide.IDE;
 import org.joda.time.LocalDate;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
 /**
- * A page for displaying time spent working on different files.
+ * TODO test A page for displaying time spent working on different files.
  */
-public class ResourcePage extends AbstractTreeViewerPage {
+public class ResourcePage extends AbstractTreeViewerPage2 {
 
   public static enum ShowMode {
     FILE, FOLDER, PROJECT
@@ -67,77 +60,34 @@ public class ResourcePage extends AbstractTreeViewerPage {
 
   private ShowMode mode = ShowMode.FILE;
 
-  private IAccessor<Map<String, Long>> accessor;
-  private IFileStore resourceMapper;
-  private Map<IProject, Set<IResource>> projectResources;
-  private Map<IFolder, Set<IFile>> folderFiles;
-  private Map<IFile, Long> fileValues;
-
-  private IAction collapseAllAction = new Action("Collapse All") {
-    @Override
-    public void run() {
-      getViewer().collapseAll();
-    }
-  };
-
-  private IAction expandAllAction = new Action("Expand All") {
-    @Override
-    public void run() {
-      getViewer().expandAll();
-    }
-  };
-
-  private IAction showFilesAction = new Action("Show Files",
-      IAction.AS_CHECK_BOX) {
-    @Override
-    public void run() {
-      showFoldersAction.setChecked(false);
-      showProjectsAction.setChecked(false);
-      setShowMode(ShowMode.FILE);
-    }
-  };
-
-  private IAction showFoldersAction = new Action("Show Folders",
-      IAction.AS_CHECK_BOX) {
-    @Override
-    public void run() {
-      showFilesAction.setChecked(false);
-      showProjectsAction.setChecked(false);
-      setShowMode(ShowMode.FOLDER);
-    }
-  };
-
-  private IAction showProjectsAction = new Action("Show Projects",
-      IAction.AS_CHECK_BOX) {
-    @Override
-    public void run() {
-      showFoldersAction.setChecked(false);
-      showFilesAction.setChecked(false);
-      setShowMode(ShowMode.PROJECT);
-    }
-  };
+  private IAccessor2<FileDataDescriptor> accessor;
+  private ResourcePageContentProvider contents;
+  private ResourcePageTableLabelProvider labels;
 
   public ResourcePage() {
     super();
-    accessor = DataHandler.getFileDataAccessor();
-    resourceMapper = DataHandler.getFileMapper();
-
-    projectResources = new HashMap<IProject, Set<IResource>>();
-    folderFiles = new HashMap<IFolder, Set<IFile>>();
-    fileValues = new HashMap<IFile, Long>();
+    contents = new ResourcePageContentProvider(this);
+    labels = new ResourcePageTableLabelProvider(contents);
+    accessor = DataHandler2.getFileDataAccessor();
   }
 
   @Override
   public void createContents(Composite parent) {
     super.createContents(parent);
     getViewer().addFilter(new ViewerFilter() {
+
       @Override
       public boolean select(Viewer viewer, Object parentElement, Object element) {
+        TreeNode node = (TreeNode) element;
+        if (node.getValue() instanceof LocalDate) {
+          return true;
+        }
+
         switch (getShowMode()) {
         case PROJECT:
-          return element instanceof IProject;
+          return node.getValue() instanceof IProject;
         case FOLDER:
-          return element instanceof IContainer;
+          return node.getValue() instanceof IContainer;
         default:
           return true;
         }
@@ -147,177 +97,82 @@ public class ResourcePage extends AbstractTreeViewerPage {
 
   @Override
   public IContributionItem[] createToolBarItems(IToolBarManager toolBar) {
-    expandAllAction.setImageDescriptor(SharedImages.EXPAND_ALL);
-    IContributionItem expandAll = new ActionContributionItem(expandAllAction);
-    toolBar.add(expandAll);
-
     ISharedImages images = PlatformUI.getWorkbench().getSharedImages();
-    ImageDescriptor img = images
-        .getImageDescriptor(ISharedImages.IMG_ELCL_COLLAPSEALL);
-    collapseAllAction.setImageDescriptor(img);
-    IContributionItem collapseAll = new ActionContributionItem(
-        collapseAllAction);
-    toolBar.add(collapseAll);
+    ImageDescriptor image;
 
-    Separator sep = new Separator();
-    toolBar.add(sep);
-
-    img = images.getImageDescriptor(IDE.SharedImages.IMG_OBJ_PROJECT);
-    showProjectsAction.setImageDescriptor(img);
-    showProjectsAction.setChecked(getShowMode() == ShowMode.PROJECT);
-    IContributionItem showProjects = new ActionContributionItem(
-        showProjectsAction);
-    toolBar.add(showProjects);
-
-    img = images.getImageDescriptor(ISharedImages.IMG_OBJ_FOLDER);
-    showFoldersAction.setImageDescriptor(img);
-    showFoldersAction.setChecked(getShowMode() == ShowMode.FOLDER);
-    IContributionItem showFolders = new ActionContributionItem(
-        showFoldersAction);
-    toolBar.add(showFolders);
-
-    img = images.getImageDescriptor(ISharedImages.IMG_OBJ_FILE);
-    showFilesAction.setImageDescriptor(img);
-    showFilesAction.setChecked(getShowMode() == ShowMode.FILE);
-    IContributionItem showFiles = new ActionContributionItem(showFilesAction);
-    toolBar.add(showFiles);
-
-    return new IContributionItem[] { expandAll, collapseAll, sep, showProjects,
-        showFolders, showFiles };
-  }
-
-  public IFile[] getFiles(IFolder folder) {
-    Set<IFile> files = folderFiles.get(folder);
-    if (files != null) {
-      return files.toArray(new IFile[files.size()]);
-    }
-    return new IFile[0];
-  }
-
-  public long getMaxFileValue() {
-    long max = 0;
-    for (long value : fileValues.values()) {
-      if (value > max) {
-        max = value;
+    // Action to show projects:
+    IAction projAction = new Action("Show Projects", IAction.AS_RADIO_BUTTON) {
+      @Override
+      public void run() {
+        setShowMode(ShowMode.PROJECT);
       }
-    }
-    return max;
-  }
+    };
+    image = images.getImageDescriptor(IDE.SharedImages.IMG_OBJ_PROJECT);
+    projAction.setImageDescriptor(image);
 
-  public long getMaxFolderValue() {
-    long max = 0;
-    for (IFolder folder : folderFiles.keySet()) {
-      long value = getValueOfFolder(folder);
-      if (value > max) {
-        max = value;
+    // Action to show folders:
+    IAction folderAction = new Action("Show Folders", IAction.AS_RADIO_BUTTON) {
+      @Override
+      public void run() {
+        setShowMode(ShowMode.FOLDER);
       }
-    }
-    return max;
-  }
+    };
+    image = images.getImageDescriptor(ISharedImages.IMG_OBJ_FOLDER);
+    folderAction.setImageDescriptor(image);
 
-  public long getMaxProjectValue() {
-    long max = 0;
-    for (IProject project : projectResources.keySet()) {
-      long value = getValueOfProject(project);
-      if (value > max) {
-        max = value;
+    // Action to show files:
+    IAction fileAction = new Action("Show Files", IAction.AS_RADIO_BUTTON) {
+      @Override
+      public void run() {
+        setShowMode(ShowMode.FILE);
       }
-    }
-    return max;
-  }
+    };
+    image = images.getImageDescriptor(ISharedImages.IMG_OBJ_FILE);
+    fileAction.setImageDescriptor(image);
 
-  public IResource[] getResources(IProject project) {
-    Set<IResource> resources = projectResources.get(project);
-    if (resources != null) {
-      return resources.toArray(new IResource[resources.size()]);
-    }
-    return new IResource[0];
+    IContributionItem[] items = new IContributionItem[] {
+        new ActionContributionItem(new ExpandAllAction(getViewer())),
+        new ActionContributionItem(new CollapseAllAction(getViewer())),
+        new Separator(), //
+        new ActionContributionItem(projAction),
+        new ActionContributionItem(folderAction),
+        new ActionContributionItem(fileAction), };
+
+    for (IContributionItem item : items)
+      toolBar.add(item);
+
+    return items;
   }
 
   public ShowMode getShowMode() {
     return mode;
   }
 
-  @Override
-  public long getValue(Object o) {
-    if (o instanceof IFile) {
-      return getValueOfFile((IFile) o);
-    } else if (o instanceof IFolder) {
-      return getValueOfFolder((IFolder) o);
-    } else if (o instanceof IProject) {
-      return getValueOfProject((IProject) o);
-    } else {
-      return 0;
-    }
-  }
-
-  public long getValueOfFile(IFile file) {
-    Long value = fileValues.get(file);
-    return (null == value) ? 0 : value;
-  }
-
-  public long getValueOfFolder(IFolder folder) {
-    Set<IFile> files = folderFiles.get(folder);
-    if (files == null) {
-      return 0;
-    }
-    long value = 0;
-    for (IFile file : files) {
-      value += getValueOfFile(file);
-    }
-    return value;
-  }
-
-  public long getValueOfProject(IProject project) {
-    Set<IResource> resources = projectResources.get(project);
-    if (resources == null) {
-      return 0;
-    }
-    long value = 0;
-    for (IResource resource : resources) {
-      value += (resource instanceof IFile) ? getValueOfFile((IFile) resource)
-          : getValueOfFolder((IFolder) resource);
-    }
-    return value;
-  }
-
   public void setShowMode(ShowMode newMode) {
     if (mode == newMode) {
       return;
     }
-
-    collapseAllAction.setEnabled(!(newMode == ShowMode.PROJECT));
-    expandAllAction.setEnabled(collapseAllAction.isEnabled());
-
     mode = newMode;
-    updateMaxValue();
     getViewer().refresh();
-  }
-
-  @Override
-  public boolean shouldPaint(Object element) {
-    return (element instanceof IProject && getShowMode() == ShowMode.PROJECT)
-        || (element instanceof IFolder && getShowMode() == ShowMode.FOLDER)
-        || (element instanceof IFile && getShowMode() == ShowMode.FILE);
   }
 
   @Override
   public void update(Preferences p) {
     Object[] elements = getViewer().getExpandedElements();
-    
+
     LocalDate start = LocalDate.fromCalendarFields(p.getStartDate());
     LocalDate end = LocalDate.fromCalendarFields(p.getEndDate());
-    doUpdate(accessor.getData(start, end));
+    getViewer().setInput(accessor.getData(start, end));
     try {
       getViewer().setExpandedElements(elements);
     } catch (IllegalArgumentException e) {
-      // Do nothing.
+      // Just in case some of the elements are no longer valid.
     }
   }
 
   @Override
-  protected CellLabelProvider createCellPainter() {
-    return new CellPainter(this) {
+  protected CellPainter createCellPainter() {
+    return new CellPainter(contents) {
       @Override
       protected Color createColor(Display display) {
         return new Color(display, 136, 177, 231);
@@ -327,110 +182,46 @@ public class ResourcePage extends AbstractTreeViewerPage {
 
   @Override
   protected void createColumns(TreeViewer viewer) {
-    TreeLabelComparator textSorter = new TreeLabelComparator(viewer);
-    TreeLabelComparator valueSorter = createValueSorterForTree(viewer);
+    TreeColumn column = new TreeColumn(viewer.getTree(), SWT.LEFT);
+    column.setText("Name");
+    column.setWidth(200);
+    column.addSelectionListener(createInitialComparator(viewer));
 
-    int[] widths = new int[] { 200, 150 };
-    int[] styles = new int[] { SWT.LEFT, SWT.RIGHT };
-    String[] names = new String[] { "Name", "Time Spent" };
+    column = new TreeColumn(viewer.getTree(), SWT.RIGHT);
+    column.setText("Time Spent");
+    column.setWidth(150);
+    column.addSelectionListener(getValueSorter());
+  }
 
-    for (int i = 0; i < names.length; i++) {
-      TreeColumn column = new TreeColumn(viewer.getTree(), styles[i]);
-      column.setText(names[i]);
-      column.setWidth(widths[i]);
-      column.addSelectionListener((names.length - 1 == i) ? valueSorter
-          : textSorter);
-    }
+  // TODO test
+  @Override
+  protected ITreeContentProvider createContentProvider() {
+    return contents;
   }
 
   @Override
-  protected TreeLabelComparator createInitialComparator(TreeViewer viewer) {
-    return new TreeLabelComparator(viewer) {
-
+  protected TreeViewerSorter createInitialComparator(TreeViewer viewer) {
+    return new TreeViewerSorter(viewer) {
       @Override
-      public int category(Object element) {
-        if (element instanceof IProject) {
-          return 1;
-        } else if (element instanceof IFolder) {
-          return 2;
-        } else if (element instanceof IFile) {
-          return 3;
-        } else {
+      protected int doCompare(Viewer v, Object e1, Object e2) {
+        if (!(e1 instanceof TreeNode) || !(e1 instanceof TreeNode))
           return 0;
+
+        Object element1 = ((TreeNode) e1).getValue();
+        Object element2 = ((TreeNode) e2).getValue();
+        if (element1 instanceof LocalDate && element2 instanceof LocalDate) {
+          return ((LocalDate) element1).compareTo(((LocalDate) element2));
+
+        } else {
+          return labels.getColumnText(e1, 0).compareToIgnoreCase(
+              labels.getColumnText(e2, 0));
         }
       }
     };
   }
 
   @Override
-  protected ITreeContentProvider createContentProvider() {
-    return new ResourcePageContentProvider(this);
-  }
-
   protected ITableLabelProvider createLabelProvider() {
-    return new ResourcePageDecoratingLabelProvider(this,
-        new ResourcePageLabelProvider(), PlatformUI.getWorkbench()
-            .getDecoratorManager().getLabelDecorator());
-  };
-
-  private void doUpdate(Map<String, Long> data) {
-    setMaxValue(0);
-
-    projectResources.clear();
-    folderFiles.clear();
-    fileValues.clear();
-
-    for (Map.Entry<String, Long> entry : data.entrySet()) {
-      IFile file = resourceMapper.getFile(entry.getKey());
-      if (file == null) {
-        file = resourceMapper.getExternalFile(entry.getKey());
-      }
-      if (file == null) {
-        continue;
-      }
-
-      Long oldValue = fileValues.get(file);
-      if (oldValue == null) {
-        oldValue = Long.valueOf(0);
-      }
-      fileValues.put(file, entry.getValue() + oldValue);
-
-      IProject project = file.getProject();
-      IContainer folder = file.getParent();
-
-      Set<IResource> resources = projectResources.get(project);
-      if (resources == null) {
-        resources = new HashSet<IResource>();
-        projectResources.put(project, resources);
-      }
-
-      if (project == folder) {
-        resources.add(file);
-      } else {
-        resources.add(folder);
-        Set<IFile> fileset = folderFiles.get(folder);
-        if (fileset == null) {
-          fileset = new HashSet<IFile>();
-          folderFiles.put((IFolder) folder, fileset);
-        }
-        fileset.add(file);
-      }
-    }
-    updateMaxValue();
-    getViewer().setInput(projectResources.keySet());
-  };
-
-  private void updateMaxValue() {
-    switch (getShowMode()) {
-    case FILE:
-      setMaxValue(getMaxFileValue());
-      break;
-    case FOLDER:
-      setMaxValue(getMaxFolderValue());
-      break;
-    default:
-      setMaxValue(getMaxProjectValue());
-      break;
-    }
+    return labels;
   }
 }

@@ -15,7 +15,7 @@
  */
 package rabbit.ui.tests.pages;
 
-import rabbit.ui.internal.pages.ResourcePageDecoratingLabelProvider;
+import rabbit.ui.internal.pages.ResourcePageTableLabelProvider;
 import rabbit.ui.internal.pages.ResourcePageLabelProvider;
 
 import static org.junit.Assert.assertEquals;
@@ -32,7 +32,7 @@ import org.junit.AfterClass;
 import org.junit.Test;
 
 /**
- * {@link ResourcePageDecoratingLabelProvider}
+ * {@link ResourcePageTableLabelProvider}
  */
 public class ResourcePageLabelProviderTest {
 

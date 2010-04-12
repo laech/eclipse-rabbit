@@ -25,6 +25,10 @@ import static org.junit.Assert.assertTrue;
 import org.eclipse.core.runtime.Platform;
 import org.junit.Test;
 
+/**
+ * @see RabbitUI
+ */
+@SuppressWarnings("restriction")
 public class RabbitUITest {
 
   @Test
@@ -41,9 +45,9 @@ public class RabbitUITest {
   }
 
   @Test
-  public void testGetRootElements() {
-    assertNotNull(RabbitUI.getDefault().getRootElements());
-    assertFalse(RabbitUI.getDefault().getRootElements().isEmpty());
+  public void testLoadRootElements() {
+    assertNotNull(RabbitUI.getDefault().loadRootPages());
+    assertFalse(RabbitUI.getDefault().loadRootPages().isEmpty());
   }
 
   @Test

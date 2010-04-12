@@ -115,8 +115,14 @@ public class PartPageLabelProvider extends BaseLabelProvider implements
   public Color getForeground(Object element) {
     if (element instanceof UndefinedWorkbenchPartDescriptor)
       return gray;
-    else
-      return null;
+
+    else if (element instanceof PartDataDescriptor) {
+      IWorkbenchPartDescriptor part = contents
+          .getPart((PartDataDescriptor) element);
+      if (part instanceof UndefinedWorkbenchPartDescriptor)
+        return gray;
+    }
+    return null;
   }
 
   /**

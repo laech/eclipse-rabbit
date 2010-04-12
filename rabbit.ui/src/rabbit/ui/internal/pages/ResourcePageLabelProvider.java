@@ -17,39 +17,78 @@ package rabbit.ui.internal.pages;
 
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.jface.viewers.IColorProvider;
+import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.TreeNode;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
 
-public class ResourcePageLabelProvider extends WorkbenchLabelProvider {
+// TODO
+public class ResourcePageLabelProvider extends LabelProvider implements
+    IColorProvider {
 
-  private final Color deletedResourceColor;
+  private final Color gray;
+  private final DateLabelProvider dateLabels;
+  private final WorkbenchLabelProvider workbenchLabels;
 
   public ResourcePageLabelProvider() {
-    deletedResourceColor = PlatformUI.getWorkbench().getDisplay()
-        .getSystemColor(SWT.COLOR_DARK_GRAY);
+    dateLabels = new DateLabelProvider();
+    workbenchLabels = new WorkbenchLabelProvider();
+    gray = PlatformUI.getWorkbench().getDisplay().getSystemColor(
+        SWT.COLOR_DARK_GRAY);
+  }
+
+  @Override
+  public void dispose() {
+    super.dispose();
+    dateLabels.dispose();
+    workbenchLabels.dispose();
+  }
+
+  @Override
+  public Color getBackground(Object element) {
+    return null;
   }
 
   @Override
   public Color getForeground(Object element) {
-    if (element instanceof IResource && !((IResource) element).exists()) {
-      return deletedResourceColor;
-    } else {
-      return super.getForeground(element);
+    if (element instanceof TreeNode) {
+      Object value = ((TreeNode) element).getValue();
+      if (value instanceof IResource && !((IResource) value).exists()) {
+        return gray;
+      }
     }
+    return null;
   }
 
   @Override
-  protected String decorateText(String input, Object element) {
-    if (!(element instanceof IResource)) {
-      return input;
+  public Image getImage(Object element) {
+    if (element instanceof TreeNode) {
+      Object value = ((TreeNode) element).getValue();
+      if (value instanceof IResource) {
+        return workbenchLabels.getImage(value);
+      }
+      return dateLabels.getImage(value);
     }
-    IResource resource = (IResource) element;
-    if (resource instanceof IFolder) {
-      return resource.getProjectRelativePath().toString();
-    } else {
-      return resource.getName();
+    return null;
+  }
+
+  @Override
+  public String getText(Object element) {
+    if (!(element instanceof TreeNode)) {
+      return null;
     }
+
+    Object value = ((TreeNode) element).getValue();
+    if (value instanceof IResource) {
+      if (value instanceof IFolder) {
+        return ((IFolder) value).getProjectRelativePath().toString();
+      }
+      return workbenchLabels.getText(value);
+    }
+    return dateLabels.getText(value);
   }
 }

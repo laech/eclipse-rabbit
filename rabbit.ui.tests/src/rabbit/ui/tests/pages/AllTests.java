@@ -35,7 +35,7 @@ CollectionContentProviderTest.class, //
     PartPageTest.class, //
 
     // Perspective page related:
-    PerspectivePageNameLabelProviderTest.class, //
+    PerspectivePageLabelProviderTest.class, //
     PerspectivePageContentProviderTest.class, //
     PerspectivePageTest.class, //
 
@@ -57,6 +57,7 @@ CollectionContentProviderTest.class, //
     //
     WorkbenchPartLabelProviderTest.class, //
     LocalDateLabelProviderTest.class, //
+    CommandLabelProviderTest.class, //
 })
 public class AllTests {
 

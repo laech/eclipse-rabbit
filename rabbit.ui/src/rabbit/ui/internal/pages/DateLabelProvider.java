@@ -17,8 +17,7 @@ package rabbit.ui.internal.pages;
 
 import rabbit.ui.internal.SharedImages;
 
-import org.eclipse.jface.viewers.BaseLabelProvider;
-import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
@@ -30,8 +29,7 @@ import javax.annotation.OverridingMethodsMustInvokeSuper;
 /**
  * Label provider for {@link LocalDate} elements.
  */
-public class DateLabelProvider extends BaseLabelProvider implements
-    ILabelProvider {
+public class DateLabelProvider extends LabelProvider {
 
   private final Image dateImage;
   private final DateTimeFormatter formatter;
@@ -58,13 +56,14 @@ public class DateLabelProvider extends BaseLabelProvider implements
   public String getText(@Nullable Object element) {
     if (element instanceof LocalDate) {
       LocalDate date = (LocalDate) element;
+      String text = formatter.print(date);
       if (date.isEqual(today))
-        return "Today";
+        return text + " - Today";
       else if (date.getYear() == today.getYear()
           && date.getDayOfYear() == today.getDayOfYear() - 1)
-        return "Yesterday";
+        return text + " - Yesterday";
       else
-        return formatter.print((LocalDate) element);
+        return text;
     }
     return null;
   }

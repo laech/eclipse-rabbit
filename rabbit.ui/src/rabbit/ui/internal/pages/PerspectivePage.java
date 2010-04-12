@@ -24,9 +24,7 @@ import rabbit.ui.TreeViewerSorter;
 import rabbit.ui.internal.RabbitUI;
 import rabbit.ui.internal.actions.CollapseAllAction;
 import rabbit.ui.internal.actions.ExpandAllAction;
-import rabbit.ui.internal.actions.ViewByDatesAction;
-
-import com.google.common.collect.Lists;
+import rabbit.ui.internal.actions.GroupByDatesAction;
 
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IContributionItem;
@@ -45,8 +43,6 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.ui.IPerspectiveDescriptor;
 import org.joda.time.LocalDate;
-
-import java.util.List;
 
 /**
  * A page displays perspective usage.
@@ -91,16 +87,16 @@ public class PerspectivePage extends AbstractTreeViewerPage {
 
   @Override
   public IContributionItem[] createToolBarItems(IToolBarManager toolBar) {
-    List<? extends IContributionItem> items = Lists.newArrayList(
+    IContributionItem[] items = new IContributionItem[] {
         new ActionContributionItem(new ExpandAllAction(getViewer())),
         new ActionContributionItem(new CollapseAllAction(getViewer())),
         new Separator(), // 
-        new ActionContributionItem(new ViewByDatesAction(contents)));
+        new ActionContributionItem(new GroupByDatesAction(contents)) };
 
     for (IContributionItem item : items)
       toolBar.add(item);
 
-    return items.toArray(new IContributionItem[items.size()]);
+    return items;
   }
 
   @Override

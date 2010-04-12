@@ -15,9 +15,9 @@
  */
 package rabbit.data.access;
 
-import org.joda.time.LocalDate;
+import com.google.common.collect.ImmutableCollection;
 
-import java.util.Collection;
+import org.joda.time.LocalDate;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
@@ -39,5 +39,6 @@ public interface IAccessor2<T> {
    */
   @Nonnull
   @CheckReturnValue
-  Collection<T> getData(@Nonnull LocalDate start, @Nonnull LocalDate end);
+  ImmutableCollection<T> getData(@Nonnull LocalDate start,
+                                 @Nonnull LocalDate end);
 }

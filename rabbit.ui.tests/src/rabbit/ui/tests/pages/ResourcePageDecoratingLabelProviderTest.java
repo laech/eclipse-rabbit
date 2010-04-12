@@ -17,7 +17,7 @@ package rabbit.ui.tests.pages;
 
 import rabbit.ui.MillisConverter;
 import rabbit.ui.internal.pages.ResourcePage;
-import rabbit.ui.internal.pages.ResourcePageDecoratingLabelProvider;
+import rabbit.ui.internal.pages.ResourcePageTableLabelProvider;
 import rabbit.ui.internal.pages.ResourcePageLabelProvider;
 import rabbit.ui.internal.pages.ResourcePage.ShowMode;
 
@@ -43,11 +43,11 @@ import java.util.Arrays;
 import java.util.HashSet;
 
 /**
- * {@link ResourcePageDecoratingLabelProvider}
+ * {@link ResourcePageTableLabelProvider}
  */
 public class ResourcePageDecoratingLabelProviderTest {
 
-  private static ResourcePageDecoratingLabelProvider provider;
+  private static ResourcePageTableLabelProvider provider;
   private static ResourcePageLabelProvider labeler;
   private static ILabelDecorator decorator;
   private static ResourcePage page;
@@ -74,7 +74,7 @@ public class ResourcePageDecoratingLabelProviderTest {
     labeler = new ResourcePageLabelProvider();
     decorator = PlatformUI.getWorkbench().getDecoratorManager()
         .getLabelDecorator();
-    provider = new ResourcePageDecoratingLabelProvider(page, labeler, decorator);
+    provider = new ResourcePageTableLabelProvider(page, labeler, decorator);
 
     ResourcePageTest.getFieldFileValues(page).put(file, value);
     ResourcePageTest.getFieldFolderFiles(page).put(folder,

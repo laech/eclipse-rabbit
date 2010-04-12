@@ -41,6 +41,10 @@ import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.Map;
 
+/**
+ * @see RabbitView
+ */
+@SuppressWarnings("restriction")
 public class RabbitViewTest {
 
   private static Shell shell;
@@ -127,7 +131,7 @@ public class RabbitViewTest {
     view.createPartControl(shell);
 
     IPage visiblePage = null;
-    for (PageDescriptor des : RabbitUI.getDefault().getRootElements()) {
+    for (PageDescriptor des : RabbitUI.getDefault().loadRootPages()) {
       visiblePage = des.page;
       display(view, des.page);
     }

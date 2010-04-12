@@ -16,7 +16,7 @@
 package rabbit.ui.tests.actions;
 
 import rabbit.ui.internal.SharedImages;
-import rabbit.ui.internal.actions.ViewByDatesAction;
+import rabbit.ui.internal.actions.GroupByDatesAction;
 import rabbit.ui.internal.pages.AbstractDateCategoryContentProvider;
 import rabbit.ui.internal.pages.PartPage;
 
@@ -27,27 +27,27 @@ import org.eclipse.jface.action.IAction;
 import org.junit.Test;
 
 /**
- * @see ViewByDatesAction
+ * @see GroupByDatesAction
  */
 @SuppressWarnings("restriction")
-public class ViewByDatesActionTest {
+public class GroupByDatesActionTest {
 
-  private final ViewByDatesAction action;
+  private final GroupByDatesAction action;
   private final AbstractDateCategoryContentProvider provider;
 
-  public ViewByDatesActionTest() {
+  public GroupByDatesActionTest() {
     provider = newContentProvider(false);
-    action = new ViewByDatesAction(provider);
+    action = new GroupByDatesAction(provider);
   }
 
   @Test
   public void testDefaultState() {
     AbstractDateCategoryContentProvider content = newContentProvider(false);
-    assertSame(new ViewByDatesAction(content).isChecked(), content
+    assertSame(new GroupByDatesAction(content).isChecked(), content
         .isDisplayingByDate());
 
     content = newContentProvider(true);
-    assertSame(new ViewByDatesAction(content).isChecked(), content
+    assertSame(new GroupByDatesAction(content).isChecked(), content
         .isDisplayingByDate());
   }
 
@@ -71,7 +71,7 @@ public class ViewByDatesActionTest {
 
   @Test
   public void testText() {
-    assertEquals("View by Dates", action.getText());
+    assertEquals("Group by Dates", action.getText());
   }
 
   private AbstractDateCategoryContentProvider newContentProvider(
@@ -95,7 +95,7 @@ public class ViewByDatesActionTest {
       }
 
       @Override
-      protected void updatePageMaxValue() {
+      protected void updateMaxValue() {
       }
     };
   }

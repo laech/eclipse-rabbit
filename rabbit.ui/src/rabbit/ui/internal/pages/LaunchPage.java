@@ -178,11 +178,6 @@ public class LaunchPage extends AbstractTreeViewerPage {
     countGraphColumn.setLabelProvider(new CellPainter(new IValueProvider() {
 
       @Override
-      public int getColumnWidth() {
-        return countGraphColumn.getColumn().getWidth();
-      }
-
-      @Override
       public long getMaxValue() {
         return maxCount;
       }

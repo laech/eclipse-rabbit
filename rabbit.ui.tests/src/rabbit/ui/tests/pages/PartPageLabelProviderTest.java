@@ -18,6 +18,7 @@ package rabbit.ui.tests.pages;
 import static rabbit.ui.MillisConverter.toDefaultString;
 
 import rabbit.data.access.model.PartDataDescriptor;
+import rabbit.data.access.model.PerspectiveDataDescriptor;
 import rabbit.ui.internal.pages.PartPage;
 import rabbit.ui.internal.pages.PartPageContentProvider;
 import rabbit.ui.internal.pages.PartPageLabelProvider;
@@ -126,6 +127,15 @@ public class PartPageLabelProviderTest {
     assertNull(labels.getForeground(defined));
     assertEquals(Display.getDefault().getSystemColor(SWT.COLOR_DARK_GRAY),
         labels.getForeground(undefined));
+    
+    PartDataDescriptor d1;
+    PartDataDescriptor d2;
+    d1 = new PartDataDescriptor(new LocalDate(), 1, defined.getId());
+    d2 = new PartDataDescriptor(new LocalDate(), 1, undefined.getId());
+    
+    page.getViewer().setInput(Arrays.asList(d1, d2));
+    assertNull(labels.getForeground(d1));
+    assertNotNull(labels.getForeground(d2));
   }
 
 }

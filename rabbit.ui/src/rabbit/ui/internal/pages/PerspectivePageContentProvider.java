@@ -165,11 +165,11 @@ public class PerspectivePageContentProvider extends
     perspectveSummaries = ImmutableMap.copyOf(perspToDuration);
     dateToPerspectives = Multimaps.index(data, categorizeByDateFunction);
 
-    updatePageMaxValue();
+    updateMaxValue();
   }
 
   @Override
-  protected void updatePageMaxValue() {
+  protected void updateMaxValue() {
     long maxValue = 0;
     if (isDisplayingByDate()) {
       for (PerspectiveDataDescriptor des : dateToPerspectives.values()) {

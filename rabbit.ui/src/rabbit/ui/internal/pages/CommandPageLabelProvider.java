@@ -16,7 +16,6 @@
 package rabbit.ui.internal.pages;
 
 import rabbit.data.access.model.CommandDataDescriptor;
-import rabbit.ui.internal.SharedImages;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -40,8 +39,8 @@ public class CommandPageLabelProvider extends BaseLabelProvider implements
     ITableLabelProvider, IColorProvider {
 
   private final Color gray;
-  private final Image commandImage;
   private final DateLabelProvider dateLabels;
+  private final CommandLabelProvider commandLabels;
   private final CommandPageContentProvider contentProvider;
 
   /**
@@ -52,8 +51,8 @@ public class CommandPageLabelProvider extends BaseLabelProvider implements
   public CommandPageLabelProvider(@Nonnull CommandPageContentProvider contents) {
     checkNotNull(contents);
     contentProvider = contents;
-    commandImage = SharedImages.GENERIC_ELEMENT.createImage();
     dateLabels = new DateLabelProvider();
+    commandLabels = new CommandLabelProvider();
     gray = PlatformUI.getWorkbench().getDisplay().getSystemColor(
         SWT.COLOR_DARK_GRAY);
   }
@@ -62,7 +61,7 @@ public class CommandPageLabelProvider extends BaseLabelProvider implements
   public void dispose() {
     super.dispose();
     dateLabels.dispose();
-    commandImage.dispose();
+    commandLabels.dispose();
   }
 
   @Override
@@ -75,59 +74,56 @@ public class CommandPageLabelProvider extends BaseLabelProvider implements
     if (columnIndex != 0)
       return null;
 
-    else if (element instanceof Command
-        || element instanceof CommandDataDescriptor)
-      return commandImage;
+    else if (element instanceof Command) {
+      return commandLabels.getImage(element);
+
+    } else if (element instanceof CommandDataDescriptor)
+      return commandLabels.getImage(contentProvider
+          .getCommand((CommandDataDescriptor) element));
     else
       return dateLabels.getImage(element);
   }
 
   @Override
   public String getColumnText(Object element, int columnIndex) {
-    try {
-      switch (columnIndex) {
-      case 0:
-        if (element instanceof Command)
-          return ((Command) element).getName();
+    switch (columnIndex) {
+    case 0:
+      if (element instanceof Command)
+        return commandLabels.getText(element);
 
-        else if (element instanceof CommandDataDescriptor)
-          return contentProvider.getCommand((CommandDataDescriptor) element)
-              .getName();
-        else
-          return dateLabels.getText(element);
+      else if (element instanceof CommandDataDescriptor)
+        return commandLabels.getText(contentProvider
+            .getCommand((CommandDataDescriptor) element));
+      else
+        return dateLabels.getText(element);
 
-      case 1:
+    case 1:
+      try {
         if (element instanceof Command)
           return ((Command) element).getDescription();
 
         else if (element instanceof CommandDataDescriptor)
           return contentProvider.getCommand((CommandDataDescriptor) element)
               .getDescription();
-        else
-          return null;
-
-      case 2:
-        if (element instanceof Command)
-          return contentProvider.getValueOfCommand((Command) element) + "";
-
-        else if (element instanceof CommandDataDescriptor)
-          return ((CommandDataDescriptor) element).getValue() + "";
-        else
-          return null;
-
-      default:
+        
+      } catch (NotDefinedException e) {
         return null;
       }
-    } catch (NotDefinedException e) {
-      if (columnIndex == 0) {
-        if (element instanceof Command)
-          return ((Command) element).getId();
-        else if (element instanceof CommandDataDescriptor)
-          return contentProvider.getCommand((CommandDataDescriptor) element)
-              .getId();
-      }
+      return null;
+
+    case 2:
+      if (element instanceof Command)
+        return contentProvider.getValueOfCommand((Command) element) + "";
+
+      else if (element instanceof CommandDataDescriptor)
+        return ((CommandDataDescriptor) element).getValue() + "";
+      else
+        return null;
+
+    default:
       return null;
     }
+
   }
 
   @Override

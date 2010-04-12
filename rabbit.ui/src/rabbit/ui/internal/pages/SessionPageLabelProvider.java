@@ -15,39 +15,71 @@
  */
 package rabbit.ui.internal.pages;
 
-import rabbit.ui.MillisConverter;
+import static rabbit.ui.MillisConverter.toDefaultString;
+
+import rabbit.data.access.model.SessionDataDescriptor;
 
 import org.eclipse.jface.viewers.BaseLabelProvider;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.swt.graphics.Image;
 
+import javax.annotation.OverridingMethodsMustInvokeSuper;
+
 /**
- * A label provider for a session page.
+ * A label provider for a {@link SessionPage}
  */
 public class SessionPageLabelProvider extends BaseLabelProvider implements
     ITableLabelProvider {
 
-  private SessionPage parent;
+  private final DateLabelProvider dateLabels;
 
-  public SessionPageLabelProvider(SessionPage parent) {
-    this.parent = parent;
+  /**
+   * Constructor.
+   */
+  public SessionPageLabelProvider() {
+    dateLabels = new DateLabelProvider();
+  }
+
+  @Override
+  public void dispose() {
+    super.dispose();
+    dateLabels.dispose();
   }
 
   @Override
   public Image getColumnImage(Object element, int columnIndex) {
-    return null;
+    if (element instanceof SessionDataDescriptor && columnIndex == 0)
+      return dateLabels.getImage(((SessionDataDescriptor) element).getDate());
+    else
+      return null;
   }
 
   @Override
   public String getColumnText(Object element, int columnIndex) {
     switch (columnIndex) {
     case 0:
-      return element.toString();
+      if (element instanceof SessionDataDescriptor)
+        return dateLabels.getText(((SessionDataDescriptor) element).getDate());
+      else
+        return null;
+
     case 1:
-      return MillisConverter.toDefaultString(parent.getValue(element));
+      if (element instanceof SessionDataDescriptor)
+        return toDefaultString(((SessionDataDescriptor) element).getValue());
+      else
+        return null;
+
     default:
       return null;
     }
   }
 
+  /**
+   * Updates the state of this label provider, this method should be called when
+   * the input of the viewer is changed.
+   */
+  @OverridingMethodsMustInvokeSuper
+  public void updateState() {
+    dateLabels.updateState();
+  }
 }

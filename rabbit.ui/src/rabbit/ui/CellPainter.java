@@ -39,13 +39,6 @@ public class CellPainter extends StyledCellLabelProvider {
   public interface IValueProvider {
 
     /**
-     * Gets the width of the column to be painted.
-     * 
-     * @return The width.
-     */
-    int getColumnWidth();
-
-    /**
      * Gets the maximum value of all the elements.
      * 
      * @return The maximum value.
@@ -101,28 +94,38 @@ public class CellPainter extends StyledCellLabelProvider {
     foreground = display.getSystemColor(SWT.COLOR_LIST_BACKGROUND);
   }
 
+  /**
+   * Gets the value provider of this painter.
+   * 
+   * @return The value provider.
+   */
+  public IValueProvider getValueProvider() {
+    return valueProvider;
+  }
+
   @Override
-  public void paint(Event e, Object element) {
+  public void paint(Event event, Object element) {
     if (!valueProvider.shouldPaint(element)) {
       return;
     }
 
-    int width = getWidth(element);
+    int columnWidth = event.gc.getClipping().width;
+    int width = getWidth(columnWidth, element);
     if (width == 0) {
       return;
     }
-    int x = e.x;
-    int y = e.y + 1;
-    int height = e.height - 2;
+    int x = event.x;
+    int y = event.y + 1;
+    int height = event.height - 2;
 
-    GC gc = e.gc;
+    GC gc = event.gc;
     Color oldBackground = gc.getBackground();
     Color oldForeground = gc.getForeground();
     int oldAnti = gc.getAntialias();
     int oldAlpha = gc.getAlpha();
 
     // Sets the alpha of the depends on the width:
-    int alpha = (int) (width / (float) valueProvider.getColumnWidth() * 255);
+    int alpha = (int) (width / (float) columnWidth * 255);
     if (alpha < 100) {
       alpha = 100;
     }
@@ -164,11 +167,15 @@ public class CellPainter extends StyledCellLabelProvider {
   /**
    * Gets the width in pixels for the paint.
    */
-  private int getWidth(Object element) {
-    int fullWidth = valueProvider.getColumnWidth();
+  private int getWidth(int columnWidth, Object element) {
+    long maxValue = valueProvider.getMaxValue();
+    if (maxValue == 0) {
+      return 0;
+    }
 
     long value = valueProvider.getValue(element);
-    int width = (int) (value * fullWidth / (double) valueProvider.getMaxValue());
+    int width = (int) (value * columnWidth / (double) valueProvider
+        .getMaxValue());
     width = ((value != 0) && (width == 0)) ? 2 : width;
 
     if (value != 0 && width < 2) {

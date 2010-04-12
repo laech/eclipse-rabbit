@@ -21,6 +21,8 @@ import rabbit.data.access.IAccessor2;
 import rabbit.data.internal.xml.schema.events.EventGroupType;
 import rabbit.data.internal.xml.schema.events.EventListType;
 
+import com.google.common.collect.ImmutableCollection;
+
 import org.joda.time.LocalDate;
 
 import java.io.File;
@@ -47,7 +49,7 @@ public abstract class AbstractAccessor2<T, E, S extends EventGroupType>
   }
 
   @Override
-  public Collection<T> getData(LocalDate start, LocalDate end) {
+  public ImmutableCollection<T> getData(LocalDate start, LocalDate end) {
     if (start == null || end == null) {
       throw new NullPointerException();
     }
@@ -61,7 +63,7 @@ public abstract class AbstractAccessor2<T, E, S extends EventGroupType>
    *          {@link #getData(Calendar, Calendar)}.
    * @return The filtered data.
    */
-  protected abstract Collection<T> filter(List<S> data);
+  protected abstract ImmutableCollection<T> filter(List<S> data);
 
   /**
    * Gets the collection of categories from the given parameter.
