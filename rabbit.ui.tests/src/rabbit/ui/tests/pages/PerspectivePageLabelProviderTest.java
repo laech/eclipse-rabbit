@@ -15,7 +15,7 @@
  */
 package rabbit.ui.tests.pages;
 
-import static rabbit.ui.MillisConverter.toDefaultString;
+import static rabbit.ui.internal.util.MillisConverter.toDefaultString;
 
 import rabbit.data.access.model.PerspectiveDataDescriptor;
 import rabbit.ui.internal.pages.PerspectivePage;

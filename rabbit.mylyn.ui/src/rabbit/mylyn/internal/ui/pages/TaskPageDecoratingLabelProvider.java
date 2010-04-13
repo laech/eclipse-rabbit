@@ -15,7 +15,7 @@
  */
 package rabbit.mylyn.internal.ui.pages;
 
-import static rabbit.ui.MillisConverter.toDefaultString;
+import static rabbit.ui.internal.util.MillisConverter.toDefaultString;
 
 import rabbit.mylyn.internal.ui.pages.TaskPage.ShowMode;
 

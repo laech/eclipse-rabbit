@@ -15,23 +15,36 @@
  */
 package rabbit.ui.internal.pages;
 
-import static rabbit.ui.MillisConverter.toDefaultString;
+import static rabbit.ui.internal.util.MillisConverter.toDefaultString;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.eclipse.jface.viewers.DecoratingLabelProvider;
 import org.eclipse.jface.viewers.IColorProvider;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.swt.graphics.Image;
 
-// TODO test
+import javax.annotation.Nonnull;
+
+/**
+ * Label provider for {@link ResourcePage}
+ */
 public class ResourcePageTableLabelProvider extends DecoratingLabelProvider
     implements ITableLabelProvider, IColorProvider {
 
   private final ResourcePageContentProvider contents;
 
+  /**
+   * Constructs a new label provider.
+   * 
+   * @param contentProvider The content provider of the viewer.
+   * @throws NullPointerException If argument is null.
+   */
   public ResourcePageTableLabelProvider(
-      ResourcePageContentProvider contentProvider) {
-    super(new ResourcePageLabelProvider(), null);
+      @Nonnull ResourcePageContentProvider contentProvider) {
 
+    super(new ResourcePageLabelProvider(), null);
+    checkNotNull(contentProvider);
     contents = contentProvider;
   }
 
@@ -47,8 +60,7 @@ public class ResourcePageTableLabelProvider extends DecoratingLabelProvider
   public String getColumnText(Object element, int columnIndex) {
     switch (columnIndex) {
     case 0:
-      String text = super.getText(element);
-      return text;
+      return super.getText(element);
 
     case 1:
       if (contents.shouldPaint(element))

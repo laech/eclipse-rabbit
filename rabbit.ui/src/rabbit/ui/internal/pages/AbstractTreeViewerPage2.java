@@ -23,8 +23,8 @@ import rabbit.ui.internal.RabbitUI;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
+import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
@@ -39,21 +39,26 @@ import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.TreeColumn;
+import org.eclipse.ui.dialogs.FilteredTree;
+import org.eclipse.ui.dialogs.PatternFilter;
 
 public abstract class AbstractTreeViewerPage2 implements IPage {
 
-  private TreeViewer viewer;
-  private TreeViewerColumn graphCol;
   private TreeViewerSorter valueSorter;
+  private FilteredTree filteredTree;
 
   public AbstractTreeViewerPage2() {
   }
 
   @Override
   public void createContents(Composite parent) {
-    viewer = new TreeViewer(parent, SWT.VIRTUAL | SWT.V_SCROLL | SWT.H_SCROLL);
-    viewer.setContentProvider(createContentProvider());
-    viewer.setLabelProvider(createLabelProvider());
+    int style = SWT.VIRTUAL | SWT.V_SCROLL | SWT.H_SCROLL;
+    filteredTree = new FilteredTree(parent, style, createFilter(), false);
+    filteredTree.setBackground(parent.getBackground());
+
+    final TreeViewer viewer = filteredTree.getViewer();
+    viewer.setContentProvider(createContentProvider(viewer));
+    viewer.setLabelProvider(createLabelProvider(viewer));
     viewer.setUseHashlookup(true);
     viewer.getTree().setHeaderVisible(true);
     viewer.getTree().addDisposeListener(new DisposeListener() {
@@ -83,7 +88,7 @@ public abstract class AbstractTreeViewerPage2 implements IPage {
           viewer.setSelection(StructuredSelection.EMPTY);
       }
     });
-    
+
     final CellPainter painter = createCellPainter();
     valueSorter = new TreeViewerSorter(viewer) {
 
@@ -101,7 +106,7 @@ public abstract class AbstractTreeViewerPage2 implements IPage {
     createColumns(viewer);
 
     // Special column for painting:
-    graphCol = new TreeViewerColumn(viewer, SWT.LEFT);
+    TreeViewerColumn graphCol = new TreeViewerColumn(viewer, SWT.LEFT);
     graphCol.setLabelProvider(painter);
     graphCol.getColumn().setWidth(100);
     graphCol.getColumn().addSelectionListener(valueSorter);
@@ -113,10 +118,23 @@ public abstract class AbstractTreeViewerPage2 implements IPage {
     viewer.setComparator(createInitialComparator(viewer));
     restoreState();
   }
-  
-  // TODO
-  protected TreeViewerSorter getValueSorter() {
-    return valueSorter;
+
+  /**
+   * Gets the tree of this page.
+   * 
+   * @return The filtered tree.
+   */
+  public FilteredTree getFilteredTree() {
+    return filteredTree;
+  }
+
+  /**
+   * Gets the viewer.
+   * 
+   * @return The viewer.
+   */
+  public TreeViewer getViewer() {
+    return filteredTree.getViewer();
   }
 
   /**
@@ -127,21 +145,29 @@ public abstract class AbstractTreeViewerPage2 implements IPage {
   protected abstract CellPainter createCellPainter();
 
   /**
-   * Gets the viewer.
-   * 
-   * @return The viewer.
-   */
-  public TreeViewer getViewer() {
-    return viewer;
-  }
-
-  /**
    * Creates the extra columns for the viewer. The graph column will be created
    * after this.
    * 
    * @param viewer The viewer.
    */
   protected abstract void createColumns(TreeViewer viewer);
+
+  /**
+   * Creates a content provider for this viewer.
+   * 
+   * @param viewer The viewer.
+   * 
+   * @return A content provider.
+   */
+  protected abstract ITreeContentProvider createContentProvider(
+      TreeViewer viewer);
+
+  /**
+   * Creates a pattern filter for the {@link FilteredTree}.
+   * 
+   * @return A pattern filter.
+   */
+  protected abstract PatternFilter createFilter();
 
   /**
    * Creates a default comparator for sorting the viewer.
@@ -152,11 +178,18 @@ public abstract class AbstractTreeViewerPage2 implements IPage {
   protected abstract ViewerComparator createInitialComparator(TreeViewer viewer);
 
   /**
-   * Creates a content provider for this viewer.
+   * Creates a label provider for the viewer.
    * 
-   * @return A content provider.
+   * @param viewer The viewer.
+   * 
+   * @return A label provider.
    */
-  protected abstract ITreeContentProvider createContentProvider();
+  protected abstract ILabelProvider createLabelProvider(TreeViewer viewer);
+
+  // TODO
+  protected TreeViewerSorter getValueSorter() {
+    return valueSorter;
+  }
 
   /** Restores the state of the page. */
   protected void restoreState() {
@@ -180,11 +213,4 @@ public abstract class AbstractTreeViewerPage2 implements IPage {
   private String getWidthPreferenceString(TreeColumn column) {
     return getClass().getSimpleName() + '.' + column.getText() + "Width";
   }
-
-  /**
-   * Creates a label provider for the viewer.
-   * 
-   * @return A label provider.
-   */
-  protected abstract ITableLabelProvider createLabelProvider();
 }

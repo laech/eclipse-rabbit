@@ -37,7 +37,13 @@ public class SharedImages {
 
   public static final ImageDescriptor ELEMENT = imageDescriptorFromPlugin(
       PLUGIN_ID, "/icons/full/obj16/element.gif");
-  
+
   public static final ImageDescriptor HIERARCHY = imageDescriptorFromPlugin(
       PLUGIN_ID, "/icons/full/obj16/hierarchical.gif");
+
+  public static final ImageDescriptor BRUSH = imageDescriptorFromPlugin(
+      PLUGIN_ID, "/icons/full/obj16/line-color.gif");
+
+  public static final ImageDescriptor SEARCH = imageDescriptorFromPlugin(
+      PLUGIN_ID, "/icons/full/obj16/search.gif");
 }

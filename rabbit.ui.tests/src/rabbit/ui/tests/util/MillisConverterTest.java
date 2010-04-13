@@ -15,7 +15,7 @@
  */
 package rabbit.ui.tests.util;
 
-import rabbit.ui.MillisConverter;
+import rabbit.ui.internal.util.MillisConverter;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -25,6 +25,7 @@ import org.junit.Test;
 /**
  * Test for {@link MillisConverter}
  */
+@SuppressWarnings("restriction")
 public class MillisConverterTest {
 
   @Test

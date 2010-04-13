@@ -43,7 +43,7 @@ CollectionContentProviderTest.class, //
     ResourcePageTest.class, //
     ResourcePageContentProviderTest.class, //
     ResourcePageLabelProviderTest.class, //
-    ResourcePageDecoratingLabelProviderTest.class, //
+    ResourcePageTableLabelProviderTest.class, //
 
     // Session page related:
     SessionPageLabelProviderTest.class, //
@@ -56,7 +56,7 @@ CollectionContentProviderTest.class, //
 
     //
     WorkbenchPartLabelProviderTest.class, //
-    LocalDateLabelProviderTest.class, //
+    DateLabelProviderTest.class, //
     CommandLabelProviderTest.class, //
 })
 public class AllTests {

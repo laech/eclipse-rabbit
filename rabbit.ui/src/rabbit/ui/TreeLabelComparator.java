@@ -49,78 +49,15 @@ import org.eclipse.swt.widgets.Widget;
  * @see ILabelProvider
  * @see TreeViewer#setLabelProvider(ITableLabelProvider)
  */
-public class TreeLabelComparator extends ViewerComparator implements
-    SelectionListener {
-
-  /**
-   * One of {@link SWT#NONE}, {@link SWT#UP}, {@link SWT#DOWN}.
-   */
-  private int sortDirection;
-  private TreeViewer viewer;
-  private TreeColumn selectedColumn;
+public class TreeLabelComparator extends TreeViewerSorter {
 
   public TreeLabelComparator(TreeViewer parent) {
-    sortDirection = SWT.NONE;
-    selectedColumn = null;
-    viewer = parent;
+    super(parent);
   }
 
   @Override
-  public int compare(Viewer v, Object e1, Object e2) {
-    int cat1 = category(e1);
-    int cat2 = category(e2);
-
-    if (cat1 != cat2) {
-      return cat1 - cat2;
-    }
-
-    int value = doCompare(v, e1, e2);
-    if (sortDirection == SWT.DOWN) {
-      value *= -1;
-    }
-    return value;
-  }
-
-  /**
-   * Gets the currently selected column.
-   * 
-   * @return The selected column.
-   */
-  public TreeColumn getSelectedColumn() {
-    return selectedColumn;
-  }
-
-  @Override
-  public void widgetDefaultSelected(SelectionEvent e) {
-  }
-
-  @Override
-  public void widgetSelected(SelectionEvent e) {
-    Widget item = e.widget;
-    if (!(item instanceof TreeColumn)) {
-      return;
-    }
-    Object[] expandedElements = viewer.getExpandedElements();
-
-    selectedColumn = (TreeColumn) e.widget;
-    Tree table = selectedColumn.getParent();
-    TreeColumn previousColumn = table.getSortColumn();
-    sortDirection = table.getSortDirection();
-
-    if (previousColumn == selectedColumn) {
-      sortDirection = (sortDirection == SWT.UP) ? SWT.DOWN : SWT.UP;
-    } else {
-      table.setSortColumn(selectedColumn);
-      sortDirection = SWT.UP;
-      viewer.setComparator(this);
-    }
-    table.setSortDirection(sortDirection);
-    viewer.refresh();
-    viewer.setExpandedElements(expandedElements);
-  }
-
   protected int doCompare(Viewer v, Object e1, Object e2) {
-    IBaseLabelProvider provider = viewer.getLabelProvider();
+    IBaseLabelProvider provider = getViewer().getLabelProvider();
 
     String s1 = null;
     String s2 = null;
@@ -131,8 +68,8 @@ public class TreeLabelComparator extends ViewerComparator implements
 
     } else if (provider instanceof ITableLabelProvider) {
       int index = 0;
-      if (selectedColumn != null) {
-        index = viewer.getTree().indexOf(selectedColumn);
+      if (getSelectedColumn() != null) {
+        index = getViewer().getTree().indexOf(getSelectedColumn());
       }
       s1 = ((ITableLabelProvider) provider).getColumnText(e1, index);
       s2 = ((ITableLabelProvider) provider).getColumnText(e2, index);

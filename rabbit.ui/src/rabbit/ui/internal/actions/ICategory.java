@@ -4,7 +4,7 @@ import org.eclipse.jface.resource.ImageDescriptor;
 
 public interface ICategory {
 
-  String getName();
+  String getText();
 
   ImageDescriptor getImageDescriptor();
 }

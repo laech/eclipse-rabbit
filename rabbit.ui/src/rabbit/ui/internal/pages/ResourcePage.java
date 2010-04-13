@@ -20,20 +20,23 @@ import rabbit.data.access.model.FileDataDescriptor;
 import rabbit.data.handler.DataHandler2;
 import rabbit.ui.CellPainter;
 import rabbit.ui.Preferences;
+import rabbit.ui.TreeLabelComparator;
 import rabbit.ui.TreeViewerSorter;
+import rabbit.ui.internal.SharedImages;
 import rabbit.ui.internal.actions.CollapseAllAction;
+import rabbit.ui.internal.actions.DropDownAction;
 import rabbit.ui.internal.actions.ExpandAllAction;
+import rabbit.ui.internal.actions.FilteredTreeAction;
+import rabbit.ui.internal.actions.GroupByAction;
+import rabbit.ui.internal.pages.ResourcePageContentProvider.Category;
 
-import org.eclipse.core.resources.IContainer;
-import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.Separator;
-import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.viewers.ITableLabelProvider;
+import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.TreeNode;
 import org.eclipse.jface.viewers.TreeViewer;
@@ -46,114 +49,67 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.dialogs.PatternFilter;
 import org.eclipse.ui.ide.IDE;
 import org.joda.time.LocalDate;
 
 /**
- * TODO test A page for displaying time spent working on different files.
+ * A page for displaying time spent working on different files.
  */
 public class ResourcePage extends AbstractTreeViewerPage2 {
 
-  public static enum ShowMode {
-    FILE, FOLDER, PROJECT
-  }
-
-  private ShowMode mode = ShowMode.FILE;
-
-  private IAccessor2<FileDataDescriptor> accessor;
   private ResourcePageContentProvider contents;
   private ResourcePageTableLabelProvider labels;
+  private IAccessor2<FileDataDescriptor> accessor;
 
   public ResourcePage() {
     super();
+    accessor = DataHandler2.getFileDataAccessor();
     contents = new ResourcePageContentProvider(this);
     labels = new ResourcePageTableLabelProvider(contents);
-    accessor = DataHandler2.getFileDataAccessor();
   }
 
   @Override
   public void createContents(Composite parent) {
     super.createContents(parent);
     getViewer().addFilter(new ViewerFilter() {
-
       @Override
-      public boolean select(Viewer viewer, Object parentElement, Object element) {
-        TreeNode node = (TreeNode) element;
-        if (node.getValue() instanceof LocalDate) {
-          return true;
-        }
-
-        switch (getShowMode()) {
-        case PROJECT:
-          return node.getValue() instanceof IProject;
-        case FOLDER:
-          return node.getValue() instanceof IContainer;
-        default:
-          return true;
-        }
+      public boolean select(Viewer v, Object parentElement, Object element) {
+        return !contents.shouldFilter(element);
       }
     });
   }
 
   @Override
   public IContributionItem[] createToolBarItems(IToolBarManager toolBar) {
-    ISharedImages images = PlatformUI.getWorkbench().getSharedImages();
-    ImageDescriptor image;
-
-    // Action to show projects:
-    IAction projAction = new Action("Show Projects", IAction.AS_RADIO_BUTTON) {
-      @Override
-      public void run() {
-        setShowMode(ShowMode.PROJECT);
-      }
-    };
-    image = images.getImageDescriptor(IDE.SharedImages.IMG_OBJ_PROJECT);
-    projAction.setImageDescriptor(image);
-
-    // Action to show folders:
-    IAction folderAction = new Action("Show Folders", IAction.AS_RADIO_BUTTON) {
-      @Override
-      public void run() {
-        setShowMode(ShowMode.FOLDER);
-      }
-    };
-    image = images.getImageDescriptor(ISharedImages.IMG_OBJ_FOLDER);
-    folderAction.setImageDescriptor(image);
-
-    // Action to show files:
-    IAction fileAction = new Action("Show Files", IAction.AS_RADIO_BUTTON) {
-      @Override
-      public void run() {
-        setShowMode(ShowMode.FILE);
-      }
-    };
-    image = images.getImageDescriptor(ISharedImages.IMG_OBJ_FILE);
-    fileAction.setImageDescriptor(image);
+    IAction groupByAllResourcesAction = newGroupByAllResourcesAction();
+    IAction colorByProjectsAction = newColorByProjectsAction();
+    IAction filterTreeAction = new FilteredTreeAction(getFilteredTree());
+    filterTreeAction.run(); // Hides the filter control
 
     IContributionItem[] items = new IContributionItem[] {
+        new ActionContributionItem(filterTreeAction), //
+        new Separator(), //
         new ActionContributionItem(new ExpandAllAction(getViewer())),
         new ActionContributionItem(new CollapseAllAction(getViewer())),
         new Separator(), //
-        new ActionContributionItem(projAction),
-        new ActionContributionItem(folderAction),
-        new ActionContributionItem(fileAction), };
+        new ActionContributionItem(new GroupByAction(contents,
+            groupByAllResourcesAction, // default action
+            newGroupByProjectsAction(), //
+            newGroupByProjectsAndFoldersAction(), // 
+            groupByAllResourcesAction)),
+        new ActionContributionItem(new DropDownAction("Color by Projects",
+            SharedImages.BRUSH, // 
+            colorByProjectsAction, // default action
+            newColorByDatesAction(), //
+            colorByProjectsAction, //
+            newColorByFoldersAction(), // 
+            newColorByFilesAction())) };
 
     for (IContributionItem item : items)
       toolBar.add(item);
 
     return items;
-  }
-
-  public ShowMode getShowMode() {
-    return mode;
-  }
-
-  public void setShowMode(ShowMode newMode) {
-    if (mode == newMode) {
-      return;
-    }
-    mode = newMode;
-    getViewer().refresh();
   }
 
   @Override
@@ -193,35 +149,134 @@ public class ResourcePage extends AbstractTreeViewerPage2 {
     column.addSelectionListener(getValueSorter());
   }
 
-  // TODO test
   @Override
-  protected ITreeContentProvider createContentProvider() {
+  protected ITreeContentProvider createContentProvider(TreeViewer viewer) {
     return contents;
   }
 
   @Override
+  protected PatternFilter createFilter() {
+    return new PatternFilter();
+  }
+
+  @Override
   protected TreeViewerSorter createInitialComparator(TreeViewer viewer) {
-    return new TreeViewerSorter(viewer) {
+    return new TreeLabelComparator(viewer) {
       @Override
       protected int doCompare(Viewer v, Object e1, Object e2) {
         if (!(e1 instanceof TreeNode) || !(e1 instanceof TreeNode))
-          return 0;
+          return super.doCompare(v, e1, e2);
 
         Object element1 = ((TreeNode) e1).getValue();
         Object element2 = ((TreeNode) e2).getValue();
-        if (element1 instanceof LocalDate && element2 instanceof LocalDate) {
+        if (element1 instanceof LocalDate && element2 instanceof LocalDate)
           return ((LocalDate) element1).compareTo(((LocalDate) element2));
-
-        } else {
-          return labels.getColumnText(e1, 0).compareToIgnoreCase(
-              labels.getColumnText(e2, 0));
-        }
+        else
+          return super.doCompare(v, e1, e2);
       }
     };
   }
 
   @Override
-  protected ITableLabelProvider createLabelProvider() {
+  protected ILabelProvider createLabelProvider(TreeViewer viewer) {
     return labels;
+  }
+
+  /**
+   * Action to color the dates.
+   */
+  private IAction newColorByDatesAction() {
+    IAction action = new Action("Dates", SharedImages.CALENDAR) {
+      @Override
+      public void run() {
+        contents.setPaintCategory(Category.DATE);
+      }
+    };
+    return action;
+  }
+
+  /**
+   * Action to color the files.
+   */
+  private IAction newColorByFilesAction() {
+    IAction action = new Action("Files", PlatformUI.getWorkbench()
+        .getSharedImages().getImageDescriptor(ISharedImages.IMG_OBJ_FILE)) {
+      @Override
+      public void run() {
+        contents.setPaintCategory(Category.FILE);
+      }
+    };
+    return action;
+  }
+
+  /**
+   * Action to color the folders.
+   */
+  private IAction newColorByFoldersAction() {
+    IAction action = new Action("Folders", PlatformUI.getWorkbench()
+        .getSharedImages().getImageDescriptor(ISharedImages.IMG_OBJ_FOLDER)) {
+      @Override
+      public void run() {
+        contents.setPaintCategory(Category.FOLDER);
+      }
+    };
+    return action;
+  }
+
+  /**
+   * Action to color the projects.
+   */
+  private IAction newColorByProjectsAction() {
+    IAction action = new Action("Projects", PlatformUI.getWorkbench()
+        .getSharedImages().getImageDescriptor(IDE.SharedImages.IMG_OBJ_PROJECT)) {
+      @Override
+      public void run() {
+        contents.setPaintCategory(Category.PROJECT);
+      }
+    };
+    return action;
+  }
+
+  /**
+   * Action to group the data by projects, then by folders, then files.
+   */
+  private IAction newGroupByAllResourcesAction() {
+    IAction action = new Action("All Resources", PlatformUI.getWorkbench()
+        .getSharedImages().getImageDescriptor(ISharedImages.IMG_OBJ_FILE)) {
+      @Override
+      public void run() {
+        contents.setSelectedCategories();
+      }
+    };
+    return action;
+  }
+
+  /**
+   * Action to group the data by projects.
+   */
+  private IAction newGroupByProjectsAction() {
+    IAction action = new Action("Projects", PlatformUI.getWorkbench()
+        .getSharedImages().getImageDescriptor(IDE.SharedImages.IMG_OBJ_PROJECT)) {
+      @Override
+      public void run() {
+        contents.setSelectedCategories(Category.PROJECT);
+      }
+    };
+    return action;
+  }
+
+  /**
+   * Action to group the data by projects, then by folders.
+   */
+  private IAction newGroupByProjectsAndFoldersAction() {
+    IAction action = new Action("Projects and Folders", PlatformUI
+        .getWorkbench().getSharedImages().getImageDescriptor(
+            ISharedImages.IMG_OBJ_FOLDER)) {
+      @Override
+      public void run() {
+        contents.setSelectedCategories(Category.PROJECT, Category.FOLDER);
+      }
+    };
+    return action;
   }
 }

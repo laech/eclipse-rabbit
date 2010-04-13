@@ -29,7 +29,7 @@ import org.junit.Test;
  * @see DateLabelProvider
  */
 @SuppressWarnings("restriction")
-public class LocalDateLabelProviderTest {
+public class DateLabelProviderTest {
 
   private static final DateLabelProvider labels = new DateLabelProvider();
 

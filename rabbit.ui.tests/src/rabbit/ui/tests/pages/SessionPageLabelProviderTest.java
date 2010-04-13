@@ -15,60 +15,65 @@
  */
 package rabbit.ui.tests.pages;
 
-import rabbit.ui.MillisConverter;
-import rabbit.ui.internal.pages.SessionPage;
+import static rabbit.ui.internal.util.MillisConverter.toDefaultString;
+
+import rabbit.data.access.model.SessionDataDescriptor;
+import rabbit.ui.internal.pages.DateLabelProvider;
 import rabbit.ui.internal.pages.SessionPageLabelProvider;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
-import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.PlatformUI;
+import org.joda.time.LocalDate;
 import org.junit.AfterClass;
-import org.junit.BeforeClass;
 import org.junit.Test;
-
-import java.text.Format;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Map;
 
 /**
  * Test for {@link SessionPageLabelProvider}
  */
+@SuppressWarnings("restriction")
 public class SessionPageLabelProviderTest {
 
-  private static Shell shell;
-  private static SessionPage page;
-  private static SessionPageLabelProvider provider;
+  private static final SessionPageLabelProvider provider;
+  private static final DateLabelProvider dateLabels;
+
+  static {
+    provider = new SessionPageLabelProvider();
+    dateLabels = new DateLabelProvider();
+  }
 
   @AfterClass
   public static void afterClass() {
     provider.dispose();
-    shell.dispose();
-  }
-
-  @BeforeClass
-  public static void beforeClass() {
-    shell = new Shell(PlatformUI.getWorkbench().getDisplay());
-    page = new SessionPage();
-    page.createContents(shell);
-    provider = new SessionPageLabelProvider(page);
+    dateLabels.dispose();
   }
 
   @Test
-  public void testGetColumnTextImage() throws Exception {
-    Format formatter = new SimpleDateFormat("yyyy-MM-dd EEEE");
-    String date = formatter.format(Calendar.getInstance().getTime());
-    long value = 187598;
-    Map<String, Long> data = SessionPageTest.getData(page);
-    data.put(date, value);
+  public void testGetColumnText_0() {
+    LocalDate today = new LocalDate();
+    SessionDataDescriptor des = new SessionDataDescriptor(today, 101);
+    assertEquals(dateLabels.getText(des), provider.getColumnText(today, 0));
 
-    assertEquals(date, provider.getColumnText(date, 0));
-    assertEquals(MillisConverter.toDefaultString(value), provider
-        .getColumnText(date, 1));
+    LocalDate yesterday = today.minusDays(1);
+    des = new SessionDataDescriptor(yesterday, 1);
+    assertEquals(dateLabels.getText(des), provider.getColumnText(yesterday, 0));
 
-    assertNull(provider.getColumnImage(date, 0));
-    assertNull(provider.getColumnImage(date, 1));
+    LocalDate someday = yesterday.minusDays(1);
+    des = new SessionDataDescriptor(someday, 0);
+    assertEquals(dateLabels.getText(des), provider.getColumnText(someday, 0));
+  }
+
+  @Test
+  public void testGetColumnText_1() {
+    SessionDataDescriptor d = new SessionDataDescriptor(new LocalDate(), 101);
+    assertEquals(toDefaultString(d.getValue()), provider.getColumnText(d, 1));
+  }
+
+  @Test
+  public void testGetColumnImage() {
+    SessionDataDescriptor d = new SessionDataDescriptor(new LocalDate(), 101);
+    assertNotNull(provider.getColumnImage(d, 0));
+    assertNull(provider.getColumnImage(d, 1));
   }
 }

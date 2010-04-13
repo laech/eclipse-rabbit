@@ -94,6 +94,9 @@ public abstract class TreeViewerSorter extends ViewerComparator implements
     viewer.refresh();
     viewer.setExpandedElements(expandedElements);
   }
+  protected TreeViewer getViewer() {
+    return viewer;
+  }
 
   protected abstract int doCompare(Viewer v, Object e1, Object e2);
 }

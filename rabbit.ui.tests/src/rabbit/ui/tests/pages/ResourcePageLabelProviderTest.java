@@ -15,8 +15,9 @@
  */
 package rabbit.ui.tests.pages;
 
-import rabbit.ui.internal.pages.ResourcePageTableLabelProvider;
+import rabbit.ui.internal.pages.DateLabelProvider;
 import rabbit.ui.internal.pages.ResourcePageLabelProvider;
+import rabbit.ui.internal.pages.ResourcePageTableLabelProvider;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -26,18 +27,23 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.jface.viewers.TreeNode;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
+import org.joda.time.LocalDate;
 import org.junit.AfterClass;
 import org.junit.Test;
 
 /**
  * {@link ResourcePageTableLabelProvider}
  */
+@SuppressWarnings("restriction")
 public class ResourcePageLabelProviderTest {
 
   private static ResourcePageLabelProvider provider = new ResourcePageLabelProvider();
+  private static DateLabelProvider dateLabels = new DateLabelProvider();
 
+  private static LocalDate date = new LocalDate();
   private static IProject project = ResourcesPlugin.getWorkspace().getRoot()
       .getProject("p");
   private static IFolder folder = project.getFolder("f");
@@ -46,13 +52,15 @@ public class ResourcePageLabelProviderTest {
   @AfterClass
   public static void afterClass() {
     provider.dispose();
+    dateLabels.dispose();
   }
 
   @Test
   public void testGetBackground() {
-    assertNull(provider.getBackground(project));
-    assertNull(provider.getBackground(folder));
-    assertNull(provider.getBackground(file));
+    assertNull(provider.getBackground(new TreeNode(project)));
+    assertNull(provider.getBackground(new TreeNode(folder)));
+    assertNull(provider.getBackground(new TreeNode(file)));
+    assertNull(provider.getBackground(new TreeNode(date)));
   }
 
   @Test
@@ -60,24 +68,34 @@ public class ResourcePageLabelProviderTest {
     IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(
         System.currentTimeMillis() + "");
     assertEquals(Display.getDefault().getSystemColor(SWT.COLOR_DARK_GRAY),
-        provider.getForeground(project));
+        provider.getForeground(new TreeNode(project)));
 
     project.create(null);
     project.open(null);
-    assertNull(provider.getForeground(project));
+    assertNull(provider.getForeground(new TreeNode(project)));
   }
 
   @Test
   public void testGetImage() {
-    assertNotNull(provider.getImage(project));
-    assertNotNull(provider.getImage(folder));
-    assertNotNull(provider.getImage(file));
+    assertNotNull(provider.getImage(new TreeNode(project)));
+    assertNotNull(provider.getImage(new TreeNode(folder)));
+    assertNotNull(provider.getImage(new TreeNode(file)));
+    assertNotNull(provider.getImage(new TreeNode(date)));
   }
 
   @Test
   public void testGetText() {
-    assertEquals(project.getName(), provider.getText(project));
-    assertEquals(folder.getName(), provider.getText(folder));
-    assertEquals(file.getName(), provider.getText(file));
+    assertEquals(project.getName(), provider.getText(new TreeNode(project)));
+    assertEquals(folder.getName(), provider.getText(new TreeNode((folder))));
+    assertEquals(file.getName(), provider.getText(new TreeNode(file)));
+    
+    LocalDate date = new LocalDate();
+    assertEquals(dateLabels.getText(date), provider.getText(new TreeNode(date)));
+    
+    date = date.minusDays(1);
+    assertEquals(dateLabels.getText(date), provider.getText(new TreeNode(date)));
+
+    date = date.minusDays(1);
+    assertEquals(dateLabels.getText(date), provider.getText(new TreeNode(date)));
   }
 }

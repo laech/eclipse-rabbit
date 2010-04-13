@@ -1,8 +1,10 @@
 package rabbit.ui.internal.actions;
 
 public interface ICategoryProvider {
-
-  ICategory[] getCategories();
   
-  void setCategories(ICategory[] categories);
+  ICategory[] getUnselectedCategories();
+
+  ICategory[] getSelectedCategories();
+  
+  void setSelectedCategories(ICategory... categories);
 }

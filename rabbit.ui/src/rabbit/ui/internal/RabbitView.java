@@ -190,8 +190,8 @@ public class RabbitView extends ViewPart {
     // Displaying area:
     FormData rightData = new FormData();
     rightData.top = new FormAttachment(0, 0);
-    rightData.left = new FormAttachment(sash, 0);
-    rightData.right = new FormAttachment(100, 0);
+    rightData.left = new FormAttachment(sash, 1);
+    rightData.right = new FormAttachment(100, -1);
     rightData.bottom = new FormAttachment(100, 0);
 
     Composite right = toolkit.createComposite(form.getBody());

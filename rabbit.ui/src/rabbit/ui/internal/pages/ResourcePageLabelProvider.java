@@ -26,7 +26,9 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
 
-// TODO
+/**
+ * Providers names for the elements in a {@link ResourcePage}.
+ */
 public class ResourcePageLabelProvider extends LabelProvider implements
     IColorProvider {
 
@@ -34,6 +36,9 @@ public class ResourcePageLabelProvider extends LabelProvider implements
   private final DateLabelProvider dateLabels;
   private final WorkbenchLabelProvider workbenchLabels;
 
+  /**
+   * Constructor.
+   */
   public ResourcePageLabelProvider() {
     dateLabels = new DateLabelProvider();
     workbenchLabels = new WorkbenchLabelProvider();

@@ -110,7 +110,7 @@ public class RabbitUI extends AbstractUIPlugin {
 
         @Override
         public void handleException(Throwable e) {
-          System.err.println(e.getMessage());
+          e.printStackTrace();
         }
 
         @Override
