@@ -15,6 +15,8 @@
  */
 package rabbit.ui.internal.util;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.IWorkbenchPartDescriptor;
@@ -24,8 +26,7 @@ import org.eclipse.ui.PlatformUI;
  * Represents an undefined {@link IWorkbenchPartDescriptor}. The descriptor may
  * have been available before but no longer available now.
  */
-public class UndefinedWorkbenchPartDescriptor implements
-    IWorkbenchPartDescriptor {
+public class UndefinedWorkbenchPartDescriptor implements IWorkbenchPartDescriptor {
 
   private String id;
 
@@ -33,31 +34,11 @@ public class UndefinedWorkbenchPartDescriptor implements
    * Constructor.
    * 
    * @param id The id of the descriptor.
+   * @throws NullPointerException If argument is null.
    */
   public UndefinedWorkbenchPartDescriptor(String id) {
+    checkNotNull(id);
     this.id = id;
-  }
-
-  @Override
-  public String getId() {
-    return id;
-  }
-
-  @Override
-  public ImageDescriptor getImageDescriptor() {
-    return PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(
-        ISharedImages.IMG_DEF_VIEW);
-  }
-
-  @Override
-  public String getLabel() {
-    return id;
-  }
-
-  // TODO equals and hashCode
-  @Override
-  public int hashCode() {
-    return getId().hashCode();
   }
 
   @Override
@@ -70,5 +51,31 @@ public class UndefinedWorkbenchPartDescriptor implements
       return false;
 
     return ((UndefinedWorkbenchPartDescriptor) obj).getId().equals(getId());
+  }
+
+  @Override
+  public String getId() {
+    return id;
+  }
+
+  @Override
+  public ImageDescriptor getImageDescriptor() {
+    return PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(
+        ISharedImages.IMG_DEF_VIEW);
+  }
+  
+  @Override
+  public String getLabel() {
+    return id;
+  }
+
+  @Override
+  public int hashCode() {
+    return getId().hashCode();
+  }
+
+  @Override
+  public String toString() {
+    return "Undefined workbench part: " + getId();
   }
 }

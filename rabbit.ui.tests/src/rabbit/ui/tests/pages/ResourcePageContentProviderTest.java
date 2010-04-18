@@ -45,7 +45,6 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Set;
 
@@ -74,7 +73,7 @@ public class ResourcePageContentProviderTest {
     shell = new Shell(PlatformUI.getWorkbench().getDisplay());
     page = new ResourcePage();
     page.createContents(shell);
-    provider = new ResourcePageContentProvider(page);
+    provider = new ResourcePageContentProvider(page.getViewer());
     page.getViewer().setContentProvider(provider);
     
     IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
@@ -91,7 +90,7 @@ public class ResourcePageContentProviderTest {
         mapper.insert(file));
     page.getViewer().setInput(Arrays.asList(des));
 
-    TreeNode root = getRoot(provider);
+    TreeNode root = provider.getRoot();
     provider.setSelectedCategories(Category.PROJECT);
     assertFalse(provider.hasChildren(root.getChildren()[0]));
 
@@ -110,7 +109,7 @@ public class ResourcePageContentProviderTest {
 
     page.getViewer().setInput(Arrays.asList(d1, d2));
 
-    TreeNode root = getRoot(provider);
+    TreeNode root = provider.getRoot();
     // Set the data to categorize by file, then by dates:
     provider.setSelectedCategories(Category.FILE, Category.DATE);
     assertEquals(1, root.getChildren().length);
@@ -235,7 +234,7 @@ public class ResourcePageContentProviderTest {
 
     page.getViewer().setInput(Arrays.asList(d1, d2));
 
-    TreeNode root = getRoot(provider);
+    TreeNode root = provider.getRoot();
     provider.setSelectedCategories(Category.FILE);
     TreeNode fileNode = root.getChildren()[0];
     assertEquals(d1.getValue() + d2.getValue(), provider.getValue(fileNode));
@@ -252,7 +251,7 @@ public class ResourcePageContentProviderTest {
     FileDataDescriptor des = new FileDataDescriptor(new LocalDate(), 1009823,
         mapper.insert(file));
     page.getViewer().setInput(Arrays.asList(des));
-    TreeNode root = getRoot(provider);
+    TreeNode root = provider.getRoot();
     assertFalse(root.getChildren() == null || root.getChildren().length == 0);
     try {
       provider.inputChanged(page.getViewer(), null, null);
@@ -405,17 +404,5 @@ public class ResourcePageContentProviderTest {
     assertTrue(provider.shouldPaint(projectNode));
     assertFalse(provider.shouldPaint(folderNode));
     assertFalse(provider.shouldPaint(fileNode));
-  }
-
-  /**
-   * Gets the private field of the content provider which holds the entire tree
-   * model.
-   */
-  private TreeNode getRoot(ResourcePageContentProvider contentProvider)
-      throws Exception {
-
-    Field field = ResourcePageContentProvider.class.getDeclaredField("root");
-    field.setAccessible(true);
-    return (TreeNode) field.get(contentProvider);
   }
 }

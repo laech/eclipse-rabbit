@@ -19,11 +19,11 @@ import static rabbit.ui.internal.util.MillisConverter.toDefaultString;
 
 import rabbit.data.access.model.LaunchConfigurationDescriptor;
 import rabbit.data.access.model.LaunchDataDescriptor;
-import rabbit.ui.internal.Pair;
 import rabbit.ui.internal.pages.LaunchPageContentProvider;
 import rabbit.ui.internal.pages.LaunchPageLabelProvider;
 import rabbit.ui.internal.pages.ResourcePageLabelProvider;
 import rabbit.ui.internal.pages.LaunchPageContentProvider.Category;
+import rabbit.ui.internal.util.Pair;
 import rabbit.ui.internal.util.UndefinedLaunchConfigurationType;
 import rabbit.ui.internal.util.UndefinedLaunchMode;
 
@@ -106,7 +106,7 @@ public class LaunchPageLabelProviderTest {
     configDescriptor = new LaunchConfigurationDescriptor(
         "Name", launchMode.getIdentifier(), typeId);
     
-    launchData = new Pair<String, String>(configDescriptor.getLaunchName(), 
+    launchData = Pair.create(configDescriptor.getLaunchName(), 
         configDescriptor.getLaunchTypeId());
     
     projectNode = new TreeNode(project);

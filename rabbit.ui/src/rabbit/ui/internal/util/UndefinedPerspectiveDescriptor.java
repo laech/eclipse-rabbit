@@ -15,6 +15,8 @@
  */
 package rabbit.ui.internal.util;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.IPerspectiveDescriptor;
 
@@ -29,8 +31,10 @@ public class UndefinedPerspectiveDescriptor implements IPerspectiveDescriptor {
    * Constructor.
    * 
    * @param id The id of this perspective.
+   * @throws NullPointerException If argument is null.
    */
   public UndefinedPerspectiveDescriptor(String id) {
+    checkNotNull(id);
     this.id = id;
   }
 
@@ -54,7 +58,6 @@ public class UndefinedPerspectiveDescriptor implements IPerspectiveDescriptor {
     return id;
   }
 
-  // TODO test
   @Override
   public boolean equals(Object obj) {
     if (obj == null)
@@ -67,7 +70,6 @@ public class UndefinedPerspectiveDescriptor implements IPerspectiveDescriptor {
     return ((UndefinedPerspectiveDescriptor) obj).getId().equals(getId());
   }
 
-  // TODO test
   @Override
   public int hashCode() {
     return getId().hashCode();

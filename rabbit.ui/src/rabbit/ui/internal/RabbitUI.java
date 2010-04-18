@@ -146,14 +146,14 @@ public class RabbitUI extends AbstractUIPlugin {
     // restructure them:
     ImmutableSet.Builder<PageDescriptor> builder = ImmutableSet.builder();
     for (PageDescriptor child : pages) {
-      if (child.parentId == null) {
+      if (child.getParentId() == null) {
         builder.add(child);
         continue;
       }
       boolean added = false;
       for (PageDescriptor parent : pages) {
-        if (parent.id.equals(child.parentId)) {
-          parent.pages.add(child);
+        if (parent.getId().equals(child.getParentId())) {
+          parent.getChildren().add(child);
           added = true;
           break;
         }

@@ -18,9 +18,9 @@ package rabbit.ui.internal.pages;
 import rabbit.data.access.IAccessor2;
 import rabbit.data.access.model.SessionDataDescriptor;
 import rabbit.data.handler.DataHandler;
-import rabbit.ui.CellPainter;
 import rabbit.ui.Preferences;
-import rabbit.ui.TableViewerSorter;
+import rabbit.ui.internal.viewers.CellPainter;
+import rabbit.ui.internal.viewers.TableViewerSorter;
 
 import org.eclipse.jface.viewers.CellLabelProvider;
 import org.eclipse.jface.viewers.ITableLabelProvider;

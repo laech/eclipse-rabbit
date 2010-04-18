@@ -18,10 +18,7 @@ package rabbit.ui.internal.pages;
 import rabbit.data.access.IAccessor2;
 import rabbit.data.access.model.FileDataDescriptor;
 import rabbit.data.handler.DataHandler;
-import rabbit.ui.CellPainter;
 import rabbit.ui.Preferences;
-import rabbit.ui.TreeViewerLabelSorter;
-import rabbit.ui.TreeViewerSorter;
 import rabbit.ui.internal.RabbitUI;
 import rabbit.ui.internal.SharedImages;
 import rabbit.ui.internal.actions.CollapseAllAction;
@@ -31,6 +28,9 @@ import rabbit.ui.internal.actions.GroupByAction;
 import rabbit.ui.internal.actions.ShowHideFilterControlAction;
 import rabbit.ui.internal.pages.ResourcePageContentProvider.Category;
 import rabbit.ui.internal.util.ICategory;
+import rabbit.ui.internal.viewers.CellPainter;
+import rabbit.ui.internal.viewers.TreeViewerLabelSorter;
+import rabbit.ui.internal.viewers.TreeViewerSorter;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
@@ -64,7 +64,7 @@ import java.util.List;
 /**
  * A page for displaying time spent working on different files.
  */
-public class ResourcePage extends AbstractTreeViewerPage2 {
+public class ResourcePage extends AbstractFilteredTreePage {
 
   // Preference constants:
   private static final String PREF_SELECTED_CATEGORIES = "ResourcePage.SelectedCatgories";
@@ -81,8 +81,7 @@ public class ResourcePage extends AbstractTreeViewerPage2 {
   
   @Override
   protected void initializeViewer(TreeViewer viewer) {
-    super.initializeViewer(viewer);
-    contents = new ResourcePageContentProvider(this);
+    contents = new ResourcePageContentProvider(viewer);
     labels = new ResourcePageTableLabelProvider(contents);
     viewer.setContentProvider(contents);
     viewer.setLabelProvider(labels);

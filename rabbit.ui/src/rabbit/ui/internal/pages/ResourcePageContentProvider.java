@@ -18,18 +18,13 @@ package rabbit.ui.internal.pages;
 import rabbit.data.IFileStore;
 import rabbit.data.access.model.FileDataDescriptor;
 import rabbit.data.handler.DataHandler;
-import rabbit.ui.CellPainter.IValueProvider;
 import rabbit.ui.internal.SharedImages;
 import rabbit.ui.internal.util.ICategory;
-import rabbit.ui.internal.util.ICategoryProvider;
-import rabbit.ui.internal.util.TreeNodes;
-
-import static com.google.common.base.Preconditions.checkNotNull;
+import rabbit.ui.internal.viewers.TreeNodes;
+import rabbit.ui.internal.viewers.CellPainter.IValueProvider;
 
 import com.google.common.collect.ImmutableBiMap;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
@@ -37,7 +32,6 @@ import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.TreeNode;
-import org.eclipse.jface.viewers.TreeNodeContentProvider;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.ui.ISharedImages;
@@ -45,11 +39,8 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.ide.IDE;
 import org.joda.time.LocalDate;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.IdentityHashMap;
-import java.util.LinkedHashSet;
-import java.util.Set;
 
 import javax.annotation.Nonnull;
 
@@ -57,8 +48,8 @@ import javax.annotation.Nonnull;
  * Content provider for a {@link TreeViewer} that accepts input as a
  * {@link Collection} of {@link FileDataDescriptor}.
  */
-public class ResourcePageContentProvider extends TreeNodeContentProvider
-    implements IValueProvider, ICategoryProvider {
+public class ResourcePageContentProvider extends AbstractCategoryContentProvider
+    implements IValueProvider {
 
   /*
    * This content provider builds a tree from the input data, and every leaf
@@ -107,10 +98,6 @@ public class ResourcePageContentProvider extends TreeNodeContentProvider
     }
   }
 
-  /** The root of the content tree. */
-  @Nonnull
-  private final TreeNode root;
-
   /**
    * A cached map of tree nodes and the total duration of that subtree. We use
    * an identity hash map here because two tree nodes can contain the same
@@ -124,87 +111,29 @@ public class ResourcePageContentProvider extends TreeNodeContentProvider
   @Nonnull
   private IdentityHashMap<TreeNode, Long> treeNodeValues;
 
-  /**
-   * A set of selected categories, the data will be structured using these
-   * categories. The order and uniqueness are important, so use a
-   * {@link LinkedHashSet}.
-   */
-  @Nonnull
-  private final Set<Category> selectedCategories;
-
-  /** A set of all the categories defined in {@link Category}. */
-  @Nonnull
-  private final ImmutableSet<Category> allCategories;
-
-  /** A helper map of categories to classes. */
-  @Nonnull
-  private final ImmutableBiMap<Category, Class<?>> categoriesAndClasses;
-
-  @Nonnull
-  private Category paintCategory = Category.PROJECT;
-
   /** {@link #getMaxValue()} */
   private long maxValue = 0;
-
-  /** The parent page. */
-  @Nonnull
-  private final ResourcePage page;
 
   /**
    * Constructor a content provider for the given viewer.
    * 
-   * @param thePage The parent page.
+   * @param viewer The viewer.
    * @throws NullPointerException If argument is null.
    */
-  public ResourcePageContentProvider(ResourcePage thePage) {
-    checkNotNull(thePage);
-    page = thePage;
+  public ResourcePageContentProvider(TreeViewer viewer) {
+    super(viewer);
     treeNodeValues = Maps.newIdentityHashMap();
-    root = new TreeNode(new Object());
-
-    allCategories = ImmutableSet.of(Category.DATE, Category.PROJECT,
-        Category.FOLDER, Category.FILE);
-
-    selectedCategories = Sets.newLinkedHashSet();
-    selectedCategories.add(Category.PROJECT);
-    selectedCategories.add(Category.FOLDER);
-    selectedCategories.add(Category.FILE);
-
-    categoriesAndClasses = ImmutableBiMap.<Category, Class<?>> builder() //
-        .put(Category.PROJECT, IProject.class) //
-        .put(Category.FOLDER, IFolder.class) //
-        .put(Category.FILE, IFile.class) //
-        .put(Category.DATE, LocalDate.class).build();
   }
-
+  
+  @SuppressWarnings("unchecked")
   @Override
-  public Object[] getElements(Object inputElement) {
-    return (root.getChildren() != null) ? root.getChildren() : new Object[0];
+  public void doInputChanged(Viewer viewer, Object oldInput, Object newInput) {
+    reorganizeData((Collection<FileDataDescriptor>) newInput);
   }
 
   @Override
   public long getMaxValue() {
     return maxValue;
-  }
-
-  /**
-   * Gets the category that is currently used to identify elements for painting.
-   * 
-   * @return The paint category.
-   */
-  public Category getPaintCategory() {
-    return paintCategory;
-  }
-
-  @Override
-  public Category[] getSelectedCategories() {
-    return selectedCategories.toArray(new Category[selectedCategories.size()]);
-  }
-
-  @Override
-  public Category[] getUnselectedCategories() {
-    Set<Category> set = Sets.difference(allCategories, selectedCategories);
-    return set.toArray(new Category[set.size()]);
   }
 
   @Override
@@ -215,7 +144,7 @@ public class ResourcePageContentProvider extends TreeNodeContentProvider
     TreeNode node = (TreeNode) element;
     Long value = treeNodeValues.get(node);
     if (value == null) {
-      value = TreeNodes.getLongValue(node);
+      value = TreeNodes.longValueOfSubtree(node);
       treeNodeValues.put(node, value);
     }
     return value;
@@ -240,92 +169,47 @@ public class ResourcePageContentProvider extends TreeNodeContentProvider
     return true;
   }
 
-  @SuppressWarnings("unchecked")
-  @Override
-  public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-    super.inputChanged(viewer, oldInput, newInput);
-    if (newInput == null)
-      root.setChildren(null);
-    else
-      reorganizeData((Collection<FileDataDescriptor>) newInput);
-  }
-
-  /**
-   * Sets which category is to be painted. For example, use
-   * {@linkplain Category#FILE} to paint the files.
-   * 
-   * @param cat The category.
-   */
-  public void setPaintCategory(Category cat) {
-    if (paintCategory != cat) {
-      paintCategory = cat;
-      updateMaxValue(categoriesAndClasses.get(paintCategory));
-      page.getViewer().refresh();
-    }
-  }
-
-  @Override
-  public void setSelectedCategories(ICategory... categories) {
-    // Restore the defaults if the categories array is null or empty:
-    if (categories == null || categories.length == 0)
-      categories = new ICategory[] { Category.PROJECT, Category.FOLDER,
-          Category.FILE };
-
-    if (Arrays.equals(categories, selectedCategories.toArray()))
-      return; // Nothing to do if same.
-
-    selectedCategories.clear();
-    for (ICategory cat : categories) {
-      if (cat instanceof Category) {
-        selectedCategories.add((Category) cat);
-      }
-    }
-
-    Object[] elements = page.getViewer().getExpandedElements();
-    // Resets the input instead of calling refresh, ensures the data is
-    // correctly structured:
-    page.getViewer().setInput(page.getViewer().getInput());
-    try {
-      page.getViewer().setExpandedElements(elements);
-    } catch (Exception e) {
-      // Just in case some elements are no valid.
-    }
-  }
-
-  /**
-   * Checks whether the given element should be hidden by the current structure.
-   * 
-   * @param element The element.
-   * @return True if the element should be hidden, false otherwise.
-   */
-  public boolean shouldFilter(Object element) {
-    TreeNode node = (TreeNode) element;
-    for (Category cat : selectedCategories) {
-      if (categoriesAndClasses.get(cat).isAssignableFrom(
-          node.getValue().getClass())) {
-        return false;
-      }
-    }
-    return true;
-  }
-
   @Override
   public boolean shouldPaint(Object element) {
     if (!(element instanceof TreeNode))
       return false;
     
     TreeNode node = (TreeNode) element;
-    return categoriesAndClasses.get(paintCategory).isAssignableFrom(
+    return categoriesAndClasses.get(getPaintCategory()).isAssignableFrom(
         node.getValue().getClass());
+  }
+
+  @Override
+  protected ICategory[] getAllSupportedCategories() {
+    return Category.values();
+  }
+
+  @Override
+  protected ImmutableBiMap<ICategory, Class<?>> getCategoriesAndClassesMap() {
+    return ImmutableBiMap.<ICategory, Class<?>> builder()
+        .put(Category.PROJECT, IProject.class)
+        .put(Category.FOLDER, IFolder.class)
+        .put(Category.FILE, IFile.class)
+        .put(Category.DATE, LocalDate.class).build();
+  }
+
+  @Override
+  protected ICategory getDefaultPaintCategory() {
+    return Category.PROJECT;
+  }
+
+  @Override
+  protected ICategory[] getDefaultSelectedCategories() {
+    return new ICategory[] { Category.PROJECT, Category.FOLDER, Category.FILE };
   }
 
   /**
    * Reorganizes the data according to {@link #getSelectedCategories()}.
    */
   private void reorganizeData(Collection<FileDataDescriptor> data) {
-    root.setChildren(null);
+    getRoot().setChildren(null);
 
-    Category[] categories = getSelectedCategories();
+    ICategory[] categories = getSelectedCategories();
     IFileStore store = DataHandler.getFileMapper();
     for (FileDataDescriptor des : data) {
 
@@ -339,26 +223,20 @@ public class ResourcePageContentProvider extends TreeNodeContentProvider
       IProject project = file.getProject();
       IContainer folder = file.getParent();
 
-      TreeNode node = root;
-      for (Category cat : categories) {
-        switch (cat) {
-        case DATE:
+      TreeNode node = getRoot();
+      for (ICategory cat : categories) {
+        if (Category.DATE == cat) {
           node = TreeNodes.findOrAppend(node, des.getDate());
-          break;
-
-        case PROJECT:
+          
+        } else if (Category.PROJECT == cat) {
           node = TreeNodes.findOrAppend(node, project);
-          break;
-
-        case FOLDER:
+          
+        } else if (Category.FOLDER == cat) {
           if (!folder.equals(project))
             node = TreeNodes.findOrAppend(node, folder);
-
-          break;
-
-        case FILE:
+          
+        } else if (Category.FILE == cat) {
           node = TreeNodes.findOrAppend(node, file);
-          break;
         }
       }
       TreeNodes.appendToParent(node, des.getValue());
@@ -366,7 +244,13 @@ public class ResourcePageContentProvider extends TreeNodeContentProvider
 
     treeNodeValues.clear();
     treeNodeValues = Maps.newIdentityHashMap();
-    updateMaxValue(categoriesAndClasses.get(paintCategory));
+    updateMaxValue(categoriesAndClasses.get(getPaintCategory()));
+  }
+  
+  @Override
+  public void setPaintCategory(ICategory cat) {
+    super.setPaintCategory(cat);
+    updateMaxValue(categoriesAndClasses.get(cat));
   }
 
   /**
@@ -377,6 +261,9 @@ public class ResourcePageContentProvider extends TreeNodeContentProvider
    * @see #getMaxValue()
    */
   private void updateMaxValue(Class<?> clazz) {
-    maxValue = TreeNodes.findMaxLongValue(root, clazz);
+    if (clazz != null) 
+      maxValue = TreeNodes.findMaxLong(getRoot(), clazz);
+    else 
+      maxValue = 0;
   }
 }

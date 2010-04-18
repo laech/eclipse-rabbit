@@ -17,13 +17,13 @@ package rabbit.ui.tests.pages;
 
 import rabbit.data.access.model.LaunchConfigurationDescriptor;
 import rabbit.data.access.model.LaunchDataDescriptor;
-import rabbit.ui.CellPainter.IValueProvider;
-import rabbit.ui.internal.Pair;
 import rabbit.ui.internal.pages.LaunchPageContentProvider;
 import rabbit.ui.internal.pages.LaunchPageContentProvider.Category;
 import rabbit.ui.internal.util.ICategory;
+import rabbit.ui.internal.util.Pair;
 import rabbit.ui.internal.util.UndefinedLaunchConfigurationType;
 import rabbit.ui.internal.util.UndefinedLaunchMode;
+import rabbit.ui.internal.viewers.CellPainter.IValueProvider;
 
 import com.google.common.collect.Sets;
 
@@ -371,7 +371,7 @@ public class LaunchPageContentProviderTest {
   @Test
   public void testShouldFilter() {
     TreeNode dateNode   = new TreeNode(new LocalDate());
-    TreeNode launchNode = new TreeNode(new Pair<String, String>("", ""));
+    TreeNode launchNode = new TreeNode(Pair.create("", ""));
     TreeNode typeNode   = new TreeNode(new UndefinedLaunchConfigurationType(""));
     TreeNode modeNode   = new TreeNode(new UndefinedLaunchMode(""));
     
@@ -419,7 +419,7 @@ public class LaunchPageContentProviderTest {
 
   private void assertShouldPaint(IValueProvider values) {
     TreeNode dateNode   = new TreeNode(new LocalDate());
-    TreeNode launchNode = new TreeNode(new Pair<String, String>("", ""));
+    TreeNode launchNode = new TreeNode(Pair.create("", ""));
     TreeNode typeNode   = new TreeNode(new UndefinedLaunchConfigurationType(""));
     TreeNode modeNode   = new TreeNode(new UndefinedLaunchMode(""));
     

@@ -15,7 +15,7 @@
  */
 package rabbit.ui.tests.pages;
 
-import rabbit.ui.internal.pages.AbstractTreeViewerPage2;
+import rabbit.ui.internal.pages.AbstractFilteredTreePage;
 import rabbit.ui.internal.pages.LaunchPage;
 import rabbit.ui.internal.pages.LaunchPageContentProvider;
 import rabbit.ui.internal.pages.LaunchPageContentProvider.Category;
@@ -30,10 +30,10 @@ import org.junit.Test;
  * @see LaunchPage
  */
 @SuppressWarnings("restriction")
-public class LaunchPageTest extends AbstractTreeViewerPageTest2 {
+public class LaunchPageTest extends AbstractFilteredTreePageTest {
 
   @Override
-  protected AbstractTreeViewerPage2 createPage() {
+  protected AbstractFilteredTreePage createPage() {
     return new LaunchPage();
   }
   

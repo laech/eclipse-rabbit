@@ -15,7 +15,7 @@
  */
 package rabbit.ui.tests.pages;
 
-import rabbit.ui.internal.pages.AbstractTreeViewerPage2;
+import rabbit.ui.internal.pages.AbstractFilteredTreePage;
 import rabbit.ui.internal.pages.ResourcePage;
 import rabbit.ui.internal.pages.ResourcePageContentProvider;
 import rabbit.ui.internal.pages.ResourcePageContentProvider.Category;
@@ -30,7 +30,7 @@ import org.junit.Test;
  * @see ResourcePage
  */
 @SuppressWarnings("restriction")
-public class ResourcePageTest extends AbstractTreeViewerPageTest2 {
+public class ResourcePageTest extends AbstractFilteredTreePageTest {
 
   @Test
   public void testSaveState_selectedCategories() throws Exception {
@@ -61,7 +61,7 @@ public class ResourcePageTest extends AbstractTreeViewerPageTest2 {
   }
 
   @Override
-  protected AbstractTreeViewerPage2 createPage() {
+  protected AbstractFilteredTreePage createPage() {
     return new ResourcePage();
   }
 }

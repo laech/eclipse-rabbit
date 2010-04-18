@@ -80,7 +80,7 @@ public class ResourcePageTableLabelProviderTest {
     page.createContents(shell);
     resourceLabels = new ResourcePageLabelProvider();
     viewer = page.getViewer();
-    contents = new ResourcePageContentProvider(page);
+    contents = new ResourcePageContentProvider(page.getViewer());
     provider = new ResourcePageTableLabelProvider(contents);
     viewer.setLabelProvider(provider);
     viewer.setContentProvider(contents);

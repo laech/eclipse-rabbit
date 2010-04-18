@@ -30,15 +30,15 @@ public interface ICategoryProvider {
   /**
    * Gets the categories that are in use.
    * 
-   * @return The categories that are in use.
+   * @return An ordered array of the categories that are in use.
    */
   ICategory[] getSelectedCategories();
 
   /**
    * Sets the selected categories.
    * 
-   * @param categories The new categories. If the new categories is null or
-   *          empty, the default categories will be used.
+   * @param categories The new categories, ordered. If the new categories is 
+   *          null or empty, the default categories will be used.
    */
   void setSelectedCategories(ICategory... categories);
 }

@@ -16,9 +16,9 @@
 package rabbit.ui.internal.pages;
 
 import rabbit.ui.IPage;
-import rabbit.ui.TableViewerLabelSorter;
-import rabbit.ui.TreeViewerLabelSorter;
-import rabbit.ui.CellPainter.IValueProvider;
+import rabbit.ui.internal.viewers.TableViewerLabelSorter;
+import rabbit.ui.internal.viewers.TreeViewerLabelSorter;
+import rabbit.ui.internal.viewers.CellPainter.IValueProvider;
 
 import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.IToolBarManager;

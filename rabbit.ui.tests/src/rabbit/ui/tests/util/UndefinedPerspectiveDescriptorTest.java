@@ -18,26 +18,51 @@ package rabbit.ui.tests.util;
 import rabbit.ui.internal.util.UndefinedPerspectiveDescriptor;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
 /**
  * Test for {@link UndefinedPerspectiveDescriptor}
  */
+@SuppressWarnings("restriction")
 public class UndefinedPerspectiveDescriptorTest {
-
-  String id = "sansijiuqehnsdfjh22wiur";
-  private UndefinedPerspectiveDescriptor per = new UndefinedPerspectiveDescriptor(
-      id);
+  
+  @Test(expected = NullPointerException.class)
+  public void testConstructor_idNull() {
+    new UndefinedPerspectiveDescriptor(null);
+  }
 
   @Test
   public void testGetId() {
+    String id = "adf23";
+    UndefinedPerspectiveDescriptor per = new UndefinedPerspectiveDescriptor(id);
     assertEquals(id, per.getId());
   }
 
   @Test
   public void testGetLabel() {
-    assertEquals(id, per.getId());
+    String id = "a12df23";
+    UndefinedPerspectiveDescriptor per = new UndefinedPerspectiveDescriptor(id);
+    assertEquals(id, per.getLabel());
+  }
+  
+  @Test
+  public void testHashCode() {
+    UndefinedPerspectiveDescriptor des = new UndefinedPerspectiveDescriptor("1");
+    assertEquals(des.getId().hashCode(), des.hashCode());
   }
 
+  @Test
+  public void testEquals() {
+    UndefinedPerspectiveDescriptor d1 = new UndefinedPerspectiveDescriptor("1");
+    UndefinedPerspectiveDescriptor d2 = new UndefinedPerspectiveDescriptor("2");
+    assertFalse(d1.equals(d2));
+    assertTrue(d1.equals(d1));
+    assertFalse(d1.equals(null));
+    
+    d2 = new UndefinedPerspectiveDescriptor(d1.getId());
+    assertTrue(d1.equals(d2));
+  }
 }

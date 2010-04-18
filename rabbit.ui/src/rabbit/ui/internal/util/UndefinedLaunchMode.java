@@ -19,14 +19,36 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.eclipse.debug.core.ILaunchMode;
 
-// TODO equals and hashcode
+/**
+ * Represents an undefined launch mode.
+ */
 public class UndefinedLaunchMode implements ILaunchMode {
   
   private final String identifier;
   
+  /**
+   * Constructor.
+   * @param id The ID of this launch mode.
+   * @throws NullPointerException If argument is null.
+   */
   public UndefinedLaunchMode(String id) {
     checkNotNull(id);
     identifier = id;
+  }
+  
+  @Override
+  public int hashCode() {
+    return getIdentifier().hashCode();
+  }
+  
+  @Override
+  public boolean equals(Object obj) {
+    if (obj == null) return false;
+    if (obj == this) return true;
+    if (obj.getClass() != getClass()) return false;
+    
+    UndefinedLaunchMode mode = (UndefinedLaunchMode) obj;
+    return getIdentifier().equals(mode.getIdentifier());
   }
 
   @Override

@@ -18,34 +18,56 @@ package rabbit.ui.tests.util;
 import rabbit.ui.internal.util.UndefinedWorkbenchPartDescriptor;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
 /**
  * Test for {@link UndefinedWorkbenchPartDescriptor}
  */
+@SuppressWarnings("restriction")
 public class UndefinedWorkbenchPartDescriptorTest {
+  
+  @Test(expected = NullPointerException.class)
+  public void testConstructor_idNull() {
+    new UndefinedWorkbenchPartDescriptor(null);
+  }
 
   @Test
   public void testGetId() {
-    UndefinedWorkbenchPartDescriptor u = new UndefinedWorkbenchPartDescriptor(
-        "iid");
+    UndefinedWorkbenchPartDescriptor u = new UndefinedWorkbenchPartDescriptor("iid");
     assertEquals("iid", u.getId());
   }
 
   @Test
   public void testGetImage() {
-    assertNotNull(new UndefinedWorkbenchPartDescriptor("id")
-        .getImageDescriptor());
+    assertNotNull(new UndefinedWorkbenchPartDescriptor("id").getImageDescriptor());
   }
 
   @Test
   public void testGetLabel() {
-    UndefinedWorkbenchPartDescriptor u = new UndefinedWorkbenchPartDescriptor(
-        "iid");
+    UndefinedWorkbenchPartDescriptor u = new UndefinedWorkbenchPartDescriptor("iid");
     assertNotNull(u.getLabel());
     assertEquals(u.getId(), u.getId());
   }
 
+  @Test
+  public void testHashCode() {
+    UndefinedWorkbenchPartDescriptor u = new UndefinedWorkbenchPartDescriptor("1");
+    assertEquals(u.getId().hashCode(), u.hashCode());
+  }
+  
+  @Test
+  public void testEquals() {
+    UndefinedWorkbenchPartDescriptor d1 = new UndefinedWorkbenchPartDescriptor("1");
+    UndefinedWorkbenchPartDescriptor d2 = new UndefinedWorkbenchPartDescriptor(d1.getId());
+    assertTrue(d1.equals(d2));
+    assertTrue(d1.equals(d1));
+    assertFalse(d1.equals(null));
+    
+    d2 = new UndefinedWorkbenchPartDescriptor(d2.getId() + "abc");
+    assertFalse(d1.equals(d2));
+  }
 }

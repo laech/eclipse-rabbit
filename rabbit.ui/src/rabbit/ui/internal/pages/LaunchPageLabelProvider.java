@@ -17,11 +17,11 @@ package rabbit.ui.internal.pages;
 
 import static rabbit.ui.internal.util.MillisConverter.toDefaultString;
 
-import rabbit.ui.CellPainter.IValueProvider;
-import rabbit.ui.internal.Pair;
 import rabbit.ui.internal.SharedImages;
+import rabbit.ui.internal.util.Pair;
 import rabbit.ui.internal.util.UndefinedLaunchConfigurationType;
 import rabbit.ui.internal.util.UndefinedLaunchMode;
+import rabbit.ui.internal.viewers.CellPainter.IValueProvider;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 

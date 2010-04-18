@@ -15,10 +15,11 @@
  */
 package rabbit.ui.internal.pages;
 
-import rabbit.ui.CellPainter;
 import rabbit.ui.IPage;
-import rabbit.ui.TreeViewerSorter;
 import rabbit.ui.internal.RabbitUI;
+import rabbit.ui.internal.viewers.CellPainter;
+import rabbit.ui.internal.viewers.TreeViewerSorter;
+import rabbit.ui.internal.viewers.CellPainter.IValueProvider;
 
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -43,18 +44,22 @@ import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.ui.dialogs.FilteredTree;
 import org.eclipse.ui.dialogs.PatternFilter;
 
-public abstract class AbstractTreeViewerPage2 implements IPage {
+/**
+ * Abstract implementation of an {@link IPage} containing a {@link FilteredTree},
+ * also defines a column for painting with a {@link CellPainter}.
+ */
+public abstract class AbstractFilteredTreePage implements IPage {
 
   private TreeViewerSorter valueSorter;
   private FilteredTree filteredTree;
 
-  public AbstractTreeViewerPage2() {
+  /**
+   * Constructor.
+   */
+  public AbstractFilteredTreePage() {
   }
   
-  // TODO
-  protected void initializeViewer(TreeViewer viewer) {
-  }
-
+  
   @Override
   public void createContents(Composite parent) {
     GridLayoutFactory.fillDefaults().margins(1, 0).applyTo(parent);
@@ -175,10 +180,21 @@ public abstract class AbstractTreeViewerPage2 implements IPage {
    */
   protected abstract ViewerComparator createInitialComparator(TreeViewer viewer);
 
-  // TODO
+  /**
+   * Gets the sorter for sorting the viewer by value, using the cell painter's
+   * {@link IValueProvider}
+   * @return The value sorter.
+   */
   protected TreeViewerSorter getValueSorter() {
     return valueSorter;
   }
+
+  /**
+   * Initialized the viewer, subclasses should use this method set the content
+   * provider and label provider for the viewer.
+   * @param viewer The viewer to be initialized.
+   */
+  protected abstract void initializeViewer(TreeViewer viewer);
 
   /** Restores the state of the page. */
   protected void restoreState() {

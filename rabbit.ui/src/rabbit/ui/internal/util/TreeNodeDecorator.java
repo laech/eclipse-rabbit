@@ -1,4 +1,4 @@
-package rabbit.ui.decorators;
+package rabbit.ui.internal.util;
 
 import org.eclipse.jface.viewers.ILabelDecorator;
 import org.eclipse.jface.viewers.ILabelProviderListener;

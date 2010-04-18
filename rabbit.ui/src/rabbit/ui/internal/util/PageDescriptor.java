@@ -23,18 +23,28 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Represents a page extension descriptor. TODO clean up
+ * Represents a page extension descriptor.
  */
 public class PageDescriptor {
 
-  public final String parentId;
-  public final String id;
-  public final String name;
-  public final String description;
-  public final IPage page;
-  public final ImageDescriptor image;
-  public final Set<PageDescriptor> pages;
+  private final String parentId;
+  private final String id;
+  private final String name;
+  private final String description;
+  private final IPage page;
+  private final ImageDescriptor image;
+  private final Set<PageDescriptor> pages;
 
+  /**
+   * Constructor.
+   * 
+   * @param id The unique identifier.
+   * @param name The name of the page.
+   * @param page The java class.
+   * @param description The description.
+   * @param image The image icon.
+   * @param parentId The parent ID.
+   */
   public PageDescriptor(String id, String name, IPage page, String description,
       ImageDescriptor image, String parentId) {
     this.id = id;
@@ -44,6 +54,62 @@ public class PageDescriptor {
     this.image = image;
     this.description = description;
     pages = new HashSet<PageDescriptor>();
+  }
+  
+  /**
+   * Gets the ID of the parent page.
+   * @return The ID of the parent page.
+   */
+  public String getParentId() {
+    return parentId;
+  }
+  
+  /**
+   * Gets the ID of this extension.
+   * @return The ID.
+   */
+  public String getId() {
+    return id;
+  }
+  
+  /**
+   * Gets the name of this page.
+   * @return The name.
+   */
+  public String getName() {
+    return name;
+  }
+  
+  /**
+   * Gets the description.
+   * @return The description.
+   */
+  public String getDescription() {
+    return description;
+  }
+  
+  /**
+   * Gets the actual page.
+   * @return The page.
+   */
+  public IPage getPage() {
+    return page;
+  }
+  
+  /**
+   * Gets the image icon.
+   * @return The icon.
+   */
+  public ImageDescriptor getImage() {
+    return image;
+  }
+  
+  /**
+   * Gets the children page.
+   * @return A set of children, modifiable.
+   */
+  public Set<PageDescriptor> getChildren() {
+    return pages;
   }
 
   @Override

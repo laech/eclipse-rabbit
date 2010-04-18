@@ -15,8 +15,8 @@
  */
 package rabbit.ui.internal.pages;
 
-import rabbit.ui.CellPainter;
 import rabbit.ui.internal.RabbitUI;
+import rabbit.ui.internal.viewers.CellPainter;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.viewers.CellLabelProvider;

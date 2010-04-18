@@ -30,15 +30,37 @@ import org.eclipse.debug.core.sourcelookup.ISourcePathComputer;
 import java.util.Collections;
 import java.util.Set;
 
-//TODO equals and hashcode
+/**
+ * Represents an undefined launch configuration type.
+ */
 @SuppressWarnings("unchecked")
 public class UndefinedLaunchConfigurationType implements ILaunchConfigurationType {
 
   private final String identifier;
 
+  /**
+   * Constructor.
+   * @param id The ID of this launch configuration type.
+   * @throws NullPointerException If argument is null.
+   */
   public UndefinedLaunchConfigurationType(String id) {
     checkNotNull(id);
     identifier = id;
+  }
+  
+  @Override
+  public boolean equals(Object obj) {
+    if (obj == null) return false;
+    if (obj == this) return true;
+    if (obj.getClass() != getClass()) return false;
+    
+    UndefinedLaunchConfigurationType t = (UndefinedLaunchConfigurationType) obj;
+    return getIdentifier().equals(t.getIdentifier());
+  }
+  
+  @Override
+  public int hashCode() {
+    return getIdentifier().hashCode();
   }
 
   @Override

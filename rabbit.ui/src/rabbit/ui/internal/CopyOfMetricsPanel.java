@@ -86,7 +86,7 @@ public class CopyOfMetricsPanel {
         if (selection instanceof IStructuredSelection) {
           PageDescriptor page = (PageDescriptor) ((IStructuredSelection) selection)
               .getFirstElement();
-          view.display(page.page);
+          view.display(page.getPage());
         }
       }
     });
@@ -100,7 +100,7 @@ public class CopyOfMetricsPanel {
 
       @Override
       public Object[] getChildren(Object o) {
-        return ((PageDescriptor) o).pages.toArray();
+        return ((PageDescriptor) o).getChildren().toArray();
       }
 
       @Override
@@ -111,7 +111,7 @@ public class CopyOfMetricsPanel {
       @Override
       public boolean hasChildren(Object o) {
         return (o instanceof PageDescriptor)
-            && !((PageDescriptor) o).pages.isEmpty();
+            && !((PageDescriptor) o).getChildren().isEmpty();
       }
     };
   }
@@ -130,25 +130,25 @@ public class CopyOfMetricsPanel {
       @Override
       public Image getImage(Object element) {
         PageDescriptor page = (PageDescriptor) element;
-        if (page.image == null) {
+        if (page.getImage() == null) {
           return null;
         }
-        Image image = images.get(page.name);
+        Image image = images.get(page.getName());
         if (image == null) {
-          image = page.image.createImage();
-          images.put(page.name, image);
+          image = page.getImage().createImage();
+          images.put(page.getName(), image);
         }
         return image;
       }
 
       @Override
       public String getText(Object element) {
-        return ((PageDescriptor) element).name;
+        return ((PageDescriptor) element).getName();
       }
 
       @Override
       public String getToolTipText(Object element) {
-        return ((PageDescriptor) element).description;
+        return ((PageDescriptor) element).getDescription();
       }
 
       @Override

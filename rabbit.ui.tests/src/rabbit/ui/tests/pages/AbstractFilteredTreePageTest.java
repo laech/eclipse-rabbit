@@ -15,7 +15,7 @@
  */
 package rabbit.ui.tests.pages;
 
-import rabbit.ui.internal.pages.AbstractTreeViewerPage2;
+import rabbit.ui.internal.pages.AbstractFilteredTreePage;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -30,12 +30,12 @@ import org.junit.Test;
 import java.lang.reflect.Method;
 
 /**
- * @see AbstractTreeViewerPage2
+ * @see AbstractFilteredTreePage
  */
 @SuppressWarnings("restriction")
-public abstract class AbstractTreeViewerPageTest2 {
+public abstract class AbstractFilteredTreePageTest {
 
-  protected AbstractTreeViewerPage2 page;
+  protected AbstractFilteredTreePage page;
 
   @Before
   public void setUp() {
@@ -83,24 +83,24 @@ public abstract class AbstractTreeViewerPageTest2 {
   }
 
   protected ViewerComparator createInitialComparator(
-      AbstractTreeViewerPage2 page, TreeViewer viewer) throws Exception {
-    Method createComparator = AbstractTreeViewerPage2.class.getDeclaredMethod(
+      AbstractFilteredTreePage page, TreeViewer viewer) throws Exception {
+    Method createComparator = AbstractFilteredTreePage.class.getDeclaredMethod(
         "createInitialComparator", TreeViewer.class);
     createComparator.setAccessible(true);
     return (ViewerComparator) createComparator.invoke(page, viewer);
   }
 
-  protected abstract AbstractTreeViewerPage2 createPage();
+  protected abstract AbstractFilteredTreePage createPage();
 
-  protected void restoreState(AbstractTreeViewerPage2 page) throws Exception {
-    Method restoreState = AbstractTreeViewerPage2.class
+  protected void restoreState(AbstractFilteredTreePage page) throws Exception {
+    Method restoreState = AbstractFilteredTreePage.class
         .getDeclaredMethod("restoreState");
     restoreState.setAccessible(true);
     restoreState.invoke(page);
   }
 
-  protected void saveState(AbstractTreeViewerPage2 page) throws Exception {
-    Method saveState = AbstractTreeViewerPage2.class
+  protected void saveState(AbstractFilteredTreePage page) throws Exception {
+    Method saveState = AbstractFilteredTreePage.class
         .getDeclaredMethod("saveState");
     saveState.setAccessible(true);
     saveState.invoke(page);

@@ -19,13 +19,13 @@ import rabbit.data.IFileStore;
 import rabbit.data.access.model.LaunchConfigurationDescriptor;
 import rabbit.data.access.model.LaunchDataDescriptor;
 import rabbit.data.handler.DataHandler;
-import rabbit.ui.CellPainter.IValueProvider;
-import rabbit.ui.internal.Pair;
 import rabbit.ui.internal.SharedImages;
 import rabbit.ui.internal.util.ICategory;
-import rabbit.ui.internal.util.TreeNodes;
+import rabbit.ui.internal.util.Pair;
 import rabbit.ui.internal.util.UndefinedLaunchConfigurationType;
 import rabbit.ui.internal.util.UndefinedLaunchMode;
+import rabbit.ui.internal.viewers.TreeNodes;
+import rabbit.ui.internal.viewers.CellPainter.IValueProvider;
 
 import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.Maps;
@@ -116,7 +116,7 @@ public class LaunchPageContentProvider extends AbstractCategoryContentProvider {
 
       Integer count = launchCounts.get(element);
       if (count == null) {
-        count = TreeNodes.getIntegerValue((TreeNode) element);
+        count = TreeNodes.intValueOfSubtree((TreeNode) element);
         launchCounts.put((TreeNode) element, count);
       }
       return count;
@@ -146,7 +146,7 @@ public class LaunchPageContentProvider extends AbstractCategoryContentProvider {
 
       Long duration = launchDurations.get(element);
       if (duration == null) {
-        duration = TreeNodes.getLongValue((TreeNode) element);
+        duration = TreeNodes.longValueOfSubtree((TreeNode) element);
         launchDurations.put((TreeNode) element, duration);
       }
       return duration;
@@ -296,7 +296,7 @@ public class LaunchPageContentProvider extends AbstractCategoryContentProvider {
         } else if (Category.LAUNCH == cat) {
           LaunchConfigurationDescriptor config = des.getLaunchDescriptor();
           launchNode = TreeNodes.findOrAppend(launchNode,
-              new Pair<String, String>(config.getLaunchName(), config.getLaunchTypeId()));
+              Pair.create(config.getLaunchName(), config.getLaunchTypeId()));
 
         } else if (Category.LAUNCH_TYPE == cat) {
           String id = des.getLaunchDescriptor().getLaunchTypeId();
@@ -358,9 +358,9 @@ public class LaunchPageContentProvider extends AbstractCategoryContentProvider {
   }
 
   private void updateMaxValues() {
-    maxLaunchDuration = TreeNodes.findMaxLongValue(getRoot(),
+    maxLaunchDuration = TreeNodes.findMaxLong(getRoot(),
         categoriesAndClasses.get(getPaintCategory()));
-    maxLaunchCount = TreeNodes.findMaxIntegerValue(getRoot(),
+    maxLaunchCount = TreeNodes.findMaxInt(getRoot(),
         categoriesAndClasses.get(getPaintCategory()));
   }
 }

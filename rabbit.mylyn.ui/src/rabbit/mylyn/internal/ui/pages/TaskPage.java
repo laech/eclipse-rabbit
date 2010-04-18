@@ -22,11 +22,11 @@ import rabbit.mylyn.TaskCore;
 import rabbit.mylyn.TaskId;
 import rabbit.mylyn.internal.ui.util.MissingTask;
 import rabbit.mylyn.internal.ui.util.MissingTaskCategory;
-import rabbit.ui.CellPainter;
 import rabbit.ui.Preferences;
-import rabbit.ui.TreeViewerLabelSorter;
 import rabbit.ui.internal.SharedImages;
 import rabbit.ui.internal.pages.AbstractTreeViewerPage;
+import rabbit.ui.internal.viewers.CellPainter;
+import rabbit.ui.internal.viewers.TreeViewerLabelSorter;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;

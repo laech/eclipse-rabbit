@@ -19,12 +19,12 @@ import rabbit.data.access.IAccessor2;
 import rabbit.data.access.model.CommandDataDescriptor;
 import rabbit.data.handler.DataHandler;
 import rabbit.ui.Preferences;
-import rabbit.ui.TreeViewerLabelSorter;
-import rabbit.ui.TreeViewerSorter;
 import rabbit.ui.internal.RabbitUI;
 import rabbit.ui.internal.actions.CollapseAllAction;
 import rabbit.ui.internal.actions.ExpandAllAction;
 import rabbit.ui.internal.actions.GroupByDatesAction;
+import rabbit.ui.internal.viewers.TreeViewerLabelSorter;
+import rabbit.ui.internal.viewers.TreeViewerSorter;
 
 import org.eclipse.core.commands.Command;
 import org.eclipse.core.commands.common.NotDefinedException;
