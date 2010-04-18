@@ -15,7 +15,7 @@
  */
 package rabbit.ui.internal.pages;
 
-import rabbit.data.access.IAccessor2;
+import rabbit.data.access.IAccessor;
 import rabbit.data.access.model.LaunchDataDescriptor;
 import rabbit.data.handler.DataHandler;
 import rabbit.ui.Preferences;
@@ -66,7 +66,7 @@ public class LaunchPage extends AbstractFilteredTreePage {
   private static final String PREF_SELECTED_CATEGORIES = "LaunchPage.SelectedCatgories";
   private static final String PREF_PAINT_CATEGORY = "LaunchPage.PaintCategory";
 
-  private IAccessor2<LaunchDataDescriptor> accessor;
+  private IAccessor<LaunchDataDescriptor> accessor;
   private LaunchPageContentProvider contents;
   private LaunchPageLabelProvider labels;
 

@@ -15,7 +15,7 @@
  */
 package rabbit.ui.internal.pages;
 
-import rabbit.data.access.IAccessor2;
+import rabbit.data.access.IAccessor;
 import rabbit.data.access.model.CommandDataDescriptor;
 import rabbit.data.handler.DataHandler;
 import rabbit.ui.Preferences;
@@ -52,7 +52,7 @@ public class CommandPage extends AbstractTreeViewerPage {
    */
   private static final String DISPLAY_BY_DATE_PREF = "PartPage.displayByDates";
 
-  private final IAccessor2<CommandDataDescriptor> accessor;
+  private final IAccessor<CommandDataDescriptor> accessor;
   private final CommandPageContentProvider contents;
   private final CommandPageLabelProvider labels;
 

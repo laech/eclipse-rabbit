@@ -25,11 +25,14 @@ import org.eclipse.swt.graphics.Image;
 
 import java.util.Map;
 
-// TODO test
+/**
+ * Label provider for {@link ICategory}
+ */
 public class CategoryLabelProvider extends LabelProvider {
 
   private Map<ICategory, Image> images;
 
+  /** Constructor */
   public CategoryLabelProvider() {
     images = Maps.newHashMap();
   }

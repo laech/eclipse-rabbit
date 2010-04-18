@@ -16,7 +16,7 @@
 package rabbit.data.handler;
 
 import rabbit.data.IFileStore;
-import rabbit.data.access.IAccessor2;
+import rabbit.data.access.IAccessor;
 import rabbit.data.access.model.CommandDataDescriptor;
 import rabbit.data.access.model.FileDataDescriptor;
 import rabbit.data.access.model.LaunchDataDescriptor;
@@ -54,12 +54,12 @@ public class DataHandler {
   /** Map<T, IStorer<T> */
   private static final Map<Class<?>, IStorer<?>> storers;
 
-  private static final IAccessor2<LaunchDataDescriptor> launchDataAccessor;
-  private static final IAccessor2<PerspectiveDataDescriptor> perspectiveDataAccessor;
-  private static final IAccessor2<CommandDataDescriptor> commandDataAccessor;
-  private static final IAccessor2<SessionDataDescriptor> sessionDataAccessor;
-  private static final IAccessor2<PartDataDescriptor> partDataAccessor;
-  private static final IAccessor2<FileDataDescriptor> fileDataAccessor;
+  private static final IAccessor<LaunchDataDescriptor> launchDataAccessor;
+  private static final IAccessor<PerspectiveDataDescriptor> perspectiveDataAccessor;
+  private static final IAccessor<CommandDataDescriptor> commandDataAccessor;
+  private static final IAccessor<SessionDataDescriptor> sessionDataAccessor;
+  private static final IAccessor<PartDataDescriptor> partDataAccessor;
+  private static final IAccessor<FileDataDescriptor> fileDataAccessor;
 
   static {
     Map<Class<?>, IStorer<?>> map = new HashMap<Class<?>, IStorer<?>>();
@@ -83,7 +83,7 @@ public class DataHandler {
    * 
    * @return An IAccessor for accessing the command event data.
    */
-  public static IAccessor2<CommandDataDescriptor> getCommandDataAccessor() {
+  public static IAccessor<CommandDataDescriptor> getCommandDataAccessor() {
     return commandDataAccessor;
   }
 
@@ -92,7 +92,7 @@ public class DataHandler {
    * 
    * @return An IAccessor for accessing the file event data.
    */
-  public static IAccessor2<FileDataDescriptor> getFileDataAccessor() {
+  public static IAccessor<FileDataDescriptor> getFileDataAccessor() {
     return fileDataAccessor;
   }
 
@@ -110,7 +110,7 @@ public class DataHandler {
    * 
    * @return An IAccessor for accessing the launch event data.
    */
-  public static IAccessor2<LaunchDataDescriptor> getLaunchDataAccessor() {
+  public static IAccessor<LaunchDataDescriptor> getLaunchDataAccessor() {
     return launchDataAccessor;
   }
 
@@ -119,7 +119,7 @@ public class DataHandler {
    * 
    * @return An IAccessor for accessing the part event data.
    */
-  public static IAccessor2<PartDataDescriptor> getPartDataAccessor() {
+  public static IAccessor<PartDataDescriptor> getPartDataAccessor() {
     return partDataAccessor;
   }
 
@@ -128,7 +128,7 @@ public class DataHandler {
    * 
    * @return An IAccessor for accessing the perspective event data.
    */
-  public static IAccessor2<PerspectiveDataDescriptor> getPerspectiveDataAccessor() {
+  public static IAccessor<PerspectiveDataDescriptor> getPerspectiveDataAccessor() {
     return perspectiveDataAccessor;
   }
 
@@ -137,7 +137,7 @@ public class DataHandler {
    * 
    * @return An IAccessor for accessing the session event data.
    */
-  public static IAccessor2<SessionDataDescriptor> getSessionDataAccessor() {
+  public static IAccessor<SessionDataDescriptor> getSessionDataAccessor() {
     return sessionDataAccessor;
   }
 

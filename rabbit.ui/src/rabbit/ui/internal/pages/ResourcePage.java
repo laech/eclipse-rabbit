@@ -15,7 +15,7 @@
  */
 package rabbit.ui.internal.pages;
 
-import rabbit.data.access.IAccessor2;
+import rabbit.data.access.IAccessor;
 import rabbit.data.access.model.FileDataDescriptor;
 import rabbit.data.handler.DataHandler;
 import rabbit.ui.Preferences;
@@ -72,7 +72,7 @@ public class ResourcePage extends AbstractFilteredTreePage {
 
   private ResourcePageContentProvider contents;
   private ResourcePageTableLabelProvider labels;
-  private IAccessor2<FileDataDescriptor> accessor;
+  private IAccessor<FileDataDescriptor> accessor;
 
   public ResourcePage() {
     super();
@@ -95,7 +95,7 @@ public class ResourcePage extends AbstractFilteredTreePage {
 
   @Override
   public IContributionItem[] createToolBarItems(IToolBarManager toolBar) {
-    IAction groupByAllResourcesAction = newGroupByAllResourcesAction();
+    IAction groupByFilesAction = newGroupByAllResourcesAction();
     IAction colorByProjectsAction = newColorByProjectsAction();
     IAction filterTreeAction = new ShowHideFilterControlAction(getFilteredTree());
     filterTreeAction.run(); // Hides the filter control
@@ -107,17 +107,18 @@ public class ResourcePage extends AbstractFilteredTreePage {
         new ActionContributionItem(new CollapseAllAction(getViewer())),
         new Separator(), //
         new ActionContributionItem(new GroupByAction(contents,
-            groupByAllResourcesAction, // default action
+            groupByFilesAction, // Default action 
+            groupByFilesAction, // First menu item
+            newGroupByFoldersAction(), //
             newGroupByProjectsAction(), //
-            newGroupByProjectsAndFoldersAction(), // 
-            groupByAllResourcesAction)),
+            newGroupByDatesAndFilesAction())),
         new ActionContributionItem(new DropDownAction("Color by Projects",
             SharedImages.BRUSH, // 
-            colorByProjectsAction, // default action
-            newColorByDatesAction(), //
+            colorByProjectsAction, // Default action
+            newColorByFilesAction(),
+            newColorByFoldersAction(),
             colorByProjectsAction, //
-            newColorByFoldersAction(), // 
-            newColorByFilesAction())) };
+            newColorByDatesAction())) };
 
     for (IContributionItem item : items)
       toolBar.add(item);
@@ -298,10 +299,10 @@ public class ResourcePage extends AbstractFilteredTreePage {
   }
 
   /**
-   * Action to group the data by projects, then by folders, then files.
+   * Action to group the data by files.
    */
   private IAction newGroupByAllResourcesAction() {
-    IAction action = new Action("All Resources", PlatformUI.getWorkbench()
+    IAction action = new Action("Files", PlatformUI.getWorkbench()
         .getSharedImages().getImageDescriptor(ISharedImages.IMG_OBJ_FILE)) {
       @Override
       public void run() {
@@ -326,15 +327,29 @@ public class ResourcePage extends AbstractFilteredTreePage {
   }
 
   /**
-   * Action to group the data by projects, then by folders.
+   * Action to group the data by folders.
    */
-  private IAction newGroupByProjectsAndFoldersAction() {
-    IAction action = new Action("Projects and Folders", PlatformUI
+  private IAction newGroupByFoldersAction() {
+    IAction action = new Action("Folders", PlatformUI
         .getWorkbench().getSharedImages().getImageDescriptor(
             ISharedImages.IMG_OBJ_FOLDER)) {
       @Override
       public void run() {
         contents.setSelectedCategories(Category.PROJECT, Category.FOLDER);
+      }
+    };
+    return action;
+  }
+  
+  /**
+   * Action to group the data by dates and files.
+   */
+  private IAction newGroupByDatesAndFilesAction() {
+    IAction action = new Action("Dates and Files", SharedImages.CALENDAR) {
+      @Override
+      public void run() {
+        contents.setSelectedCategories(Category.DATE, Category.PROJECT, 
+            Category.FOLDER, Category.FILE);
       }
     };
     return action;

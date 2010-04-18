@@ -17,7 +17,6 @@ package rabbit.data.internal.xml;
 
 import static rabbit.data.internal.xml.DatatypeUtil.toLocalDate;
 
-import rabbit.data.access.IAccessor;
 import rabbit.data.internal.xml.merge.IMerger;
 import rabbit.data.internal.xml.merge.Mergers;
 import rabbit.data.internal.xml.schema.events.EventGroupType;
@@ -48,7 +47,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
  *          dates.
  */
 public abstract class AbstractDataNodeAccessor<E, T, S extends EventGroupType>
-    extends AbstractAccessor2<E, T, S> {
+    extends AbstractAccessor<E, T, S> {
 
   @CheckForNull
   protected final IMerger<T> merger;

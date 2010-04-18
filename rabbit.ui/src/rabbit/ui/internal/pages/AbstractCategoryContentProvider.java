@@ -195,8 +195,8 @@ public abstract class AbstractCategoryContentProvider extends
     TreeNode node = (TreeNode) element;
     for (ICategory cat : selectedCategories) {
       Class<?> clazz = categoriesAndClasses.get(cat);
-      if (clazz != null)
-        return !clazz.isAssignableFrom(node.getValue().getClass());
+      if (clazz != null && clazz.isAssignableFrom(node.getValue().getClass()))
+        return false;
     }
     return true;
   }

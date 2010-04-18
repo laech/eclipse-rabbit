@@ -15,7 +15,7 @@
  */
 package rabbit.ui.internal.pages;
 
-import rabbit.data.access.IAccessor2;
+import rabbit.data.access.IAccessor;
 import rabbit.data.access.model.SessionDataDescriptor;
 import rabbit.data.handler.DataHandler;
 import rabbit.ui.Preferences;
@@ -40,7 +40,7 @@ import java.util.Collection;
  */
 public class SessionPage extends AbstractTableViewerPage {
 
-  private final IAccessor2<SessionDataDescriptor> accessor;
+  private final IAccessor<SessionDataDescriptor> accessor;
   private final SessionPageLabelProvider labels;
 
   /** Constructs a new page. */

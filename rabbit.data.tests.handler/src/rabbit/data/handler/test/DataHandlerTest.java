@@ -1,5 +1,3 @@
-package rabbit.data.handler.test;
-
 /*
  * Copyright 2010 The Rabbit Eclipse Plug-in Project
  * 
@@ -15,6 +13,8 @@ package rabbit.data.handler.test;
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+package rabbit.data.handler.test;
+
 import rabbit.data.handler.DataHandler;
 import rabbit.data.store.model.CommandEvent;
 import rabbit.data.store.model.FileEvent;

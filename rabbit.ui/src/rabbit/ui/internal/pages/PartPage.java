@@ -15,7 +15,7 @@
  */
 package rabbit.ui.internal.pages;
 
-import rabbit.data.access.IAccessor2;
+import rabbit.data.access.IAccessor;
 import rabbit.data.access.model.PartDataDescriptor;
 import rabbit.data.handler.DataHandler;
 import rabbit.ui.Preferences;
@@ -54,7 +54,7 @@ public class PartPage extends AbstractTreeViewerPage {
    */
   private static final String DISPLAY_BY_DATE_PREF = "PartPage.displayByDates";
 
-  private final IAccessor2<PartDataDescriptor> accessor;
+  private final IAccessor<PartDataDescriptor> accessor;
   private final PartPageContentProvider contents;
   private final PartPageLabelProvider labels;
 

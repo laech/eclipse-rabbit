@@ -77,6 +77,46 @@ public class LaunchPageContentProviderTest {
   public void testConstructor_viewerNull() {
     new LaunchPageContentProvider(null);
   }
+  
+  @Test
+  public void testGetChildren() {
+    /*
+     * Build a tree that look like the following, then check the value of each
+     * node against the data:
+     *  
+     * +-- RunMode --- Date
+     * |
+     * +-- DebugMode --- Date
+     */
+    LaunchConfigurationDescriptor runMode = new LaunchConfigurationDescriptor(
+        "Name", ILaunchManager.RUN_MODE, "org.eclipse.pde.ui.RuntimeWorkbench");
+    LaunchConfigurationDescriptor debugMode = new LaunchConfigurationDescriptor(
+        runMode.getLaunchName(), ILaunchManager.DEBUG_MODE, runMode.getLaunchTypeId());
+    
+    LaunchDataDescriptor d1 = new LaunchDataDescriptor(new LocalDate(), runMode, 1,   10, Collections.<String>emptySet());
+    LaunchDataDescriptor d2 = new LaunchDataDescriptor(d1.getDate(), debugMode, 19, 1200, Collections.<String>emptySet());
+    
+    provider.getViewer().setInput(Arrays.asList(d1, d2));
+    provider.setSelectedCategories(Category.LAUNCH_MODE, Category.DATE);
+    
+    // We should have two different modes:
+    TreeNode[] launchModes = (TreeNode[]) provider.getElements(null);
+    assertNotNull(launchModes);
+    assertEquals(2, launchModes.length);
+    
+    // Each mode should have a date as their child:
+    assertNotNull(provider.getChildren(launchModes[0]));
+    assertEquals(1, provider.getChildren(launchModes[0]).length);
+    TreeNode dateNode = (TreeNode) provider.getChildren(launchModes[0])[0];
+    assertEquals(d1.getDate(), dateNode.getValue());
+    assertFalse(provider.hasChildren(dateNode));
+
+    assertNotNull(provider.getChildren(launchModes[1]));
+    assertEquals(1, provider.getChildren(launchModes[1]).length);
+    dateNode = (TreeNode) provider.getChildren(launchModes[1])[0];
+    assertEquals(d1.getDate(), dateNode.getValue());
+    assertFalse(provider.hasChildren(dateNode));
+  }
 
   @Test
   public void testGetElements() {
@@ -412,6 +452,16 @@ public class LaunchPageContentProviderTest {
     assertTrue(provider.shouldFilter(launchNode));
     assertFalse(provider.shouldFilter(typeNode));
     assertTrue(provider.shouldFilter(modeNode));
+    assertFalse(provider.shouldFilter(projectNode));
+    assertFalse(provider.shouldFilter(folderNode));
+    assertFalse(provider.shouldFilter(fileNode));
+    
+    // Test with multiple categories:
+    provider.setSelectedCategories(Category.LAUNCH_MODE, Category.DATE);
+    assertFalse(provider.shouldFilter(dateNode));
+    assertTrue(provider.shouldFilter(launchNode));
+    assertTrue(provider.shouldFilter(typeNode));
+    assertFalse(provider.shouldFilter(modeNode));
     assertFalse(provider.shouldFilter(projectNode));
     assertFalse(provider.shouldFilter(folderNode));
     assertFalse(provider.shouldFilter(fileNode));

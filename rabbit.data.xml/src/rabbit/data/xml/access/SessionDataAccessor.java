@@ -1,6 +1,6 @@
 package rabbit.data.xml.access;
 
-import rabbit.data.access.IAccessor2;
+import rabbit.data.access.IAccessor;
 import rabbit.data.access.model.PerspectiveDataDescriptor;
 import rabbit.data.access.model.SessionDataDescriptor;
 
@@ -16,10 +16,10 @@ import java.util.Map;
 /**
  * Accesses session data events.
  */
-public class SessionDataAccessor implements IAccessor2<SessionDataDescriptor> {
+public class SessionDataAccessor implements IAccessor<SessionDataDescriptor> {
 
   /** Uses a perspective data accessor to get the data out. */
-  private final IAccessor2<PerspectiveDataDescriptor> accessor;
+  private final IAccessor<PerspectiveDataDescriptor> accessor;
 
   /**
    * Constructor.

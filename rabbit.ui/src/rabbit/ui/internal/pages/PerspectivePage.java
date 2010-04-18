@@ -15,7 +15,7 @@
  */
 package rabbit.ui.internal.pages;
 
-import rabbit.data.access.IAccessor2;
+import rabbit.data.access.IAccessor;
 import rabbit.data.access.model.PerspectiveDataDescriptor;
 import rabbit.data.handler.DataHandler;
 import rabbit.ui.Preferences;
@@ -54,7 +54,7 @@ public class PerspectivePage extends AbstractTreeViewerPage {
    */
   private static final String DISPLAY_BY_DATE_PREF = "PerspectivePage.displayByDates";
 
-  private final IAccessor2<PerspectiveDataDescriptor> accessor;
+  private final IAccessor<PerspectiveDataDescriptor> accessor;
   private final PerspectivePageContentProvider contents;
   private final PerspectivePageLabelProvider labels;
 

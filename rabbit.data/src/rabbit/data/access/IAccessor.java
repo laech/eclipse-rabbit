@@ -15,6 +15,8 @@
  */
 package rabbit.data.access;
 
+import com.google.common.collect.ImmutableCollection;
+
 import org.joda.time.LocalDate;
 
 import javax.annotation.CheckReturnValue;
@@ -32,10 +34,11 @@ public interface IAccessor<T> {
    * 
    * @param start The start date.
    * @param end The end Date.
-   * @return A map of data.
+   * @return A collection of data, or an empty collection if no data is found.
    * @throws NullPointerException If any of the arguments is null.
    */
   @Nonnull
   @CheckReturnValue
-  T getData(@Nonnull LocalDate start, @Nonnull LocalDate end);
+  ImmutableCollection<T> getData(@Nonnull LocalDate start,
+                                 @Nonnull LocalDate end);
 }
