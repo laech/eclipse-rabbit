@@ -15,18 +15,25 @@
  */
 package rabbit.data.test.xml.access;
 
+import rabbit.data.access.model.PartDataDescriptor;
 import rabbit.data.internal.xml.schema.events.PartEventListType;
 import rabbit.data.internal.xml.schema.events.PartEventType;
-import rabbit.data.test.xml.AbstractIdToValueAccessorTest;
+import rabbit.data.test.xml.AbstractDataNodeAccessorTest;
 import rabbit.data.xml.access.PartDataAccessor;
+
+import static org.junit.Assert.assertEquals;
+
+import org.joda.time.LocalDate;
 
 import java.util.List;
 
 /**
  * Test for {@link PartDataAccessor}
  */
-public class PartDataAccessorTest extends
-    AbstractIdToValueAccessorTest<PartEventType, PartEventListType> {
+@SuppressWarnings("restriction")
+public class PartDataAccessorTest
+    extends
+    AbstractDataNodeAccessorTest<PartDataDescriptor, PartEventType, PartEventListType> {
 
   @Override
   protected PartDataAccessor create() {
@@ -34,17 +41,20 @@ public class PartDataAccessorTest extends
   }
 
   @Override
-  protected PartEventListType createListType() {
+  protected PartEventListType createCategory() {
     return objectFactory.createPartEventListType();
   }
 
   @Override
-  protected PartEventType createXmlType() {
-    return objectFactory.createPartEventType();
+  protected PartEventType createElement() {
+    PartEventType type = objectFactory.createPartEventType();
+    type.setDuration(11);
+    type.setPartId("am.an.id");
+    return type;
   }
 
   @Override
-  protected List<PartEventType> getXmlTypes(PartEventListType list) {
+  protected List<PartEventType> getElements(PartEventListType list) {
     return list.getPartEvent();
   }
 
@@ -58,4 +68,14 @@ public class PartDataAccessorTest extends
     type.setDuration(usage);
   }
 
+  @Override
+  public void testCreateDataNode() throws Exception {
+    LocalDate date = new LocalDate();
+    PartEventType type = createElement();
+    PartDataDescriptor des = createDataNode(accessor, date, type);
+    
+    assertEquals(date, des.getDate());
+    assertEquals(type.getPartId(), des.getPartId());
+    assertEquals(type.getDuration(), des.getValue());
+  }
 }

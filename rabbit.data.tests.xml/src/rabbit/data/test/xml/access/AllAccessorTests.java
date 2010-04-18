@@ -20,19 +20,11 @@ import org.junit.runners.Suite;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses( {
-// CommandDataAccessorTest.class, //
-    // FileDataAccessorTest.class, //
-    // LaunchDataAccessorTest.class, //
-    // PartDataAccessorTest.class, //
-    // PerspectiveDataAccessorTest.class, //
-    // SessionDataAccessorTest.class, //
-
-    // /2s
-    CommandDataAccessorTest2.class, //
-    FileDataAccessorTest2.class, //
-    LaunchDataAccessorTest2.class, //
-    PartDataAccessorTest2.class, //
-    PerspectiveDataAccessorTest2.class, //
+    CommandDataAccessorTest.class,
+    FileDataAccessorTest.class,
+    LaunchDataAccessorTest.class,
+    PartDataAccessorTest.class,
+    PerspectiveDataAccessorTest.class,
 })
 public class AllAccessorTests {
 

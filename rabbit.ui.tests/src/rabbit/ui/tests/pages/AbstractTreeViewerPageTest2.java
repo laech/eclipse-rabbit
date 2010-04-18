@@ -20,7 +20,6 @@ import rabbit.ui.internal.pages.AbstractTreeViewerPage2;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.swt.widgets.TreeColumn;
@@ -49,12 +48,12 @@ public abstract class AbstractTreeViewerPageTest2 {
       }
     });
   }
-
+  
   @Test
-  public void testCreateContentProvider() throws Exception {
-    assertNotNull(createContentProvider(page, page.getViewer()));
+  public void testContentProviderNotNull() {
+    assertNotNull(page.getViewer().getContentProvider());
   }
-
+  
   @Test
   public void testCreateInitialComparator() throws Exception {
     assertNotNull(createInitialComparator(page, page.getViewer()));
@@ -66,7 +65,7 @@ public abstract class AbstractTreeViewerPageTest2 {
   }
 
   @Test
-  public void testSaveState() throws Exception {
+  public void testSaveState_columnWidths() throws Exception {
     int width = 12;
     for (TreeColumn column : page.getViewer().getTree().getColumns()) {
       column.setWidth(width);
@@ -81,14 +80,6 @@ public abstract class AbstractTreeViewerPageTest2 {
     for (TreeColumn column : page.getViewer().getTree().getColumns()) {
       assertEquals(width, column.getWidth());
     }
-  }
-
-  protected IContentProvider createContentProvider(
-      AbstractTreeViewerPage2 page, TreeViewer viewer) throws Exception {
-    Method createContentProvider = AbstractTreeViewerPage2.class
-        .getDeclaredMethod("createContentProvider", TreeViewer.class);
-    createContentProvider.setAccessible(true);
-    return (IContentProvider) createContentProvider.invoke(page, viewer);
   }
 
   protected ViewerComparator createInitialComparator(

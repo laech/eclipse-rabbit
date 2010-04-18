@@ -20,13 +20,8 @@ import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerComparator;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeColumn;
-import org.eclipse.swt.widgets.Widget;
 
 /**
  * <p>
@@ -49,9 +44,9 @@ import org.eclipse.swt.widgets.Widget;
  * @see ILabelProvider
  * @see TreeViewer#setLabelProvider(ITableLabelProvider)
  */
-public class TreeLabelComparator extends TreeViewerSorter {
+public class TreeViewerLabelSorter extends TreeViewerSorter {
 
-  public TreeLabelComparator(TreeViewer parent) {
+  public TreeViewerLabelSorter(TreeViewer parent) {
     super(parent);
   }
 

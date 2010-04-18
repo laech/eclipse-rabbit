@@ -17,11 +17,11 @@ package rabbit.ui.internal.pages;
 
 import rabbit.data.IFileStore;
 import rabbit.data.access.model.FileDataDescriptor;
-import rabbit.data.handler.DataHandler2;
+import rabbit.data.handler.DataHandler;
 import rabbit.ui.CellPainter.IValueProvider;
 import rabbit.ui.internal.SharedImages;
-import rabbit.ui.internal.actions.ICategory;
-import rabbit.ui.internal.actions.ICategoryProvider;
+import rabbit.ui.internal.util.ICategory;
+import rabbit.ui.internal.util.ICategoryProvider;
 import rabbit.ui.internal.util.TreeNodes;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -53,13 +53,19 @@ import java.util.Set;
 
 import javax.annotation.Nonnull;
 
-// TODO test
 /**
  * Content provider for a {@link TreeViewer} that accepts input as a
  * {@link Collection} of {@link FileDataDescriptor}.
  */
 public class ResourcePageContentProvider extends TreeNodeContentProvider
     implements IValueProvider, ICategoryProvider {
+
+  /*
+   * This content provider builds a tree from the input data, and every leaf
+   * node of the tree is containing a java.util.Long value, these values are the
+   * values of each FileDataDescriptor. This way, we can calculate the total 
+   * value of every subtree by traversal.
+   */
 
   /**
    * Categories supported by {@link ResourcePageContentProvider}. For
@@ -181,6 +187,15 @@ public class ResourcePageContentProvider extends TreeNodeContentProvider
     return maxValue;
   }
 
+  /**
+   * Gets the category that is currently used to identify elements for painting.
+   * 
+   * @return The paint category.
+   */
+  public Category getPaintCategory() {
+    return paintCategory;
+  }
+
   @Override
   public Category[] getSelectedCategories() {
     return selectedCategories.toArray(new Category[selectedCategories.size()]);
@@ -236,7 +251,8 @@ public class ResourcePageContentProvider extends TreeNodeContentProvider
   }
 
   /**
-   * Sets which category is to be painted.
+   * Sets which category is to be painted. For example, use
+   * {@linkplain Category#FILE} to paint the files.
    * 
    * @param cat The category.
    */
@@ -295,6 +311,9 @@ public class ResourcePageContentProvider extends TreeNodeContentProvider
 
   @Override
   public boolean shouldPaint(Object element) {
+    if (!(element instanceof TreeNode))
+      return false;
+    
     TreeNode node = (TreeNode) element;
     return categoriesAndClasses.get(paintCategory).isAssignableFrom(
         node.getValue().getClass());
@@ -307,7 +326,7 @@ public class ResourcePageContentProvider extends TreeNodeContentProvider
     root.setChildren(null);
 
     Category[] categories = getSelectedCategories();
-    IFileStore store = DataHandler2.getFileMapper();
+    IFileStore store = DataHandler.getFileMapper();
     for (FileDataDescriptor des : data) {
 
       IFile file = store.getFile(des.getFileId());
@@ -342,7 +361,7 @@ public class ResourcePageContentProvider extends TreeNodeContentProvider
           break;
         }
       }
-      TreeNodes.appendParent(node, des.getValue());
+      TreeNodes.appendToParent(node, des.getValue());
     }
 
     treeNodeValues.clear();
@@ -358,6 +377,6 @@ public class ResourcePageContentProvider extends TreeNodeContentProvider
    * @see #getMaxValue()
    */
   private void updateMaxValue(Class<?> clazz) {
-    maxValue = TreeNodes.findMaxValue(root, clazz);
+    maxValue = TreeNodes.findMaxLongValue(root, clazz);
   }
 }

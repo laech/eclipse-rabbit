@@ -17,9 +17,9 @@ package rabbit.ui.internal.pages;
 
 import rabbit.data.access.IAccessor2;
 import rabbit.data.access.model.CommandDataDescriptor;
-import rabbit.data.handler.DataHandler2;
+import rabbit.data.handler.DataHandler;
 import rabbit.ui.Preferences;
-import rabbit.ui.TreeLabelComparator;
+import rabbit.ui.TreeViewerLabelSorter;
 import rabbit.ui.TreeViewerSorter;
 import rabbit.ui.internal.RabbitUI;
 import rabbit.ui.internal.actions.CollapseAllAction;
@@ -67,7 +67,7 @@ public class CommandPage extends AbstractTreeViewerPage {
     boolean displayByDate = store.getBoolean(DISPLAY_BY_DATE_PREF);
     contents = new CommandPageContentProvider(this, displayByDate);
     labels = new CommandPageLabelProvider(contents);
-    accessor = DataHandler2.getCommandDataAccessor();
+    accessor = DataHandler.getCommandDataAccessor();
   }
 
   @Override
@@ -78,7 +78,7 @@ public class CommandPage extends AbstractTreeViewerPage {
     column.setWidth(150);
 
     column = new TreeColumn(viewer.getTree(), SWT.LEFT);
-    column.addSelectionListener(new TreeLabelComparator(viewer));
+    column.addSelectionListener(new TreeViewerLabelSorter(viewer));
     column.setText("Description");
     column.setWidth(200);
 

@@ -15,18 +15,25 @@
  */
 package rabbit.data.test.xml.access;
 
+import rabbit.data.access.model.CommandDataDescriptor;
 import rabbit.data.internal.xml.schema.events.CommandEventListType;
 import rabbit.data.internal.xml.schema.events.CommandEventType;
-import rabbit.data.test.xml.AbstractIdToValueAccessorTest;
+import rabbit.data.test.xml.AbstractDataNodeAccessorTest;
 import rabbit.data.xml.access.CommandDataAccessor;
+
+import static org.junit.Assert.assertEquals;
+
+import org.joda.time.LocalDate;
 
 import java.util.List;
 
 /**
  * Test for {@link CommandDataAccessor}
  */
-public class CommandDataAccessorTest extends
-    AbstractIdToValueAccessorTest<CommandEventType, CommandEventListType> {
+@SuppressWarnings("restriction")
+public class CommandDataAccessorTest
+    extends
+    AbstractDataNodeAccessorTest<CommandDataDescriptor, CommandEventType, CommandEventListType> {
 
   @Override
   protected CommandDataAccessor create() {
@@ -34,17 +41,20 @@ public class CommandDataAccessorTest extends
   }
 
   @Override
-  protected CommandEventListType createListType() {
+  protected CommandEventListType createCategory() {
     return objectFactory.createCommandEventListType();
   }
 
   @Override
-  protected CommandEventType createXmlType() {
-    return objectFactory.createCommandEventType();
+  protected CommandEventType createElement() {
+    CommandEventType type = objectFactory.createCommandEventType();
+    type.setCommandId("abc");
+    type.setCount(10);
+    return type;
   }
 
   @Override
-  protected List<CommandEventType> getXmlTypes(CommandEventListType list) {
+  protected List<CommandEventType> getElements(CommandEventListType list) {
     return list.getCommandEvent();
   }
 
@@ -56,6 +66,17 @@ public class CommandDataAccessorTest extends
   @Override
   protected void setUsage(CommandEventType type, long usage) {
     type.setCount((int) usage);
+  }
+
+  @Override
+  public void testCreateDataNode() throws Exception {
+    LocalDate date = new LocalDate();
+    CommandEventType type = createElement();
+    CommandDataDescriptor des = createDataNode(accessor, date, type);
+    
+    assertEquals(date, des.getDate());
+    assertEquals(type.getCommandId(), des.getCommandId());
+    assertEquals(type.getCount(), des.getValue());
   }
 
 }

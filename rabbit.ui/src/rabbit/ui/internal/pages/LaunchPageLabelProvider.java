@@ -15,41 +15,59 @@
  */
 package rabbit.ui.internal.pages;
 
-import rabbit.data.access.model.ZLaunchDescriptor;
-import rabbit.ui.internal.util.LaunchResource;
-import rabbit.ui.internal.util.MillisConverter;
+import static rabbit.ui.internal.util.MillisConverter.toDefaultString;
 
-import org.eclipse.debug.core.DebugPlugin;
+import rabbit.ui.CellPainter.IValueProvider;
+import rabbit.ui.internal.Pair;
+import rabbit.ui.internal.SharedImages;
+import rabbit.ui.internal.util.UndefinedLaunchConfigurationType;
+import rabbit.ui.internal.util.UndefinedLaunchMode;
+
+import static com.google.common.base.Preconditions.checkNotNull;
+
+import org.eclipse.debug.core.ILaunchConfigurationType;
 import org.eclipse.debug.core.ILaunchManager;
+import org.eclipse.debug.core.ILaunchMode;
 import org.eclipse.debug.ui.DebugUITools;
 import org.eclipse.debug.ui.IDebugUIConstants;
-import org.eclipse.jface.viewers.BaseLabelProvider;
 import org.eclipse.jface.viewers.IColorProvider;
 import org.eclipse.jface.viewers.ITableLabelProvider;
+import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.TreeNode;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.ui.PlatformUI;
 
 /**
  * Label provider a {@link LaunchPage}.
  */
-public class LaunchPageLabelProvider extends BaseLabelProvider implements
+public class LaunchPageLabelProvider extends LabelProvider implements
     ITableLabelProvider, IColorProvider {
 
-  protected final ResourcePageLabelProvider provider;
-  protected ILaunchManager manager;
+  private final ResourcePageLabelProvider resourceLabels;
+  private final LaunchPageContentProvider contents;
+  private final Image launchImage;
+  private final Color gray;
 
   /**
    * Constructs a new label provider.
+   * 
+   * @param contentProvider The content provider of the page.
    */
-  public LaunchPageLabelProvider() {
-    manager = DebugPlugin.getDefault().getLaunchManager();
-    provider = new ResourcePageLabelProvider();
+  public LaunchPageLabelProvider(LaunchPageContentProvider contentProvider) {
+    checkNotNull(contentProvider);
+    contents = contentProvider;
+    resourceLabels = new ResourcePageLabelProvider();
+    launchImage = SharedImages.ELEMENT.createImage();
+    gray = PlatformUI.getWorkbench().getDisplay().getSystemColor(SWT.COLOR_DARK_GRAY);
   }
 
   @Override
   public void dispose() {
     super.dispose();
-    provider.dispose();
+    launchImage.dispose();
+    resourceLabels.dispose();
   }
 
   @Override
@@ -58,72 +76,89 @@ public class LaunchPageLabelProvider extends BaseLabelProvider implements
   }
 
   @Override
-  public Image getColumnImage(Object element, int columnIndex) {
+  public Image getImage(Object element) {
+    if (!(element instanceof TreeNode))
+      return null;
 
-    if (columnIndex == 0) {
-      if (element instanceof ZLaunchDescriptor) {
-        return DebugUITools.getImage(((ZLaunchDescriptor) element)
-            .getLaunchTypeId());
+    Object value = ((TreeNode) element).getValue();
+    if (value instanceof ILaunchMode) {
+      return getLaunchModeImage(((ILaunchMode) value).getIdentifier());
 
-      } else if (element instanceof LaunchResource) {
-        return provider.getImage(((LaunchResource) element).getResource());
-      }
-      return provider.getImage(element);
+    } else if (value instanceof ILaunchConfigurationType) {
+      String id = ((ILaunchConfigurationType) value).getIdentifier();
+      return DebugUITools.getImage(id);
 
-    } else if (columnIndex == 1) {
-      if (element instanceof ZLaunchDescriptor) {
-        String mode = ((ZLaunchDescriptor) element).getLaunchModeId();
-        if (mode.equals(ILaunchManager.DEBUG_MODE)) {
-          return DebugUITools.getImage(IDebugUIConstants.IMG_OBJS_LAUNCH_DEBUG);
-
-        } else if (mode.equals(ILaunchManager.RUN_MODE)) {
-          return DebugUITools.getImage(IDebugUIConstants.IMG_OBJS_LAUNCH_RUN);
-        }
-      }
+    } else if (value instanceof Pair<?, ?>) { // <LaunchName, LaunchTypeId>
+      return DebugUITools.getImage(((Pair<?, ?>) value).getSecond().toString());
     }
-    return null;
+    return resourceLabels.getImage(element);
+  }
+
+  @Override
+  public Image getColumnImage(Object element, int columnIndex) {
+    return (columnIndex == 0) ? getImage(element) : null;
+  }
+
+  @Override
+  public String getText(Object element) {
+    if (!(element instanceof TreeNode))
+      return null;
+
+    Object value = ((TreeNode) element).getValue();
+    if (value instanceof ILaunchMode)
+      return ((ILaunchMode) value).getLabel().replace("&", "");
+
+    else if (value instanceof ILaunchConfigurationType)
+      return ((ILaunchConfigurationType) value).getName();
+
+    else if (value instanceof Pair<?, ?>) // <LaunchName, LaunchTypeId>
+      return ((Pair<?, ?>) value).getFirst().toString();
+    else
+      return resourceLabels.getText(element);
   }
 
   @Override
   public String getColumnText(Object element, int columnIndex) {
+    if (columnIndex == 0)
+      return getText(element);
 
     switch (columnIndex) {
-    case 0:
-      if (element instanceof ZLaunchDescriptor) {
-        return ((ZLaunchDescriptor) element).getLaunchName();
-
-      } else if (element instanceof LaunchResource) {
-        return provider.getText(((LaunchResource) element).getResource());
-      }
-      return provider.getText(element);
-
     case 1:
-      if (element instanceof ZLaunchDescriptor) {
-        return ((ZLaunchDescriptor) element).getLaunchModeId().toString();
-      }
-      break;
+      IValueProvider countProvider = contents.getLaunchCountValueProvider();
+      if (countProvider.shouldPaint(element))
+        return countProvider.getValue(element) + "";
 
-    case 2:
-      if (element instanceof ZLaunchDescriptor) {
-        return ((ZLaunchDescriptor) element).getCount() + "";
-      }
-      break;
+    case 3:
+      IValueProvider provider = contents.getLaunchDurationValueProvider();
+      if (provider.shouldPaint(element))
+        return toDefaultString(provider.getValue(element));
 
-    case 4:
-      if (element instanceof ZLaunchDescriptor) {
-        return MillisConverter.toDefaultString(((ZLaunchDescriptor) element)
-            .getTotalDuration());
-      }
-      break;
+    default:
+      return null;
     }
-    return null;
   }
 
   @Override
   public Color getForeground(Object element) {
-    if (element instanceof LaunchResource) {
-      return provider.getForeground(((LaunchResource) element).getResource());
-    }
-    return provider.getForeground(element);
+    if (!(element instanceof TreeNode))
+      return null;
+    
+    TreeNode node = (TreeNode) element;
+    if (node.getValue() instanceof UndefinedLaunchMode || 
+        node.getValue() instanceof UndefinedLaunchConfigurationType)
+      return gray;
+    else 
+      return resourceLabels.getForeground(element);
+  }
+
+  private Image getLaunchModeImage(String modeId) {
+    if (modeId.equals(ILaunchManager.DEBUG_MODE))
+      return DebugUITools.getImage(IDebugUIConstants.IMG_OBJS_LAUNCH_DEBUG);
+
+    else if (modeId.equals(ILaunchManager.RUN_MODE))
+      return DebugUITools.getImage(IDebugUIConstants.IMG_OBJS_LAUNCH_RUN);
+    
+    else
+      return DebugUITools.getImage(IDebugUIConstants.IMG_OBJS_ENVIRONMENT);
   }
 }

@@ -16,8 +16,8 @@
 package rabbit.ui.internal.pages;
 
 import rabbit.ui.IPage;
-import rabbit.ui.TableLabelComparator;
-import rabbit.ui.TreeLabelComparator;
+import rabbit.ui.TableViewerLabelSorter;
+import rabbit.ui.TreeViewerLabelSorter;
 import rabbit.ui.CellPainter.IValueProvider;
 
 import org.eclipse.jface.action.IContributionItem;
@@ -49,8 +49,8 @@ public abstract class AbstractValueProviderPage implements IValueProvider,
   }
 
   // TODO
-  protected TableLabelComparator createValueSorterForTable(TableViewer viewer) {
-    return new TableLabelComparator(viewer) {
+  protected TableViewerLabelSorter createValueSorterForTable(TableViewer viewer) {
+    return new TableViewerLabelSorter(viewer) {
       @Override
       protected int doCompare(Viewer v, Object e1, Object e2) {
         return (getValue(e1) > getValue(e2)) ? 1 : -1;
@@ -58,8 +58,8 @@ public abstract class AbstractValueProviderPage implements IValueProvider,
     };
   }
   // TODO
-  protected TreeLabelComparator createValueSorterForTree(TreeViewer viewer) {
-    return new TreeLabelComparator(viewer) {
+  protected TreeViewerLabelSorter createValueSorterForTree(TreeViewer viewer) {
+    return new TreeViewerLabelSorter(viewer) {
       @Override
       protected int doCompare(Viewer v, Object e1, Object e2) {
         return (getValue(e1) > getValue(e2)) ? 1 : -1;

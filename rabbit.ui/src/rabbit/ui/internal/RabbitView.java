@@ -190,8 +190,8 @@ public class RabbitView extends ViewPart {
     // Displaying area:
     FormData rightData = new FormData();
     rightData.top = new FormAttachment(0, 0);
-    rightData.left = new FormAttachment(sash, 1);
-    rightData.right = new FormAttachment(100, -1);
+    rightData.left = new FormAttachment(sash, 0);
+    rightData.right = new FormAttachment(100, 0);
     rightData.bottom = new FormAttachment(100, 0);
 
     Composite right = toolkit.createComposite(form.getBody());
@@ -204,7 +204,7 @@ public class RabbitView extends ViewPart {
     GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER)
         .grab(true, false).applyTo(header);
     {
-      Label label = toolkit.createLabel(header, "Statistics");
+      Label label = toolkit.createLabel(header, "Statistics  ");
       label.setFont(left.getHead().getFont());
       label.setForeground(left.getHead().getForeground());
 

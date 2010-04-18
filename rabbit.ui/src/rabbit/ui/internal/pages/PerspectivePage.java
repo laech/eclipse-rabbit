@@ -17,7 +17,7 @@ package rabbit.ui.internal.pages;
 
 import rabbit.data.access.IAccessor2;
 import rabbit.data.access.model.PerspectiveDataDescriptor;
-import rabbit.data.handler.DataHandler2;
+import rabbit.data.handler.DataHandler;
 import rabbit.ui.CellPainter;
 import rabbit.ui.Preferences;
 import rabbit.ui.TreeViewerSorter;
@@ -69,7 +69,7 @@ public class PerspectivePage extends AbstractTreeViewerPage {
     boolean displayByDate = store.getBoolean(DISPLAY_BY_DATE_PREF);
     contents = new PerspectivePageContentProvider(this, displayByDate);
     labels = new PerspectivePageLabelProvider(contents);
-    accessor = DataHandler2.getPerspectiveDataAccessor();
+    accessor = DataHandler.getPerspectiveDataAccessor();
   }
 
   @Override

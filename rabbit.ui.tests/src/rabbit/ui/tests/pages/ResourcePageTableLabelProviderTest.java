@@ -18,7 +18,7 @@ package rabbit.ui.tests.pages;
 import static rabbit.ui.internal.util.MillisConverter.toDefaultString;
 
 import rabbit.data.access.model.FileDataDescriptor;
-import rabbit.data.handler.DataHandler2;
+import rabbit.data.handler.DataHandler;
 import rabbit.ui.internal.pages.ResourcePage;
 import rabbit.ui.internal.pages.ResourcePageContentProvider;
 import rabbit.ui.internal.pages.ResourcePageLabelProvider;
@@ -130,7 +130,7 @@ public class ResourcePageTableLabelProviderTest {
   @Test
   public void testGetColumnText_1() throws Exception {
     FileDataDescriptor des1 = new FileDataDescriptor((LocalDate) dateNode
-        .getValue(), 12, DataHandler2.getFileMapper().insert(
+        .getValue(), 12, DataHandler.getFileMapper().insert(
         (IFile) fileNode.getValue()));
     FileDataDescriptor des2 = new FileDataDescriptor(des1.getDate(), 11982222,
         des1.getFileId());

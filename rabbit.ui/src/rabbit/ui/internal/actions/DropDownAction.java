@@ -1,3 +1,18 @@
+/*
+ * Copyright 2010 The Rabbit Eclipse Plug-in Project
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ */
 package rabbit.ui.internal.actions;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -10,14 +25,28 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Menu;
 
+import javax.annotation.Nonnull;
+
+/**
+ * An action that has a drop down menu.
+ */
 public class DropDownAction extends Action implements IMenuCreator {
 
-  private Menu menu;
+  protected Menu menu;
   private IAction defaultAction;
   private IAction[] menuItems;
 
+  /**
+   * Constructor.
+   * 
+   * @param text The text of this action.
+   * @param image The image of this action.
+   * @param defaultAction The default action to run.
+   * @param menuItems The list of actions to be displayed on the menu.
+   * @throws NullPointerException If default action is null.
+   */
   public DropDownAction(String text, ImageDescriptor image,
-      IAction defaultAction, IAction... menuItems) {
+      @Nonnull IAction defaultAction, IAction... menuItems) {
     super(text, IAction.AS_DROP_DOWN_MENU);
     checkNotNull(defaultAction);
 
@@ -25,11 +54,6 @@ public class DropDownAction extends Action implements IMenuCreator {
     setImageDescriptor(image);
     this.defaultAction = defaultAction;
     this.menuItems = menuItems;
-  }
-
-  @Override
-  public void run() {
-    defaultAction.run();
   }
 
   @Override
@@ -57,11 +81,26 @@ public class DropDownAction extends Action implements IMenuCreator {
     return null;
   }
 
-  protected IAction getDefaultAction() {
+  @Override
+  public void run() {
+    defaultAction.run();
+  }
+
+  /**
+   * Gets the default action.
+   * 
+   * @return The default action.
+   */
+  public IAction getDefaultAction() {
     return defaultAction;
   }
 
-  protected IAction[] getMenuItemActions() {
+  /**
+   * Gets the actions to be displayed on the menu.
+   * 
+   * @return The actions to be displayed on the menu.
+   */
+  public IAction[] getMenuItemActions() {
     return menuItems;
   }
 }

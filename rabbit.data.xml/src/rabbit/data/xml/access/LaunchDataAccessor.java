@@ -15,67 +15,49 @@
  */
 package rabbit.data.xml.access;
 
-import static rabbit.data.internal.xml.util.StringUtil.getString;
-
-import rabbit.data.access.model.ZLaunchDescriptor;
-import rabbit.data.internal.xml.AbstractAccessor;
+import rabbit.data.access.model.LaunchConfigurationDescriptor;
+import rabbit.data.access.model.LaunchDataDescriptor;
+import rabbit.data.internal.xml.AbstractDataNodeAccessor;
 import rabbit.data.internal.xml.DataStore;
 import rabbit.data.internal.xml.IDataStore;
+import rabbit.data.internal.xml.merge.IMerger;
+import rabbit.data.internal.xml.merge.LaunchEventTypeMerger;
 import rabbit.data.internal.xml.schema.events.EventListType;
 import rabbit.data.internal.xml.schema.events.LaunchEventListType;
 import rabbit.data.internal.xml.schema.events.LaunchEventType;
 
+import org.joda.time.LocalDate;
+
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 /**
- * Gets launch event data.
+ * Accesses launch event data.
  */
 public class LaunchDataAccessor
     extends
-    AbstractAccessor<Set<ZLaunchDescriptor>, LaunchEventType, LaunchEventListType> {
+    AbstractDataNodeAccessor<LaunchDataDescriptor, LaunchEventType, LaunchEventListType> {
 
   @Override
-  protected Set<ZLaunchDescriptor> filter(List<LaunchEventListType> data) {
-    Set<ZLaunchDescriptor> result = new HashSet<ZLaunchDescriptor>();
+  protected LaunchDataDescriptor createDataNode(LocalDate cal,
+      LaunchEventType type) {
 
-    for (LaunchEventListType list : data) {
-      for (LaunchEventType type : list.getLaunchEvent()) {
+    try {
+      LaunchConfigurationDescriptor des = new LaunchConfigurationDescriptor(
+          type.getName(), type.getLaunchModeId(), type.getLaunchTypeId());
 
-        boolean done = false;
-        for (ZLaunchDescriptor des : result) {
-          if (getString(type.getName()).equals(des.getLaunchName())
-              && getString(type.getLaunchModeId())
-                  .equals(des.getLaunchModeId())
-              && getString(type.getLaunchTypeId())
-                  .equals(des.getLaunchTypeId())) {
+      return new LaunchDataDescriptor(cal, des, type.getCount(), type
+          .getTotalDuration(), type.getFileId());
 
-            des.setCount(des.getCount() + type.getCount());
-            des.setTotalDuration(des.getTotalDuration()
-                + type.getTotalDuration());
-            des.getFileIds().addAll(type.getFileId());
-
-            done = true;
-            break;
-          }
-        }
-
-        if (!done) {
-          ZLaunchDescriptor launch = new ZLaunchDescriptor();
-          launch.setTotalDuration(type.getTotalDuration());
-          launch.getFileIds().addAll(type.getFileId());
-          launch.setLaunchName(type.getName());
-          launch.setLaunchTypeId(type.getLaunchTypeId());
-          launch.setLaunchModeId(type.getLaunchModeId());
-          launch.setCount(type.getCount());
-
-          result.add(launch);
-        }
-      }
+    } catch (NullPointerException e) {
+      return null;
+    } catch (IllegalArgumentException e) {
+      return null;
     }
-    return result;
+  }
+
+  @Override
+  protected Collection<LaunchEventType> getElements(LaunchEventListType list) {
+    return list.getLaunchEvent();
   }
 
   @Override
@@ -86,6 +68,11 @@ public class LaunchDataAccessor
   @Override
   protected IDataStore getDataStore() {
     return DataStore.LAUNCH_STORE;
+  }
+
+  @Override
+  protected IMerger<LaunchEventType> createMerger() {
+    return new LaunchEventTypeMerger();
   }
 
 }

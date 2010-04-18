@@ -17,34 +17,40 @@ package rabbit.ui.internal.pages;
 
 import rabbit.data.access.IAccessor2;
 import rabbit.data.access.model.FileDataDescriptor;
-import rabbit.data.handler.DataHandler2;
+import rabbit.data.handler.DataHandler;
 import rabbit.ui.CellPainter;
 import rabbit.ui.Preferences;
-import rabbit.ui.TreeLabelComparator;
+import rabbit.ui.TreeViewerLabelSorter;
 import rabbit.ui.TreeViewerSorter;
+import rabbit.ui.internal.RabbitUI;
 import rabbit.ui.internal.SharedImages;
 import rabbit.ui.internal.actions.CollapseAllAction;
 import rabbit.ui.internal.actions.DropDownAction;
 import rabbit.ui.internal.actions.ExpandAllAction;
-import rabbit.ui.internal.actions.FilteredTreeAction;
 import rabbit.ui.internal.actions.GroupByAction;
+import rabbit.ui.internal.actions.ShowHideFilterControlAction;
 import rabbit.ui.internal.pages.ResourcePageContentProvider.Category;
+import rabbit.ui.internal.util.ICategory;
 
+import com.google.common.base.Joiner;
+import com.google.common.collect.Lists;
+
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.Separator;
-import org.eclipse.jface.viewers.ILabelProvider;
-import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.viewers.TreeNode;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.ui.ISharedImages;
@@ -53,10 +59,16 @@ import org.eclipse.ui.dialogs.PatternFilter;
 import org.eclipse.ui.ide.IDE;
 import org.joda.time.LocalDate;
 
+import java.util.List;
+
 /**
  * A page for displaying time spent working on different files.
  */
 public class ResourcePage extends AbstractTreeViewerPage2 {
+
+  // Preference constants:
+  private static final String PREF_SELECTED_CATEGORIES = "ResourcePage.SelectedCatgories";
+  private static final String PREF_PAINT_CATEGORY = "ResourcePage.PaintCategory";
 
   private ResourcePageContentProvider contents;
   private ResourcePageTableLabelProvider labels;
@@ -64,15 +76,17 @@ public class ResourcePage extends AbstractTreeViewerPage2 {
 
   public ResourcePage() {
     super();
-    accessor = DataHandler2.getFileDataAccessor();
+    accessor = DataHandler.getFileDataAccessor();
+  }
+  
+  @Override
+  protected void initializeViewer(TreeViewer viewer) {
+    super.initializeViewer(viewer);
     contents = new ResourcePageContentProvider(this);
     labels = new ResourcePageTableLabelProvider(contents);
-  }
-
-  @Override
-  public void createContents(Composite parent) {
-    super.createContents(parent);
-    getViewer().addFilter(new ViewerFilter() {
+    viewer.setContentProvider(contents);
+    viewer.setLabelProvider(labels);
+    viewer.addFilter(new ViewerFilter() {
       @Override
       public boolean select(Viewer v, Object parentElement, Object element) {
         return !contents.shouldFilter(element);
@@ -84,7 +98,7 @@ public class ResourcePage extends AbstractTreeViewerPage2 {
   public IContributionItem[] createToolBarItems(IToolBarManager toolBar) {
     IAction groupByAllResourcesAction = newGroupByAllResourcesAction();
     IAction colorByProjectsAction = newColorByProjectsAction();
-    IAction filterTreeAction = new FilteredTreeAction(getFilteredTree());
+    IAction filterTreeAction = new ShowHideFilterControlAction(getFilteredTree());
     filterTreeAction.run(); // Hides the filter control
 
     IContributionItem[] items = new IContributionItem[] {
@@ -150,18 +164,30 @@ public class ResourcePage extends AbstractTreeViewerPage2 {
   }
 
   @Override
-  protected ITreeContentProvider createContentProvider(TreeViewer viewer) {
-    return contents;
-  }
-
-  @Override
   protected PatternFilter createFilter() {
     return new PatternFilter();
   }
 
   @Override
   protected TreeViewerSorter createInitialComparator(TreeViewer viewer) {
-    return new TreeLabelComparator(viewer) {
+    return new TreeViewerLabelSorter(viewer) {
+      
+      @Override
+      public int category(Object element) {
+        if (element instanceof TreeNode) {
+          TreeNode node = (TreeNode) element;
+          if (node.getValue() instanceof IFile)
+            return 1;
+          if (node.getValue() instanceof IFolder)
+            return 2;
+          if (node.getValue() instanceof IProject)
+            return 3;
+          if (node.getValue() instanceof LocalDate)
+            return 4;
+        }
+        return super.category(element);
+      }
+      
       @Override
       protected int doCompare(Viewer v, Object e1, Object e2) {
         if (!(e1 instanceof TreeNode) || !(e1 instanceof TreeNode))
@@ -178,8 +204,43 @@ public class ResourcePage extends AbstractTreeViewerPage2 {
   }
 
   @Override
-  protected ILabelProvider createLabelProvider(TreeViewer viewer) {
-    return labels;
+  protected void restoreState() {
+    super.restoreState();
+    IPreferenceStore store = RabbitUI.getDefault().getPreferenceStore();
+
+    // Restores the selected categories of the content provider:
+    String[] categoryStr = store.getString(PREF_SELECTED_CATEGORIES).split(",");
+    List<Category> cats = Lists.newArrayList();
+    for (String str : categoryStr) {
+      try {
+        cats.add(Enum.valueOf(Category.class, str));
+      } catch (IllegalArgumentException e) {
+        // Ignore invalid elements.
+      }
+    }
+    contents.setSelectedCategories(cats.toArray(new ICategory[cats.size()]));
+
+    // Restores the paint category of the content provider:
+    String paintStr = store.getString(PREF_PAINT_CATEGORY);
+    try {
+      Category cat = Enum.valueOf(Category.class, paintStr);
+      contents.setPaintCategory(cat);
+    } catch (IllegalArgumentException e) {
+      // Just let the content provider use its default paint category.
+    }
+  }
+
+  @Override
+  protected void saveState() {
+    super.saveState();
+    IPreferenceStore store = RabbitUI.getDefault().getPreferenceStore();
+
+    // Saves the selected categories of the content provider:
+    ICategory[] categories = contents.getSelectedCategories();
+    store.setValue(PREF_SELECTED_CATEGORIES, Joiner.on(",").join(categories));
+
+    // Saves the paint category of the content provider:
+    store.setValue(PREF_PAINT_CATEGORY, contents.getPaintCategory().toString());
   }
 
   /**

@@ -17,11 +17,11 @@ package rabbit.ui.tests.pages;
 
 import rabbit.data.IFileStore;
 import rabbit.data.access.model.FileDataDescriptor;
-import rabbit.data.handler.DataHandler2;
-import rabbit.ui.internal.actions.ICategory;
+import rabbit.data.handler.DataHandler;
 import rabbit.ui.internal.pages.ResourcePage;
 import rabbit.ui.internal.pages.ResourcePageContentProvider;
 import rabbit.ui.internal.pages.ResourcePageContentProvider.Category;
+import rabbit.ui.internal.util.ICategory;
 
 import com.google.common.collect.Sets;
 
@@ -82,11 +82,11 @@ public class ResourcePageContentProviderTest {
     folder = project.getFolder("f");
     file = folder.getFile("a");
     
-    mapper = DataHandler2.getFileMapper();
+    mapper = DataHandler.getFileMapper();
   }
 
   @Test
-  public void hasChildren() throws Exception {
+  public void testHasChildren() throws Exception {
     FileDataDescriptor des = new FileDataDescriptor(new LocalDate(), 1009823,
         mapper.insert(file));
     page.getViewer().setInput(Arrays.asList(des));
@@ -272,7 +272,7 @@ public class ResourcePageContentProviderTest {
   }
 
   @Test
-  public void testSelectedCategories_emptyArray() {
+  public void testSetSelectedCategories_emptyArray() {
     try {
       ICategory[] cats = new ICategory[] { Category.FILE, Category.FOLDER };
       provider.setSelectedCategories(cats);
@@ -289,7 +289,7 @@ public class ResourcePageContentProviderTest {
   }
 
   @Test
-  public void testSelectedCategories_emptyVararg() {
+  public void testSetSelectedCategories_emptyVararg() {
     try {
       ICategory[] cats = new ICategory[] { Category.FILE, Category.FOLDER };
       provider.setSelectedCategories(cats);

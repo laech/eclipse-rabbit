@@ -15,20 +15,44 @@
  */
 package rabbit.data.xml.access;
 
-import rabbit.data.internal.xml.AbstractIdToValueAccessor;
+import rabbit.data.access.model.FileDataDescriptor;
+import rabbit.data.internal.xml.AbstractDataNodeAccessor;
 import rabbit.data.internal.xml.DataStore;
 import rabbit.data.internal.xml.IDataStore;
+import rabbit.data.internal.xml.merge.FileEventTypeMerger;
 import rabbit.data.internal.xml.schema.events.EventListType;
 import rabbit.data.internal.xml.schema.events.FileEventListType;
 import rabbit.data.internal.xml.schema.events.FileEventType;
 
+import org.joda.time.LocalDate;
+
 import java.util.Collection;
 
 /**
- * For getting data on file events.
+ * Accesses file event data.
  */
-public class FileDataAccessor extends
-    AbstractIdToValueAccessor<FileEventType, FileEventListType> {
+public class FileDataAccessor
+    extends
+    AbstractDataNodeAccessor<FileDataDescriptor, FileEventType, FileEventListType> {
+
+  public FileDataAccessor() {
+  }
+
+  @Override
+  protected FileDataDescriptor createDataNode(LocalDate cal, FileEventType type) {
+    try {
+      return new FileDataDescriptor(cal, type.getDuration(), type.getFileId());
+    } catch (NullPointerException e) {
+      return null;
+    } catch (IllegalArgumentException e) {
+      return null;
+    }
+  }
+
+  @Override
+  protected Collection<FileEventType> getElements(FileEventListType list) {
+    return list.getFileEvent();
+  }
 
   @Override
   protected Collection<FileEventListType> getCategories(EventListType doc) {
@@ -41,18 +65,8 @@ public class FileDataAccessor extends
   }
 
   @Override
-  protected String getId(FileEventType e) {
-    return e.getFileId();
-  }
-
-  @Override
-  protected long getUsage(FileEventType e) {
-    return e.getDuration();
-  }
-
-  @Override
-  protected Collection<FileEventType> getXmlTypes(FileEventListType list) {
-    return list.getFileEvent();
+  protected FileEventTypeMerger createMerger() {
+    return new FileEventTypeMerger();
   }
 
 }

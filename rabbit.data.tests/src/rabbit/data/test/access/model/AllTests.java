@@ -14,7 +14,6 @@ CommandDataDescriptorTest.class, //
     PerspectiveDataDescriptorTest.class, //
     SessionDataDescriptorTest.class, //
     ValueDescriptorTest.class, //
-    ZLaunchDescriptorTest.class, //
 })
 public class AllTests {
 

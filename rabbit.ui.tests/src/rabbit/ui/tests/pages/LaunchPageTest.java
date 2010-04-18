@@ -15,28 +15,53 @@
  */
 package rabbit.ui.tests.pages;
 
-import rabbit.data.access.model.ZLaunchDescriptor;
+import rabbit.ui.internal.pages.AbstractTreeViewerPage2;
 import rabbit.ui.internal.pages.LaunchPage;
+import rabbit.ui.internal.pages.LaunchPageContentProvider;
+import rabbit.ui.internal.pages.LaunchPageContentProvider.Category;
+import rabbit.ui.internal.util.ICategory;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-public class LaunchPageTest extends AbstractTreeViewerPageTest {
-
-  @Test
-  public void testGetValue() {
-    LaunchPage page = createPage();
-    assertEquals(0, page.getValue(new Object()));
-    assertEquals(0, page.getValue(null));
-
-    ZLaunchDescriptor des = new ZLaunchDescriptor();
-    des.setTotalDuration(19834);
-    assertEquals(des.getTotalDuration(), page.getValue(des));
-  }
+/**
+ * @see LaunchPage
+ */
+@SuppressWarnings("restriction")
+public class LaunchPageTest extends AbstractTreeViewerPageTest2 {
 
   @Override
-  protected LaunchPage createPage() {
+  protected AbstractTreeViewerPage2 createPage() {
     return new LaunchPage();
+  }
+  
+  @Test
+  public void testSaveState_selectedCategories() throws Exception {
+    LaunchPageContentProvider contents = (LaunchPageContentProvider) page
+        .getViewer().getContentProvider();
+    
+    ICategory[] categories = new ICategory[] { Category.DATE, Category.LAUNCH };
+    contents.setSelectedCategories(categories);
+    saveState(page);
+    
+    contents.setSelectedCategories(new ICategory[] { Category.LAUNCH_MODE });
+    restoreState(page);
+    assertArrayEquals(categories, contents.getSelectedCategories());
+  }
+  
+  @Test
+  public void testSaveState_paintCategory() throws Exception {
+    LaunchPageContentProvider contents = (LaunchPageContentProvider) page
+        .getViewer().getContentProvider();
+    
+    Category paintCategory = Category.DATE;
+    contents.setPaintCategory(paintCategory);
+    saveState(page);
+    
+    contents.setPaintCategory(Category.LAUNCH);
+    restoreState(page);
+    assertEquals(paintCategory, contents.getPaintCategory());
   }
 }

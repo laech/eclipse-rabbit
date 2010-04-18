@@ -15,102 +15,453 @@
  */
 package rabbit.ui.tests.pages;
 
-import rabbit.data.IFileStore;
-import rabbit.data.access.model.ZLaunchDescriptor;
-import rabbit.data.handler.DataHandler;
+import rabbit.data.access.model.LaunchConfigurationDescriptor;
+import rabbit.data.access.model.LaunchDataDescriptor;
+import rabbit.ui.CellPainter.IValueProvider;
+import rabbit.ui.internal.Pair;
 import rabbit.ui.internal.pages.LaunchPageContentProvider;
-import rabbit.ui.internal.util.LaunchResource;
+import rabbit.ui.internal.pages.LaunchPageContentProvider.Category;
+import rabbit.ui.internal.util.ICategory;
+import rabbit.ui.internal.util.UndefinedLaunchConfigurationType;
+import rabbit.ui.internal.util.UndefinedLaunchMode;
 
+import com.google.common.collect.Sets;
+
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.junit.Before;
+import org.eclipse.debug.core.ILaunchManager;
+import org.eclipse.jface.viewers.TreeNode;
+import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.PlatformUI;
+import org.joda.time.LocalDate;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.util.Arrays;
-import java.util.HashSet;
+import java.util.Collections;
+import java.util.Set;
 
 /**
  * @see LaunchPageContentProvider
  */
+@SuppressWarnings("restriction")
 public class LaunchPageContentProviderTest {
 
-  private LaunchPageContentProvider provider;
-  private IFileStore fileMapper = DataHandler.getFileMapper();
-  private IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
+  private static Shell shell;
+  private static LaunchPageContentProvider provider;
 
-  @Before
-  public void before() {
-    provider = new LaunchPageContentProvider();
+  @AfterClass
+  public static void afterClass() {
+    shell.dispose();
   }
 
-  @Test
-  public void testGetChildren() {
-    ZLaunchDescriptor des = new ZLaunchDescriptor();
-
-    IFile file = root.getProject("p").getFolder("f").getFile("ff");
-    String fileId = fileMapper.insert(file);
-    des.getFileIds().addAll(new HashSet<String>(Arrays.asList(fileId)));
-    provider.inputChanged(null, null, new HashSet<ZLaunchDescriptor>(Arrays
-        .asList(des)));
-
-    LaunchResource projectRes = new LaunchResource(des, file.getProject());
-    LaunchResource folderRes = new LaunchResource(des, file.getParent());
-
-    assertEquals(projectRes, provider.getChildren(des)[0]);
-    assertEquals(folderRes, provider.getChildren(projectRes)[0]);
-    assertEquals(file, provider.getChildren(folderRes)[0]);
+  @BeforeClass
+  public static void beforeClass() {
+    shell = new Shell(PlatformUI.getWorkbench().getDisplay());
+    TreeViewer viewer = new TreeViewer(shell);
+    provider = new LaunchPageContentProvider(viewer);
+    viewer.setContentProvider(provider);
+  }
+  
+  @Test(expected = NullPointerException.class)
+  public void testConstructor_viewerNull() {
+    new LaunchPageContentProvider(null);
   }
 
   @Test
   public void testGetElements() {
-    assertNotNull(provider.getElements(new HashSet<Object>()));
-    assertEquals(2, provider.getElements(new HashSet<String>(Arrays.asList("1",
-        "2"))).length);
+    LaunchConfigurationDescriptor config = new LaunchConfigurationDescriptor(
+        "Name", ILaunchManager.RUN_MODE, "org.eclipse.pde.ui.RuntimeWorkbench");
+    
+    LaunchDataDescriptor d1 = new LaunchDataDescriptor(new LocalDate(), config, 
+        0, 10, Collections.<String> emptySet());
+    LaunchDataDescriptor d2 = new LaunchDataDescriptor(d1.getDate().plusDays(1),
+        config, 110, 1800, Collections.<String> emptySet());
+    
+
+    provider.getViewer().setInput(Arrays.asList(d1, d2));
+
+    provider.setSelectedCategories(Category.DATE);
+    // Passing null is OK, the provider should return the children of its "root"
+    // Size is two, because we defined two data descriptors of different dates:
+    assertEquals(2, provider.getElements(null).length);
+    TreeNode[] nodes = (TreeNode[]) provider.getElements(null);
+    assertTrue(nodes[0].getValue() instanceof LocalDate);
+    assertTrue(nodes[1].getValue() instanceof LocalDate);
+    Set<LocalDate> dates = Sets.newTreeSet();
+    dates.add((LocalDate) nodes[0].getValue());
+    dates.add((LocalDate) nodes[1].getValue());
+    assertTrue(dates.contains(d1.getDate()));
+    assertTrue(dates.contains(d2.getDate()));
+
+    provider.setSelectedCategories(Category.LAUNCH_MODE);
+    assertEquals(1, provider.getElements(null).length);
+  }
+
+  @Test
+  public void testGetLaunchCountValueProvider() {
+    assertNotNull(provider.getLaunchCountValueProvider());
+  }
+
+  @Test
+  public void testGetLaunchCountValueProvider_getMaxValue() {
+    /*
+     * Build a tree that look like the following, then check the value of each
+     * node against the data:
+     *  
+     * Date +-- LaunchType +-- Launch +-- RunMode
+     *                                |
+     *                                +-- DebugMode
+     */
+    
+    LaunchConfigurationDescriptor runMode = new LaunchConfigurationDescriptor(
+        "Name", ILaunchManager.RUN_MODE, "org.eclipse.pde.ui.RuntimeWorkbench");
+    LaunchConfigurationDescriptor debugMode = new LaunchConfigurationDescriptor(
+        runMode.getLaunchName(), ILaunchManager.DEBUG_MODE, runMode.getLaunchTypeId());
+    
+    LaunchDataDescriptor d1 = new LaunchDataDescriptor(new LocalDate(), runMode, 1,   10, Collections.<String>emptySet());
+    LaunchDataDescriptor d2 = new LaunchDataDescriptor(d1.getDate(), debugMode, 19, 1200, Collections.<String>emptySet());
+    
+    IValueProvider values = provider.getLaunchCountValueProvider();
+    provider.getViewer().setInput(Arrays.asList(d1, d2));
+    provider.setSelectedCategories(Category.DATE, Category.LAUNCH_TYPE, Category.LAUNCH, Category.LAUNCH_MODE);
+    
+    provider.setPaintCategory(Category.DATE);
+    assertEquals(d1.getLaunchCount() + d2.getLaunchCount(), values.getMaxValue());
+    
+    provider.setPaintCategory(Category.LAUNCH_TYPE);
+    assertEquals(d1.getLaunchCount() + d2.getLaunchCount(), values.getMaxValue());
+    
+    provider.setPaintCategory(Category.LAUNCH);
+    assertEquals(d1.getLaunchCount() + d2.getLaunchCount(), values.getMaxValue());
+    
+    provider.setPaintCategory(Category.LAUNCH_MODE);
+    assertEquals(d2.getLaunchCount(), values.getMaxValue());
+  }
+
+  @Test
+  public void testGetLaunchCountValueProvider_getValue() {
+    /*
+     * Build a tree that look like the following, then check the value of each
+     * node against the data:
+     *  
+     * Date +-- LaunchType +-- Launch +-- RunMode
+     *                                |
+     *                                +-- DebugMode
+     */
+    
+    LaunchConfigurationDescriptor runMode = new LaunchConfigurationDescriptor(
+        "Name", ILaunchManager.RUN_MODE, "org.eclipse.pde.ui.RuntimeWorkbench");
+    LaunchConfigurationDescriptor debugMode = new LaunchConfigurationDescriptor(
+        runMode.getLaunchName(), ILaunchManager.DEBUG_MODE, runMode.getLaunchTypeId());
+    LaunchDataDescriptor d1 = new LaunchDataDescriptor(new LocalDate(), runMode, 1,   10, Collections.<String>emptySet());
+    LaunchDataDescriptor d2 = new LaunchDataDescriptor(d1.getDate(), debugMode, 19, 1200, Collections.<String>emptySet());
+
+    provider.getViewer().setInput(Arrays.asList(d1, d2));
+    provider.setSelectedCategories(Category.DATE, Category.LAUNCH_TYPE, Category.LAUNCH, Category.LAUNCH_MODE);
+    IValueProvider values = provider.getLaunchCountValueProvider();
+    TreeNode root = provider.getRoot();
+    
+    provider.setPaintCategory(Category.DATE);
+    assertEquals(d1.getLaunchCount() + d2.getLaunchCount(), values.getValue(root.getChildren()[0]));
+    
+    provider.setPaintCategory(Category.LAUNCH_TYPE);
+    assertEquals(d1.getLaunchCount() + d2.getLaunchCount(), values.getValue(root.getChildren()[0]));
+    
+    provider.setPaintCategory(Category.LAUNCH);
+    assertEquals(d1.getLaunchCount() + d2.getLaunchCount(), values.getValue(root.getChildren()[0]));
+    
+    provider.setPaintCategory(Category.LAUNCH_MODE);
+    provider.setSelectedCategories(Category.LAUNCH_MODE);
+    TreeNode[] nodes = root.getChildren();
+    assertEquals(2, nodes.length);
+    assertEquals(d1.getLaunchCount(), values.getValue(nodes[0]));
+    assertEquals(d2.getLaunchCount(), values.getValue(nodes[1]));
+  }
+
+  @Test
+  public void testGetLaunchCountValueProvider_shouldPaint() {
+    assertShouldPaint(provider.getLaunchCountValueProvider());
+  }
+
+  @Test
+  public void testGetLaunchDurationValueProvider() {
+    assertNotNull(provider.getLaunchDurationValueProvider());
+  }
+
+  @Test
+  public void testGetLaunchDurationValueProvider_getMaxValue() {
+    /*
+     * Build a tree that look like the following, then check the value of each
+     * node against the data:
+     *  
+     * Date +-- LaunchType +-- Launch +-- RunMode
+     *                                |
+     *                                +-- DebugMode
+     */
+    
+    LaunchConfigurationDescriptor runMode = new LaunchConfigurationDescriptor(
+        "Name", ILaunchManager.RUN_MODE, "org.eclipse.pde.ui.RuntimeWorkbench");
+    LaunchConfigurationDescriptor debugMode = new LaunchConfigurationDescriptor(
+        runMode.getLaunchName(), ILaunchManager.DEBUG_MODE, runMode.getLaunchTypeId());
+    
+    LaunchDataDescriptor d1 = new LaunchDataDescriptor(new LocalDate(), runMode, 1,   10, Collections.<String>emptySet());
+    LaunchDataDescriptor d2 = new LaunchDataDescriptor(d1.getDate(), debugMode, 19, 1200, Collections.<String>emptySet());
+    
+    IValueProvider values = provider.getLaunchDurationValueProvider();
+    provider.setSelectedCategories(Category.DATE, Category.LAUNCH_TYPE, Category.LAUNCH, Category.LAUNCH_MODE);
+    
+    provider.setPaintCategory(Category.DATE);
+    assertEquals(d1.getTotalDuration() + d2.getTotalDuration(), values.getMaxValue());
+    
+    provider.setPaintCategory(Category.LAUNCH_TYPE);
+    assertEquals(d1.getTotalDuration() + d2.getTotalDuration(), values.getMaxValue());
+    
+    provider.setPaintCategory(Category.LAUNCH);
+    assertEquals(d1.getTotalDuration() + d2.getTotalDuration(), values.getMaxValue());
+    
+    provider.setPaintCategory(Category.LAUNCH_MODE);
+    assertEquals(d2.getTotalDuration(), values.getMaxValue());
+  }
+
+  @Test
+  public void testGetLaunchDurationValueProvider_getValue() {
+    /*
+     * Build a tree that look like the following, then check the value of each
+     * node against the data:
+     *  
+     * Date +-- LaunchType +-- Launch +-- RunMode
+     *                                |
+     *                                +-- DebugMode
+     */
+    
+    LaunchConfigurationDescriptor runMode = new LaunchConfigurationDescriptor(
+        "Name", ILaunchManager.RUN_MODE, "org.eclipse.pde.ui.RuntimeWorkbench");
+    LaunchConfigurationDescriptor debugMode = new LaunchConfigurationDescriptor(
+        runMode.getLaunchName(), ILaunchManager.DEBUG_MODE, runMode.getLaunchTypeId());
+    LaunchDataDescriptor d1 = new LaunchDataDescriptor(new LocalDate(), runMode, 1,   10, Collections.<String>emptySet());
+    LaunchDataDescriptor d2 = new LaunchDataDescriptor(d1.getDate(), debugMode, 19, 1200, Collections.<String>emptySet());
+
+    provider.setSelectedCategories(Category.DATE, Category.LAUNCH_TYPE, Category.LAUNCH, Category.LAUNCH_MODE);
+    provider.getViewer().setInput(Arrays.asList(d1, d2));
+    IValueProvider values = provider.getLaunchDurationValueProvider();
+    TreeNode root = provider.getRoot();
+    
+    provider.setPaintCategory(Category.DATE);
+    assertEquals(d1.getTotalDuration() + d2.getTotalDuration(), values.getValue(root.getChildren()[0]));
+    
+    provider.setPaintCategory(Category.LAUNCH_TYPE);
+    assertEquals(d1.getTotalDuration() + d2.getTotalDuration(), values.getValue(root.getChildren()[0]));
+    
+    provider.setPaintCategory(Category.LAUNCH);
+    assertEquals(d1.getTotalDuration() + d2.getTotalDuration(), values.getValue(root.getChildren()[0]));
+    
+    provider.setPaintCategory(Category.LAUNCH_MODE);
+    provider.setSelectedCategories(Category.LAUNCH_MODE);
+    TreeNode[] nodes = root.getChildren();
+    assertEquals(2, nodes.length);
+    assertEquals(d1.getTotalDuration(), values.getValue(nodes[0]));
+    assertEquals(d2.getTotalDuration(), values.getValue(nodes[1]));
+  }
+  
+  @Test
+  public void testGetLaunchDurationValueProvider_shouldPaint() {
+    assertShouldPaint(provider.getLaunchDurationValueProvider());
+  }
+  
+  @Test
+  public void testGetPaintCategory_defaultValue() {
+    assertSame(Category.LAUNCH, new LaunchPageContentProvider(provider.getViewer()).getPaintCategory());
+  }
+
+  @Test
+  public void testGetSelectedCategories() {
+    assertNotNull(provider.getSelectedCategories());
+    // Never empty, if were set to empty, defaults should be used:
+    assertTrue(provider.getSelectedCategories().length > 0);
+    
+    ICategory[] categories = new ICategory[] { Category.DATE, Category.LAUNCH };
+    provider.setSelectedCategories(categories);
+    assertArrayEquals(categories, provider.getSelectedCategories());
+    
+    categories = new ICategory[] { Category.LAUNCH_MODE, Category.LAUNCH_TYPE };
+    provider.setSelectedCategories(categories);
+    assertArrayEquals(categories, provider.getSelectedCategories());
+  }
+  
+  @Test
+  public void testGetUnselectedCategories() {
+    Set<Category> all = Sets.newHashSet(Category.DATE, Category.LAUNCH,
+        Category.LAUNCH_MODE, Category.LAUNCH_TYPE);
+    ICategory[] categories = all.toArray(new ICategory[all.size()]);
+    provider.setSelectedCategories(categories);
+    assertEquals(0, provider.getUnselectedCategories().length);
+
+    categories = new ICategory[] { Category.DATE, Category.LAUNCH };
+    provider.setSelectedCategories(categories);
+
+    Set<Category> unselect = Sets.difference(all, Sets.newHashSet(categories));
+    assertEquals(unselect.size(), provider.getUnselectedCategories().length);
+    assertTrue(unselect.containsAll(Arrays.asList(provider
+        .getUnselectedCategories())));
   }
 
   @Test
   public void testHasChildren() {
-    ZLaunchDescriptor des = new ZLaunchDescriptor();
-    provider.inputChanged(null, null, new HashSet<ZLaunchDescriptor>(Arrays
-        .asList(des)));
-    assertFalse(provider.hasChildren(des));
-
-    IFile file = root.getProject("p").getFolder("f").getFile("ff");
-    String fileId = fileMapper.insert(file);
-    des.getFileIds().addAll(new HashSet<String>(Arrays.asList(fileId)));
-    provider.inputChanged(null, null, new HashSet<ZLaunchDescriptor>(Arrays
-        .asList(des)));
-
-    assertTrue(provider.hasChildren(des));
-    assertTrue(provider.hasChildren(new LaunchResource(des, file.getProject())));
-    assertTrue(provider.hasChildren(new LaunchResource(des, file.getParent())));
-    assertFalse(provider.hasChildren(new LaunchResource(des, file)));
-    assertFalse(provider.hasChildren(file));
+    LaunchConfigurationDescriptor runMode = new LaunchConfigurationDescriptor(
+        "Name", ILaunchManager.RUN_MODE, "org.eclipse.pde.ui.RuntimeWorkbench");
+    LaunchDataDescriptor des = new LaunchDataDescriptor(new LocalDate(), runMode, 1,   10, Collections.<String>emptySet());
+    
+    provider.getViewer().setInput(Arrays.asList(des));
+    
+    TreeNode root = provider.getRoot();
+    provider.setSelectedCategories(Category.DATE);
+    assertFalse(provider.hasChildren(root.getChildren()[0]));
+    
+    provider.setSelectedCategories(Category.DATE, Category.LAUNCH);
+    assertTrue(provider.hasChildren(root.getChildren()[0]));
+    assertFalse(provider.hasChildren(root.getChildren()[0].getChildren()[0]));
   }
 
   @Test
-  public void testInputChanged() {
-    ZLaunchDescriptor des = new ZLaunchDescriptor();
-    provider.inputChanged(null, null, new HashSet<ZLaunchDescriptor>(Arrays
-        .asList(des)));
-    assertFalse(provider.hasChildren(des));
-
-    IFile file = root.getProject("p").getFolder("f").getFile("ff");
-    String fileId = fileMapper.insert(file);
-    des.getFileIds().addAll(new HashSet<String>(Arrays.asList(fileId)));
-    provider.inputChanged(null, null, new HashSet<ZLaunchDescriptor>(Arrays
-        .asList(des)));
-
-    assertTrue(provider.hasChildren(des));
-
-    provider.inputChanged(null, null, null);
-    assertFalse(provider.hasChildren(des));
+  public void testInputChanged_clearsOldData() {
+    provider.getRoot().setChildren(new TreeNode[] { new TreeNode("1") });
+    assertTrue(provider.getElements(null).length > 0);
+    TreeViewer viewer = provider.getViewer();
+    provider.inputChanged(viewer, viewer.getInput(), null);
+    assertEquals(0, provider.getElements(null).length);
+  }
+  
+  @Test
+  public void testInputChanged_newInputNull() {
+    try {
+      TreeViewer viewer = provider.getViewer();
+      provider.inputChanged(viewer, viewer.getInput(), null);
+    } catch (Exception e) {
+      fail();
+    }
   }
 
+  @Test
+  public void testSetPaintCategory() {
+    ICategory cat = Category.DATE;
+    provider.setPaintCategory(cat);
+    assertEquals(cat, provider.getPaintCategory());
+    
+    cat = Category.LAUNCH;
+    provider.setPaintCategory(cat);
+    assertEquals(cat, provider.getPaintCategory());
+  }
+
+  public void testSetPaintCategory_argumentNullToReset() {
+    provider.setPaintCategory(null);
+    assertSame(Category.LAUNCH, provider.getPaintCategory());
+  }
+
+  @Test
+  public void testShouldFilter() {
+    TreeNode dateNode   = new TreeNode(new LocalDate());
+    TreeNode launchNode = new TreeNode(new Pair<String, String>("", ""));
+    TreeNode typeNode   = new TreeNode(new UndefinedLaunchConfigurationType(""));
+    TreeNode modeNode   = new TreeNode(new UndefinedLaunchMode(""));
+    
+    IWorkspaceRoot root  = ResourcesPlugin.getWorkspace().getRoot();
+    TreeNode projectNode = new TreeNode(root.getProject("p"));
+    TreeNode folderNode  = new TreeNode(root.getProject("p").getFolder("f"));
+    TreeNode fileNode    = new TreeNode(root.getProject("p").getFile("f.txt"));
+    
+    provider.setSelectedCategories(Category.DATE);
+    assertFalse(provider.shouldFilter(dateNode));
+    assertTrue(provider.shouldFilter(launchNode));
+    assertTrue(provider.shouldFilter(typeNode));
+    assertTrue(provider.shouldFilter(modeNode));
+    assertFalse(provider.shouldFilter(projectNode));
+    assertFalse(provider.shouldFilter(folderNode));
+    assertFalse(provider.shouldFilter(fileNode));
+
+    provider.setSelectedCategories(Category.LAUNCH);
+    assertTrue(provider.shouldFilter(dateNode));
+    assertFalse(provider.shouldFilter(launchNode));
+    assertTrue(provider.shouldFilter(typeNode));
+    assertTrue(provider.shouldFilter(modeNode));
+    assertFalse(provider.shouldFilter(projectNode));
+    assertFalse(provider.shouldFilter(folderNode));
+    assertFalse(provider.shouldFilter(fileNode));
+
+    provider.setSelectedCategories(Category.LAUNCH_MODE);
+    assertTrue(provider.shouldFilter(dateNode));
+    assertTrue(provider.shouldFilter(launchNode));
+    assertTrue(provider.shouldFilter(typeNode));
+    assertFalse(provider.shouldFilter(modeNode));
+    assertFalse(provider.shouldFilter(projectNode));
+    assertFalse(provider.shouldFilter(folderNode));
+    assertFalse(provider.shouldFilter(fileNode));
+
+    provider.setSelectedCategories(Category.LAUNCH_TYPE);
+    assertTrue(provider.shouldFilter(dateNode));
+    assertTrue(provider.shouldFilter(launchNode));
+    assertFalse(provider.shouldFilter(typeNode));
+    assertTrue(provider.shouldFilter(modeNode));
+    assertFalse(provider.shouldFilter(projectNode));
+    assertFalse(provider.shouldFilter(folderNode));
+    assertFalse(provider.shouldFilter(fileNode));
+  }
+
+  private void assertShouldPaint(IValueProvider values) {
+    TreeNode dateNode   = new TreeNode(new LocalDate());
+    TreeNode launchNode = new TreeNode(new Pair<String, String>("", ""));
+    TreeNode typeNode   = new TreeNode(new UndefinedLaunchConfigurationType(""));
+    TreeNode modeNode   = new TreeNode(new UndefinedLaunchMode(""));
+    
+    IWorkspaceRoot root  = ResourcesPlugin.getWorkspace().getRoot();
+    TreeNode projectNode = new TreeNode(root.getProject("p"));
+    TreeNode folderNode  = new TreeNode(root.getProject("p").getFolder("f"));
+    TreeNode fileNode    = new TreeNode(root.getProject("p").getFile("f.txt"));
+    
+    provider.setPaintCategory(Category.DATE);
+    assertTrue (values.shouldPaint(dateNode));
+    assertFalse(values.shouldPaint(launchNode));
+    assertFalse(values.shouldPaint(typeNode));
+    assertFalse(values.shouldPaint(modeNode));
+    assertFalse(values.shouldPaint(projectNode));
+    assertFalse(values.shouldPaint(folderNode));
+    assertFalse(values.shouldPaint(fileNode));
+
+    provider.setPaintCategory(Category.LAUNCH);
+    assertFalse(values.shouldPaint(dateNode));
+    assertTrue (values.shouldPaint(launchNode));
+    assertFalse(values.shouldPaint(typeNode));
+    assertFalse(values.shouldPaint(modeNode));
+    assertFalse(values.shouldPaint(projectNode));
+    assertFalse(values.shouldPaint(folderNode));
+    assertFalse(values.shouldPaint(fileNode));
+
+    provider.setPaintCategory(Category.LAUNCH_MODE);
+    assertFalse(values.shouldPaint(dateNode));
+    assertFalse(values.shouldPaint(launchNode));
+    assertFalse(values.shouldPaint(typeNode));
+    assertTrue (values.shouldPaint(modeNode));
+    assertFalse(values.shouldPaint(projectNode));
+    assertFalse(values.shouldPaint(folderNode));
+    assertFalse(values.shouldPaint(fileNode));
+
+    provider.setPaintCategory(Category.LAUNCH_TYPE);
+    assertFalse(values.shouldPaint(dateNode));
+    assertFalse(values.shouldPaint(launchNode));
+    assertTrue (values.shouldPaint(typeNode));
+    assertFalse(values.shouldPaint(modeNode));
+    assertFalse(values.shouldPaint(projectNode));
+    assertFalse(values.shouldPaint(folderNode));
+    assertFalse(values.shouldPaint(fileNode));
+  }
 }

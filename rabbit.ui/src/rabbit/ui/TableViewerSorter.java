@@ -93,6 +93,10 @@ public abstract class TableViewerSorter extends ViewerComparator implements
     table.setSortDirection(sortDirection);
     viewer.refresh();
   }
+  
+  public TableViewer getViewer() {
+    return viewer;
+  }
 
   protected abstract int doCompare(Viewer v, Object e1, Object e2);
 

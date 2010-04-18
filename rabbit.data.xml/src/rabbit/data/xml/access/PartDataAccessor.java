@@ -15,24 +15,30 @@
  */
 package rabbit.data.xml.access;
 
-import rabbit.data.internal.xml.AbstractIdToValueAccessor;
+import rabbit.data.access.model.PartDataDescriptor;
+import rabbit.data.internal.xml.AbstractDataNodeAccessor;
 import rabbit.data.internal.xml.DataStore;
 import rabbit.data.internal.xml.IDataStore;
+import rabbit.data.internal.xml.merge.PartEventTypeMerger;
 import rabbit.data.internal.xml.schema.events.EventListType;
 import rabbit.data.internal.xml.schema.events.PartEventListType;
 import rabbit.data.internal.xml.schema.events.PartEventType;
 
+import org.joda.time.LocalDate;
+
 import java.util.Collection;
 
 /**
- * Gets data about part usage.
+ * Accesses workbench part event data.
  */
-public class PartDataAccessor extends
-    AbstractIdToValueAccessor<PartEventType, PartEventListType> {
+public class PartDataAccessor
+    extends
+    AbstractDataNodeAccessor<PartDataDescriptor, PartEventType, PartEventListType> {
 
-  /** Constructor. */
+  /**
+   * Constructor.
+   */
   public PartDataAccessor() {
-    super();
   }
 
   @Override
@@ -46,17 +52,23 @@ public class PartDataAccessor extends
   }
 
   @Override
-  protected String getId(PartEventType e) {
-    return e.getPartId();
+  protected PartDataDescriptor createDataNode(LocalDate cal, PartEventType type) {
+    try {
+      return new PartDataDescriptor(cal, type.getDuration(), type.getPartId());
+    } catch (NullPointerException e) {
+      return null;
+    } catch (IllegalArgumentException e) {
+      return null;
+    }
   }
 
   @Override
-  protected long getUsage(PartEventType e) {
-    return e.getDuration();
-  }
-
-  @Override
-  protected Collection<PartEventType> getXmlTypes(PartEventListType list) {
+  protected Collection<PartEventType> getElements(PartEventListType list) {
     return list.getPartEvent();
+  }
+
+  @Override
+  protected PartEventTypeMerger createMerger() {
+    return new PartEventTypeMerger();
   }
 }

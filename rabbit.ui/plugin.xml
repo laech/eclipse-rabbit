@@ -89,11 +89,6 @@
             name="Launches"
             parent="rabbit.ui.pages.projectRelated">
       </page>
-      <page
-            class="rabbit.ui.internal.pages.Z"
-            id="rabbit.ui.page1"
-            name="Z">
-      </page>
    </extension>
    <extension
          point="org.eclipse.ui.preferencePages">

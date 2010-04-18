@@ -15,17 +15,43 @@
  */
 package rabbit.data.xml.access;
 
-import rabbit.data.internal.xml.AbstractIdToValueAccessor;
+import rabbit.data.access.model.CommandDataDescriptor;
+import rabbit.data.internal.xml.AbstractDataNodeAccessor;
 import rabbit.data.internal.xml.DataStore;
 import rabbit.data.internal.xml.IDataStore;
+import rabbit.data.internal.xml.merge.CommandEventTypeMerger;
 import rabbit.data.internal.xml.schema.events.CommandEventListType;
 import rabbit.data.internal.xml.schema.events.CommandEventType;
 import rabbit.data.internal.xml.schema.events.EventListType;
 
+import org.joda.time.LocalDate;
+
 import java.util.Collection;
 
-public class CommandDataAccessor extends
-    AbstractIdToValueAccessor<CommandEventType, CommandEventListType> {
+/**
+ * Accesses command event data.
+ */
+public class CommandDataAccessor
+    extends
+    AbstractDataNodeAccessor<CommandDataDescriptor, CommandEventType, CommandEventListType> {
+
+  public CommandDataAccessor() {
+  }
+
+  @Override
+  protected CommandDataDescriptor createDataNode(LocalDate cal,
+      CommandEventType type) {
+
+    try {
+      return new CommandDataDescriptor(cal, type.getCount(), type
+          .getCommandId());
+
+    } catch (NullPointerException e) {
+      return null;
+    } catch (IllegalArgumentException e) {
+      return null;
+    }
+  }
 
   @Override
   protected Collection<CommandEventListType> getCategories(EventListType doc) {
@@ -38,18 +64,13 @@ public class CommandDataAccessor extends
   }
 
   @Override
-  protected String getId(CommandEventType e) {
-    return e.getCommandId();
-  }
-
-  @Override
-  protected long getUsage(CommandEventType e) {
-    return e.getCount();
-  }
-
-  @Override
-  protected Collection<CommandEventType> getXmlTypes(CommandEventListType list) {
+  protected Collection<CommandEventType> getElements(CommandEventListType list) {
     return list.getCommandEvent();
+  }
+
+  @Override
+  protected CommandEventTypeMerger createMerger() {
+    return new CommandEventTypeMerger();
   }
 
 }

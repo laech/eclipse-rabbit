@@ -15,25 +15,52 @@
  */
 package rabbit.data.xml.access;
 
-import rabbit.data.internal.xml.AbstractIdToValueAccessor;
+import rabbit.data.access.model.PerspectiveDataDescriptor;
+import rabbit.data.internal.xml.AbstractDataNodeAccessor;
 import rabbit.data.internal.xml.DataStore;
 import rabbit.data.internal.xml.IDataStore;
+import rabbit.data.internal.xml.merge.PerspectiveEventTypeMerger;
 import rabbit.data.internal.xml.schema.events.EventListType;
 import rabbit.data.internal.xml.schema.events.PerspectiveEventListType;
 import rabbit.data.internal.xml.schema.events.PerspectiveEventType;
 
+import org.joda.time.LocalDate;
+
 import java.util.Collection;
 
 /**
- * Gets the data about how much time is spent using different perspectives.
- * <p>
- * The data returned by {@link #getData(java.util.Calendar, java.util.Calendar)}
- * is a map, where the keys are perspective IDs, and the values are durations in
- * milliseconds.
- * </p>
+ * Accesses perspective event data.
  */
-public class PerspectiveDataAccessor extends
-    AbstractIdToValueAccessor<PerspectiveEventType, PerspectiveEventListType> {
+public class PerspectiveDataAccessor
+    extends
+    AbstractDataNodeAccessor<PerspectiveDataDescriptor, PerspectiveEventType, PerspectiveEventListType> {
+
+  /**
+   * Constructor.
+   */
+  public PerspectiveDataAccessor() {
+  }
+
+  @Override
+  protected PerspectiveDataDescriptor createDataNode(LocalDate cal,
+      PerspectiveEventType type) {
+
+    try {
+      return new PerspectiveDataDescriptor(cal, type.getDuration(), type
+          .getPerspectiveId());
+
+    } catch (NullPointerException e) {
+      return null;
+    } catch (IllegalArgumentException e) {
+      return null;
+    }
+  }
+
+  @Override
+  protected Collection<PerspectiveEventType> getElements(
+      PerspectiveEventListType list) {
+    return list.getPerspectiveEvent();
+  }
 
   @Override
   protected Collection<PerspectiveEventListType> getCategories(EventListType doc) {
@@ -46,19 +73,7 @@ public class PerspectiveDataAccessor extends
   }
 
   @Override
-  protected String getId(PerspectiveEventType e) {
-    return e.getPerspectiveId();
+  protected PerspectiveEventTypeMerger createMerger() {
+    return new PerspectiveEventTypeMerger();
   }
-
-  @Override
-  protected long getUsage(PerspectiveEventType e) {
-    return e.getDuration();
-  }
-
-  @Override
-  protected Collection<PerspectiveEventType> getXmlTypes(
-      PerspectiveEventListType list) {
-    return list.getPerspectiveEvent();
-  }
-
 }

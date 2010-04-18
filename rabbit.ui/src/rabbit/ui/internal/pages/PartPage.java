@@ -17,7 +17,7 @@ package rabbit.ui.internal.pages;
 
 import rabbit.data.access.IAccessor2;
 import rabbit.data.access.model.PartDataDescriptor;
-import rabbit.data.handler.DataHandler2;
+import rabbit.data.handler.DataHandler;
 import rabbit.ui.CellPainter;
 import rabbit.ui.Preferences;
 import rabbit.ui.TreeViewerSorter;
@@ -69,7 +69,7 @@ public class PartPage extends AbstractTreeViewerPage {
     boolean displayByDate = store.getBoolean(DISPLAY_BY_DATE_PREF);
     contents = new PartPageContentProvider(this, displayByDate);
     labels = new PartPageLabelProvider(contents);
-    accessor = DataHandler2.getPartDataAccessor();
+    accessor = DataHandler.getPartDataAccessor();
   }
 
   @Override

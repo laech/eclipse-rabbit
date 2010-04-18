@@ -15,76 +15,30 @@
  */
 package rabbit.data.test.xml.access;
 
-import static rabbit.data.internal.xml.util.StringUtil.getString;
-
-import rabbit.data.access.model.ZLaunchDescriptor;
+import rabbit.data.access.model.LaunchDataDescriptor;
 import rabbit.data.internal.xml.DatatypeUtil;
-import rabbit.data.internal.xml.schema.events.EventListType;
 import rabbit.data.internal.xml.schema.events.LaunchEventListType;
 import rabbit.data.internal.xml.schema.events.LaunchEventType;
-import rabbit.data.test.xml.AbstractAccessorTest;
+import rabbit.data.test.xml.AbstractDataNodeAccessorTest;
 import rabbit.data.xml.access.LaunchDataAccessor;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import org.eclipse.debug.core.ILaunchManager;
+import org.joda.time.LocalDate;
 
 import java.util.GregorianCalendar;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 /**
  * @see LaunchDataAccessor
  */
+@SuppressWarnings("restriction")
 public class LaunchDataAccessorTest
     extends
-    AbstractAccessorTest<Set<ZLaunchDescriptor>, LaunchEventType, LaunchEventListType> {
+    AbstractDataNodeAccessorTest<LaunchDataDescriptor, LaunchEventType, LaunchEventListType> {
 
-  @Override
-  protected void assertValues(Set<ZLaunchDescriptor> data, EventListType events) {
-    Set<ZLaunchDescriptor> myData = new HashSet<ZLaunchDescriptor>();
-    for (LaunchEventListType list : events.getLaunchEvents()) {
-      for (LaunchEventType type : list.getLaunchEvent()) {
-
-        boolean done = false;
-
-        for (ZLaunchDescriptor des : myData) {
-          if (getString(type.getName()).equals(des.getLaunchName())
-              && getString(type.getLaunchModeId())
-                  .equals(des.getLaunchModeId())
-              && getString(type.getLaunchTypeId())
-                  .equals(des.getLaunchTypeId())) {
-
-            des.setCount(des.getCount() + type.getCount());
-            des.setTotalDuration(des.getTotalDuration()
-                + type.getTotalDuration());
-            des.getFileIds().addAll(type.getFileId());
-
-            done = true;
-            break;
-          }
-        }
-
-        if (!done) {
-          ZLaunchDescriptor des = new ZLaunchDescriptor();
-          des.setCount(type.getCount());
-          des.setTotalDuration(type.getTotalDuration());
-          des.getFileIds().addAll(type.getFileId());
-          des.setLaunchName(type.getName());
-          des.setLaunchTypeId(type.getLaunchTypeId());
-          des.setLaunchModeId(type.getLaunchModeId());
-
-          myData.add(des);
-        }
-      }
-    }
-
-    assertEquals(myData.size(), data.size());
-    myData.removeAll(data);
-    assertTrue(myData.isEmpty());
-  }
 
   @Override
   protected LaunchDataAccessor create() {
@@ -92,7 +46,7 @@ public class LaunchDataAccessorTest
   }
 
   @Override
-  protected LaunchEventListType createListType() {
+  protected LaunchEventListType createCategory() {
     LaunchEventListType type = objectFactory.createLaunchEventListType();
     type.setDate(DatatypeUtil
         .toXmlDateTime(new GregorianCalendar()));
@@ -100,7 +54,7 @@ public class LaunchDataAccessorTest
   }
 
   @Override
-  protected LaunchEventType createXmlType() {
+  protected LaunchEventType createElement() {
     LaunchEventType type = objectFactory.createLaunchEventType();
     type.setTotalDuration(10);
     type.setLaunchModeId(ILaunchManager.RUN_MODE);
@@ -111,7 +65,7 @@ public class LaunchDataAccessorTest
   }
 
   @Override
-  protected List<LaunchEventType> getXmlTypes(LaunchEventListType list) {
+  protected List<LaunchEventType> getElements(LaunchEventListType list) {
     return list.getLaunchEvent();
   }
 
@@ -125,5 +79,21 @@ public class LaunchDataAccessorTest
   @Override
   protected void setUsage(LaunchEventType type, long usage) {
     type.setTotalDuration(usage);
+  }
+
+  @Override
+  public void testCreateDataNode() throws Exception {
+    LocalDate date = new LocalDate();
+    LaunchEventType e = createElement();
+    LaunchDataDescriptor des = createDataNode(accessor, date, e);
+    
+    assertEquals(date, des.getDate());
+    assertEquals(e.getCount(), des.getLaunchCount());
+    assertEquals(e.getTotalDuration(), des.getTotalDuration());
+    assertEquals(e.getLaunchModeId(), des.getLaunchDescriptor().getLaunchModeId());
+    assertEquals(e.getLaunchTypeId(), des.getLaunchDescriptor().getLaunchTypeId());
+    assertEquals(e.getName(), des.getLaunchDescriptor().getLaunchName());
+    assertEquals(e.getFileId().size(), des.getFileIds().size());
+    assertTrue(e.getFileId().containsAll(des.getFileIds()));
   }
 }

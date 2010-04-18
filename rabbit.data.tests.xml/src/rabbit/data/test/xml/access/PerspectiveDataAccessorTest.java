@@ -15,16 +15,22 @@
  */
 package rabbit.data.test.xml.access;
 
+import rabbit.data.access.model.PerspectiveDataDescriptor;
 import rabbit.data.internal.xml.schema.events.PerspectiveEventListType;
 import rabbit.data.internal.xml.schema.events.PerspectiveEventType;
-import rabbit.data.test.xml.AbstractIdToValueAccessorTest;
+import rabbit.data.test.xml.AbstractDataNodeAccessorTest;
 import rabbit.data.xml.access.PerspectiveDataAccessor;
+
+import static org.junit.Assert.assertEquals;
+
+import org.joda.time.LocalDate;
 
 import java.util.List;
 
+@SuppressWarnings("restriction")
 public class PerspectiveDataAccessorTest
     extends
-    AbstractIdToValueAccessorTest<PerspectiveEventType, PerspectiveEventListType> {
+    AbstractDataNodeAccessorTest<PerspectiveDataDescriptor, PerspectiveEventType, PerspectiveEventListType> {
 
   @Override
   protected PerspectiveDataAccessor create() {
@@ -32,17 +38,20 @@ public class PerspectiveDataAccessorTest
   }
 
   @Override
-  protected PerspectiveEventListType createListType() {
+  protected PerspectiveEventListType createCategory() {
     return objectFactory.createPerspectiveEventListType();
   }
 
   @Override
-  protected PerspectiveEventType createXmlType() {
-    return objectFactory.createPerspectiveEventType();
+  protected PerspectiveEventType createElement() {
+    PerspectiveEventType type = objectFactory.createPerspectiveEventType();
+    type.setDuration(11);
+    type.setPerspectiveId("abc");
+    return type;
   }
 
   @Override
-  protected List<PerspectiveEventType> getXmlTypes(PerspectiveEventListType list) {
+  protected List<PerspectiveEventType> getElements(PerspectiveEventListType list) {
     return list.getPerspectiveEvent();
   }
 
@@ -54,6 +63,17 @@ public class PerspectiveDataAccessorTest
   @Override
   protected void setUsage(PerspectiveEventType type, long usage) {
     type.setDuration(usage);
+  }
+
+  @Override
+  public void testCreateDataNode() throws Exception {
+    LocalDate date = new LocalDate();
+    PerspectiveEventType e = createElement();
+    PerspectiveDataDescriptor des = createDataNode(accessor, date, e);
+
+    assertEquals(date, des.getDate());
+    assertEquals(e.getDuration(), des.getValue());
+    assertEquals(e.getPerspectiveId(), des.getPerspectiveId());
   }
 
 }

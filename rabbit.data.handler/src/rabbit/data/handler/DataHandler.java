@@ -16,8 +16,13 @@
 package rabbit.data.handler;
 
 import rabbit.data.IFileStore;
-import rabbit.data.access.IAccessor;
-import rabbit.data.access.model.ZLaunchDescriptor;
+import rabbit.data.access.IAccessor2;
+import rabbit.data.access.model.CommandDataDescriptor;
+import rabbit.data.access.model.FileDataDescriptor;
+import rabbit.data.access.model.LaunchDataDescriptor;
+import rabbit.data.access.model.PartDataDescriptor;
+import rabbit.data.access.model.PerspectiveDataDescriptor;
+import rabbit.data.access.model.SessionDataDescriptor;
 import rabbit.data.store.IStorer;
 import rabbit.data.store.model.CommandEvent;
 import rabbit.data.store.model.FileEvent;
@@ -40,7 +45,6 @@ import rabbit.data.xml.store.PerspectiveEventStorer;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Handler class provider common classes to access the data.
@@ -50,12 +54,12 @@ public class DataHandler {
   /** Map<T, IStorer<T> */
   private static final Map<Class<?>, IStorer<?>> storers;
 
-  private static final IAccessor<Set<ZLaunchDescriptor>> launchDataAccessor;
-  private static final IAccessor<Map<String, Long>> perspectiveDataAccessor;
-  private static final IAccessor<Map<String, Long>> commandDataAccessor;
-  private static final IAccessor<Map<String, Long>> sessionDataAccessor;
-  private static final IAccessor<Map<String, Long>> partDataAccessor;
-  private static final IAccessor<Map<String, Long>> fileDataAccessor;
+  private static final IAccessor2<LaunchDataDescriptor> launchDataAccessor;
+  private static final IAccessor2<PerspectiveDataDescriptor> perspectiveDataAccessor;
+  private static final IAccessor2<CommandDataDescriptor> commandDataAccessor;
+  private static final IAccessor2<SessionDataDescriptor> sessionDataAccessor;
+  private static final IAccessor2<PartDataDescriptor> partDataAccessor;
+  private static final IAccessor2<FileDataDescriptor> fileDataAccessor;
 
   static {
     Map<Class<?>, IStorer<?>> map = new HashMap<Class<?>, IStorer<?>>();
@@ -79,7 +83,7 @@ public class DataHandler {
    * 
    * @return An IAccessor for accessing the command event data.
    */
-  public static IAccessor<Map<String, Long>> getCommandDataAccessor() {
+  public static IAccessor2<CommandDataDescriptor> getCommandDataAccessor() {
     return commandDataAccessor;
   }
 
@@ -88,7 +92,7 @@ public class DataHandler {
    * 
    * @return An IAccessor for accessing the file event data.
    */
-  public static IAccessor<Map<String, Long>> getFileDataAccessor() {
+  public static IAccessor2<FileDataDescriptor> getFileDataAccessor() {
     return fileDataAccessor;
   }
 
@@ -106,7 +110,7 @@ public class DataHandler {
    * 
    * @return An IAccessor for accessing the launch event data.
    */
-  public static IAccessor<Set<ZLaunchDescriptor>> getLaunchDataAccessor() {
+  public static IAccessor2<LaunchDataDescriptor> getLaunchDataAccessor() {
     return launchDataAccessor;
   }
 
@@ -115,7 +119,7 @@ public class DataHandler {
    * 
    * @return An IAccessor for accessing the part event data.
    */
-  public static IAccessor<Map<String, Long>> getPartDataAccessor() {
+  public static IAccessor2<PartDataDescriptor> getPartDataAccessor() {
     return partDataAccessor;
   }
 
@@ -124,7 +128,7 @@ public class DataHandler {
    * 
    * @return An IAccessor for accessing the perspective event data.
    */
-  public static IAccessor<Map<String, Long>> getPerspectiveDataAccessor() {
+  public static IAccessor2<PerspectiveDataDescriptor> getPerspectiveDataAccessor() {
     return perspectiveDataAccessor;
   }
 
@@ -133,7 +137,7 @@ public class DataHandler {
    * 
    * @return An IAccessor for accessing the session event data.
    */
-  public static IAccessor<Map<String, Long>> getSessionDataAccessor() {
+  public static IAccessor2<SessionDataDescriptor> getSessionDataAccessor() {
     return sessionDataAccessor;
   }
 

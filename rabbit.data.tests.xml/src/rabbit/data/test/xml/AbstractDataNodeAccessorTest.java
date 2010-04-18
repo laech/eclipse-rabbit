@@ -45,7 +45,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
  */
 @SuppressWarnings("restriction")
 public abstract class AbstractDataNodeAccessorTest<E, T, S extends EventGroupType>
-    extends AbstractAccessorTest2<E, T, S> {
+    extends AbstractAccessorTest<E, T, S> {
 
   protected AbstractDataNodeAccessor<E, T, S> accessor = create();
 

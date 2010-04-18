@@ -17,12 +17,48 @@ package rabbit.ui.tests.pages;
 
 import rabbit.ui.internal.pages.AbstractTreeViewerPage2;
 import rabbit.ui.internal.pages.ResourcePage;
+import rabbit.ui.internal.pages.ResourcePageContentProvider;
+import rabbit.ui.internal.pages.ResourcePageContentProvider.Category;
+import rabbit.ui.internal.util.ICategory;
+
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+
+import org.junit.Test;
 
 /**
  * @see ResourcePage
  */
 @SuppressWarnings("restriction")
 public class ResourcePageTest extends AbstractTreeViewerPageTest2 {
+
+  @Test
+  public void testSaveState_selectedCategories() throws Exception {
+    ResourcePageContentProvider contents = (ResourcePageContentProvider) page
+        .getViewer().getContentProvider();
+    
+    ICategory[] categories = new ICategory[] { Category.DATE, Category.FILE };
+    contents.setSelectedCategories(categories);
+    saveState(page);
+    
+    contents.setSelectedCategories(new ICategory[] { Category.FOLDER });
+    restoreState(page);
+    assertArrayEquals(categories, contents.getSelectedCategories());
+  }
+  
+  @Test
+  public void testSaveState_paintCategory() throws Exception {
+    ResourcePageContentProvider contents = (ResourcePageContentProvider) page
+        .getViewer().getContentProvider();
+    
+    Category paintCategory = Category.FILE;
+    contents.setPaintCategory(paintCategory);
+    saveState(page);
+    
+    contents.setPaintCategory(Category.DATE);
+    restoreState(page);
+    assertEquals(paintCategory, contents.getPaintCategory());
+  }
 
   @Override
   protected AbstractTreeViewerPage2 createPage() {

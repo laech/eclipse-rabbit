@@ -15,18 +15,25 @@
  */
 package rabbit.data.test.xml.access;
 
+import rabbit.data.access.model.FileDataDescriptor;
 import rabbit.data.internal.xml.schema.events.FileEventListType;
 import rabbit.data.internal.xml.schema.events.FileEventType;
-import rabbit.data.test.xml.AbstractIdToValueAccessorTest;
+import rabbit.data.test.xml.AbstractDataNodeAccessorTest;
 import rabbit.data.xml.access.FileDataAccessor;
+
+import static org.junit.Assert.assertEquals;
+
+import org.joda.time.LocalDate;
 
 import java.util.List;
 
 /**
  * Test for {@link FileDataAccessor}
  */
-public class FileDataAccessorTest extends
-    AbstractIdToValueAccessorTest<FileEventType, FileEventListType> {
+@SuppressWarnings("restriction")
+public class FileDataAccessorTest
+    extends
+    AbstractDataNodeAccessorTest<FileDataDescriptor, FileEventType, FileEventListType> {
 
   @Override
   protected FileDataAccessor create() {
@@ -34,17 +41,20 @@ public class FileDataAccessorTest extends
   }
 
   @Override
-  protected FileEventListType createListType() {
+  protected FileEventListType createCategory() {
     return objectFactory.createFileEventListType();
   }
 
   @Override
-  protected FileEventType createXmlType() {
-    return objectFactory.createFileEventType();
+  protected FileEventType createElement() {
+    FileEventType type = objectFactory.createFileEventType();
+    type.setDuration(1000);
+    type.setFileId("ab");
+    return type;
   }
 
   @Override
-  protected List<FileEventType> getXmlTypes(FileEventListType list) {
+  protected List<FileEventType> getElements(FileEventListType list) {
     return list.getFileEvent();
   }
 
@@ -56,6 +66,17 @@ public class FileDataAccessorTest extends
   @Override
   protected void setUsage(FileEventType type, long usage) {
     type.setDuration(usage);
+  }
+
+  @Override
+  public void testCreateDataNode() throws Exception {
+    LocalDate date = new LocalDate();
+    FileEventType type = createElement();
+    FileDataDescriptor des = createDataNode(accessor, date, type);
+
+    assertEquals(date, des.getDate());
+    assertEquals(type.getDuration(), des.getValue());
+    assertEquals(type.getFileId(), des.getFileId());
   }
 
 }

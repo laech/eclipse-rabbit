@@ -20,14 +20,9 @@ import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerComparator;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
-import org.eclipse.swt.widgets.Widget;
-
+// TODO clean up all the sorters
 /**
  * <p>
  * A comparator for sorting the a {@link TableViewer} when the user is clicked
@@ -47,83 +42,22 @@ import org.eclipse.swt.widgets.Widget;
  * @see ITableLabelProvider
  * @see TreeViewer#setLabelProvider(ITableLabelProvider)
  */
-public class TableLabelComparator extends ViewerComparator implements
-    SelectionListener {
+public class TableViewerLabelSorter extends TableViewerSorter {
 
-  /**
-   * One of {@link SWT#NONE}, {@link SWT#UP}, {@link SWT#DOWN}.
-   */
-  private int sortDirection;
-  private TableViewer viewer;
-  private TableColumn selectedColumn;
-
-  public TableLabelComparator(TableViewer parent) {
-    sortDirection = SWT.NONE;
-    selectedColumn = null;
-    viewer = parent;
+  public TableViewerLabelSorter(TableViewer parent) {
+    super(parent);
   }
 
   @Override
-  public int compare(Viewer v, Object e1, Object e2) {
-    int cat1 = category(e1);
-    int cat2 = category(e2);
-
-    if (cat1 != cat2) {
-      return cat1 - cat2;
-    }
-
-    int value = doCompare(v, e1, e2);
-    if (sortDirection == SWT.DOWN) {
-      value *= -1;
-    }
-    return value;
-  }
-
-  /**
-   * Gets the currently selected column.
-   * 
-   * @return The selected column.
-   */
-  public TableColumn getSelectedColumn() {
-    return selectedColumn;
-  }
-
-  @Override
-  public void widgetDefaultSelected(SelectionEvent e) {
-  }
-
-  @Override
-  public void widgetSelected(SelectionEvent e) {
-    Widget item = e.widget;
-    if (!(item instanceof TableColumn)) {
-      return;
-    }
-
-    selectedColumn = (TableColumn) e.widget;
-    Table table = selectedColumn.getParent();
-    TableColumn previousColumn = table.getSortColumn();
-    sortDirection = table.getSortDirection();
-
-    if (previousColumn == selectedColumn) {
-      sortDirection = (sortDirection == SWT.UP) ? SWT.DOWN : SWT.UP;
-    } else {
-      table.setSortColumn(selectedColumn);
-      sortDirection = SWT.UP;
-      viewer.setComparator(this);
-    }
-    table.setSortDirection(sortDirection);
-    viewer.refresh();
-  }
-
   protected int doCompare(Viewer v, Object e1, Object e2) {
-    IBaseLabelProvider provider = viewer.getLabelProvider();
+    IBaseLabelProvider provider = getViewer().getLabelProvider();
 
     String s1 = null;
     String s2 = null;
     if (provider instanceof ITableLabelProvider) {
       int index = 0;
-      if (selectedColumn != null) {
-        index = viewer.getTable().indexOf(selectedColumn);
+      if (getSelectedColumn() != null) {
+        index = getViewer().getTable().indexOf(getSelectedColumn());
       }
       s1 = ((ITableLabelProvider) provider).getColumnText(e1, index);
       s2 = ((ITableLabelProvider) provider).getColumnText(e2, index);

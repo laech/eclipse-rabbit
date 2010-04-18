@@ -24,7 +24,7 @@ import rabbit.mylyn.internal.ui.util.MissingTask;
 import rabbit.mylyn.internal.ui.util.MissingTaskCategory;
 import rabbit.ui.CellPainter;
 import rabbit.ui.Preferences;
-import rabbit.ui.TreeLabelComparator;
+import rabbit.ui.TreeViewerLabelSorter;
 import rabbit.ui.internal.SharedImages;
 import rabbit.ui.internal.pages.AbstractTreeViewerPage;
 
@@ -463,8 +463,8 @@ public class TaskPage extends AbstractTreeViewerPage {
 
   @Override
   protected void createColumns(TreeViewer viewer) {
-    TreeLabelComparator textSorter = new TreeLabelComparator(viewer);
-    TreeLabelComparator valueSorter = createValueSorterForTree(viewer);
+    TreeViewerLabelSorter textSorter = new TreeViewerLabelSorter(viewer);
+    TreeViewerLabelSorter valueSorter = createValueSorterForTree(viewer);
 
     int[] widths = new int[] { 300, 150 };
     int[] styles = new int[] { SWT.LEFT, SWT.RIGHT };
@@ -480,8 +480,8 @@ public class TaskPage extends AbstractTreeViewerPage {
   }
 
   @Override
-  protected TreeLabelComparator createInitialComparator(TreeViewer viewer) {
-    return new TreeLabelComparator(viewer) {
+  protected TreeViewerLabelSorter createInitialComparator(TreeViewer viewer) {
+    return new TreeViewerLabelSorter(viewer) {
 
       @Override
       public int category(Object e) {
