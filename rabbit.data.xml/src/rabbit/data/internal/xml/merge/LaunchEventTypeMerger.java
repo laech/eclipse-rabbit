@@ -17,7 +17,6 @@ package rabbit.data.internal.xml.merge;
 
 import rabbit.data.internal.xml.schema.events.LaunchEventType;
 
-import com.google.common.base.Objects;
 import com.google.common.collect.Sets;
 
 import java.util.Set;
@@ -29,9 +28,14 @@ public class LaunchEventTypeMerger extends AbstractMerger<LaunchEventType> {
 
   @Override
   protected boolean doIsMergeable(LaunchEventType t1, LaunchEventType t2) {
-    return Objects.equal(t1.getName(), t2.getName())
-        && Objects.equal(t1.getLaunchModeId(), t2.getLaunchModeId())
-        && Objects.equal(t1.getLaunchTypeId(), t2.getLaunchTypeId());
+    return (t1.getName() != null)
+        && (t1.getName().equals(t2.getName()))
+        
+        && (t1.getLaunchModeId() != null)
+        && (t1.getLaunchModeId().equals(t2.getLaunchModeId()))
+        
+        && (t1.getLaunchTypeId() != null)
+        && (t1.getLaunchTypeId().equals(t2.getLaunchTypeId()));
   }
 
   @Override

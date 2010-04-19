@@ -17,15 +17,20 @@ package rabbit.mylyn.events;
 
 import rabbit.data.store.model.FileEvent;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import org.eclipse.mylyn.tasks.core.ITask;
 import org.joda.time.DateTime;
+
+import javax.annotation.Nonnull;
 
 /**
  * Represents a task event.
  */
-public class TaskEvent extends FileEvent {
+public class TaskFileEvent extends FileEvent {
 
-  private ITask task;
+  @Nonnull
+  private final ITask task;
 
   /**
    * Constructs a new event.
@@ -33,15 +38,20 @@ public class TaskEvent extends FileEvent {
    * @param endTime The end time of the event.
    * @param duration The duration of the event, in milliseconds.
    * @param fileId The id of the file.
-   * @param task The task.
-   * @throws IllegalArgumentException If duration is negative, or file Id is an
-   *           empty string or contains whitespace only.
+   * @param task The task that was working on.
+   * @throws IllegalArgumentException If duration is negative, and/or the fileId
+   *           is an empty string or contains white space.
    * @throws NullPointerException If time is null, or file id is null, or task
    *           is null.
    */
-  public TaskEvent(DateTime endTime, long duration, String fileId, ITask task) {
+  public TaskFileEvent(@Nonnull DateTime endTime, 
+                                long duration, 
+                       @Nonnull String fileId, 
+                       @Nonnull ITask task) {
+    
     super(endTime, duration, fileId);
-    setTask(task);
+    checkNotNull(task);
+    this.task = task;
   }
 
   /**
@@ -49,21 +59,8 @@ public class TaskEvent extends FileEvent {
    * 
    * @return The task.
    */
+  @Nonnull
   public ITask getTask() {
     return task;
   }
-
-  /**
-   * Sets the task.
-   * 
-   * @param task The task.
-   * @throws NullPointerException If task is null.
-   */
-  public void setTask(ITask task) {
-    if (task == null) {
-      throw new NullPointerException();
-    }
-    this.task = task;
-  }
-
 }

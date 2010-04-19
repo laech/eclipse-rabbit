@@ -27,29 +27,25 @@ import org.junit.Test;
  */
 public class ContinuousEventTest extends DiscreteEventTest {
 
-  private static long duration = 348723;
-
-  private ContinuousEvent event;
-
-  public ContinuousEventTest() {
-    event = createEvent(new DateTime());
-  }
-
   @Test(expected = IllegalArgumentException.class)
   public void testConstructor_withNegativeDuration() {
-    new ContinuousEvent(new DateTime(), -1);
+   createEvent(new DateTime(), -1);
   }
 
   @Test
   public void testGetDuration() {
-    assertEquals(duration, event.getDuration());
+    long duration = 348723;
+    assertEquals(duration, createEvent(new DateTime(), duration).getDuration());
   }
 
   @Override
-  protected ContinuousEvent createEvent(DateTime time) {
-    return createEvent(time, duration);
+  protected final ContinuousEvent createEvent(DateTime time) {
+    return createEvent(time, 10);
   }
 
+  /**
+   * @see ContinuousEvent#ContinuousEvent(DateTime, long)
+   */
   protected ContinuousEvent createEvent(DateTime time, long duration) {
     return new ContinuousEvent(time, duration);
   }

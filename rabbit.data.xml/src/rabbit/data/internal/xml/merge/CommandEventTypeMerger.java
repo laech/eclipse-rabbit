@@ -17,8 +17,6 @@ package rabbit.data.internal.xml.merge;
 
 import rabbit.data.internal.xml.schema.events.CommandEventType;
 
-import com.google.common.base.Objects;
-
 /**
  * Merger for {@link CommandEventType}.
  */
@@ -34,7 +32,8 @@ public class CommandEventTypeMerger extends AbstractMerger<CommandEventType> {
 
   @Override
   public boolean doIsMergeable(CommandEventType t1, CommandEventType t2) {
-    return Objects.equal(t1.getCommandId(), t2.getCommandId());
+    return (t1.getCommandId() != null)
+        && (t1.getCommandId().equals(t2.getCommandId()));
   }
 
 }

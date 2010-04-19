@@ -210,7 +210,7 @@ public class ResourcePageContentProvider extends AbstractCategoryContentProvider
     getRoot().setChildren(null);
 
     ICategory[] categories = getSelectedCategories();
-    IFileStore store = DataHandler.getFileMapper();
+    IFileStore store = DataHandler.getFileStore();
     for (FileDataDescriptor des : data) {
 
       IFile file = store.getFile(des.getFileId());

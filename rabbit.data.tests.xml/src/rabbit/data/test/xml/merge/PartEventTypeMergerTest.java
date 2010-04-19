@@ -36,7 +36,7 @@ public class PartEventTypeMergerTest extends AbstractMergerTest<PartEventType> {
    * Tests when {@link PartEventType#getPartId()} returns null on both
    * parameters,
    * {@link PartEventTypeMerger#isMergeable(PartEventType, PartEventType)}
-   * should return true (because both null) instead of failing.
+   * should return false instead of failing.
    */
   @Test
   public void testIsMerageable_bothParamGetPartIdReturnsNull() {
@@ -46,9 +46,9 @@ public class PartEventTypeMergerTest extends AbstractMergerTest<PartEventType> {
     t2.setPartId(null);
 
     try {
-      assertTrue(merger.isMergeable(t1, t2));
+      assertFalse(merger.isMergeable(t1, t2));
     } catch (Exception e) {
-      fail("Should return true instead of exception");
+      fail("Should return false instead of exception");
     }
   }
 

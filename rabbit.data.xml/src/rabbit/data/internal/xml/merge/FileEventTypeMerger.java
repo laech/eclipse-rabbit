@@ -17,8 +17,6 @@ package rabbit.data.internal.xml.merge;
 
 import rabbit.data.internal.xml.schema.events.FileEventType;
 
-import com.google.common.base.Objects;
-
 /**
  * Merger for {@link FileEventType}.
  */
@@ -34,7 +32,7 @@ public class FileEventTypeMerger extends AbstractMerger<FileEventType> {
 
   @Override
   public boolean doIsMergeable(FileEventType t1, FileEventType t2) {
-    return Objects.equal(t1.getFileId(), t2.getFileId());
+    return (t1.getFileId() != null) && (t1.getFileId().equals(t2.getFileId()));
   }
 
 }

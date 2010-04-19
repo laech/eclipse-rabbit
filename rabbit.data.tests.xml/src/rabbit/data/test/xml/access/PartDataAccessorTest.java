@@ -64,7 +64,7 @@ public class PartDataAccessorTest
   }
 
   @Override
-  protected void setUsage(PartEventType type, long usage) {
+  protected void setValue(PartEventType type, long usage) {
     type.setDuration(usage);
   }
 

@@ -154,7 +154,7 @@ public class TaskPage extends AbstractTreeViewerPage {
   public TaskPage() {
     super();
     accessor = TaskCore.getTaskDataAccessor();
-    resourceMapper = DataHandler.getFileMapper();
+    resourceMapper = DataHandler.getFileStore();
 
     taskToProjects = new HashMap<ITask, Set<TaskResource>>();
     projectToResources = new HashMap<TaskResource, Set<TaskResource>>();

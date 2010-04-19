@@ -16,7 +16,7 @@
 package rabbit.mylyn.tests.trackers;
 
 import rabbit.data.handler.DataHandler;
-import rabbit.mylyn.events.TaskEvent;
+import rabbit.mylyn.events.TaskFileEvent;
 import rabbit.mylyn.internal.trackers.TaskTracker;
 import rabbit.tracking.tests.trackers.AbstractPartTrackerTest;
 
@@ -41,7 +41,7 @@ import java.util.Date;
  */
 @SuppressWarnings("restriction")
 @RunWith(SWTBotJunit4ClassRunner.class)
-public class TaskTrackerTest extends AbstractPartTrackerTest<TaskEvent> {
+public class TaskTrackerTest extends AbstractPartTrackerTest<TaskFileEvent> {
 
   private ITask task;
 
@@ -53,8 +53,8 @@ public class TaskTrackerTest extends AbstractPartTrackerTest<TaskEvent> {
   }
 
   @Override
-  protected TaskEvent createEvent() {
-    return new TaskEvent(new DateTime(), 187, "fileId", task);
+  protected TaskFileEvent createEvent() {
+    return new TaskFileEvent(new DateTime(), 187, "fileId", task);
   }
 
   @Override
@@ -63,11 +63,11 @@ public class TaskTrackerTest extends AbstractPartTrackerTest<TaskEvent> {
   }
 
   @Override
-  protected boolean hasSamePart(TaskEvent event, IWorkbenchPart part) {
+  protected boolean hasSamePart(TaskFileEvent event, IWorkbenchPart part) {
     if (part instanceof IEditorPart) {
       IEditorPart editor = (IEditorPart) part;
       IFile file = (IFile) editor.getEditorInput().getAdapter(IFile.class);
-      String id = DataHandler.getFileMapper().getId(file);
+      String id = DataHandler.getFileStore().getId(file);
       return event.getFileId().equals(id);
     } else {
       return false;
@@ -75,7 +75,7 @@ public class TaskTrackerTest extends AbstractPartTrackerTest<TaskEvent> {
   }
 
   @Override
-  protected void internalAssertAccuracy(TaskEvent event, IWorkbenchPart part,
+  protected void internalAssertAccuracy(TaskFileEvent event, IWorkbenchPart part,
       long durationInMillis, int size, DateTime start, DateTime end) {
 
     // 1/10 of a second is acceptable?
@@ -86,7 +86,7 @@ public class TaskTrackerTest extends AbstractPartTrackerTest<TaskEvent> {
     assertEquals(size, tracker.getData().size());
     IFile file = (IFile) ((IEditorPart) part).getEditorInput().getAdapter(
         IFile.class);
-    assertEquals(event.getFileId(), DataHandler.getFileMapper().getId(file));
+    assertEquals(event.getFileId(), DataHandler.getFileStore().getId(file));
 
     assertEquals(task, event.getTask());
   }

@@ -17,16 +17,16 @@ import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for launchEventListType complex type.
+ * <p>Java class for taskFileEventListType complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="launchEventListType">
+ * &lt;complexType name="taskFileEventListType">
  *   &lt;complexContent>
  *     &lt;extension base="{}eventGroupType">
  *       &lt;sequence>
- *         &lt;element name="launchEvent" type="{}launchEventType" maxOccurs="unbounded"/>
+ *         &lt;element name="taskFileEvent" type="{}taskFileEventType" maxOccurs="unbounded"/>
  *       &lt;/sequence>
  *     &lt;/extension>
  *   &lt;/complexContent>
@@ -36,43 +36,43 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "launchEventListType", propOrder = {
-    "launchEvent"
+@XmlType(name = "taskFileEventListType", propOrder = {
+    "taskFileEvent"
 })
-public class LaunchEventListType
+public class TaskFileEventListType
     extends EventGroupType
 {
 
     @XmlElement(required = true)
-    protected List<LaunchEventType> launchEvent;
+    protected List<TaskFileEventType> taskFileEvent;
 
     /**
-     * Gets the value of the launchEvent property.
+     * Gets the value of the taskFileEvent property.
      * 
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
-     * This is why there is not a <CODE>set</CODE> method for the launchEvent property.
+     * This is why there is not a <CODE>set</CODE> method for the taskFileEvent property.
      * 
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
-     *    getLaunchEvent().add(newItem);
+     *    getTaskFileEvent().add(newItem);
      * </pre>
      * 
      * 
      * <p>
      * Objects of the following type(s) are allowed in the list
-     * {@link LaunchEventType }
+     * {@link TaskFileEventType }
      * 
      * 
      */
-    public List<LaunchEventType> getLaunchEvent() {
-        if (launchEvent == null) {
-            launchEvent = new ArrayList<LaunchEventType>();
+    public List<TaskFileEventType> getTaskFileEvent() {
+        if (taskFileEvent == null) {
+            taskFileEvent = new ArrayList<TaskFileEventType>();
         }
-        return this.launchEvent;
+        return this.taskFileEvent;
     }
 
 }

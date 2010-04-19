@@ -90,7 +90,7 @@ public abstract class AbstractMergerTest<T> {
 
   /**
    * Creates a target type for testing, all fields must be filled. Subsequence
-   * calls to this method must return equals objects.
+   * calls to this method must return objects with exact same values.
    */
   protected abstract T createTargetType();
 
@@ -98,8 +98,8 @@ public abstract class AbstractMergerTest<T> {
    * Creates a target type for testing, all fields must be filled, and is
    * different to {@link #createTargetType()}, i.e. calling {@link
    * AbstractMerger#isMergeable(createTargetType(), createTargetType2())} will
-   * always return false. Subsequence calls to this method must return equals
-   * objects.
+   * always return false. Subsequence calls to this method must return objects 
+   * with exact same values.
    */
   protected abstract T createTargetTypeDiff();
 }

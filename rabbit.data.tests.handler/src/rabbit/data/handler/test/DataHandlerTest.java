@@ -59,7 +59,7 @@ public class DataHandlerTest {
 
   @Test
   public void testGetResourceManager() {
-    Assert.assertNotNull(DataHandler.getFileMapper());
+    Assert.assertNotNull(DataHandler.getFileStore());
   }
 
   @Test

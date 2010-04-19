@@ -21,11 +21,11 @@ import rabbit.data.internal.xml.IDataStore;
 import rabbit.data.internal.xml.convert.IConverter;
 import rabbit.data.internal.xml.merge.IMerger;
 import rabbit.data.internal.xml.schema.events.EventListType;
-import rabbit.data.internal.xml.schema.events.TaskEventListType;
-import rabbit.data.internal.xml.schema.events.TaskEventType;
-import rabbit.mylyn.TaskEventConverter;
-import rabbit.mylyn.TaskEventTypeMerger;
-import rabbit.mylyn.events.TaskEvent;
+import rabbit.data.internal.xml.schema.events.TaskFileEventListType;
+import rabbit.data.internal.xml.schema.events.TaskFileEventType;
+import rabbit.mylyn.TaskFileEventConverter;
+import rabbit.mylyn.TaskFileEventTypeMerger;
+import rabbit.mylyn.events.TaskFileEvent;
 
 import java.util.List;
 
@@ -33,10 +33,10 @@ import javax.annotation.Nonnull;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 /**
- * Stores {@link TaskEvent}.
+ * Stores {@link TaskFileEvent}.
  */
 public final class TaskEventStorer extends
-    AbstractStorer<TaskEvent, TaskEventType, TaskEventListType> {
+    AbstractStorer<TaskFileEvent, TaskFileEventType, TaskFileEventListType> {
 
   private static final TaskEventStorer INSTANCE = new TaskEventStorer();
 
@@ -50,22 +50,22 @@ public final class TaskEventStorer extends
   }
   
   @Nonnull
-  private final IMerger<TaskEventType> merger;
+  private final IMerger<TaskFileEventType> merger;
   @Nonnull
-  private final IConverter<TaskEvent, TaskEventType> converter;
+  private final IConverter<TaskFileEvent, TaskFileEventType> converter;
 
   private TaskEventStorer() {
-    merger = new TaskEventTypeMerger();
-    converter = new TaskEventConverter();
+    merger = new TaskFileEventTypeMerger();
+    converter = new TaskFileEventConverter();
   }
 
   @Override
-  protected List<TaskEventListType> getCategories(EventListType events) {
-    return events.getTaskEvents();
+  protected List<TaskFileEventListType> getCategories(EventListType events) {
+    return events.getTaskFileEvents();
   }
 
   @Override
-  protected IConverter<TaskEvent, TaskEventType> getConverter() {
+  protected IConverter<TaskFileEvent, TaskFileEventType> getConverter() {
     return converter;
   }
 
@@ -75,18 +75,18 @@ public final class TaskEventStorer extends
   }
 
   @Override
-  protected List<TaskEventType> getElements(TaskEventListType list) {
-    return list.getTaskEvent();
+  protected List<TaskFileEventType> getElements(TaskFileEventListType list) {
+    return list.getTaskFileEvent();
   }
 
   @Override
-  protected IMerger<TaskEventType> getMerger() {
+  protected IMerger<TaskFileEventType> getMerger() {
     return merger;
   }
 
   @Override
-  protected TaskEventListType newCategory(XMLGregorianCalendar date) {
-    TaskEventListType type = objectFactory.createTaskEventListType();
+  protected TaskFileEventListType newCategory(XMLGregorianCalendar date) {
+    TaskFileEventListType type = objectFactory.createTaskFileEventListType();
     type.setDate(date);
     return type;
   }

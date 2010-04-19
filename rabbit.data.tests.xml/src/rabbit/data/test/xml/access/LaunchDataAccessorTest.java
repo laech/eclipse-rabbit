@@ -77,7 +77,7 @@ public class LaunchDataAccessorTest
   }
 
   @Override
-  protected void setUsage(LaunchEventType type, long usage) {
+  protected void setValue(LaunchEventType type, long usage) {
     type.setTotalDuration(usage);
   }
 

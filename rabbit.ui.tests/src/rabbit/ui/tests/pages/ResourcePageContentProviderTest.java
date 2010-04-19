@@ -81,7 +81,7 @@ public class ResourcePageContentProviderTest {
     folder = project.getFolder("f");
     file = folder.getFile("a");
     
-    mapper = DataHandler.getFileMapper();
+    mapper = DataHandler.getFileStore();
   }
 
   @Test

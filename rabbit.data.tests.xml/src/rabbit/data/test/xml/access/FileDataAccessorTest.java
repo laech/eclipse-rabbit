@@ -64,7 +64,7 @@ public class FileDataAccessorTest
   }
 
   @Override
-  protected void setUsage(FileEventType type, long usage) {
+  protected void setValue(FileEventType type, long usage) {
     type.setDuration(usage);
   }
 

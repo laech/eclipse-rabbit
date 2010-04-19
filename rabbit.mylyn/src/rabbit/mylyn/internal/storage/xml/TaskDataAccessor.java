@@ -15,66 +15,58 @@
  */
 package rabbit.mylyn.internal.storage.xml;
 
-import rabbit.data.internal.xml.AbstractAccessor;
+import rabbit.data.internal.xml.AbstractDataNodeAccessor;
 import rabbit.data.internal.xml.DataStore;
 import rabbit.data.internal.xml.IDataStore;
+import rabbit.data.internal.xml.merge.IMerger;
 import rabbit.data.internal.xml.schema.events.EventListType;
-import rabbit.data.internal.xml.schema.events.TaskEventListType;
-import rabbit.data.internal.xml.schema.events.TaskEventType;
+import rabbit.data.internal.xml.schema.events.TaskFileEventListType;
+import rabbit.data.internal.xml.schema.events.TaskFileEventType;
+import rabbit.mylyn.TaskFileDataDescriptor;
+import rabbit.mylyn.TaskFileEventTypeMerger;
 import rabbit.mylyn.TaskId;
 
+import org.joda.time.LocalDate;
+
 import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
-public class TaskDataAccessor
-    extends
-    AbstractAccessor<Map<TaskId, Map<String, Long>>, TaskEventType, TaskEventListType> {
+/**
+ * Gets task data.
+ */
+public class TaskDataAccessor extends
+    AbstractDataNodeAccessor<TaskFileDataDescriptor, TaskFileEventType, TaskFileEventListType> {
 
   @Override
-  protected Map<TaskId, Map<String, Long>> filter(List<TaskEventListType> data) {
-    Map<TaskId, Map<String, Long>> result = new HashMap<TaskId, Map<String, Long>>();
-    for (TaskEventListType list : data) {
-      for (TaskEventType type : list.getTaskEvent()) {
-
-        String handleId = type.getTaskId().getHandleId();
-        Date creationDate = type.getTaskId().getCreationDate()
-            .toGregorianCalendar().getTime();
-
-        TaskId id = null;
-        try {
-          id = new TaskId(handleId, creationDate);
-        } catch (IllegalArgumentException e) {
-          continue; // Ignore, due to invalid XML entries?
-        } catch (NullPointerException e) {
-          continue; // Ignore, due to invalid XML entries?
-        }
-
-        Map<String, Long> map = result.get(id);
-        if (map == null) {
-          map = new HashMap<String, Long>();
-          result.put(id, map);
-        }
-
-        Long value = map.get(type.getFileId());
-        if (value == null) {
-          value = 0L;
-        }
-        map.put(type.getFileId(), type.getDuration() + value);
-      }
-    }
-    return result;
-  }
-
-  @Override
-  protected Collection<TaskEventListType> getCategories(EventListType doc) {
-    return doc.getTaskEvents();
+  protected Collection<TaskFileEventListType> getCategories(EventListType doc) {
+    return doc.getTaskFileEvents();
   }
 
   @Override
   protected IDataStore getDataStore() {
     return DataStore.TASK_STORE;
+  }
+
+  @Override
+  protected TaskFileDataDescriptor createDataNode(LocalDate cal, TaskFileEventType type) {
+    try {
+      TaskId id = new TaskId(type.getTaskId().getHandleId(), 
+          type.getTaskId().getCreationDate().toGregorianCalendar().getTime());
+      return new TaskFileDataDescriptor(cal, type.getDuration(), type.getFileId(), id);
+      
+    } catch (NullPointerException e) {
+      return null;
+    } catch (IllegalArgumentException e) {
+      return null;
+    }
+  }
+
+  @Override
+  protected IMerger<TaskFileEventType> createMerger() {
+    return new TaskFileEventTypeMerger();
+  }
+
+  @Override
+  protected Collection<TaskFileEventType> getElements(TaskFileEventListType category) {
+    return category.getTaskFileEvent();
   }
 }

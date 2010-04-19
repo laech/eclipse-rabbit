@@ -130,7 +130,7 @@ public class ResourcePageTableLabelProviderTest {
   @Test
   public void testGetColumnText_1() throws Exception {
     FileDataDescriptor des1 = new FileDataDescriptor((LocalDate) dateNode
-        .getValue(), 12, DataHandler.getFileMapper().insert(
+        .getValue(), 12, DataHandler.getFileStore().insert(
         (IFile) fileNode.getValue()));
     FileDataDescriptor des2 = new FileDataDescriptor(des1.getDate(), 11982222,
         des1.getFileId());

@@ -83,7 +83,7 @@ public class FileTrackerTest extends AbstractPartTrackerTest<FileEvent> {
     if (part instanceof IEditorPart) {
       IEditorPart editor = (IEditorPart) part;
       IFile file = (IFile) editor.getEditorInput().getAdapter(IFile.class);
-      String id = DataHandler.getFileMapper().getId(file);
+      String id = DataHandler.getFileStore().getId(file);
       return event.getFileId().equals(id);
     } else {
       return false;
@@ -102,7 +102,7 @@ public class FileTrackerTest extends AbstractPartTrackerTest<FileEvent> {
     Assert.assertEquals(size, tracker.getData().size());
     IFile file = (IFile) ((IEditorPart) part).getEditorInput().getAdapter(
         IFile.class);
-    Assert.assertEquals(event.getFileId(), DataHandler.getFileMapper().getId(
+    Assert.assertEquals(event.getFileId(), DataHandler.getFileStore().getId(
         file));
   }
 

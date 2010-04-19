@@ -21,6 +21,7 @@ public class FileDataDescriptor extends ValueDescriptor {
    * 
    * @param date The date of the data.
    * @param value The duration of the event, in milliseconds.
+   * @param fileId The ID of the file.
    * @throws NullPointerException If date is null, or fileId is null.
    * @throws IllegalArgumentException If value < 0;
    */

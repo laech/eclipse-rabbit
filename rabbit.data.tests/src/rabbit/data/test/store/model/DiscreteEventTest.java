@@ -18,7 +18,6 @@ package rabbit.data.test.store.model;
 import rabbit.data.store.model.DiscreteEvent;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 
 import org.joda.time.DateTime;
 import org.junit.Test;
@@ -28,26 +27,20 @@ import org.junit.Test;
  */
 public class DiscreteEventTest {
 
-  private DateTime time = new DateTime();
-
-  private DiscreteEvent event = createEvent(time);
-
   @Test(expected = NullPointerException.class)
   public void testConstructor_null() {
-    new DiscreteEvent(null);
-  }
-
-  @Test
-  public void testEvent() {
-    assertNotNull(event);
+    createEvent(null);
   }
 
   @Test
   public void testGetTime() {
-    assertEquals(time, event.getTime());
+    DateTime time = new DateTime();
+    assertEquals(time, createEvent(time).getTime());
   }
 
-  /** Creates an event for testing. */
+  /**
+   * @see DiscreteEvent#DiscreteEvent(DateTime)
+   */
   protected DiscreteEvent createEvent(DateTime time) {
     return new DiscreteEvent(time);
   }

@@ -48,7 +48,7 @@ public class FileTracker extends AbstractPartTracker<FileEvent> {
 
       if (input instanceof IFileEditorInput) {
         IFile file = ((IFileEditorInput) input).getFile();
-        String id = DataHandler.getFileMapper().insert(file);
+        String id = DataHandler.getFileStore().insert(file);
         return new FileEvent(endTime, duration, id);
 
       }

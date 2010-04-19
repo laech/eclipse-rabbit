@@ -15,10 +15,10 @@
  */
 package rabbit.mylyn.tests.storage.xml;
 
-import rabbit.data.internal.xml.schema.events.TaskEventListType;
-import rabbit.data.internal.xml.schema.events.TaskEventType;
+import rabbit.data.internal.xml.schema.events.TaskFileEventListType;
+import rabbit.data.internal.xml.schema.events.TaskFileEventType;
 import rabbit.data.test.xml.AbstractStorerTest;
-import rabbit.mylyn.events.TaskEvent;
+import rabbit.mylyn.events.TaskFileEvent;
 import rabbit.mylyn.internal.storage.xml.TaskEventStorer;
 
 import com.google.common.base.Objects;
@@ -31,7 +31,7 @@ import org.joda.time.DateTime;
  */
 @SuppressWarnings("restriction")
 public class TaskEventStorerTest extends
-    AbstractStorerTest<TaskEvent, TaskEventType, TaskEventListType> {
+    AbstractStorerTest<TaskFileEvent, TaskFileEventType, TaskFileEventListType> {
 
   @Override
   protected TaskEventStorer createStorer() {
@@ -39,26 +39,24 @@ public class TaskEventStorerTest extends
   }
 
   @Override
-  protected TaskEvent createEventDiff(DateTime dateTime) {
+  protected TaskFileEvent createEventDiff(DateTime dateTime) {
     LocalTask task = new LocalTask("taskId", "what?");
     task.setCreationDate(dateTime.toDate());
-    return new TaskEvent(dateTime, 187, "fileId", task);
+    return new TaskFileEvent(dateTime, 187, "fileId", task);
   }
 
   @Override
-  protected TaskEvent createEvent(DateTime dateTime) {
+  protected TaskFileEvent createEvent(DateTime dateTime) {
     LocalTask task = new LocalTask("tas1kId", "what?1");
     task.setCreationDate(dateTime.toDate());
-    return new TaskEvent(dateTime, 1187, "fileId", task);
+    return new TaskFileEvent(dateTime, 1187, "fileId", task);
   }
 
   @Override
-  protected boolean equal(TaskEventType t1, TaskEventType t2) {
+  protected boolean equal(TaskFileEventType t1, TaskFileEventType t2) {
     return t1.getDuration() == t2.getDuration()
         && Objects.equal(t1.getFileId(), t2.getFileId())
-        && Objects.equal(t1.getTaskId().getHandleId(), t2.getTaskId()
-            .getHandleId())
-        && Objects.equal(t1.getTaskId().getCreationDate(), t2.getTaskId()
-            .getCreationDate());
+        && Objects.equal(t1.getTaskId().getHandleId(), t2.getTaskId().getHandleId())
+        && Objects.equal(t1.getTaskId().getCreationDate(), t2.getTaskId().getCreationDate());
   }
 }

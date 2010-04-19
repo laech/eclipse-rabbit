@@ -284,7 +284,7 @@ public class LaunchPageContentProvider extends AbstractCategoryContentProvider {
     getRoot().setChildren(null);
 
     ICategory[] categories = getSelectedCategories();
-    IFileStore store = DataHandler.getFileMapper();
+    IFileStore store = DataHandler.getFileStore();
     ILaunchManager manager = DebugPlugin.getDefault().getLaunchManager();
     for (LaunchDataDescriptor des : data) {
 

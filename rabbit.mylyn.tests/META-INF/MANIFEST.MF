@@ -20,7 +20,8 @@ Require-Bundle: rabbit.data.handler;bundle-version="1.1.0",
  org.eclipse.core.runtime,
  rabbit.tracking;bundle-version="1.1.0",
  org.eclipse.swtbot.eclipse.finder,
- rabbit.common;bundle-version="1.0.0"
+ rabbit.common;bundle-version="1.0.0",
+ rabbit.data.tests;bundle-version="1.0.0"
 Export-Package: rabbit.mylyn.tests,
  rabbit.mylyn.tests.events,
  rabbit.mylyn.tests.storage.xml,

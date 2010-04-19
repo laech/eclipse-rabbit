@@ -18,6 +18,7 @@ package rabbit.data.test.store.model;
 import rabbit.data.store.model.FileEvent;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 import org.joda.time.DateTime;
 import org.junit.Test;
@@ -29,28 +30,84 @@ public class FileEventTest extends ContinuousEventTest {
 
   @Test(expected = IllegalArgumentException.class)
   public void testContructor_fileIdEmpty() {
-    new FileEvent(new DateTime(), 10, "");
+    createEvent(new DateTime(), 10, "");
   }
 
   @Test(expected = NullPointerException.class)
   public void testContructor_fileIdNull() {
-    new FileEvent(new DateTime(), 10, null);
+    createEvent(new DateTime(), 10, null);
   }
 
-  @Test(expected = IllegalArgumentException.class)
-  public void testContructor_fileIdWhitespaceOnly() {
-    new FileEvent(new DateTime(), 10, " \t");
+  @Test
+  public void testContructor_fileIdWhitespace() {
+    try {
+      createEvent(new DateTime(), 10, " ");
+      fail();
+    } catch (IllegalArgumentException e) {
+    }
+    
+    try {
+      createEvent(new DateTime(), 10, "\t");
+      fail();
+    } catch (IllegalArgumentException e) {
+    }
+
+    try {
+      createEvent(new DateTime(), 10, "\n");
+      fail();
+    } catch (IllegalArgumentException e) {
+    }
+    
+    try {
+      createEvent(new DateTime(), 10, "\r");
+      fail();
+    } catch (IllegalArgumentException e) {
+    }
+
+    try {
+      createEvent(new DateTime(), 10, "\f");
+      fail();
+    } catch (IllegalArgumentException e) {
+    }
+    
+
+    try {
+      createEvent(new DateTime(), 10, "\tsdflkj");
+      fail();
+    } catch (IllegalArgumentException e) {
+    }
+    
+
+    try {
+      createEvent(new DateTime(), 10, "lkjasdf ");
+      fail();
+    } catch (IllegalArgumentException e) {
+    }
+    
+
+    try {
+      createEvent(new DateTime(), 10, "asdkfj aoiujf");
+      fail();
+    } catch (IllegalArgumentException e) {
+    }
   }
 
   @Test
   public void testGetFileId() {
     String fileId = System.currentTimeMillis() + "";
-    FileEvent event = new FileEvent(new DateTime(), 10, fileId);
+    FileEvent event = createEvent(new DateTime(), 10, fileId);
     assertEquals(fileId, event.getFileId());
   }
 
   @Override
-  protected FileEvent createEvent(DateTime time, long duration) {
-    return new FileEvent(time, duration, System.currentTimeMillis() + "");
+  protected final FileEvent createEvent(DateTime time, long duration) {
+    return createEvent(time, duration, System.currentTimeMillis() + "");
+  }
+  
+  /**
+   * @see FileEvent#FileEvent(DateTime, long, String)
+   */
+  protected FileEvent createEvent(DateTime time, long duration, String fileId) {
+    return new FileEvent(time, duration, fileId);
   }
 }

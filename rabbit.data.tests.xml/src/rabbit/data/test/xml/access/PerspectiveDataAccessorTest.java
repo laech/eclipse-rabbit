@@ -61,7 +61,7 @@ public class PerspectiveDataAccessorTest
   }
 
   @Override
-  protected void setUsage(PerspectiveEventType type, long usage) {
+  protected void setValue(PerspectiveEventType type, long usage) {
     type.setDuration(usage);
   }
 

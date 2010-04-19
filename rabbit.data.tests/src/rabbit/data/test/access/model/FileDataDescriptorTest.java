@@ -62,7 +62,7 @@ public class FileDataDescriptorTest extends ValueDescriptorTest {
   }
 
   @Override
-  protected FileDataDescriptor createDescriptor(LocalDate date, long duration) {
+  protected final FileDataDescriptor createDescriptor(LocalDate date, long duration) {
     return createDescriptor(date, duration, "fileId.x");
   }
 
@@ -73,6 +73,7 @@ public class FileDataDescriptorTest extends ValueDescriptorTest {
    * @param duration The duration will be used to create the descriptor.
    * @param fileId The file ID will be used to create the descriptor.
    * @return A descriptor created using the parameters.
+   * @see FileDataDescriptor#FileDataDescriptor(LocalDate, long, String)
    */
   protected FileDataDescriptor createDescriptor(LocalDate date, long duration,
       String fileId) {

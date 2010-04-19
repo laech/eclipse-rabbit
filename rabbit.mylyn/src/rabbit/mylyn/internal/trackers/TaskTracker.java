@@ -17,8 +17,9 @@ package rabbit.mylyn.internal.trackers;
 
 import rabbit.data.handler.DataHandler;
 import rabbit.data.store.IStorer;
+import rabbit.data.store.model.FileEvent;
 import rabbit.mylyn.TaskCore;
-import rabbit.mylyn.events.TaskEvent;
+import rabbit.mylyn.events.TaskFileEvent;
 import rabbit.tracking.internal.trackers.AbstractPartTracker;
 
 import org.eclipse.core.resources.IFile;
@@ -31,37 +32,31 @@ import org.joda.time.DateTime;
 /**
  * Tracks task events.
  */
-public class TaskTracker extends AbstractPartTracker<TaskEvent> {
+public class TaskTracker extends AbstractPartTracker<TaskFileEvent> {
 
   public TaskTracker() {
     super();
   }
 
   @Override
-  protected IStorer<TaskEvent> createDataStorer() {
+  protected IStorer<TaskFileEvent> createDataStorer() {
     return TaskCore.getTaskEventStorer();
   }
 
   @Override
-  protected TaskEvent tryCreateEvent(DateTime endTime, long duration,
-      IWorkbenchPart part) {
+  protected TaskFileEvent tryCreateEvent(DateTime endTime, long duration, IWorkbenchPart part) {
     ITask task = TasksUi.getTaskActivityManager().getActiveTask();
-    if (task == null) {
+    if (task == null)
       return null;
-    }
 
-    if (part instanceof IEditorPart == false) {
+    if (!(part instanceof IEditorPart))
       return null;
-    }
 
-    IFile file = (IFile) ((IEditorPart) part).getEditorInput().getAdapter(
-        IFile.class);
-    if (file == null) {
+    IFile file = (IFile) ((IEditorPart) part).getEditorInput().getAdapter(IFile.class);
+    if (file == null)
       return null;
-    }
 
-    String fileId = DataHandler.getFileMapper().insert(file);
-    return new TaskEvent(endTime, duration, fileId, task);
+    String fileId = DataHandler.getFileStore().insert(file);
+    return new TaskFileEvent(endTime, duration, fileId, task);
   }
-
 }

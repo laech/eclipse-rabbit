@@ -101,7 +101,7 @@ public class DataHandler {
    * 
    * @return The resource manager.
    */
-  public static IFileStore getFileMapper() {
+  public static IFileStore getFileStore() {
     return FileStore.INSTANCE;
   }
 

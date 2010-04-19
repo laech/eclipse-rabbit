@@ -15,6 +15,7 @@
  */
 package rabbit.data.store.model;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.joda.time.DateTime;
@@ -36,13 +37,16 @@ public class FileEvent extends ContinuousEvent {
    * @param endTime The end time of the event.
    * @param duration The duration of the event, in milliseconds.
    * @param fileId The id of the file.
-   * @throws IllegalArgumentException If duration is negative.
+   * @throws IllegalArgumentException If duration is negative, and/or the fileId
+   *           is an empty string or contains white space.
    * @throws NullPointerException If time is null or file id is null.
    */
   public FileEvent(@Nonnull DateTime endTime, long duration,
       @Nonnull String fileId) {
     super(endTime, duration);
     checkNotNull(fileId);
+    checkArgument(fileId.length() > 0);
+    checkArgument(!fileId.matches(".*\\s.*"));
     this.fileId = fileId;
   }
 

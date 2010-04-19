@@ -94,7 +94,7 @@ public abstract class AbstractAccessorTest<T, E, S extends EventGroupType> {
     int count1 = 298;
     E type1 = createElement();
     setId(type1, id);
-    setUsage(type1, count1);
+    setValue(type1, count1);
 
     S list1 = createCategory();
     MutableDateTime tmp = new MutableDateTime();
@@ -108,7 +108,7 @@ public abstract class AbstractAccessorTest<T, E, S extends EventGroupType> {
     int count2 = 22817;
     E type2 = createElement();
     setId(type2, id);
-    setUsage(type2, count2);
+    setValue(type2, count2);
 
     S list2 = createCategory();
     tmp.setDayOfMonth(3);
@@ -143,7 +143,7 @@ public abstract class AbstractAccessorTest<T, E, S extends EventGroupType> {
     int count1 = 1232948;
     E type1 = createElement();
     setId(type1, id);
-    setUsage(type1, count1);
+    setValue(type1, count1);
 
     S list1 = createCategory();
     XMLGregorianCalendar start = toXmlDate(date);
@@ -155,7 +155,7 @@ public abstract class AbstractAccessorTest<T, E, S extends EventGroupType> {
     int count2 = 2342817;
     E type2 = createElement();
     setId(type2, id);
-    setUsage(type2, count2);
+    setValue(type2, count2);
 
     S list2 = createCategory();
     XMLGregorianCalendar end = toXmlDate(date);
@@ -273,5 +273,5 @@ public abstract class AbstractAccessorTest<T, E, S extends EventGroupType> {
    * @param type The type.
    * @param usage The usage.
    */
-  protected abstract void setUsage(E type, long usage);
+  protected abstract void setValue(E type, long usage);
 }

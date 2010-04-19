@@ -66,7 +66,7 @@ public class LaunchTracker extends AbstractTracker<LaunchEvent> implements
    * Constructs a new tracker.
    */
   public LaunchTracker() {
-    fileMapper = DataHandler.getFileMapper();
+    fileMapper = DataHandler.getFileStore();
     launchTimes = new HashMap<ILaunch, Long>();
     launchFiles = new HashMap<ILaunch, Set<String>>();
     launchConfigs = new HashMap<ILaunch, ILaunchConfiguration>();

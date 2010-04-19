@@ -73,9 +73,9 @@ public class LaunchEventTypeMergerTest extends
     t2.setLaunchModeId(null);
 
     try {
-      assertTrue(merger.isMergeable(t1, t2));
+      assertFalse(merger.isMergeable(t1, t2));
     } catch (Exception e) {
-      fail("Should return true instead of exception");
+      fail("Should return false instead of exception");
     }
   }
 
@@ -87,9 +87,9 @@ public class LaunchEventTypeMergerTest extends
     t2.setLaunchTypeId(null);
 
     try {
-      assertTrue(merger.isMergeable(t1, t2));
+      assertFalse(merger.isMergeable(t1, t2));
     } catch (Exception e) {
-      fail("Should return true instead of exception");
+      fail("Should return false instead of exception");
     }
   }
 
@@ -101,9 +101,9 @@ public class LaunchEventTypeMergerTest extends
     t2.setName(null);
 
     try {
-      assertTrue(merger.isMergeable(t1, t2));
+      assertFalse(merger.isMergeable(t1, t2));
     } catch (Exception e) {
-      fail("Should return true instead of exception");
+      fail("Should return false instead of exception");
     }
   }
 

@@ -26,6 +26,9 @@ import static org.junit.Assert.fail;
 
 import org.junit.Test;
 
+/**
+ * @see PerspectiveEventTypeMerger
+ */
 @SuppressWarnings("restriction")
 public class PerspectiveEventTypeMergerTest extends
     AbstractMergerTest<PerspectiveEventType> {
@@ -34,7 +37,7 @@ public class PerspectiveEventTypeMergerTest extends
    * Tests when {@link PerspectiveEventType#getPerspectiveId()} returns null on
    * both parameters,
    * {@link PerspectiveEventTypeMerger#isMergeable(PerspectiveEventType, PerspectiveEventType)}
-   * should return true (because both null) instead of failing.
+   * should return false (as not mergeable) instead of failing.
    */
   @Test
   public void testIsMerageable_bothParamGetPerspectiveIdReturnsNull() {
@@ -44,9 +47,9 @@ public class PerspectiveEventTypeMergerTest extends
     t2.setPerspectiveId(null);
 
     try {
-      assertTrue(merger.isMergeable(t1, t2));
+      assertFalse(merger.isMergeable(t1, t2));
     } catch (Exception e) {
-      fail("Should return true instead of exception");
+      fail("Should return false instead of exception");
     }
   }
 

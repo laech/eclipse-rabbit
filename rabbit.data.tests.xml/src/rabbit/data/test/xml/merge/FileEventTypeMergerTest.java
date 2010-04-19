@@ -36,7 +36,7 @@ public class FileEventTypeMergerTest extends AbstractMergerTest<FileEventType> {
    * Tests when {@link FileEventType#getFileId()} returns null on both
    * parameters,
    * {@link FileEventTypeMerger#isMergeable(FileEventType, FileEventType)}
-   * should return true (because both null) instead of failing.
+   * should return false instead of failing.
    */
   @Test
   public void testIsMerageable_bothParamGetFileIdReturnsNull() {
@@ -46,9 +46,9 @@ public class FileEventTypeMergerTest extends AbstractMergerTest<FileEventType> {
     t2.setFileId(null);
 
     try {
-      assertTrue(merger.isMergeable(t1, t2));
+      assertFalse(merger.isMergeable(t1, t2));
     } catch (Exception e) {
-      fail("Should return true instead of exception");
+      fail("Should return false instead of exception");
     }
   }
 

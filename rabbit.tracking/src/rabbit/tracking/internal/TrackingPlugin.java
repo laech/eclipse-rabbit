@@ -108,7 +108,7 @@ public class TrackingPlugin extends AbstractUIPlugin implements
       tracker.flushData();
       tracker.setEnabled(true);
     }
-    DataHandler.getFileMapper().save(true);
+    DataHandler.getFileStore().save(true);
   }
 
   @Override

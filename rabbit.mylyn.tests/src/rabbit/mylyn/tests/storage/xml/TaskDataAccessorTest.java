@@ -15,58 +15,26 @@
  */
 package rabbit.mylyn.tests.storage.xml;
 
-import static rabbit.data.internal.xml.DatatypeUtil.toXmlDateTime;
-
-import rabbit.data.internal.xml.schema.events.EventListType;
-import rabbit.data.internal.xml.schema.events.TaskEventListType;
-import rabbit.data.internal.xml.schema.events.TaskEventType;
+import rabbit.data.internal.xml.DatatypeUtil;
+import rabbit.data.internal.xml.schema.events.TaskFileEventListType;
+import rabbit.data.internal.xml.schema.events.TaskFileEventType;
 import rabbit.data.internal.xml.schema.events.TaskIdType;
-import rabbit.data.test.xml.AbstractAccessorTest;
-import rabbit.mylyn.TaskId;
+import rabbit.data.test.xml.AbstractDataNodeAccessorTest;
+import rabbit.mylyn.TaskFileDataDescriptor;
 import rabbit.mylyn.internal.storage.xml.TaskDataAccessor;
 
 import static org.junit.Assert.assertEquals;
 
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.HashMap;
+import org.joda.time.LocalDate;
+
 import java.util.List;
-import java.util.Map;
 
 /**
  * @see TaskDataAccessor
  */
-public class TaskDataAccessorTest
-    extends
-    AbstractAccessorTest<Map<TaskId, Map<String, Long>>, TaskEventType, TaskEventListType> {
-
-  @Override
-  protected void assertValues(Map<TaskId, Map<String, Long>> data,
-      EventListType events) {
-    Map<TaskId, Map<String, Long>> map = new HashMap<TaskId, Map<String, Long>>();
-    for (TaskEventListType list : events.getTaskEvents()) {
-      for (TaskEventType type : list.getTaskEvent()) {
-
-        String handleId = type.getTaskId().getHandleId();
-        Date creationDate = type.getTaskId().getCreationDate()
-            .toGregorianCalendar().getTime();
-        TaskId taskId = new TaskId(handleId, creationDate);
-
-        Map<String, Long> fileMap = map.get(taskId);
-        if (fileMap == null) {
-          fileMap = new HashMap<String, Long>();
-          map.put(taskId, fileMap);
-        }
-
-        Long value = fileMap.get(type.getFileId());
-        if (value == null) {
-          value = 0L;
-        }
-        fileMap.put(type.getFileId(), value + type.getDuration());
-      }
-    }
-    assertEquals(map, data);
-  }
+@SuppressWarnings("restriction")
+public class TaskDataAccessorTest extends
+    AbstractDataNodeAccessorTest<TaskFileDataDescriptor, TaskFileEventType, TaskFileEventListType> {
 
   @Override
   protected TaskDataAccessor create() {
@@ -74,34 +42,63 @@ public class TaskDataAccessorTest
   }
 
   @Override
-  protected TaskEventListType createListType() {
-    return objectFactory.createTaskEventListType();
+  public void testCreateDataNode() throws Exception {
+    LocalDate eventDate = new LocalDate(2999, 9, 9);
+    LocalDate creationDate = new LocalDate(3000, 1, 1);
+    String handleId = "handleId";
+    String fileId = "abcdefg";
+    long duration = 9834;
+    
+    TaskIdType id = new TaskIdType();
+    id.setCreationDate(DatatypeUtil.toXmlDate(creationDate));
+    id.setHandleId(handleId);
+    
+    TaskFileEventType type = new TaskFileEventType();
+    type.setDuration(duration);
+    type.setFileId(fileId);
+    type.setTaskId(id);
+    
+    TaskFileDataDescriptor des = createDataNode(accessor, eventDate, type);
+    assertEquals(duration, des.getValue());
+    assertEquals(eventDate, des.getDate());
+    assertEquals(fileId, des.getFileId());
+    assertEquals(handleId, des.getTaskId().getHandleIdentifier());
+    assertEquals(DatatypeUtil.toXmlDate(creationDate), type.getTaskId().getCreationDate());
   }
 
   @Override
-  protected TaskEventType createXmlType() {
-    TaskIdType id = objectFactory.createTaskIdType();
-    id.setCreationDate(toXmlDateTime(new GregorianCalendar()));
-    id.setHandleId("abcdef");
+  protected TaskFileEventListType createCategory() {
+    TaskFileEventListType list = new TaskFileEventListType();
+    list.setDate(DatatypeUtil.toXmlDate(new LocalDate()));
+    return list;
+  }
 
-    TaskEventType type = objectFactory.createTaskEventType();
+  @Override
+  protected TaskFileEventType createElement() {
+    TaskIdType id = new TaskIdType();
+    id.setCreationDate(DatatypeUtil.toXmlDate(new LocalDate()));
+    id.setHandleId("ok");
+    
+    TaskFileEventType type = new TaskFileEventType();
+    type.setDuration(10);
+    type.setFileId("hello");
     type.setTaskId(id);
     return type;
   }
 
   @Override
-  protected List<TaskEventType> getXmlTypes(TaskEventListType list) {
-    return list.getTaskEvent();
+  protected List<TaskFileEventType> getElements(TaskFileEventListType list) {
+    return list.getTaskFileEvent();
   }
 
   @Override
-  protected void setId(TaskEventType type, String id) {
+  protected void setId(TaskFileEventType type, String id) {
+    // Change one of the ID property - fileId or taskId
     type.setFileId(id);
   }
 
   @Override
-  protected void setUsage(TaskEventType type, long usage) {
-    type.setDuration(usage);
+  protected void setValue(TaskFileEventType type, long value) {
+    type.setDuration(value);
   }
-
 }

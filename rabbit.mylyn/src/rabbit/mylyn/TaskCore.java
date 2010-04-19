@@ -17,13 +17,11 @@ package rabbit.mylyn;
 
 import rabbit.data.access.IAccessor;
 import rabbit.data.store.IStorer;
-import rabbit.mylyn.events.TaskEvent;
+import rabbit.mylyn.events.TaskFileEvent;
 import rabbit.mylyn.internal.storage.xml.TaskDataAccessor;
 import rabbit.mylyn.internal.storage.xml.TaskEventStorer;
 
-import java.util.Map;
-
-/**
+/**TODO
  */
 public class TaskCore {
 
@@ -38,16 +36,16 @@ public class TaskCore {
    * 
    * @return An accessor to get the data stored.
    */
-  public static IAccessor<Map<TaskId, Map<String, Long>>> getTaskDataAccessor() {
+  public static IAccessor<TaskFileDataDescriptor> getTaskDataAccessor() {
     return accessor;
   }
 
   /**
-   * Gets an {@code IStorer} that stores {@linkplain TaskEvent}.
+   * Gets an {@code IStorer} that stores {@linkplain TaskFileEvent}.
    * 
    * @return The storer.
    */
-  public static IStorer<TaskEvent> getTaskEventStorer() {
+  public static IStorer<TaskFileEvent> getTaskEventStorer() {
     return TaskEventStorer.getInstance();
   }
 

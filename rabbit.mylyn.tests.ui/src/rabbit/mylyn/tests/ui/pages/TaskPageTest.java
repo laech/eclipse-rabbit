@@ -196,7 +196,7 @@ public class TaskPageTest extends AbstractTreeViewerPageTest {
    */
   @Test
   public void testDoUpdate_sameTaskHanldeId() throws Exception {
-    IFileStore manager = DataHandler.getFileMapper();
+    IFileStore manager = DataHandler.getFileStore();
 
     String handleId = "13iu4ey";
     String summary = "nvheuihf";
@@ -245,7 +245,7 @@ public class TaskPageTest extends AbstractTreeViewerPageTest {
     // Test two id pointing to same file, getting the value of the file must
     // return the sum.
 
-    IFileStore manager = DataHandler.getFileMapper();
+    IFileStore manager = DataHandler.getFileStore();
     IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(
         "tmp");
     if (!project.exists()) {
@@ -609,7 +609,7 @@ public class TaskPageTest extends AbstractTreeViewerPageTest {
         preference.getStartDate().getTimeInMillis()), new LocalDate(preference
         .getEndDate().getTimeInMillis()));
 
-    IFileStore resourceMapper = DataHandler.getFileMapper();
+    IFileStore resourceMapper = DataHandler.getFileStore();
     IRepositoryModel repo = TasksUi.getRepositoryModel();
 
     for (Entry<TaskId, Map<String, Long>> taskEn : data.entrySet()) {

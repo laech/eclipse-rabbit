@@ -11,22 +11,24 @@ package rabbit.data.internal.xml.schema.events;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
-import javax.xml.datatype.XMLGregorianCalendar;
 
 
 /**
- * <p>Java class for taskIdType complex type.
+ * <p>Java class for taskFileEventType complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="taskIdType">
+ * &lt;complexType name="taskFileEventType">
  *   &lt;complexContent>
- *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *       &lt;attribute name="handleId" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
- *       &lt;attribute name="creationDate" use="required" type="{http://www.w3.org/2001/XMLSchema}dateTime" />
- *     &lt;/restriction>
+ *     &lt;extension base="{}durationEventType">
+ *       &lt;sequence>
+ *         &lt;element name="taskId" type="{}taskIdType"/>
+ *       &lt;/sequence>
+ *       &lt;attribute name="fileId" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
+ *     &lt;/extension>
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
@@ -34,60 +36,64 @@ import javax.xml.datatype.XMLGregorianCalendar;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "taskIdType")
-public class TaskIdType {
+@XmlType(name = "taskFileEventType", propOrder = {
+    "taskId"
+})
+public class TaskFileEventType
+    extends DurationEventType
+{
 
+    @XmlElement(required = true)
+    protected TaskIdType taskId;
     @XmlAttribute(required = true)
-    protected String handleId;
-    @XmlAttribute(required = true)
-    protected XMLGregorianCalendar creationDate;
+    protected String fileId;
 
     /**
-     * Gets the value of the handleId property.
+     * Gets the value of the taskId property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link TaskIdType }
+     *     
+     */
+    public TaskIdType getTaskId() {
+        return taskId;
+    }
+
+    /**
+     * Sets the value of the taskId property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link TaskIdType }
+     *     
+     */
+    public void setTaskId(TaskIdType value) {
+        this.taskId = value;
+    }
+
+    /**
+     * Gets the value of the fileId property.
      * 
      * @return
      *     possible object is
      *     {@link String }
      *     
      */
-    public String getHandleId() {
-        return handleId;
+    public String getFileId() {
+        return fileId;
     }
 
     /**
-     * Sets the value of the handleId property.
+     * Sets the value of the fileId property.
      * 
      * @param value
      *     allowed object is
      *     {@link String }
      *     
      */
-    public void setHandleId(String value) {
-        this.handleId = value;
-    }
-
-    /**
-     * Gets the value of the creationDate property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link XMLGregorianCalendar }
-     *     
-     */
-    public XMLGregorianCalendar getCreationDate() {
-        return creationDate;
-    }
-
-    /**
-     * Sets the value of the creationDate property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link XMLGregorianCalendar }
-     *     
-     */
-    public void setCreationDate(XMLGregorianCalendar value) {
-        this.creationDate = value;
+    public void setFileId(String value) {
+        this.fileId = value;
     }
 
 }

@@ -14,7 +14,7 @@
 			<xs:element name="partEvents" type="partEventListType" maxOccurs="unbounded" />
 			<xs:element name="fileEvents" type="fileEventListType" maxOccurs="unbounded" />
 			<xs:element name="perspectiveEvents" type="perspectiveEventListType" maxOccurs="unbounded" />
-			<xs:element name="taskEvents" type="taskEventListType" maxOccurs="unbounded" />
+			<xs:element name="taskFileEvents" type="taskFileEventListType" maxOccurs="unbounded" />
 			<xs:element name="launchEvents" type="launchEventListType" maxOccurs="unbounded" />
 		</xs:sequence>
 	</xs:complexType>
@@ -92,16 +92,16 @@
 	</xs:complexType>
 	
 	<!-- Task File Events: -->
-	<xs:complexType name="taskEventListType">
+	<xs:complexType name="taskFileEventListType">
 		<xs:complexContent>
 			<xs:extension base="eventGroupType">
 				<xs:sequence>
-					<xs:element name="taskEvent" type="taskEventType" maxOccurs="unbounded" />
+					<xs:element name="taskFileEvent" type="taskFileEventType" maxOccurs="unbounded" />
 				</xs:sequence>
 			</xs:extension>
 		</xs:complexContent>
 	</xs:complexType>
-	<xs:complexType name="taskEventType">
+	<xs:complexType name="taskFileEventType">
 		<xs:complexContent>
 			<xs:extension base="durationEventType">
 				<xs:sequence>

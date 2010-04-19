@@ -37,7 +37,7 @@ public class CommandEventTypeMergerTest extends
    * Tests when {@link CommandEventType#getCommandId()} returns null on both
    * parameters,
    * {@link CommandEventTypeMerger#isMergeable(CommandEventType, CommandEventType)}
-   * should return true (because both null) instead of failing.
+   * should return false instead of failing.
    */
   @Test
   public void testIsMerageable_bothParamGetCommandIdReturnsNull() {
@@ -47,9 +47,9 @@ public class CommandEventTypeMergerTest extends
     t2.setCommandId(null);
 
     try {
-      assertTrue(merger.isMergeable(t1, t2));
+      assertFalse(merger.isMergeable(t1, t2));
     } catch (Exception e) {
-      fail("Should return true instead of exception");
+      fail("Should return false instead of exception");
     }
   }
 

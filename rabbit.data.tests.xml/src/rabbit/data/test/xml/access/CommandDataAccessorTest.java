@@ -64,7 +64,7 @@ public class CommandDataAccessorTest
   }
 
   @Override
-  protected void setUsage(CommandEventType type, long usage) {
+  protected void setValue(CommandEventType type, long usage) {
     type.setCount((int) usage);
   }
 
