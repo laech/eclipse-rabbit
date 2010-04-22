@@ -13,26 +13,18 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package rabbit.mylyn.tests;
+package rabbit.ui.tests.pages;
 
-import rabbit.mylyn.TaskCore;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
-import static org.junit.Assert.assertNotNull;
+@RunWith(Suite.class)
+@Suite.SuiteClasses( { 
+  TaskPageContentProviderTest.class,
+  TaskPageDecoratingLabelProviderTest.class,
+  TaskPageLabelProviderTest.class,
+  TaskPageTest.class,
+})
+public class AllTests {
 
-import org.junit.Test;
-
-/**
- * @see TaskCore
- */
-public class TaskCoreTest {
-
-  @Test
-  public void testGetTaskDataAccessor() {
-    assertNotNull(TaskCore.getTaskDataAccessor());
-  }
-
-  @Test
-  public void testGetTaskEventStorer() {
-    assertNotNull(TaskCore.getTaskEventStorer());
-  }
 }
