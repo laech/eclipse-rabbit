@@ -15,6 +15,8 @@
  */
 package rabbit.ui.internal.viewers;
 
+import com.google.common.base.Predicate;
+
 import org.eclipse.jface.viewers.TreeNode;
 
 import java.util.Arrays;
@@ -47,12 +49,15 @@ public class TreeNodes {
   }
 
   /**
-   * Finds a child node who has the given value.
+   * Finds a child node who has the given value (using
+   * {@link Object#equals(Object)}). This method only looks at the immediate
+   * children of the parent node.
    * 
    * @param parent The parent node.
    * @param childValue The value of the child node.
    * @return The child node who has the value, or null if no immediate child of
    *         the parent has that value.
+   * @see #findChildRecursively(TreeNode, Object)
    */
   public static TreeNode findChild(TreeNode parent, Object childValue) {
     TreeNode[] oldChildren = parent.getChildren();
@@ -65,18 +70,47 @@ public class TreeNodes {
     }
     return null;
   }
+  
+  /**
+   * Finds a child node who has the given value (using
+   * {@link Object#equals(Object)}). This method looks at all the tree nodes of
+   * the given subtree. If the given parent node contains the value, the parent
+   * is returned; if a tree node containing the value is found, that tree node
+   * is returned without further looking into the tree. This method may not be
+   * suitable to use if multiple elements are consider equal in the subtree.
+   * 
+   * @param parent The root of the subtree.
+   * @param childValue The value of the tree node.
+   * @return The tree node who has the given value, or null if not found.
+   * @see #findChild(TreeNode, Object)
+   */
+  public static TreeNode findChildRecursively(TreeNode parent, Object childValue) {
+    if (childValue.equals(parent.getValue()))
+      return parent;
+    
+    if (parent.getChildren() == null)
+      return null;
+    
+    for (TreeNode node : parent.getChildren()) {
+      TreeNode result = findChildRecursively(node, childValue);
+      if (result != null)
+        return result;
+    }
+    
+    return null;
+  }
 
   /**
    * Finds the max int value of a subtree for all the tree nodes who's object
-   * value's class is, or is a subclass of the given class.
+   * value returns true on {@link Predicate#apply(Object)}.
    * 
    * @param root The root of the subtree to search the value for.
-   * @param clazz The class of the elements to search for.
+   * @param predicate The predicate to test elements.
    * @return The max value of the subtree.
    * @see #intValueOfSubtree(TreeNode)
    */
-  public static int findMaxInt(TreeNode root, Class<?> clazz) {
-    if (clazz.isAssignableFrom(root.getValue().getClass()))
+  public static int findMaxInt(TreeNode root,Predicate<Object> predicate) {
+    if (predicate.apply(root.getValue()))
       return intValueOfSubtree(root);
 
     TreeNode[] children = root.getChildren();
@@ -85,7 +119,7 @@ public class TreeNodes {
 
     int max = 0;
     for (TreeNode node : children) {
-      int value = findMaxInt(node, clazz);
+      int value = findMaxInt(node, predicate);
       if (value > max)
         max = value;
     }
@@ -94,15 +128,15 @@ public class TreeNodes {
 
   /**
    * Finds the max long value of a subtree for all the tree nodes who's object
-   * value's class is, or is a subclass of the given class.
+   * value returns true on {@link Predicate#apply(Object)}.
    * 
    * @param root The root of the subtree to search the value for.
-   * @param clazz The class of the elements to search for.
+   * @param predicate The predicate to test elements.
    * @return The max value of the subtree.
    * @see #longValueOfSubtree(TreeNode)
    */
-  public static long findMaxLong(TreeNode root, Class<?> clazz) {
-    if (clazz.isAssignableFrom(root.getValue().getClass()))
+  public static long findMaxLong(TreeNode root, Predicate<Object> predicate) {
+    if (predicate.apply(root.getValue()))
       return longValueOfSubtree(root);
 
     TreeNode[] children = root.getChildren();
@@ -111,7 +145,7 @@ public class TreeNodes {
 
     long max = 0;
     for (TreeNode node : children) {
-      long value = findMaxLong(node, clazz);
+      long value = findMaxLong(node, predicate);
       if (value > max)
         max = value;
     }

@@ -20,9 +20,15 @@ import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(Suite.class)
-@SuiteClasses( { CommandEventTest.class, ContinuousEventTest.class,
-    DiscreteEventTest.class, PartEventTest.class, PerspectiveEventTest.class,
-    FileEventTest.class, LaunchEventTest.class,
+@SuiteClasses( { 
+  CommandEventTest.class, 
+  ContinuousEventTest.class,
+  DiscreteEventTest.class, 
+  PartEventTest.class, 
+  PerspectiveEventTest.class,
+  FileEventTest.class, 
+  LaunchEventTest.class,
+  TaskFileEventTest.class,
 //
 })
 public class AllTests {

@@ -44,6 +44,8 @@ public class CollapseAllAction extends Action {
   @Override
   public void run() {
     super.run();
+    viewer.getTree().setRedraw(false);
     viewer.collapseAll();
+    viewer.getTree().setRedraw(true);
   }
 }

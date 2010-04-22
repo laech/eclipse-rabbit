@@ -15,7 +15,7 @@
  */
 package rabbit.ui.tests.pages;
 
-import static rabbit.ui.internal.util.MillisConverter.toDefaultString;
+import static rabbit.ui.internal.util.DurationFormat.format;
 
 import rabbit.data.access.model.SessionDataDescriptor;
 import rabbit.ui.internal.pages.DateLabelProvider;
@@ -67,7 +67,7 @@ public class SessionPageLabelProviderTest {
   @Test
   public void testGetColumnText_1() {
     SessionDataDescriptor d = new SessionDataDescriptor(new LocalDate(), 101);
-    assertEquals(toDefaultString(d.getValue()), provider.getColumnText(d, 1));
+    assertEquals(format(d.getValue()), provider.getColumnText(d, 1));
   }
 
   @Test

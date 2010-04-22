@@ -25,9 +25,10 @@ import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
-import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.viewers.ITreeSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.TreeViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
@@ -80,14 +81,25 @@ public abstract class AbstractFilteredTreePage implements IPage {
       }
     });
 
-    // Expand tree node on double click:
+    // Expand/collapse tree node on double click:
     viewer.addDoubleClickListener(new IDoubleClickListener() {
       @Override
       public void doubleClick(DoubleClickEvent e) {
-        IStructuredSelection select = (IStructuredSelection) e.getSelection();
-        Object o = select.getFirstElement();
-        if (((ITreeContentProvider) viewer.getContentProvider()).hasChildren(o))
-          viewer.setExpandedState(o, !viewer.getExpandedState(o));
+        if (e.getSelection() instanceof ITreeSelection) {
+          ITreeSelection selection = (ITreeSelection) e.getSelection();
+          
+          try {
+            TreePath path = selection.getPaths()[0];
+            ITreeContentProvider contents = (ITreeContentProvider) viewer.getContentProvider();
+            if (contents.hasChildren(selection.getFirstElement()))
+              viewer.setExpandedState(path, !viewer.getExpandedState(path));
+            
+          } catch (NullPointerException ex) {
+            ex.printStackTrace();
+          } catch (ArrayIndexOutOfBoundsException ex) {
+            ex.printStackTrace();
+          }
+        }
       }
     });
 

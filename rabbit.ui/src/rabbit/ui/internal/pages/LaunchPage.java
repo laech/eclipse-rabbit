@@ -43,6 +43,7 @@ import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.viewers.TreeNode;
+import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.TreeViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
@@ -121,15 +122,15 @@ public class LaunchPage extends AbstractFilteredTreePage {
     IAction filterAction = new ShowHideFilterControlAction(getFilteredTree());
     filterAction.run();
 
-    IAction groupByMode = newGroupByLaunchModesAction();
+    IAction groupByLaunches = newGroupByLaunchesAction();
     IContributionItem[] items = new IContributionItem[] {
         new ActionContributionItem(filterAction), //
         new Separator(), //
         new ActionContributionItem(new ExpandAllAction(getViewer())),
         new ActionContributionItem(new CollapseAllAction(getViewer())),
         new Separator(), //
-        new ActionContributionItem(new GroupByAction(contents, groupByMode,
-            newGroupByLaunchesAction(), //
+        new ActionContributionItem(new GroupByAction(contents, groupByLaunches,
+            groupByLaunches, //
             newGroupByLaunchModesAction(), //
             newGroupByLaunchConfigTypesAction(), //
             newGroupByDatesAction())), //
@@ -146,17 +147,13 @@ public class LaunchPage extends AbstractFilteredTreePage {
 
   @Override
   public void update(Preferences p) {
-    Object[] elements = getViewer().getExpandedElements();
+    TreePath[] expandedPaths = getViewer().getExpandedTreePaths();
 
     LocalDate start = LocalDate.fromCalendarFields(p.getStartDate());
     LocalDate end = LocalDate.fromCalendarFields(p.getEndDate());
     getViewer().setInput(accessor.getData(start, end));
 
-    try {
-      getViewer().setExpandedElements(elements);
-    } catch (Exception e) {
-      // Ignore.
-    }
+    getViewer().setExpandedTreePaths(expandedPaths);
   }
 
   /**

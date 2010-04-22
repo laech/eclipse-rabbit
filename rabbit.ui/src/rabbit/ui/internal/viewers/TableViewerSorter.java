@@ -47,11 +47,12 @@ public abstract class TableViewerSorter extends ViewerComparator implements
     int cat1 = category(e1);
     int cat2 = category(e2);
 
+    int value = 0;
     if (cat1 != cat2) {
-      return cat1 - cat2;
+      value = cat1 - cat2;
+    } else {
+      value = doCompare(v, e1, e2);
     }
-
-    int value = doCompare(v, e1, e2);
     if (sortDirection == SWT.DOWN) {
       value *= -1;
     }

@@ -15,7 +15,7 @@
  */
 package rabbit.ui.internal.pages;
 
-import static rabbit.ui.internal.util.MillisConverter.toDefaultString;
+import static rabbit.ui.internal.util.DurationFormat.format;
 
 import rabbit.ui.internal.SharedImages;
 import rabbit.ui.internal.util.Pair;
@@ -131,7 +131,7 @@ public class LaunchPageLabelProvider extends LabelProvider implements
     case 3:
       IValueProvider provider = contents.getLaunchDurationValueProvider();
       if (provider.shouldPaint(element))
-        return toDefaultString(provider.getValue(element));
+        return format(provider.getValue(element));
 
     default:
       return null;

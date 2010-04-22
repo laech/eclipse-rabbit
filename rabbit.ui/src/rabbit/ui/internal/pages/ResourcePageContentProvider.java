@@ -23,6 +23,8 @@ import rabbit.ui.internal.util.ICategory;
 import rabbit.ui.internal.viewers.TreeNodes;
 import rabbit.ui.internal.viewers.CellPainter.IValueProvider;
 
+import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.Maps;
 
@@ -55,7 +57,13 @@ public class ResourcePageContentProvider extends AbstractCategoryContentProvider
    * This content provider builds a tree from the input data, and every leaf
    * node of the tree is containing a java.util.Long value, these values are the
    * values of each FileDataDescriptor. This way, we can calculate the total 
-   * value of every subtree by traversal.
+   * value of every subtree by traversal. For example:
+   * 
+   * Parent +-- Child1 --- Long
+   *        |
+   *        +-- Child2 --- Long
+   *        |
+   *        +-- Child3 --- Long
    */
 
   /**
@@ -175,8 +183,7 @@ public class ResourcePageContentProvider extends AbstractCategoryContentProvider
       return false;
     
     TreeNode node = (TreeNode) element;
-    return categoriesAndClasses.get(getPaintCategory()).isAssignableFrom(
-        node.getValue().getClass());
+    return getCategorizers().get(getPaintCategory()).apply(node.getValue());
   }
 
   @Override
@@ -185,12 +192,13 @@ public class ResourcePageContentProvider extends AbstractCategoryContentProvider
   }
 
   @Override
-  protected ImmutableBiMap<ICategory, Class<?>> getCategoriesAndClassesMap() {
-    return ImmutableBiMap.<ICategory, Class<?>> builder()
-        .put(Category.PROJECT, IProject.class)
-        .put(Category.FOLDER, IFolder.class)
-        .put(Category.FILE, IFile.class)
-        .put(Category.DATE, LocalDate.class).build();
+  protected ImmutableBiMap<ICategory, Predicate<Object>> initializeCategorizers() {
+    return ImmutableBiMap.<ICategory, Predicate<Object>> builder()
+        .put(Category.PROJECT, Predicates.instanceOf(IProject.class))
+        .put(Category.FOLDER,  Predicates.instanceOf(IFolder.class))
+        .put(Category.FILE,    Predicates.instanceOf(IFile.class))
+        .put(Category.DATE,    Predicates.instanceOf(LocalDate.class))
+        .build();
   }
 
   @Override
@@ -244,26 +252,20 @@ public class ResourcePageContentProvider extends AbstractCategoryContentProvider
 
     treeNodeValues.clear();
     treeNodeValues = Maps.newIdentityHashMap();
-    updateMaxValue(categoriesAndClasses.get(getPaintCategory()));
+    updateMaxValue();
   }
   
   @Override
   public void setPaintCategory(ICategory cat) {
     super.setPaintCategory(cat);
-    updateMaxValue(categoriesAndClasses.get(cat));
+    updateMaxValue();
   }
 
   /**
    * Updates the max value for painting.
-   * 
-   * @param clazz The class type of the elements. For example, use {@code
-   *          IFile.class} if to find the max value of all files.
    * @see #getMaxValue()
    */
-  private void updateMaxValue(Class<?> clazz) {
-    if (clazz != null) 
-      maxValue = TreeNodes.findMaxLong(getRoot(), clazz);
-    else 
-      maxValue = 0;
+  private void updateMaxValue() {
+    maxValue = TreeNodes.findMaxLong(getRoot(), getCategorizers().get(getPaintCategory()));
   }
 }

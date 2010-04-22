@@ -15,7 +15,7 @@
  */
 package rabbit.ui.internal.pages;
 
-import static rabbit.ui.internal.util.MillisConverter.toDefaultString;
+import static rabbit.ui.internal.util.DurationFormat.format;
 
 import rabbit.data.access.model.PartDataDescriptor;
 import rabbit.ui.internal.util.UndefinedWorkbenchPartDescriptor;
@@ -97,11 +97,11 @@ public class PartPageLabelProvider extends BaseLabelProvider implements
 
     case 1:
       if (obj instanceof IWorkbenchPartDescriptor)
-        return toDefaultString(contents
+        return format(contents
             .getValueOfPart((IWorkbenchPartDescriptor) obj));
 
       else if (obj instanceof PartDataDescriptor)
-        return toDefaultString(((PartDataDescriptor) obj).getValue());
+        return format(((PartDataDescriptor) obj).getValue());
 
       else
         return null;

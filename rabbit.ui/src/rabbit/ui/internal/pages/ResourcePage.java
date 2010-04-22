@@ -46,6 +46,7 @@ import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.viewers.TreeNode;
+import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
@@ -128,16 +129,13 @@ public class ResourcePage extends AbstractFilteredTreePage {
 
   @Override
   public void update(Preferences p) {
-    Object[] elements = getViewer().getExpandedElements();
+    TreePath[] expandedPaths = getViewer().getExpandedTreePaths();
 
     LocalDate start = LocalDate.fromCalendarFields(p.getStartDate());
     LocalDate end = LocalDate.fromCalendarFields(p.getEndDate());
     getViewer().setInput(accessor.getData(start, end));
-    try {
-      getViewer().setExpandedElements(elements);
-    } catch (IllegalArgumentException e) {
-      // Just in case some of the elements are no longer valid.
-    }
+    
+    getViewer().setExpandedTreePaths(expandedPaths);
   }
 
   @Override
@@ -345,7 +343,7 @@ public class ResourcePage extends AbstractFilteredTreePage {
    * Action to group the data by dates and files.
    */
   private IAction newGroupByDatesAndFilesAction() {
-    IAction action = new Action("Dates and Files", SharedImages.CALENDAR) {
+    IAction action = new Action("Dates", SharedImages.CALENDAR) {
       @Override
       public void run() {
         contents.setSelectedCategories(Category.DATE, Category.PROJECT, 

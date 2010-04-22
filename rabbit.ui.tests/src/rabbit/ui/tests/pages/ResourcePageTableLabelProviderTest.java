@@ -15,7 +15,7 @@
  */
 package rabbit.ui.tests.pages;
 
-import static rabbit.ui.internal.util.MillisConverter.toDefaultString;
+import static rabbit.ui.internal.util.DurationFormat.format;
 
 import rabbit.data.access.model.FileDataDescriptor;
 import rabbit.data.handler.DataHandler;
@@ -156,7 +156,7 @@ public class ResourcePageTableLabelProviderTest {
 
     // Show project:
     contents.setPaintCategory(Category.PROJECT);
-    assertEquals(toDefaultString(des1.getValue() + des2.getValue()), provider
+    assertEquals(format(des1.getValue() + des2.getValue()), provider
         .getColumnText(projectNode, 1));
     assertNull(provider.getColumnText(folderNode, 1));
     assertNull(provider.getColumnText(fileNode, 1));
@@ -165,7 +165,7 @@ public class ResourcePageTableLabelProviderTest {
     // Show folder:
     contents.setPaintCategory(Category.FOLDER);
     assertNull(provider.getColumnText(projectNode, 1));
-    assertEquals(toDefaultString(des1.getValue() + des2.getValue()), provider
+    assertEquals(format(des1.getValue() + des2.getValue()), provider
         .getColumnText(folderNode, 1));
     assertNull(provider.getColumnText(fileNode, 1));
     assertNull(provider.getColumnText(dateNode, 1));
@@ -174,7 +174,7 @@ public class ResourcePageTableLabelProviderTest {
     contents.setPaintCategory(Category.FILE);
     assertNull(provider.getColumnText(projectNode, 1));
     assertNull(provider.getColumnText(folderNode, 1));
-    assertEquals(toDefaultString(des1.getValue() + des2.getValue()), provider
+    assertEquals(format(des1.getValue() + des2.getValue()), provider
         .getColumnText(fileNode, 1));
     assertNull(provider.getColumnText(dateNode, 1));
 
@@ -183,7 +183,7 @@ public class ResourcePageTableLabelProviderTest {
     assertNull(provider.getColumnText(projectNode, 1));
     assertNull(provider.getColumnText(folderNode, 1));
     assertNull(provider.getColumnText(fileNode, 1));
-    assertEquals(toDefaultString(des1.getValue() + des2.getValue()), provider
+    assertEquals(format(des1.getValue() + des2.getValue()), provider
         .getColumnText(dateNode, 1));
   }
 

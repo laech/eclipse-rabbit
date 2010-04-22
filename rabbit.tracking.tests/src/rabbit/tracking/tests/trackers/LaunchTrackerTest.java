@@ -55,7 +55,8 @@ import java.util.HashSet;
 @SuppressWarnings("restriction")
 @RunWith(SWTBotJunit4ClassRunner.class)
 public class LaunchTrackerTest extends AbstractTrackerTest<LaunchEvent> {
-  /*
+  
+  /* TODO
    * This is not a completed test class, need to test launches in debug mode and
    * hitting breakpoints to record files, current manual testing is done on
    * this.

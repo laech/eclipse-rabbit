@@ -20,7 +20,7 @@ import org.junit.runners.Suite;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses( { 
-  MillisConverterTest.class,
+  DurationFormatTest.class,
   UndefinedPerspectiveDescriptorTest.class,
   UndefinedWorkbenchPartDescriptorTest.class,
   UndefinedLaunchConfigurationTypeTest.class,

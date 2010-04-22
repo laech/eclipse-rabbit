@@ -4,15 +4,17 @@ Bundle-Name: rabbit.data.tests.xml
 Bundle-SymbolicName: rabbit.data.tests.xml
 Bundle-Version: 1.1.0.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Require-Bundle: rabbit.data;bundle-version="1.1.0",
- rabbit.data.handler;bundle-version="1.1.0",
- rabbit.data.xml;bundle-version="1.1.0",
- rabbit.tracking;bundle-version="1.1.0",
+Require-Bundle: rabbit.data,
+ rabbit.data.handler,
+ rabbit.data.xml,
+ rabbit.tracking,
  org.eclipse.ui,
  org.eclipse.debug.core,
  org.junit4,
  org.eclipse.core.runtime,
- rabbit.common;bundle-version="1.0.0"
+ rabbit.common,
+ org.eclipse.mylyn.tasks.core,
+ org.eclipse.mylyn.tasks.ui
 Export-Package: rabbit.data.test.xml,
  rabbit.data.test.xml.access,
  rabbit.data.test.xml.convert,

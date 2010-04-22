@@ -25,6 +25,7 @@ import org.junit.runners.Suite;
     LaunchDataAccessorTest.class,
     PartDataAccessorTest.class,
     PerspectiveDataAccessorTest.class,
+    TaskFileDataAccessorTest.class
 })
 public class AllAccessorTests {
 

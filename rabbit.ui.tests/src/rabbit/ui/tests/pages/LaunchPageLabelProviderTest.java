@@ -15,7 +15,7 @@
  */
 package rabbit.ui.tests.pages;
 
-import static rabbit.ui.internal.util.MillisConverter.toDefaultString;
+import static rabbit.ui.internal.util.DurationFormat.format;
 
 import rabbit.data.access.model.LaunchConfigurationDescriptor;
 import rabbit.data.access.model.LaunchDataDescriptor;
@@ -259,7 +259,7 @@ public class LaunchPageLabelProviderTest {
     debugModeNode = launchNode.getChildren()[1];
     
     contents.setPaintCategory(Category.DATE);
-    assertEquals(toDefaultString(d1.getTotalDuration() + d2.getTotalDuration()), labels.getColumnText(dateNode, 3));
+    assertEquals(format(d1.getTotalDuration() + d2.getTotalDuration()), labels.getColumnText(dateNode, 3));
     assertNull(labels.getColumnText(runModeNode, 3));
     assertNull(labels.getColumnText(debugModeNode, 3));
     assertNull(labels.getColumnText(launchTypeNode, 3));
@@ -269,7 +269,7 @@ public class LaunchPageLabelProviderTest {
     assertNull(labels.getColumnText(dateNode, 3));
     assertNull(labels.getColumnText(runModeNode, 3));
     assertNull(labels.getColumnText(debugModeNode, 3));
-    assertEquals(toDefaultString(d1.getTotalDuration() + d2.getTotalDuration()), labels.getColumnText(launchTypeNode, 3));
+    assertEquals(format(d1.getTotalDuration() + d2.getTotalDuration()), labels.getColumnText(launchTypeNode, 3));
     assertNull(labels.getColumnText(launchNode, 3));
     
     contents.setPaintCategory(Category.LAUNCH);
@@ -277,12 +277,12 @@ public class LaunchPageLabelProviderTest {
     assertNull(labels.getColumnText(runModeNode, 3));
     assertNull(labels.getColumnText(debugModeNode, 3));
     assertNull(labels.getColumnText(launchTypeNode, 3));
-    assertEquals(toDefaultString(d1.getTotalDuration() + d2.getTotalDuration()), labels.getColumnText(launchNode, 3));
+    assertEquals(format(d1.getTotalDuration() + d2.getTotalDuration()), labels.getColumnText(launchNode, 3));
     
     contents.setPaintCategory(Category.LAUNCH_MODE);
     assertNull(labels.getColumnText(dateNode, 1));
-    assertEquals(toDefaultString(d1.getTotalDuration()), labels.getColumnText(runModeNode, 3));
-    assertEquals(toDefaultString(d2.getTotalDuration()), labels.getColumnText(debugModeNode, 3));
+    assertEquals(format(d1.getTotalDuration()), labels.getColumnText(runModeNode, 3));
+    assertEquals(format(d2.getTotalDuration()), labels.getColumnText(debugModeNode, 3));
     assertNull(labels.getColumnText(launchTypeNode, 3));
     assertNull(labels.getColumnText(launchNode, 3));
   }

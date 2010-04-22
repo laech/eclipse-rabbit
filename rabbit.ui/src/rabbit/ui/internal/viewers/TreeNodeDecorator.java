@@ -1,4 +1,4 @@
-package rabbit.ui.internal.util;
+package rabbit.ui.internal.viewers;
 
 import org.eclipse.jface.viewers.ILabelDecorator;
 import org.eclipse.jface.viewers.ILabelProviderListener;
@@ -31,7 +31,7 @@ public class TreeNodeDecorator implements ILabelDecorator {
 
   @Override
   public void dispose() {
-    decorator.dispose();
+//    decorator.dispose();
   }
 
   @Override

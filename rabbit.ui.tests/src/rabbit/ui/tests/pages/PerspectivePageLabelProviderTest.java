@@ -15,7 +15,7 @@
  */
 package rabbit.ui.tests.pages;
 
-import static rabbit.ui.internal.util.MillisConverter.toDefaultString;
+import static rabbit.ui.internal.util.DurationFormat.format;
 
 import rabbit.data.access.model.PerspectiveDataDescriptor;
 import rabbit.ui.internal.pages.PerspectivePage;
@@ -108,17 +108,17 @@ public class PerspectivePageLabelProviderTest {
     PerspectiveDataDescriptor d2;
     d1 = new PerspectiveDataDescriptor(new LocalDate(), 111, defined.getId());
     d2 = new PerspectiveDataDescriptor(new LocalDate(), 101, defined.getId());
-    assertEquals(toDefaultString(d1.getValue()), labels.getColumnText(d1, 1));
-    assertEquals(toDefaultString(d2.getValue()), labels.getColumnText(d2, 1));
-    assertEquals(toDefaultString(d1.getValue() + d2.getValue()), labels
+    assertEquals(format(d1.getValue()), labels.getColumnText(d1, 1));
+    assertEquals(format(d2.getValue()), labels.getColumnText(d2, 1));
+    assertEquals(format(d1.getValue() + d2.getValue()), labels
         .getColumnText(defined, 1));
 
     d1 = new PerspectiveDataDescriptor(new LocalDate(), 222, undefined.getId());
     d2 = new PerspectiveDataDescriptor(new LocalDate(), 999, undefined.getId());
     page.getViewer().setInput(Arrays.asList(d1, d2));
-    assertEquals(toDefaultString(d1.getValue()), labels.getColumnText(d1, 1));
-    assertEquals(toDefaultString(d2.getValue()), labels.getColumnText(d2, 1));
-    assertEquals(toDefaultString(d1.getValue() + d2.getValue()), labels
+    assertEquals(format(d1.getValue()), labels.getColumnText(d1, 1));
+    assertEquals(format(d2.getValue()), labels.getColumnText(d2, 1));
+    assertEquals(format(d1.getValue() + d2.getValue()), labels
         .getColumnText(undefined, 1));
   }
 

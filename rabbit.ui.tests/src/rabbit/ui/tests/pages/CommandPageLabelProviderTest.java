@@ -15,8 +15,6 @@
  */
 package rabbit.ui.tests.pages;
 
-import static rabbit.ui.internal.util.MillisConverter.toDefaultString;
-
 import rabbit.data.access.model.CommandDataDescriptor;
 import rabbit.ui.internal.pages.CommandPage;
 import rabbit.ui.internal.pages.CommandPageContentProvider;

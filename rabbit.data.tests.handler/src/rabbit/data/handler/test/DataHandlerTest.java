@@ -20,6 +20,7 @@ import rabbit.data.store.model.CommandEvent;
 import rabbit.data.store.model.FileEvent;
 import rabbit.data.store.model.PartEvent;
 import rabbit.data.store.model.PerspectiveEvent;
+import rabbit.data.store.model.TaskFileEvent;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -31,7 +32,7 @@ import org.junit.Test;
  * @see DataHandler
  */
 public class DataHandlerTest {
-
+  
   @Test
   public void testGetCommandDataAccessor() {
     assertNotNull(DataHandler.getCommandDataAccessor());
@@ -74,5 +75,15 @@ public class DataHandlerTest {
   @Test(expected = NullPointerException.class)
   public void testGetStorer_withNull() {
     DataHandler.getStorer(null);
+  }
+
+  @Test
+  public void testGetTaskFileDataAccessor() {
+    assertNotNull(DataHandler.getTaskFileDataAccessor());
+  }
+
+  @Test
+  public void testGetTaskFileEventStorer() {
+    assertNotNull(DataHandler.getStorer(TaskFileEvent.class));
   }
 }

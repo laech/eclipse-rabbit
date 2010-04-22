@@ -24,6 +24,7 @@ import org.junit.runners.Suite;
     LaunchEventStorerTest.class, //
     PartEventStorerTest.class, //
     PerspectiveEventStorerTest.class, //
+    TaskFileEventStorerTest.class,
 })
 public class AllStorerTests {
 

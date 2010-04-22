@@ -15,7 +15,7 @@
  */
 package rabbit.ui.internal.pages;
 
-import static rabbit.ui.internal.util.MillisConverter.toDefaultString;
+import static rabbit.ui.internal.util.DurationFormat.format;
 
 import rabbit.data.access.model.SessionDataDescriptor;
 
@@ -65,7 +65,7 @@ public class SessionPageLabelProvider extends BaseLabelProvider implements
 
     case 1:
       if (element instanceof SessionDataDescriptor)
-        return toDefaultString(((SessionDataDescriptor) element).getValue());
+        return format(((SessionDataDescriptor) element).getValue());
       else
         return null;
 

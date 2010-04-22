@@ -15,7 +15,7 @@
  */
 package rabbit.ui.internal.pages;
 
-import static rabbit.ui.internal.util.MillisConverter.toDefaultString;
+import static rabbit.ui.internal.util.DurationFormat.format;
 
 import rabbit.data.access.model.PerspectiveDataDescriptor;
 import rabbit.ui.internal.util.UndefinedPerspectiveDescriptor;
@@ -103,11 +103,11 @@ public class PerspectivePageLabelProvider extends BaseLabelProvider implements
 
     case 1:
       if (element instanceof IPerspectiveDescriptor)
-        return toDefaultString(contentProvider
+        return format(contentProvider
             .getValueOfPerspective((IPerspectiveDescriptor) element));
 
       else if (element instanceof PerspectiveDataDescriptor)
-        return toDefaultString(((PerspectiveDataDescriptor) element).getValue());
+        return format(((PerspectiveDataDescriptor) element).getValue());
       else
         return null;
 

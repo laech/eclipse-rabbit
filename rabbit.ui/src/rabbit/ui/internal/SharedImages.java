@@ -21,29 +21,39 @@ import static org.eclipse.ui.plugin.AbstractUIPlugin.imageDescriptorFromPlugin;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 
+/**
+ * Shared image descriptors.
+ */
 public class SharedImages {
 
-  public static final ImageDescriptor REFRESH = imageDescriptorFromPlugin(
-      PLUGIN_ID, "icons/full/obj16/refresh.gif");
+  public static final ImageDescriptor REFRESH = getObj16("refresh.gif");
 
-  public static final ImageDescriptor EXPAND_ALL = imageDescriptorFromPlugin(
-      PLUGIN_ID, "icons/full/obj16/expandall.gif");
+  public static final ImageDescriptor EXPAND_ALL = getObj16("expandall.gif");
 
-  public static final ImageDescriptor CALENDAR = imageDescriptorFromPlugin(
-      PLUGIN_ID, "/icons/full/obj16/calendar.png");
+  public static final ImageDescriptor CALENDAR = getObj16("calendar.png");
 
-  public static final ImageDescriptor TIME_HIERARCHY = imageDescriptorFromPlugin(
-      PLUGIN_ID, "/icons/full/obj16/time-hierarchy.png");
+  public static final ImageDescriptor TIME_HIERARCHY = getObj16("time-hierarchy.png");
 
-  public static final ImageDescriptor ELEMENT = imageDescriptorFromPlugin(
-      PLUGIN_ID, "/icons/full/obj16/element.gif");
+  public static final ImageDescriptor ELEMENT = getObj16("element.gif");
 
-  public static final ImageDescriptor HIERARCHY = imageDescriptorFromPlugin(
-      PLUGIN_ID, "/icons/full/obj16/hierarchical.gif");
+  public static final ImageDescriptor HIERARCHY = getObj16("hierarchical.gif");
 
-  public static final ImageDescriptor BRUSH = imageDescriptorFromPlugin(
-      PLUGIN_ID, "/icons/full/obj16/line-color.gif");
+  public static final ImageDescriptor BRUSH = getObj16("line-color.gif");
 
-  public static final ImageDescriptor SEARCH = imageDescriptorFromPlugin(
-      PLUGIN_ID, "/icons/full/obj16/search.gif");
+  public static final ImageDescriptor SEARCH = getObj16("search.gif");
+  
+  public static final ImageDescriptor LAUNCH_TYPE = getObj16("launch-type.gif");
+  
+  public static final ImageDescriptor LAUNCH_MODE = getObj16("launch-mode.gif");
+  
+  public static final ImageDescriptor LAUNCH = getObj16("run.gif");
+  
+  /**
+   * Gets an image descriptor from the directory "icons/full/obj16/".
+   * @param name The name of the file.
+   * @return An image descriptor, or null if not found.
+   */
+  private static ImageDescriptor getObj16(String name) {
+    return imageDescriptorFromPlugin(PLUGIN_ID, "icons/full/obj16/" + name);
+  }
 }

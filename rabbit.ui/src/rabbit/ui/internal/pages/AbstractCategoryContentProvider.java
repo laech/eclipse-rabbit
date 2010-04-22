@@ -20,8 +20,8 @@ import rabbit.ui.internal.util.ICategoryProvider;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.collect.BiMap;
-import com.google.common.collect.ImmutableBiMap;
+import com.google.common.base.Predicate;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 
@@ -32,6 +32,7 @@ import org.eclipse.jface.viewers.Viewer;
 
 import java.util.Arrays;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -52,11 +53,12 @@ public abstract class AbstractCategoryContentProvider extends
    * provider.
    */
   protected final Set<ICategory> allCategories;
-
+  
   /**
-   * An unmodifiable BiMap maps categories and classes.
+   * An unmodifiable map contain categories and predicates to categorize the 
+   * elements.
    */
-  protected final BiMap<ICategory, Class<?>> categoriesAndClasses;
+  private final Map<ICategory, Predicate<Object>> categorizers;
 
   /**
    * A set of selected categories, the data will be structured using these
@@ -87,11 +89,19 @@ public abstract class AbstractCategoryContentProvider extends
     for (ICategory category : getDefaultSelectedCategories())
       selectedCategories.add(category);
 
-    categoriesAndClasses = getCategoriesAndClassesMap();
-    
+    categorizers = initializeCategorizers();
     paintCategory = getDefaultPaintCategory();
   }
 
+  /**
+   * Gets the map contain categories and predicates to categorize
+   * the elements.
+   * @return The map, unmodifiable.
+   */
+  public Map<ICategory, Predicate<Object>> getCategorizers() {
+    return categorizers;
+  }
+  
   @Override
   public Object[] getElements(Object inputElement) {
     return (getRoot().getChildren() != null) ? getRoot().getChildren()
@@ -153,6 +163,8 @@ public abstract class AbstractCategoryContentProvider extends
     if (paintCategory != cat && allCategories.contains(cat)) {
       paintCategory = cat;
       getViewer().refresh();
+    } else {
+      return;
     }
   }
 
@@ -194,8 +206,8 @@ public abstract class AbstractCategoryContentProvider extends
 
     TreeNode node = (TreeNode) element;
     for (ICategory cat : selectedCategories) {
-      Class<?> clazz = categoriesAndClasses.get(cat);
-      if (clazz != null && clazz.isAssignableFrom(node.getValue().getClass()))
+      Predicate<Object> predicate = getCategorizers().get(cat);
+      if (predicate != null && predicate.apply(node.getValue()))
         return false;
     }
     return true;
@@ -219,12 +231,6 @@ public abstract class AbstractCategoryContentProvider extends
   protected abstract ICategory[] getAllSupportedCategories();
 
   /**
-   * Gets the mapping of categories and classes defined by subclasses.
-   * @return The mapping of categories and classes.
-   */
-  protected abstract ImmutableBiMap<ICategory, Class<?>> getCategoriesAndClassesMap();
-
-  /**
    * Gets the default paint category.
    * 
    * @return The default paint category.
@@ -236,4 +242,10 @@ public abstract class AbstractCategoryContentProvider extends
    * @return An ordered array of default category selection.
    */
   protected abstract ICategory[] getDefaultSelectedCategories();
+
+  /**
+   * Gets the mapping of categories and classes defined by subclasses.
+   * @return The mapping of categories and classes.
+   */
+  protected abstract ImmutableMap<ICategory, Predicate<Object>> initializeCategorizers();
 }

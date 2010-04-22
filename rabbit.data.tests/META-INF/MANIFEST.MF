@@ -4,11 +4,14 @@ Bundle-Name: rabbit.data.tests
 Bundle-SymbolicName: rabbit.data.tests
 Bundle-Version: 1.0.0.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Require-Bundle: rabbit.data;bundle-version="1.1.0",
- org.junit4,
+Require-Bundle: org.junit4,
+ rabbit.data,
  org.eclipse.ui,
  org.eclipse.debug.core,
  org.eclipse.core.runtime,
- rabbit.common;bundle-version="1.0.0"
+ rabbit.common,
+ org.eclipse.mylyn.tasks.core,
+ org.eclipse.mylyn.tasks.ui
 Export-Package: rabbit.data.test.access.model,
+ rabbit.data.test.common,
  rabbit.data.test.store.model

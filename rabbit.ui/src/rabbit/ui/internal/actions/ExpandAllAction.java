@@ -43,6 +43,8 @@ public class ExpandAllAction extends Action {
   @Override
   public void run() {
     super.run();
+    viewer.getTree().setRedraw(false);
     viewer.expandAll();
+    viewer.getTree().setRedraw(true);
   }
 }

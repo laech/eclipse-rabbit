@@ -24,6 +24,7 @@ import org.junit.runners.Suite;
     LaunchEventConverterTest.class, //
     PartEventConverterTest.class, //
     PerspectiveEventConverterTest.class, //
+    TaskFileEventConverterTest.class
 })
 public class AllConverterTests {
 

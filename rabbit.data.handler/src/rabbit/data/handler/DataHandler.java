@@ -23,12 +23,14 @@ import rabbit.data.access.model.LaunchDataDescriptor;
 import rabbit.data.access.model.PartDataDescriptor;
 import rabbit.data.access.model.PerspectiveDataDescriptor;
 import rabbit.data.access.model.SessionDataDescriptor;
+import rabbit.data.access.model.TaskFileDataDescriptor;
 import rabbit.data.store.IStorer;
 import rabbit.data.store.model.CommandEvent;
 import rabbit.data.store.model.FileEvent;
 import rabbit.data.store.model.LaunchEvent;
 import rabbit.data.store.model.PartEvent;
 import rabbit.data.store.model.PerspectiveEvent;
+import rabbit.data.store.model.TaskFileEvent;
 import rabbit.data.xml.FileStore;
 import rabbit.data.xml.access.CommandDataAccessor;
 import rabbit.data.xml.access.FileDataAccessor;
@@ -36,11 +38,13 @@ import rabbit.data.xml.access.LaunchDataAccessor;
 import rabbit.data.xml.access.PartDataAccessor;
 import rabbit.data.xml.access.PerspectiveDataAccessor;
 import rabbit.data.xml.access.SessionDataAccessor;
+import rabbit.data.xml.access.TaskFileDataAccessor;
 import rabbit.data.xml.store.CommandEventStorer;
 import rabbit.data.xml.store.FileEventStorer;
 import rabbit.data.xml.store.LaunchEventStorer;
 import rabbit.data.xml.store.PartEventStorer;
 import rabbit.data.xml.store.PerspectiveEventStorer;
+import rabbit.data.xml.store.TaskFileEventStorer;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -60,6 +64,7 @@ public class DataHandler {
   private static final IAccessor<SessionDataDescriptor> sessionDataAccessor;
   private static final IAccessor<PartDataDescriptor> partDataAccessor;
   private static final IAccessor<FileDataDescriptor> fileDataAccessor;
+  private static final IAccessor<TaskFileDataDescriptor> taskFileDataAccessor;
 
   static {
     Map<Class<?>, IStorer<?>> map = new HashMap<Class<?>, IStorer<?>>();
@@ -68,6 +73,7 @@ public class DataHandler {
     map.put(FileEvent.class, FileEventStorer.getInstance());
     map.put(PartEvent.class, PartEventStorer.getInstance());
     map.put(LaunchEvent.class, LaunchEventStorer.getInstance());
+    map.put(TaskFileEvent.class, TaskFileEventStorer.getInstance());
     storers = Collections.unmodifiableMap(map);
 
     perspectiveDataAccessor = new PerspectiveDataAccessor();
@@ -76,6 +82,7 @@ public class DataHandler {
     launchDataAccessor = new LaunchDataAccessor();
     partDataAccessor = new PartDataAccessor();
     fileDataAccessor = new FileDataAccessor();
+    taskFileDataAccessor = new TaskFileDataAccessor();
   }
 
   /**
@@ -151,6 +158,7 @@ public class DataHandler {
    * <li>{@link PartEvent}</li>
    * <li>{@link PerspectiveEvent}</li>
    * <li>{@link LaunchEvent}</li>
+   * <li>{@link TaskFileEvent}</li>
    * </ul>
    * </p>
    * 
@@ -166,6 +174,15 @@ public class DataHandler {
     }
     Object storer = storers.get(objectClass);
     return (null == storer) ? null : (IStorer<T>) storer;
+  }
+
+  /**
+   * Gets an IAccessor to get the task file event data.
+   * 
+   * @return An IAccessor to get the data stored.
+   */
+  public static IAccessor<TaskFileDataDescriptor> getTaskFileDataAccessor() {
+    return taskFileDataAccessor;
   }
 
   private DataHandler() {

@@ -21,15 +21,18 @@ import static org.junit.Assert.assertNotNull;
 
 import org.junit.Test;
 
+import java.lang.reflect.Field;
+
+/**
+ * @see SharedImages
+ */
+@SuppressWarnings("restriction")
 public class SharedImagesTest {
 
   @Test
-  public void expandAllImage() {
-    assertNotNull(SharedImages.EXPAND_ALL);
-  }
-
-  @Test
-  public void refreshImage() {
-    assertNotNull(SharedImages.REFRESH);
+  public void testAllFields() throws Exception {
+    Field[] fields = SharedImages.class.getFields();
+    for (Field field : fields)
+      assertNotNull(field.getName(), field.get(null));
   }
 }

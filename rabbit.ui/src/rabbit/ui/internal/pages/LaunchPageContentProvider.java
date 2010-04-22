@@ -27,6 +27,8 @@ import rabbit.ui.internal.util.UndefinedLaunchMode;
 import rabbit.ui.internal.viewers.TreeNodes;
 import rabbit.ui.internal.viewers.CellPainter.IValueProvider;
 
+import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.Maps;
 
@@ -38,8 +40,6 @@ import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunchConfigurationType;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.core.ILaunchMode;
-import org.eclipse.debug.ui.DebugUITools;
-import org.eclipse.debug.ui.IDebugUIConstants;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.TreeNode;
 import org.eclipse.jface.viewers.TreeViewer;
@@ -56,6 +56,26 @@ import javax.annotation.Nonnull;
  * {@code Collection<LaunchDataDescriptor>}
  */
 public class LaunchPageContentProvider extends AbstractCategoryContentProvider {
+
+  /*
+   * This content provider builds a tree from the input data, and every leaf
+   * node of the tree is containing a java.util.Long value, or a 
+   * java.util.Integer value, these values are the values of each 
+   * LaunchDataDescriptor. This way, we can calculate the total value of every 
+   * subtree by traversal. If the data descriptor contains resources, a subtree
+   * of the resources will also be attached to the same parent as the Long &
+   * Integer nodes, for example:
+   * 
+   * (OtherParentNodes) +-- Integer
+   *                    |
+   *                    +-- Long
+   *                    |
+   *                    | // If there are files, one more subtree will be here:
+   *                    +-- (Project) +-- (Folder) --- (File)
+   *                                  |
+   *                                  +-- (File)
+   * 
+   */
   
   /**
    * Categories supported by {@link LaunchPageContentProvider}
@@ -66,32 +86,27 @@ public class LaunchPageContentProvider extends AbstractCategoryContentProvider {
     DATE("Dates", SharedImages.CALENDAR),
 
     /** Launch category */
-    LAUNCH("Launches", DebugUITools
-        .getImageDescriptor(IDebugUIConstants.IMG_OBJS_DEBUG_TARGET)),
+    LAUNCH("Launches", SharedImages.LAUNCH),
 
     /** Launch mode category */
-    LAUNCH_MODE("Launch Modes", DebugUITools
-        .getImageDescriptor(IDebugUIConstants.IMG_ACT_DEBUG)),
+    LAUNCH_MODE("Launch Modes", SharedImages.LAUNCH_MODE),
 
     /** Launch type category */
-    LAUNCH_TYPE("Launch Types", DebugUITools
-        .getImageDescriptor(IDebugUIConstants.IMG_OBJS_ENVIRONMENT));
+    LAUNCH_TYPE("Launch Types", SharedImages.LAUNCH_TYPE);
 
-    @Nonnull private final String text;
-    @Nonnull private final ImageDescriptor image;
+    private final String text;
+    private final ImageDescriptor image;
 
     private Category(@Nonnull String text, @Nonnull ImageDescriptor image) {
       this.text = text;
       this.image = image;
     }
 
-    @Nonnull
     @Override
     public ImageDescriptor getImageDescriptor() {
       return image;
     }
 
-    @Nonnull
     @Override
     public String getText() {
       return text;
@@ -259,12 +274,13 @@ public class LaunchPageContentProvider extends AbstractCategoryContentProvider {
   }
 
   @Override
-  protected ImmutableBiMap<ICategory, Class<?>> getCategoriesAndClassesMap() {
-    return ImmutableBiMap.<ICategory, Class<?>> builder()
-        .put(Category.LAUNCH, Pair.class)
-        .put(Category.LAUNCH_TYPE, ILaunchConfigurationType.class)
-        .put(Category.LAUNCH_MODE, ILaunchMode.class)
-        .put(Category.DATE, LocalDate.class).build();
+  protected ImmutableBiMap<ICategory, Predicate<Object>> initializeCategorizers() {
+    return ImmutableBiMap.<ICategory, Predicate<Object>> builder()
+        .put(Category.LAUNCH,      Predicates.instanceOf(Pair.class))
+        .put(Category.LAUNCH_TYPE, Predicates.instanceOf(ILaunchConfigurationType.class))
+        .put(Category.LAUNCH_MODE, Predicates.instanceOf(ILaunchMode.class))
+        .put(Category.DATE,        Predicates.instanceOf(LocalDate.class))
+        .build();
   }
 
   @Override
@@ -350,17 +366,13 @@ public class LaunchPageContentProvider extends AbstractCategoryContentProvider {
       return false;
 
     TreeNode node = (TreeNode) element;
-    Class<?> clazz = categoriesAndClasses.get(getPaintCategory());
-    if (clazz != null)
-      return clazz.isAssignableFrom(node.getValue().getClass());
-    else
-      return false;
+    return getCategorizers().get(getPaintCategory()).apply(node.getValue());
   }
 
   private void updateMaxValues() {
     maxLaunchDuration = TreeNodes.findMaxLong(getRoot(),
-        categoriesAndClasses.get(getPaintCategory()));
+        getCategorizers().get(getPaintCategory()));
     maxLaunchCount = TreeNodes.findMaxInt(getRoot(),
-        categoriesAndClasses.get(getPaintCategory()));
+        getCategorizers().get(getPaintCategory()));
   }
 }
