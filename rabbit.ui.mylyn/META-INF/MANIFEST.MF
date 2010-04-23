@@ -6,7 +6,6 @@ Bundle-Version: 1.1.0.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Require-Bundle: rabbit.data,
  rabbit.data.handler,
- rabbit.mylyn,
  rabbit.ui,
  org.eclipse.ui,
  org.eclipse.core.runtime,
