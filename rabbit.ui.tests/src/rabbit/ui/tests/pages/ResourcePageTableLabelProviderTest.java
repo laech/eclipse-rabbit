@@ -44,7 +44,6 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import java.lang.reflect.Field;
 import java.util.Arrays;
 
 /**
@@ -143,12 +142,7 @@ public class ResourcePageTableLabelProviderTest {
         Category.FOLDER, Category.FILE);
     viewer.setInput(Arrays.asList(des1, des2));
 
-    // We need to "hack" into the content viewer to get the root node for
-    // testing, and get the other tree nodes according to the categories we just
-    // set above:
-    Field field = ResourcePageContentProvider.class.getDeclaredField("root");
-    field.setAccessible(true);
-    TreeNode root = (TreeNode) field.get(contents);
+    TreeNode root = contents.getRoot();
     TreeNode dateNode = root.getChildren()[0];
     TreeNode projectNode = dateNode.getChildren()[0];
     TreeNode folderNode = projectNode.getChildren()[0];

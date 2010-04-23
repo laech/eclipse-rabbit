@@ -33,7 +33,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 /**
- * Label provider for commands.
+ * Label provider for {@link Command}.
  */
 public class CommandLabelProvider extends LabelProvider {
 
@@ -46,7 +46,7 @@ public class CommandLabelProvider extends LabelProvider {
    * {@link Image#dispose()}.
    */
   @Nonnull
-  private Map<String, Image> images;
+  private final Map<String, Image> images;
 
   /** The image to return if the command has no image. */
   @Nonnull

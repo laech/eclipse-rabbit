@@ -20,6 +20,11 @@ public class CommandDataDescriptorTest extends ValueDescriptorTest {
   public void testConstructor_commandIdNull() {
     createDescriptor(new LocalDate(), 1, null);
   }
+  
+  @Test(expected = IllegalArgumentException.class)
+  public void testConstructor_commandIdEmpty() {
+    createDescriptor(new LocalDate(), 1, "");
+  }
 
   @Override
   public void testHashCode() {

@@ -20,56 +20,59 @@ import rabbit.data.access.model.CommandDataDescriptor;
 import rabbit.data.handler.DataHandler;
 import rabbit.ui.Preferences;
 import rabbit.ui.internal.RabbitUI;
+import rabbit.ui.internal.SharedImages;
 import rabbit.ui.internal.actions.CollapseAllAction;
+import rabbit.ui.internal.actions.DropDownAction;
 import rabbit.ui.internal.actions.ExpandAllAction;
-import rabbit.ui.internal.actions.GroupByDatesAction;
+import rabbit.ui.internal.actions.GroupByAction;
+import rabbit.ui.internal.actions.ShowHideFilterControlAction;
+import rabbit.ui.internal.util.ICategory;
+import rabbit.ui.internal.viewers.CellPainter;
 import rabbit.ui.internal.viewers.TreeViewerLabelSorter;
 import rabbit.ui.internal.viewers.TreeViewerSorter;
 
-import org.eclipse.core.commands.Command;
-import org.eclipse.core.commands.common.NotDefinedException;
+import com.google.common.base.Joiner;
+import com.google.common.collect.Lists;
+
+import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
+import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ITableLabelProvider;
-import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.viewers.TreeNode;
+import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.TreeColumn;
+import org.eclipse.ui.dialogs.PatternFilter;
 import org.joda.time.LocalDate;
+
+import java.util.List;
 
 /**
  * A page for displaying command usage.
  */
-public class CommandPage extends AbstractTreeViewerPage {
-
-  /**
-   * Preference constants for displaying the data by date.
-   */
-  private static final String DISPLAY_BY_DATE_PREF = "PartPage.displayByDates";
+public class CommandPage extends AbstractFilteredTreePage {
+  
+  // Preference constants:
+  private static final String PREF_SELECTED_CATEGORIES = "CommandPage.SelectedCatgories";
+  private static final String PREF_PAINT_CATEGORY = "CommandPage.PaintCategory";
 
   private final IAccessor<CommandDataDescriptor> accessor;
-  private final CommandPageContentProvider contents;
-  private final CommandPageLabelProvider labels;
+  private CommandPageContentProvider contents;
+  private CommandPageLabelProvider labels;
 
   /**
    * Constructor.
    */
   public CommandPage() {
     super();
-    IPreferenceStore store = RabbitUI.getDefault().getPreferenceStore();
-    store.setDefault(DISPLAY_BY_DATE_PREF, true);
-
-    boolean displayByDate = store.getBoolean(DISPLAY_BY_DATE_PREF);
-    contents = new CommandPageContentProvider(this, displayByDate);
-    labels = new CommandPageLabelProvider(contents);
     accessor = DataHandler.getCommandDataAccessor();
   }
-
+  
   @Override
   public void createColumns(TreeViewer viewer) {
     TreeColumn column = new TreeColumn(viewer.getTree(), SWT.LEFT);
@@ -83,18 +86,51 @@ public class CommandPage extends AbstractTreeViewerPage {
     column.setWidth(200);
 
     column = new TreeColumn(viewer.getTree(), SWT.RIGHT);
-    column.addSelectionListener(createValueSorterForTree(viewer));
+    column.addSelectionListener(getValueSorter());
     column.setText("Usage Count");
     column.setWidth(100);
   }
 
   @Override
   public IContributionItem[] createToolBarItems(IToolBarManager toolBar) {
+    ShowHideFilterControlAction filterAction = new ShowHideFilterControlAction(getFilteredTree());
+    filterAction.run();
+    
+    final ICategory cmd = Category.COMMAND;
+    final ICategory date = Category.DATE;
+    
+    IAction groupByCmd = new Action(cmd.getText(), cmd.getImageDescriptor()) {
+      @Override public void run() {
+        contents.setSelectedCategories(cmd);
+      }
+    };
+    IAction groupByDate = new Action(date.getText(), date.getImageDescriptor()) {
+      @Override public void run() {
+        contents.setSelectedCategories(date, cmd);
+      }
+    };
+    IAction colorByCmd = new Action(cmd.getText(), cmd.getImageDescriptor()) {
+      @Override public void run() {
+        contents.setPaintCategory(cmd);
+      }
+    };
+    IAction colorByDate = new Action(date.getText(), date.getImageDescriptor()) {
+      @Override public void run() {
+        contents.setPaintCategory(date);
+      }
+    };
+    
     IContributionItem[] items = new IContributionItem[] {
+        new ActionContributionItem(filterAction),
+        new Separator(),
         new ActionContributionItem(new ExpandAllAction(getViewer())),
         new ActionContributionItem(new CollapseAllAction(getViewer())),
-        new Separator(),// 
-        new ActionContributionItem(new GroupByDatesAction(contents)) };
+        new Separator(),
+        new ActionContributionItem(new GroupByAction(contents, groupByCmd,
+            groupByCmd, groupByDate)),
+        new ActionContributionItem(new DropDownAction(
+            "Highlight " + colorByCmd.getText(), SharedImages.BRUSH, 
+            colorByCmd, colorByCmd, colorByDate))};
 
     for (IContributionItem item : items)
       toolBar.add(item);
@@ -103,87 +139,92 @@ public class CommandPage extends AbstractTreeViewerPage {
   }
 
   @Override
-  public long getValue(Object o) {
-    if (o instanceof Command)
-      return contents.getValueOfCommand((Command) o);
-
-    if (o instanceof CommandDataDescriptor)
-      return ((CommandDataDescriptor) o).getValue();
-
-    return 0;
-  }
-
-  @Override
   public void update(Preferences p) {
-    setMaxValue(0);
     labels.updateState();
 
-    Object[] elements = getViewer().getExpandedElements();
-    ISelection selection = getViewer().getSelection();
+    TreePath[] expandedPaths = getViewer().getExpandedTreePaths();
 
     LocalDate start = LocalDate.fromCalendarFields(p.getStartDate());
     LocalDate end = LocalDate.fromCalendarFields(p.getEndDate());
     getViewer().setInput(accessor.getData(start, end));
-    try {
-      getViewer().setExpandedElements(elements);
-      getViewer().setSelection(selection);
-    } catch (Exception e) {
-      // Just in case something goes wrong while restoring the viewer's state
-    }
+    
+    getViewer().setExpandedTreePaths(expandedPaths);
   }
 
   @Override
-  protected ITreeContentProvider createContentProvider() {
-    return contents;
+  protected CellPainter createCellPainter() {
+    return new CellPainter(contents);
+  }
+
+  @Override
+  protected PatternFilter createFilter() {
+    return new PatternFilter();
   }
 
   @Override
   protected TreeViewerSorter createInitialComparator(TreeViewer viewer) {
-    return new TreeViewerSorter(viewer) {
+    return new TreeViewerLabelSorter(viewer) {
 
       @Override
       protected int doCompare(Viewer v, Object e1, Object e2) {
+        if (e1 instanceof TreeNode)
+          e1 = ((TreeNode) e1).getValue();
+        if (e2 instanceof TreeNode)
+          e2 = ((TreeNode) e2).getValue();
+        
         if (e1 instanceof LocalDate && e2 instanceof LocalDate)
           return ((LocalDate) e1).compareTo((LocalDate) e2);
-
-        if (e1 instanceof Command && e2 instanceof Command)
-          return compareCommands((Command) e1, (Command) e2);
-
-        if (e1 instanceof CommandDataDescriptor
-            && e2 instanceof CommandDataDescriptor) {
-          Command cmd1 = contents.getCommand((CommandDataDescriptor) e1);
-          Command cmd2 = contents.getCommand((CommandDataDescriptor) e2);
-          return compareCommands(cmd1, cmd2);
-        }
-
-        return 0;
-      }
-
-      private int compareCommands(Command e1, Command e2) {
-        String a = ((Command) e1).getId();
-        String b = ((Command) e2).getId();
-        try {
-          a = ((Command) e1).getName();
-        } catch (NotDefinedException e) {
-        }
-        try {
-          b = ((Command) e2).getName();
-        } catch (NotDefinedException e) {
-        }
-        return a.compareToIgnoreCase(b);
+        else
+          return super.doCompare(v, e1, e2);
       }
     };
   }
 
   @Override
-  protected ITableLabelProvider createLabelProvider() {
-    return labels;
+  protected void initializeViewer(TreeViewer viewer) {
+    contents = new CommandPageContentProvider(viewer);
+    labels = new CommandPageLabelProvider(contents);
+    viewer.setLabelProvider(labels);
+    viewer.setContentProvider(contents);
+  }
+  
+  @Override
+  protected void restoreState() {
+    super.restoreState();
+    IPreferenceStore store = RabbitUI.getDefault().getPreferenceStore();
+
+    // Restores the selected categories of the content provider:
+    String[] categoryStr = store.getString(PREF_SELECTED_CATEGORIES).split(",");
+    List<Category> cats = Lists.newArrayList();
+    for (String str : categoryStr) {
+      try {
+        cats.add(Enum.valueOf(Category.class, str));
+      } catch (IllegalArgumentException e) {
+        // Ignore invalid elements.
+      }
+    }
+    contents.setSelectedCategories(cats.toArray(new ICategory[cats.size()]));
+
+    // Restores the paint category of the content provider:
+    String paintStr = store.getString(PREF_PAINT_CATEGORY);
+    try {
+      Category cat = Enum.valueOf(Category.class, paintStr);
+      contents.setPaintCategory(cat);
+    } catch (IllegalArgumentException e) {
+      // Just let the content provider use its default paint category.
+    }
   }
 
   @Override
   protected void saveState() {
     super.saveState();
-    RabbitUI.getDefault().getPreferenceStore().setValue(DISPLAY_BY_DATE_PREF,
-        contents.isDisplayingByDate());
+    IPreferenceStore store = RabbitUI.getDefault().getPreferenceStore();
+
+    // Saves the selected categories of the content provider:
+    ICategory[] categories = contents.getSelectedCategories();
+    store.setValue(PREF_SELECTED_CATEGORIES, Joiner.on(",").join(categories));
+
+    // Saves the paint category of the content provider:
+    store.setValue(PREF_PAINT_CATEGORY, contents.getPaintCategory().toString());
   }
 }

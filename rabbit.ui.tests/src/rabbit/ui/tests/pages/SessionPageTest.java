@@ -15,9 +15,7 @@
  */
 package rabbit.ui.tests.pages;
 
-import rabbit.data.access.IAccessor;
-import rabbit.data.handler.DataHandler;
-import rabbit.ui.Preferences;
+import rabbit.data.access.model.SessionDataDescriptor;
 import rabbit.ui.internal.pages.AbstractTableViewerPage;
 import rabbit.ui.internal.pages.SessionPage;
 
@@ -26,62 +24,16 @@ import static org.junit.Assert.assertEquals;
 import org.joda.time.LocalDate;
 import org.junit.Test;
 
-import java.lang.reflect.Field;
-import java.util.Calendar;
-import java.util.Map;
-
 /**
  * Test for {@link SessionPage}
  */
+@SuppressWarnings("restriction")
 public class SessionPageTest extends AbstractTableViewerPageTest {
-
-  @SuppressWarnings("unchecked")
-  static Map<String, Long> getData(SessionPage page) throws Exception {
-    Field field = SessionPage.class.getDeclaredField("model");
-    field.setAccessible(true);
-    return (Map<String, Long>) field.get(page);
-  }
 
   @Test
   public void testGetValue() throws Exception {
-    long value = 9823;
-    String date = "abc";
-    Map<String, Long> data = getData((SessionPage) page);
-    data.put(date, value);
-
-    assertEquals(value, page.getValue(date));
-    assertEquals(0, page.getValue(new Object()));
-  }
-
-  @Test
-  public void testUpdate() throws Exception {
-    long max = 0;
-    IAccessor<Map<String, Long>> accessor = DataHandler
-        .getSessionDataAccessor();
-
-    Preferences pref = new Preferences();
-    Map<String, Long> data = accessor.getData(
-        new LocalDate(pref.getStartDate()), new LocalDate(pref.getEndDate()));
-    for (long value : data.values()) {
-      if (value > max) {
-        max = value;
-      }
-    }
-    page.update(pref);
-    assertEquals(max, page.getMaxValue());
-
-    pref.getStartDate().add(Calendar.MONTH, -1);
-    pref.getEndDate().add(Calendar.DAY_OF_MONTH, -5);
-    data = accessor.getData(new LocalDate(pref.getStartDate()), new LocalDate(
-        pref.getEndDate()));
-    max = 0;
-    for (long value : data.values()) {
-      if (value > max) {
-        max = value;
-      }
-    }
-    page.update(pref);
-    assertEquals(max, page.getMaxValue());
+    SessionDataDescriptor des = new SessionDataDescriptor(new LocalDate(), 10);
+    assertEquals(des.getValue(), page.getValue(des));
   }
 
   @Override

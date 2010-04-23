@@ -1,5 +1,6 @@
 package rabbit.data.access.model;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.Objects;
@@ -21,12 +22,13 @@ public class CommandDataDescriptor extends ValueDescriptor {
    * 
    * @param date The date of the data.
    * @throws NullPointerException If date is null, or commandId is null.
-   * @throws IllegalArgumentException If count is < 0.
+   * @throws IllegalArgumentException If count is < 0, or commandId has 0 length.
    */
   public CommandDataDescriptor(@Nonnull LocalDate date, @Nonnull long count,
       @Nonnull String commandId) {
     super(date, count);
     checkNotNull(commandId, "Command ID cannot be null");
+    checkArgument(commandId.length() > 0);
     this.commandId = commandId;
   }
 

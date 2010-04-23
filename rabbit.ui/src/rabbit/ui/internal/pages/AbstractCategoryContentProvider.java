@@ -145,13 +145,11 @@ public abstract class AbstractCategoryContentProvider extends
   }
 
   @Override
-  public final void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
+  public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
     super.inputChanged(viewer, oldInput, newInput);
-    if (newInput == null) {
-      getRoot().setChildren(null);
-      return;
-    }
-    doInputChanged(viewer, oldInput, newInput);
+    getRoot().setChildren(null);
+    if (newInput != null)
+      doInputChanged(viewer, oldInput, newInput);
   }
 
   /**

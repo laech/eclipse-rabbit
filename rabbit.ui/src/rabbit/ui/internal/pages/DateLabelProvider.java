@@ -74,7 +74,7 @@ public class DateLabelProvider extends LabelProvider {
     dateImage.dispose();
   }
 
-  /**
+  /**TODO
    * Updates the state of this label provider, this method should be called when
    * the input of the viewer is changed.
    */

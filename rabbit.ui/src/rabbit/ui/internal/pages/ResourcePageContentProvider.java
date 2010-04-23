@@ -21,12 +21,10 @@ import rabbit.data.handler.DataHandler;
 import rabbit.ui.internal.SharedImages;
 import rabbit.ui.internal.util.ICategory;
 import rabbit.ui.internal.viewers.TreeNodes;
-import rabbit.ui.internal.viewers.CellPainter.IValueProvider;
 
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableBiMap;
-import com.google.common.collect.Maps;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
@@ -42,29 +40,12 @@ import org.eclipse.ui.ide.IDE;
 import org.joda.time.LocalDate;
 
 import java.util.Collection;
-import java.util.IdentityHashMap;
-
-import javax.annotation.Nonnull;
 
 /**
  * Content provider for a {@link TreeViewer} that accepts input as a
  * {@link Collection} of {@link FileDataDescriptor}.
  */
-public class ResourcePageContentProvider extends AbstractCategoryContentProvider
-    implements IValueProvider {
-
-  /*
-   * This content provider builds a tree from the input data, and every leaf
-   * node of the tree is containing a java.util.Long value, these values are the
-   * values of each FileDataDescriptor. This way, we can calculate the total 
-   * value of every subtree by traversal. For example:
-   * 
-   * Parent +-- Child1 --- Long
-   *        |
-   *        +-- Child2 --- Long
-   *        |
-   *        +-- Child3 --- Long
-   */
+public class ResourcePageContentProvider extends AbstractValueContentProvider {
 
   /**
    * Categories supported by {@link ResourcePageContentProvider}. For
@@ -107,22 +88,6 @@ public class ResourcePageContentProvider extends AbstractCategoryContentProvider
   }
 
   /**
-   * A cached map of tree nodes and the total duration of that subtree. We use
-   * an identity hash map here because two tree nodes can contain the same
-   * object but still have different durations.
-   * <p>
-   * For example, a user worked on fileA for 10 minutes on Monday, 20 minutes on
-   * Tuesday, then we can have two tree nodes containing fileA but different
-   * durations (10 minutes and 20 minutes).
-   * </p>
-   */
-  @Nonnull
-  private IdentityHashMap<TreeNode, Long> treeNodeValues;
-
-  /** {@link #getMaxValue()} */
-  private long maxValue = 0;
-
-  /**
    * Constructor a content provider for the given viewer.
    * 
    * @param viewer The viewer.
@@ -130,7 +95,6 @@ public class ResourcePageContentProvider extends AbstractCategoryContentProvider
    */
   public ResourcePageContentProvider(TreeViewer viewer) {
     super(viewer);
-    treeNodeValues = Maps.newIdentityHashMap();
   }
   
   @SuppressWarnings("unchecked")
@@ -140,65 +104,8 @@ public class ResourcePageContentProvider extends AbstractCategoryContentProvider
   }
 
   @Override
-  public long getMaxValue() {
-    return maxValue;
-  }
-
-  @Override
-  public long getValue(Object element) {
-    if (false == element instanceof TreeNode)
-      return 0;
-
-    TreeNode node = (TreeNode) element;
-    Long value = treeNodeValues.get(node);
-    if (value == null) {
-      value = TreeNodes.longValueOfSubtree(node);
-      treeNodeValues.put(node, value);
-    }
-    return value;
-  }
-
-  @Override
-  public boolean hasChildren(Object element) {
-    TreeNode node = (TreeNode) element;
-    if (node.getChildren() == null || node.getChildren().length == 0) {
-      return false;
-    }
-
-    /*
-     * Hides the pure numeric tree nodes, these are nodes with java.lang.Long
-     * objects hanging at the end of the branches, we only use those to
-     * calculate values for the parents, not to be shown to the users:
-     */
-    if (node.getChildren()[0].getValue() instanceof Long) {
-      return false;
-    }
-
-    return true;
-  }
-
-  @Override
-  public boolean shouldPaint(Object element) {
-    if (!(element instanceof TreeNode))
-      return false;
-    
-    TreeNode node = (TreeNode) element;
-    return getCategorizers().get(getPaintCategory()).apply(node.getValue());
-  }
-
-  @Override
   protected ICategory[] getAllSupportedCategories() {
     return Category.values();
-  }
-
-  @Override
-  protected ImmutableBiMap<ICategory, Predicate<Object>> initializeCategorizers() {
-    return ImmutableBiMap.<ICategory, Predicate<Object>> builder()
-        .put(Category.PROJECT, Predicates.instanceOf(IProject.class))
-        .put(Category.FOLDER,  Predicates.instanceOf(IFolder.class))
-        .put(Category.FILE,    Predicates.instanceOf(IFile.class))
-        .put(Category.DATE,    Predicates.instanceOf(LocalDate.class))
-        .build();
   }
 
   @Override
@@ -209,6 +116,16 @@ public class ResourcePageContentProvider extends AbstractCategoryContentProvider
   @Override
   protected ICategory[] getDefaultSelectedCategories() {
     return new ICategory[] { Category.PROJECT, Category.FOLDER, Category.FILE };
+  }
+
+  @Override
+  protected ImmutableBiMap<ICategory, Predicate<Object>> initializeCategorizers() {
+    return ImmutableBiMap.<ICategory, Predicate<Object>> builder()
+        .put(Category.PROJECT, Predicates.instanceOf(IProject.class))
+        .put(Category.FOLDER,  Predicates.instanceOf(IFolder.class))
+        .put(Category.FILE,    Predicates.instanceOf(IFile.class))
+        .put(Category.DATE,    Predicates.instanceOf(LocalDate.class))
+        .build();
   }
 
   /**
@@ -249,23 +166,5 @@ public class ResourcePageContentProvider extends AbstractCategoryContentProvider
       }
       TreeNodes.appendToParent(node, des.getValue());
     }
-
-    treeNodeValues.clear();
-    treeNodeValues = Maps.newIdentityHashMap();
-    updateMaxValue();
-  }
-  
-  @Override
-  public void setPaintCategory(ICategory cat) {
-    super.setPaintCategory(cat);
-    updateMaxValue();
-  }
-
-  /**
-   * Updates the max value for painting.
-   * @see #getMaxValue()
-   */
-  private void updateMaxValue() {
-    maxValue = TreeNodes.findMaxLong(getRoot(), getCategorizers().get(getPaintCategory()));
   }
 }

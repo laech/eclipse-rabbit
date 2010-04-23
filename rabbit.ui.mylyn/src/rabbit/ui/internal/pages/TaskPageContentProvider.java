@@ -20,17 +20,14 @@ import rabbit.data.access.model.TaskFileDataDescriptor;
 import rabbit.data.common.TaskId;
 import rabbit.data.handler.DataHandler;
 import rabbit.ui.internal.SharedImages;
-import rabbit.ui.internal.pages.AbstractCategoryContentProvider;
 import rabbit.ui.internal.util.ICategory;
 import rabbit.ui.internal.util.UnrecognizedTask;
 import rabbit.ui.internal.viewers.TreeNodes;
-import rabbit.ui.internal.viewers.CellPainter.IValueProvider;
 
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
@@ -49,26 +46,11 @@ import org.eclipse.ui.ide.IDE;
 import org.joda.time.LocalDate;
 
 import java.util.Collection;
-import java.util.IdentityHashMap;
 
 /**
  * Content provider accepts input as {@code Collection<TaskFileDataDescriptor}
  */
-public class TaskPageContentProvider extends AbstractCategoryContentProvider
-    implements IValueProvider {
-
-  /*
-   * This content provider builds a tree from the input data, and every leaf
-   * node of the tree is containing a java.util.Long value, these values are the
-   * values of each FileDataDescriptor. This way, we can calculate the total 
-   * value of every subtree by traversal. For example:
-   * 
-   * Parent +-- Child1 --- Long
-   *        |
-   *        +-- Child2 --- Long
-   *        |
-   *        +-- Child3 --- Long
-   */
+public class TaskPageContentProvider extends AbstractValueContentProvider {
   
   /**
    * TODO
@@ -105,66 +87,14 @@ public class TaskPageContentProvider extends AbstractCategoryContentProvider
     }
   }
 
-  private long maxValue;
-
-  private IdentityHashMap<TreeNode, Long> treeNodeValues = Maps.newIdentityHashMap();
-
+  /**
+   * Constructs a new content provider for the given viewer.
+   * @param treeViewer The viewer of this content provider.
+   */
   public TaskPageContentProvider(TreeViewer treeViewer) {
     super(treeViewer);
   }
 
-  @Override
-  public long getMaxValue() {
-    return maxValue;
-  }
-
-  @Override
-  public long getValue(Object element) {
-    if (element instanceof TreeNode) {
-      TreeNode node = (TreeNode) element;
-      Long value = treeNodeValues.get(node);
-      if (value == null) {
-        value = TreeNodes.longValueOfSubtree(node);
-        treeNodeValues.put(node, value);
-      }
-      return value;
-    }
-    return 0;
-  }
-
-  @Override
-  public boolean hasChildren(Object element) {
-    TreeNode node = (TreeNode) element;
-    if (node.getChildren() == null) {
-      return false;
-    }
-
-    /*
-     * Hides the pure numeric tree nodes, these are nodes with java.lang.Long
-     * objects hanging at the end of the branches, we only use those to
-     * calculate values for the parents, not to be shown to the users:
-     */
-    if (node.getChildren()[0].getValue() instanceof Long) {
-      return false;
-    }
-
-    return true;
-  }
-  
-  @Override
-  public void setPaintCategory(ICategory cat) {
-    super.setPaintCategory(cat);
-    updateMaxValue();
-  }
-  
-  @Override
-  public boolean shouldPaint(Object element) {
-    if (!(element instanceof TreeNode))
-      return false;
-    
-    TreeNode node = (TreeNode) element;
-    return getCategorizers().get(getPaintCategory()).apply(node.getValue());
-  }
   @SuppressWarnings("unchecked")
   @Override
   protected void doInputChanged(Viewer viewer, Object oldInput, Object newInput) {
@@ -225,6 +155,7 @@ public class TaskPageContentProvider extends AbstractCategoryContentProvider
           node = TreeNodes.findOrAppend(node, task);
           
         } else { // PROJECT/FOLDER/FILE Categories:
+          
           IFile file = fileStore.getFile(des.getFileId());
           if (file == null)
             file = fileStore.getExternalFile(des.getFileId());
@@ -245,11 +176,5 @@ public class TaskPageContentProvider extends AbstractCategoryContentProvider
       
       TreeNodes.appendToParent(node, des.getValue());
     }
-    updateMaxValue();
-  }
-  
-  private void updateMaxValue() {
-    maxValue = TreeNodes.findMaxLong(getRoot(), 
-        getCategorizers().get(getPaintCategory()));
   }
 }

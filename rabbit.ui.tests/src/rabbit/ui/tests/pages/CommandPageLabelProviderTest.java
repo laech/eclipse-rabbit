@@ -16,15 +16,19 @@
 package rabbit.ui.tests.pages;
 
 import rabbit.data.access.model.CommandDataDescriptor;
-import rabbit.ui.internal.pages.CommandPage;
+import rabbit.ui.internal.pages.Category;
+import rabbit.ui.internal.pages.CommandLabelProvider;
 import rabbit.ui.internal.pages.CommandPageContentProvider;
 import rabbit.ui.internal.pages.CommandPageLabelProvider;
+import rabbit.ui.internal.pages.DateLabelProvider;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
 import org.eclipse.core.commands.Command;
+import org.eclipse.jface.viewers.TreeNode;
+import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
@@ -44,31 +48,41 @@ import java.util.Arrays;
 public class CommandPageLabelProviderTest {
 
   private static Shell shell;
-  private static CommandPage page;
-  private static CommandPageLabelProvider labels;
+  private static CommandPageLabelProvider labelProvider;
   private static CommandPageContentProvider contents;
+  private static CommandLabelProvider commandLabels;
+  private static DateLabelProvider dateLabels;
 
-  private static Command defined;
-  private static Command undefined;
+  private static TreeNode dateNode;
+  private static TreeNode definedNode;
+  private static TreeNode undefinedNode;
 
   @AfterClass
   public static void afterClass() {
-    labels.dispose();
+    labelProvider.dispose();
+    commandLabels.dispose();
+    dateLabels.dispose();
     shell.dispose();
   }
 
   @BeforeClass
   public static void beforeClass() {
     shell = new Shell(PlatformUI.getWorkbench().getDisplay());
-    page = new CommandPage();
-    page.createContents(shell);
-    contents = new CommandPageContentProvider(page, true);
-    labels = new CommandPageLabelProvider(contents);
-    defined = getCommandService().getDefinedCommands()[0];
-    undefined = getCommandService().getCommand(System.currentTimeMillis() + "");
+    TreeViewer viewer = new TreeViewer(shell);
+    contents = new CommandPageContentProvider(viewer);
+    labelProvider = new CommandPageLabelProvider(contents);
+    Command defined = getCommandService().getDefinedCommands()[0];
+    Command undefined = getCommandService().getCommand(System.currentTimeMillis() + "");
 
-    page.getViewer().setContentProvider(contents);
-    page.getViewer().setLabelProvider(labels);
+    viewer.setContentProvider(contents);
+    viewer.setLabelProvider(labelProvider);
+
+    dateNode = new TreeNode(new LocalDate());
+    definedNode = new TreeNode(defined);
+    undefinedNode = new TreeNode(undefined);
+    
+    dateLabels = new DateLabelProvider();
+    commandLabels = new CommandLabelProvider();
   }
 
   private static ICommandService getCommandService() {
@@ -78,82 +92,78 @@ public class CommandPageLabelProviderTest {
 
   @Test
   public void testGetBackground() {
-    assertNull(labels.getBackground(defined));
-    assertNull(labels.getBackground(undefined));
-    assertNull(labels.getBackground(new LocalDate()));
+    assertNull(labelProvider.getBackground(definedNode));
+    assertNull(labelProvider.getBackground(undefinedNode));
+    assertNull(labelProvider.getBackground(dateNode));
+  }
+  
+  @Test
+  public void testGetImage() {
+    assertNotNull(labelProvider.getImage(dateNode));
+    assertNotNull(labelProvider.getImage(definedNode));
+    assertNotNull(labelProvider.getImage(undefinedNode));
   }
 
   @Test
   public void testGetColumnImage() {
-    assertNotNull(labels.getColumnImage(defined, 0));
-    assertNull(labels.getColumnImage(defined, 1));
-    assertNull(labels.getColumnImage(defined, 2));
-
-    assertNotNull(labels.getColumnImage(undefined, 0));
-    assertNull(labels.getColumnImage(undefined, 1));
-    assertNull(labels.getColumnImage(undefined, 2));
-
-    assertNotNull(labels.getColumnImage(new LocalDate(), 0));
-    assertNull(labels.getColumnImage(new LocalDate(), 1));
-    assertNull(labels.getColumnImage(new LocalDate(), 2));
+    assertNotNull(labelProvider.getColumnImage(dateNode, 0));
+    assertNotNull(labelProvider.getColumnImage(definedNode, 0));
+    assertNotNull(labelProvider.getColumnImage(undefinedNode, 0));
+  }
+  
+  @Test
+  public void testGetText() {
+    assertEquals(commandLabels.getText(definedNode.getValue()), labelProvider.getText(definedNode));
+    assertEquals(commandLabels.getText(undefinedNode.getValue()), labelProvider.getText(undefinedNode));
+    assertEquals(dateLabels.getText(dateNode.getValue()), labelProvider.getText(dateNode));
   }
 
   @Test
   public void testGetColumnText_0() throws Exception {
-    assertEquals(defined.getName(), labels.getColumnText(defined, 0));
-    assertEquals(undefined.getId(), labels.getColumnText(undefined, 0));
-
-    LocalDate date = new LocalDate();
-    CommandDataDescriptor des = new CommandDataDescriptor(date, 1, defined
-        .getId());
-    assertEquals(defined.getName(), labels.getColumnText(des, 0));
-
-    des = new CommandDataDescriptor(date, 1, undefined.getId());
-    assertEquals(undefined.getId(), labels.getColumnText(des, 0));
+    assertEquals(commandLabels.getText(definedNode.getValue()), labelProvider.getColumnText(definedNode, 0));
+    assertEquals(commandLabels.getText(undefinedNode.getValue()), labelProvider.getColumnText(undefinedNode, 0));
+    assertEquals(dateLabels.getText(dateNode.getValue()), labelProvider.getColumnText(dateNode, 0));
   }
 
   @Test
   public void testGetColumnText_2() throws Exception {
+    Command defined = (Command) definedNode.getValue();
+    Command undefined = (Command) undefinedNode.getValue();
+    
     CommandDataDescriptor d1;
     CommandDataDescriptor d2;
     LocalDate date = new LocalDate();
     d1 = new CommandDataDescriptor(date, 11, defined.getId());
-    d2 = new CommandDataDescriptor(date, 102, d1.getCommandId());
-    page.getViewer().setInput(Arrays.asList(d1, d2));
+    d2 = new CommandDataDescriptor(date, 102, undefined.getId());
+    contents.getViewer().setInput(Arrays.asList(d1, d2));
 
-    assertEquals(d1.getValue() + "", labels.getColumnText(d1, 2));
-    assertEquals(d2.getValue() + "", labels.getColumnText(d2, 2));
-    assertEquals(d1.getValue() + d2.getValue() + "", labels.getColumnText(
-        defined, 2));
-
-    d1 = new CommandDataDescriptor(date, 100, undefined.getId());
-    d2 = new CommandDataDescriptor(date, 9812, undefined.getId());
-    page.getViewer().setInput(Arrays.asList(d1, d2));
-
-    assertEquals(d1.getValue() + "", labels.getColumnText(d1, 2));
-    assertEquals(d2.getValue() + "", labels.getColumnText(d2, 2));
-    assertEquals(d1.getValue() + d2.getValue() + "", labels.getColumnText(
-        undefined, 2));
+    contents.setSelectedCategories(Category.COMMAND);
+    contents.setPaintCategory(Category.COMMAND);
+    TreeNode root = contents.getRoot();
+    TreeNode[] commandNodes = root.getChildren();
+    assertEquals(2, commandNodes.length);
+    assertEquals(d1.getValue() + "", labelProvider.getColumnText(commandNodes[0], 2));
+    assertEquals(d2.getValue() + "", labelProvider.getColumnText(commandNodes[1], 2));
+    
+    contents.setSelectedCategories(Category.DATE);
+    contents.setPaintCategory(Category.DATE);
+    assertEquals(1, root.getChildren().length);
+    TreeNode dateNode = root.getChildren()[0];
+    assertEquals(d1.getValue() + d2.getValue() + "", labelProvider.getColumnText(dateNode, 2));
   }
 
   @Test
   public void testGetColumnText_1() throws Exception {
-    assertEquals(defined.getDescription(), labels.getColumnText(defined, 1));
-    assertNull(labels.getColumnText(undefined, 1));
-
-    LocalDate date = new LocalDate();
-    CommandDataDescriptor des;
-    des = new CommandDataDescriptor(date, 1, defined.getId());
-    assertEquals(defined.getDescription(), labels.getColumnText(des, 1));
-
-    des = new CommandDataDescriptor(date, 1, undefined.getId());
-    assertNull(labels.getColumnText(des, 1));
+    Command defined = (Command) definedNode.getValue();
+    Command undefined = (Command) undefinedNode.getValue();
+    assertEquals(defined.getDescription(), labelProvider.getColumnText(defined, 1));
+    assertNull(labelProvider.getColumnText(undefined, 1));
   }
 
   @Test
   public void testGetForeground() {
-    assertNull(labels.getForeground(defined));
+    assertNull(labelProvider.getForeground(definedNode));
     assertEquals(Display.getDefault().getSystemColor(SWT.COLOR_DARK_GRAY),
-        labels.getForeground(undefined));
+        labelProvider.getForeground(undefinedNode));
   }
 }

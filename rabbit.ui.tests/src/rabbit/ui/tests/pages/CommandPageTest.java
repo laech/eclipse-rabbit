@@ -15,60 +15,53 @@
  */
 package rabbit.ui.tests.pages;
 
-import rabbit.data.access.model.CommandDataDescriptor;
+import rabbit.ui.internal.pages.AbstractFilteredTreePage;
+import rabbit.ui.internal.pages.Category;
 import rabbit.ui.internal.pages.CommandPage;
 import rabbit.ui.internal.pages.CommandPageContentProvider;
+import rabbit.ui.internal.util.ICategory;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
-import org.joda.time.LocalDate;
 import org.junit.Test;
-
-import java.util.Arrays;
 
 /**
  * Test for {@link CommandPage}
  */
 @SuppressWarnings("restriction")
-public class CommandPageTest extends AbstractTreeViewerPageTest {
+public class CommandPageTest extends AbstractFilteredTreePageTest {
 
   @Test
-  public void testGetValue() throws Exception {
-    CommandDataDescriptor des1;
-    CommandDataDescriptor des2;
-    des1 = new CommandDataDescriptor(new LocalDate(), 101, "123");
-    des2 = new CommandDataDescriptor(new LocalDate(), 9823, des1.getCommandId());
-
-    assertEquals(des1.getValue(), page.getValue(des1));
-    assertEquals(des2.getValue(), page.getValue(des2));
-
-    page.getViewer().setInput(Arrays.asList(des1, des2));
-    CommandPageContentProvider cp;
-    cp = (CommandPageContentProvider) page.getViewer().getContentProvider();
-    assertEquals(des1.getValue() + des2.getValue(), page.getValue(cp
-        .getCommand(des1)));
+  public void testSaveState_selectedCategories() throws Exception {
+    CommandPageContentProvider contents = (CommandPageContentProvider) page
+        .getViewer().getContentProvider();
+    
+    ICategory[] categories = new ICategory[] { Category.DATE, Category.COMMAND };
+    contents.setSelectedCategories(categories);
+    saveState(page);
+    
+    contents.setSelectedCategories(new ICategory[] { Category.DATE });
+    restoreState(page);
+    assertArrayEquals(categories, contents.getSelectedCategories());
   }
-
+  
   @Test
-  public void testUpdate() throws Exception {
-    CommandPageContentProvider cp;
-    cp = (CommandPageContentProvider) page.getViewer().getContentProvider();
-    cp.setDisplayByDate(true);
-
-    CommandDataDescriptor des1;
-    CommandDataDescriptor des2;
-    des1 = new CommandDataDescriptor(new LocalDate(), 101, "123");
-    des2 = new CommandDataDescriptor(new LocalDate(), 9823, des1.getCommandId());
-    page.getViewer().setInput(Arrays.asList(des1, des2));
-
-    assertEquals(des2.getValue(), page.getMaxValue());
-
-    cp.setDisplayByDate(false);
-    assertEquals(des1.getValue() + des2.getValue(), page.getMaxValue());
+  public void testSaveState_paintCategory() throws Exception {
+    CommandPageContentProvider contents = (CommandPageContentProvider) page
+        .getViewer().getContentProvider();
+    
+    Category paintCategory = Category.COMMAND;
+    contents.setPaintCategory(paintCategory);
+    saveState(page);
+    
+    contents.setPaintCategory(Category.DATE);
+    restoreState(page);
+    assertEquals(paintCategory, contents.getPaintCategory());
   }
 
   @Override
-  protected CommandPage createPage() {
+  protected AbstractFilteredTreePage createPage() {
     return new CommandPage();
   }
 
