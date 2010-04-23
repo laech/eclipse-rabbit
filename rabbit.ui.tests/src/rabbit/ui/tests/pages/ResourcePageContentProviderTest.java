@@ -18,9 +18,9 @@ package rabbit.ui.tests.pages;
 import rabbit.data.IFileStore;
 import rabbit.data.access.model.FileDataDescriptor;
 import rabbit.data.handler.DataHandler;
+import rabbit.ui.internal.pages.Category;
 import rabbit.ui.internal.pages.ResourcePage;
 import rabbit.ui.internal.pages.ResourcePageContentProvider;
-import rabbit.ui.internal.pages.ResourcePageContentProvider.Category;
 import rabbit.ui.internal.util.ICategory;
 
 import com.google.common.collect.Sets;

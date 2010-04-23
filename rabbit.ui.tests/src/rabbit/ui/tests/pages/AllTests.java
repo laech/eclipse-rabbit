@@ -58,6 +58,8 @@ CollectionContentProviderTest.class, //
     WorkbenchPartLabelProviderTest.class, //
     DateLabelProviderTest.class, //
     CommandLabelProviderTest.class, //
+    
+    CategoryTest.class,
 })
 public class AllTests {
 

@@ -19,10 +19,10 @@ import static rabbit.ui.internal.util.DurationFormat.format;
 
 import rabbit.data.access.model.LaunchConfigurationDescriptor;
 import rabbit.data.access.model.LaunchDataDescriptor;
+import rabbit.ui.internal.pages.Category;
 import rabbit.ui.internal.pages.LaunchPageContentProvider;
 import rabbit.ui.internal.pages.LaunchPageLabelProvider;
 import rabbit.ui.internal.pages.ResourcePageLabelProvider;
-import rabbit.ui.internal.pages.LaunchPageContentProvider.Category;
 import rabbit.ui.internal.util.Pair;
 import rabbit.ui.internal.util.UndefinedLaunchConfigurationType;
 import rabbit.ui.internal.util.UndefinedLaunchMode;

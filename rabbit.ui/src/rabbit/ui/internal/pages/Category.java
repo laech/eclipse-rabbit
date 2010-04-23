@@ -19,14 +19,42 @@ import rabbit.ui.internal.SharedImages;
 import rabbit.ui.internal.util.ICategory;
 
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.ui.ISharedImages;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.ide.IDE;
 
 /**
  *TODO complete and test
+ * Internal enum of categories, shared by pages.
  */
 public enum Category implements ICategory {
   
+  /** Date category. */
   DATE("Dates", SharedImages.CALENDAR),
-  COMMAND("Commands", SharedImages.ELEMENT)
+  
+  /** Command category. */
+  COMMAND("Commands", SharedImages.ELEMENT),
+  
+  /** Launch category. */
+  LAUNCH("Launches", SharedImages.LAUNCH),
+
+  /** Launch mode category. */
+  LAUNCH_MODE("Launch Modes", SharedImages.LAUNCH_MODE),
+
+  /** Launch type category */
+  LAUNCH_TYPE("Launch Types", SharedImages.LAUNCH_TYPE),
+  
+  /** Project category */
+  PROJECT("Projects", PlatformUI.getWorkbench().getSharedImages()
+      .getImageDescriptor(IDE.SharedImages.IMG_OBJ_PROJECT)),
+
+  /** Folder category */
+  FOLDER("Folders", PlatformUI.getWorkbench().getSharedImages()
+      .getImageDescriptor(ISharedImages.IMG_OBJ_FOLDER)),
+
+  /** File category */
+  FILE("Files", PlatformUI.getWorkbench().getSharedImages()
+      .getImageDescriptor(ISharedImages.IMG_OBJ_FILE));
   ;
   
   private String text;

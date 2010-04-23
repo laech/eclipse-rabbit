@@ -19,7 +19,6 @@ import rabbit.data.IFileStore;
 import rabbit.data.access.model.LaunchConfigurationDescriptor;
 import rabbit.data.access.model.LaunchDataDescriptor;
 import rabbit.data.handler.DataHandler;
-import rabbit.ui.internal.SharedImages;
 import rabbit.ui.internal.util.ICategory;
 import rabbit.ui.internal.util.Pair;
 import rabbit.ui.internal.util.UndefinedLaunchConfigurationType;
@@ -40,7 +39,6 @@ import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunchConfigurationType;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.core.ILaunchMode;
-import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.TreeNode;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
@@ -49,11 +47,18 @@ import org.joda.time.LocalDate;
 import java.util.Collection;
 import java.util.IdentityHashMap;
 
-import javax.annotation.Nonnull;
-
 /**
- * Content provider for a {@link LaunchPage}. Acceptable input is 
- * {@code Collection<LaunchDataDescriptor>}
+ * Acceptable input for this content provider is {@code
+ * Collection<LaunchDataDescriptor>}
+ * <p>
+ * The following {@link ICategory}s are supported:
+ * <ul>
+ * <li>{@link Category#DATE}</li>
+ * <li>{@link Category#LAUNCH}</li>
+ * <li>{@link Category#LAUNCH_MODE}</li>
+ * <li>{@link Category#LAUNCH_TYPE}</li>
+ * </ul>
+ * </p>
  */
 public class LaunchPageContentProvider extends AbstractCategoryContentProvider {
 
@@ -76,42 +81,6 @@ public class LaunchPageContentProvider extends AbstractCategoryContentProvider {
    *                                  +-- (File)
    * 
    */
-  
-  /**
-   * Categories supported by {@link LaunchPageContentProvider}
-   */
-  public static enum Category implements ICategory {
-
-    /** Date category */
-    DATE("Dates", SharedImages.CALENDAR),
-
-    /** Launch category */
-    LAUNCH("Launches", SharedImages.LAUNCH),
-
-    /** Launch mode category */
-    LAUNCH_MODE("Launch Modes", SharedImages.LAUNCH_MODE),
-
-    /** Launch type category */
-    LAUNCH_TYPE("Launch Types", SharedImages.LAUNCH_TYPE);
-
-    private final String text;
-    private final ImageDescriptor image;
-
-    private Category(@Nonnull String text, @Nonnull ImageDescriptor image) {
-      this.text = text;
-      this.image = image;
-    }
-
-    @Override
-    public ImageDescriptor getImageDescriptor() {
-      return image;
-    }
-
-    @Override
-    public String getText() {
-      return text;
-    }
-  }
   
   /**
    * Value provider for launch count values.

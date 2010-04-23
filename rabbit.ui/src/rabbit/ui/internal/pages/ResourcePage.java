@@ -26,7 +26,6 @@ import rabbit.ui.internal.actions.DropDownAction;
 import rabbit.ui.internal.actions.ExpandAllAction;
 import rabbit.ui.internal.actions.GroupByAction;
 import rabbit.ui.internal.actions.ShowHideFilterControlAction;
-import rabbit.ui.internal.pages.ResourcePageContentProvider.Category;
 import rabbit.ui.internal.util.ICategory;
 import rabbit.ui.internal.viewers.CellPainter;
 import rabbit.ui.internal.viewers.TreeViewerLabelSorter;

@@ -19,11 +19,11 @@ import static rabbit.ui.internal.util.DurationFormat.format;
 
 import rabbit.data.access.model.FileDataDescriptor;
 import rabbit.data.handler.DataHandler;
+import rabbit.ui.internal.pages.Category;
 import rabbit.ui.internal.pages.ResourcePage;
 import rabbit.ui.internal.pages.ResourcePageContentProvider;
 import rabbit.ui.internal.pages.ResourcePageLabelProvider;
 import rabbit.ui.internal.pages.ResourcePageTableLabelProvider;
-import rabbit.ui.internal.pages.ResourcePageContentProvider.Category;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;

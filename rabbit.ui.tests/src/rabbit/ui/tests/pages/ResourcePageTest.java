@@ -16,9 +16,9 @@
 package rabbit.ui.tests.pages;
 
 import rabbit.ui.internal.pages.AbstractFilteredTreePage;
+import rabbit.ui.internal.pages.Category;
 import rabbit.ui.internal.pages.ResourcePage;
 import rabbit.ui.internal.pages.ResourcePageContentProvider;
-import rabbit.ui.internal.pages.ResourcePageContentProvider.Category;
 import rabbit.ui.internal.util.ICategory;
 
 import static org.junit.Assert.assertArrayEquals;

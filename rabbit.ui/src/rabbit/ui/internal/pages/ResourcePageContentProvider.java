@@ -18,7 +18,6 @@ package rabbit.ui.internal.pages;
 import rabbit.data.IFileStore;
 import rabbit.data.access.model.FileDataDescriptor;
 import rabbit.data.handler.DataHandler;
-import rabbit.ui.internal.SharedImages;
 import rabbit.ui.internal.util.ICategory;
 import rabbit.ui.internal.viewers.TreeNodes;
 
@@ -30,13 +29,9 @@ import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.TreeNode;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.ui.ISharedImages;
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.ide.IDE;
 import org.joda.time.LocalDate;
 
 import java.util.Collection;
@@ -44,48 +39,17 @@ import java.util.Collection;
 /**
  * Content provider for a {@link TreeViewer} that accepts input as a
  * {@link Collection} of {@link FileDataDescriptor}.
+ * <p>
+ * The following {@link ICategory}s are supported:
+ * <ul>
+ * <li>{@link Category#DATE}</li>
+ * <li>{@link Category#PROJECT}</li>
+ * <li>{@link Category#FOLDER}</li>
+ * <li>{@link Category#FILE}</li>
+ * </ul>
+ * </p>
  */
 public class ResourcePageContentProvider extends AbstractValueContentProvider {
-
-  /**
-   * Categories supported by {@link ResourcePageContentProvider}. For
-   * structuring the data.
-   */
-  public static enum Category implements ICategory {
-
-    /** Date category */
-    DATE("Dates", SharedImages.CALENDAR),
-
-    /** Project category */
-    PROJECT("Projects", PlatformUI.getWorkbench().getSharedImages()
-        .getImageDescriptor(IDE.SharedImages.IMG_OBJ_PROJECT)),
-
-    /** Folder category */
-    FOLDER("Folders", PlatformUI.getWorkbench().getSharedImages()
-        .getImageDescriptor(ISharedImages.IMG_OBJ_FOLDER)),
-
-    /** File category */
-    FILE("Files", PlatformUI.getWorkbench().getSharedImages()
-        .getImageDescriptor(ISharedImages.IMG_OBJ_FILE));
-
-    private String text;
-    private ImageDescriptor image;
-
-    private Category(String text, ImageDescriptor image) {
-      this.text = text;
-      this.image = image;
-    }
-
-    @Override
-    public ImageDescriptor getImageDescriptor() {
-      return image;
-    }
-
-    @Override
-    public String getText() {
-      return text;
-    }
-  }
 
   /**
    * Constructor a content provider for the given viewer.
