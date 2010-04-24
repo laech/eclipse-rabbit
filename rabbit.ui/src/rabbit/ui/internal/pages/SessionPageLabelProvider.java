@@ -19,8 +19,8 @@ import static rabbit.ui.internal.util.DurationFormat.format;
 
 import rabbit.data.access.model.SessionDataDescriptor;
 
-import org.eclipse.jface.viewers.BaseLabelProvider;
 import org.eclipse.jface.viewers.ITableLabelProvider;
+import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
 
 import javax.annotation.OverridingMethodsMustInvokeSuper;
@@ -28,7 +28,7 @@ import javax.annotation.OverridingMethodsMustInvokeSuper;
 /**
  * A label provider for a {@link SessionPage}
  */
-public class SessionPageLabelProvider extends BaseLabelProvider implements
+public class SessionPageLabelProvider extends LabelProvider implements
     ITableLabelProvider {
 
   private final DateLabelProvider dateLabels;
@@ -45,11 +45,24 @@ public class SessionPageLabelProvider extends BaseLabelProvider implements
     super.dispose();
     dateLabels.dispose();
   }
+  
+  @Override
+  public Image getImage(Object element) {
+    if (element instanceof SessionDataDescriptor)
+      return dateLabels.getImage(((SessionDataDescriptor) element).getDate());
+    else
+      return null;
+  }
 
   @Override
   public Image getColumnImage(Object element, int columnIndex) {
-    if (element instanceof SessionDataDescriptor && columnIndex == 0)
-      return dateLabels.getImage(((SessionDataDescriptor) element).getDate());
+    return (columnIndex == 0) ? getImage(element) : null;
+  }
+  
+  @Override
+  public String getText(Object element) {
+    if (element instanceof SessionDataDescriptor)
+      return dateLabels.getText(((SessionDataDescriptor) element).getDate());
     else
       return null;
   }
@@ -58,10 +71,7 @@ public class SessionPageLabelProvider extends BaseLabelProvider implements
   public String getColumnText(Object element, int columnIndex) {
     switch (columnIndex) {
     case 0:
-      if (element instanceof SessionDataDescriptor)
-        return dateLabels.getText(((SessionDataDescriptor) element).getDate());
-      else
-        return null;
+      return getText(element);
 
     case 1:
       if (element instanceof SessionDataDescriptor)

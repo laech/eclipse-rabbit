@@ -19,18 +19,22 @@ import rabbit.data.access.IAccessor;
 import rabbit.data.access.model.SessionDataDescriptor;
 import rabbit.data.handler.DataHandler;
 import rabbit.ui.Preference;
+import rabbit.ui.internal.actions.ShowHideFilterControlAction;
 import rabbit.ui.internal.viewers.CellPainter;
-import rabbit.ui.internal.viewers.TableViewerSorter;
+import rabbit.ui.internal.viewers.TreeViewerLabelSorter;
+import rabbit.ui.internal.viewers.TreeViewerSorter;
+import rabbit.ui.internal.viewers.CellPainter.IValueProvider;
 
-import org.eclipse.jface.viewers.CellLabelProvider;
-import org.eclipse.jface.viewers.ITableLabelProvider;
-import org.eclipse.jface.viewers.ITreeContentProvider;
-import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.action.ActionContributionItem;
+import org.eclipse.jface.action.IContributionItem;
+import org.eclipse.jface.action.IToolBarManager;
+import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.TableColumn;
+import org.eclipse.swt.widgets.TreeColumn;
+import org.eclipse.ui.dialogs.PatternFilter;
 import org.joda.time.LocalDate;
 
 import java.util.Collection;
@@ -38,15 +42,35 @@ import java.util.Collection;
 /**
  * A page displaying how much time is spent on using Eclipse every day.
  */
-public class SessionPage extends AbstractTableViewerPage {
+public class SessionPage extends AbstractFilteredTreePage 
+    implements IValueProvider {
 
   private final IAccessor<SessionDataDescriptor> accessor;
-  private final SessionPageLabelProvider labels;
+  private SessionPageLabelProvider labels;
+  private long maxValue;
 
   /** Constructs a new page. */
   public SessionPage() {
     accessor = DataHandler.getSessionDataAccessor();
-    labels = new SessionPageLabelProvider();
+    maxValue = 0;
+  }
+
+  @Override
+  public IContributionItem[] createToolBarItems(IToolBarManager toolBar) {
+    ShowHideFilterControlAction filter = new ShowHideFilterControlAction(getFilteredTree());
+    filter.run();
+    IContributionItem[] items = new IContributionItem[] {
+        new ActionContributionItem(filter) };
+    
+    for (IContributionItem item : items)
+      toolBar.add(item);
+    
+    return items;
+  }
+
+  @Override
+  public long getMaxValue() {
+    return maxValue;
   }
 
   @Override
@@ -58,8 +82,13 @@ public class SessionPage extends AbstractTableViewerPage {
   }
 
   @Override
+  public boolean shouldPaint(Object element) {
+    return true;
+  }
+
+  @Override
   public void update(Preference p) {
-    setMaxValue(0);
+    maxValue = 0;
     labels.updateState();
 
     LocalDate start = LocalDate.fromCalendarFields(p.getStartDate());
@@ -67,13 +96,13 @@ public class SessionPage extends AbstractTableViewerPage {
     Collection<SessionDataDescriptor> data = accessor.getData(start, end);
     for (SessionDataDescriptor des : data) {
       if (des.getValue() > getMaxValue())
-        setMaxValue(des.getValue());
+        maxValue = des.getValue();
     }
     getViewer().setInput(data);
   }
 
   @Override
-  protected CellLabelProvider createCellPainter() {
+  protected CellPainter createCellPainter() {
     return new CellPainter(this) {
       @Override
       protected Color createColor(Display display) {
@@ -83,8 +112,26 @@ public class SessionPage extends AbstractTableViewerPage {
   }
 
   @Override
-  protected void createColumns(TableViewer viewer) {
-    TableViewerSorter sorter = new TableViewerSorter(viewer) {
+  protected void createColumns(TreeViewer viewer) {
+    TreeColumn column = new TreeColumn(viewer.getTree(), SWT.LEFT);
+    column.setText("Date");
+    column.setWidth(200);
+    column.addSelectionListener(createInitialComparator(viewer));
+    
+    column = new TreeColumn(viewer.getTree(), SWT.RIGHT);
+    column.setText("Duration");
+    column.setWidth(150);
+    column.addSelectionListener(getValueSorter());
+  }
+
+  @Override
+  protected PatternFilter createFilter() {
+    return new PatternFilter();
+  }
+
+  @Override
+  protected TreeViewerSorter createInitialComparator(TreeViewer viewer) {
+    return new TreeViewerLabelSorter(viewer) {
       @Override
       protected int doCompare(Viewer v, Object e1, Object e2) {
         if (e1 instanceof SessionDataDescriptor
@@ -93,30 +140,16 @@ public class SessionPage extends AbstractTableViewerPage {
           SessionDataDescriptor des2 = (SessionDataDescriptor) e2;
           return des1.getDate().compareTo(des2.getDate());
         }
-        return 0;
+        return super.doCompare(v, e1, e2);
       }
     };
-    
-    TableColumn column = new TableColumn(viewer.getTable(), SWT.LEFT);
-    column.setText("Date");
-    column.setWidth(200);
-    column.addSelectionListener(sorter);
-    
-    column = new TableColumn(viewer.getTable(), SWT.RIGHT);
-    column.setText("Duration");
-    column.setWidth(150);
-    column.addSelectionListener(createValueSorterForTable(viewer));
-    
-    getViewer().setComparator(sorter);
-  }
-  
-  @Override
-  protected ITreeContentProvider createContentProvider() {
-    return new CollectionContentProvider();
   }
 
   @Override
-  protected ITableLabelProvider createLabelProvider() {
-    return new SessionPageLabelProvider();
+  protected void initializeViewer(TreeViewer viewer) {
+    viewer.setContentProvider(new CollectionContentProvider());
+    labels = new SessionPageLabelProvider();
+    viewer.setLabelProvider(labels);
   }
+
 }

@@ -48,6 +48,27 @@ public class SessionPageLabelProviderTest {
     provider.dispose();
     dateLabels.dispose();
   }
+  
+  @Test
+  public void testGetText() {
+    LocalDate today = new LocalDate();
+    SessionDataDescriptor des = new SessionDataDescriptor(today, 101);
+    assertEquals(dateLabels.getText(des), provider.getText(today));
+
+    LocalDate yesterday = today.minusDays(1);
+    des = new SessionDataDescriptor(yesterday, 1);
+    assertEquals(dateLabels.getText(des), provider.getText(yesterday));
+
+    LocalDate someday = yesterday.minusDays(1);
+    des = new SessionDataDescriptor(someday, 0);
+    assertEquals(dateLabels.getText(des), provider.getText(someday));
+  }
+  
+  @Test
+  public void testGetImage() {
+    SessionDataDescriptor d = new SessionDataDescriptor(new LocalDate(), 101);
+    assertNotNull(provider.getImage(d));
+  }
 
   @Test
   public void testGetColumnText_0() {

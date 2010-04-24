@@ -16,8 +16,9 @@
 package rabbit.ui.tests.pages;
 
 import rabbit.data.access.model.SessionDataDescriptor;
-import rabbit.ui.internal.pages.AbstractTableViewerPage;
+import rabbit.ui.internal.pages.AbstractFilteredTreePage;
 import rabbit.ui.internal.pages.SessionPage;
+import rabbit.ui.internal.viewers.CellPainter.IValueProvider;
 
 import static org.junit.Assert.assertEquals;
 
@@ -28,16 +29,16 @@ import org.junit.Test;
  * Test for {@link SessionPage}
  */
 @SuppressWarnings("restriction")
-public class SessionPageTest extends AbstractTableViewerPageTest {
+public class SessionPageTest extends AbstractFilteredTreePageTest {
 
   @Test
   public void testGetValue() throws Exception {
     SessionDataDescriptor des = new SessionDataDescriptor(new LocalDate(), 10);
-    assertEquals(des.getValue(), page.getValue(des));
+    assertEquals(des.getValue(), ((IValueProvider) page).getValue(des));
   }
 
   @Override
-  protected AbstractTableViewerPage createPage() {
+  protected AbstractFilteredTreePage createPage() {
     return new SessionPage();
   }
 }
