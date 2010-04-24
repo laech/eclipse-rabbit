@@ -40,6 +40,7 @@ import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.ui.dialogs.FilteredTree;
@@ -63,10 +64,17 @@ public abstract class AbstractFilteredTreePage implements IPage {
   
   @Override
   public void createContents(Composite parent) {
-    GridLayoutFactory.fillDefaults().margins(1, 0).applyTo(parent);
+    GridLayoutFactory.fillDefaults().margins(0, 0).applyTo(parent);
     
     int style = SWT.VIRTUAL | SWT.V_SCROLL | SWT.H_SCROLL;
-    filteredTree = new FilteredTree(parent, style, createFilter(), false);
+    filteredTree = new FilteredTree(parent, style, createFilter(), false) {
+      @Override
+      protected Composite createFilterControls(Composite parent) {
+        parent.setLayout(new GridLayout(2, false)); 
+        return super.createFilterControls(parent);
+      }
+    };
+    
     filteredTree.setBackground(parent.getBackground());
     filteredTree.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 

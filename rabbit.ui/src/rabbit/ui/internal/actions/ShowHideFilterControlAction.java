@@ -21,6 +21,7 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.ui.dialogs.FilteredTree;
 
 /**
@@ -46,6 +47,7 @@ public class ShowHideFilterControlAction extends Action {
   public void run() {
     GridData data = (GridData) fTree.getFilterControl().getParent()
         .getLayoutData();
+    GridLayout layout = (GridLayout) fTree.getLayout();
 
     if (data.heightHint == 0) {
       data.heightHint = SWT.DEFAULT;
@@ -53,10 +55,11 @@ public class ShowHideFilterControlAction extends Action {
       fTree.getFilterControl().setFocus();
     } else {
       data.heightHint = 0;
+      layout.verticalSpacing = 0;
       fTree.getFilterControl().getParent().setVisible(false);
     }
 
-    fTree.getFilterControl().getParent().getParent().layout();
+    fTree.layout();
     setChecked(fTree.getFilterControl().getParent().isVisible());
   }
 }

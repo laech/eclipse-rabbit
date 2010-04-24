@@ -140,6 +140,8 @@ public class RabbitView extends ViewPart {
 
   private final Preference preferences;
 
+  private final boolean isWindowsOS = Platform.getOS().equals(Platform.OS_WIN32);
+
   /**
    * Constructs a new view.
    */
@@ -200,20 +202,25 @@ public class RabbitView extends ViewPart {
 
     // Header:
     Composite header = toolkit.createComposite(right);
-    header.setLayout(new GridLayout(3, false));
+    GridLayout headerLayout = new GridLayout(2, false);
+    if (!isWindowsOS) {
+      headerLayout.marginHeight = 0;
+      headerLayout.marginWidth = 0;
+      headerLayout.horizontalSpacing = 0;
+      headerLayout.verticalSpacing = 0;
+    }
+    header.setLayout(headerLayout);
     GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER)
         .grab(true, false).applyTo(header);
     {
-      Label label = toolkit.createLabel(header, "Statistics  ");
-      label.setFont(left.getHead().getFont());
-      label.setForeground(left.getHead().getForeground());
-
-      ToolBar bar = new ToolBar(header, SWT.FLAT);
+      int toolbarStyle = (isWindowsOS) ? SWT.FLAT : SWT.NONE;
+      
+      ToolBar bar = new ToolBar(header, toolbarStyle);
       bar.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
       bar.setBackground(header.getBackground());
       extensionToolBar = new ToolBarManager(bar);
 
-      bar = new ToolBar(header, SWT.FLAT);
+      bar = new ToolBar(header, toolbarStyle);
       bar.setBackground(header.getBackground());
       createToolBarItems(new ToolBarManager(bar));
     }
@@ -318,7 +325,7 @@ public class RabbitView extends ViewPart {
     CalendarAction.create(toolBar, getSite().getShell(), preferences
         .getEndDate(), " To: ", " ");
   }
-
+  
   /**
    * Creates tool bar items for Windows operating system.
    * 
@@ -372,17 +379,19 @@ public class RabbitView extends ViewPart {
   private void createToolBarItems(IToolBarManager toolBar) {
     // Only Windows && Eclipse 3.5 has SWT.DROP_DOWN for DateTime.
     // We don't support 3.3 and before anyway:
-    boolean isWindows = Platform.getOS().equals(Platform.OS_WIN32);
     boolean isDropDownDateTimeSupported = !getProductVersion()
         .startsWith("3.4");
 
-    if (isWindows && isDropDownDateTimeSupported) {
+    if (isWindowsOS && isDropDownDateTimeSupported) {
       createToolBarForWindowsOS(toolBar);
     } else {
       createToolBarForNonWindowsOS(toolBar);
     }
 
-    createSpace(toolBar);
+    if (isWindowsOS) { // Looks better:
+      createSpace(toolBar);
+    }
+    
     IAction refresh = new Action("Refresh") {
       @Override
       public void run() {
@@ -395,7 +404,7 @@ public class RabbitView extends ViewPart {
      * look ugly on Windows if some tool bar actions have text and some have
      * icons, so in this case, no icons at all.
      */
-    if (!isWindows || isDropDownDateTimeSupported) {
+    if (!isWindowsOS || isDropDownDateTimeSupported) {
       refresh.setImageDescriptor(SharedImages.REFRESH);
     }
 
