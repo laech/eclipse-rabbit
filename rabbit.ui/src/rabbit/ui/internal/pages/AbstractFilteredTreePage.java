@@ -67,13 +67,16 @@ public abstract class AbstractFilteredTreePage implements IPage {
     GridLayoutFactory.fillDefaults().margins(0, 0).applyTo(parent);
     
     int style = SWT.VIRTUAL | SWT.V_SCROLL | SWT.H_SCROLL;
-    filteredTree = new FilteredTree(parent, style, createFilter(), false) {
-      @Override
-      protected Composite createFilterControls(Composite parent) {
-        parent.setLayout(new GridLayout(2, false)); 
-        return super.createFilterControls(parent);
-      }
-    };
+    filteredTree = new FilteredTree(parent, style, createFilter(), false);
+    
+    { // Make it look a bit nicer for us:
+      GridLayout layout = (GridLayout) filteredTree.getLayout();
+      layout.verticalSpacing = 0;
+
+      layout = (GridLayout) filteredTree.getFilterControl().getParent().getLayout();
+      layout.marginHeight = 5;
+      layout.marginWidth = 5;
+    }
     
     filteredTree.setBackground(parent.getBackground());
     filteredTree.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
