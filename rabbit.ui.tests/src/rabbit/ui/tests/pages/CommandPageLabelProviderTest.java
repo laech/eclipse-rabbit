@@ -89,6 +89,11 @@ public class CommandPageLabelProviderTest {
     return (ICommandService) PlatformUI.getWorkbench().getService(
         ICommandService.class);
   }
+  
+  @Test(expected = NullPointerException.class)
+  public void testConstructor_contentProviderNull() {
+    new CommandPageLabelProvider(null);
+  }
 
   @Test
   public void testGetBackground() {

@@ -15,59 +15,53 @@
  */
 package rabbit.ui.tests.pages;
 
-import rabbit.data.access.model.PartDataDescriptor;
-import rabbit.ui.internal.pages.AbstractTreeViewerPage;
+import rabbit.ui.internal.pages.AbstractFilteredTreePage;
+import rabbit.ui.internal.pages.Category;
 import rabbit.ui.internal.pages.PartPage;
 import rabbit.ui.internal.pages.PartPageContentProvider;
-import rabbit.ui.internal.util.UndefinedWorkbenchPartDescriptor;
+import rabbit.ui.internal.util.ICategory;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
-import org.joda.time.LocalDate;
 import org.junit.Test;
-
-import java.util.Arrays;
 
 /**
  * Test for {@link PartPage}
  */
 @SuppressWarnings("restriction")
-public class PartPageTest extends AbstractTreeViewerPageTest {
+public class PartPageTest extends AbstractFilteredTreePageTest {
   
   @Test
-  public void testGetValue() throws Exception {
-    PartDataDescriptor des1 = new PartDataDescriptor(
-        new LocalDate(), 19834, "abc");
-    PartDataDescriptor des2 = new PartDataDescriptor(des1
-        .getDate().minusDays(1), 14, des1.getPartId());
-
-    page.getViewer().setInput(Arrays.asList(des1, des2));
-    assertEquals(des1.getValue(), page.getValue(des1));
-    assertEquals(des2.getValue(), page.getValue(des2));
-    assertEquals(des1.getValue() + des2.getValue(), page
-        .getValue(new UndefinedWorkbenchPartDescriptor(des1.getPartId())));
+  public void testSaveState_selectedCategories() throws Exception {
+    PartPageContentProvider contents = (PartPageContentProvider) page
+        .getViewer().getContentProvider();
+    
+    ICategory[] categories = new ICategory[] { Category.DATE, Category.WORKBENCH_TOOL };
+    contents.setSelectedCategories(categories);
+    saveState(page);
+    
+    contents.setSelectedCategories(Category.WORKBENCH_TOOL);
+    restoreState(page);
+    assertArrayEquals(categories, contents.getSelectedCategories());
   }
   
   @Test
-  public void testUpdate() throws Exception {
-    PartPageContentProvider cp;
-    cp = (PartPageContentProvider) page.getViewer().getContentProvider();
-    cp.setDisplayByDate(true);
+  public void testSaveState_paintCategory() throws Exception {
+    PartPageContentProvider contents = (PartPageContentProvider) page
+        .getViewer().getContentProvider();
     
-    PartDataDescriptor des1;
-    PartDataDescriptor des2;
-    des1 = new PartDataDescriptor(new LocalDate(), 101, "123");
-    des2 = new PartDataDescriptor(new LocalDate(), 9823, des1.getPartId());
-    page.getViewer().setInput(Arrays.asList(des1, des2));
+    Category paintCategory = Category.DATE;
+    contents.setPaintCategory(paintCategory);
+    saveState(page);
     
-    assertEquals(des2.getValue(), page.getMaxValue());
-    
-    cp.setDisplayByDate(false);
-    assertEquals(des1.getValue() + des2.getValue(), page.getMaxValue());
+    contents.setPaintCategory(Category.WORKBENCH_TOOL);
+    restoreState(page);
+    assertEquals(paintCategory, contents.getPaintCategory());
   }
 
   @Override
-  protected AbstractTreeViewerPage createPage() {
+  protected AbstractFilteredTreePage createPage() {
     return new PartPage();
   }
 }

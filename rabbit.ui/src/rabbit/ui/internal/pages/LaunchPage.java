@@ -18,7 +18,7 @@ package rabbit.ui.internal.pages;
 import rabbit.data.access.IAccessor;
 import rabbit.data.access.model.LaunchDataDescriptor;
 import rabbit.data.handler.DataHandler;
-import rabbit.ui.Preferences;
+import rabbit.ui.Preference;
 import rabbit.ui.internal.RabbitUI;
 import rabbit.ui.internal.SharedImages;
 import rabbit.ui.internal.actions.CollapseAllAction;
@@ -46,10 +46,8 @@ import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.TreeViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.ui.dialogs.PatternFilter;
@@ -83,17 +81,6 @@ public class LaunchPage extends AbstractFilteredTreePage {
     labels = new LaunchPageLabelProvider(contents);
     viewer.setContentProvider(contents);
     viewer.setLabelProvider(labels);
-  }
-
-  @Override
-  public void createContents(Composite parent) {
-    super.createContents(parent);
-    getViewer().addFilter(new ViewerFilter() {
-      @Override
-      public boolean select(Viewer viewer, Object parent, Object element) {
-        return !contents.shouldFilter(element);
-      }
-    });
   }
 
   @Override
@@ -134,7 +121,7 @@ public class LaunchPage extends AbstractFilteredTreePage {
             newGroupByLaunchConfigTypesAction(), //
             newGroupByDatesAction())), //
         new ActionContributionItem(new DropDownAction( //
-            "Color by " + colorActions[0].getText(), SharedImages.BRUSH, // 
+            "Highlight " + colorActions[0].getText(), SharedImages.BRUSH, // 
             colorActions[0], //
             colorActions)) };
 
@@ -145,7 +132,7 @@ public class LaunchPage extends AbstractFilteredTreePage {
   }
 
   @Override
-  public void update(Preferences p) {
+  public void update(Preference p) {
     TreePath[] expandedPaths = getViewer().getExpandedTreePaths();
 
     LocalDate start = LocalDate.fromCalendarFields(p.getStartDate());

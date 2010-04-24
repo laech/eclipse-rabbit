@@ -52,7 +52,7 @@
       <page
             class="rabbit.ui.internal.pages.PartPage"
             description="Time spent using different views and editors"
-            icon="icons/full/obj16/pin_editor.gif"
+            icon="icons/full/obj16/defaultview.gif"
             id="rabbit.ui.pages.workbenchPart"
             name="Editors and Views"
             parent="rabbit.ui.pages.eclipseUsage">

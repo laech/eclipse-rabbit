@@ -91,6 +91,11 @@ public class ResourcePageTableLabelProviderTest {
     fileNode = new TreeNode(((IFolder) folderNode.getValue()).getFile("a"));
     dateNode = new TreeNode(new LocalDate());
   }
+  
+  @Test(expected = NullPointerException.class)
+  public void testConstructor_contentProviderNull() {
+    new ResourcePageTableLabelProvider(null);
+  }
 
   @Test
   public void testGetBackground() {

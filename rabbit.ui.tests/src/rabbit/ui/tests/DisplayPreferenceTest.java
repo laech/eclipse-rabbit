@@ -15,7 +15,7 @@
  */
 package rabbit.ui.tests;
 
-import rabbit.ui.Preferences;
+import rabbit.ui.Preference;
 import rabbit.ui.internal.RabbitUI;
 
 import static org.junit.Assert.assertTrue;
@@ -26,7 +26,7 @@ import org.junit.Test;
 import java.util.Calendar;
 
 /**
- * Test for {@link Preferences}
+ * Test for {@link Preference}
  */
 public class DisplayPreferenceTest {
 
@@ -41,14 +41,14 @@ public class DisplayPreferenceTest {
   // }
   // }
 
-  private Preferences preference; // Test subject.
+  private Preference preference; // Test subject.
 
   // private DisplayPreferenceObserver observer; // For testing observer
   // feature.
 
   @Before
   public void setUp() {
-    preference = new Preferences();
+    preference = new Preference();
     // observer = new DisplayPreferenceObserver();
   }
 

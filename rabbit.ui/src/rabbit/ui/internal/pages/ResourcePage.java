@@ -18,7 +18,7 @@ package rabbit.ui.internal.pages;
 import rabbit.data.access.IAccessor;
 import rabbit.data.access.model.FileDataDescriptor;
 import rabbit.data.handler.DataHandler;
-import rabbit.ui.Preferences;
+import rabbit.ui.Preference;
 import rabbit.ui.internal.RabbitUI;
 import rabbit.ui.internal.SharedImages;
 import rabbit.ui.internal.actions.CollapseAllAction;
@@ -48,7 +48,6 @@ import org.eclipse.jface.viewers.TreeNode;
 import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Display;
@@ -85,12 +84,6 @@ public class ResourcePage extends AbstractFilteredTreePage {
     labels = new ResourcePageTableLabelProvider(contents);
     viewer.setContentProvider(contents);
     viewer.setLabelProvider(labels);
-    viewer.addFilter(new ViewerFilter() {
-      @Override
-      public boolean select(Viewer v, Object parentElement, Object element) {
-        return !contents.shouldFilter(element);
-      }
-    });
   }
 
   @Override
@@ -112,8 +105,8 @@ public class ResourcePage extends AbstractFilteredTreePage {
             newGroupByFoldersAction(), //
             newGroupByProjectsAction(), //
             newGroupByDatesAndFilesAction())),
-        new ActionContributionItem(new DropDownAction("Color by Projects",
-            SharedImages.BRUSH, // 
+        new ActionContributionItem(new DropDownAction(
+            "Highlight " + colorByProjectsAction.getText(), SharedImages.BRUSH, 
             colorByProjectsAction, // Default action
             newColorByFilesAction(),
             newColorByFoldersAction(),
@@ -127,7 +120,7 @@ public class ResourcePage extends AbstractFilteredTreePage {
   }
 
   @Override
-  public void update(Preferences p) {
+  public void update(Preference p) {
     TreePath[] expandedPaths = getViewer().getExpandedTreePaths();
 
     LocalDate start = LocalDate.fromCalendarFields(p.getStartDate());

@@ -18,7 +18,7 @@ package rabbit.ui.internal.pages;
 import rabbit.data.access.IAccessor;
 import rabbit.data.access.model.TaskFileDataDescriptor;
 import rabbit.data.handler.DataHandler;
-import rabbit.ui.Preferences;
+import rabbit.ui.Preference;
 import rabbit.ui.internal.RabbitUI;
 import rabbit.ui.internal.SharedImages;
 import rabbit.ui.internal.actions.CollapseAllAction;
@@ -26,7 +26,6 @@ import rabbit.ui.internal.actions.DropDownAction;
 import rabbit.ui.internal.actions.ExpandAllAction;
 import rabbit.ui.internal.actions.GroupByAction;
 import rabbit.ui.internal.actions.ShowHideFilterControlAction;
-import rabbit.ui.internal.pages.AbstractFilteredTreePage;
 import rabbit.ui.internal.pages.TaskPageContentProvider.Category;
 import rabbit.ui.internal.util.ICategory;
 import rabbit.ui.internal.viewers.CellPainter;
@@ -45,7 +44,6 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Display;
@@ -117,7 +115,7 @@ public class TaskPage extends AbstractFilteredTreePage {
   }
 
   @Override
-  public void update(Preferences p) {
+  public void update(Preference p) {
     TreePath[] expandedPaths = getViewer().getExpandedTreePaths();
 
     LocalDate start = LocalDate.fromCalendarFields(p.getStartDate());
@@ -247,12 +245,6 @@ public class TaskPage extends AbstractFilteredTreePage {
     labelProvider = new TaskPageDecoratingLabelProvider(contentProvider);
     viewer.setContentProvider(contentProvider);
     viewer.setLabelProvider(labelProvider);
-    viewer.addFilter(new ViewerFilter() {
-      @Override
-      public boolean select(Viewer viewer, Object parentElement, Object element) {
-        return !contentProvider.shouldFilter(element);
-      }
-    });
   }
   
   @Override

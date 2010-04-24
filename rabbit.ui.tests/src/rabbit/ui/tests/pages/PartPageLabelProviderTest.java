@@ -18,16 +18,19 @@ package rabbit.ui.tests.pages;
 import static rabbit.ui.internal.util.DurationFormat.format;
 
 import rabbit.data.access.model.PartDataDescriptor;
-import rabbit.data.access.model.PerspectiveDataDescriptor;
-import rabbit.ui.internal.pages.PartPage;
+import rabbit.ui.internal.pages.Category;
+import rabbit.ui.internal.pages.DateLabelProvider;
 import rabbit.ui.internal.pages.PartPageContentProvider;
 import rabbit.ui.internal.pages.PartPageLabelProvider;
+import rabbit.ui.internal.pages.WorkbenchPartLabelProvider;
 import rabbit.ui.internal.util.UndefinedWorkbenchPartDescriptor;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
+import org.eclipse.jface.viewers.TreeNode;
+import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
@@ -47,95 +50,115 @@ import java.util.Arrays;
 public class PartPageLabelProviderTest {
 
   private static Shell shell;
-  private static PartPage page;
-  private static PartPageLabelProvider labels;
+  private static PartPageLabelProvider labelProvider;
   private static PartPageContentProvider contents;
+  private static WorkbenchPartLabelProvider partLabels;
+  private static DateLabelProvider dateLabels;
 
-  /** A defined workbench part. */
-  private static IWorkbenchPartDescriptor defined;
-
-  /** An undefined workbench part (not exists) */
-  private static IWorkbenchPartDescriptor undefined;
+  private static TreeNode dateNode;
+  private static TreeNode definedNode;
+  private static TreeNode undefinedNode;
 
   @AfterClass
   public static void afterClass() {
-    labels.dispose();
+    labelProvider.dispose();
+    partLabels.dispose();
+    dateLabels.dispose();
     shell.dispose();
   }
 
   @BeforeClass
   public static void beforeClass() {
     shell = new Shell(PlatformUI.getWorkbench().getDisplay());
-    page = new PartPage();
-    contents = new PartPageContentProvider(page, true);
-    labels = new PartPageLabelProvider(contents);
-    defined = PlatformUI.getWorkbench().getViewRegistry().getViews()[0];
-    undefined = new UndefinedWorkbenchPartDescriptor("abc.def.g");
+    TreeViewer viewer = new TreeViewer(shell);
+    contents = new PartPageContentProvider(viewer);
+    labelProvider = new PartPageLabelProvider(contents);
+    viewer.setContentProvider(contents);
+    viewer.setLabelProvider(labelProvider);
+    
+    IWorkbenchPartDescriptor defined = PlatformUI.getWorkbench().getViewRegistry().getViews()[0];
+    IWorkbenchPartDescriptor undefined = new UndefinedWorkbenchPartDescriptor(System.currentTimeMillis() + "");
 
-    page.createContents(shell);
-    page.getViewer().setContentProvider(contents);
-    page.getViewer().setLabelProvider(labels);
+    dateNode = new TreeNode(new LocalDate());
+    definedNode = new TreeNode(defined);
+    undefinedNode = new TreeNode(undefined);
+    
+    dateLabels = new DateLabelProvider();
+    partLabels = new WorkbenchPartLabelProvider();
+  }
+  
+  @Test(expected = NullPointerException.class)
+  public void testConstructor_contentProviderNull() {
+    new PartPageLabelProvider(null);
   }
 
   @Test
   public void testGetBackground() {
-    assertNull(labels.getBackground(defined));
-    assertNull(labels.getBackground(undefined));
+    assertNull(labelProvider.getBackground(definedNode));
+    assertNull(labelProvider.getBackground(undefinedNode));
+    assertNull(labelProvider.getBackground(dateNode));
+  }
+  
+  @Test
+  public void testGetImage() {
+    assertNotNull(labelProvider.getImage(dateNode));
+    assertNotNull(labelProvider.getImage(definedNode));
+    assertNotNull(labelProvider.getImage(undefinedNode));
   }
 
   @Test
   public void testGetColumnImage() {
-    assertNotNull(labels.getColumnImage(defined, 0));
-    assertNotNull(labels.getColumnImage(undefined, 0));
+    assertNotNull(labelProvider.getColumnImage(dateNode, 0));
+    assertNotNull(labelProvider.getColumnImage(definedNode, 0));
+    assertNotNull(labelProvider.getColumnImage(undefinedNode, 0));
+  }
+  
+  @Test
+  public void testGetText() {
+    assertEquals(partLabels.getText(definedNode.getValue()), labelProvider.getText(definedNode));
+    assertEquals(partLabels.getText(undefinedNode.getValue()), labelProvider.getText(undefinedNode));
+    assertEquals(dateLabels.getText(dateNode.getValue()), labelProvider.getText(dateNode));
   }
 
   @Test
   public void testGetColumnText_0() throws Exception {
-    assertEquals(defined.getLabel(), labels.getColumnText(defined, 0));
-    assertEquals(undefined.getLabel(), labels.getColumnText(undefined, 0));
-
-    PartDataDescriptor des;
-    des = new PartDataDescriptor(new LocalDate(), 1, defined.getId());
-    assertEquals(defined.getLabel(), labels.getColumnText(des, 0));
-
-    des = new PartDataDescriptor(new LocalDate(), 1, undefined.getId());
-    assertEquals(undefined.getLabel(), labels.getColumnText(undefined, 0));
+    assertEquals(partLabels.getText(definedNode.getValue()), labelProvider.getColumnText(definedNode, 0));
+    assertEquals(partLabels.getText(undefinedNode.getValue()), labelProvider.getColumnText(undefinedNode, 0));
+    assertEquals(dateLabels.getText(dateNode.getValue()), labelProvider.getColumnText(dateNode, 0));
   }
 
   @Test
   public void testGetColumnText_1() throws Exception {
+    IWorkbenchPartDescriptor defined = (IWorkbenchPartDescriptor) definedNode.getValue();
+    IWorkbenchPartDescriptor undefined = (IWorkbenchPartDescriptor) undefinedNode.getValue();
+    
     PartDataDescriptor d1;
     PartDataDescriptor d2;
-    d1 = new PartDataDescriptor(new LocalDate(), 111, defined.getId());
-    d2 = new PartDataDescriptor(new LocalDate(), 101, d1.getPartId());
-    assertEquals(format(d1.getValue()), labels.getColumnText(d1, 1));
-    assertEquals(format(d2.getValue()), labels.getColumnText(d2, 1));
-    assertEquals(format(d1.getValue() + d2.getValue()), labels
-        .getColumnText(defined, 1));
+    LocalDate date = new LocalDate();
+    d1 = new PartDataDescriptor(date, 11, defined.getId());
+    d2 = new PartDataDescriptor(date, 102, undefined.getId());
+    contents.getViewer().setInput(Arrays.asList(d1, d2));
 
-    d1 = new PartDataDescriptor(new LocalDate(), 222, undefined.getId());
-    d2 = new PartDataDescriptor(new LocalDate(), 999, d1.getPartId());
-    page.getViewer().setInput(Arrays.asList(d1, d2));
-    assertEquals(format(d1.getValue()), labels.getColumnText(d1, 1));
-    assertEquals(format(d2.getValue()), labels.getColumnText(d2, 1));
-    assertEquals(format(d1.getValue() + d2.getValue()), labels
-        .getColumnText(undefined, 1));
+    contents.setSelectedCategories(Category.WORKBENCH_TOOL);
+    contents.setPaintCategory(Category.WORKBENCH_TOOL);
+    TreeNode root = contents.getRoot();
+    TreeNode[] partNodes = root.getChildren();
+    assertEquals(2, partNodes.length);
+    assertEquals(format(d1.getValue()), labelProvider.getColumnText(partNodes[0], 1));
+    assertEquals(format(d2.getValue()), labelProvider.getColumnText(partNodes[1], 1));
+    
+    contents.setSelectedCategories(Category.DATE);
+    contents.setPaintCategory(Category.DATE);
+    assertEquals(1, root.getChildren().length);
+    TreeNode dateNode = root.getChildren()[0];
+    assertEquals(format(d1.getValue() + d2.getValue()), labelProvider.getColumnText(dateNode, 1));
   }
 
   @Test
   public void testGetForeground() {
-    assertNull(labels.getForeground(defined));
+    assertNull(labelProvider.getForeground(definedNode));
     assertEquals(Display.getDefault().getSystemColor(SWT.COLOR_DARK_GRAY),
-        labels.getForeground(undefined));
-    
-    PartDataDescriptor d1;
-    PartDataDescriptor d2;
-    d1 = new PartDataDescriptor(new LocalDate(), 1, defined.getId());
-    d2 = new PartDataDescriptor(new LocalDate(), 1, undefined.getId());
-    
-    page.getViewer().setInput(Arrays.asList(d1, d2));
-    assertNull(labels.getForeground(d1));
-    assertNotNull(labels.getForeground(d2));
+        labelProvider.getForeground(undefinedNode));
   }
 
 }

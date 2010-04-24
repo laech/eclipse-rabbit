@@ -118,11 +118,16 @@ public class LaunchPageLabelProviderTest {
     launchDataNode = new TreeNode(launchData);
     
   }
-
+  
   @AfterClass
   public static void afterClass() {
     labels.dispose();
     shell.dispose();
+  }
+  
+  @Test(expected = NullPointerException.class)
+  public void testConstructor_contentProviderNull() {
+    new LaunchPageLabelProvider(null);
   }
   
   @Test 

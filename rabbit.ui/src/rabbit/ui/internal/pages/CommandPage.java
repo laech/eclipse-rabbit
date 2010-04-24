@@ -18,7 +18,7 @@ package rabbit.ui.internal.pages;
 import rabbit.data.access.IAccessor;
 import rabbit.data.access.model.CommandDataDescriptor;
 import rabbit.data.handler.DataHandler;
-import rabbit.ui.Preferences;
+import rabbit.ui.Preference;
 import rabbit.ui.internal.RabbitUI;
 import rabbit.ui.internal.SharedImages;
 import rabbit.ui.internal.actions.CollapseAllAction;
@@ -139,7 +139,7 @@ public class CommandPage extends AbstractFilteredTreePage {
   }
 
   @Override
-  public void update(Preferences p) {
+  public void update(Preference p) {
     labels.updateState();
 
     TreePath[] expandedPaths = getViewer().getExpandedTreePaths();

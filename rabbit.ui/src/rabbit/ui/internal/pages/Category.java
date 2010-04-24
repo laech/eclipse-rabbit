@@ -54,7 +54,11 @@ public enum Category implements ICategory {
 
   /** File category */
   FILE("Files", PlatformUI.getWorkbench().getSharedImages()
-      .getImageDescriptor(ISharedImages.IMG_OBJ_FILE));
+      .getImageDescriptor(ISharedImages.IMG_OBJ_FILE)),
+  
+  /** Workbench tool category */
+  WORKBENCH_TOOL("Workbench Tools", PlatformUI.getWorkbench().getSharedImages()
+      .getImageDescriptor(ISharedImages.IMG_DEF_VIEW)),
   ;
   
   private String text;

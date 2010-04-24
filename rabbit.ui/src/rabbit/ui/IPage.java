@@ -44,6 +44,6 @@ public interface IPage {
    * 
    * @param preference The object containing the update preferences.
    */
-  void update(Preferences preference);
+  void update(Preference preference);
 
 }

@@ -18,57 +18,60 @@ package rabbit.ui.internal.pages;
 import rabbit.data.access.IAccessor;
 import rabbit.data.access.model.PartDataDescriptor;
 import rabbit.data.handler.DataHandler;
-import rabbit.ui.Preferences;
+import rabbit.ui.Preference;
 import rabbit.ui.internal.RabbitUI;
+import rabbit.ui.internal.SharedImages;
 import rabbit.ui.internal.actions.CollapseAllAction;
+import rabbit.ui.internal.actions.DropDownAction;
 import rabbit.ui.internal.actions.ExpandAllAction;
-import rabbit.ui.internal.actions.GroupByDatesAction;
+import rabbit.ui.internal.actions.GroupByAction;
+import rabbit.ui.internal.actions.ShowHideFilterControlAction;
+import rabbit.ui.internal.util.ICategory;
 import rabbit.ui.internal.viewers.CellPainter;
+import rabbit.ui.internal.viewers.TreeViewerLabelSorter;
 import rabbit.ui.internal.viewers.TreeViewerSorter;
 
+import com.google.common.base.Joiner;
+import com.google.common.collect.Lists;
+
+import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
+import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.viewers.CellLabelProvider;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ITableLabelProvider;
-import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.viewers.TreeNode;
+import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.TreeColumn;
-import org.eclipse.ui.IWorkbenchPartDescriptor;
+import org.eclipse.ui.dialogs.PatternFilter;
 import org.joda.time.LocalDate;
+
+import java.util.List;
 
 /**
  * A page displays workbench part usage.
  */
-public class PartPage extends AbstractTreeViewerPage {
+public class PartPage extends AbstractFilteredTreePage {
 
-  /**
-   * Preference constants for displaying the data by date.
-   */
-  private static final String DISPLAY_BY_DATE_PREF = "PartPage.displayByDates";
+  // Preference constants:
+  private static final String PREF_SELECTED_CATEGORIES = "PartPage.SelectedCatgories";
+  private static final String PREF_PAINT_CATEGORY = "PartPage.PaintCategory";
 
   private final IAccessor<PartDataDescriptor> accessor;
-  private final PartPageContentProvider contents;
-  private final PartPageLabelProvider labels;
+  private PartPageContentProvider contents;
+  private PartPageLabelProvider labels;
 
   /**
    * Constructs a new page.
    */
   public PartPage() {
     super();
-    IPreferenceStore store = RabbitUI.getDefault().getPreferenceStore();
-    store.setDefault(DISPLAY_BY_DATE_PREF, true);
-
-    boolean displayByDate = store.getBoolean(DISPLAY_BY_DATE_PREF);
-    contents = new PartPageContentProvider(this, displayByDate);
-    labels = new PartPageLabelProvider(contents);
     accessor = DataHandler.getPartDataAccessor();
   }
 
@@ -80,18 +83,51 @@ public class PartPage extends AbstractTreeViewerPage {
     column.setWidth(200);
 
     column = new TreeColumn(viewer.getTree(), SWT.RIGHT);
-    column.addSelectionListener(createValueSorterForTree(viewer));
+    column.addSelectionListener(getValueSorter());
     column.setText("Usage");
     column.setWidth(200);
   }
 
   @Override
   public IContributionItem[] createToolBarItems(IToolBarManager toolBar) {
+    final ICategory date = Category.DATE;
+    final ICategory part = Category.WORKBENCH_TOOL;
+    
+    IAction colorByDate = new Action(date.getText(), date.getImageDescriptor()) {
+      @Override public void run() {
+        contents.setPaintCategory(date);
+      }
+    };
+    IAction colorByPart = new Action(part.getText(), part.getImageDescriptor()) {
+      @Override public void run() {
+        contents.setPaintCategory(part);
+      }
+    };
+    IAction groupByDate = new Action(date.getText(), date.getImageDescriptor()) {
+      @Override public void run() {
+        contents.setSelectedCategories(date, part);
+      }
+    };
+    IAction groupByPart = new Action(part.getText(), part.getImageDescriptor()) {
+      @Override public void run() {
+        contents.setSelectedCategories(part);
+      }
+    };
+    
+    ShowHideFilterControlAction filter = new ShowHideFilterControlAction(getFilteredTree());
+    filter.run();
+    
     IContributionItem[] items = new IContributionItem[] {
+        new ActionContributionItem(filter),
+        new Separator(),
         new ActionContributionItem(new ExpandAllAction(getViewer())),
         new ActionContributionItem(new CollapseAllAction(getViewer())),
-        new Separator(), // 
-        new ActionContributionItem(new GroupByDatesAction(contents)) };
+        new Separator(), 
+        new ActionContributionItem(new GroupByAction(contents, groupByPart, 
+            groupByPart, groupByDate)), 
+        new ActionContributionItem(new DropDownAction(
+            "Highlight " + colorByPart.getText(), SharedImages.BRUSH, 
+            colorByPart, colorByPart, colorByDate))};
 
     for (IContributionItem item : items)
       toolBar.add(item);
@@ -100,44 +136,20 @@ public class PartPage extends AbstractTreeViewerPage {
   }
 
   @Override
-  public long getValue(Object element) {
-    if (element instanceof IWorkbenchPartDescriptor)
-      return contents.getValueOfPart((IWorkbenchPartDescriptor) element);
-
-    else if (element instanceof PartDataDescriptor)
-      return ((PartDataDescriptor) element).getValue();
-
-    else
-      return 0;
-  }
-
-  @Override
-  public boolean shouldPaint(Object element) {
-    return !(element instanceof LocalDate);
-  }
-
-  @Override
-  public void update(Preferences p) {
-    setMaxValue(0);
+  public void update(Preference p) {
     labels.updateState();
-
-    Object[] elements = getViewer().getExpandedElements();
-    ISelection selection = getViewer().getSelection();
+    TreePath[] paths = getViewer().getExpandedTreePaths();
 
     LocalDate start = LocalDate.fromCalendarFields(p.getStartDate());
     LocalDate end = LocalDate.fromCalendarFields(p.getEndDate());
     getViewer().setInput(accessor.getData(start, end));
-    try {
-      getViewer().setExpandedElements(elements);
-      getViewer().setSelection(selection);
-    } catch (Exception e) {
-      // Just in case something goes wrong while restoring the viewer's state
-    }
+    
+    getViewer().setExpandedTreePaths(paths);
   }
 
   @Override
-  protected CellLabelProvider createCellPainter() {
-    return new CellPainter(this) {
+  protected CellPainter createCellPainter() {
+    return new CellPainter(contents) {
       @Override
       protected Color createColor(Display display) {
         return new Color(display, 49, 132, 155);
@@ -146,45 +158,72 @@ public class PartPage extends AbstractTreeViewerPage {
   }
 
   @Override
-  protected ITreeContentProvider createContentProvider() {
-    return contents;
-  }
-
-  @Override
   protected TreeViewerSorter createInitialComparator(TreeViewer viewer) {
-    return new TreeViewerSorter(viewer) {
+    return new TreeViewerLabelSorter(viewer) {
 
       @Override
       protected int doCompare(Viewer v, Object x, Object y) {
-        if (x instanceof LocalDate && y instanceof LocalDate) {
+        if (x instanceof TreeNode) x = ((TreeNode) x).getValue();
+        if (y instanceof TreeNode) y = ((TreeNode) y).getValue();
+        
+        if (x instanceof LocalDate && y instanceof LocalDate)
           return ((LocalDate) x).compareTo((LocalDate) y);
-
-        } else if (x instanceof IWorkbenchPartDescriptor
-            && y instanceof IWorkbenchPartDescriptor) {
-          IWorkbenchPartDescriptor a = (IWorkbenchPartDescriptor) x;
-          IWorkbenchPartDescriptor b = (IWorkbenchPartDescriptor) y;
-          return a.getLabel().compareToIgnoreCase(b.getLabel());
-
-        } else if (x instanceof PartDataDescriptor
-            && y instanceof PartDataDescriptor) {
-          IWorkbenchPartDescriptor a = contents.getPart((PartDataDescriptor) x);
-          IWorkbenchPartDescriptor b = contents.getPart((PartDataDescriptor) y);
-          return a.getLabel().compareToIgnoreCase(b.getLabel());
-        }
-        return 0;
+        else
+          return super.doCompare(v, x, y);
       }
     };
   }
+  
+  @Override
+  protected void initializeViewer(TreeViewer viewer) {
+   contents = new PartPageContentProvider(viewer);
+   labels = new PartPageLabelProvider(contents);
+   viewer.setContentProvider(contents);
+   viewer.setLabelProvider(labels);
+  }
 
   @Override
-  protected ITableLabelProvider createLabelProvider() {
-    return labels;
+  protected PatternFilter createFilter() {
+    return new PatternFilter();
+  }  
+  
+  @Override
+  protected void restoreState() {
+    super.restoreState();
+    IPreferenceStore store = RabbitUI.getDefault().getPreferenceStore();
+
+    // Restores the selected categories of the content provider:
+    String[] categoryStr = store.getString(PREF_SELECTED_CATEGORIES).split(",");
+    List<Category> cats = Lists.newArrayList();
+    for (String str : categoryStr) {
+      try {
+        cats.add(Enum.valueOf(Category.class, str));
+      } catch (IllegalArgumentException e) {
+        // Ignore invalid elements.
+      }
+    }
+    contents.setSelectedCategories(cats.toArray(new ICategory[cats.size()]));
+
+    // Restores the paint category of the content provider:
+    String paintStr = store.getString(PREF_PAINT_CATEGORY);
+    try {
+      Category cat = Enum.valueOf(Category.class, paintStr);
+      contents.setPaintCategory(cat);
+    } catch (IllegalArgumentException e) {
+      // Just let the content provider use its default paint category.
+    }
   }
 
   @Override
   protected void saveState() {
     super.saveState();
-    RabbitUI.getDefault().getPreferenceStore().setValue(DISPLAY_BY_DATE_PREF,
-        contents.isDisplayingByDate());
+    IPreferenceStore store = RabbitUI.getDefault().getPreferenceStore();
+
+    // Saves the selected categories of the content provider:
+    ICategory[] categories = contents.getSelectedCategories();
+    store.setValue(PREF_SELECTED_CATEGORIES, Joiner.on(",").join(categories));
+
+    // Saves the paint category of the content provider:
+    store.setValue(PREF_PAINT_CATEGORY, contents.getPaintCategory().toString());
   }
 }

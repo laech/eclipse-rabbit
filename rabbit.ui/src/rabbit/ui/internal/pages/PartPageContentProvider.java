@@ -16,179 +16,97 @@
 package rabbit.ui.internal.pages;
 
 import rabbit.data.access.model.PartDataDescriptor;
+import rabbit.ui.internal.util.ICategory;
 import rabbit.ui.internal.util.UndefinedWorkbenchPartDescriptor;
+import rabbit.ui.internal.viewers.TreeNodes;
 
-import com.google.common.base.Function;
+import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableMultimap;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Multimaps;
 
-import org.eclipse.core.runtime.IConfigurationElement;
-import org.eclipse.core.runtime.Platform;
+import org.eclipse.jface.viewers.TreeNode;
+import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.ui.IEditorDescriptor;
 import org.eclipse.ui.IEditorRegistry;
 import org.eclipse.ui.IWorkbenchPartDescriptor;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.views.IViewDescriptor;
+import org.eclipse.ui.views.IViewRegistry;
 import org.joda.time.LocalDate;
 
 import java.util.Collection;
-import java.util.Map;
-import java.util.Set;
-
-import javax.annotation.Nonnull;
 
 /**
- * Content provider for a {@link PartPage}. Acceptable input is {@code
- * Iterable<PartDataDescriptor>}.
+ * Content provider for a {@code TreeViewer}. Acceptable input is {@code
+ * Collection<PartDataDescriptor>}. *
+ * <p>
+ * The following {@link ICategory}s are supported:
+ * <ul>
+ * <li>{@link Category#DATE}</li>
+ * <li>{@link Category#WORKBENCH_TOOL}</li>
+ * </ul>
+ * </p>
  */
-public class PartPageContentProvider extends
-    AbstractDateCategoryContentProvider {
-
-  /** Map of part to total duration. */
-  @Nonnull
-  private ImmutableMap<IWorkbenchPartDescriptor, Long> partSummaries;
-  /** Map of date to part data. */
-  @Nonnull
-  private ImmutableMultimap<LocalDate, PartDataDescriptor> dateToParts;
-  /** All editors and view extensions. */
-  @Nonnull
-  private final Map<String, IWorkbenchPartDescriptor> parts;
-  /** Function to categorize the data by date. */
-  @Nonnull
-  private Function<PartDataDescriptor, LocalDate> categorizeByDateFunction;
+public class PartPageContentProvider extends AbstractValueContentProvider {
 
   /**
-   * Constructor.
-   * 
-   * @param page The parent page.
-   * @param displayByDate True the display by dates, false otherwise.
-   * @throws NullPointerException If page is null.
+   * Constructs a new content provider for the given viewer.
+   * @param treeViewer The viewer.
+   * @throws NullPointerException If argument is null.
    */
-  public PartPageContentProvider(@Nonnull PartPage page, boolean displayByDate) {
-    super(page, displayByDate);
-    resetData();
-
-    // Loads all the editors and views:
-    parts = Maps.newLinkedHashMap();
-    IEditorRegistry registry = PlatformUI.getWorkbench().getEditorRegistry();
-    for (IConfigurationElement e : Platform.getExtensionRegistry()
-        .getConfigurationElementsFor("org.eclipse.ui.editors")) {
-      IEditorDescriptor editor = registry.findEditor(e.getAttribute("id"));
-      if (editor != null)
-        parts.put(editor.getId(), editor);
-    }
-
-    for (IViewDescriptor des : PlatformUI.getWorkbench().getViewRegistry()
-        .getViews()) {
-      parts.put(des.getId(), des);
-    }
-
-    // The function:
-    categorizeByDateFunction = new Function<PartDataDescriptor, LocalDate>() {
-      @Override
-      public LocalDate apply(PartDataDescriptor from) {
-        return from.getDate();
-      }
-    };
-  }
-
-  /** Resets all data field to empty. */
-  private void resetData() {
-    partSummaries = ImmutableMap.of();
-    dateToParts = ImmutableMultimap.of();
+  public PartPageContentProvider(TreeViewer treeViewer) {
+    super(treeViewer);
   }
 
   @Override
-  public Object[] getChildren(Object element) {
-    if (element instanceof LocalDate) {
-      Collection<?> parts = dateToParts.get((LocalDate) element);
-      return parts.toArray(new Object[parts.size()]);
-    }
-    return EMPTY_ARRAY;
+  protected ICategory[] getAllSupportedCategories() {
+    return new ICategory[] { Category.DATE, Category.WORKBENCH_TOOL };
   }
 
   @Override
-  public boolean hasChildren(Object element) {
-    return dateToParts.containsKey(element);
+  protected ICategory getDefaultPaintCategory() {
+    return Category.WORKBENCH_TOOL;
   }
 
   @Override
-  public Object[] getElements(Object input) {
-    if (isDisplayingByDate()) {
-      Set<LocalDate> dates = dateToParts.keySet();
-      return dates.toArray(new Object[dates.size()]);
-    } else {
-      return partSummaries.keySet().toArray(new Object[partSummaries.size()]);
-    }
+  protected ICategory[] getDefaultSelectedCategories() {
+    return new ICategory[] { Category.WORKBENCH_TOOL };
   }
 
+  @Override
+  protected ImmutableMap<ICategory, Predicate<Object>> initializeCategorizers() {
+    return ImmutableMap.<ICategory, Predicate<Object>> builder()
+        .put(Category.DATE, Predicates.instanceOf(LocalDate.class))
+        .put(Category.WORKBENCH_TOOL, Predicates.instanceOf(IWorkbenchPartDescriptor.class))
+        .build();
+  }
+  
   @SuppressWarnings("unchecked")
   @Override
-  public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-    if (newInput == null) {
-      resetData();
-      return;
-    }
-
-    Iterable<PartDataDescriptor> data = (Iterable<PartDataDescriptor>) newInput;
-    dateToParts = Multimaps.index(data, categorizeByDateFunction);
-
-    Map<IWorkbenchPartDescriptor, Long> sums = Maps.newLinkedHashMap();
+  protected void doInputChanged(Viewer viewer, Object oldInput, Object newInput) {
+    super.doInputChanged(viewer, oldInput, newInput);
+    getRoot().setChildren(null);
+    
+    Collection<PartDataDescriptor> data = (Collection<PartDataDescriptor>) newInput;
+    IEditorRegistry editors = PlatformUI.getWorkbench().getEditorRegistry();
+    IViewRegistry views = PlatformUI.getWorkbench().getViewRegistry();
     for (PartDataDescriptor des : data) {
-      IWorkbenchPartDescriptor part = getPart(des);
-      Long value = sums.get(part);
-      sums.put(part, (value == null) ? des.getValue() : des.getValue() + value);
-    }
-    partSummaries = ImmutableMap.copyOf(sums);
-
-    updateMaxValue();
-  }
-
-  @Override
-  protected void updateMaxValue() {
-    long max = 0;
-    if (isDisplayingByDate()) {
-      for (PartDataDescriptor des : dateToParts.values()) {
-        if (des.getValue() > max)
-          max = des.getValue();
+      
+      TreeNode node = getRoot();
+      for (ICategory cat : selectedCategories) {
+        if (Category.DATE == cat) {
+          node = TreeNodes.findOrAppend(node, des.getDate());
+          
+        } else if (Category.WORKBENCH_TOOL == cat) {
+          IWorkbenchPartDescriptor part = editors.findEditor(des.getPartId());
+          if (part == null) 
+            part = views.find(des.getPartId());
+          if (part == null)
+            part = new UndefinedWorkbenchPartDescriptor(des.getPartId());
+          
+          node = TreeNodes.findOrAppend(node, part);
+        }
       }
-    } else {
-      for (Long value : partSummaries.values()) {
-        if (value > max)
-          max = value;
-      }
+      TreeNodes.appendToParent(node, des.getValue());
     }
-    page.setMaxValue(max);
-  }
-
-  /**
-   * Gets the workbench part with the ID from the data descriptor.
-   * 
-   * @param des The data descriptor containing the ID.
-   * @return A workbench part descriptor, never null. If no parts contain the
-   *         ID, a custom part descriptor is returned.
-   */
-  @Nonnull
-  public IWorkbenchPartDescriptor getPart(PartDataDescriptor des) {
-    IWorkbenchPartDescriptor part = parts.get(des.getPartId());
-    if (part == null) {
-      part = new UndefinedWorkbenchPartDescriptor(des.getPartId());
-      parts.put(part.getId(), part);
-    }
-    return part;
-  }
-
-  /**
-   * Gets the value of the workbench part.
-   * 
-   * @param part The workbench part.
-   * @return The value.
-   */
-  public long getValueOfPart(IWorkbenchPartDescriptor part) {
-    Long value = partSummaries.get(part);
-    return (value == null) ? 0 : value;
   }
 }

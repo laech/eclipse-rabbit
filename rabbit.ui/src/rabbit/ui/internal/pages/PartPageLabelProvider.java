@@ -17,28 +17,30 @@ package rabbit.ui.internal.pages;
 
 import static rabbit.ui.internal.util.DurationFormat.format;
 
-import rabbit.data.access.model.PartDataDescriptor;
 import rabbit.ui.internal.util.UndefinedWorkbenchPartDescriptor;
 
-import org.eclipse.jface.viewers.BaseLabelProvider;
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import org.eclipse.jface.viewers.IColorProvider;
 import org.eclipse.jface.viewers.ITableLabelProvider;
+import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.TreeNode;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.ui.IWorkbenchPartDescriptor;
 import org.eclipse.ui.PlatformUI;
+import org.joda.time.LocalDate;
 
 import javax.annotation.OverridingMethodsMustInvokeSuper;
 
 /**
  * Label provider for a {@link PartPage}
  */
-public class PartPageLabelProvider extends BaseLabelProvider implements
+public class PartPageLabelProvider extends LabelProvider implements
     ITableLabelProvider, IColorProvider {
 
   private final WorkbenchPartLabelProvider partLabels;
-  private final PartPageContentProvider contents;
+  private final PartPageContentProvider contentProvider;
   private final DateLabelProvider dateLabels;
   private final Color gray;
 
@@ -46,9 +48,11 @@ public class PartPageLabelProvider extends BaseLabelProvider implements
    * Constructor.
    * 
    * @param contentProvider The content provider of the page.
+   * @throws NullPointerException If argument is null.
    */
   public PartPageLabelProvider(PartPageContentProvider contentProvider) {
-    contents = contentProvider;
+    checkNotNull(contentProvider);
+    this.contentProvider = contentProvider;
     partLabels = new WorkbenchPartLabelProvider();
     dateLabels = new DateLabelProvider();
     gray = PlatformUI.getWorkbench().getDisplay().getSystemColor(
@@ -66,45 +70,40 @@ public class PartPageLabelProvider extends BaseLabelProvider implements
   public Color getBackground(Object element) {
     return null;
   }
-
+  
   @Override
-  public Image getColumnImage(Object object, int columnIndex) {
-    if (columnIndex != 0)
-      return null;
-
-    else if (object instanceof IWorkbenchPartDescriptor)
-      return partLabels.getImage(object);
-
-    else if (object instanceof PartDataDescriptor)
-      return partLabels.getImage(contents.getPart((PartDataDescriptor) object));
-
-    else
-      return dateLabels.getImage(object);
+  public String getText(Object element) {
+    if (element instanceof TreeNode) 
+      element = ((TreeNode) element).getValue();
+    if (element instanceof LocalDate) 
+      return dateLabels.getText(element);
+    else 
+      return partLabels.getText(element);
+  }
+  
+  @Override
+  public Image getImage(Object element) {
+    if (element instanceof TreeNode)
+      element = ((TreeNode) element).getValue();
+    
+    return (element instanceof LocalDate) ? dateLabels.getImage(element)
+        : partLabels.getImage(element);
   }
 
   @Override
-  public String getColumnText(Object obj, int columnIndex) {
+  public Image getColumnImage(Object element, int columnIndex) {
+    return (columnIndex == 0) ? getImage(element) : null;
+  }
+
+  @Override
+  public String getColumnText(Object element, int columnIndex) {
     switch (columnIndex) {
     case 0:
-      if (obj instanceof IWorkbenchPartDescriptor)
-        return partLabels.getText(obj);
-
-      else if (obj instanceof PartDataDescriptor)
-        return partLabels.getText(contents.getPart((PartDataDescriptor) obj));
-
-      else
-        return dateLabels.getText(obj);
+      return getText(element);
 
     case 1:
-      if (obj instanceof IWorkbenchPartDescriptor)
-        return format(contents
-            .getValueOfPart((IWorkbenchPartDescriptor) obj));
-
-      else if (obj instanceof PartDataDescriptor)
-        return format(((PartDataDescriptor) obj).getValue());
-
-      else
-        return null;
+      return !contentProvider.shouldPaint(element) ? null 
+          : format(contentProvider.getValue(element));
 
     default:
       return null;
@@ -113,16 +112,10 @@ public class PartPageLabelProvider extends BaseLabelProvider implements
 
   @Override
   public Color getForeground(Object element) {
-    if (element instanceof UndefinedWorkbenchPartDescriptor)
-      return gray;
-
-    else if (element instanceof PartDataDescriptor) {
-      IWorkbenchPartDescriptor part = contents
-          .getPart((PartDataDescriptor) element);
-      if (part instanceof UndefinedWorkbenchPartDescriptor)
-        return gray;
-    }
-    return null;
+    if (element instanceof TreeNode)
+      element = ((TreeNode) element).getValue();
+    
+    return (element instanceof UndefinedWorkbenchPartDescriptor) ? gray : null;
   }
 
   /**

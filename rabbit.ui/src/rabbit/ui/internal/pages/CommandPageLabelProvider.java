@@ -26,8 +26,6 @@ import org.eclipse.jface.viewers.TreeNode;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.widgets.Event;
-import org.eclipse.swt.widgets.Listener;
 import org.eclipse.ui.PlatformUI;
 
 import javax.annotation.OverridingMethodsMustInvokeSuper;
@@ -56,14 +54,6 @@ public class CommandPageLabelProvider extends LabelProvider implements
     commandLabels = new CommandLabelProvider();
     gray = PlatformUI.getWorkbench().getDisplay().getSystemColor(
         SWT.COLOR_DARK_GRAY);
-    
-    contents.getViewer().getTree().addListener(SWT.SetData, new Listener() {
-      
-      @Override
-      public void handleEvent(Event event) {
-        System.out.println("setdata");
-      }
-    });
   }
 
   @Override

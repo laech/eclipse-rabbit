@@ -29,6 +29,7 @@ import org.eclipse.jface.viewers.TreeNode;
 import org.eclipse.jface.viewers.TreeNodeContentProvider;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerFilter;
 
 import java.util.Arrays;
 import java.util.LinkedHashSet;
@@ -39,11 +40,8 @@ import java.util.Set;
  * Abstract content provider supports categorization of data.
  * 
  * This class uses {@link TreeNode} to build a tree model from the data. Each
- * value of each {@code TreeNode} can be put into an {@link ICategory}, each
- * category also represents a unique class type. For example, if there is a
- * category called "File", then the corresponding class type of this category
- * can be {@code IFile.class}, all tree nodes who contain objects of type
- * {@code IFile} can be put into the "File" category.
+ * value of each {@code TreeNode} can be put into an {@link ICategory}, using a
+ * {@link Predicate}.
  */
 public abstract class AbstractCategoryContentProvider extends
     TreeNodeContentProvider implements ICategoryProvider {
@@ -81,6 +79,13 @@ public abstract class AbstractCategoryContentProvider extends
    */
   public AbstractCategoryContentProvider(TreeViewer treeViewer) {
     checkNotNull(treeViewer);
+    treeViewer.addFilter(new ViewerFilter() {
+      @Override
+      public boolean select(Viewer viewer, Object parentElement, Object element) {
+        return !shouldFilter(element);
+      }
+    });
+    
     viewer = treeViewer;
     root = new TreeNode(new Object());
     allCategories = ImmutableSet.of(getAllSupportedCategories());

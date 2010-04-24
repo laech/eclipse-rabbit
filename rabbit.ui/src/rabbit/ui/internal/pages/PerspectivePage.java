@@ -18,7 +18,7 @@ package rabbit.ui.internal.pages;
 import rabbit.data.access.IAccessor;
 import rabbit.data.access.model.PerspectiveDataDescriptor;
 import rabbit.data.handler.DataHandler;
-import rabbit.ui.Preferences;
+import rabbit.ui.Preference;
 import rabbit.ui.internal.RabbitUI;
 import rabbit.ui.internal.actions.CollapseAllAction;
 import rabbit.ui.internal.actions.ExpandAllAction;
@@ -116,7 +116,7 @@ public class PerspectivePage extends AbstractTreeViewerPage {
   }
 
   @Override
-  public void update(Preferences p) {
+  public void update(Preference p) {
     setMaxValue(0);
     labels.updateState();
 
