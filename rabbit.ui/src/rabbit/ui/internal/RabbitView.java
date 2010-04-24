@@ -216,7 +216,7 @@ public class RabbitView extends ViewPart {
       int toolbarStyle = (isWindowsOS) ? SWT.FLAT : SWT.NONE;
       
       ToolBar bar = new ToolBar(header, toolbarStyle);
-      bar.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+      bar.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
       bar.setBackground(header.getBackground());
       extensionToolBar = new ToolBarManager(bar);
 
