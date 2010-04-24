@@ -48,6 +48,8 @@ public class SharedImages {
   
   public static final ImageDescriptor LAUNCH = getObj16("run.gif");
   
+  public static final ImageDescriptor PERSPECTIVE = getObj16("defaultpersp.gif");
+  
   /**
    * Gets an image descriptor from the directory "icons/full/obj16/".
    * @param name The name of the file.

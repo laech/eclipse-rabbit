@@ -15,58 +15,53 @@
  */
 package rabbit.ui.tests.pages;
 
-import rabbit.data.access.model.PerspectiveDataDescriptor;
+import rabbit.ui.internal.pages.AbstractFilteredTreePage;
+import rabbit.ui.internal.pages.Category;
 import rabbit.ui.internal.pages.PerspectivePage;
 import rabbit.ui.internal.pages.PerspectivePageContentProvider;
-import rabbit.ui.internal.util.UndefinedPerspectiveDescriptor;
+import rabbit.ui.internal.util.ICategory;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
-import org.joda.time.LocalDate;
 import org.junit.Test;
-
-import java.util.Arrays;
 
 /**
  * Test for {@link PerspectivePage}
  */
 @SuppressWarnings("restriction")
-public class PerspectivePageTest extends AbstractTreeViewerPageTest {
+public class PerspectivePageTest extends AbstractFilteredTreePageTest {
 
   @Test
-  public void testGetValue() {
-    PerspectiveDataDescriptor des1 = new PerspectiveDataDescriptor(
-        new LocalDate(), 19834, "abc");
-    PerspectiveDataDescriptor des2 = new PerspectiveDataDescriptor(des1
-        .getDate().minusDays(1), 14, des1.getPerspectiveId());
-
-    page.getViewer().setInput(Arrays.asList(des1, des2));
-    assertEquals(des1.getValue(), page.getValue(des1));
-    assertEquals(des2.getValue(), page.getValue(des2));
-    assertEquals(des1.getValue() + des2.getValue(), page
-        .getValue(new UndefinedPerspectiveDescriptor(des1.getPerspectiveId())));
+  public void testSaveState_selectedCategories() throws Exception {
+    PerspectivePageContentProvider contents = (PerspectivePageContentProvider) page
+        .getViewer().getContentProvider();
+    
+    ICategory[] categories = new ICategory[] { Category.DATE, Category.PERSPECTIVE };
+    contents.setSelectedCategories(categories);
+    saveState(page);
+    
+    contents.setSelectedCategories(Category.PERSPECTIVE);
+    restoreState(page);
+    assertArrayEquals(categories, contents.getSelectedCategories());
   }
-
+  
   @Test
-  public void testUpdate() throws Exception {
-    PerspectivePageContentProvider cp;
-    cp = (PerspectivePageContentProvider) page.getViewer().getContentProvider();
-    cp.setDisplayByDate(true);
-
-    PerspectiveDataDescriptor des1;
-    PerspectiveDataDescriptor des2;
-    des1 = new PerspectiveDataDescriptor(new LocalDate(), 101, "123");
-    des2 = new PerspectiveDataDescriptor(new LocalDate(), 9823, des1.getPerspectiveId());
-    page.getViewer().setInput(Arrays.asList(des1, des2));
-
-    assertEquals(des2.getValue(), page.getMaxValue());
-
-    cp.setDisplayByDate(false);
-    assertEquals(des1.getValue() + des2.getValue(), page.getMaxValue());
+  public void testSaveState_paintCategory() throws Exception {
+    PerspectivePageContentProvider contents = (PerspectivePageContentProvider) page
+        .getViewer().getContentProvider();
+    
+    Category paintCategory = Category.DATE;
+    contents.setPaintCategory(paintCategory);
+    saveState(page);
+    
+    contents.setPaintCategory(Category.PERSPECTIVE);
+    restoreState(page);
+    assertEquals(paintCategory, contents.getPaintCategory());
   }
 
   @Override
-  protected PerspectivePage createPage() {
+  protected AbstractFilteredTreePage createPage() {
     return new PerspectivePage();
   }
 

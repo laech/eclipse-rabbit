@@ -59,6 +59,9 @@ public enum Category implements ICategory {
   /** Workbench tool category */
   WORKBENCH_TOOL("Workbench Tools", PlatformUI.getWorkbench().getSharedImages()
       .getImageDescriptor(ISharedImages.IMG_DEF_VIEW)),
+      
+  /** Perspective category */
+  PERSPECTIVE("Perspectives", SharedImages.PERSPECTIVE),
   ;
   
   private String text;

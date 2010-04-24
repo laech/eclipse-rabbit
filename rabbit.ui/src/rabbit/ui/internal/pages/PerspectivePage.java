@@ -20,56 +20,67 @@ import rabbit.data.access.model.PerspectiveDataDescriptor;
 import rabbit.data.handler.DataHandler;
 import rabbit.ui.Preference;
 import rabbit.ui.internal.RabbitUI;
+import rabbit.ui.internal.SharedImages;
 import rabbit.ui.internal.actions.CollapseAllAction;
+import rabbit.ui.internal.actions.DropDownAction;
 import rabbit.ui.internal.actions.ExpandAllAction;
-import rabbit.ui.internal.actions.GroupByDatesAction;
+import rabbit.ui.internal.actions.GroupByAction;
+import rabbit.ui.internal.actions.ShowHideFilterControlAction;
+import rabbit.ui.internal.util.ICategory;
 import rabbit.ui.internal.viewers.CellPainter;
+import rabbit.ui.internal.viewers.TreeViewerLabelSorter;
 import rabbit.ui.internal.viewers.TreeViewerSorter;
 
+import com.google.common.base.Joiner;
+import com.google.common.collect.Lists;
+
+import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
+import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.viewers.CellLabelProvider;
 import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ITableLabelProvider;
-import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.viewers.TreeNode;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.TreeColumn;
-import org.eclipse.ui.IPerspectiveDescriptor;
+import org.eclipse.ui.dialogs.PatternFilter;
 import org.joda.time.LocalDate;
+
+import java.util.List;
 
 /**
  * A page displays perspective usage.
  */
-public class PerspectivePage extends AbstractTreeViewerPage {
-
-  /**
-   * Preference constants for displaying the data by date.
-   */
-  private static final String DISPLAY_BY_DATE_PREF = "PerspectivePage.displayByDates";
+public class PerspectivePage extends AbstractFilteredTreePage {
+  
+  // Preference constants:
+  private static final String PREF_SELECTED_CATEGORIES = "PerspectivePage.SelectedCatgories";
+  private static final String PREF_PAINT_CATEGORY = "PerspectivePage.PaintCategory";
 
   private final IAccessor<PerspectiveDataDescriptor> accessor;
-  private final PerspectivePageContentProvider contents;
-  private final PerspectivePageLabelProvider labels;
+  private PerspectivePageContentProvider contents;
+  private PerspectivePageLabelProvider labels;
 
   /**
    * Constructs a new page.
    */
   public PerspectivePage() {
     super();
-    IPreferenceStore store = RabbitUI.getDefault().getPreferenceStore();
-    store.setDefault(DISPLAY_BY_DATE_PREF, true);
-
-    boolean displayByDate = store.getBoolean(DISPLAY_BY_DATE_PREF);
-    contents = new PerspectivePageContentProvider(this, displayByDate);
-    labels = new PerspectivePageLabelProvider(contents);
     accessor = DataHandler.getPerspectiveDataAccessor();
+  }
+  
+  @Override
+  protected void initializeViewer(TreeViewer viewer) {
+    contents = new PerspectivePageContentProvider(viewer);
+    labels = new PerspectivePageLabelProvider(contents);
+    viewer.setContentProvider(contents);
+    viewer.setLabelProvider(labels);
   }
 
   @Override
@@ -82,16 +93,49 @@ public class PerspectivePage extends AbstractTreeViewerPage {
     column = new TreeColumn(viewer.getTree(), SWT.RIGHT);
     column.setText("Usage");
     column.setWidth(200);
-    column.addSelectionListener(createValueSorterForTree(viewer));
+    column.addSelectionListener(getValueSorter());
   }
 
   @Override
   public IContributionItem[] createToolBarItems(IToolBarManager toolBar) {
+    final ICategory date = Category.DATE;
+    final ICategory pers = Category.PERSPECTIVE;
+    
+    IAction colorByDate = new Action(date.getText(), date.getImageDescriptor()) {
+      @Override public void run() {
+        contents.setPaintCategory(date);
+      }
+    };
+    IAction colorByPers = new Action(pers.getText(), pers.getImageDescriptor()) {
+      @Override public void run() {
+        contents.setPaintCategory(pers);
+      }
+    };
+    IAction groupByDate = new Action(date.getText(), date.getImageDescriptor()) {
+      @Override public void run() {
+        contents.setSelectedCategories(date, pers);
+      }
+    };
+    IAction groupByPers = new Action(pers.getText(), pers.getImageDescriptor()) {
+      @Override public void run() {
+        contents.setSelectedCategories(pers);
+      }
+    };
+    
+    ShowHideFilterControlAction filter = new ShowHideFilterControlAction(getFilteredTree());
+    filter.run();
+    
     IContributionItem[] items = new IContributionItem[] {
+        new ActionContributionItem(filter),
+        new Separator(),
         new ActionContributionItem(new ExpandAllAction(getViewer())),
         new ActionContributionItem(new CollapseAllAction(getViewer())),
-        new Separator(), // 
-        new ActionContributionItem(new GroupByDatesAction(contents)) };
+        new Separator(), 
+        new ActionContributionItem(new GroupByAction(contents, groupByPers, 
+            groupByPers, groupByDate)), 
+        new ActionContributionItem(new DropDownAction(
+            "Highlight " + colorByPers.getText(), SharedImages.BRUSH, 
+            colorByPers, colorByPers, colorByDate))};
 
     for (IContributionItem item : items)
       toolBar.add(item);
@@ -100,24 +144,7 @@ public class PerspectivePage extends AbstractTreeViewerPage {
   }
 
   @Override
-  public long getValue(Object o) {
-    if (o instanceof IPerspectiveDescriptor)
-      return contents.getValueOfPerspective((IPerspectiveDescriptor) o);
-
-    if (o instanceof PerspectiveDataDescriptor)
-      return ((PerspectiveDataDescriptor) o).getValue();
-
-    return 0;
-  }
-
-  @Override
-  public boolean shouldPaint(Object element) {
-    return !(element instanceof LocalDate);
-  }
-
-  @Override
   public void update(Preference p) {
-    setMaxValue(0);
     labels.updateState();
 
     Object[] elements = getViewer().getExpandedElements();
@@ -135,8 +162,8 @@ public class PerspectivePage extends AbstractTreeViewerPage {
   }
 
   @Override
-  protected CellLabelProvider createCellPainter() {
-    return new CellPainter(this) {
+  protected CellPainter createCellPainter() {
+    return new CellPainter(contents) {
       @Override
       protected Color createColor(Display display) {
         return new Color(display, 218, 176, 0);
@@ -145,48 +172,63 @@ public class PerspectivePage extends AbstractTreeViewerPage {
   }
 
   @Override
-  protected ITreeContentProvider createContentProvider() {
-    return contents;
-  }
-
-  @Override
   protected TreeViewerSorter createInitialComparator(TreeViewer viewer) {
-    return new TreeViewerSorter(viewer) {
-
+    return new TreeViewerLabelSorter(viewer) {
       @Override
-      protected int doCompare(Viewer v, Object e1, Object e2) {
-        if (e1 instanceof LocalDate && e2 instanceof LocalDate)
-          return ((LocalDate) e1).compareTo((LocalDate) e2);
-
-        if (e1 instanceof IPerspectiveDescriptor
-            && e2 instanceof IPerspectiveDescriptor) {
-          IPerspectiveDescriptor p1 = (IPerspectiveDescriptor) e1;
-          IPerspectiveDescriptor p2 = (IPerspectiveDescriptor) e2;
-          return p1.getLabel().compareToIgnoreCase(p2.getLabel());
-        }
-
-        if (e1 instanceof PerspectiveDataDescriptor
-            && e2 instanceof PerspectiveDataDescriptor) {
-          PerspectiveDataDescriptor des1 = (PerspectiveDataDescriptor) e1;
-          PerspectiveDataDescriptor des2 = (PerspectiveDataDescriptor) e2;
-          return contents.getPerspective(des1).getLabel().compareToIgnoreCase(
-              contents.getPerspective(des2).getLabel());
-        }
-
-        return 0;
+      protected int doCompare(Viewer v, Object x, Object y) {
+        if (x instanceof TreeNode) x = ((TreeNode) x).getValue();
+        if (y instanceof TreeNode) y = ((TreeNode) y).getValue();
+        
+        if (x instanceof LocalDate && y instanceof LocalDate)
+          return ((LocalDate) x).compareTo((LocalDate) y);
+        else
+          return super.doCompare(v, x, y);
       }
     };
   }
 
   @Override
-  protected ITableLabelProvider createLabelProvider() {
-    return labels;
+  protected PatternFilter createFilter() {
+    return new PatternFilter();
+  }  
+  
+  @Override
+  protected void restoreState() {
+    super.restoreState();
+    IPreferenceStore store = RabbitUI.getDefault().getPreferenceStore();
+
+    // Restores the selected categories of the content provider:
+    String[] categoryStr = store.getString(PREF_SELECTED_CATEGORIES).split(",");
+    List<Category> cats = Lists.newArrayList();
+    for (String str : categoryStr) {
+      try {
+        cats.add(Enum.valueOf(Category.class, str));
+      } catch (IllegalArgumentException e) {
+        // Ignore invalid elements.
+      }
+    }
+    contents.setSelectedCategories(cats.toArray(new ICategory[cats.size()]));
+
+    // Restores the paint category of the content provider:
+    String paintStr = store.getString(PREF_PAINT_CATEGORY);
+    try {
+      Category cat = Enum.valueOf(Category.class, paintStr);
+      contents.setPaintCategory(cat);
+    } catch (IllegalArgumentException e) {
+      // Just let the content provider use its default paint category.
+    }
   }
 
   @Override
   protected void saveState() {
     super.saveState();
-    RabbitUI.getDefault().getPreferenceStore().setValue(DISPLAY_BY_DATE_PREF,
-        contents.isDisplayingByDate());
+    IPreferenceStore store = RabbitUI.getDefault().getPreferenceStore();
+
+    // Saves the selected categories of the content provider:
+    ICategory[] categories = contents.getSelectedCategories();
+    store.setValue(PREF_SELECTED_CATEGORIES, Joiner.on(",").join(categories));
+
+    // Saves the paint category of the content provider:
+    store.setValue(PREF_PAINT_CATEGORY, contents.getPaintCategory().toString());
   }
 }

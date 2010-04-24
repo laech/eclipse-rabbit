@@ -18,7 +18,8 @@ package rabbit.ui.tests.pages;
 import static rabbit.ui.internal.util.DurationFormat.format;
 
 import rabbit.data.access.model.PerspectiveDataDescriptor;
-import rabbit.ui.internal.pages.PerspectivePage;
+import rabbit.ui.internal.pages.Category;
+import rabbit.ui.internal.pages.DateLabelProvider;
 import rabbit.ui.internal.pages.PerspectivePageContentProvider;
 import rabbit.ui.internal.pages.PerspectivePageLabelProvider;
 import rabbit.ui.internal.util.UndefinedPerspectiveDescriptor;
@@ -27,13 +28,17 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
+import org.eclipse.jface.viewers.TreeNode;
+import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IPerspectiveDescriptor;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.model.PerspectiveLabelProvider;
 import org.joda.time.LocalDate;
 import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -44,97 +49,115 @@ import java.util.Arrays;
 @SuppressWarnings("restriction")
 public class PerspectivePageLabelProviderTest {
 
-  private static final Shell shell;
-  private static final PerspectivePage page;
-  private static final PerspectivePageLabelProvider labels;
-  private static final PerspectivePageContentProvider contents;
+  private static Shell shell;
+  private static PerspectivePageLabelProvider labelProvider;
+  private static PerspectivePageContentProvider contents;
+  private static PerspectiveLabelProvider perspectiveLabels;
+  private static DateLabelProvider dateLabels;
 
-  /** A defined perspective. */
-  private static final IPerspectiveDescriptor defined;
-
-  /** An undefined perspective (not exists) */
-  private static final IPerspectiveDescriptor undefined;
-
-  static {
-    shell = new Shell(PlatformUI.getWorkbench().getDisplay());
-    page = new PerspectivePage();
-    contents = new PerspectivePageContentProvider(page, true);
-    labels = new PerspectivePageLabelProvider(contents);
-
-    page.createContents(shell);
-    page.getViewer().setContentProvider(contents);
-    page.getViewer().setLabelProvider(
-        new PerspectivePageLabelProvider(contents));
-
-    undefined = new UndefinedPerspectiveDescriptor(System.nanoTime() + "");
-    defined = PlatformUI.getWorkbench().getPerspectiveRegistry()
-        .getPerspectives()[0];
-  }
+  private static TreeNode dateNode;
+  private static TreeNode definedNode;
+  private static TreeNode undefinedNode;
 
   @AfterClass
   public static void afterClass() {
-    labels.dispose();
+    labelProvider.dispose();
+    perspectiveLabels.dispose();
+    dateLabels.dispose();
     shell.dispose();
+  }
+
+  @BeforeClass
+  public static void beforeClass() {
+    shell = new Shell(PlatformUI.getWorkbench().getDisplay());
+    TreeViewer viewer = new TreeViewer(shell);
+    contents = new PerspectivePageContentProvider(viewer);
+    labelProvider = new PerspectivePageLabelProvider(contents);
+    viewer.setContentProvider(contents);
+    viewer.setLabelProvider(labelProvider);
+    
+    IPerspectiveDescriptor defined = PlatformUI.getWorkbench().getPerspectiveRegistry().getPerspectives()[0];
+    IPerspectiveDescriptor undefined = new UndefinedPerspectiveDescriptor(System.currentTimeMillis() + "");
+
+    dateNode = new TreeNode(new LocalDate());
+    definedNode = new TreeNode(defined);
+    undefinedNode = new TreeNode(undefined);
+    
+    dateLabels = new DateLabelProvider();
+    perspectiveLabels = new PerspectiveLabelProvider(false);
+  }
+  
+  @Test(expected = NullPointerException.class)
+  public void testConstructor_contentProviderNull() {
+    new PerspectivePageLabelProvider(null);
   }
 
   @Test
   public void testGetBackground() {
-    assertNull(labels.getBackground(defined));
-    assertNull(labels.getBackground(undefined));
+    assertNull(labelProvider.getBackground(definedNode));
+    assertNull(labelProvider.getBackground(undefinedNode));
+    assertNull(labelProvider.getBackground(dateNode));
+  }
+  
+  @Test
+  public void testGetImage() {
+    assertNotNull(labelProvider.getImage(dateNode));
+    assertNotNull(labelProvider.getImage(definedNode));
+    assertNotNull(labelProvider.getImage(undefinedNode));
   }
 
   @Test
   public void testGetColumnImage() {
-    assertNotNull(labels.getColumnImage(defined, 0));
-    assertNotNull(labels.getColumnImage(undefined, 0));
+    assertNotNull(labelProvider.getColumnImage(dateNode, 0));
+    assertNotNull(labelProvider.getColumnImage(definedNode, 0));
+    assertNotNull(labelProvider.getColumnImage(undefinedNode, 0));
+  }
+  
+  @Test
+  public void testGetText() {
+    assertEquals(perspectiveLabels.getText(definedNode.getValue()), labelProvider.getText(definedNode));
+    assertEquals(perspectiveLabels.getText(undefinedNode.getValue()), labelProvider.getText(undefinedNode));
+    assertEquals(dateLabels.getText(dateNode.getValue()), labelProvider.getText(dateNode));
   }
 
   @Test
   public void testGetColumnText_0() throws Exception {
-    assertEquals(defined.getLabel(), labels.getColumnText(defined, 0));
-    assertEquals(undefined.getLabel(), labels.getColumnText(undefined, 0));
-
-    PerspectiveDataDescriptor des;
-    des = new PerspectiveDataDescriptor(new LocalDate(), 1, defined.getId());
-    assertEquals(defined.getLabel(), labels.getColumnText(des, 0));
-
-    des = new PerspectiveDataDescriptor(new LocalDate(), 1, undefined.getId());
-    assertEquals(undefined.getLabel(), labels.getColumnText(undefined, 0));
+    assertEquals(perspectiveLabels.getText(definedNode.getValue()), labelProvider.getColumnText(definedNode, 0));
+    assertEquals(perspectiveLabels.getText(undefinedNode.getValue()), labelProvider.getColumnText(undefinedNode, 0));
+    assertEquals(dateLabels.getText(dateNode.getValue()), labelProvider.getColumnText(dateNode, 0));
   }
 
   @Test
   public void testGetColumnText_1() throws Exception {
+    IPerspectiveDescriptor defined = (IPerspectiveDescriptor) definedNode.getValue();
+    IPerspectiveDescriptor undefined = (IPerspectiveDescriptor) undefinedNode.getValue();
+    
     PerspectiveDataDescriptor d1;
     PerspectiveDataDescriptor d2;
-    d1 = new PerspectiveDataDescriptor(new LocalDate(), 111, defined.getId());
-    d2 = new PerspectiveDataDescriptor(new LocalDate(), 101, defined.getId());
-    assertEquals(format(d1.getValue()), labels.getColumnText(d1, 1));
-    assertEquals(format(d2.getValue()), labels.getColumnText(d2, 1));
-    assertEquals(format(d1.getValue() + d2.getValue()), labels
-        .getColumnText(defined, 1));
+    LocalDate date = new LocalDate();
+    d1 = new PerspectiveDataDescriptor(date, 11212121, defined.getId());
+    d2 = new PerspectiveDataDescriptor(date, 102131112, undefined.getId());
+    contents.getViewer().setInput(Arrays.asList(d1, d2));
 
-    d1 = new PerspectiveDataDescriptor(new LocalDate(), 222, undefined.getId());
-    d2 = new PerspectiveDataDescriptor(new LocalDate(), 999, undefined.getId());
-    page.getViewer().setInput(Arrays.asList(d1, d2));
-    assertEquals(format(d1.getValue()), labels.getColumnText(d1, 1));
-    assertEquals(format(d2.getValue()), labels.getColumnText(d2, 1));
-    assertEquals(format(d1.getValue() + d2.getValue()), labels
-        .getColumnText(undefined, 1));
+    contents.setSelectedCategories(Category.PERSPECTIVE);
+    contents.setPaintCategory(Category.PERSPECTIVE);
+    TreeNode root = contents.getRoot();
+    TreeNode[] perspectiveNodes = root.getChildren();
+    assertEquals(2, perspectiveNodes.length);
+    assertEquals(format(d1.getValue()), labelProvider.getColumnText(perspectiveNodes[0], 1));
+    assertEquals(format(d2.getValue()), labelProvider.getColumnText(perspectiveNodes[1], 1));
+    
+    contents.setSelectedCategories(Category.DATE);
+    contents.setPaintCategory(Category.DATE);
+    assertEquals(1, root.getChildren().length);
+    TreeNode dateNode = root.getChildren()[0];
+    assertEquals(format(d1.getValue() + d2.getValue()), labelProvider.getColumnText(dateNode, 1));
   }
 
   @Test
   public void testGetForeground() {
-    assertNull(labels.getForeground(defined));
+    assertNull(labelProvider.getForeground(definedNode));
     assertEquals(Display.getDefault().getSystemColor(SWT.COLOR_DARK_GRAY),
-        labels.getForeground(undefined));
-
-    PerspectiveDataDescriptor d1;
-    PerspectiveDataDescriptor d2;
-    d1 = new PerspectiveDataDescriptor(new LocalDate(), 1, defined.getId());
-    d2 = new PerspectiveDataDescriptor(new LocalDate(), 1, undefined.getId());
-    
-    page.getViewer().setInput(Arrays.asList(d1, d2));
-    assertNull(labels.getForeground(d1));
-    assertNotNull(labels.getForeground(d2));
+        labelProvider.getForeground(undefinedNode));
   }
 }

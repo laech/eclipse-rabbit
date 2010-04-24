@@ -17,27 +17,27 @@ package rabbit.ui.internal.pages;
 
 import static rabbit.ui.internal.util.DurationFormat.format;
 
-import rabbit.data.access.model.PerspectiveDataDescriptor;
 import rabbit.ui.internal.util.UndefinedPerspectiveDescriptor;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import org.eclipse.jface.viewers.BaseLabelProvider;
 import org.eclipse.jface.viewers.IColorProvider;
 import org.eclipse.jface.viewers.ITableLabelProvider;
+import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.TreeNode;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.ui.IPerspectiveDescriptor;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.model.PerspectiveLabelProvider;
+import org.joda.time.LocalDate;
 
 import javax.annotation.OverridingMethodsMustInvokeSuper;
 
 /**
  * Label provider for a {@link PerspectivePage}.
  */
-public class PerspectivePageLabelProvider extends BaseLabelProvider implements
+public class PerspectivePageLabelProvider extends LabelProvider implements
     ITableLabelProvider, IColorProvider {
 
   private final Color gray;
@@ -49,6 +49,7 @@ public class PerspectivePageLabelProvider extends BaseLabelProvider implements
    * Constructor.
    * 
    * @param content The content provider for the page.
+   * @throws NullPointerException If argument is null.
    */
   public PerspectivePageLabelProvider(PerspectivePageContentProvider content) {
     checkNotNull(content);
@@ -71,45 +72,39 @@ public class PerspectivePageLabelProvider extends BaseLabelProvider implements
   public Color getBackground(Object element) {
     return null;
   }
+  
+  @Override
+  public Image getImage(Object element) {
+    if (element instanceof TreeNode)
+      element = ((TreeNode) element).getValue();
+    
+    return (element instanceof LocalDate) ? dateLabels.getImage(element)
+        : perspectiveLabels.getImage(element);
+  }
+  
+  @Override
+  public String getText(Object element) {
+    if (element instanceof TreeNode)
+      element = ((TreeNode) element).getValue();
+
+    return (element instanceof LocalDate) ? dateLabels.getText(element)
+        : perspectiveLabels.getText(element);
+  }
 
   @Override
   public Image getColumnImage(Object element, int columnIndex) {
-    if (columnIndex != 0)
-      return null;
-
-    else if (element instanceof IPerspectiveDescriptor)
-      return perspectiveLabels.getImage(element);
-
-    else if (element instanceof PerspectiveDataDescriptor)
-      return perspectiveLabels.getImage(contentProvider
-          .getPerspective((PerspectiveDataDescriptor) element));
-
-    else
-      return dateLabels.getImage(element);
+    return (columnIndex == 0) ? getImage(element) : null;
   }
 
   @Override
   public String getColumnText(Object element, int columnIndex) {
     switch (columnIndex) {
     case 0:
-      if (element instanceof IPerspectiveDescriptor)
-        return perspectiveLabels.getText(element);
-
-      else if (element instanceof PerspectiveDataDescriptor)
-        return perspectiveLabels.getText(contentProvider
-            .getPerspective((PerspectiveDataDescriptor) element));
-      else
-        return dateLabels.getText(element);
+      return getText(element);
 
     case 1:
-      if (element instanceof IPerspectiveDescriptor)
-        return format(contentProvider
-            .getValueOfPerspective((IPerspectiveDescriptor) element));
-
-      else if (element instanceof PerspectiveDataDescriptor)
-        return format(((PerspectiveDataDescriptor) element).getValue());
-      else
-        return null;
+      return !contentProvider.shouldPaint(element) ? null
+          : format(contentProvider.getValue(element));
 
     default:
       return null;
@@ -118,17 +113,13 @@ public class PerspectivePageLabelProvider extends BaseLabelProvider implements
 
   @Override
   public Color getForeground(Object element) {
+    if (element instanceof TreeNode)
+      element = ((TreeNode) element).getValue();
+      
     if (element instanceof UndefinedPerspectiveDescriptor)
       return gray;
-
-    else if (element instanceof PerspectiveDataDescriptor) {
-      IPerspectiveDescriptor p = contentProvider
-          .getPerspective((PerspectiveDataDescriptor) element);
-      if (p instanceof UndefinedPerspectiveDescriptor)
-        return gray;
-    }
-
-    return null;
+    else
+      return null;
   }
 
   /**
