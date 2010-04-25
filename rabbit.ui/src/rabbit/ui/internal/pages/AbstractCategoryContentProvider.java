@@ -123,10 +123,11 @@ public abstract class AbstractCategoryContentProvider extends
   }
 
   /**
-   * Gets the root of the content tree.
+   * Gets the root of the content tree. The returned root will always be the 
+   * same object, therefore it could be cached.
    * @return The root.
    */
-  public TreeNode getRoot() {
+  public final TreeNode getRoot() {
     return root;
   }
 

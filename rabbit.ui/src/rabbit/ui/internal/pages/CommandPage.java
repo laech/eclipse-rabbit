@@ -16,9 +16,7 @@
 package rabbit.ui.internal.pages;
 
 import rabbit.data.access.IAccessor;
-import rabbit.data.access.model.CommandDataDescriptor;
 import rabbit.data.handler.DataHandler;
-import rabbit.ui.Preference;
 import rabbit.ui.internal.RabbitUI;
 import rabbit.ui.internal.SharedImages;
 import rabbit.ui.internal.actions.CollapseAllAction;
@@ -42,7 +40,6 @@ import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.viewers.TreeNode;
-import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
@@ -55,24 +52,22 @@ import java.util.List;
 /**
  * A page for displaying command usage.
  */
-public class CommandPage extends AbstractFilteredTreePage {
+public class CommandPage extends AbstractAccessorPage {
   
   // Preference constants:
   private static final String PREF_SELECTED_CATEGORIES = "CommandPage.SelectedCatgories";
   private static final String PREF_PAINT_CATEGORY = "CommandPage.PaintCategory";
 
-  private final IAccessor<CommandDataDescriptor> accessor;
   private CommandPageContentProvider contents;
   private CommandPageLabelProvider labels;
-
+  
   /**
    * Constructor.
    */
   public CommandPage() {
     super();
-    accessor = DataHandler.getCommandDataAccessor();
   }
-  
+
   @Override
   public void createColumns(TreeViewer viewer) {
     TreeColumn column = new TreeColumn(viewer.getTree(), SWT.LEFT);
@@ -90,7 +85,7 @@ public class CommandPage extends AbstractFilteredTreePage {
     column.setText("Usage Count");
     column.setWidth(100);
   }
-
+  
   @Override
   public IContributionItem[] createToolBarItems(IToolBarManager toolBar) {
     ShowHideFilterControlAction filterAction = new ShowHideFilterControlAction(getFilteredTree());
@@ -120,12 +115,15 @@ public class CommandPage extends AbstractFilteredTreePage {
       }
     };
     
+    IAction collapse = new CollapseAllAction(getViewer());
     IContributionItem[] items = new IContributionItem[] {
         new ActionContributionItem(filterAction),
         new Separator(),
-        new ActionContributionItem(new ExpandAllAction(getViewer())),
-        new ActionContributionItem(new CollapseAllAction(getViewer())),
-        new Separator(),
+        new ActionContributionItem(new DropDownAction(
+            collapse.getText(), collapse.getImageDescriptor(), 
+            collapse, 
+            collapse,
+            new ExpandAllAction(getViewer()))),
         new ActionContributionItem(new GroupByAction(contents, groupByCmd,
             groupByCmd, groupByDate)),
         new ActionContributionItem(new DropDownAction(
@@ -136,19 +134,6 @@ public class CommandPage extends AbstractFilteredTreePage {
       toolBar.add(item);
 
     return items;
-  }
-
-  @Override
-  public void update(Preference p) {
-    labels.updateState();
-
-    TreePath[] expandedPaths = getViewer().getExpandedTreePaths();
-
-    LocalDate start = LocalDate.fromCalendarFields(p.getStartDate());
-    LocalDate end = LocalDate.fromCalendarFields(p.getEndDate());
-    getViewer().setInput(accessor.getData(start, end));
-    
-    getViewer().setExpandedTreePaths(expandedPaths);
   }
 
   @Override
@@ -178,6 +163,11 @@ public class CommandPage extends AbstractFilteredTreePage {
           return super.doCompare(v, e1, e2);
       }
     };
+  }
+
+  @Override
+  protected IAccessor<?> getAccessor() {
+    return DataHandler.getCommandDataAccessor();
   }
 
   @Override

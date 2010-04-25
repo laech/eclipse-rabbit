@@ -291,7 +291,7 @@ public class CopyOfRabbitView extends ViewPart {
       // Updates the current visible page, mark others as not updated:
       Boolean updated = pageStatus.get(page);
       if (updated == null || updated == false) {
-        page.update(preferences);
+        page.updateJob(preferences);
         pageStatus.put(page, Boolean.TRUE);
       }
     }
@@ -443,7 +443,7 @@ public class CopyOfRabbitView extends ViewPart {
       boolean isVisible = stackLayout.topControl == entry.getValue();
       if (isVisible) {
         // update current visible page.
-        entry.getKey().update(preferences);
+        entry.getKey().updateJob(preferences);
       }
       pageStatus.put(entry.getKey(), Boolean.valueOf(isVisible));
     }

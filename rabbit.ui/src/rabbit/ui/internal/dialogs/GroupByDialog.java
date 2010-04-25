@@ -20,7 +20,6 @@ import rabbit.ui.internal.util.ICategory;
 import com.google.common.collect.Lists;
 
 import org.eclipse.jface.dialogs.IMessageProvider;
-import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelection;

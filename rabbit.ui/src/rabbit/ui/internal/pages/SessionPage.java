@@ -25,6 +25,7 @@ import rabbit.ui.internal.viewers.TreeViewerLabelSorter;
 import rabbit.ui.internal.viewers.TreeViewerSorter;
 import rabbit.ui.internal.viewers.CellPainter.IValueProvider;
 
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.IToolBarManager;
@@ -35,9 +36,6 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.ui.dialogs.PatternFilter;
-import org.joda.time.LocalDate;
-
-import java.util.Collection;
 
 /**
  * A page displaying how much time is spent on using Eclipse every day.
@@ -87,20 +85,13 @@ public class SessionPage extends AbstractFilteredTreePage
   }
 
   @Override
-  public void update(Preference p) {
+  public Job updateJob(final Preference p) {
     maxValue = 0;
     labels.updateState();
-
-    LocalDate start = LocalDate.fromCalendarFields(p.getStartDate());
-    LocalDate end = LocalDate.fromCalendarFields(p.getEndDate());
-    Collection<SessionDataDescriptor> data = accessor.getData(start, end);
-    for (SessionDataDescriptor des : data) {
-      if (des.getValue() > getMaxValue())
-        maxValue = des.getValue();
-    }
-    getViewer().setInput(data);
+    
+    return AbstractAccessorPage.newUpdateJob(getViewer(), p, accessor, Job.SHORT);
   }
-
+  
   @Override
   protected CellPainter createCellPainter() {
     return new CellPainter(this) {

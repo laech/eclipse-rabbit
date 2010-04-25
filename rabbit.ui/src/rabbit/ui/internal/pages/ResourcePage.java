@@ -16,9 +16,7 @@
 package rabbit.ui.internal.pages;
 
 import rabbit.data.access.IAccessor;
-import rabbit.data.access.model.FileDataDescriptor;
 import rabbit.data.handler.DataHandler;
-import rabbit.ui.Preference;
 import rabbit.ui.internal.RabbitUI;
 import rabbit.ui.internal.SharedImages;
 import rabbit.ui.internal.actions.CollapseAllAction;
@@ -45,7 +43,6 @@ import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.viewers.TreeNode;
-import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
@@ -63,7 +60,7 @@ import java.util.List;
 /**
  * A page for displaying time spent working on different files.
  */
-public class ResourcePage extends AbstractFilteredTreePage {
+public class ResourcePage extends AbstractAccessorPage {
 
   // Preference constants:
   private static final String PREF_SELECTED_CATEGORIES = "ResourcePage.SelectedCatgories";
@@ -71,46 +68,39 @@ public class ResourcePage extends AbstractFilteredTreePage {
 
   private ResourcePageContentProvider contents;
   private ResourcePageTableLabelProvider labels;
-  private IAccessor<FileDataDescriptor> accessor;
-
+  
   public ResourcePage() {
     super();
-    accessor = DataHandler.getFileDataAccessor();
-  }
-  
-  @Override
-  protected void initializeViewer(TreeViewer viewer) {
-    contents = new ResourcePageContentProvider(viewer);
-    labels = new ResourcePageTableLabelProvider(contents);
-    viewer.setContentProvider(contents);
-    viewer.setLabelProvider(labels);
   }
 
   @Override
   public IContributionItem[] createToolBarItems(IToolBarManager toolBar) {
+    IAction collapse = new CollapseAllAction(getViewer());
     IAction groupByFilesAction = newGroupByAllResourcesAction();
     IAction colorByProjectsAction = newColorByProjectsAction();
     IAction filterTreeAction = new ShowHideFilterControlAction(getFilteredTree());
     filterTreeAction.run(); // Hides the filter control
 
     IContributionItem[] items = new IContributionItem[] {
-        new ActionContributionItem(filterTreeAction), //
-        new Separator(), //
-        new ActionContributionItem(new ExpandAllAction(getViewer())),
-        new ActionContributionItem(new CollapseAllAction(getViewer())),
-        new Separator(), //
+        new ActionContributionItem(filterTreeAction),
+        new Separator(),
+        new ActionContributionItem(new DropDownAction(
+            collapse.getText(), collapse.getImageDescriptor(), 
+            collapse, 
+            collapse, 
+            new ExpandAllAction(getViewer()))),
         new ActionContributionItem(new GroupByAction(contents,
             groupByFilesAction, // Default action 
             groupByFilesAction, // First menu item
-            newGroupByFoldersAction(), //
-            newGroupByProjectsAction(), //
+            newGroupByFoldersAction(), 
+            newGroupByProjectsAction(), 
             newGroupByDatesAndFilesAction())),
         new ActionContributionItem(new DropDownAction(
             "Highlight " + colorByProjectsAction.getText(), SharedImages.BRUSH, 
             colorByProjectsAction, // Default action
             newColorByFilesAction(),
             newColorByFoldersAction(),
-            colorByProjectsAction, //
+            colorByProjectsAction, 
             newColorByDatesAction())) };
 
     for (IContributionItem item : items)
@@ -118,18 +108,7 @@ public class ResourcePage extends AbstractFilteredTreePage {
 
     return items;
   }
-
-  @Override
-  public void update(Preference p) {
-    TreePath[] expandedPaths = getViewer().getExpandedTreePaths();
-
-    LocalDate start = LocalDate.fromCalendarFields(p.getStartDate());
-    LocalDate end = LocalDate.fromCalendarFields(p.getEndDate());
-    getViewer().setInput(accessor.getData(start, end));
-    
-    getViewer().setExpandedTreePaths(expandedPaths);
-  }
-
+  
   @Override
   protected CellPainter createCellPainter() {
     return new CellPainter(contents) {
@@ -146,7 +125,7 @@ public class ResourcePage extends AbstractFilteredTreePage {
     column.setText("Name");
     column.setWidth(200);
     column.addSelectionListener(createInitialComparator(viewer));
-
+    
     column = new TreeColumn(viewer.getTree(), SWT.RIGHT);
     column.setText("Time Spent");
     column.setWidth(150);
@@ -191,6 +170,19 @@ public class ResourcePage extends AbstractFilteredTreePage {
           return super.doCompare(v, e1, e2);
       }
     };
+  }
+
+  @Override
+  protected IAccessor<?> getAccessor() {
+    return DataHandler.getFileDataAccessor();
+  }
+
+  @Override
+  protected void initializeViewer(TreeViewer viewer) {
+    contents = new ResourcePageContentProvider(viewer);
+    labels = new ResourcePageTableLabelProvider(contents);
+    viewer.setContentProvider(contents);
+    viewer.setLabelProvider(labels);
   }
 
   @Override
@@ -303,14 +295,14 @@ public class ResourcePage extends AbstractFilteredTreePage {
   }
 
   /**
-   * Action to group the data by projects.
+   * Action to group the data by dates and files.
    */
-  private IAction newGroupByProjectsAction() {
-    IAction action = new Action("Projects", PlatformUI.getWorkbench()
-        .getSharedImages().getImageDescriptor(IDE.SharedImages.IMG_OBJ_PROJECT)) {
+  private IAction newGroupByDatesAndFilesAction() {
+    IAction action = new Action("Dates", SharedImages.CALENDAR) {
       @Override
       public void run() {
-        contents.setSelectedCategories(Category.PROJECT);
+        contents.setSelectedCategories(Category.DATE, Category.PROJECT, 
+            Category.FOLDER, Category.FILE);
       }
     };
     return action;
@@ -332,14 +324,14 @@ public class ResourcePage extends AbstractFilteredTreePage {
   }
   
   /**
-   * Action to group the data by dates and files.
+   * Action to group the data by projects.
    */
-  private IAction newGroupByDatesAndFilesAction() {
-    IAction action = new Action("Dates", SharedImages.CALENDAR) {
+  private IAction newGroupByProjectsAction() {
+    IAction action = new Action("Projects", PlatformUI.getWorkbench()
+        .getSharedImages().getImageDescriptor(IDE.SharedImages.IMG_OBJ_PROJECT)) {
       @Override
       public void run() {
-        contents.setSelectedCategories(Category.DATE, Category.PROJECT, 
-            Category.FOLDER, Category.FILE);
+        contents.setSelectedCategories(Category.PROJECT);
       }
     };
     return action;

@@ -7,7 +7,6 @@ import com.google.common.base.Predicates;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
 
 import org.eclipse.jface.viewers.TreeNode;
 import org.junit.Test;
@@ -38,36 +37,6 @@ public class TreeNodesTest {
     TreeNode child = TreeNodes.appendToParent(root, value);
     assertNotNull(TreeNodes.findChild(root, value));
     assertEquals(child, TreeNodes.findChild(root, value));
-  }
-  
-  @Test
-  public void testFindChildRecursively() {
-    String target = "abc";
-    
-    TreeNode root = new TreeNode(target);
-    assertSame(root, TreeNodes.findChildRecursively(root, target));
-    
-    
-    root.setChildren(new TreeNode[] { new TreeNode(""), new TreeNode("123") });
-    assertSame(root, TreeNodes.findChildRecursively(root, target));
-    
-    
-    root = new TreeNode(new Object());
-    TreeNode targetNode = new TreeNode(target);
-    root.setChildren(new TreeNode[] { new TreeNode(112), new TreeNode(12) });
-    root.getChildren()[0].setChildren(new TreeNode[] { targetNode, new TreeNode("1") });
-    assertSame(targetNode, TreeNodes.findChildRecursively(root, target));
-    
-    
-    root = new TreeNode(new Object());
-    root.setChildren(new TreeNode[] { new TreeNode(112), new TreeNode(12) });
-    root.getChildren()[0].setChildren(new TreeNode[] { new TreeNode("1"), targetNode });
-    assertSame(targetNode, TreeNodes.findChildRecursively(root, target));
-    
-    root = new TreeNode(target);
-    root.setChildren(new TreeNode[] { new TreeNode(112), new TreeNode(12) });
-    root.getChildren()[0].setChildren(new TreeNode[] { new TreeNode(2), new TreeNode("1") });
-    assertNull(TreeNodes.findChildRecursively(root.getChildren()[0], target));
   }
   
   @Test

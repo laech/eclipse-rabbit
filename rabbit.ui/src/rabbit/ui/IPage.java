@@ -15,6 +15,7 @@
  */
 package rabbit.ui;
 
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.swt.widgets.Composite;
@@ -40,10 +41,13 @@ public interface IPage {
   IContributionItem[] createToolBarItems(IToolBarManager toolBar);
 
   /**
-   * Updates the data of this page.
+   * Creates a job which will be ran to update the page. This page will only
+   * return the job, not run it.
    * 
-   * @param preference The object containing the update preferences.
+   * @param preference The new preferences.
+   * @return A job to update the page, or null if this page does not need to be
+   *         updated.
    */
-  void update(Preference preference);
+  Job updateJob(Preference preference);
 
 }

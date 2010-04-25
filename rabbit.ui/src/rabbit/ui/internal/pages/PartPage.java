@@ -16,9 +16,7 @@
 package rabbit.ui.internal.pages;
 
 import rabbit.data.access.IAccessor;
-import rabbit.data.access.model.PartDataDescriptor;
 import rabbit.data.handler.DataHandler;
-import rabbit.ui.Preference;
 import rabbit.ui.internal.RabbitUI;
 import rabbit.ui.internal.SharedImages;
 import rabbit.ui.internal.actions.CollapseAllAction;
@@ -42,7 +40,6 @@ import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.viewers.TreeNode;
-import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
@@ -57,22 +54,20 @@ import java.util.List;
 /**
  * A page displays workbench part usage.
  */
-public class PartPage extends AbstractFilteredTreePage {
+public class PartPage extends AbstractAccessorPage {
 
   // Preference constants:
   private static final String PREF_SELECTED_CATEGORIES = "PartPage.SelectedCatgories";
   private static final String PREF_PAINT_CATEGORY = "PartPage.PaintCategory";
 
-  private final IAccessor<PartDataDescriptor> accessor;
   private PartPageContentProvider contents;
   private PartPageLabelProvider labels;
-
+  
   /**
    * Constructs a new page.
    */
   public PartPage() {
     super();
-    accessor = DataHandler.getPartDataAccessor();
   }
 
   @Override
@@ -117,12 +112,15 @@ public class PartPage extends AbstractFilteredTreePage {
     ShowHideFilterControlAction filter = new ShowHideFilterControlAction(getFilteredTree());
     filter.run();
     
+    IAction collapse = new CollapseAllAction(getViewer());
     IContributionItem[] items = new IContributionItem[] {
         new ActionContributionItem(filter),
         new Separator(),
-        new ActionContributionItem(new ExpandAllAction(getViewer())),
-        new ActionContributionItem(new CollapseAllAction(getViewer())),
-        new Separator(), 
+        new ActionContributionItem(new DropDownAction(
+            collapse.getText(), collapse.getImageDescriptor(), 
+            collapse, 
+            collapse,
+            new ExpandAllAction(getViewer()))),
         new ActionContributionItem(new GroupByAction(contents, groupByPart, 
             groupByPart, groupByDate)), 
         new ActionContributionItem(new DropDownAction(
@@ -136,18 +134,6 @@ public class PartPage extends AbstractFilteredTreePage {
   }
 
   @Override
-  public void update(Preference p) {
-    labels.updateState();
-    TreePath[] paths = getViewer().getExpandedTreePaths();
-
-    LocalDate start = LocalDate.fromCalendarFields(p.getStartDate());
-    LocalDate end = LocalDate.fromCalendarFields(p.getEndDate());
-    getViewer().setInput(accessor.getData(start, end));
-    
-    getViewer().setExpandedTreePaths(paths);
-  }
-
-  @Override
   protected CellPainter createCellPainter() {
     return new CellPainter(contents) {
       @Override
@@ -155,6 +141,11 @@ public class PartPage extends AbstractFilteredTreePage {
         return new Color(display, 49, 132, 155);
       }
     };
+  }
+
+  @Override
+  protected PatternFilter createFilter() {
+    return new PatternFilter();
   }
 
   @Override
@@ -175,16 +166,16 @@ public class PartPage extends AbstractFilteredTreePage {
   }
   
   @Override
+  protected IAccessor<?> getAccessor() {
+    return DataHandler.getPartDataAccessor();
+  }
+
+  @Override
   protected void initializeViewer(TreeViewer viewer) {
    contents = new PartPageContentProvider(viewer);
    labels = new PartPageLabelProvider(contents);
    viewer.setContentProvider(contents);
    viewer.setLabelProvider(labels);
-  }
-
-  @Override
-  protected PatternFilter createFilter() {
-    return new PatternFilter();
   }  
   
   @Override

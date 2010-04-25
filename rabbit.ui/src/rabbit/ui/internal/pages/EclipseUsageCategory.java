@@ -18,6 +18,7 @@ package rabbit.ui.internal.pages;
 import rabbit.ui.Preference;
 import rabbit.ui.IPage;
 
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.swt.SWT;
@@ -48,9 +49,10 @@ public class EclipseUsageCategory implements IPage {
   public IContributionItem[] createToolBarItems(IToolBarManager toolBar) {
     return new IContributionItem[0];
   }
-
+  
   @Override
-  public void update(Preference preference) {
+  public Job updateJob(Preference preference) {
+    return null;
   }
 
 }

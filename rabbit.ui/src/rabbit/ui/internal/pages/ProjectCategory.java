@@ -18,6 +18,7 @@ package rabbit.ui.internal.pages;
 import rabbit.ui.Preference;
 import rabbit.ui.IPage;
 
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.swt.SWT;
@@ -37,8 +38,7 @@ public class ProjectCategory implements IPage {
     Label label = new Label(parent, SWT.NONE);
     label.setBackground(parent.getBackground());
     label.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
-    label
-        .setText("This category contains pages that display information relating to projects.");
+    label.setText("This category contains pages that display information relating to projects.");
   }
 
   @Override
@@ -47,7 +47,8 @@ public class ProjectCategory implements IPage {
   }
 
   @Override
-  public void update(Preference preference) {
+  public Job updateJob(Preference preference) {
+    return null;
   }
 
 }

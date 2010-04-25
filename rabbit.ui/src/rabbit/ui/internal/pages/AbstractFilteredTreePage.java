@@ -68,6 +68,8 @@ public abstract class AbstractFilteredTreePage implements IPage {
     
     int style = SWT.VIRTUAL | SWT.V_SCROLL | SWT.H_SCROLL;
     filteredTree = new FilteredTree(parent, style, createFilter(), false);
+    filteredTree.setBackground(parent.getBackground());
+    filteredTree.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
     
     { // Make it look a bit nicer for us:
       GridLayout layout = (GridLayout) filteredTree.getLayout();
@@ -77,13 +79,16 @@ public abstract class AbstractFilteredTreePage implements IPage {
       layout.marginHeight = 5;
       layout.marginWidth = 5;
     }
-    
-    filteredTree.setBackground(parent.getBackground());
-    filteredTree.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
     final TreeViewer viewer = filteredTree.getViewer();
     initializeViewer(viewer);
+    
+    /*
+     * Set hash look up to be disabled by default, because some subclasses may
+     * rely on object identity instead of Object.equals(Object). 
+     */
     viewer.setUseHashlookup(true);
+    
     viewer.getTree().setHeaderVisible(true);
     viewer.getTree().addDisposeListener(new DisposeListener() {
       @Override

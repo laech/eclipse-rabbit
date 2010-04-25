@@ -16,11 +16,12 @@
 package rabbit.ui.internal;
 
 import rabbit.tracking.internal.TrackingPlugin;
-import rabbit.ui.Preference;
 import rabbit.ui.IPage;
+import rabbit.ui.Preference;
 
 import org.eclipse.core.runtime.IProduct;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ControlContribution;
 import org.eclipse.jface.action.IAction;
@@ -49,6 +50,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.forms.widgets.Form;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.part.ViewPart;
+import org.eclipse.ui.progress.IWorkbenchSiteProgressService;
 
 import java.util.Calendar;
 import java.util.HashMap;
@@ -281,8 +283,8 @@ public class RabbitView extends ViewPart {
       // Updates the current visible page, mark others as not updated:
       Boolean updated = pageStatus.get(page);
       if (updated == null || updated == false) {
-        page.update(preferences);
         pageStatus.put(page, Boolean.TRUE);
+        updatePage(page, preferences);
       }
     }
 
@@ -429,9 +431,20 @@ public class RabbitView extends ViewPart {
       boolean isVisible = stackLayout.topControl == entry.getValue();
       if (isVisible) {
         // update current visible page.
-        entry.getKey().update(preferences);
+        updatePage(entry.getKey(), preferences);
       }
       pageStatus.put(entry.getKey(), Boolean.valueOf(isVisible));
     }
+  }
+  
+  private void updatePage(final IPage page, final Preference preference) {
+    Job job = page.updateJob(preference);
+    if (job == null)
+      return;
+    
+    IWorkbenchSiteProgressService service = (IWorkbenchSiteProgressService) 
+        getSite().getService(IWorkbenchSiteProgressService.class);
+    
+    service.schedule(job);
   }
 }

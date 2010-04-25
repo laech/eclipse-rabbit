@@ -17,15 +17,12 @@ package rabbit.ui.internal.pages;
 
 import static rabbit.ui.internal.util.DurationFormat.format;
 
-import rabbit.ui.internal.viewers.TreeNodeDecorator;
-
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.eclipse.jface.viewers.DecoratingLabelProvider;
 import org.eclipse.jface.viewers.IColorProvider;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.ui.PlatformUI;
 
 import javax.annotation.Nonnull;
 
@@ -46,8 +43,7 @@ public class ResourcePageTableLabelProvider extends DecoratingLabelProvider
   public ResourcePageTableLabelProvider(
       @Nonnull ResourcePageContentProvider contentProvider) {
 
-    super(new ResourcePageLabelProvider(), 
-        null);
+    super(new ResourcePageLabelProvider(), null);
     
     checkNotNull(contentProvider);
     contents = contentProvider;

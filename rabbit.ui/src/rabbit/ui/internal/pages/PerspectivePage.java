@@ -16,9 +16,7 @@
 package rabbit.ui.internal.pages;
 
 import rabbit.data.access.IAccessor;
-import rabbit.data.access.model.PerspectiveDataDescriptor;
 import rabbit.data.handler.DataHandler;
-import rabbit.ui.Preference;
 import rabbit.ui.internal.RabbitUI;
 import rabbit.ui.internal.SharedImages;
 import rabbit.ui.internal.actions.CollapseAllAction;
@@ -41,7 +39,6 @@ import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.TreeNode;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
@@ -57,22 +54,25 @@ import java.util.List;
 /**
  * A page displays perspective usage.
  */
-public class PerspectivePage extends AbstractFilteredTreePage {
+public class PerspectivePage extends AbstractAccessorPage {
   
   // Preference constants:
   private static final String PREF_SELECTED_CATEGORIES = "PerspectivePage.SelectedCatgories";
   private static final String PREF_PAINT_CATEGORY = "PerspectivePage.PaintCategory";
 
-  private final IAccessor<PerspectiveDataDescriptor> accessor;
   private PerspectivePageContentProvider contents;
   private PerspectivePageLabelProvider labels;
+  
+  @Override
+  protected IAccessor<?> getAccessor() {
+    return DataHandler.getPerspectiveDataAccessor();
+  }
 
   /**
    * Constructs a new page.
    */
   public PerspectivePage() {
     super();
-    accessor = DataHandler.getPerspectiveDataAccessor();
   }
   
   @Override
@@ -125,12 +125,15 @@ public class PerspectivePage extends AbstractFilteredTreePage {
     ShowHideFilterControlAction filter = new ShowHideFilterControlAction(getFilteredTree());
     filter.run();
     
+    IAction collapse = new CollapseAllAction(getViewer());
     IContributionItem[] items = new IContributionItem[] {
         new ActionContributionItem(filter),
         new Separator(),
-        new ActionContributionItem(new ExpandAllAction(getViewer())),
-        new ActionContributionItem(new CollapseAllAction(getViewer())),
-        new Separator(), 
+        new ActionContributionItem(new DropDownAction(
+            collapse.getText(), collapse.getImageDescriptor(), 
+            collapse, 
+            collapse,
+            new ExpandAllAction(getViewer()))),
         new ActionContributionItem(new GroupByAction(contents, groupByPers, 
             groupByPers, groupByDate)), 
         new ActionContributionItem(new DropDownAction(
@@ -141,24 +144,6 @@ public class PerspectivePage extends AbstractFilteredTreePage {
       toolBar.add(item);
 
     return items;
-  }
-
-  @Override
-  public void update(Preference p) {
-    labels.updateState();
-
-    Object[] elements = getViewer().getExpandedElements();
-    ISelection selection = getViewer().getSelection();
-
-    LocalDate start = LocalDate.fromCalendarFields(p.getStartDate());
-    LocalDate end = LocalDate.fromCalendarFields(p.getEndDate());
-    getViewer().setInput(accessor.getData(start, end));
-    try {
-      getViewer().setExpandedElements(elements);
-      getViewer().setSelection(selection);
-    } catch (Exception e) {
-      // Just in case something goes wrong while restoring the viewer's state
-    }
   }
 
   @Override

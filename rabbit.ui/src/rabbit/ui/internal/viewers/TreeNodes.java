@@ -70,35 +70,6 @@ public class TreeNodes {
     }
     return null;
   }
-  
-  /**
-   * Finds a child node who has the given value (using
-   * {@link Object#equals(Object)}). This method looks at all the tree nodes of
-   * the given subtree. If the given parent node contains the value, the parent
-   * is returned; if a tree node containing the value is found, that tree node
-   * is returned without further looking into the tree. This method may not be
-   * suitable to use if multiple elements are consider equal in the subtree.
-   * 
-   * @param parent The root of the subtree.
-   * @param childValue The value of the tree node.
-   * @return The tree node who has the given value, or null if not found.
-   * @see #findChild(TreeNode, Object)
-   */
-  public static TreeNode findChildRecursively(TreeNode parent, Object childValue) {
-    if (childValue.equals(parent.getValue()))
-      return parent;
-    
-    if (parent.getChildren() == null)
-      return null;
-    
-    for (TreeNode node : parent.getChildren()) {
-      TreeNode result = findChildRecursively(node, childValue);
-      if (result != null)
-        return result;
-    }
-    
-    return null;
-  }
 
   /**
    * Finds the max int value of a subtree for all the tree nodes who's object

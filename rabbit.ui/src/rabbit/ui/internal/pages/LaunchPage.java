@@ -16,9 +16,7 @@
 package rabbit.ui.internal.pages;
 
 import rabbit.data.access.IAccessor;
-import rabbit.data.access.model.LaunchDataDescriptor;
 import rabbit.data.handler.DataHandler;
-import rabbit.ui.Preference;
 import rabbit.ui.internal.RabbitUI;
 import rabbit.ui.internal.SharedImages;
 import rabbit.ui.internal.actions.CollapseAllAction;
@@ -42,7 +40,6 @@ import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.viewers.TreeNode;
-import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.TreeViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
@@ -58,31 +55,22 @@ import java.util.List;
 /**
  * Displays launch events.
  */
-public class LaunchPage extends AbstractFilteredTreePage {
+public class LaunchPage extends AbstractAccessorPage {
   
   // Preference constants:
   private static final String PREF_SELECTED_CATEGORIES = "LaunchPage.SelectedCatgories";
   private static final String PREF_PAINT_CATEGORY = "LaunchPage.PaintCategory";
 
-  private IAccessor<LaunchDataDescriptor> accessor;
   private LaunchPageContentProvider contents;
   private LaunchPageLabelProvider labels;
-
+  
   /**
    * Constructs a new page.
    */
   public LaunchPage() {
-    accessor = DataHandler.getLaunchDataAccessor();
+    super();
   }
   
-  @Override
-  protected void initializeViewer(TreeViewer viewer) {
-    contents = new LaunchPageContentProvider(viewer);
-    labels = new LaunchPageLabelProvider(contents);
-    viewer.setContentProvider(contents);
-    viewer.setLabelProvider(labels);
-  }
-
   @Override
   public IContributionItem[] createToolBarItems(IToolBarManager toolBar) {
 
@@ -108,13 +96,16 @@ public class LaunchPage extends AbstractFilteredTreePage {
     IAction filterAction = new ShowHideFilterControlAction(getFilteredTree());
     filterAction.run();
 
+    IAction collapse = new CollapseAllAction(getViewer());
     IAction groupByLaunches = newGroupByLaunchesAction();
     IContributionItem[] items = new IContributionItem[] {
         new ActionContributionItem(filterAction), //
-        new Separator(), //
-        new ActionContributionItem(new ExpandAllAction(getViewer())),
-        new ActionContributionItem(new CollapseAllAction(getViewer())),
-        new Separator(), //
+        new Separator(),
+        new ActionContributionItem(new DropDownAction(
+            collapse.getText(), collapse.getImageDescriptor(), 
+            collapse, 
+            collapse,
+            new ExpandAllAction(getViewer()))),
         new ActionContributionItem(new GroupByAction(contents, groupByLaunches,
             groupByLaunches, //
             newGroupByLaunchModesAction(), //
@@ -129,17 +120,6 @@ public class LaunchPage extends AbstractFilteredTreePage {
       toolBar.add(item);
 
     return items;
-  }
-
-  @Override
-  public void update(Preference p) {
-    TreePath[] expandedPaths = getViewer().getExpandedTreePaths();
-
-    LocalDate start = LocalDate.fromCalendarFields(p.getStartDate());
-    LocalDate end = LocalDate.fromCalendarFields(p.getEndDate());
-    getViewer().setInput(accessor.getData(start, end));
-
-    getViewer().setExpandedTreePaths(expandedPaths);
   }
 
   /**
@@ -182,7 +162,7 @@ public class LaunchPage extends AbstractFilteredTreePage {
           return (count1 > count2) ? 1 : -1;
       }
     };
-
+    
     TreeColumn column = new TreeColumn(viewer.getTree(), SWT.LEFT);
     column.setText("Name");
     column.setWidth(180);
@@ -226,18 +206,18 @@ public class LaunchPage extends AbstractFilteredTreePage {
       }
     };
   }
-  
+
   @Override
-  protected void saveState() {
-    super.saveState();
-    IPreferenceStore store = RabbitUI.getDefault().getPreferenceStore();
+  protected IAccessor<?> getAccessor() {
+    return DataHandler.getLaunchDataAccessor();
+  }
 
-    // Saves the selected categories of the content provider:
-    ICategory[] categories = contents.getSelectedCategories();
-    store.setValue(PREF_SELECTED_CATEGORIES, Joiner.on(",").join(categories));
-
-    // Saves the paint category of the content provider:
-    store.setValue(PREF_PAINT_CATEGORY, contents.getPaintCategory().toString());
+  @Override
+  protected void initializeViewer(TreeViewer viewer) {
+    contents = new LaunchPageContentProvider(viewer);
+    labels = new LaunchPageLabelProvider(contents);
+    viewer.setContentProvider(contents);
+    viewer.setLabelProvider(labels);
   }
   
   @Override
@@ -265,6 +245,19 @@ public class LaunchPage extends AbstractFilteredTreePage {
     } catch (IllegalArgumentException e) {
       // Just let the content provider use its default paint category.
     }
+  }
+  
+  @Override
+  protected void saveState() {
+    super.saveState();
+    IPreferenceStore store = RabbitUI.getDefault().getPreferenceStore();
+
+    // Saves the selected categories of the content provider:
+    ICategory[] categories = contents.getSelectedCategories();
+    store.setValue(PREF_SELECTED_CATEGORIES, Joiner.on(",").join(categories));
+
+    // Saves the paint category of the content provider:
+    store.setValue(PREF_PAINT_CATEGORY, contents.getPaintCategory().toString());
   }
 
   /** Action to group data by launch dates. */
