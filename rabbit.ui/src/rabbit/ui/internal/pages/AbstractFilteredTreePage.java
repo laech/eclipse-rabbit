@@ -83,12 +83,7 @@ public abstract class AbstractFilteredTreePage implements IPage {
     final TreeViewer viewer = filteredTree.getViewer();
     initializeViewer(viewer);
     
-    /*
-     * Set hash look up to be disabled by default, because some subclasses may
-     * rely on object identity instead of Object.equals(Object). 
-     */
     viewer.setUseHashlookup(true);
-    
     viewer.getTree().setHeaderVisible(true);
     viewer.getTree().addDisposeListener(new DisposeListener() {
       @Override
