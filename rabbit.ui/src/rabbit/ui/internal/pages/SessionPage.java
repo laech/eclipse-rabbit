@@ -37,6 +37,8 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.ui.dialogs.PatternFilter;
 
+import java.util.Collection;
+
 /**
  * A page displaying how much time is spent on using Eclipse every day.
  */
@@ -86,7 +88,6 @@ public class SessionPage extends AbstractFilteredTreePage
 
   @Override
   public Job updateJob(final Preference p) {
-    maxValue = 0;
     labels.updateState();
     
     return AbstractAccessorPage.newUpdateJob(getViewer(), p, accessor, Job.SHORT);
@@ -138,9 +139,25 @@ public class SessionPage extends AbstractFilteredTreePage
 
   @Override
   protected void initializeViewer(TreeViewer viewer) {
-    viewer.setContentProvider(new CollectionContentProvider());
     labels = new SessionPageLabelProvider();
     viewer.setLabelProvider(labels);
+    viewer.setContentProvider(new CollectionContentProvider() {
+      @SuppressWarnings("unchecked")
+      @Override
+      public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
+        super.inputChanged(viewer, oldInput, newInput);
+        if (newInput == null) {
+          return;
+        }
+        maxValue = 0;
+        Collection<SessionDataDescriptor> data = (Collection<SessionDataDescriptor>) newInput;
+        for (SessionDataDescriptor des : data) {
+          if (des.getValue() > maxValue) {
+            maxValue = des.getValue();
+          }
+        }
+      }
+    });
   }
 
 }

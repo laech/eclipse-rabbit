@@ -54,7 +54,7 @@ import javax.xml.bind.JAXBElement;
  * Test {@link FileStore}
  */
 @SuppressWarnings("restriction")
-public class XmlFileMapperTest {
+public class FileStoreTest {
 
   private FileStore manager = FileStore.INSTANCE;
 

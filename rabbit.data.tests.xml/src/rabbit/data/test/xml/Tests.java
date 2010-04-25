@@ -22,7 +22,7 @@ import org.junit.runners.Suite;
 @Suite.SuiteClasses( { DataStoreTest.class, //
     DatatypeUtilTest.class,//
     JaxbUtilTest.class,//
-    XmlFileMapperTest.class,//
+    FileStoreTest.class,//
     XmlPluginTest.class,//
 //
 })
