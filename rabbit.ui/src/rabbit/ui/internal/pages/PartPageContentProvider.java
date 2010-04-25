@@ -27,7 +27,6 @@ import com.google.common.collect.ImmutableMap;
 import org.eclipse.jface.viewers.TreeNode;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.ui.IEditorDescriptor;
 import org.eclipse.ui.IEditorRegistry;
 import org.eclipse.ui.IWorkbenchPartDescriptor;
@@ -73,6 +72,24 @@ public class PartPageContentProvider extends AbstractValueContentProvider {
       return isHidingViews() ? !(input instanceof IViewDescriptor) : true;
     }
   };
+
+  @Override
+  public boolean shouldFilter(Object element) {
+    boolean shouldFilter = super.shouldFilter(element);
+    if (!shouldFilter) {
+      if (element instanceof TreeNode) {
+        element = ((TreeNode) element).getValue();
+      }
+      if (element instanceof IEditorDescriptor) {
+        return isHidingEditors();
+      } else if (element instanceof IViewDescriptor) {
+        return isHidingViews();
+      } else {
+        return false;
+      }
+    }
+    return shouldFilter;
+  }
   
   /**
    * Constructs a new content provider for the given viewer.
@@ -81,22 +98,6 @@ public class PartPageContentProvider extends AbstractValueContentProvider {
    */
   public PartPageContentProvider(TreeViewer treeViewer) {
     super(treeViewer);
-
-    treeViewer.addFilter(new ViewerFilter() {
-      @Override
-      public boolean select(Viewer viewer, Object parentElement, Object element) {
-        if (element instanceof TreeNode) {
-          element = ((TreeNode) element).getValue();
-        }
-        if (element instanceof IEditorDescriptor) {
-          return !isHidingEditors();
-        } else if (element instanceof IViewDescriptor) {
-          return !isHidingViews();
-        } else {
-          return true;
-        }
-      }
-    });
   }
   
   /**

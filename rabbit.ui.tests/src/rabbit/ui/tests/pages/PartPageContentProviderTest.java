@@ -33,8 +33,10 @@ import static org.junit.Assert.fail;
 import org.eclipse.jface.viewers.TreeNode;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.IEditorDescriptor;
 import org.eclipse.ui.IWorkbenchPartDescriptor;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.views.IViewDescriptor;
 import org.joda.time.LocalDate;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -51,13 +53,12 @@ public class PartPageContentProviderTest {
 
   private static Shell shell;
   private static PartPageContentProvider provider;
-  private final IWorkbenchPartDescriptor part = new UndefinedWorkbenchPartDescriptor(System.nanoTime() + "");
-
-
+  
   @AfterClass
   public static void afterClass() {
     shell.dispose();
   }
+
 
   @BeforeClass
   public static void beforeClass() {
@@ -67,19 +68,7 @@ public class PartPageContentProviderTest {
     viewer.setContentProvider(provider);
   }
 
-  @Test
-  public void testHasChildren() throws Exception {
-    PartDataDescriptor des = new PartDataDescriptor(new LocalDate(), 1, "id");
-    provider.getViewer().setInput(Arrays.asList(des));
-
-    TreeNode root = provider.getRoot();
-    provider.setSelectedCategories(Category.DATE);
-    assertFalse(provider.hasChildren(root.getChildren()[0]));
-
-    provider.setSelectedCategories(Category.WORKBENCH_TOOL, Category.DATE);
-    assertTrue(provider.hasChildren(root.getChildren()[0]));
-    assertFalse(provider.hasChildren(root.getChildren()[0].getChildren()[0]));
-  }
+  private final IWorkbenchPartDescriptor part = new UndefinedWorkbenchPartDescriptor(System.nanoTime() + "");
 
   @Test
   public void testGetChildren() throws Exception {
@@ -105,7 +94,7 @@ public class PartPageContentProviderTest {
     assertTrue(set.contains(d1.getDate()));
     assertTrue(set.contains(d2.getDate()));
   }
-
+  
   @Test
   public void testGetElement() throws Exception {
     // Two data descriptor of different dates, same id, different value:
@@ -131,7 +120,7 @@ public class PartPageContentProviderTest {
     assertEquals(1, provider.getElements(null).length);
     assertEquals(new TreeNode(part), provider.getElements(null)[0]);
   }
-
+  
   @Test
   public void testGetMaxValue() {
     // Two data descriptor of different dates, same id, different value:
@@ -154,7 +143,7 @@ public class PartPageContentProviderTest {
     provider.setSelectedCategories(Category.DATE, Category.WORKBENCH_TOOL);
     assertEquals(d1.getValue(), provider.getMaxValue());
   }
-
+  
   @Test
   public void testGetSelectedCategories() {
     assertNotNull(provider.getSelectedCategories());
@@ -168,7 +157,7 @@ public class PartPageContentProviderTest {
     provider.setSelectedCategories(categories);
     assertArrayEquals(categories, provider.getSelectedCategories());
   }
-
+  
   @Test
   public void testGetUnselectedCategories() {
     Set<Category> all = Sets.newHashSet(Category.DATE, Category.WORKBENCH_TOOL);
@@ -184,7 +173,7 @@ public class PartPageContentProviderTest {
     assertTrue(unselect.containsAll(Arrays.asList(provider
         .getUnselectedCategories())));
   }
-
+  
   @Test
   public void testGetValue() throws Exception {
     // Two data descriptor of different dates, same id, different value:
@@ -204,7 +193,21 @@ public class PartPageContentProviderTest {
     assertEquals(d1.getValue(), provider.getValue(dateNodes[0]));
     assertEquals(d2.getValue(), provider.getValue(dateNodes[1]));
   }
+  
+  @Test
+  public void testHasChildren() throws Exception {
+    PartDataDescriptor des = new PartDataDescriptor(new LocalDate(), 1, "id");
+    provider.getViewer().setInput(Arrays.asList(des));
 
+    TreeNode root = provider.getRoot();
+    provider.setSelectedCategories(Category.DATE);
+    assertFalse(provider.hasChildren(root.getChildren()[0]));
+
+    provider.setSelectedCategories(Category.WORKBENCH_TOOL, Category.DATE);
+    assertTrue(provider.hasChildren(root.getChildren()[0]));
+    assertFalse(provider.hasChildren(root.getChildren()[0].getChildren()[0]));
+  }
+  
   @Test
   public void testInputChanged_clearsOldData() throws Exception {
     PartDataDescriptor des = new PartDataDescriptor(new LocalDate(), 1, "id");
@@ -218,7 +221,7 @@ public class PartPageContentProviderTest {
       fail();
     }
   }
-
+  
   @Test
   public void testInputChanged_newInputNull() {
     try {
@@ -226,6 +229,129 @@ public class PartPageContentProviderTest {
     } catch (Exception e) {
       fail();
     }
+  }
+
+  @Test
+  public void testIsHidingEditors() {
+    provider.setHideEditors(true);
+    assertTrue(provider.isHidingEditors());
+    provider.setHideEditors(false);
+    assertFalse(provider.isHidingEditors());
+  }
+
+  @Test
+  public void testIsHidingEditors_defaultFalse() {
+    assertFalse(new PartPageContentProvider(new TreeViewer(shell)).isHidingEditors());
+  }
+
+  @Test
+  public void testIsHidingViews() {
+    provider.setHideViews(true);
+    assertTrue(provider.isHidingViews());
+    provider.setHideViews(false);
+    assertFalse(provider.isHidingViews());
+  }
+
+  @Test
+  public void testIsHidingViews_defaultFalse() {
+    assertFalse(new PartPageContentProvider(new TreeViewer(shell)).isHidingViews());
+  }
+
+  @Test
+  public void testSetHideEditors() {
+    IEditorDescriptor editor = PlatformUI.getWorkbench().getEditorRegistry().findEditor("org.eclipse.ui.DefaultTextEditor");
+    assertNotNull(editor);
+    provider.setHideEditors(true);
+    assertTrue(provider.shouldFilter(new TreeNode(editor)));
+    provider.setHideEditors(false);
+    assertFalse(provider.shouldFilter(new TreeNode(editor)));
+  }
+
+  @Test
+  public void testSetHideEditors_maxValueUpdated() {
+    IEditorDescriptor editor = PlatformUI.getWorkbench().getEditorRegistry().findEditor("org.eclipse.ui.DefaultTextEditor");
+    assertNotNull(editor);
+    IViewDescriptor view = PlatformUI.getWorkbench().getViewRegistry().getViews()[0];
+    
+    PartDataDescriptor editorDes = new PartDataDescriptor(new LocalDate(), 10, editor.getId());
+    PartDataDescriptor viewDes = new PartDataDescriptor(new LocalDate(), editorDes.getValue() - 1, view.getId());
+    provider.getViewer().setInput(Arrays.asList(editorDes, viewDes));
+    
+    provider.setHideEditors(true);
+    assertEquals(viewDes.getValue(), provider.getMaxValue());
+    provider.setHideEditors(false);
+    assertEquals(editorDes.getValue(), provider.getMaxValue());
+  }
+
+  @Test
+  public void testSetHideEditors_undefinedPart() {
+    IWorkbenchPartDescriptor undefined = new UndefinedWorkbenchPartDescriptor("1");
+    provider.setHideEditors(true);
+    assertFalse(provider.shouldFilter(new TreeNode(undefined)));
+    provider.setHideEditors(false);
+    assertFalse(provider.shouldFilter(new TreeNode(undefined)));
+  }
+  
+  @Test
+  public void testSetHideViews() {
+    IViewDescriptor view = PlatformUI.getWorkbench().getViewRegistry().getViews()[0];
+    provider.setHideViews(true);
+    assertTrue(provider.shouldFilter(new TreeNode(view)));
+    provider.setHideViews(false);
+    assertFalse(provider.shouldFilter(new TreeNode(view)));
+  }
+  
+  @Test
+  public void testSetHideViews_maxValueUpdated() {
+    IEditorDescriptor editor = PlatformUI.getWorkbench().getEditorRegistry().findEditor("org.eclipse.ui.DefaultTextEditor");
+    assertNotNull(editor);
+    IViewDescriptor view = PlatformUI.getWorkbench().getViewRegistry().getViews()[0];
+    
+    PartDataDescriptor viewDes = new PartDataDescriptor(new LocalDate(), 10, view.getId());
+    PartDataDescriptor editorDes = new PartDataDescriptor(new LocalDate(), viewDes.getValue() - 1, editor.getId());
+    provider.getViewer().setInput(Arrays.asList(editorDes, viewDes));
+    
+    provider.setHideViews(true);
+    assertEquals(editorDes.getValue(), provider.getMaxValue());
+    provider.setHideViews(false);
+    assertEquals(viewDes.getValue(), provider.getMaxValue());
+  }
+
+  @Test
+  public void testSetHideViews_undefinedPart() {
+    IWorkbenchPartDescriptor undefined = new UndefinedWorkbenchPartDescriptor("1");
+    provider.setHideViews(true);
+    assertFalse(provider.shouldFilter(new TreeNode(undefined)));
+    provider.setHideViews(false);
+    assertFalse(provider.shouldFilter(new TreeNode(undefined)));
+  }
+
+  @Test
+  public void testSetPaintCategory() {
+    // Two data descriptor of different dates, same id, different value:
+    PartDataDescriptor d1 = new PartDataDescriptor(new LocalDate(), 1000, "id");
+    PartDataDescriptor d2 = new PartDataDescriptor(d1.getDate().minusDays(1), 2, d1.getPartId());
+
+    provider.getViewer().setInput(Arrays.asList(d1, d2));
+
+    provider.setSelectedCategories(Category.DATE);
+    provider.setPaintCategory(Category.DATE);
+    assertEquals(d1.getValue(), provider.getMaxValue());
+
+    provider.setSelectedCategories(Category.WORKBENCH_TOOL);
+    provider.setPaintCategory(Category.WORKBENCH_TOOL);
+    assertEquals(d1.getValue() + d2.getValue(), provider.getMaxValue());
+  }
+
+  @Test
+  public void testSetSelectedCategories() {
+    ICategory[] cats = new ICategory[] { Category.WORKBENCH_TOOL, Category.DATE };
+    provider.setSelectedCategories(cats);
+    assertArrayEquals(cats, provider.getSelectedCategories());
+
+    cats = new ICategory[] { Category.DATE };
+    provider.setSelectedCategories(cats);
+    assertArrayEquals(cats, provider.getSelectedCategories());
   }
 
   @Test
@@ -260,34 +386,6 @@ public class PartPageContentProviderTest {
     } catch (Exception e) {
       fail();
     }
-  }
-
-  @Test
-  public void testSetPaintCategory() {
-    // Two data descriptor of different dates, same id, different value:
-    PartDataDescriptor d1 = new PartDataDescriptor(new LocalDate(), 1000, "id");
-    PartDataDescriptor d2 = new PartDataDescriptor(d1.getDate().minusDays(1), 2, d1.getPartId());
-
-    provider.getViewer().setInput(Arrays.asList(d1, d2));
-
-    provider.setSelectedCategories(Category.DATE);
-    provider.setPaintCategory(Category.DATE);
-    assertEquals(d1.getValue(), provider.getMaxValue());
-
-    provider.setSelectedCategories(Category.WORKBENCH_TOOL);
-    provider.setPaintCategory(Category.WORKBENCH_TOOL);
-    assertEquals(d1.getValue() + d2.getValue(), provider.getMaxValue());
-  }
-
-  @Test
-  public void testSetSelectedCategories() {
-    ICategory[] cats = new ICategory[] { Category.WORKBENCH_TOOL, Category.DATE };
-    provider.setSelectedCategories(cats);
-    assertArrayEquals(cats, provider.getSelectedCategories());
-
-    cats = new ICategory[] { Category.DATE };
-    provider.setSelectedCategories(cats);
-    assertArrayEquals(cats, provider.getSelectedCategories());
   }
 
   @Test
