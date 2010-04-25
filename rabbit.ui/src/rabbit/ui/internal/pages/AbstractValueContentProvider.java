@@ -69,7 +69,7 @@ public abstract class AbstractValueContentProvider
   private IdentityHashMap<TreeNode, Long> treeNodeValues;
 
   /** {@link #getMaxValue()} */
-  private long maxValue;
+  protected long maxValue;
 
   /**
    * Constructor a content provider for the given viewer.
@@ -140,7 +140,7 @@ public abstract class AbstractValueContentProvider
    * Updates the max value for painting.
    * @see #getMaxValue()
    */
-  private void updateMaxValue() {
+  protected void updateMaxValue() {
     maxValue = TreeNodes.findMaxLong(getRoot(), getCategorizers().get(getPaintCategory()));
   }
   

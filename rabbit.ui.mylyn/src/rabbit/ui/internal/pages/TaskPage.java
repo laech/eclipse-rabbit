@@ -16,9 +16,7 @@
 package rabbit.ui.internal.pages;
 
 import rabbit.data.access.IAccessor;
-import rabbit.data.access.model.TaskFileDataDescriptor;
 import rabbit.data.handler.DataHandler;
-import rabbit.ui.Preference;
 import rabbit.ui.internal.RabbitUI;
 import rabbit.ui.internal.SharedImages;
 import rabbit.ui.internal.actions.CollapseAllAction;
@@ -41,7 +39,6 @@ import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
@@ -56,21 +53,19 @@ import java.util.List;
 /**
  * A page for displaying time spent working on different tasks and resources.
  */
-public class TaskPage extends AbstractFilteredTreePage {
+public class TaskPage extends AbstractAccessorPage {
   
   // Preference constants:
   private static final String PREF_SELECTED_CATEGORIES = "TaskPage.SelectedCatgories";
   private static final String PREF_PAINT_CATEGORY = "TaskPage.PaintCategory";
 
-  private IAccessor<TaskFileDataDescriptor> accessor;
   private TaskPageContentProvider contentProvider;
   private TaskPageDecoratingLabelProvider labelProvider;
-
+  
   public TaskPage() {
     super();
-    accessor = DataHandler.getTaskFileDataAccessor();
   }
-  
+
   @Override
   public IContributionItem[] createToolBarItems(IToolBarManager toolBar) {
     ShowHideFilterControlAction filterAction = new ShowHideFilterControlAction(getFilteredTree());
@@ -92,18 +87,21 @@ public class TaskPage extends AbstractFilteredTreePage {
     IAction defaultColorAction = colorByActions[3];
     IAction defaultGroupAction = newGroupByTasksAction();
     
+    IAction collapse = new CollapseAllAction(getViewer());
     IContributionItem[] items = new IContributionItem[] {
         new ActionContributionItem(filterAction),
         new Separator(),
-        new ActionContributionItem(new ExpandAllAction(getViewer())),
-        new ActionContributionItem(new CollapseAllAction(getViewer())),
-        new Separator(),
+        new ActionContributionItem(new DropDownAction(
+            collapse.getText(), collapse.getImageDescriptor(), 
+            collapse, 
+            collapse,
+            new ExpandAllAction(getViewer()))),
         new ActionContributionItem(new GroupByAction(contentProvider, 
             defaultGroupAction,
             defaultGroupAction,
             newGroupByDatesAction())),
         new ActionContributionItem(new DropDownAction(
-            "Color by " + defaultColorAction.getText(), SharedImages.BRUSH, 
+            "Highlight " + defaultColorAction.getText(), SharedImages.BRUSH, 
             defaultColorAction, 
             colorByActions))
     };
@@ -112,17 +110,6 @@ public class TaskPage extends AbstractFilteredTreePage {
       toolBar.add(item);
     
     return items;
-  }
-
-  @Override
-  public void update(Preference p) {
-    TreePath[] expandedPaths = getViewer().getExpandedTreePaths();
-
-    LocalDate start = LocalDate.fromCalendarFields(p.getStartDate());
-    LocalDate end = LocalDate.fromCalendarFields(p.getEndDate());
-    getViewer().setInput(accessor.getData(start, end));
-
-    getViewer().setExpandedTreePaths(expandedPaths);
   }
   
   @Override
@@ -135,79 +122,8 @@ public class TaskPage extends AbstractFilteredTreePage {
     };
   }
   
-//  private class P extends BaseLabelProvider implements IStyledLabelProvider, IFontProvider, IColorProvider {
-//    
-//    private final TaskPageLabelProvider provider = new TaskPageLabelProvider();
-//    
-//    @Override
-//    public void dispose() {
-//      super.dispose();
-//      provider.dispose();
-//    }
-//
-//    @Override
-//    public Image getImage(Object element) {
-//      return provider.getImage(element);
-//    }
-//
-//    @Override
-//    public StyledString getStyledText(Object element) {
-//      String string = provider.getText(element);
-//      return (string != null ) ? new StyledString(string) : new StyledString("");
-//    }
-//
-//    @Override
-//    public Font getFont(Object element) {
-//      return provider.getFont(element);
-//    }
-//
-//    @Override
-//    public Color getBackground(Object element) {
-//      return provider.getBackground(element);
-//    }
-//
-//    @Override
-//    public Color getForeground(Object element) {
-//      return provider.getForeground(element);
-//    }
-//    
-//  }
-  
   @Override
   protected void createColumns(final TreeViewer viewer) {
-//    final DecoratingStyledCellLabelProvider p = new DecoratingStyledCellLabelProvider(new P(), new TreeNodeDecorator(), null);
-//    p.addListener(new ILabelProviderListener() {
-//      
-//      @Override
-//      public void labelProviderChanged(LabelProviderChangedEvent event) {
-//        if (!viewer.getTree().isVisible())
-//          return;
-//        
-//        Object[] elements = event.getElements();
-//        if (elements == null) {
-//          viewer.refresh();
-//        } else {
-//          for (Object element : elements) {
-//            TreeNode node = null;
-//            if (element instanceof TreeNode) {
-//              node = (TreeNode) element;
-//            } else {
-//              node = TreeNodes.findChildRecursively(contentProvider.getRoot(), element);
-//            }
-//            if (node != null) {
-//              viewer.update(node, null);
-//            }
-//            System.out.print(element + " ");
-//            System.out.println(element.getClass());
-//          }
-//        }
-//        
-//      }
-//    });
-//    TreeViewerColumn vc = new TreeViewerColumn(viewer, SWT.RIGHT);
-//    vc.getColumn().setWidth(200);
-//    vc.setLabelProvider(p);
-    
     TreeColumn column = new TreeColumn(viewer.getTree(), SWT.LEFT);
     column.setText("Name");
     column.setWidth(300);
@@ -218,7 +134,7 @@ public class TaskPage extends AbstractFilteredTreePage {
     column.addSelectionListener(getValueSorter());
     
   }
-
+  
   @Override
   protected PatternFilter createFilter() {
     return new PatternFilter();
@@ -237,6 +153,11 @@ public class TaskPage extends AbstractFilteredTreePage {
         return super.doCompare(v, e1, e2);
       }
     };
+  }
+
+  @Override
+  protected IAccessor<?> getAccessor() {
+    return DataHandler.getTaskFileDataAccessor();
   }
 
   @Override

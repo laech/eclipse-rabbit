@@ -50,6 +50,10 @@ public class SharedImages {
   
   public static final ImageDescriptor PERSPECTIVE = getObj16("defaultpersp.gif");
   
+  public static final ImageDescriptor EDITOR = getObj16("editor-highlight.gif");
+  
+  public static final ImageDescriptor VIEW = getObj16("view-highlight.gif");
+  
   /**
    * Gets an image descriptor from the directory "icons/full/obj16/".
    * @param name The name of the file.

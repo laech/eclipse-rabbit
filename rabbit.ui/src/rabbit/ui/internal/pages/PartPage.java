@@ -108,6 +108,21 @@ public class PartPage extends AbstractAccessorPage {
         contents.setSelectedCategories(part);
       }
     };
+    IAction hideEditors = new Action("Hide Editors", IAction.AS_CHECK_BOX) {
+      @Override public void run() {
+        contents.setHideEditors(isChecked());
+      }
+    };
+    hideEditors.setChecked(contents.isHidingEditors());
+    hideEditors.setImageDescriptor(SharedImages.EDITOR);
+    
+    IAction hideViews = new Action("Hide Views", IAction.AS_CHECK_BOX) {
+      @Override public void run() {
+        contents.setHideViews(isChecked());
+      }
+    };
+    hideViews.setChecked(contents.isHidingViews());
+    hideViews.setImageDescriptor(SharedImages.VIEW);
     
     ShowHideFilterControlAction filter = new ShowHideFilterControlAction(getFilteredTree());
     filter.run();
@@ -121,11 +136,18 @@ public class PartPage extends AbstractAccessorPage {
             collapse, 
             collapse,
             new ExpandAllAction(getViewer()))),
-        new ActionContributionItem(new GroupByAction(contents, groupByPart, 
-            groupByPart, groupByDate)), 
+        new ActionContributionItem(new GroupByAction(contents, 
+            groupByPart, 
+            groupByPart, 
+            groupByDate)), 
         new ActionContributionItem(new DropDownAction(
             "Highlight " + colorByPart.getText(), SharedImages.BRUSH, 
-            colorByPart, colorByPart, colorByDate))};
+            colorByPart, 
+            colorByPart, 
+            colorByDate)),
+        new ActionContributionItem(hideViews),
+        new ActionContributionItem(hideEditors)
+        };
 
     for (IContributionItem item : items)
       toolBar.add(item);
@@ -172,12 +194,12 @@ public class PartPage extends AbstractAccessorPage {
 
   @Override
   protected void initializeViewer(TreeViewer viewer) {
-   contents = new PartPageContentProvider(viewer);
-   labels = new PartPageLabelProvider(contents);
-   viewer.setContentProvider(contents);
-   viewer.setLabelProvider(labels);
-  }  
-  
+    contents = new PartPageContentProvider(viewer);
+    labels = new PartPageLabelProvider(contents);
+    viewer.setContentProvider(contents);
+    viewer.setLabelProvider(labels);
+  }
+
   @Override
   protected void restoreState() {
     super.restoreState();
