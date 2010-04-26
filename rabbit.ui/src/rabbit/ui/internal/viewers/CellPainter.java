@@ -124,18 +124,16 @@ public class CellPainter extends StyledCellLabelProvider {
     int oldAnti = gc.getAntialias();
     int oldAlpha = gc.getAlpha();
 
-    // Sets the alpha of the depends on the width:
-    int alpha = (int) (width / (float) columnWidth * 255);
-    if (alpha < 100) {
-      alpha = 100;
-    }
-    gc.setAlpha(alpha);
-
     /*
-     * On Linux, enabling GC's antialias will cause the color bar to be half
-     * drawn.
+     * On Linux, enabling GC's antialias or changing the alpha will sometimes
+     * cause the color bar to be half drawn.
      */
     if (!isLinux) {
+	  int alpha = (int) (width / (float) columnWidth * 255);
+	  if (alpha < 100) {
+	    alpha = 100;
+	  }
+	  gc.setAlpha(alpha);
       gc.setAntialias(SWT.ON);
     }
     gc.setBackground(background);

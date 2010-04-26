@@ -15,6 +15,8 @@
  */
 package rabbit.ui.internal.pages;
 
+import java.util.Arrays;
+
 import rabbit.ui.IPage;
 import rabbit.ui.internal.RabbitUI;
 import rabbit.ui.internal.viewers.CellPainter;
@@ -239,6 +241,10 @@ public abstract class AbstractFilteredTreePage implements IPage {
   }
 
   private String getWidthPreferenceString(TreeColumn column) {
-    return getClass().getSimpleName() + '.' + column.getText() + "Width";
+    String string = column.getText();
+    if (string == null || string.equals("")) {
+      string = "" + Arrays.asList(getViewer().getTree().getColumns()).indexOf(column);
+    }
+    return getClass().getSimpleName() + '.' + string + "Width";
   }
 }
