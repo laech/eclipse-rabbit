@@ -239,7 +239,8 @@ public class LaunchPageContentProvider extends AbstractCategoryContentProvider {
 
   @Override
   protected ICategory[] getAllSupportedCategories() {
-    return Category.values();
+    return new ICategory[] { 
+        Category.LAUNCH, Category.LAUNCH_MODE, Category.LAUNCH_TYPE };
   }
 
   @Override

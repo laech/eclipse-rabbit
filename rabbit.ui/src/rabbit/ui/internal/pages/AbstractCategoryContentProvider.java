@@ -27,6 +27,7 @@ import com.google.common.collect.Sets;
 
 import org.eclipse.jface.viewers.TreeNode;
 import org.eclipse.jface.viewers.TreeNodeContentProvider;
+import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
@@ -166,7 +167,9 @@ public abstract class AbstractCategoryContentProvider extends
   public void setPaintCategory(ICategory cat) {
     if (paintCategory != cat && allCategories.contains(cat)) {
       paintCategory = cat;
+      getViewer().getTree().setRedraw(false);
       getViewer().refresh();
+      getViewer().getTree().setRedraw(true);
     } else {
       return;
     }
@@ -187,15 +190,11 @@ public abstract class AbstractCategoryContentProvider extends
         selectedCategories.add(category);
     }
 
-    Object[] elements = getViewer().getExpandedElements();
-    // Resets the input instead of calling refresh, ensures the data is
-    // correctly structured:
+    getViewer().getTree().setRedraw(false);
+    TreePath[] paths = getViewer().getExpandedTreePaths();
     getViewer().setInput(getViewer().getInput());
-    try {
-      getViewer().setExpandedElements(elements);
-    } catch (Exception e) {
-      // Just in case some elements are no valid.
-    }
+    getViewer().setExpandedTreePaths(paths);
+    getViewer().getTree().setRedraw(true);
   }
 
   /**

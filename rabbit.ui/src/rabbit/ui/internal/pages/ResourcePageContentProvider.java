@@ -69,7 +69,8 @@ public class ResourcePageContentProvider extends AbstractValueContentProvider {
 
   @Override
   protected ICategory[] getAllSupportedCategories() {
-    return Category.values();
+    return new ICategory[] { 
+        Category.DATE, Category.PROJECT, Category.FOLDER, Category.FILE };
   }
 
   @Override

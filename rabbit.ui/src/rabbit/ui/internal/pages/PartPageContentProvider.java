@@ -125,7 +125,9 @@ public class PartPageContentProvider extends AbstractValueContentProvider {
     if (hideEditors != hide) {
       hideEditors = hide;
       updateMaxValue();
+      getViewer().getTree().setRedraw(false);
       getViewer().refresh(false);
+      getViewer().getTree().setRedraw(true);
     }
   }
   
@@ -137,7 +139,9 @@ public class PartPageContentProvider extends AbstractValueContentProvider {
     if (hideViews != hide) {
       hideViews = hide;
       updateMaxValue();
+      getViewer().getTree().setRedraw(false);
       getViewer().refresh(false);
+      getViewer().getTree().setRedraw(true);
     }
   }
 
