@@ -1,13 +1,13 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: rabbit.tracking
+Bundle-Name: Rabbit Tracking
 Bundle-SymbolicName: rabbit.tracking;singleton:=true
 Bundle-Version: 1.1.0.qualifier
 Bundle-Activator: rabbit.tracking.internal.TrackingPlugin
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  org.eclipse.debug.core,
- rabbit.data.handler;bundle-version="1.1.0",
+ rabbit.data.handler;bundle-version="1.0.0",
  org.eclipse.ui.ide,
  rabbit.data;bundle-version="1.1.0",
  rabbit.common;bundle-version="1.0.0"

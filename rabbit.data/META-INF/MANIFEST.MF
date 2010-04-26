@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: rabbit.data
-Bundle-SymbolicName: rabbit.data
+Bundle-Name: Rabbit Data
+Bundle-SymbolicName: rabbit.data;singleton:=true
 Bundle-Version: 1.1.0.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Require-Bundle: rabbit.common;bundle-version="1.0.0",

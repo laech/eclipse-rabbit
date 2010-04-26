@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: rabbit.common
-Bundle-SymbolicName: rabbit.common
+Bundle-Name: Rabbit Common
+Bundle-SymbolicName: rabbit.common;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: com.google.common.annotations,
