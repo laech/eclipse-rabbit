@@ -72,7 +72,7 @@ public interface IFileStore {
   /**
    * Saves the current data.
    * 
-   * @param update True to update the references to external resources, false
+   * @param updateExternalDb True to update the references to external resources, false
    *          otherwise.
    * @return {@code true} if data is successfully saved, {@code false}
    *         otherwise.

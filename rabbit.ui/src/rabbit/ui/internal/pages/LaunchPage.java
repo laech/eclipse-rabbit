@@ -194,7 +194,7 @@ public class LaunchPage extends AbstractAccessorPage {
     return new TreeViewerLabelSorter(viewer) {
       @Override
       protected int doCompare(Viewer v, Object e1, Object e2) {
-        if (!(e1 instanceof TreeNode) || !(e1 instanceof TreeNode))
+        if (!(e1 instanceof TreeNode) || !(e2 instanceof TreeNode))
           return super.doCompare(v, e1, e2);
 
         Object element1 = ((TreeNode) e1).getValue();

@@ -108,7 +108,9 @@ public class TrackingPlugin extends AbstractUIPlugin implements
       tracker.flushData();
       tracker.setEnabled(true);
     }
-    DataHandler.getFileStore().save(true);
+    if (!DataHandler.getFileStore().save(true)) {
+      getLog().log(new Status(IStatus.ERROR, PLUGIN_ID, "Error occurred while saving data."));
+    }
   }
 
   @Override
