@@ -76,7 +76,7 @@
       </page>
       <page
             class="rabbit.ui.internal.pages.LaunchPage"
-            description="Displays information about launch events"
+            description="Displays information about launch events and resources involved when debugging"
             icon="icons/full/obj16/launch.gif"
             id="rabbit.ui.pages.launch"
             name="Launches"

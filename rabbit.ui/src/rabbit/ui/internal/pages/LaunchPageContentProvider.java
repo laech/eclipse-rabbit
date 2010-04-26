@@ -240,7 +240,7 @@ public class LaunchPageContentProvider extends AbstractCategoryContentProvider {
   @Override
   protected ICategory[] getAllSupportedCategories() {
     return new ICategory[] { 
-        Category.LAUNCH, Category.LAUNCH_MODE, Category.LAUNCH_TYPE };
+        Category.DATE, Category.LAUNCH, Category.LAUNCH_MODE, Category.LAUNCH_TYPE };
   }
 
   @Override

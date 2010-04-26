@@ -79,6 +79,19 @@ public class LaunchPageContentProviderTest {
   }
   
   @Test
+  public void testCategories() {
+    Set<ICategory> selected = Sets.newHashSet(provider.getSelectedCategories());
+    Set<ICategory> unselected = Sets.newHashSet(provider.getUnselectedCategories());
+    assertEquals(0, Sets.intersection(selected, unselected).size());
+    
+    Set<ICategory> all = Sets.union(selected, unselected);
+    Set<Category> set = Sets.newHashSet(Category.DATE, Category.LAUNCH,
+        Category.LAUNCH_MODE, Category.LAUNCH_TYPE);
+    assertEquals(set.size(), all.size());
+    assertEquals(0, Sets.difference(all, set).size());
+  }
+  
+  @Test
   public void testGetChildren() {
     /*
      * Build a tree that look like the following, then check the value of each
@@ -321,7 +334,7 @@ public class LaunchPageContentProviderTest {
   
   @Test
   public void testGetPaintCategory_defaultValue() {
-    assertSame(Category.LAUNCH, new LaunchPageContentProvider(provider.getViewer()).getPaintCategory());
+    assertSame(Category.LAUNCH, new LaunchPageContentProvider(new TreeViewer(shell)).getPaintCategory());
   }
 
   @Test

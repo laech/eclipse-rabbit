@@ -85,6 +85,19 @@ public class ResourcePageContentProviderTest {
   }
 
   @Test
+  public void testCategories() {
+    Set<ICategory> selected = Sets.newHashSet(provider.getSelectedCategories());
+    Set<ICategory> unselected = Sets.newHashSet(provider.getUnselectedCategories());
+    assertEquals(0, Sets.intersection(selected, unselected).size());
+    
+    Set<ICategory> all = Sets.union(selected, unselected);
+    Set<Category> set = Sets.newHashSet(Category.DATE, Category.PROJECT, 
+        Category.FOLDER, Category.FILE);
+    assertEquals(set.size(), all.size());
+    assertEquals(0, Sets.difference(all, set).size());
+  }
+  
+  @Test
   public void testHasChildren() throws Exception {
     FileDataDescriptor des = new FileDataDescriptor(new LocalDate(), 1009823,
         mapper.insert(file));

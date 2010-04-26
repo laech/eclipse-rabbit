@@ -68,6 +68,18 @@ public class CommandPageContentProviderTest {
     provider = new CommandPageContentProvider(viewer);
     viewer.setContentProvider(provider);
   }
+  
+  @Test
+  public void testCategories() {
+    Set<ICategory> selected = Sets.newHashSet(provider.getSelectedCategories());
+    Set<ICategory> unselected = Sets.newHashSet(provider.getUnselectedCategories());
+    assertEquals(0, Sets.intersection(selected, unselected).size());
+    
+    Set<ICategory> all = Sets.union(selected, unselected);
+    Set<Category> set = Sets.newHashSet(Category.DATE, Category.COMMAND);
+    assertEquals(set.size(), all.size());
+    assertEquals(0, Sets.difference(all, set).size());
+  }
 
   @Test
   public void testHasChildren() throws Exception {
