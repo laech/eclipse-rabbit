@@ -46,6 +46,9 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Sash;
 import org.eclipse.swt.widgets.ToolBar;
+import org.eclipse.ui.IMemento;
+import org.eclipse.ui.IViewSite;
+import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.forms.widgets.Form;
 import org.eclipse.ui.forms.widgets.FormToolkit;
@@ -62,6 +65,12 @@ import java.util.regex.Pattern;
  * A view to show metrics.
  */
 public class RabbitView extends ViewPart {
+
+  /** Preference constant for saving/restoring the view state. */
+  private static final String PREF_RABBIT_VIEW = "rabbitView";
+
+  /** Preference constant for saving/restoring the view state. */
+  private static final String PREF_METRICS_WIDTH = "metricsPanelWidth";
 
   /**
    * Checks whether the two calendars has the same year, month, and day of
@@ -101,7 +110,7 @@ public class RabbitView extends ViewPart {
     widget.setMonth(date.get(Calendar.MONTH));
     widget.setDay(date.get(Calendar.DAY_OF_MONTH));
   }
-
+  
   /**
    * Gets the version of Eclipse. Not completely reliable.
    * 
@@ -119,31 +128,46 @@ public class RabbitView extends ViewPart {
       return "";
     }
   }
-
+  
   /**
    * A map containing page status (updated or not), if a page is not updated
    * (value return false), then it will be updated before it's displayed (when a
    * user clicks on a tree node).
    */
   private Map<IPage, Boolean> pageStatus;
+
   /** A map containing pages and the root composite of the page. */
   private Map<IPage, Composite> pages;
+
   /** A map containing pages and their tool bar items. */
   private Map<IPage, IContributionItem[]> pageToolItems;
-
+  
   /** A tool bar for pages to create their tool bar items. */
   private IToolBarManager extensionToolBar;
-
+  
   private FormToolkit toolkit;
 
+  /**
+   * The layout of {@link #displayPanel}, used to show/hide pages on user 
+   * selection.
+   */
   private StackLayout stackLayout;
 
+  /** The composite to show the page that is selected by the user. */
   private Composite displayPanel;
-
+  
+  /** The preferences for the pages. */
   private final Preference preferences;
-
+  
+  /** True if this OS is Windows, false otherwise. */
   private final boolean isWindowsOS = Platform.getOS().equals(Platform.OS_WIN32);
 
+  /** File to save/restore the view state, may be null. */
+  private IMemento memento;
+  
+  /** The form data of the sash dividing the two panels. */
+  private FormData sashFormData;
+  
   /**
    * Constructs a new view.
    */
@@ -156,20 +180,20 @@ public class RabbitView extends ViewPart {
     stackLayout = new StackLayout();
     preferences = new Preference();
   }
-
+  
   @Override
   public void createPartControl(Composite parent) {
     Form form = toolkit.createForm(parent);
     form.getBody().setLayout(new FormLayout());
 
-    FormData fd = new FormData();
-    fd.width = 1;
-    fd.top = new FormAttachment(0, 0);
-    fd.left = new FormAttachment(0, 200);
-    fd.bottom = new FormAttachment(100, 0);
+    sashFormData = new FormData();
+    sashFormData.width = 1;
+    sashFormData.top = new FormAttachment(0, 0);
+    sashFormData.left = new FormAttachment(0, 200);
+    sashFormData.bottom = new FormAttachment(100, 0);
     final Sash sash = new Sash(form.getBody(), SWT.VERTICAL);
     sash.setBackground(toolkit.getColors().getBorderColor());
-    sash.setLayoutData(fd);
+    sash.setLayoutData(sashFormData);
     sash.addListener(SWT.Selection, new Listener() {
       @Override
       public void handleEvent(Event e) {
@@ -244,8 +268,12 @@ public class RabbitView extends ViewPart {
     }
     stackLayout.topControl = cmp;
     displayPanel.layout();
+    
+    if (memento != null) {
+      restoreState(memento);
+    }
   }
-
+  
   /**
    * Displays the given page.
    * 
@@ -292,11 +320,23 @@ public class RabbitView extends ViewPart {
     stackLayout.topControl = cmp;
     displayPanel.layout();
   }
-
+  
   @Override
   public void dispose() {
     toolkit.dispose();
     super.dispose();
+  }
+
+  @Override
+  public void init(IViewSite site, IMemento memento) throws PartInitException {
+    super.init(site, memento);
+    this.memento = memento;
+  }
+
+  @Override
+  public void saveState(IMemento memento) {
+    memento = memento.createChild(PREF_RABBIT_VIEW);
+    memento.putInteger(PREF_METRICS_WIDTH, sashFormData.left.offset);
   }
 
   @Override
@@ -327,7 +367,7 @@ public class RabbitView extends ViewPart {
     CalendarAction.create(toolBar, getSite().getShell(), preferences
         .getEndDate(), " To: ", " ");
   }
-  
+
   /**
    * Creates tool bar items for Windows operating system.
    * 
@@ -372,7 +412,7 @@ public class RabbitView extends ViewPart {
       }
     });
   }
-
+  
   /**
    * Creates the tool bar items.
    * 
@@ -416,6 +456,32 @@ public class RabbitView extends ViewPart {
   }
 
   /**
+   * Restores the view state.
+   * @param memento The settings.
+   */
+  private void restoreState(IMemento memento) {
+    memento = memento.getChild(PREF_RABBIT_VIEW);
+    if (memento == null) {
+      return;
+    }
+    Integer width = memento.getInteger(PREF_METRICS_WIDTH);
+    if (width != null && width > 0) {
+      sashFormData.left.offset = width;
+    }
+  }
+
+  private void updatePage(final IPage page, final Preference preference) {
+    Job job = page.updateJob(preference);
+    if (job == null)
+      return;
+    
+    IWorkbenchSiteProgressService service = (IWorkbenchSiteProgressService) 
+        getSite().getService(IWorkbenchSiteProgressService.class);
+    
+    service.schedule(job);
+  }
+  
+  /**
    * Updates the pages to current preference.
    */
   private void updateView() {
@@ -435,16 +501,5 @@ public class RabbitView extends ViewPart {
       }
       pageStatus.put(entry.getKey(), Boolean.valueOf(isVisible));
     }
-  }
-  
-  private void updatePage(final IPage page, final Preference preference) {
-    Job job = page.updateJob(preference);
-    if (job == null)
-      return;
-    
-    IWorkbenchSiteProgressService service = (IWorkbenchSiteProgressService) 
-        getSite().getService(IWorkbenchSiteProgressService.class);
-    
-    service.schedule(job);
   }
 }
