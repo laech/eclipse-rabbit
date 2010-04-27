@@ -131,8 +131,8 @@ public class TaskPage extends AbstractAccessorPage {
     
     column = new TreeColumn(viewer.getTree(), SWT.RIGHT);
     column.setText("Time Spent");
+    column.setWidth(100);
     column.addSelectionListener(getValueSorter());
-    
   }
   
   @Override

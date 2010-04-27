@@ -193,7 +193,7 @@ public class GroupByDialog extends FormDialog {
 
     FormToolkit toolkit = mform.getToolkit();
     Form form = mform.getForm().getForm();
-    form.setMessage("Spectify how the elements should be structured",
+    form.setMessage("Specify how the elements should be structured",
         IMessageProvider.INFORMATION);
     toolkit.decorateFormHeading(form);
 
