@@ -36,18 +36,14 @@ import javax.xml.bind.JAXBException;
  */
 public enum DataStore implements IDataStore {
 
-  COMMAND_STORE("commandEvents"), PART_STORE("partEvents"), PERSPECTIVE_STORE(
-      "perspectiveEvents"), FILE_STORE("fileEvents"),
-
-  /**
-   * @since 1.1
-   */
+  COMMAND_STORE("commandEvents"), 
+  PART_STORE("partEvents"), 
+  PERSPECTIVE_STORE("perspectiveEvents"), 
+  FILE_STORE("fileEvents"),
   TASK_STORE("taskEvents"),
-
-  /**
-   * @since 1.1
-   */
-  LAUNCH_STORE("launchEvents");
+  LAUNCH_STORE("launchEvents"),
+  SESSION_STORE("sessionEvents");
+  
 
   /**
    * An object factory for creating XML object types.

@@ -10,20 +10,18 @@ package rabbit.data.internal.xml.schema.events;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for partEventType complex type.
+ * <p>Java class for sessionEventType complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="partEventType">
+ * &lt;complexType name="sessionEventType">
  *   &lt;complexContent>
  *     &lt;extension base="{}durationEventType">
- *       &lt;attribute name="partId" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
  *     &lt;/extension>
  *   &lt;/complexContent>
  * &lt;/complexType>
@@ -32,36 +30,10 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "partEventType")
-public class PartEventType
+@XmlType(name = "sessionEventType")
+public class SessionEventType
     extends DurationEventType
 {
 
-    @XmlAttribute(required = true)
-    protected String partId;
-
-    /**
-     * Gets the value of the partId property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
-     */
-    public String getPartId() {
-        return partId;
-    }
-
-    /**
-     * Sets the value of the partId property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
-     */
-    public void setPartId(String value) {
-        this.partId = value;
-    }
 
 }

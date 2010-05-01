@@ -13,23 +13,24 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package rabbit.data.test.xml.merge;
+package rabbit.data.store.model;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
+import org.joda.time.DateTime;
 
-@RunWith(Suite.class)
-@Suite.SuiteClasses( { CommandEventTypeMergerTest.class, //
-    FileEventTypeMergerTest.class, //
-    LaunchEventTypeMergerTest.class, //
-    PartEventTypeMergerTest.class, //
-    PerspectiveEventTypeMergerTest.class, //
-    TaskFileEventTypeMergerTest.class,
-    SessionEventTypeMergerTest.class,
-    
-    MergersTest.class, //
-    
-})
-public class AllMergerTests {
+/**
+ * Represents a duration spent using Eclipse.
+ */
+public class SessionEvent extends ContinuousEvent {
 
+  /**
+   * Constructs a new event.
+   * 
+   * @param endTime The end time of the event.
+   * @param duration The duration in milliseconds.
+   * @throws IllegalArgumentException If duration is negative.
+   * @throws NullPointerException If time is null.
+   */
+  public SessionEvent(DateTime endTime, long duration) {
+    super(endTime, duration);
+  }
 }

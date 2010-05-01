@@ -13,23 +13,20 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package rabbit.data.test.xml.merge;
+package rabbit.data.test.store.model;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
+import rabbit.data.store.model.ContinuousEvent;
+import rabbit.data.store.model.SessionEvent;
 
-@RunWith(Suite.class)
-@Suite.SuiteClasses( { CommandEventTypeMergerTest.class, //
-    FileEventTypeMergerTest.class, //
-    LaunchEventTypeMergerTest.class, //
-    PartEventTypeMergerTest.class, //
-    PerspectiveEventTypeMergerTest.class, //
-    TaskFileEventTypeMergerTest.class,
-    SessionEventTypeMergerTest.class,
-    
-    MergersTest.class, //
-    
-})
-public class AllMergerTests {
+import org.joda.time.DateTime;
 
+/**
+ * @see SessionEvent
+ */
+public class SessionEventTest extends ContinuousEventTest {
+
+  @Override
+  protected ContinuousEvent createEvent(DateTime time, long duration) {
+    return new SessionEvent(time, duration);
+  }
 }

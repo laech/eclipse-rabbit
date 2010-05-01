@@ -52,6 +52,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Test {@link AbstractPartTracker}
  */
+@SuppressWarnings("restriction")
 @RunWith(SWTBotJunit4ClassRunner.class)
 public abstract class AbstractPartTrackerTest<E extends ContinuousEvent>
     extends AbstractTrackerTest<E> {
@@ -78,7 +79,15 @@ public abstract class AbstractPartTrackerTest<E extends ContinuousEvent>
     win = getActiveWindow();
     tracker = createTracker();
   }
-
+  
+  @Test
+  public void testObserverIsAdded() {
+    tracker.setEnabled(false); // It should remove itself from the observable
+    int count = TrackingPlugin.getDefault().getIdleDetector().countObservers();
+    tracker.setEnabled(true); // It should add itself to the observable
+    assertEquals(count + 1, TrackingPlugin.getDefault().getIdleDetector().countObservers());
+  }
+  
   /*
    * Old tests base on calling listener methods.
    */

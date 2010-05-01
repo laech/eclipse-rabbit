@@ -13,20 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package rabbit.data.test.xml.convert;
+package rabbit.data.internal.xml.convert;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
+import rabbit.data.internal.xml.schema.events.SessionEventType;
+import rabbit.data.store.model.SessionEvent;
 
-@RunWith(Suite.class)
-@Suite.SuiteClasses( { CommandEventConverterTest.class, //
-    FileEventConverterTest.class, //
-    LaunchEventConverterTest.class, //
-    PartEventConverterTest.class, //
-    PerspectiveEventConverterTest.class, //
-    TaskFileEventConverterTest.class,
-    SessionEventConverterTest.class,
-})
-public class AllConverterTests {
+/**
+ * Converts {@link SessionEvent} to {@link SessionEventType}.
+ */
+public class SessionEventConverter extends 
+    AbstractConverter<SessionEvent, SessionEventType> {
+
+  @Override
+  protected SessionEventType doConvert(SessionEvent event) {
+    SessionEventType type = new SessionEventType();
+    type.setDuration(event.getDuration());
+    return type;
+  }
 
 }

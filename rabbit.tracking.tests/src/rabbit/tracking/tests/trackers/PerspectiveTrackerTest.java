@@ -42,6 +42,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Test for {@link PerspectiveTracker}
  */
+@SuppressWarnings("restriction")
 public class PerspectiveTrackerTest extends
     AbstractTrackerTest<PerspectiveEvent> {
 
@@ -66,6 +67,14 @@ public class PerspectiveTrackerTest extends
             wb.getPerspectiveRegistry().getPerspectives()[1]);
       }
     });
+  }
+  
+  @Test
+  public void testObserverIsAdded() {
+    tracker.setEnabled(false); // It should remove itself from the observable
+    int count = TrackingPlugin.getDefault().getIdleDetector().countObservers();
+    tracker.setEnabled(true); // It should add itself to the observable
+    assertEquals(count + 1, TrackingPlugin.getDefault().getIdleDetector().countObservers());
   }
 
   /*

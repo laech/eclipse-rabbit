@@ -16,6 +16,7 @@
 package rabbit.tracking.tests.trackers;
 
 import rabbit.data.store.model.LaunchEvent;
+import rabbit.tracking.internal.TrackingPlugin;
 import rabbit.tracking.internal.trackers.LaunchTracker;
 
 import static org.junit.Assert.assertEquals;
@@ -116,6 +117,14 @@ public class LaunchTrackerTest extends AbstractTrackerTest<LaunchEvent> {
   @Before
   public void before() {
     tracker = new LaunchTracker();
+  }
+  
+  @Test
+  public void testObserverIsAdded() {
+    tracker.setEnabled(false); // It should remove itself from the observable
+    int count = TrackingPlugin.getDefault().getIdleDetector().countObservers();
+    tracker.setEnabled(true); // It should add itself to the observable
+    assertEquals(count + 1, TrackingPlugin.getDefault().getIdleDetector().countObservers());
   }
 
   /*

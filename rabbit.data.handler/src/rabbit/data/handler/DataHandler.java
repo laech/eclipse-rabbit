@@ -30,6 +30,7 @@ import rabbit.data.store.model.FileEvent;
 import rabbit.data.store.model.LaunchEvent;
 import rabbit.data.store.model.PartEvent;
 import rabbit.data.store.model.PerspectiveEvent;
+import rabbit.data.store.model.SessionEvent;
 import rabbit.data.store.model.TaskFileEvent;
 import rabbit.data.xml.FileStore;
 import rabbit.data.xml.access.CommandDataAccessor;
@@ -44,19 +45,26 @@ import rabbit.data.xml.store.FileEventStorer;
 import rabbit.data.xml.store.LaunchEventStorer;
 import rabbit.data.xml.store.PartEventStorer;
 import rabbit.data.xml.store.PerspectiveEventStorer;
+import rabbit.data.xml.store.SessionEventStorer;
 import rabbit.data.xml.store.TaskFileEventStorer;
+
+import com.google.common.collect.BiMap;
+import com.google.common.collect.ImmutableBiMap;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.management.ImmutableDescriptor;
+
 /**
  * Handler class provider common classes to access the data.
+ * TODO test
  */
 public class DataHandler {
 
   /** Map<T, IStorer<T> */
-  private static final Map<Class<?>, IStorer<?>> storers;
+  private static final BiMap<Class<?>, IStorer<?>> storers;
 
   private static final IAccessor<LaunchDataDescriptor> launchDataAccessor;
   private static final IAccessor<PerspectiveDataDescriptor> perspectiveDataAccessor;
@@ -65,16 +73,20 @@ public class DataHandler {
   private static final IAccessor<PartDataDescriptor> partDataAccessor;
   private static final IAccessor<FileDataDescriptor> fileDataAccessor;
   private static final IAccessor<TaskFileDataDescriptor> taskFileDataAccessor;
+  
+  private static final BiMap<Class<?>, IAccessor<?>> accessors;
 
   static {
-    Map<Class<?>, IStorer<?>> map = new HashMap<Class<?>, IStorer<?>>();
-    map.put(PerspectiveEvent.class, PerspectiveEventStorer.getInstance());
-    map.put(CommandEvent.class, CommandEventStorer.getInstance());
-    map.put(FileEvent.class, FileEventStorer.getInstance());
-    map.put(PartEvent.class, PartEventStorer.getInstance());
-    map.put(LaunchEvent.class, LaunchEventStorer.getInstance());
-    map.put(TaskFileEvent.class, TaskFileEventStorer.getInstance());
-    storers = Collections.unmodifiableMap(map);
+    storers = ImmutableBiMap.<Class<?>, IStorer<?>>builder()
+        .put(PerspectiveEvent.class, PerspectiveEventStorer.getInstance())
+        .put(CommandEvent.class, CommandEventStorer.getInstance())
+        .put(FileEvent.class, FileEventStorer.getInstance())
+        .put(PartEvent.class, PartEventStorer.getInstance())
+        .put(LaunchEvent.class, LaunchEventStorer.getInstance())
+        .put(TaskFileEvent.class, TaskFileEventStorer.getInstance())
+    // TODO test
+        .put(SessionEvent.class, SessionEventStorer.getInstance())
+        .build();
 
     perspectiveDataAccessor = new PerspectiveDataAccessor();
     commandDataAccessor = new CommandDataAccessor();
@@ -83,6 +95,16 @@ public class DataHandler {
     partDataAccessor = new PartDataAccessor();
     fileDataAccessor = new FileDataAccessor();
     taskFileDataAccessor = new TaskFileDataAccessor();
+    
+    accessors = ImmutableBiMap.<Class<?>, IAccessor<?>>builder()
+        .put(PerspectiveDataDescriptor.class, new PerspectiveDataAccessor())
+        .put(CommandDataDescriptor.class, new CommandDataAccessor())
+        .put(SessionDataDescriptor.class, new SessionDataAccessor())
+        .put(LaunchDataDescriptor.class, new LaunchDataAccessor())
+        .put(PartDataDescriptor.class, new PartDataAccessor())
+        .put(FileDataDescriptor.class, new FileDataAccessor())
+        .put(TaskFileDataDescriptor.class, new TaskFileDataAccessor())
+        .build();
   }
 
   /**
@@ -159,6 +181,7 @@ public class DataHandler {
    * <li>{@link PerspectiveEvent}</li>
    * <li>{@link LaunchEvent}</li>
    * <li>{@link TaskFileEvent}</li>
+   * <li>{@link SessionEvent}</li>
    * </ul>
    * </p>
    * 

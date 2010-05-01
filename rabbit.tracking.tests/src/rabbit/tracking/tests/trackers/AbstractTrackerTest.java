@@ -27,9 +27,10 @@ import org.junit.Test;
 /**
  * Test for {@link AbstractTracker}
  */
+@SuppressWarnings("restriction")
 public abstract class AbstractTrackerTest<T> {
 
-  private AbstractTracker<T> tracker = createTracker();
+  protected AbstractTracker<T> tracker = createTracker();
 
   @Test
   public void testAddData() {

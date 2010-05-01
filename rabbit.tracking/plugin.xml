@@ -19,6 +19,9 @@
       <tracker
             class="rabbit.tracking.internal.trackers.PerspectiveTracker">
       </tracker>
+      <tracker
+            class="rabbit.tracking.internal.trackers.SessionTracker">
+      </tracker>
    </extension>
    <extension
          point="org.eclipse.ui.startup">

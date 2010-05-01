@@ -29,6 +29,7 @@ import org.junit.runners.Suite.SuiteClasses;
   FileEventTest.class, 
   LaunchEventTest.class,
   TaskFileEventTest.class,
+  SessionEventTest.class,
 //
 })
 public class AllTests {

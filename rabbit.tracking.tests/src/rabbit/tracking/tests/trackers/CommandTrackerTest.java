@@ -16,6 +16,7 @@
 package rabbit.tracking.tests.trackers;
 
 import rabbit.data.store.model.CommandEvent;
+import rabbit.tracking.internal.TrackingPlugin;
 import rabbit.tracking.internal.trackers.CommandTracker;
 
 import static org.junit.Assert.assertEquals;
@@ -38,6 +39,7 @@ import java.util.Collections;
 /**
  * Test for {@link CommandTracker}
  */
+@SuppressWarnings("restriction")
 public class CommandTrackerTest extends AbstractTrackerTest<CommandEvent> {
 
   private CommandTracker tracker;
@@ -45,6 +47,14 @@ public class CommandTrackerTest extends AbstractTrackerTest<CommandEvent> {
   @Before
   public void setUp() {
     tracker = createTracker();
+  }
+  
+  @Test
+  public void testObserverIsAdded() {
+    tracker.setEnabled(false); // It should remove itself from the observable
+    int count = TrackingPlugin.getDefault().getIdleDetector().countObservers();
+    tracker.setEnabled(true); // It should add itself to the observable
+    assertEquals(count + 1, TrackingPlugin.getDefault().getIdleDetector().countObservers());
   }
 
   @Test
