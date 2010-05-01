@@ -16,6 +16,7 @@
 package rabbit.ui.internal.pages;
 
 import rabbit.data.access.IAccessor;
+import rabbit.data.access.model.TaskFileDataDescriptor;
 import rabbit.data.handler.DataHandler;
 import rabbit.ui.internal.RabbitUI;
 import rabbit.ui.internal.SharedImages;
@@ -157,7 +158,7 @@ public class TaskPage extends AbstractAccessorPage {
 
   @Override
   protected IAccessor<?> getAccessor() {
-    return DataHandler.getTaskFileDataAccessor();
+    return DataHandler.getAccessor(TaskFileDataDescriptor.class);
   }
 
   @Override

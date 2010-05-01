@@ -51,7 +51,7 @@ public class SessionPage extends AbstractFilteredTreePage
 
   /** Constructs a new page. */
   public SessionPage() {
-    accessor = DataHandler.getSessionDataAccessor();
+    accessor = DataHandler.getAccessor(SessionDataDescriptor.class);
     maxValue = 0;
   }
 

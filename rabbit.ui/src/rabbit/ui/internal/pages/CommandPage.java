@@ -16,6 +16,7 @@
 package rabbit.ui.internal.pages;
 
 import rabbit.data.access.IAccessor;
+import rabbit.data.access.model.CommandDataDescriptor;
 import rabbit.data.handler.DataHandler;
 import rabbit.ui.internal.RabbitUI;
 import rabbit.ui.internal.SharedImages;
@@ -167,7 +168,7 @@ public class CommandPage extends AbstractAccessorPage {
 
   @Override
   protected IAccessor<?> getAccessor() {
-    return DataHandler.getCommandDataAccessor();
+    return DataHandler.getAccessor(CommandDataDescriptor.class);
   }
 
   @Override

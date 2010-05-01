@@ -16,6 +16,7 @@
 package rabbit.ui.internal.pages;
 
 import rabbit.data.access.IAccessor;
+import rabbit.data.access.model.LaunchDataDescriptor;
 import rabbit.data.handler.DataHandler;
 import rabbit.ui.internal.RabbitUI;
 import rabbit.ui.internal.SharedImages;
@@ -209,7 +210,7 @@ public class LaunchPage extends AbstractAccessorPage {
 
   @Override
   protected IAccessor<?> getAccessor() {
-    return DataHandler.getLaunchDataAccessor();
+    return DataHandler.getAccessor(LaunchDataDescriptor.class);
   }
 
   @Override

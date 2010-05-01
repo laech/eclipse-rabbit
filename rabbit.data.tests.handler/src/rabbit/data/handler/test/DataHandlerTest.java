@@ -15,15 +15,23 @@
  */
 package rabbit.data.handler.test;
 
+import rabbit.data.access.model.CommandDataDescriptor;
+import rabbit.data.access.model.FileDataDescriptor;
+import rabbit.data.access.model.LaunchDataDescriptor;
+import rabbit.data.access.model.PartDataDescriptor;
+import rabbit.data.access.model.PerspectiveDataDescriptor;
+import rabbit.data.access.model.SessionDataDescriptor;
+import rabbit.data.access.model.TaskFileDataDescriptor;
 import rabbit.data.handler.DataHandler;
 import rabbit.data.store.model.CommandEvent;
 import rabbit.data.store.model.FileEvent;
+import rabbit.data.store.model.LaunchEvent;
 import rabbit.data.store.model.PartEvent;
 import rabbit.data.store.model.PerspectiveEvent;
+import rabbit.data.store.model.SessionEvent;
 import rabbit.data.store.model.TaskFileEvent;
 
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -34,32 +42,7 @@ import org.junit.Test;
 public class DataHandlerTest {
   
   @Test
-  public void testGetCommandDataAccessor() {
-    assertNotNull(DataHandler.getCommandDataAccessor());
-  }
-
-  @Test
-  public void testGetFileDataAccessor() {
-    assertNotNull(DataHandler.getFileDataAccessor());
-  }
-
-  @Test
-  public void testGetLaunchDataAccessor() {
-    assertNotNull(DataHandler.getLaunchDataAccessor());
-  }
-
-  @Test
-  public void testGetPartDataAccessor() {
-    assertNotNull(DataHandler.getPartDataAccessor());
-  }
-
-  @Test
-  public void testGetPerspectiveDataAccessor() {
-    assertNotNull(DataHandler.getPerspectiveDataAccessor());
-  }
-
-  @Test
-  public void testGetResourceManager() {
+  public void testGetFileStore() {
     Assert.assertNotNull(DataHandler.getFileStore());
   }
 
@@ -69,21 +52,19 @@ public class DataHandlerTest {
     assertNotNull(DataHandler.getStorer(CommandEvent.class));
     assertNotNull(DataHandler.getStorer(FileEvent.class));
     assertNotNull(DataHandler.getStorer(PartEvent.class));
-    assertNull(DataHandler.getStorer(String.class));
-  }
-
-  @Test(expected = NullPointerException.class)
-  public void testGetStorer_withNull() {
-    DataHandler.getStorer(null);
-  }
-
-  @Test
-  public void testGetTaskFileDataAccessor() {
-    assertNotNull(DataHandler.getTaskFileDataAccessor());
-  }
-
-  @Test
-  public void testGetTaskFileEventStorer() {
+    assertNotNull(DataHandler.getStorer(SessionEvent.class));
     assertNotNull(DataHandler.getStorer(TaskFileEvent.class));
+    assertNotNull(DataHandler.getStorer(LaunchEvent.class));
+  }
+  
+  @Test
+  public void testGetAccessor() {
+    assertNotNull(DataHandler.getAccessor(PerspectiveDataDescriptor.class));
+    assertNotNull(DataHandler.getAccessor(CommandDataDescriptor.class));
+    assertNotNull(DataHandler.getAccessor(FileDataDescriptor.class));
+    assertNotNull(DataHandler.getAccessor(PartDataDescriptor.class));
+    assertNotNull(DataHandler.getAccessor(SessionDataDescriptor.class));
+    assertNotNull(DataHandler.getAccessor(TaskFileDataDescriptor.class));
+    assertNotNull(DataHandler.getAccessor(LaunchDataDescriptor.class));
   }
 }

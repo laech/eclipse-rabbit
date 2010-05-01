@@ -16,6 +16,7 @@
 package rabbit.ui.internal.pages;
 
 import rabbit.data.access.IAccessor;
+import rabbit.data.access.model.PartDataDescriptor;
 import rabbit.data.handler.DataHandler;
 import rabbit.ui.internal.RabbitUI;
 import rabbit.ui.internal.SharedImages;
@@ -189,7 +190,7 @@ public class PartPage extends AbstractAccessorPage {
   
   @Override
   protected IAccessor<?> getAccessor() {
-    return DataHandler.getPartDataAccessor();
+    return DataHandler.getAccessor(PartDataDescriptor.class);
   }
 
   @Override

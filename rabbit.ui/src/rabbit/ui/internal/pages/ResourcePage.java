@@ -16,6 +16,7 @@
 package rabbit.ui.internal.pages;
 
 import rabbit.data.access.IAccessor;
+import rabbit.data.access.model.FileDataDescriptor;
 import rabbit.data.handler.DataHandler;
 import rabbit.ui.internal.RabbitUI;
 import rabbit.ui.internal.SharedImages;
@@ -174,7 +175,7 @@ public class ResourcePage extends AbstractAccessorPage {
 
   @Override
   protected IAccessor<?> getAccessor() {
-    return DataHandler.getFileDataAccessor();
+    return DataHandler.getAccessor(FileDataDescriptor.class);
   }
 
   @Override

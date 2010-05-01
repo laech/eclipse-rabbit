@@ -16,6 +16,7 @@
 package rabbit.ui.internal.pages;
 
 import rabbit.data.access.IAccessor;
+import rabbit.data.access.model.PerspectiveDataDescriptor;
 import rabbit.data.handler.DataHandler;
 import rabbit.ui.internal.RabbitUI;
 import rabbit.ui.internal.SharedImages;
@@ -65,7 +66,7 @@ public class PerspectivePage extends AbstractAccessorPage {
   
   @Override
   protected IAccessor<?> getAccessor() {
-    return DataHandler.getPerspectiveDataAccessor();
+    return DataHandler.getAccessor(PerspectiveDataDescriptor.class);
   }
 
   /**
