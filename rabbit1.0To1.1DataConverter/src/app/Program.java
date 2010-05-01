@@ -26,18 +26,87 @@ import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+/**
+ * Main program to convert the old formats to new formats.
+ */
 public class Program {
   
+  /*
+   * In Rabbit 1.0, data about sessions are actually the sum of perspective
+   * durations grouped by dates. In Rabbit 1.1, session tracking has became
+   * independent, so it no longer relies on perspective data. Therefore data
+   * about perspectives before 1.1 will be extract out to separate session 
+   * files (so that the user can still see them in Rabbit View), new data will 
+   * be tracked by a session tracker and stored in new files.
+   * 
+   * For example, if we have a 1.0 data file "perspectiveEvents-2010-03.xml":
+   * 
+   * <events>
+   *   <perspectiveEvents date="2010-03-01">
+   *     <perspectiveEvent perspectiveId="org.eclipse.debug.ui.DebugPerspective" duration="1" />
+   *     <perspectiveEvent perspectiveId="org.eclipse.pde.ui.PDEPerspective" duration="1" />
+   *   </perspectiveEvents>
+   * </events>
+   * 
+   * The above data will be copied and modified to another file 
+   * "sessionEvents-2010-03.xml":
+   * 
+   * <events>
+   *   <sessionEvents date="2010-03-01">
+   *     <sessionEvents duration="2" />
+   *   </sessionEvents>
+   * </events>
+   * 
+   */
+  
+  /*
+   * In Rabbit 1.0, file events are storing the IDs of the files, in 1.1 it will 
+   * be changed to store the paths of the files. This way renaming/moving files
+   * within the workspace will no longer be monitored. The Rabbit 1.1 way thinks
+   * renaming/moving files are parts of the history of the projects, so they 
+   * should be retained instead of mapping the old files to the new location
+   * after renaming/moving. This also improves the performance of Rabbit as no
+   * mapping needs to be held in memory.
+   * 
+   * Before:
+   * 
+   * <events>
+   *   <fileEvents date="2010-03-01">
+   *     <fileEvent fileId="1298237445" duration="123" />
+   *   </fileEvents>
+   * </events>
+   * 
+   * After:
+   * 
+   * <events>
+   *   <fileEvents date="2010-03-01">
+   *     <fileEvent filePath="/rabbit/plugin.xml" duration="123" />
+   *   </fileEvents>
+   * </events>
+   * 
+   */
+  
+  /** Date attribute */
   private static final String ATTR_DATE = "date";
+  /** Duration attribute */
   private static final String ATTR_DURATION = "duration";
+  /** File ID attribute */
   private static final String ATTR_FILE_ID = "fileId";
+  /** File path attribute */
   private static final String ATTR_FILE_PATH = "filePath";
+  /** Event list tag */
   private static final String TAG_EVENT_LIST = "events";
+  /** File event tag */
   private static final String TAG_FILE_EVENT = "fileEvent";
+  /** File event list tag */
   private static final String TAG_FILE_EVENT_LIST = "fileEvents";
+  /** Perspective event tag */
   private static final String TAG_PERSPECTIVE_EVENT = "perspectiveEvent";
+  /** Perspective event list tag */
   private static final String TAG_PERSPECTIVE_EVENT_LIST = "perspectiveEvents";
+  /** Session event tag */
   private static final String TAG_SESSION_EVENT = "sessionEvent";
+  /** Session event list tag */
   private static final String TAG_SESSION_EVENT_LIST = "sessionEvents";
   
   /**
@@ -64,7 +133,7 @@ public class Program {
     }
   }
   
-  public static void main(String[] args) {
+  public static void run() {
     System.out.println("Working...");
     
     String[] perspectiveEventFileNames = new String[] {
@@ -127,7 +196,7 @@ public class Program {
     fileIdToFilePath = Collections.unmodifiableMap(fileIdToPath);
     
 
-    // Start:
+    // Start converting:
     for (File file : perspectiveEventFiles) {
       try {
         handlePerspectiveEventFile(file);
@@ -141,7 +210,7 @@ public class Program {
     }
     for (File file : fileEventFiles) {
       try {
-        handleFileEventFile(file);
+        handleFileEventFile(file, fileIdToFilePath);
       } catch (SAXException e) {
         System.err.println(e.getMessage());
       } catch (IOException e) {
@@ -158,13 +227,14 @@ public class Program {
    * Converts the file event data to the new format.
    * 
    * @param file The file containing the XML data.
+   * @param fileIdToPath The map containing the mapping of file IDs to file paths.
    * @throws NullPointerException If file is null.
    * @throws SAXException If any parse errors occur.
    * @throws IOException If any IO errors occur.
    * @throws TransformerException If an unrecoverable error occurs during the
    *           course of the transformation while saving the data.
    */
-  static void handleFileEventFile(File file) 
+  static void handleFileEventFile(File file, Map<String, String> fileIdToPath) 
       throws SAXException, IOException, TransformerException {
     
     Document document = builder.parse(file);
@@ -178,7 +248,7 @@ public class Program {
         
         Element event = (Element) oldEvents.item(j);
         String fileId = event.getAttribute(ATTR_FILE_ID);
-        String filePath = fileIdToFilePath.get(fileId);
+        String filePath = fileIdToPath.get(fileId);
         if (filePath != null) {
           event.setAttribute(ATTR_FILE_PATH, filePath);
           event.removeAttribute(ATTR_FILE_ID);
@@ -197,11 +267,13 @@ public class Program {
   }
   
   /**
-   * Converts the old perspective event data to separate session data. 
+   * Converts the old perspective event data to separate session data.
    * Independent session tracking is introduced in Rabbit 1.1, will not rely on
    * perspective event data any more.
    * 
-   * @param file The file containing the XML data.
+   * @param file The file containing the XML data, which has the format
+   *          "perspectiveEvents-yyyy-MM.xml" as it name, where "yyyy"
+   *          represents the year, and "MM" represents the month.
    * @throws NullPointerException If file is null.
    * @throws SAXException If any parse errors occur.
    * @throws IOException If any IO errors occur.
