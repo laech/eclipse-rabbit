@@ -19,6 +19,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableSet;
 
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.joda.time.DateTime;
@@ -37,9 +39,9 @@ public class LaunchEvent extends ContinuousEvent {
   @Nonnull
   private final ILaunchConfiguration config;
 
-  /** Unmodifiable set of IDs. */
+  /** Unmodifiable set of file paths. */
   @Nonnull
-  private final ImmutableSet<String> fileIds;
+  private final ImmutableSet<IPath> filePaths;
 
   /**
    * Constructs a new event.
@@ -47,37 +49,38 @@ public class LaunchEvent extends ContinuousEvent {
    * @param endTime The end time of the event.
    * @param duration The duration of the event, in milliseconds.
    * @param config The launch configuration.
-   * @param fileIds The IDs of the files associated with the launch, or an empty
-   *          collection.
+   * @param filePaths The paths of the files associated with the launch, or an
+   *          empty collection.
    * @throws IllegalArgumentException If duration is negative.
-   * @throws NullPointerException If startTime, or launch, or config, or fileIds
-   *           is null.
-   * @see {@link rabbit.IFileStore.storage.IFileMapper}
+   * @throws NullPointerException If startTime, or launch, or config, or
+   *           filePaths is null.
+   * 
+   * @see IResource#getFullPath()
    */
   public LaunchEvent(@Nonnull DateTime endTime, long duration,
       @Nonnull ILaunch launch, @Nonnull ILaunchConfiguration config,
-      @Nonnull Set<String> fileIds) {
+      @Nonnull Set<IPath> filePaths) {
 
     super(endTime, duration);
 
     checkNotNull(launch, "Launch cannot be null");
     checkNotNull(config, "Launch configuration cannot be null");
-    checkNotNull(fileIds, "File IDs cannot be null");
+    checkNotNull(filePaths, "File paths cannot be null");
 
     this.config = config;
     this.launch = launch;
-    this.fileIds = ImmutableSet.copyOf(fileIds);
+    this.filePaths = ImmutableSet.copyOf(filePaths);
   }
 
   /**
    * Gets the IDs of the files involved.
    * 
-   * @return A collection of IDs of the files involved, or an empty collection.
-   * @see {@link rabbit.IFileStore.storage.IFileMapper}
+   * @return An unmodifiable collection of IDs of the files involved, or an
+   *         empty collection.
    */
   @Nonnull
-  public ImmutableSet<String> getFileIds() {
-    return fileIds;
+  public Set<IPath> getFilePaths() {
+    return filePaths;
   }
 
   /**

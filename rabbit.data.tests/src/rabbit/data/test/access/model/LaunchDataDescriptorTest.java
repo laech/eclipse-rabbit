@@ -4,17 +4,18 @@ import rabbit.data.access.model.LaunchConfigurationDescriptor;
 import rabbit.data.access.model.LaunchDataDescriptor;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
 import org.joda.time.LocalDate;
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -26,14 +27,14 @@ public class LaunchDataDescriptorTest extends DateDescriptorTest {
   @Test(expected = IllegalArgumentException.class)
   public void testConstructor_countNegative() {
     createDescriptor(new LocalDate(), createLaunchConfiguration(), -1, 1,
-        Collections.<String> emptySet());
+        Collections.<IPath> emptySet());
   }
 
   @Test
   public void testConstructor_countZero() {
     try {
       createDescriptor(new LocalDate(), createLaunchConfiguration(), 0, 1,
-          Collections.<String> emptySet());
+          Collections.<IPath> emptySet());
     } catch (IllegalArgumentException e) {
       fail("0 should be accepted");
     }
@@ -42,14 +43,14 @@ public class LaunchDataDescriptorTest extends DateDescriptorTest {
   @Test(expected = IllegalArgumentException.class)
   public void testConstructor_durationNegative() {
     createDescriptor(new LocalDate(), createLaunchConfiguration(), 1, -1,
-        Collections.<String> emptySet());
+        Collections.<IPath> emptySet());
   }
 
   @Test
   public void testConstructor_durationZero() {
     try {
       createDescriptor(new LocalDate(), createLaunchConfiguration(), 1, 0,
-          Collections.<String> emptySet());
+          Collections.<IPath> emptySet());
     } catch (IllegalArgumentException e) {
       fail("0 should be accepted");
     }
@@ -65,12 +66,11 @@ public class LaunchDataDescriptorTest extends DateDescriptorTest {
     int count = 12;
     long value = 19083;
     LocalDate date = new LocalDate();
-    List<String> fileIds = Arrays.asList("1", "3");
+    List<IPath> filePaths = Lists.<IPath> newArrayList(new Path("/p/a/b"), new Path("/p/p/p"));
     LaunchConfigurationDescriptor config = createLaunchConfiguration();
     int hashCode = config.hashCode();
 
-    LaunchDataDescriptor des = createDescriptor(date, config, count, value,
-        fileIds);
+    LaunchDataDescriptor des = createDescriptor(date, config, count, value,filePaths);
     assertEquals(hashCode, des.hashCode());
   }
 
@@ -79,58 +79,58 @@ public class LaunchDataDescriptorTest extends DateDescriptorTest {
     int count = 12;
     long value = 19083;
     LocalDate date = new LocalDate();
-    List<String> fileIds = new ArrayList<String>(Arrays.asList("1", "3"));
+    List<IPath> filePaths = Lists.<IPath> newArrayList(new Path("/p/a/b"), new Path("/p/p/p"));
     LaunchConfigurationDescriptor config = createLaunchConfiguration();
 
     LaunchDataDescriptor des1 = createDescriptor(date, config, count, value,
-        fileIds);
+        filePaths);
     assertTrue(des1.equals(des1));
     assertFalse(des1.equals(null));
     assertFalse(des1.equals(""));
 
     LaunchDataDescriptor des2 = createDescriptor(date, config, count, value,
-        fileIds);
+        filePaths);
     assertTrue(des1.equals(des2));
     assertTrue(des2.equals(des1));
 
-    des2 = createDescriptor(date.plusDays(1), config, count, value, fileIds);
+    des2 = createDescriptor(date.plusDays(1), config, count, value, filePaths);
     assertFalse(des1.equals(des2));
 
     des2 = createDescriptor(date, new LaunchConfigurationDescriptor(System
         .currentTimeMillis()
-        + "", "", ""), count, value, fileIds);
+        + "", "", ""), count, value, filePaths);
     assertFalse(des1.equals(des2));
     
-    des2 = createDescriptor(date, config, count + 1, value, fileIds);
+    des2 = createDescriptor(date, config, count + 1, value, filePaths);
     assertFalse(des1.equals(des2));
     
-    des2 = createDescriptor(date, config, count, value + 1, fileIds);
+    des2 = createDescriptor(date, config, count, value + 1, filePaths);
     assertFalse(des1.equals(des2));
     
-    fileIds.add(System.nanoTime() + "");
-    des2 = createDescriptor(date, config, count, value, fileIds);
+    filePaths.add(new Path("/a/b/c/d/e"));
+    des2 = createDescriptor(date, config, count, value, filePaths);
     assertFalse(des1.equals(des2));
   }
 
   @Test(expected = NullPointerException.class)
   public void testCosntructor_launchConfigNull() {
     createDescriptor(new LocalDate(), null, 2, 2, Collections
-        .<String> emptySet());
+        .<IPath> emptySet());
   }
 
   @Test
   public void testGetFileIds() {
-    ImmutableSet<String> fileIds = ImmutableSet.of("a", "b");
+    ImmutableSet<IPath> filePaths = ImmutableSet.<IPath> of(new Path("/a"), new Path("/b"));
     LaunchDataDescriptor des = createDescriptor(new LocalDate(),
-        createLaunchConfiguration(), 1, 3, fileIds);
-    assertEquals(fileIds, des.getFileIds());
+        createLaunchConfiguration(), 1, 3, filePaths);
+    assertEquals(filePaths, des.getFilePaths());
   }
 
   @Test
   public void testGetLaunchConfigurationDescriptor() {
     LaunchConfigurationDescriptor config = createLaunchConfiguration();
     LaunchDataDescriptor des = createDescriptor(new LocalDate(), config, 1, 1,
-        Collections.<String> emptySet());
+        Collections.<IPath> emptySet());
     assertEquals(config, des.getLaunchDescriptor());
   }
 
@@ -138,7 +138,7 @@ public class LaunchDataDescriptorTest extends DateDescriptorTest {
   public void testGetLaunchCount() {
     int count = 2387;
     LaunchDataDescriptor des = createDescriptor(new LocalDate(),
-        createLaunchConfiguration(), count, 1, Collections.<String> emptySet());
+        createLaunchConfiguration(), count, 1, Collections.<IPath> emptySet());
     assertEquals(count, des.getLaunchCount());
   }
 
@@ -147,14 +147,14 @@ public class LaunchDataDescriptorTest extends DateDescriptorTest {
     long duration = 98238734;
     LaunchDataDescriptor des = createDescriptor(new LocalDate(),
         createLaunchConfiguration(), 1, duration, Collections
-            .<String> emptySet());
+            .<IPath> emptySet());
     assertEquals(duration, des.getTotalDuration());
   }
 
   @Override
   protected final LaunchDataDescriptor createDescriptor(LocalDate date) {
     return createDescriptor(date, createLaunchConfiguration(), 1, 2,
-        Collections.<String> emptySet());
+        Collections.<IPath> emptySet());
   }
 
   /**
@@ -164,14 +164,14 @@ public class LaunchDataDescriptorTest extends DateDescriptorTest {
    * @param des The launch configuration descriptor.
    * @param count The launch count.
    * @param duration The launch duration.
-   * @param fileIds The file IDs.
+   * @param filePaths The file paths.
    * @return A descriptor created using the parameters.
    */
   protected LaunchDataDescriptor createDescriptor(LocalDate date,
       LaunchConfigurationDescriptor des, int count, long duration,
-      Iterable<String> fileIds) {
+      Iterable<IPath> filePaths) {
 
-    return new LaunchDataDescriptor(date, des, count, duration, fileIds);
+    return new LaunchDataDescriptor(date, des, count, duration, filePaths);
   }
 
   private LaunchConfigurationDescriptor createLaunchConfiguration() {

@@ -20,6 +20,8 @@ import rabbit.data.store.model.LaunchEvent;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertSame;
 
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchManager;
@@ -46,21 +48,21 @@ public class LaunchEventTest extends ContinuousEventTest {
 
   @Test
   public void testConstructor_copiesFileIds() {
-    Set<String> fileIds = new HashSet<String>();
-    fileIds.add("a");
-    fileIds.add("b");
-    fileIds.add("c");
+    Set<IPath> filePaths = new HashSet<IPath>();
+    filePaths.add(new Path("/a"));
+    filePaths.add(new Path("/b"));
+    filePaths.add(new Path("/c"));
     LaunchEvent event = new LaunchEvent(new DateTime(), 18, new Launch(
         new LaunchConfigurationForTest("a"), ILaunchManager.DEBUG_MODE, null),
-        new LaunchConfigurationForTest("asdf"), fileIds);
+        new LaunchConfigurationForTest("asdf"), filePaths);
 
-    assertFalse(fileIds == event.getFileIds());
+    assertFalse(filePaths == event.getFilePaths());
 
-    fileIds.add("Should not effect the collection in the event.");
-    assertFalse(fileIds.size() == event.getFileIds().size());
+    filePaths.add(new Path("/Should not effect the collection in the event."));
+    assertFalse(filePaths.size() == event.getFilePaths().size());
 
-    fileIds.clear();
-    assertFalse(event.getFileIds().isEmpty());
+    filePaths.clear();
+    assertFalse(event.getFilePaths().isEmpty());
   }
 
   @Test(expected = NullPointerException.class)
@@ -74,22 +76,22 @@ public class LaunchEventTest extends ContinuousEventTest {
   public void testConstructor_launchConfigNull() {
     new LaunchEvent(new DateTime(), 10, new Launch(
         new LaunchConfigurationForTest("a"), ILaunchManager.DEBUG_MODE, null),
-        null, Collections.<String> emptySet());
+        null, Collections.<IPath> emptySet());
   }
 
   @Test(expected = NullPointerException.class)
   public void testConstructor_launchNull() {
     new LaunchEvent(new DateTime(), 10, null,
         new LaunchConfigurationForTest("Adfd222"), Collections
-            .<String> emptySet());
+            .<IPath> emptySet());
   }
 
   @Test(expected = UnsupportedOperationException.class)
   public void testGetFileIds_unmodifiable() {
     LaunchEvent event = new LaunchEvent(new DateTime(), 32, new Launch(
         new LaunchConfigurationForTest("a"), ILaunchManager.DEBUG_MODE, null),
-        new LaunchConfigurationForTest("a"), new HashSet<String>());
-    event.getFileIds().add("Should throw exception.");
+        new LaunchConfigurationForTest("a"), new HashSet<IPath>());
+    event.getFilePaths().add(new Path("/Should throw exception."));
   }
 
   @Test
@@ -97,7 +99,7 @@ public class LaunchEventTest extends ContinuousEventTest {
     ILaunch launch = new Launch(new LaunchConfigurationForTest("a"),
         ILaunchManager.DEBUG_MODE, null);
     LaunchEvent event = new LaunchEvent(new DateTime(), 10, launch,
-        new LaunchConfigurationForTest("bbb"), Collections.<String> emptySet());
+        new LaunchConfigurationForTest("bbb"), Collections.<IPath> emptySet());
 
     assertSame(launch, event.getLaunch());
   }
@@ -107,7 +109,7 @@ public class LaunchEventTest extends ContinuousEventTest {
     ILaunchConfiguration config = new LaunchConfigurationForTest("b");
     LaunchEvent event = new LaunchEvent(new DateTime(), 101,
         new Launch(config, ILaunchManager.DEBUG_MODE, null), config,
-        Collections.<String> emptySet());
+        Collections.<IPath> emptySet());
 
     assertSame(config, event.getLaunchConfiguration());
   }

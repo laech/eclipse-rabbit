@@ -25,6 +25,8 @@ import static org.junit.Assert.assertTrue;
 import org.eclipse.core.internal.registry.ConfigurationElement;
 import org.eclipse.core.internal.registry.ConfigurationElementHandle;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationType;
@@ -55,11 +57,11 @@ public class LaunchEventConverterTest extends
     long duration = 9823;
     ILaunchConfiguration config = new LaunchConfigurationForTest();
     ILaunch launch = new Launch(config, ILaunchManager.DEBUG_MODE, null);
-    Set<String> fileIds = new HashSet<String>();
-    fileIds.add("abc");
-    fileIds.add("def");
+    Set<IPath> filePaths = new HashSet<IPath>();
+    filePaths.add(new Path("/abc"));
+    filePaths.add(new Path("/def"));
 
-    LaunchEvent event = new LaunchEvent(time, duration, launch, config, fileIds);
+    LaunchEvent event = new LaunchEvent(time, duration, launch, config, filePaths);
     LaunchEventType type = converter.convert(event);
 
     assertEquals(1, type.getCount());
@@ -67,9 +69,10 @@ public class LaunchEventConverterTest extends
     assertEquals(config.getType().getIdentifier(), type.getLaunchTypeId());
     assertEquals(ILaunchManager.DEBUG_MODE, type.getLaunchModeId());
     assertEquals(config.getName(), type.getName());
-    assertEquals(fileIds.size(), type.getFileId().size());
-    fileIds.removeAll(type.getFileId());
-    assertTrue(fileIds.isEmpty());
+    assertEquals(filePaths.size(), type.getFilePath().size());
+    for (IPath path : filePaths) {
+      assertTrue(type.getFilePath().contains(path.toString()));
+    }
   }
 
 //Empty class for testing.

@@ -15,12 +15,12 @@
  */
 package rabbit.tracking.internal.trackers;
 
-import rabbit.data.IFileStore;
 import rabbit.data.handler.DataHandler;
 import rabbit.data.store.IStorer;
 import rabbit.data.store.model.LaunchEvent;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.debug.core.DebugEvent;
 import org.eclipse.debug.core.DebugException;
 import org.eclipse.debug.core.DebugPlugin;
@@ -45,8 +45,6 @@ import java.util.Set;
 public class LaunchTracker extends AbstractTracker<LaunchEvent> implements
     IDebugEventSetListener {
 
-  private IFileStore fileMapper;
-
   /**
    * A map of launches and launch configurations. The configuration should be
    * added here as soon as the launch is started, because configuration can be
@@ -59,15 +57,14 @@ public class LaunchTracker extends AbstractTracker<LaunchEvent> implements
   private Map<ILaunch, Long> launchTimes;
 
   /** A map of launches and the files involved (for debug launches). */
-  private Map<ILaunch, Set<String>> launchFiles;
+  private Map<ILaunch, Set<IPath>> launchFiles;
 
   /**
    * Constructs a new tracker.
    */
   public LaunchTracker() {
-    fileMapper = DataHandler.getFileStore();
     launchTimes = new HashMap<ILaunch, Long>();
-    launchFiles = new HashMap<ILaunch, Set<String>>();
+    launchFiles = new HashMap<ILaunch, Set<IPath>>();
     launchConfigs = new HashMap<ILaunch, ILaunchConfiguration>();
   }
 
@@ -142,9 +139,9 @@ public class LaunchTracker extends AbstractTracker<LaunchEvent> implements
         return;
       }
 
-      Set<String> fileIds = launchFiles.get(launch);
-      if (fileIds == null) {
-        fileIds = Collections.emptySet();
+      Set<IPath> filePaths = launchFiles.get(launch);
+      if (filePaths == null) {
+        filePaths = Collections.emptySet();
       }
 
       ILaunchConfiguration config = launchConfigs.get(launch);
@@ -152,7 +149,7 @@ public class LaunchTracker extends AbstractTracker<LaunchEvent> implements
         System.err.println("handleProcessEvent: Launch configuration is null.");
         return;
       }
-      addData(new LaunchEvent(endTime, duration, launch, config, fileIds));
+      addData(new LaunchEvent(endTime, duration, launch, config, filePaths));
     }
   }
 
@@ -198,12 +195,12 @@ public class LaunchTracker extends AbstractTracker<LaunchEvent> implements
     // Element is a file in workspace, record it:
     if (element != null && element instanceof IFile) {
       IFile file = (IFile) element;
-      Set<String> fileIds = launchFiles.get(launch);
-      if (fileIds == null) {
-        fileIds = new HashSet<String>();
-        launchFiles.put(launch, fileIds);
+      Set<IPath> filePaths = launchFiles.get(launch);
+      if (filePaths == null) {
+        filePaths = new HashSet<IPath>(3);
+        launchFiles.put(launch, filePaths);
       }
-      fileIds.add(fileMapper.insert(file));
+      filePaths.add(file.getFullPath());
     }
   }
 }

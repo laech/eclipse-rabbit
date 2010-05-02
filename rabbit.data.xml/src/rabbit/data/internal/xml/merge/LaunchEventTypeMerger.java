@@ -47,9 +47,9 @@ public class LaunchEventTypeMerger extends AbstractMerger<LaunchEventType> {
     result.setCount(t1.getCount() + t2.getCount());
     result.setTotalDuration(t1.getTotalDuration() + t2.getTotalDuration());
 
-    Set<String> fileIds = Sets.newLinkedHashSet(t1.getFileId());
-    fileIds.addAll(t2.getFileId());
-    result.getFileId().addAll(fileIds);
+    Set<String> fileIds = Sets.newLinkedHashSet(t1.getFilePath());
+    fileIds.addAll(t2.getFilePath());
+    result.getFilePath().addAll(fileIds);
     return result;
   }
 

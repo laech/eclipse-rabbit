@@ -19,5 +19,4 @@ Export-Package: rabbit.data.test.xml,
  rabbit.data.test.xml.access,
  rabbit.data.test.xml.convert,
  rabbit.data.test.xml.merge,
- rabbit.data.test.xml.startup,
  rabbit.data.test.xml.store

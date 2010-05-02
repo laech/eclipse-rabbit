@@ -48,9 +48,9 @@ public class TaskFileEventTypeMergerTest extends
    t2.setDuration(t2.getDuration() + 1);
    assertTrue(merger.isMergeable(t1, t2));
    
-   t2.setFileId(t2.getFileId() + "1");
+   t2.setFilePath(t2.getFilePath() + "1");
    assertFalse(merger.isMergeable(t1, t2));
-   t2.setFileId(t1.getFileId());
+   t2.setFilePath(t1.getFilePath());
    assertTrue(merger.isMergeable(t1, t2));
    
    TaskIdType id2 = t2.getTaskId();
@@ -66,9 +66,9 @@ public class TaskFileEventTypeMergerTest extends
   @Test
   public void testIsMergeable_bothParamGetFileIdReturnsNull() {
     TaskFileEventType t1 = createTargetType();
-    t1.setFileId(null);
+    t1.setFilePath(null);
     TaskFileEventType t2 = createTargetType();
-    t2.setFileId(null);
+    t2.setFilePath(null);
 
     try {
       assertFalse(merger.isMergeable(t1, t2));
@@ -121,9 +121,9 @@ public class TaskFileEventTypeMergerTest extends
   @Test
   public void testIsMergeable_firstParamGetFileIdReturnsNull() {
     TaskFileEventType t1 = createTargetType();
-    t1.setFileId(null);
+    t1.setFilePath(null);
     TaskFileEventType t2 = createTargetType();
-    t2.setFileId("notNull");
+    t2.setFilePath("notNull");
 
     try {
       assertFalse(merger.isMergeable(t1, t2));
@@ -174,9 +174,9 @@ public class TaskFileEventTypeMergerTest extends
   @Test
   public void testIsMergeable_secondParamGetFileIdReturnsNull() {
     TaskFileEventType t1 = createTargetType();
-    t1.setFileId("notNull");
+    t1.setFilePath("notNull");
     TaskFileEventType t2 = createTargetType();
-    t2.setFileId(null);
+    t2.setFilePath(null);
 
     try {
       assertFalse(merger.isMergeable(t1, t2));
@@ -240,12 +240,12 @@ public class TaskFileEventTypeMergerTest extends
     id2.setCreationDate(DatatypeUtil.toXmlDate(date));
     
     TaskFileEventType t1 = new TaskFileEventType();
-    t1.setFileId(fileId);
+    t1.setFilePath(fileId);
     t1.setDuration(duration1);
     t1.setTaskId(id1);
     
     TaskFileEventType t2 = new TaskFileEventType();
-    t2.setFileId(fileId);
+    t2.setFilePath(fileId);
     t2.setDuration(duration2);
     t2.setTaskId(id2);
     
@@ -257,7 +257,7 @@ public class TaskFileEventTypeMergerTest extends
     // Now the real tests:
     TaskFileEventType merged = merger.merge(t1, t2);
     assertEquals(duration1 + duration2, merged.getDuration());
-    assertEquals(fileId, merged.getFileId());
+    assertEquals(fileId, merged.getFilePath());
     assertNotSame(t1.getTaskId(), merged.getTaskId());
     assertNotSame(t2.getTaskId(), merged.getTaskId());
     assertEquals(handleId, merged.getTaskId().getHandleId());
@@ -281,12 +281,12 @@ public class TaskFileEventTypeMergerTest extends
     id2.setCreationDate(DatatypeUtil.toXmlDate(date));
     
     TaskFileEventType t1 = new TaskFileEventType();
-    t1.setFileId(fileId);
+    t1.setFilePath(fileId);
     t1.setDuration(duration1);
     t1.setTaskId(id1);
     
     TaskFileEventType t2 = new TaskFileEventType();
-    t2.setFileId(fileId);
+    t2.setFilePath(fileId);
     t2.setDuration(duration2);
     t2.setTaskId(id2);
     
@@ -302,13 +302,13 @@ public class TaskFileEventTypeMergerTest extends
     
     // Check the parameters are not altered:
     assertEquals(duration1, t1.getDuration());
-    assertEquals(fileId, t1.getFileId());
+    assertEquals(fileId, t1.getFilePath());
     assertSame(id1, t1.getTaskId());
     assertEquals(handleId, t1.getTaskId().getHandleId());
     assertEquals(DatatypeUtil.toXmlDate(date), t1.getTaskId().getCreationDate());
 
     assertEquals(duration2, t2.getDuration());
-    assertEquals(fileId, t2.getFileId());
+    assertEquals(fileId, t2.getFilePath());
     assertSame(id2, t2.getTaskId());
     assertEquals(handleId, t2.getTaskId().getHandleId());
     assertEquals(DatatypeUtil.toXmlDate(date), t2.getTaskId().getCreationDate());
@@ -336,7 +336,7 @@ public class TaskFileEventTypeMergerTest extends
     
     TaskFileEventType type = new TaskFileEventType();
     type.setDuration(129);
-    type.setFileId("helloWorld");
+    type.setFilePath("helloWorld");
     type.setTaskId(id);
     
     return type;
@@ -350,7 +350,7 @@ public class TaskFileEventTypeMergerTest extends
     
     TaskFileEventType type = new TaskFileEventType();
     type.setDuration(12119);
-    type.setFileId("0.9.8.7.6.");
+    type.setFilePath("0.9.8.7.6.");
     type.setTaskId(id);
     
     return type;

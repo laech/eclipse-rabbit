@@ -162,7 +162,7 @@ public class XmlPlugin extends AbstractUIPlugin {
       prop.setProperty(PROP_STORAGE_ROOT, directory.getAbsolutePath());
       prop.store(stream,
           "This file contains configurations for the Rabbit Eclipse plugin."
-              + "\nPlease do not delete.");
+              + "\nPlease do not delete, otherwise Rabbit will not work properly.");
       return true;
 
     } catch (FileNotFoundException e) {

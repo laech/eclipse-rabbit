@@ -15,21 +15,21 @@
  */
 package rabbit.tracking.tests.trackers;
 
-import rabbit.data.handler.DataHandler;
 import rabbit.data.store.model.TaskFileEvent;
 import rabbit.tracking.internal.trackers.TaskTracker;
-import rabbit.tracking.tests.trackers.AbstractPartTrackerTest;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.mylyn.internal.tasks.core.LocalTask;
 import org.eclipse.mylyn.tasks.core.ITask;
 import org.eclipse.mylyn.tasks.ui.TasksUi;
 import org.eclipse.swtbot.swt.finder.junit.SWTBotJunit4ClassRunner;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.PlatformUI;
 import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.runner.RunWith;
@@ -49,12 +49,16 @@ public class TaskTrackerTest extends AbstractPartTrackerTest<TaskFileEvent> {
   public void setUpActiveTask() {
     task = new LocalTask(System.currentTimeMillis() + "", "what?");
     task.setCreationDate(new Date());
-    TasksUi.getTaskActivityManager().activateTask(task);
+    PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+      @Override public void run() {
+        TasksUi.getTaskActivityManager().activateTask(task); 
+      }
+    });
   }
 
   @Override
   protected TaskFileEvent createEvent() {
-    return new TaskFileEvent(new DateTime(), 187, "fileId", task);
+    return new TaskFileEvent(new DateTime(), 187, new Path("/a/b/c"), task);
   }
 
   @Override
@@ -67,8 +71,7 @@ public class TaskTrackerTest extends AbstractPartTrackerTest<TaskFileEvent> {
     if (part instanceof IEditorPart) {
       IEditorPart editor = (IEditorPart) part;
       IFile file = (IFile) editor.getEditorInput().getAdapter(IFile.class);
-      String id = DataHandler.getFileStore().getId(file);
-      return event.getFileId().equals(id);
+      return event.getFilePath().equals(file.getFullPath());
     } else {
       return false;
     }
@@ -84,10 +87,8 @@ public class TaskTrackerTest extends AbstractPartTrackerTest<TaskFileEvent> {
     assertTrue(start.compareTo(event.getTime()) <= 0);
     assertTrue(end.compareTo(event.getTime()) >= 0);
     assertEquals(size, tracker.getData().size());
-    IFile file = (IFile) ((IEditorPart) part).getEditorInput().getAdapter(
-        IFile.class);
-    assertEquals(event.getFileId(), DataHandler.getFileStore().getId(file));
-
+    IFile file = (IFile) ((IEditorPart) part).getEditorInput().getAdapter(IFile.class);
+    assertEquals(event.getFilePath(), file.getFullPath());
     assertEquals(task, event.getTask());
   }
 

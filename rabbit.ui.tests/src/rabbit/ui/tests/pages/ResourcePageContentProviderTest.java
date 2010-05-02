@@ -15,9 +15,7 @@
  */
 package rabbit.ui.tests.pages;
 
-import rabbit.data.IFileStore;
 import rabbit.data.access.model.FileDataDescriptor;
-import rabbit.data.handler.DataHandler;
 import rabbit.ui.internal.pages.Category;
 import rabbit.ui.internal.pages.ResourcePage;
 import rabbit.ui.internal.pages.ResourcePageContentProvider;
@@ -56,7 +54,6 @@ public class ResourcePageContentProviderTest {
 
   private static Shell shell;
   private static ResourcePage page;
-  private static IFileStore mapper;
   private static ResourcePageContentProvider provider;
 
   private static IProject project;
@@ -80,8 +77,6 @@ public class ResourcePageContentProviderTest {
     project = root.getProject("p");
     folder = project.getFolder("f");
     file = folder.getFile("a");
-    
-    mapper = DataHandler.getFileStore();
   }
 
   @Test
@@ -99,8 +94,7 @@ public class ResourcePageContentProviderTest {
   
   @Test
   public void testHasChildren() throws Exception {
-    FileDataDescriptor des = new FileDataDescriptor(new LocalDate(), 1009823,
-        mapper.insert(file));
+    FileDataDescriptor des = new FileDataDescriptor(new LocalDate(), 1009823, file.getFullPath());
     page.getViewer().setInput(Arrays.asList(des));
 
     TreeNode root = provider.getRoot();
@@ -115,10 +109,9 @@ public class ResourcePageContentProviderTest {
   @Test
   public void testGetChildren() throws Exception {
     // Two data descriptor of different dates, same file, different value:
-    FileDataDescriptor d1 = new FileDataDescriptor(new LocalDate(), 1009823,
-        mapper.insert(file));
+    FileDataDescriptor d1 = new FileDataDescriptor(new LocalDate(), 1009823, file.getFullPath());
     FileDataDescriptor d2 = new FileDataDescriptor(d1.getDate().minusDays(1),
-        123, mapper.insert(file));
+        123, file.getFullPath());
 
     page.getViewer().setInput(Arrays.asList(d1, d2));
 
@@ -142,10 +135,9 @@ public class ResourcePageContentProviderTest {
   @Test
   public void testGetElement() throws Exception {
     // Two data descriptor of different dates, same file, different value:
-    FileDataDescriptor d1 = new FileDataDescriptor(new LocalDate(), 1009823,
-        mapper.insert(file));
+    FileDataDescriptor d1 = new FileDataDescriptor(new LocalDate(), 1009823, file.getFullPath());
     FileDataDescriptor d2 = new FileDataDescriptor(d1.getDate().minusDays(1),
-        123, mapper.insert(file));
+        123, file.getFullPath());
 
     page.getViewer().setInput(Arrays.asList(d1, d2));
 
@@ -170,10 +162,9 @@ public class ResourcePageContentProviderTest {
   @Test
   public void testGetMaxValue() {
     // Two data descriptor of different dates, same file, different value:
-    FileDataDescriptor d1 = new FileDataDescriptor(new LocalDate(), 1009823,
-        mapper.insert(file));
+    FileDataDescriptor d1 = new FileDataDescriptor(new LocalDate(), 1009823, file.getFullPath());
     FileDataDescriptor d2 = new FileDataDescriptor(d1.getDate().minusDays(1),
-        123, mapper.insert(file));
+        123, file.getFullPath());
 
     // Date
     page.getViewer().setInput(Arrays.asList(d1, d2));
@@ -240,10 +231,9 @@ public class ResourcePageContentProviderTest {
   @Test
   public void testGetValue() throws Exception {
     // Two data descriptor of different dates, same file, different value:
-    FileDataDescriptor d1 = new FileDataDescriptor(new LocalDate(), 1009823,
-        mapper.insert(file));
+    FileDataDescriptor d1 = new FileDataDescriptor(new LocalDate(), 1009823, file.getFullPath());
     FileDataDescriptor d2 = new FileDataDescriptor(d1.getDate().minusDays(1),
-        123, mapper.insert(file));
+        123, file.getFullPath());
 
     page.getViewer().setInput(Arrays.asList(d1, d2));
 
@@ -261,8 +251,7 @@ public class ResourcePageContentProviderTest {
 
   @Test
   public void testInputChanged_clearsOldData() throws Exception {
-    FileDataDescriptor des = new FileDataDescriptor(new LocalDate(), 1009823,
-        mapper.insert(file));
+    FileDataDescriptor des = new FileDataDescriptor(new LocalDate(), 1009823, file.getFullPath());
     page.getViewer().setInput(Arrays.asList(des));
     TreeNode root = provider.getRoot();
     assertFalse(root.getChildren() == null || root.getChildren().length == 0);
@@ -320,10 +309,9 @@ public class ResourcePageContentProviderTest {
   @Test
   public void testSetPaintCategory() {
     // Two data descriptor of different dates, same file, different value:
-    FileDataDescriptor d1 = new FileDataDescriptor(new LocalDate(), 1009823,
-        mapper.insert(file));
+    FileDataDescriptor d1 = new FileDataDescriptor(new LocalDate(), 1009823, file.getFullPath());
     FileDataDescriptor d2 = new FileDataDescriptor(d1.getDate().minusDays(1),
-        123, mapper.insert(file));
+        123, file.getFullPath());
 
     page.getViewer().setInput(Arrays.asList(d1, d2));
 

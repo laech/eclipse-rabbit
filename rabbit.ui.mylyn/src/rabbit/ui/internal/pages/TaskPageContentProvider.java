@@ -15,10 +15,8 @@
  */
 package rabbit.ui.internal.pages;
 
-import rabbit.data.IFileStore;
 import rabbit.data.access.model.TaskFileDataDescriptor;
 import rabbit.data.common.TaskId;
-import rabbit.data.handler.DataHandler;
 import rabbit.ui.internal.SharedImages;
 import rabbit.ui.internal.util.ICategory;
 import rabbit.ui.internal.util.UnrecognizedTask;
@@ -32,6 +30,10 @@ import com.google.common.collect.ImmutableMap;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.TreeNode;
 import org.eclipse.jface.viewers.TreeViewer;
@@ -135,7 +137,7 @@ public class TaskPageContentProvider extends AbstractValueContentProvider {
     getRoot().setChildren(null);
     
     IRepositoryModel repo = TasksUi.getRepositoryModel();
-    IFileStore fileStore = DataHandler.getFileStore();
+    IWorkspaceRoot workspace = ResourcesPlugin.getWorkspace().getRoot();
     for (TaskFileDataDescriptor des : data) {
       
       TreeNode node = getRoot();
@@ -156,11 +158,12 @@ public class TaskPageContentProvider extends AbstractValueContentProvider {
           
         } else { // PROJECT/FOLDER/FILE Categories:
           
-          IFile file = fileStore.getFile(des.getFileId());
-          if (file == null)
-            file = fileStore.getExternalFile(des.getFileId());
-          if (file == null)
-            continue;
+          IPath path = des.getFilePath();
+          String pathStr = path.toString();
+          if (pathStr.contains(":")) {
+            path = new Path(pathStr.replace(":", ""));
+          }
+          IFile file = workspace.getFile(path);
 
           if (Category.PROJECT == cat)
             node = TreeNodes.findOrAppend(node, file.getProject());

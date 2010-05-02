@@ -14,9 +14,6 @@ Export-Package: rabbit.data.internal.xml;x-friends:="rabbit.data.xml.ui",
  rabbit.data.internal.xml.convert;x-internal:=true,
  rabbit.data.internal.xml.merge;x-internal:=true,
  rabbit.data.internal.xml.schema.events;x-internal:=true,
- rabbit.data.internal.xml.schema.resources;x-internal:=true,
- rabbit.data.internal.xml.startup;x-internal:=true,
- rabbit.data.xml,
  rabbit.data.xml.access,
  rabbit.data.xml.store
 Bundle-Activator: rabbit.data.internal.xml.XmlPlugin

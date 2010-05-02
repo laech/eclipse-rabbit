@@ -19,6 +19,7 @@ import rabbit.data.internal.xml.schema.events.LaunchEventType;
 import rabbit.data.store.model.LaunchEvent;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 
 /**
  * Converts from {@link LaunchEvent} to {@link LaunchEventType}.
@@ -29,7 +30,9 @@ public class LaunchEventConverter extends
   @Override
   protected LaunchEventType doConvert(LaunchEvent element) {
     LaunchEventType type = new LaunchEventType();
-    type.getFileId().addAll(element.getFileIds());
+    for (IPath path : element.getFilePaths()) {
+      type.getFilePath().add(path.toString());
+    }
     type.setTotalDuration(element.getDuration());
     type.setName(element.getLaunchConfiguration().getName());
     try {

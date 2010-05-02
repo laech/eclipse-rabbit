@@ -5,7 +5,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableSet;
 
+import org.eclipse.core.runtime.IPath;
 import org.joda.time.LocalDate;
+
+import java.util.Set;
 
 import javax.annotation.Nonnull;
 
@@ -15,7 +18,7 @@ import javax.annotation.Nonnull;
 public class LaunchDataDescriptor extends DateDescriptor {
 
   @Nonnull
-  private final ImmutableSet<String> fileIds;
+  private final ImmutableSet<IPath> filePaths;
   @Nonnull
   private final LaunchConfigurationDescriptor launch;
   private final long totalDuration;
@@ -28,21 +31,23 @@ public class LaunchDataDescriptor extends DateDescriptor {
    * @param launch The launch configuration description.
    * @param count The number of time this launch configuration is executed.
    * @param totalDuration The total duration of the launches, in milliseconds.
-   * @param fileIds The IDs of the files involved, or an empty collection.
+   * @param filePaths The paths of the files involved, or an empty collection.
    * @throws NullPointerException If date, or launch, or fileIds is null.
    * @throws IllegalArgumentException If count < 0, or totalDuration < 0.
    */
   public LaunchDataDescriptor(@Nonnull LocalDate dt,
-      @Nonnull LaunchConfigurationDescriptor launch, int count,
-      long totalDuration, @Nonnull Iterable<String> fileIds) {
+                              @Nonnull LaunchConfigurationDescriptor launch, 
+                                       int count,
+                                       long totalDuration, 
+                              @Nonnull Iterable<IPath> filePaths) {
 
     super(dt);
     checkNotNull(launch);
     checkArgument(totalDuration >= 0);
     checkArgument(count >= 0);
-    checkNotNull(fileIds);
+    checkNotNull(filePaths);
 
-    this.fileIds = ImmutableSet.copyOf(fileIds);
+    this.filePaths = ImmutableSet.copyOf(filePaths);
     this.launch = launch;
     this.count = count;
     this.totalDuration = totalDuration;
@@ -66,18 +71,18 @@ public class LaunchDataDescriptor extends DateDescriptor {
     return des.getDate().equals(getDate())
         && des.getLaunchCount() == getLaunchCount()
         && des.getTotalDuration() == getTotalDuration()
-        && des.getFileIds().equals(getFileIds())
+        && des.getFilePaths().equals(getFilePaths())
         && des.getLaunchDescriptor().equals(getLaunchDescriptor());
   }
 
   /**
-   * Gets the file IDs of this launch.
+   * Gets the file paths of this launch.
    * 
-   * @return The IDs of the files involved, never null.
+   * @return An unmodifiable set of paths of the files involved, never null.
    */
   @Nonnull
-  public ImmutableSet<String> getFileIds() {
-    return fileIds;
+  public Set<IPath> getFilePaths() {
+    return filePaths;
   }
 
   /**

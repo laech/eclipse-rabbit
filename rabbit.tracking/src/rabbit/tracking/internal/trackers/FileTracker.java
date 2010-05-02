@@ -20,11 +20,16 @@ import rabbit.data.store.IStorer;
 import rabbit.data.store.model.FileEvent;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IFileEditorInput;
+import org.eclipse.ui.IURIEditorInput;
 import org.eclipse.ui.IWorkbenchPart;
 import org.joda.time.DateTime;
+
+import java.net.URI;
 
 /**
  * Tracks time spent on files.
@@ -46,11 +51,26 @@ public class FileTracker extends AbstractPartTracker<FileEvent> {
     if (part instanceof IEditorPart) {
       IEditorInput input = ((IEditorPart) part).getEditorInput();
 
+      /*
+       * Order of this "if" statement is important.
+       * 
+       * The editor input is likely to implement both IFileEditorInput and 
+       * IURIEditorInput. The difference between the two input is that the 
+       * IFileEditorInput contains an IFile, which has a workspace path, like
+       * "/project/folder/file.extension", the IUIREditorInput has no such file,
+       * it only has a path to the actual file in the file system, like 
+       * "C:/a.txt". We want workspace paths wherever possible.
+       */
       if (input instanceof IFileEditorInput) {
+        // Contains a file in the workspace
         IFile file = ((IFileEditorInput) input).getFile();
-        String id = DataHandler.getFileStore().insert(file);
-        return new FileEvent(endTime, duration, id);
+        return new FileEvent(endTime, duration, file.getFullPath());
 
+      } else if (input instanceof IURIEditorInput) {
+        // A file outside of workspace
+        URI uri = ((IURIEditorInput) input).getURI();
+        IPath path = new Path(uri.getPath());
+        return new FileEvent(endTime, duration, path);
       }
     }
     return null;

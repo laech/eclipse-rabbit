@@ -64,15 +64,6 @@ public class SessionTracker extends AbstractTracker<SessionEvent> implements
   protected IStorer<SessionEvent> createDataStorer() {
     return DataHandler.getStorer(SessionEvent.class);
   }
-  
-  @Override
-  public void saveData() {
-    super.saveData();
-    for (SessionEvent e : getData()) {
-      System.out.println(e.getTime().toString() + " " + e.getDuration() / (float) 1000); 
-    }
-  }
-  
 
   @Override
   protected void doDisable() {

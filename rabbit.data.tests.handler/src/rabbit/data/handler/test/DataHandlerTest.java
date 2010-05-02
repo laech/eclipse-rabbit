@@ -33,7 +33,6 @@ import rabbit.data.store.model.TaskFileEvent;
 
 import static org.junit.Assert.assertNotNull;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 /**
@@ -41,11 +40,6 @@ import org.junit.Test;
  */
 public class DataHandlerTest {
   
-  @Test
-  public void testGetFileStore() {
-    Assert.assertNotNull(DataHandler.getFileStore());
-  }
-
   @Test
   public void testGetStorer() {
     assertNotNull(DataHandler.getStorer(PerspectiveEvent.class));

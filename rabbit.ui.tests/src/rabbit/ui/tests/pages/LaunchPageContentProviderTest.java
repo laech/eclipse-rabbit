@@ -37,6 +37,7 @@ import static org.junit.Assert.fail;
 
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jface.viewers.TreeNode;
 import org.eclipse.jface.viewers.TreeViewer;
@@ -106,8 +107,8 @@ public class LaunchPageContentProviderTest {
     LaunchConfigurationDescriptor debugMode = new LaunchConfigurationDescriptor(
         runMode.getLaunchName(), ILaunchManager.DEBUG_MODE, runMode.getLaunchTypeId());
     
-    LaunchDataDescriptor d1 = new LaunchDataDescriptor(new LocalDate(), runMode, 1,   10, Collections.<String>emptySet());
-    LaunchDataDescriptor d2 = new LaunchDataDescriptor(d1.getDate(), debugMode, 19, 1200, Collections.<String>emptySet());
+    LaunchDataDescriptor d1 = new LaunchDataDescriptor(new LocalDate(), runMode, 1,   10, Collections.<IPath>emptySet());
+    LaunchDataDescriptor d2 = new LaunchDataDescriptor(d1.getDate(), debugMode, 19, 1200, Collections.<IPath>emptySet());
     
     provider.getViewer().setInput(Arrays.asList(d1, d2));
     provider.setSelectedCategories(Category.LAUNCH_MODE, Category.DATE);
@@ -137,9 +138,9 @@ public class LaunchPageContentProviderTest {
         "Name", ILaunchManager.RUN_MODE, "org.eclipse.pde.ui.RuntimeWorkbench");
     
     LaunchDataDescriptor d1 = new LaunchDataDescriptor(new LocalDate(), config, 
-        0, 10, Collections.<String> emptySet());
+        0, 10, Collections.<IPath> emptySet());
     LaunchDataDescriptor d2 = new LaunchDataDescriptor(d1.getDate().plusDays(1),
-        config, 110, 1800, Collections.<String> emptySet());
+        config, 110, 1800, Collections.<IPath> emptySet());
     
 
     provider.getViewer().setInput(Arrays.asList(d1, d2));
@@ -182,8 +183,8 @@ public class LaunchPageContentProviderTest {
     LaunchConfigurationDescriptor debugMode = new LaunchConfigurationDescriptor(
         runMode.getLaunchName(), ILaunchManager.DEBUG_MODE, runMode.getLaunchTypeId());
     
-    LaunchDataDescriptor d1 = new LaunchDataDescriptor(new LocalDate(), runMode, 1,   10, Collections.<String>emptySet());
-    LaunchDataDescriptor d2 = new LaunchDataDescriptor(d1.getDate(), debugMode, 19, 1200, Collections.<String>emptySet());
+    LaunchDataDescriptor d1 = new LaunchDataDescriptor(new LocalDate(), runMode, 1,   10, Collections.<IPath>emptySet());
+    LaunchDataDescriptor d2 = new LaunchDataDescriptor(d1.getDate(), debugMode, 19, 1200, Collections.<IPath>emptySet());
     
     IValueProvider values = provider.getLaunchCountValueProvider();
     provider.getViewer().setInput(Arrays.asList(d1, d2));
@@ -217,8 +218,8 @@ public class LaunchPageContentProviderTest {
         "Name", ILaunchManager.RUN_MODE, "org.eclipse.pde.ui.RuntimeWorkbench");
     LaunchConfigurationDescriptor debugMode = new LaunchConfigurationDescriptor(
         runMode.getLaunchName(), ILaunchManager.DEBUG_MODE, runMode.getLaunchTypeId());
-    LaunchDataDescriptor d1 = new LaunchDataDescriptor(new LocalDate(), runMode, 1,   10, Collections.<String>emptySet());
-    LaunchDataDescriptor d2 = new LaunchDataDescriptor(d1.getDate(), debugMode, 19, 1200, Collections.<String>emptySet());
+    LaunchDataDescriptor d1 = new LaunchDataDescriptor(new LocalDate(), runMode, 1,   10, Collections.<IPath>emptySet());
+    LaunchDataDescriptor d2 = new LaunchDataDescriptor(d1.getDate(), debugMode, 19, 1200, Collections.<IPath>emptySet());
 
     provider.getViewer().setInput(Arrays.asList(d1, d2));
     provider.setSelectedCategories(Category.DATE, Category.LAUNCH_TYPE, Category.LAUNCH, Category.LAUNCH_MODE);
@@ -268,8 +269,8 @@ public class LaunchPageContentProviderTest {
     LaunchConfigurationDescriptor debugMode = new LaunchConfigurationDescriptor(
         runMode.getLaunchName(), ILaunchManager.DEBUG_MODE, runMode.getLaunchTypeId());
     
-    LaunchDataDescriptor d1 = new LaunchDataDescriptor(new LocalDate(), runMode, 1,   10, Collections.<String>emptySet());
-    LaunchDataDescriptor d2 = new LaunchDataDescriptor(d1.getDate(), debugMode, 19, 1200, Collections.<String>emptySet());
+    LaunchDataDescriptor d1 = new LaunchDataDescriptor(new LocalDate(), runMode, 1,   10, Collections.<IPath>emptySet());
+    LaunchDataDescriptor d2 = new LaunchDataDescriptor(d1.getDate(), debugMode, 19, 1200, Collections.<IPath>emptySet());
     
     IValueProvider values = provider.getLaunchDurationValueProvider();
     provider.setSelectedCategories(Category.DATE, Category.LAUNCH_TYPE, Category.LAUNCH, Category.LAUNCH_MODE);
@@ -302,8 +303,8 @@ public class LaunchPageContentProviderTest {
         "Name", ILaunchManager.RUN_MODE, "org.eclipse.pde.ui.RuntimeWorkbench");
     LaunchConfigurationDescriptor debugMode = new LaunchConfigurationDescriptor(
         runMode.getLaunchName(), ILaunchManager.DEBUG_MODE, runMode.getLaunchTypeId());
-    LaunchDataDescriptor d1 = new LaunchDataDescriptor(new LocalDate(), runMode, 1,   10, Collections.<String>emptySet());
-    LaunchDataDescriptor d2 = new LaunchDataDescriptor(d1.getDate(), debugMode, 19, 1200, Collections.<String>emptySet());
+    LaunchDataDescriptor d1 = new LaunchDataDescriptor(new LocalDate(), runMode, 1,   10, Collections.<IPath>emptySet());
+    LaunchDataDescriptor d2 = new LaunchDataDescriptor(d1.getDate(), debugMode, 19, 1200, Collections.<IPath>emptySet());
 
     provider.setSelectedCategories(Category.DATE, Category.LAUNCH_TYPE, Category.LAUNCH, Category.LAUNCH_MODE);
     provider.getViewer().setInput(Arrays.asList(d1, d2));
@@ -373,7 +374,7 @@ public class LaunchPageContentProviderTest {
   public void testHasChildren() {
     LaunchConfigurationDescriptor runMode = new LaunchConfigurationDescriptor(
         "Name", ILaunchManager.RUN_MODE, "org.eclipse.pde.ui.RuntimeWorkbench");
-    LaunchDataDescriptor des = new LaunchDataDescriptor(new LocalDate(), runMode, 1,   10, Collections.<String>emptySet());
+    LaunchDataDescriptor des = new LaunchDataDescriptor(new LocalDate(), runMode, 1,   10, Collections.<IPath>emptySet());
     
     provider.getViewer().setInput(Arrays.asList(des));
     

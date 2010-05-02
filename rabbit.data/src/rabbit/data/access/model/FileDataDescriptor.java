@@ -4,6 +4,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.Objects;
 
+import org.eclipse.core.runtime.IPath;
 import org.joda.time.LocalDate;
 
 import javax.annotation.Nonnull;
@@ -14,27 +15,27 @@ import javax.annotation.Nonnull;
 public class FileDataDescriptor extends ValueDescriptor {
 
   @Nonnull
-  private final String fileId;
+  private final IPath filePath;
 
   /**
    * Constructs a new data descriptor.
    * 
    * @param date The date of the data.
    * @param value The duration of the event, in milliseconds.
-   * @param fileId The ID of the file.
-   * @throws NullPointerException If date is null, or fileId is null.
+   * @param filePath The path of the file.
+   * @throws NullPointerException If date is null, or filePath is null.
    * @throws IllegalArgumentException If value < 0;
    */
   public FileDataDescriptor(@Nonnull LocalDate date, long value,
-      @Nonnull String fileId) {
+      @Nonnull IPath filePath) {
     super(date, value);
-    checkNotNull(fileId, "File ID cannot be null");
-    this.fileId = fileId;
+    checkNotNull(filePath, "File ID cannot be null");
+    this.filePath = filePath;
   }
 
   @Override
   public int hashCode() {
-    return Objects.hashCode(getDate(), getFileId());
+    return Objects.hashCode(getDate(), getFilePath());
   }
 
   @Override
@@ -48,17 +49,17 @@ public class FileDataDescriptor extends ValueDescriptor {
 
     FileDataDescriptor des = (FileDataDescriptor) obj;
     return des.getDate().equals(getDate()) && des.getValue() == getValue()
-        && des.getFileId().equals(getFileId());
+        && des.getFilePath().equals(getFilePath());
   }
 
   /**
-   * Gets the ID of the file.
+   * Gets the path of the file.
    * 
-   * @return The ID, never null.
+   * @return The path, never null.
    */
   @Nonnull
-  public String getFileId() {
-    return fileId;
+  public IPath getFilePath() {
+    return filePath;
   }
 
   /**

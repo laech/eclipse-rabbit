@@ -49,7 +49,7 @@ public class FileDataAccessorTest
   protected FileEventType createElement() {
     FileEventType type = objectFactory.createFileEventType();
     type.setDuration(1000);
-    type.setFileId("ab");
+    type.setFilePath("/ab");
     return type;
   }
 
@@ -60,7 +60,7 @@ public class FileDataAccessorTest
 
   @Override
   protected void setId(FileEventType type, String id) {
-    type.setFileId(id);
+    type.setFilePath(id);
   }
 
   @Override
@@ -76,7 +76,7 @@ public class FileDataAccessorTest
 
     assertEquals(date, des.getDate());
     assertEquals(type.getDuration(), des.getValue());
-    assertEquals(type.getFileId(), des.getFileId());
+    assertEquals(type.getFilePath(), des.getFilePath().toString());
   }
 
 }

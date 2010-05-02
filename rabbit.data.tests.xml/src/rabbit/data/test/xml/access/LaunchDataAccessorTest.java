@@ -93,7 +93,7 @@ public class LaunchDataAccessorTest
     assertEquals(e.getLaunchModeId(), des.getLaunchDescriptor().getLaunchModeId());
     assertEquals(e.getLaunchTypeId(), des.getLaunchDescriptor().getLaunchTypeId());
     assertEquals(e.getName(), des.getLaunchDescriptor().getLaunchName());
-    assertEquals(e.getFileId().size(), des.getFileIds().size());
-    assertTrue(e.getFileId().containsAll(des.getFileIds()));
+    assertEquals(e.getFilePath().size(), des.getFilePaths().size());
+    assertTrue(e.getFilePath().containsAll(des.getFilePaths()));
   }
 }

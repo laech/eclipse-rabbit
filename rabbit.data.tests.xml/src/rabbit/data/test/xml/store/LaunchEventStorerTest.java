@@ -26,6 +26,8 @@ import com.google.common.base.Objects;
 import org.eclipse.core.internal.registry.ConfigurationElement;
 import org.eclipse.core.internal.registry.ConfigurationElementHandle;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationType;
@@ -108,9 +110,9 @@ public class LaunchEventStorerTest extends
     long duration = 19823;
     ILaunchConfiguration config = new LaunchConfigurationForTest();
     ILaunch launch = new Launch(config, ILaunchManager.DEBUG_MODE, null);
-    Set<String> fileIds = new HashSet<String>();
-    fileIds.add("ab1c");
-    fileIds.add("d1ef");
+    Set<IPath> fileIds = new HashSet<IPath>();
+    fileIds.add(new Path("/ab1c"));
+    fileIds.add(new Path("/d1ef"));
     return new LaunchEvent(dateTime, duration, launch, config, fileIds);
   }
 
@@ -119,8 +121,8 @@ public class LaunchEventStorerTest extends
     long duration = 119823;
     ILaunchConfiguration config = new LaunchConfigurationForTest();
     ILaunch launch = new Launch(config, ILaunchManager.PROFILE_MODE, null);
-    Set<String> fileIds = new HashSet<String>();
-    fileIds.add("1ab1c");
+    Set<IPath> fileIds = new HashSet<IPath>();
+    fileIds.add(new Path("/1ab1c"));
     return new LaunchEvent(dateTime, duration, launch, config, fileIds);
   }
 
@@ -131,8 +133,8 @@ public class LaunchEventStorerTest extends
         && Objects.equal(t1.getName(), t2.getName())
         && t1.getCount() == t2.getCount()
         && t1.getTotalDuration() == t2.getTotalDuration()
-        && t1.getFileId().size() == t2.getFileId().size()
-        && t1.getFileId().containsAll(t2.getFileId())
-        && t2.getFileId().containsAll(t1.getFileId());
+        && t1.getFilePath().size() == t2.getFilePath().size()
+        && t1.getFilePath().containsAll(t2.getFilePath())
+        && t2.getFilePath().containsAll(t1.getFilePath());
   }
 }

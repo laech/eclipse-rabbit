@@ -23,6 +23,7 @@ public class ProgramUI extends JFrame {
    */
   public ProgramUI() {
     setDefaultCloseOperation(EXIT_ON_CLOSE);
+    setLocationByPlatform(true);
     setTitle("Rabbit Data Converter");
 
     final JLabel label = new JLabel();

@@ -21,6 +21,7 @@ import rabbit.data.store.model.FileEvent;
 
 import static org.junit.Assert.assertEquals;
 
+import org.eclipse.core.runtime.Path;
 import org.joda.time.DateTime;
 
 /**
@@ -37,9 +38,9 @@ public class FileEventConverterTest extends
 
   @Override
   public void testConvert() throws Exception {
-    FileEvent event = new FileEvent(new DateTime(), 100, "file.a.c.b");
+    FileEvent event = new FileEvent(new DateTime(), 100, new Path("/file/acb"));
     FileEventType type = converter.convert(event);
-    assertEquals(event.getFileId(), type.getFileId());
+    assertEquals(event.getFilePath().toString(), type.getFilePath());
     assertEquals(event.getDuration(), type.getDuration());
   }
 

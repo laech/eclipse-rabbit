@@ -190,24 +190,24 @@ public class LaunchEventTypeMergerTest extends
     LaunchEventType t1 = createTargetType();
     t1.setCount(10000);
     t1.setTotalDuration(98340);
-    t1.getFileId().addAll(Arrays.asList(System.currentTimeMillis() + ""));
+    t1.getFilePath().addAll(Arrays.asList(System.currentTimeMillis() + ""));
 
     LaunchEventType t2 = createTargetType();
     t2.setCount(10000);
     t2.setTotalDuration(98340);
-    t2.getFileId().addAll(Arrays.asList(System.nanoTime() + ""));
-    t2.getFileId().addAll(t1.getFileId());
+    t2.getFilePath().addAll(Arrays.asList(System.nanoTime() + ""));
+    t2.getFilePath().addAll(t1.getFilePath());
 
     int totalCount = t1.getCount() + t2.getCount();
     long totalDuration = t1.getTotalDuration() + t2.getTotalDuration();
-    Set<String> allFileIds = new HashSet<String>(t1.getFileId());
-    allFileIds.addAll(t2.getFileId());
+    Set<String> allFileIds = new HashSet<String>(t1.getFilePath());
+    allFileIds.addAll(t2.getFilePath());
 
     LaunchEventType result = merger.merge(t1, t2);
     assertEquals(totalCount, result.getCount());
     assertEquals(totalDuration, result.getTotalDuration());
-    assertEquals(allFileIds.size(), result.getFileId().size());
-    assertTrue(allFileIds.containsAll(result.getFileId()));
+    assertEquals(allFileIds.size(), result.getFilePath().size());
+    assertTrue(allFileIds.containsAll(result.getFilePath()));
   }
   
   @Override
@@ -228,14 +228,14 @@ public class LaunchEventTypeMergerTest extends
     type1.setLaunchModeId(mode);
     type1.setCount(count1);
     type1.setTotalDuration(duration1);
-    type1.getFileId().addAll(fileIds1);
+    type1.getFilePath().addAll(fileIds1);
     LaunchEventType type2 = new LaunchEventType();
     type2.setName(name);
     type2.setLaunchTypeId(type);
     type2.setLaunchModeId(mode);
     type2.setCount(count2);
     type2.setTotalDuration(duration2);
-    type2.getFileId().addAll(fileIds2);
+    type2.getFilePath().addAll(fileIds2);
     
     LaunchEventType result = merger.merge(type1, type2);
     assertNotSame(type1, result);
@@ -245,15 +245,15 @@ public class LaunchEventTypeMergerTest extends
     assertEquals(type, type1.getLaunchTypeId());
     assertEquals(count1, type1.getCount());
     assertEquals(duration1, type1.getTotalDuration());
-    assertEquals(fileIds1.size(), type1.getFileId().size());
-    assertTrue(fileIds1.containsAll(type1.getFileId()));
+    assertEquals(fileIds1.size(), type1.getFilePath().size());
+    assertTrue(fileIds1.containsAll(type1.getFilePath()));
     assertEquals(name, type2.getName());
     assertEquals(mode, type2.getLaunchModeId());
     assertEquals(type, type2.getLaunchTypeId());
     assertEquals(count2, type2.getCount());
     assertEquals(duration2, type2.getTotalDuration());
-    assertEquals(fileIds2.size(), type2.getFileId().size());
-    assertTrue(fileIds2.containsAll(type2.getFileId()));
+    assertEquals(fileIds2.size(), type2.getFilePath().size());
+    assertTrue(fileIds2.containsAll(type2.getFilePath()));
   }
 
   @Override
@@ -269,8 +269,8 @@ public class LaunchEventTypeMergerTest extends
     type.setLaunchTypeId("someTypeId");
     type.setName("aName");
     type.setTotalDuration(1999);
-    type.getFileId().add("1");
-    type.getFileId().add("2");
+    type.getFilePath().add("1");
+    type.getFilePath().add("2");
     return type;
   }
 
@@ -282,7 +282,7 @@ public class LaunchEventTypeMergerTest extends
     type.setLaunchTypeId("someTypeId111111");
     type.setName("aName11111");
     type.setTotalDuration(1999111);
-    type.getFileId().add("A");
+    type.getFilePath().add("A");
     return type;
   }
 

@@ -24,6 +24,7 @@ import rabbit.data.internal.xml.schema.events.EventListType;
 import rabbit.data.internal.xml.schema.events.FileEventListType;
 import rabbit.data.internal.xml.schema.events.FileEventType;
 
+import org.eclipse.core.runtime.Path;
 import org.joda.time.LocalDate;
 
 import java.util.Collection;
@@ -41,7 +42,7 @@ public class FileDataAccessor
   @Override
   protected FileDataDescriptor createDataNode(LocalDate cal, FileEventType type) {
     try {
-      return new FileDataDescriptor(cal, type.getDuration(), type.getFileId());
+      return new FileDataDescriptor(cal, type.getDuration(), new Path(type.getFilePath()));
     } catch (NullPointerException e) {
       return null;
     } catch (IllegalArgumentException e) {

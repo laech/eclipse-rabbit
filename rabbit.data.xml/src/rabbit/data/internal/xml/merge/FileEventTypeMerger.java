@@ -25,14 +25,14 @@ public class FileEventTypeMerger extends AbstractMerger<FileEventType> {
   @Override
   protected FileEventType doMerge(FileEventType t1, FileEventType t2) {
     FileEventType result = new FileEventType();
-    result.setFileId(t1.getFileId());
+    result.setFilePath(t1.getFilePath());
     result.setDuration(t1.getDuration() + t2.getDuration());
     return result;
   }
 
   @Override
   public boolean doIsMergeable(FileEventType t1, FileEventType t2) {
-    return (t1.getFileId() != null) && (t1.getFileId().equals(t2.getFileId()));
+    return (t1.getFilePath() != null) && (t1.getFilePath().equals(t2.getFilePath()));
   }
 
 }

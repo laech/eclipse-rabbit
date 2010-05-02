@@ -15,7 +15,6 @@
  */
 package rabbit.tracking.tests.trackers;
 
-import rabbit.data.handler.DataHandler;
 import rabbit.data.store.model.FileEvent;
 import rabbit.tracking.internal.trackers.FileTracker;
 
@@ -25,6 +24,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.swtbot.swt.finder.junit.SWTBotJunit4ClassRunner;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPart;
@@ -37,6 +38,7 @@ import java.util.Iterator;
 /**
  * Test for {@link FileTracker}
  */
+@SuppressWarnings("restriction")
 @RunWith(SWTBotJunit4ClassRunner.class)
 public class FileTrackerTest extends AbstractPartTrackerTest<FileEvent> {
 
@@ -70,7 +72,7 @@ public class FileTrackerTest extends AbstractPartTrackerTest<FileEvent> {
 
   @Override
   protected FileEvent createEvent() {
-    return new FileEvent(new DateTime(), 10, "someId");
+    return new FileEvent(new DateTime(), 10, Path.fromPortableString("/p/f/a.txt"));
   }
 
   @Override
@@ -83,8 +85,8 @@ public class FileTrackerTest extends AbstractPartTrackerTest<FileEvent> {
     if (part instanceof IEditorPart) {
       IEditorPart editor = (IEditorPart) part;
       IFile file = (IFile) editor.getEditorInput().getAdapter(IFile.class);
-      String id = DataHandler.getFileStore().getId(file);
-      return event.getFileId().equals(id);
+      IPath path = file.getFullPath();
+      return event.getFilePath().equals(path);
     } else {
       return false;
     }
@@ -100,10 +102,8 @@ public class FileTrackerTest extends AbstractPartTrackerTest<FileEvent> {
     Assert.assertTrue(start.compareTo(event.getTime()) <= 0);
     Assert.assertTrue(end.compareTo(event.getTime()) >= 0);
     Assert.assertEquals(size, tracker.getData().size());
-    IFile file = (IFile) ((IEditorPart) part).getEditorInput().getAdapter(
-        IFile.class);
-    Assert.assertEquals(event.getFileId(), DataHandler.getFileStore().getId(
-        file));
+    IFile file = (IFile) ((IEditorPart) part).getEditorInput().getAdapter(IFile.class);
+    Assert.assertEquals(event.getFilePath(), file.getFullPath());
   }
 
 }

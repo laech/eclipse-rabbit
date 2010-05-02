@@ -55,13 +55,13 @@ public class TaskFileDataAccessorTest extends
     
     TaskFileEventType type = new TaskFileEventType();
     type.setDuration(duration);
-    type.setFileId(fileId);
+    type.setFilePath(fileId);
     type.setTaskId(id);
     
     TaskFileDataDescriptor des = createDataNode(accessor, eventDate, type);
     assertEquals(duration, des.getValue());
     assertEquals(eventDate, des.getDate());
-    assertEquals(fileId, des.getFileId());
+    assertEquals(fileId, des.getFilePath().toString());
     assertEquals(handleId, des.getTaskId().getHandleIdentifier());
     assertEquals(DatatypeUtil.toXmlDate(creationDate), type.getTaskId().getCreationDate());
   }
@@ -81,7 +81,7 @@ public class TaskFileDataAccessorTest extends
     
     TaskFileEventType type = new TaskFileEventType();
     type.setDuration(10);
-    type.setFileId("hello");
+    type.setFilePath("hello");
     type.setTaskId(id);
     return type;
   }
@@ -94,7 +94,7 @@ public class TaskFileDataAccessorTest extends
   @Override
   protected void setId(TaskFileEventType type, String id) {
     // Change one of the ID property - fileId or taskId
-    type.setFileId(id);
+    type.setFilePath(id);
   }
 
   @Override

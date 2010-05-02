@@ -87,7 +87,7 @@
   <xs:complexType name="fileEventType">
     <xs:complexContent>
       <xs:extension base="durationEventType">
-        <xs:attribute name="fileId" type="xs:string" use="required" />
+        <xs:attribute name="filePath" type="xs:string" use="required" />
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
@@ -108,7 +108,7 @@
         <xs:sequence>
           <xs:element name="taskId" type="taskIdType" minOccurs="1" maxOccurs="1" />
         </xs:sequence>
-        <xs:attribute name="fileId" type="xs:string" use="required" />
+        <xs:attribute name="filePath" type="xs:string" use="required" />
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
@@ -132,10 +132,10 @@
       <xs:extension base="countEventType">
         <xs:sequence>
           <!-- 
-            fileId represents the files involved in a debug session, can be 
+            filePath represents the files involved in a debug session, can be 
             empty:
            -->
-          <xs:element name="fileId" type="xs:string" minOccurs="0" maxOccurs="unbounded" />
+          <xs:element name="filePath" type="xs:string" minOccurs="0" maxOccurs="unbounded" />
         </xs:sequence>
         <xs:attribute name="name" type="xs:string" use="required" />
         <xs:attribute name="launchModeId" type="xs:string" use="required" />

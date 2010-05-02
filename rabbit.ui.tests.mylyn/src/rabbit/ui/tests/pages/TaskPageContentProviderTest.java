@@ -15,10 +15,8 @@
  */
 package rabbit.ui.tests.pages;
 
-import rabbit.data.IFileStore;
 import rabbit.data.access.model.TaskFileDataDescriptor;
 import rabbit.data.common.TaskId;
-import rabbit.data.handler.DataHandler;
 import rabbit.ui.internal.pages.TaskPage;
 import rabbit.ui.internal.pages.TaskPageContentProvider;
 import rabbit.ui.internal.pages.TaskPageContentProvider.Category;
@@ -59,7 +57,6 @@ public class TaskPageContentProviderTest {
 
   private static Shell shell;
   private static TaskPage page;
-  private static IFileStore mapper;
   private static TaskPageContentProvider provider;
 
   private static IProject project;
@@ -83,8 +80,6 @@ public class TaskPageContentProviderTest {
     project = root.getProject("p");
     folder = project.getFolder("f");
     file = folder.getFile("a");
-    
-    mapper = DataHandler.getFileStore();
   }
   
   @Test
@@ -103,7 +98,7 @@ public class TaskPageContentProviderTest {
   @Test
   public void testHasChildren() throws Exception {
     TaskFileDataDescriptor des = new TaskFileDataDescriptor(new LocalDate(), 
-        1009823, mapper.insert(file), new TaskId("1", new Date()));
+        1009823, file.getFullPath(), new TaskId("1", new Date()));
     page.getViewer().setInput(Arrays.asList(des));
 
     TreeNode root = provider.getRoot();
@@ -120,9 +115,9 @@ public class TaskPageContentProviderTest {
     // Two data descriptor of different dates, same file, different value:
     TaskId id = new TaskId("1", new Date());
     TaskFileDataDescriptor d1 = new TaskFileDataDescriptor(
-        new LocalDate(), 1009823, mapper.insert(file), id);
+        new LocalDate(), 1009823, file.getFullPath(), id);
     TaskFileDataDescriptor d2 = new TaskFileDataDescriptor(
-        d1.getDate().minusDays(1), 123, mapper.insert(file), id);
+        d1.getDate().minusDays(1), 123, file.getFullPath(), id);
 
     page.getViewer().setInput(Arrays.asList(d1, d2));
 
@@ -147,9 +142,9 @@ public class TaskPageContentProviderTest {
     // Two data descriptor of different dates, same file, different value:
     TaskId id = new TaskId("1", new Date());
     TaskFileDataDescriptor d1 = new TaskFileDataDescriptor(
-        new LocalDate(), 1009823, mapper.insert(file), id);
+        new LocalDate(), 1009823, file.getFullPath(), id);
     TaskFileDataDescriptor d2 = new TaskFileDataDescriptor(
-        d1.getDate().minusDays(1), 123, mapper.insert(file), id);
+        d1.getDate().minusDays(1), 123, file.getFullPath(), id);
 
     page.getViewer().setInput(Arrays.asList(d1, d2));
 
@@ -176,9 +171,9 @@ public class TaskPageContentProviderTest {
     // Two data descriptor of different dates, same file, different value:
     TaskId id = new TaskId("1", new Date());
     TaskFileDataDescriptor d1 = new TaskFileDataDescriptor(
-        new LocalDate(), 1009823, mapper.insert(file), id);
+        new LocalDate(), 1009823, file.getFullPath(), id);
     TaskFileDataDescriptor d2 = new TaskFileDataDescriptor(
-        d1.getDate().minusDays(1), 123, mapper.insert(file), id);
+        d1.getDate().minusDays(1), 123, file.getFullPath(), id);
 
     // Date
     page.getViewer().setInput(Arrays.asList(d1, d2));
@@ -251,9 +246,9 @@ public class TaskPageContentProviderTest {
     // Two data descriptor of different dates, same file, different value:
     TaskId id = new TaskId("1", new Date());
     TaskFileDataDescriptor d1 = new TaskFileDataDescriptor(
-        new LocalDate(), 1009823, mapper.insert(file), id);
+        new LocalDate(), 1009823, file.getFullPath(), id);
     TaskFileDataDescriptor d2 = new TaskFileDataDescriptor(
-        d1.getDate().minusDays(1), 123, mapper.insert(file), id);
+        d1.getDate().minusDays(1), 123, file.getFullPath(), id);
 
     page.getViewer().setInput(Arrays.asList(d1, d2));
 
@@ -273,7 +268,7 @@ public class TaskPageContentProviderTest {
   public void testInputChanged_clearsOldData() throws Exception {
     TaskId id = new TaskId("1", new Date());
     TaskFileDataDescriptor des = new TaskFileDataDescriptor(
-        new LocalDate(), 1009823, mapper.insert(file), id);
+        new LocalDate(), 1009823, file.getFullPath(), id);
     
     page.getViewer().setInput(Arrays.asList(des));
     TreeNode root = provider.getRoot();
@@ -338,9 +333,9 @@ public class TaskPageContentProviderTest {
     // Two data descriptor of different dates, same file, different value:
     TaskId id = new TaskId("1", new Date());
     TaskFileDataDescriptor d1 = new TaskFileDataDescriptor(
-        new LocalDate(), 1009823, mapper.insert(file), id);
+        new LocalDate(), 1009823, file.getFullPath(), id);
     TaskFileDataDescriptor d2 = new TaskFileDataDescriptor(
-        d1.getDate().minusDays(1), 123, mapper.insert(file), id);
+        d1.getDate().minusDays(1), 123, file.getFullPath(), id);
 
     page.getViewer().setInput(Arrays.asList(d1, d2));
 

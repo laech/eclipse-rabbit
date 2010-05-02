@@ -15,7 +15,6 @@
  */
 package rabbit.data.handler;
 
-import rabbit.data.IFileStore;
 import rabbit.data.access.IAccessor;
 import rabbit.data.access.model.CommandDataDescriptor;
 import rabbit.data.access.model.FileDataDescriptor;
@@ -32,7 +31,6 @@ import rabbit.data.store.model.PartEvent;
 import rabbit.data.store.model.PerspectiveEvent;
 import rabbit.data.store.model.SessionEvent;
 import rabbit.data.store.model.TaskFileEvent;
-import rabbit.data.xml.FileStore;
 import rabbit.data.xml.access.CommandDataAccessor;
 import rabbit.data.xml.access.FileDataAccessor;
 import rabbit.data.xml.access.LaunchDataAccessor;
@@ -82,16 +80,6 @@ public class DataHandler {
         .put(FileDataDescriptor.class, new FileDataAccessor())
         .put(TaskFileDataDescriptor.class, new TaskFileDataAccessor())
         .build();
-  }
-
-  /**
-   * TODO remove
-   * Gets the resource manager.
-   * 
-   * @return The resource manager.
-   */
-  public static IFileStore getFileStore() {
-    return FileStore.INSTANCE;
   }
 
   /**

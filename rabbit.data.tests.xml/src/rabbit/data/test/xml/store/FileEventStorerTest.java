@@ -23,6 +23,7 @@ import rabbit.data.xml.store.FileEventStorer;
 
 import com.google.common.base.Objects;
 
+import org.eclipse.core.runtime.Path;
 import org.joda.time.DateTime;
 
 /**
@@ -39,17 +40,17 @@ public class FileEventStorerTest extends
 
   @Override
   protected FileEvent createEvent(DateTime dateTime) {
-    return new FileEvent(dateTime, 10, "someId");
+    return new FileEvent(dateTime, 10, new Path("/some"));
   }
 
   @Override
   protected FileEvent createEventDiff(DateTime dateTime) {
-    return new FileEvent(dateTime, 10, "someIdabvc");
+    return new FileEvent(dateTime, 10, new Path("/some/some"));
   }
 
   @Override
   protected boolean equal(FileEventType t1, FileEventType t2) {
-    return Objects.equal(t1.getFileId(), t2.getFileId())
+    return Objects.equal(t1.getFilePath(), t2.getFilePath())
         && t1.getDuration() == t2.getDuration();
   }
 

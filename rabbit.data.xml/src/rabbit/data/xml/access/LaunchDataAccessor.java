@@ -26,9 +26,14 @@ import rabbit.data.internal.xml.schema.events.EventListType;
 import rabbit.data.internal.xml.schema.events.LaunchEventListType;
 import rabbit.data.internal.xml.schema.events.LaunchEventType;
 
+import com.google.common.collect.Sets;
+
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
 import org.joda.time.LocalDate;
 
 import java.util.Collection;
+import java.util.Set;
 
 /**
  * Accesses launch event data.
@@ -45,8 +50,12 @@ public class LaunchDataAccessor
       LaunchConfigurationDescriptor des = new LaunchConfigurationDescriptor(
           type.getName(), type.getLaunchModeId(), type.getLaunchTypeId());
 
+      Set<IPath> paths = Sets.newHashSetWithExpectedSize(type.getFilePath().size());
+      for (String str : type.getFilePath()) {
+        paths.add(new Path(str));
+      }
       return new LaunchDataDescriptor(cal, des, type.getCount(), type
-          .getTotalDuration(), type.getFileId());
+          .getTotalDuration(), paths);
 
     } catch (NullPointerException e) {
       return null;

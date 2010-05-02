@@ -28,7 +28,7 @@ public class FileEventConverter extends
   protected FileEventType doConvert(FileEvent element) {
     FileEventType type = new FileEventType();
     type.setDuration(element.getDuration());
-    type.setFileId(element.getFileId());
+    type.setFilePath(element.getFilePath().toString());
     return type;
   }
 

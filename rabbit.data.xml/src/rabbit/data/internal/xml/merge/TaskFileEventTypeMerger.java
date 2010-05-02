@@ -46,9 +46,9 @@ public class TaskFileEventTypeMerger extends AbstractMerger<TaskFileEventType> {
             && (id1.getCreationDate().equals(id2.getCreationDate()))
             
             // Check the file IDs:
-            && (t1.getFileId() != null)
-            && (t2.getFileId() != null)
-            && (t1.getFileId().equals(t2.getFileId()));
+            && (t1.getFilePath() != null)
+            && (t2.getFilePath() != null)
+            && (t1.getFilePath().equals(t2.getFilePath()));
     }
     return result;
   }
@@ -61,7 +61,7 @@ public class TaskFileEventTypeMerger extends AbstractMerger<TaskFileEventType> {
 
     TaskFileEventType result = new TaskFileEventType();
     result.setDuration(t1.getDuration() + t2.getDuration());
-    result.setFileId(t1.getFileId());
+    result.setFilePath(t1.getFilePath());
     result.setTaskId(id);
 
     return result;

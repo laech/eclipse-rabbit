@@ -21,6 +21,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.Objects;
 
+import org.eclipse.core.runtime.IPath;
 import org.joda.time.LocalDate;
 
 import javax.annotation.Nonnull;
@@ -38,24 +39,24 @@ public class TaskFileDataDescriptor extends FileDataDescriptor {
    * 
    * @param date The date of the data.
    * @param value The duration of the event, in milliseconds.
-   * @param fileId The ID of the file.
+   * @param filePath The path of the file.
    * @param taskId The ID of the task.
-   * @throws NullPointerException If date is null, or fileId is null, or taskId
-   *           is null.
+   * @throws NullPointerException If date is null, or filePath is null, or
+   *           taskId is null.
    * @throws IllegalArgumentException If value < 0;
    */
   public TaskFileDataDescriptor(@Nonnull LocalDate date, 
                                          long value, 
-                                @Nonnull String fileId, 
+                                @Nonnull IPath filePath, 
                                 @Nonnull TaskId taskId) {
-    super(date, value, fileId);
+    super(date, value, filePath);
     checkNotNull(taskId, "Task ID cannot be null");
     this.taskId = taskId;
   }
   
   @Override
   public int hashCode() {
-    return Objects.hashCode(getDate(), getFileId(), getTaskId());
+    return Objects.hashCode(getDate(), getFilePath(), getTaskId());
   }
   
   @Override
@@ -66,7 +67,7 @@ public class TaskFileDataDescriptor extends FileDataDescriptor {
     
     TaskFileDataDescriptor des = (TaskFileDataDescriptor) obj;
     return des.getDate().equals(getDate())
-        && des.getFileId().equals(getFileId())
+        && des.getFilePath().equals(getFilePath())
         && des.getTaskId().equals(getTaskId())
         && des.getValue() == getValue();
   }

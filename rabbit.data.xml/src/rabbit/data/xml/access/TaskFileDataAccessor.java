@@ -26,6 +26,7 @@ import rabbit.data.internal.xml.schema.events.EventListType;
 import rabbit.data.internal.xml.schema.events.TaskFileEventListType;
 import rabbit.data.internal.xml.schema.events.TaskFileEventType;
 
+import org.eclipse.core.runtime.Path;
 import org.joda.time.LocalDate;
 
 import java.util.Collection;
@@ -51,7 +52,7 @@ public class TaskFileDataAccessor extends
     try {
       TaskId id = new TaskId(type.getTaskId().getHandleId(), 
           type.getTaskId().getCreationDate().toGregorianCalendar().getTime());
-      return new TaskFileDataDescriptor(cal, type.getDuration(), type.getFileId(), id);
+      return new TaskFileDataDescriptor(cal, type.getDuration(), new Path(type.getFilePath()), id);
       
     } catch (NullPointerException e) {
       return null;

@@ -15,10 +15,8 @@
  */
 package rabbit.ui.internal.pages;
 
-import rabbit.data.IFileStore;
 import rabbit.data.access.model.LaunchConfigurationDescriptor;
 import rabbit.data.access.model.LaunchDataDescriptor;
-import rabbit.data.handler.DataHandler;
 import rabbit.ui.internal.util.ICategory;
 import rabbit.ui.internal.util.Pair;
 import rabbit.ui.internal.util.UndefinedLaunchConfigurationType;
@@ -35,6 +33,9 @@ import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunchConfigurationType;
 import org.eclipse.debug.core.ILaunchManager;
@@ -270,8 +271,8 @@ public class LaunchPageContentProvider extends AbstractCategoryContentProvider {
     getRoot().setChildren(null);
 
     ICategory[] categories = getSelectedCategories();
-    IFileStore store = DataHandler.getFileStore();
     ILaunchManager manager = DebugPlugin.getDefault().getLaunchManager();
+    IWorkspaceRoot workspace = ResourcesPlugin.getWorkspace().getRoot();
     for (LaunchDataDescriptor des : data) {
 
       TreeNode launchNode = getRoot();
@@ -308,13 +309,9 @@ public class LaunchPageContentProvider extends AbstractCategoryContentProvider {
       TreeNodes.appendToParent(launchNode, des.getTotalDuration());
 
       // Adds the resources (if any) to the end of the leaf:
-      for (String fileId : des.getFileIds()) {
+      for (IPath filePath : des.getFilePaths()) {
         TreeNode resourceNode = launchNode;
-        IFile file = store.getFile(fileId);
-        if (file == null)
-          file = store.getExternalFile(fileId);
-        if (file == null)
-          continue;
+        IFile file = workspace.getFile(filePath);
         IProject project = file.getProject();
         IContainer folder = file.getParent();
 

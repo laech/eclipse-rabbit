@@ -15,10 +15,14 @@
  */
 package rabbit.data.store.model;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
 import org.joda.time.DateTime;
+
+import java.net.URI;
 
 import javax.annotation.Nonnull;
 
@@ -29,34 +33,34 @@ import javax.annotation.Nonnull;
 public class FileEvent extends ContinuousEvent {
 
   @Nonnull
-  private final String fileId;
+  private final IPath filePath;
 
   /**
    * Constructs a new event.
    * 
    * @param endTime The end time of the event.
    * @param duration The duration of the event, in milliseconds.
-   * @param fileId The id of the file.
-   * @throws IllegalArgumentException If duration is negative, and/or the fileId
-   *           is an empty string or contains white space.
-   * @throws NullPointerException If time is null or file id is null.
+   * @param filePath The path of the file.
+   * @throws IllegalArgumentException If duration is negative.
+   * @throws NullPointerException If time is null or file path is null.
+   * 
+   * @see IResource#getFullPath()
+   * @see Path#Path(String)
+   * @see URI#getPath()
    */
-  public FileEvent(@Nonnull DateTime endTime, long duration,
-      @Nonnull String fileId) {
+  public FileEvent(@Nonnull DateTime endTime, long duration, 
+      @Nonnull IPath filePath) {
     super(endTime, duration);
-    checkNotNull(fileId);
-    checkArgument(fileId.length() > 0);
-    checkArgument(!fileId.matches(".*\\s.*"));
-    this.fileId = fileId;
+    checkNotNull(filePath);
+    this.filePath = filePath;
   }
 
   /**
-   * Gets the file id.
-   * 
-   * @return The file id, never null.
+   * Gets the file path.
+   * @return The file path, never null.
    */
   @Nonnull
-  public String getFileId() {
-    return fileId;
+  public IPath getFilePath() {
+    return filePath;
   }
 }

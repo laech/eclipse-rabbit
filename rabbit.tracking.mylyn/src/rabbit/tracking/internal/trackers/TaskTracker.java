@@ -20,11 +20,18 @@ import rabbit.data.store.IStorer;
 import rabbit.data.store.model.TaskFileEvent;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.mylyn.tasks.core.ITask;
 import org.eclipse.mylyn.tasks.ui.TasksUi;
+import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IFileEditorInput;
+import org.eclipse.ui.IURIEditorInput;
 import org.eclipse.ui.IWorkbenchPart;
 import org.joda.time.DateTime;
+
+import java.net.URI;
 
 /**
  * Tracks task events.
@@ -43,17 +50,34 @@ public class TaskTracker extends AbstractPartTracker<TaskFileEvent> {
   @Override
   protected TaskFileEvent tryCreateEvent(DateTime endTime, long duration, IWorkbenchPart part) {
     ITask task = TasksUi.getTaskActivityManager().getActiveTask();
-    if (task == null)
+    if (task == null) {
       return null;
+    }
+    if (part instanceof IEditorPart) {
+      IEditorInput input = ((IEditorPart) part).getEditorInput();
 
-    if (!(part instanceof IEditorPart))
-      return null;
+      /*
+       * Order of this "if" statement is important.
+       * 
+       * The editor input is likely to implement both IFileEditorInput and 
+       * IURIEditorInput. The difference between the two input is that the 
+       * IFileEditorInput contains an IFile, which has a workspace path, like
+       * "/project/folder/file.extension", the IUIREditorInput has no such file,
+       * it only has a path to the actual file in the file system, like 
+       * "C:/a.txt". We want workspace paths wherever possible.
+       */
+      if (input instanceof IFileEditorInput) {
+        // Contains a file in the workspace
+        IFile file = ((IFileEditorInput) input).getFile();
+        return new TaskFileEvent(endTime, duration, file.getFullPath(), task);
 
-    IFile file = (IFile) ((IEditorPart) part).getEditorInput().getAdapter(IFile.class);
-    if (file == null)
-      return null;
-
-    String fileId = DataHandler.getFileStore().insert(file);
-    return new TaskFileEvent(endTime, duration, fileId, task);
+      } else if (input instanceof IURIEditorInput) {
+        // A file outside of workspace
+        URI uri = ((IURIEditorInput) input).getURI();
+        IPath path = new Path(uri.getPath());
+        return new TaskFileEvent(endTime, duration, path, task);
+      }
+    }
+    return null;
   }
 }

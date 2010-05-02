@@ -21,6 +21,7 @@ import rabbit.data.store.model.TaskFileEvent;
 
 import static org.junit.Assert.assertEquals;
 
+import org.eclipse.core.runtime.Path;
 import org.eclipse.mylyn.internal.tasks.core.LocalTask;
 import org.eclipse.mylyn.tasks.core.ITask;
 import org.joda.time.DateTime;
@@ -43,13 +44,13 @@ public class TaskFileEventConverterTest extends
   public void testConvert() throws Exception {
     ITask task = new LocalTask("abc", "a task");
     task.setCreationDate(new Date());
-    TaskFileEvent event = new TaskFileEvent(new DateTime(), 100, "a", task);
+    TaskFileEvent event = new TaskFileEvent(new DateTime(), 100, new Path("/a/b"), task);
     TaskFileEventType type = converter.convert(event);
     
     assertEquals(task.getHandleIdentifier(), type.getTaskId().getHandleId());
     assertEquals(task.getCreationDate(), type.getTaskId().getCreationDate().toGregorianCalendar().getTime());
     assertEquals(event.getDuration(), type.getDuration());
-    assertEquals(event.getFileId(), type.getFileId());
+    assertEquals(event.getFilePath().toString(), type.getFilePath());
   }
 
 }

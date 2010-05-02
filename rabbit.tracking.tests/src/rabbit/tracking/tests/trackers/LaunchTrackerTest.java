@@ -16,7 +16,6 @@
 package rabbit.tracking.tests.trackers;
 
 import rabbit.data.store.model.LaunchEvent;
-import rabbit.tracking.internal.TrackingPlugin;
 import rabbit.tracking.internal.trackers.LaunchTracker;
 
 import static org.junit.Assert.assertEquals;
@@ -27,6 +26,7 @@ import org.eclipse.core.internal.registry.ConfigurationElementHandle;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfigurationType;
@@ -118,14 +118,6 @@ public class LaunchTrackerTest extends AbstractTrackerTest<LaunchEvent> {
   public void before() {
     tracker = new LaunchTracker();
   }
-  
-  @Test
-  public void testObserverIsAdded() {
-    tracker.setEnabled(false); // It should remove itself from the observable
-    int count = TrackingPlugin.getDefault().getIdleDetector().countObservers();
-    tracker.setEnabled(true); // It should add itself to the observable
-    assertEquals(count + 1, TrackingPlugin.getDefault().getIdleDetector().countObservers());
-  }
 
   /*
    * Tests the launching in normal mode ("run");
@@ -201,7 +193,7 @@ public class LaunchTrackerTest extends AbstractTrackerTest<LaunchEvent> {
     ILaunch launch = new Launch(new LaunchConfigurationForTest(),
         ILaunchManager.RUN_MODE, null);
     return new LaunchEvent(new DateTime(), 10, launch, launch
-        .getLaunchConfiguration(), new HashSet<String>(Arrays.asList("1", "2")));
+        .getLaunchConfiguration(), new HashSet<IPath>(Arrays.asList(new Path("/1"), new Path("/2"))));
   }
 
   @Override

@@ -23,6 +23,7 @@ import rabbit.data.xml.store.TaskFileEventStorer;
 
 import com.google.common.base.Objects;
 
+import org.eclipse.core.runtime.Path;
 import org.eclipse.mylyn.internal.tasks.core.LocalTask;
 import org.joda.time.DateTime;
 
@@ -42,20 +43,20 @@ public class TaskFileEventStorerTest extends
   protected TaskFileEvent createEventDiff(DateTime dateTime) {
     LocalTask task = new LocalTask("taskId", "what?");
     task.setCreationDate(dateTime.toDate());
-    return new TaskFileEvent(dateTime, 187, "fileId", task);
+    return new TaskFileEvent(dateTime, 187, new Path("/p/f/a"), task);
   }
 
   @Override
   protected TaskFileEvent createEvent(DateTime dateTime) {
     LocalTask task = new LocalTask("tas1kId", "what?1");
     task.setCreationDate(dateTime.toDate());
-    return new TaskFileEvent(dateTime, 1187, "fileId", task);
+    return new TaskFileEvent(dateTime, 1187, new Path("/a/b/c"), task);
   }
 
   @Override
   protected boolean equal(TaskFileEventType t1, TaskFileEventType t2) {
     return t1.getDuration() == t2.getDuration()
-        && Objects.equal(t1.getFileId(), t2.getFileId())
+        && Objects.equal(t1.getFilePath(), t2.getFilePath())
         && Objects.equal(t1.getTaskId().getHandleId(), t2.getTaskId().getHandleId())
         && Objects.equal(t1.getTaskId().getCreationDate(), t2.getTaskId().getCreationDate());
   }

@@ -15,9 +15,7 @@
  */
 package rabbit.ui.internal.pages;
 
-import rabbit.data.IFileStore;
 import rabbit.data.access.model.FileDataDescriptor;
-import rabbit.data.handler.DataHandler;
 import rabbit.ui.internal.util.ICategory;
 import rabbit.ui.internal.viewers.TreeNodes;
 
@@ -29,6 +27,10 @@ import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.viewers.TreeNode;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
@@ -100,16 +102,16 @@ public class ResourcePageContentProvider extends AbstractValueContentProvider {
     getRoot().setChildren(null);
 
     ICategory[] categories = getSelectedCategories();
-    IFileStore store = DataHandler.getFileStore();
+    IWorkspaceRoot workspace = ResourcesPlugin.getWorkspace().getRoot();
     for (FileDataDescriptor des : data) {
 
-      IFile file = store.getFile(des.getFileId());
-      if (file == null) {
-        file = store.getExternalFile(des.getFileId());
+      IPath path = des.getFilePath();
+      String pathStr = path.toString();
+      if (pathStr.contains(":")) {
+        path = new Path(pathStr.replace(":", ""));
       }
-      if (file == null) {
-        continue;
-      }
+      IFile file = workspace.getFile(path);
+      System.out.println(des.getFilePath());
       IProject project = file.getProject();
       IContainer folder = file.getParent();
 

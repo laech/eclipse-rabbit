@@ -35,6 +35,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunchConfigurationType;
 import org.eclipse.debug.core.ILaunchManager;
@@ -172,8 +173,8 @@ public class LaunchPageLabelProviderTest {
     LaunchConfigurationDescriptor debugMode = new LaunchConfigurationDescriptor(
         configDescriptor.getLaunchName(), ILaunchManager.DEBUG_MODE, configDescriptor.getLaunchTypeId());
     
-    LaunchDataDescriptor d1 = new LaunchDataDescriptor(date, runMode,    1,   10, Collections.<String>emptySet());
-    LaunchDataDescriptor d2 = new LaunchDataDescriptor(date, debugMode, 19, 1200, Collections.<String>emptySet());
+    LaunchDataDescriptor d1 = new LaunchDataDescriptor(date, runMode,    1,   10, Collections.<IPath>emptySet());
+    LaunchDataDescriptor d2 = new LaunchDataDescriptor(date, debugMode, 19, 1200, Collections.<IPath>emptySet());
 
     viewer.setInput(Arrays.asList(d1, d2));
     contents.setSelectedCategories(
@@ -244,8 +245,8 @@ public class LaunchPageLabelProviderTest {
     LaunchConfigurationDescriptor debugMode = new LaunchConfigurationDescriptor(
         configDescriptor.getLaunchName(), ILaunchManager.DEBUG_MODE, configDescriptor.getLaunchTypeId());
     
-    LaunchDataDescriptor d1 = new LaunchDataDescriptor(date, runMode,    1,   10, Collections.<String>emptySet());
-    LaunchDataDescriptor d2 = new LaunchDataDescriptor(date, debugMode, 11, 1200, Collections.<String>emptySet());
+    LaunchDataDescriptor d1 = new LaunchDataDescriptor(date, runMode,    1,   10, Collections.<IPath>emptySet());
+    LaunchDataDescriptor d2 = new LaunchDataDescriptor(date, debugMode, 11, 1200, Collections.<IPath>emptySet());
 
     viewer.setInput(Arrays.asList(d1, d2));
     contents.setSelectedCategories(

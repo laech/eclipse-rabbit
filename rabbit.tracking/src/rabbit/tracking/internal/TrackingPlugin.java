@@ -15,7 +15,6 @@
  */
 package rabbit.tracking.internal;
 
-import rabbit.data.handler.DataHandler;
 import rabbit.tracking.ITracker;
 
 import com.google.common.collect.ImmutableCollection;
@@ -86,8 +85,8 @@ public class TrackingPlugin extends AbstractUIPlugin implements
 
   @Override
   public void postShutdown(IWorkbench workbench) {
-    // Important not to do anything here, everything should be done before the
-    // workbench is shut down.
+    // Everything should be done before the workbench is shut down, use
+    // preShutdown method instead
   }
 
   @Override
@@ -107,9 +106,6 @@ public class TrackingPlugin extends AbstractUIPlugin implements
       tracker.setEnabled(false);
       tracker.flushData();
       tracker.setEnabled(true);
-    }
-    if (!DataHandler.getFileStore().save(true)) {
-      getLog().log(new Status(IStatus.ERROR, PLUGIN_ID, "Error occurred while saving data."));
     }
   }
 
