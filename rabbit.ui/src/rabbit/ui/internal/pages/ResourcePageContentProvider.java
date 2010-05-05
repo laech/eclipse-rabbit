@@ -106,6 +106,10 @@ public class ResourcePageContentProvider extends AbstractValueContentProvider {
     for (FileDataDescriptor des : data) {
 
       IPath path = des.getFilePath();
+      if (path.segmentCount() < 2) {
+        continue; // Invalid path.
+      }
+      
       String pathStr = path.toString();
       if (pathStr.contains(":")) {
         path = new Path(pathStr.replace(":", ""));

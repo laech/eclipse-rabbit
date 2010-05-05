@@ -79,7 +79,7 @@ public class SessionTracker extends AbstractTracker<SessionEvent> implements
 
   @Override
   public void update(Observable observable, Object arg) {
-    if (observable != TrackingPlugin.getDefault().getIdleDetector()) {
+    if (observable != TrackingPlugin.getDefault().getIdleDetector() || !isEnabled()) {
       return;
     }
     
@@ -95,14 +95,12 @@ public class SessionTracker extends AbstractTracker<SessionEvent> implements
    */
   private void tryEndSession() {
     if (startTime < 0) {
-      System.out.println("No session has been started");
       return;
     }
     long duration = System.currentTimeMillis() - startTime;
-    if (duration < 0) {
-      System.err.println("Session Time < 0");
+    if (duration > 0) {
+      addData(new SessionEvent(new DateTime(), duration));
     }
-    addData(new SessionEvent(new DateTime(), duration));
     resetSession();
   }
   

@@ -18,6 +18,7 @@ package rabbit.data.handler;
 import rabbit.data.access.IAccessor;
 import rabbit.data.access.model.CommandDataDescriptor;
 import rabbit.data.access.model.FileDataDescriptor;
+import rabbit.data.access.model.JavaDataDescriptor;
 import rabbit.data.access.model.LaunchDataDescriptor;
 import rabbit.data.access.model.PartDataDescriptor;
 import rabbit.data.access.model.PerspectiveDataDescriptor;
@@ -26,6 +27,7 @@ import rabbit.data.access.model.TaskFileDataDescriptor;
 import rabbit.data.store.IStorer;
 import rabbit.data.store.model.CommandEvent;
 import rabbit.data.store.model.FileEvent;
+import rabbit.data.store.model.JavaEvent;
 import rabbit.data.store.model.LaunchEvent;
 import rabbit.data.store.model.PartEvent;
 import rabbit.data.store.model.PerspectiveEvent;
@@ -33,6 +35,7 @@ import rabbit.data.store.model.SessionEvent;
 import rabbit.data.store.model.TaskFileEvent;
 import rabbit.data.xml.access.CommandDataAccessor;
 import rabbit.data.xml.access.FileDataAccessor;
+import rabbit.data.xml.access.JavaDataAccessor;
 import rabbit.data.xml.access.LaunchDataAccessor;
 import rabbit.data.xml.access.PartDataAccessor;
 import rabbit.data.xml.access.PerspectiveDataAccessor;
@@ -40,6 +43,7 @@ import rabbit.data.xml.access.SessionDataAccessor;
 import rabbit.data.xml.access.TaskFileDataAccessor;
 import rabbit.data.xml.store.CommandEventStorer;
 import rabbit.data.xml.store.FileEventStorer;
+import rabbit.data.xml.store.JavaEventStorer;
 import rabbit.data.xml.store.LaunchEventStorer;
 import rabbit.data.xml.store.PartEventStorer;
 import rabbit.data.xml.store.PerspectiveEventStorer;
@@ -69,6 +73,7 @@ public class DataHandler {
         .put(LaunchEvent.class, LaunchEventStorer.getInstance())
         .put(TaskFileEvent.class, TaskFileEventStorer.getInstance())
         .put(SessionEvent.class, SessionEventStorer.getInstance())
+        .put(JavaEvent.class, JavaEventStorer.getInstance())
         .build();
 
     accessors = ImmutableBiMap.<Class<?>, IAccessor<?>>builder()
@@ -79,6 +84,7 @@ public class DataHandler {
         .put(PartDataDescriptor.class, new PartDataAccessor())
         .put(FileDataDescriptor.class, new FileDataAccessor())
         .put(TaskFileDataDescriptor.class, new TaskFileDataAccessor())
+        .put(JavaDataDescriptor.class, new JavaDataAccessor())
         .build();
   }
 
@@ -94,6 +100,7 @@ public class DataHandler {
    * <li>{@link LaunchEvent}</li>
    * <li>{@link TaskFileEvent}</li>
    * <li>{@link SessionEvent}</li>
+   * <li>TODO {@link JavaEvent}</li>
    * </ul>
    * </p>
    * 
@@ -118,6 +125,7 @@ public class DataHandler {
    * <li>{@link LaunchDataDescriptor}</li>
    * <li>{@link TaskFileDataDescriptor}</li>
    * <li>{@link SessionDataDescriptor}</li>
+   * <li>TODO {@link JavaDataDescriptor}</li>
    * </ul>
    * </p>
    * 

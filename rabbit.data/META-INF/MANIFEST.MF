@@ -8,7 +8,8 @@ Require-Bundle: rabbit.common;bundle-version="1.0.0",
  org.eclipse.debug.core;resolution:=optional,
  org.eclipse.mylyn.tasks.core;resolution:=optional,
  org.eclipse.ui;resolution:=optional,
- org.eclipse.core.runtime
+ org.eclipse.core.runtime,
+ org.eclipse.jdt.core;resolution:=optional
 Export-Package: rabbit.data.access,
  rabbit.data.access.model,
  rabbit.data.common,

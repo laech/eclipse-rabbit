@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="rabbit.ui.pages">
+      <page
+            class="rabbit.ui.internal.pages.JavaPage"
+            id="rabbit.ui.pages.java"
+            name="Java Members">
+      </page>
+   </extension>
+
+</plugin>

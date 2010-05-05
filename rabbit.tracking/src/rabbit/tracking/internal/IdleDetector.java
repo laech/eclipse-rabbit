@@ -145,9 +145,9 @@ public final class IdleDetector extends Observable implements Listener {
    * Checks whether this user is active.
    * 
    * @return True if the user is active, false otherwise. <br />
-   *         <b>Note</b>: Value returned cannot be trusted if
-   *         {@link #isRunning()} is false.
-   * @see #isRunning
+   *         If this idle detector is not running, this method will always
+   *         return true.
+   * @see #isRunning()
    */
   public boolean isUserActive() {
     if (!isRunning) {

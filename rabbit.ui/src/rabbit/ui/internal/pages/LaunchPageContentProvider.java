@@ -310,6 +310,10 @@ public class LaunchPageContentProvider extends AbstractCategoryContentProvider {
 
       // Adds the resources (if any) to the end of the leaf:
       for (IPath filePath : des.getFilePaths()) {
+        if (filePath.segmentCount() < 2) {
+          continue; // Invalid path.
+        }
+        
         TreeNode resourceNode = launchNode;
         IFile file = workspace.getFile(filePath);
         IProject project = file.getProject();

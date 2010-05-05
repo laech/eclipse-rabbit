@@ -42,7 +42,8 @@ public enum DataStore implements IDataStore {
   FILE_STORE("fileEvents"),
   TASK_STORE("taskEvents"),
   LAUNCH_STORE("launchEvents"),
-  SESSION_STORE("sessionEvents");
+  SESSION_STORE("sessionEvents"),
+  JAVA_STORE("javaEvents");
   
 
   /**

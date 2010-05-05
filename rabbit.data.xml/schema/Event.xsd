@@ -17,6 +17,7 @@
       <xs:element name="taskFileEvents" type="taskFileEventListType" maxOccurs="unbounded" />
       <xs:element name="launchEvents" type="launchEventListType" maxOccurs="unbounded" />
       <xs:element name="sessionEvents" type="sessionEventListType" maxOccurs="unbounded" />
+      <xs:element name="javaEvents" type="javaEventListType" maxOccurs="unbounded" />
     </xs:sequence>
   </xs:complexType>
 
@@ -158,6 +159,24 @@
   <xs:complexType name="sessionEventType">
     <xs:complexContent>
       <xs:extension base="durationEventType" />
+    </xs:complexContent>
+  </xs:complexType>
+  
+  <!-- Java Events: -->
+  <xs:complexType name="javaEventListType">
+    <xs:complexContent>
+      <xs:extension base="eventGroupType">
+        <xs:sequence>
+          <xs:element name="javaEvent" type="javaEventType" maxOccurs="unbounded" />
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="javaEventType">
+    <xs:complexContent>
+      <xs:extension base="durationEventType">
+        <xs:attribute name="handleIdentifier" type="xs:string" use="required" />
+      </xs:extension>
     </xs:complexContent>
   </xs:complexType>
 

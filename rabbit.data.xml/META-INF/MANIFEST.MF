@@ -5,11 +5,12 @@ Bundle-SymbolicName: rabbit.data.xml;singleton:=true
 Bundle-Version: 1.1.0.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Require-Bundle: org.eclipse.core.runtime,
- org.eclipse.ui,
+ org.eclipse.ui;resolution:=optional,
  org.eclipse.debug.core;resolution:=optional,
  org.eclipse.mylyn.tasks.core;resolution:=optional,
  rabbit.data;bundle-version="1.1.0",
- rabbit.common;bundle-version="1.0.0"
+ rabbit.common;bundle-version="1.0.0",
+ org.eclipse.jdt.core;resolution:=optional
 Export-Package: rabbit.data.internal.xml;x-friends:="rabbit.data.xml.ui",
  rabbit.data.internal.xml.convert;x-internal:=true,
  rabbit.data.internal.xml.merge;x-internal:=true,

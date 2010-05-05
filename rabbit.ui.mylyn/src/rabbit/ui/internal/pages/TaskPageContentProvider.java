@@ -159,6 +159,10 @@ public class TaskPageContentProvider extends AbstractValueContentProvider {
         } else { // PROJECT/FOLDER/FILE Categories:
           
           IPath path = des.getFilePath();
+          if (path.segmentCount() < 2) {
+            continue; // Invalid path.
+          }
+          
           String pathStr = path.toString();
           if (pathStr.contains(":")) {
             path = new Path(pathStr.replace(":", ""));
