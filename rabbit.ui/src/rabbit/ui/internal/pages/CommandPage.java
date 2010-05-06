@@ -38,7 +38,6 @@ import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.IToolBarManager;
-import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.viewers.TreeNode;
 import org.eclipse.jface.viewers.TreeViewer;
@@ -119,7 +118,6 @@ public class CommandPage extends AbstractAccessorPage {
     IAction collapse = new CollapseAllAction(getViewer());
     IContributionItem[] items = new IContributionItem[] {
         new ActionContributionItem(filterAction),
-        new Separator(),
         new ActionContributionItem(new DropDownAction(
             collapse.getText(), collapse.getImageDescriptor(), 
             collapse, 

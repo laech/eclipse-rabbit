@@ -111,7 +111,7 @@ public class JavaPage extends AbstractAccessorPage {
     IAction groupByPkg = new Action(cat.getText(), cat.getImageDescriptor()) {
       @Override public void run() {
         contentProvider.setSelectedCategories(JavaCategory.PACKAGE, 
-            JavaCategory.TYPE_ROOT, JavaCategory.TYPE);
+            JavaCategory.TYPE_ROOT, JavaCategory.TYPE, JavaCategory.METHOD);
       }
     };
     
@@ -126,13 +126,15 @@ public class JavaPage extends AbstractAccessorPage {
     
     IContributionItem[] items = new IContributionItem[] {
         new ActionContributionItem(filter),
-        new Separator(),
         new ActionContributionItem(new DropDownAction(
             collapse.getText(), collapse.getImageDescriptor(), 
             collapse, 
             collapse,
             new ExpandAllAction(getViewer()))),
-        new ActionContributionItem(new GroupByAction(contentProvider, new Action(){})),
+        new ActionContributionItem(new GroupByAction(contentProvider, 
+            groupByPkg, 
+            groupByPkg, 
+            groupByPrj)),
     };
     
     for (IContributionItem item : items) {

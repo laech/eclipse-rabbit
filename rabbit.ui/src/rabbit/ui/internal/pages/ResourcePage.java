@@ -41,7 +41,6 @@ import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.IToolBarManager;
-import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.viewers.TreeNode;
 import org.eclipse.jface.viewers.TreeViewer;
@@ -84,7 +83,6 @@ public class ResourcePage extends AbstractAccessorPage {
 
     IContributionItem[] items = new IContributionItem[] {
         new ActionContributionItem(filterTreeAction),
-        new Separator(),
         new ActionContributionItem(new DropDownAction(
             collapse.getText(), collapse.getImageDescriptor(), 
             collapse, 

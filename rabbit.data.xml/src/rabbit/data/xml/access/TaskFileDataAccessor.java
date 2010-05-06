@@ -54,9 +54,7 @@ public class TaskFileDataAccessor extends
           type.getTaskId().getCreationDate().toGregorianCalendar().getTime());
       return new TaskFileDataDescriptor(cal, type.getDuration(), new Path(type.getFilePath()), id);
       
-    } catch (NullPointerException e) {
-      return null;
-    } catch (IllegalArgumentException e) {
+    } catch (Exception e) {
       return null;
     }
   }

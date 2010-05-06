@@ -35,7 +35,13 @@ public class JavaDataAccessor extends
 
   @Override
   protected JavaDataDescriptor createDataNode(LocalDate cal, JavaEventType type) {
-    return new JavaDataDescriptor(cal, type.getDuration(), type.getHandleIdentifier());
+    try {
+      return new JavaDataDescriptor(cal, type.getDuration(), type.getHandleIdentifier());
+    } catch (NullPointerException e) {
+      return null;
+    } catch (IllegalArgumentException e) {
+      return null;
+    }
   }
 
   @Override

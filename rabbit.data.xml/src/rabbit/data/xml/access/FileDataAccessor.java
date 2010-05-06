@@ -47,6 +47,8 @@ public class FileDataAccessor
       return null;
     } catch (IllegalArgumentException e) {
       return null;
+    } catch (Throwable t) {
+      return null; // This one is for the construction of the path.
     }
   }
 
