@@ -18,7 +18,6 @@ package rabbit.ui.internal;
 import rabbit.ui.IPage;
 import rabbit.ui.internal.util.PageDescriptor;
 
-import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 
@@ -33,6 +32,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
+import java.util.Collection;
 import java.util.Set;
 
 /**
@@ -101,7 +101,7 @@ public class RabbitUI extends AbstractUIPlugin {
    * 
    * @return The root pages.
    */
-  public ImmutableCollection<PageDescriptor> loadRootPages() {
+  public Collection<PageDescriptor> loadRootPages() {
     final Set<PageDescriptor> pages = Sets.newLinkedHashSet();
     for (final IConfigurationElement e : Platform.getExtensionRegistry()
         .getConfigurationElementsFor(UI_PAGE_EXTENSION_ID)) {

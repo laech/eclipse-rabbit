@@ -239,8 +239,7 @@ public class RabbitView extends ViewPart {
     GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER)
         .grab(true, false).applyTo(header);
     {
-      int toolbarStyle = SWT.HORIZONTAL;
-      //(isWindowsOS) ? SWT.FLAT : SWT.NONE;
+      int toolbarStyle = (isWindowsOS) ? SWT.FLAT : SWT.NONE;
       
       ToolBar bar = new ToolBar(header, toolbarStyle);
       bar.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
