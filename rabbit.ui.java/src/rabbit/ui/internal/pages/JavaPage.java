@@ -26,6 +26,7 @@ import rabbit.ui.internal.actions.ShowHideFilterControlAction;
 import rabbit.ui.internal.pages.JavaPageContentProvider.JavaCategory;
 import rabbit.ui.internal.util.ICategory;
 import rabbit.ui.internal.viewers.CellPainter;
+import rabbit.ui.internal.viewers.TreeViewerLabelSorter;
 
 import org.eclipse.jdt.ui.JavaElementComparator;
 import org.eclipse.jface.action.Action;
@@ -33,14 +34,17 @@ import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.IToolBarManager;
-import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.viewers.StyledCellLabelProvider;
 import org.eclipse.jface.viewers.TreeNode;
 import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.jface.viewers.TreeViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.ui.dialogs.PatternFilter;
+import org.joda.time.LocalDate;
 
 // TODO
 @SuppressWarnings("restriction")
@@ -62,17 +66,36 @@ public class JavaPage extends AbstractAccessorPage {
 
   @Override
   protected void createColumns(TreeViewer viewer) {
-    TreeColumn column = new TreeColumn(viewer.getTree(), SWT.LEFT);
-    column.setWidth(200);
-    column.setText("Name");
+    TreeViewerColumn viewerColumn = new TreeViewerColumn(viewer, SWT.LEFT);
+    viewerColumn.getColumn().setText("Name");
+    viewerColumn.getColumn().setWidth(200);
+    viewerColumn.getColumn().addSelectionListener(new TreeViewerLabelSorter(viewer) {
+      @Override
+      protected int doCompare(Viewer v, Object e1, Object e2) {
+        if (e1 instanceof TreeNode) {
+          e1 = ((TreeNode) e1).getValue();
+        }
+        if (e2 instanceof TreeNode) {
+          e2 = ((TreeNode) e2).getValue();
+        }
+        
+        if (e1 instanceof LocalDate && e2 instanceof LocalDate) {
+          return ((LocalDate) e1).compareTo((LocalDate) e2);
+        }
+        return super.doCompare(v, e1, e2);
+      }
+    });
+    viewerColumn.setLabelProvider(new StyledCellLabelProvider() {
+      @Override
+      public void update(ViewerCell cell) {
+        cell.setText(labelProvider.getText(cell.getElement()));
+        cell.setImage(labelProvider.getImage(cell.getElement()));
+      }
+    });
     // TOOD
     
-//    TreeViewerColumn vc = new TreeViewerColumn(viewer, SWT.LEFT);
-//    vc.getColumn().setWidth(200);
-//    vc.getColumn().setText("Name");
-//    vc.setLabelProvider(new DecoratingStyledCellLabelProvider(labelProvider, null, null));
-    
-    column = new TreeColumn(viewer.getTree(), SWT.RIGHT);
+    TreeColumn column = new TreeColumn(viewer.getTree(), SWT.RIGHT);
+    column.addSelectionListener(getValueSorter());
     column.setWidth(100);
     column.setText("Time Spent");
   }

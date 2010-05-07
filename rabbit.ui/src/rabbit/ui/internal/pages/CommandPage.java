@@ -39,9 +39,12 @@ import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.viewers.StyledCellLabelProvider;
 import org.eclipse.jface.viewers.TreeNode;
 import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.jface.viewers.TreeViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.ui.dialogs.PatternFilter;
@@ -70,12 +73,19 @@ public class CommandPage extends AbstractAccessorPage {
 
   @Override
   public void createColumns(TreeViewer viewer) {
-    TreeColumn column = new TreeColumn(viewer.getTree(), SWT.LEFT);
-    column.addSelectionListener(createInitialComparator(viewer));
-    column.setText("Name");
-    column.setWidth(150);
+    TreeViewerColumn viewerColumn = new TreeViewerColumn(viewer, SWT.LEFT);
+    viewerColumn.getColumn().setText("Name");
+    viewerColumn.getColumn().setWidth(150);
+    viewerColumn.getColumn().addSelectionListener(createInitialComparator(viewer));
+    viewerColumn.setLabelProvider(new StyledCellLabelProvider() {
+      @Override
+      public void update(ViewerCell cell) {
+        cell.setText(labels.getText(cell.getElement()));
+        cell.setImage(labels.getImage(cell.getElement()));
+      }
+    });
 
-    column = new TreeColumn(viewer.getTree(), SWT.LEFT);
+    TreeColumn column = new TreeColumn(viewer.getTree(), SWT.LEFT);
     column.addSelectionListener(new TreeViewerLabelSorter(viewer));
     column.setText("Description");
     column.setWidth(200);

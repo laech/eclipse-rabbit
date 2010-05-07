@@ -39,10 +39,12 @@ import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.viewers.StyledCellLabelProvider;
 import org.eclipse.jface.viewers.TreeNode;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.TreeViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Display;
@@ -162,12 +164,19 @@ public class LaunchPage extends AbstractAccessorPage {
       }
     };
     
-    TreeColumn column = new TreeColumn(viewer.getTree(), SWT.LEFT);
-    column.setText("Name");
-    column.setWidth(180);
-    column.addSelectionListener(createInitialComparator(viewer));
+    TreeViewerColumn viewerColumn = new TreeViewerColumn(viewer, SWT.LEFT);
+    viewerColumn.getColumn().setText("Name");
+    viewerColumn.getColumn().setWidth(180);
+    viewerColumn.getColumn().addSelectionListener(createInitialComparator(viewer));
+    viewerColumn.setLabelProvider(new StyledCellLabelProvider() {
+      @Override
+      public void update(ViewerCell cell) {
+        cell.setText(labels.getText(cell.getElement()));
+        cell.setImage(labels.getImage(cell.getElement()));
+      }
+    });
 
-    column = new TreeColumn(viewer.getTree(), SWT.RIGHT);
+    TreeColumn column = new TreeColumn(viewer.getTree(), SWT.RIGHT);
     column.setText("Count");
     column.setWidth(80);
     column.addSelectionListener(countSorter);

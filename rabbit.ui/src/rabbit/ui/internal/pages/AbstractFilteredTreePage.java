@@ -44,6 +44,8 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.ui.dialogs.FilteredTree;
 import org.eclipse.ui.dialogs.PatternFilter;
@@ -123,6 +125,15 @@ public abstract class AbstractFilteredTreePage implements IPage {
         super.mouseDown(e);
         if (viewer.getTree().getItem(new Point(e.x, e.y)) == null)
           viewer.setSelection(StructuredSelection.EMPTY);
+      }
+    });
+    
+    viewer.getTree().addListener(SWT.MeasureItem, new Listener() {
+      @Override
+      public void handleEvent(Event event) {
+        if (event.height < 20) {
+          event.height = 20;
+        }
       }
     });
 

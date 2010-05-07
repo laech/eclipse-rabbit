@@ -18,23 +18,25 @@ package rabbit.ui.internal;
 import rabbit.ui.internal.util.PageDescriptor;
 
 import org.eclipse.jface.resource.ImageRegistry;
-import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.CellLabelProvider;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.IDoubleClickListener;
-import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StyledCellLabelProvider;
 import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.jface.window.ToolTip;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Event;
 
 import java.util.Collection;
 
@@ -116,8 +118,8 @@ public class MetricsPanel {
     };
   }
 
-  private ILabelProvider createLabelProvider() {
-    return new ColumnLabelProvider() {
+  private CellLabelProvider createLabelProvider() {
+    return new StyledCellLabelProvider() {
 
       private ImageRegistry images = new ImageRegistry();
 
@@ -126,9 +128,23 @@ public class MetricsPanel {
         super.dispose();
         images.dispose();
       }
-
+      
       @Override
-      public Image getImage(Object element) {
+      protected void measure(Event event, Object element) {
+        super.measure(event, element);
+        if (event.height < 20) {
+          event.height = 20;
+        }
+      }
+      
+      @Override
+      public void update(ViewerCell cell) {
+        super.update(cell);
+        cell.setText(getText(cell.getElement()));
+        cell.setImage(getImage(cell.getElement()));
+      }
+
+      private Image getImage(Object element) {
         PageDescriptor page = (PageDescriptor) element;
         if (page.getImage() == null) {
           return null;
@@ -141,8 +157,7 @@ public class MetricsPanel {
         return image;
       }
 
-      @Override
-      public String getText(Object element) {
+      private String getText(Object element) {
         return ((PageDescriptor) element).getName();
       }
 
