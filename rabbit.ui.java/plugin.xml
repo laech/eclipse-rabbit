@@ -13,6 +13,7 @@
       </page>
       <page
             class="rabbit.ui.internal.pages.JavaCategoryPage"
+            description="Contains pages that display specific information about Java related activities"
             icon="icons/full/obj16/java.gif"
             id="rabbit.ui.pages.javaCategory"
             name="Java Specifics">

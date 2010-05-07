@@ -27,6 +27,7 @@ import rabbit.ui.internal.actions.GroupByAction;
 import rabbit.ui.internal.actions.ShowHideFilterControlAction;
 import rabbit.ui.internal.util.ICategory;
 import rabbit.ui.internal.viewers.CellPainter;
+import rabbit.ui.internal.viewers.DelegatingStyledCellLabelProvider;
 import rabbit.ui.internal.viewers.TreeViewerLabelSorter;
 import rabbit.ui.internal.viewers.TreeViewerSorter;
 
@@ -39,12 +40,10 @@ import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.viewers.StyledCellLabelProvider;
 import org.eclipse.jface.viewers.TreeNode;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.TreeViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Display;
@@ -92,13 +91,7 @@ public class PerspectivePage extends AbstractAccessorPage {
     viewerColumn.getColumn().setText("Name");
     viewerColumn.getColumn().setWidth(200);
     viewerColumn.getColumn().addSelectionListener(createInitialComparator(viewer));
-    viewerColumn.setLabelProvider(new StyledCellLabelProvider() {
-      @Override
-      public void update(ViewerCell cell) {
-        cell.setText(labels.getText(cell.getElement()));
-        cell.setImage(labels.getImage(cell.getElement()));
-      }
-    });
+    viewerColumn.setLabelProvider(new DelegatingStyledCellLabelProvider(labels, false));
 
     TreeColumn column = new TreeColumn(viewer.getTree(), SWT.RIGHT);
     column.setText("Usage");

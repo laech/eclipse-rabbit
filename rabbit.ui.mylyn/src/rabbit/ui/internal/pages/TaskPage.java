@@ -28,6 +28,7 @@ import rabbit.ui.internal.actions.ShowHideFilterControlAction;
 import rabbit.ui.internal.pages.TaskPageContentProvider.Category;
 import rabbit.ui.internal.util.ICategory;
 import rabbit.ui.internal.viewers.CellPainter;
+import rabbit.ui.internal.viewers.DelegatingStyledCellLabelProvider;
 import rabbit.ui.internal.viewers.TreeViewerLabelSorter;
 
 import com.google.common.base.Joiner;
@@ -39,11 +40,9 @@ import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.viewers.StyledCellLabelProvider;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.TreeViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Display;
@@ -130,13 +129,7 @@ public class TaskPage extends AbstractAccessorPage {
     viewerColumn.getColumn().setText("Name");
     viewerColumn.getColumn().setWidth(300);
     viewerColumn.getColumn().addSelectionListener(createInitialComparator(viewer));
-    viewerColumn.setLabelProvider(new StyledCellLabelProvider() {
-      @Override
-      public void update(ViewerCell cell) {
-        cell.setText(labelProvider.getText(cell.getElement()));
-        cell.setImage(labelProvider.getImage(cell.getElement()));
-      }
-    });
+    viewerColumn.setLabelProvider(new DelegatingStyledCellLabelProvider(labelProvider, false));
     
     TreeColumn column = new TreeColumn(viewer.getTree(), SWT.RIGHT);
     column.setText("Time Spent");

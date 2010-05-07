@@ -21,6 +21,7 @@ import rabbit.data.handler.DataHandler;
 import rabbit.ui.Preference;
 import rabbit.ui.internal.actions.ShowHideFilterControlAction;
 import rabbit.ui.internal.viewers.CellPainter;
+import rabbit.ui.internal.viewers.DelegatingStyledCellLabelProvider;
 import rabbit.ui.internal.viewers.TreeViewerLabelSorter;
 import rabbit.ui.internal.viewers.TreeViewerSorter;
 import rabbit.ui.internal.viewers.CellPainter.IValueProvider;
@@ -29,11 +30,9 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.IToolBarManager;
-import org.eclipse.jface.viewers.StyledCellLabelProvider;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.TreeViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Display;
@@ -112,13 +111,7 @@ public class SessionPage extends AbstractFilteredTreePage
     viewerColumn.getColumn().setText("Name");
     viewerColumn.getColumn().setWidth(200);
     viewerColumn.getColumn().addSelectionListener(createInitialComparator(viewer));
-    viewerColumn.setLabelProvider(new StyledCellLabelProvider() {
-      @Override
-      public void update(ViewerCell cell) {
-        cell.setText(labels.getText(cell.getElement()));
-        cell.setImage(labels.getImage(cell.getElement()));
-      }
-    });
+    viewerColumn.setLabelProvider(new DelegatingStyledCellLabelProvider(labels, false));
     
     TreeColumn column = new TreeColumn(viewer.getTree(), SWT.RIGHT);
     column.setText("Duration");

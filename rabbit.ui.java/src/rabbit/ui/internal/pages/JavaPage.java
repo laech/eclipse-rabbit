@@ -26,6 +26,7 @@ import rabbit.ui.internal.actions.ShowHideFilterControlAction;
 import rabbit.ui.internal.pages.JavaPageContentProvider.JavaCategory;
 import rabbit.ui.internal.util.ICategory;
 import rabbit.ui.internal.viewers.CellPainter;
+import rabbit.ui.internal.viewers.DelegatingStyledCellLabelProvider;
 import rabbit.ui.internal.viewers.TreeViewerLabelSorter;
 
 import org.eclipse.jdt.ui.JavaElementComparator;
@@ -34,12 +35,10 @@ import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.IToolBarManager;
-import org.eclipse.jface.viewers.StyledCellLabelProvider;
 import org.eclipse.jface.viewers.TreeNode;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.TreeViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.TreeColumn;
@@ -85,13 +84,7 @@ public class JavaPage extends AbstractAccessorPage {
         return super.doCompare(v, e1, e2);
       }
     });
-    viewerColumn.setLabelProvider(new StyledCellLabelProvider() {
-      @Override
-      public void update(ViewerCell cell) {
-        cell.setText(labelProvider.getText(cell.getElement()));
-        cell.setImage(labelProvider.getImage(cell.getElement()));
-      }
-    });
+    viewerColumn.setLabelProvider(new DelegatingStyledCellLabelProvider(labelProvider, false));
     // TOOD
     
     TreeColumn column = new TreeColumn(viewer.getTree(), SWT.RIGHT);
