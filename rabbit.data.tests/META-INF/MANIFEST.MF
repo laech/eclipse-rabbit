@@ -11,7 +11,8 @@ Require-Bundle: org.junit4,
  org.eclipse.core.runtime,
  rabbit.common,
  org.eclipse.mylyn.tasks.core,
- org.eclipse.mylyn.tasks.ui
+ org.eclipse.mylyn.tasks.ui,
+ org.eclipse.jdt.core
 Export-Package: rabbit.data.test.access.model,
  rabbit.data.test.common,
  rabbit.data.test.store.model

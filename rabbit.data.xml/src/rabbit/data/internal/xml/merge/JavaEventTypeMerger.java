@@ -17,7 +17,9 @@ package rabbit.data.internal.xml.merge;
 
 import rabbit.data.internal.xml.schema.events.JavaEventType;
 
-// TODO
+/**
+ * Merges {@link JavaEventType}s.
+ */
 public class JavaEventTypeMerger extends AbstractMerger<JavaEventType> {
 
   @Override

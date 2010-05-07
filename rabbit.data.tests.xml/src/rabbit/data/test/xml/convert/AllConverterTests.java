@@ -26,6 +26,7 @@ import org.junit.runners.Suite;
     PerspectiveEventConverterTest.class, //
     TaskFileEventConverterTest.class,
     SessionEventConverterTest.class,
+    JavaEventConverterTest.class,
 })
 public class AllConverterTests {
 

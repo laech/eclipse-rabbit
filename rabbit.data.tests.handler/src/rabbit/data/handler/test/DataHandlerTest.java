@@ -17,6 +17,7 @@ package rabbit.data.handler.test;
 
 import rabbit.data.access.model.CommandDataDescriptor;
 import rabbit.data.access.model.FileDataDescriptor;
+import rabbit.data.access.model.JavaDataDescriptor;
 import rabbit.data.access.model.LaunchDataDescriptor;
 import rabbit.data.access.model.PartDataDescriptor;
 import rabbit.data.access.model.PerspectiveDataDescriptor;
@@ -25,6 +26,7 @@ import rabbit.data.access.model.TaskFileDataDescriptor;
 import rabbit.data.handler.DataHandler;
 import rabbit.data.store.model.CommandEvent;
 import rabbit.data.store.model.FileEvent;
+import rabbit.data.store.model.JavaEvent;
 import rabbit.data.store.model.LaunchEvent;
 import rabbit.data.store.model.PartEvent;
 import rabbit.data.store.model.PerspectiveEvent;
@@ -49,6 +51,7 @@ public class DataHandlerTest {
     assertNotNull(DataHandler.getStorer(SessionEvent.class));
     assertNotNull(DataHandler.getStorer(TaskFileEvent.class));
     assertNotNull(DataHandler.getStorer(LaunchEvent.class));
+    assertNotNull(DataHandler.getStorer(JavaEvent.class));
   }
   
   @Test
@@ -60,5 +63,6 @@ public class DataHandlerTest {
     assertNotNull(DataHandler.getAccessor(SessionDataDescriptor.class));
     assertNotNull(DataHandler.getAccessor(TaskFileDataDescriptor.class));
     assertNotNull(DataHandler.getAccessor(LaunchDataDescriptor.class));
+    assertNotNull(DataHandler.getAccessor(JavaDataDescriptor.class));
   }
 }

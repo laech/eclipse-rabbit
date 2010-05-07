@@ -14,6 +14,7 @@ CommandDataDescriptorTest.class, //
     PerspectiveDataDescriptorTest.class, //
     SessionDataDescriptorTest.class, //
     TaskFileDataDescriptorTest.class,
+    JavaDataDescriptorTest.class,
     ValueDescriptorTest.class, //
 })
 public class AllTests {

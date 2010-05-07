@@ -26,6 +26,7 @@ import org.junit.runners.Suite;
     PerspectiveEventTypeMergerTest.class, //
     TaskFileEventTypeMergerTest.class,
     SessionEventTypeMergerTest.class,
+    JavaEventTypeMergerTest.class,
     
     MergersTest.class, //
     

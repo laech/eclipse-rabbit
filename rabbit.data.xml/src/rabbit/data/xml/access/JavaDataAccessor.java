@@ -29,9 +29,17 @@ import org.joda.time.LocalDate;
 
 import java.util.Collection;
 
-// TODO
+/**
+ * Gets java element event data from the database.
+ */
 public class JavaDataAccessor extends 
     AbstractDataNodeAccessor<JavaDataDescriptor, JavaEventType, JavaEventListType> {
+
+  /**
+   * Constructor.
+   */
+  public JavaDataAccessor() {
+  }
 
   @Override
   protected JavaDataDescriptor createDataNode(LocalDate cal, JavaEventType type) {

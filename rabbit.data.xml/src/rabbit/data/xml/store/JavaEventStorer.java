@@ -31,12 +31,18 @@ import java.util.List;
 
 import javax.xml.datatype.XMLGregorianCalendar;
 
-// TODO
+/**
+ * Stores {@link JavaEvent}s.
+ */
 public class JavaEventStorer 
     extends AbstractStorer<JavaEvent, JavaEventType, JavaEventListType> {
   
   private static JavaEventStorer INSTANCE = new JavaEventStorer();
   
+  /**
+   * Gets the shared instance of this class.
+   * @return The shared instance.
+   */
   public static JavaEventStorer getInstance() {
     return INSTANCE;
   }
@@ -44,6 +50,9 @@ public class JavaEventStorer
   private final IMerger<JavaEventType> merger;
   private final IConverter<JavaEvent, JavaEventType> converter;
   
+  /**
+   * Private constructor.
+   */
   private JavaEventStorer() {
     merger = new JavaEventTypeMerger();
     converter = new JavaEventConverter();

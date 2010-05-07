@@ -18,8 +18,9 @@ package rabbit.data.internal.xml.convert;
 import rabbit.data.internal.xml.schema.events.JavaEventType;
 import rabbit.data.store.model.JavaEvent;
 
-
-// TODO test
+/**
+ * Converts {@link JavaEvent} to {@link JavaEventType}
+ */
 public class JavaEventConverter extends AbstractConverter<JavaEvent, JavaEventType> {
 
   @Override

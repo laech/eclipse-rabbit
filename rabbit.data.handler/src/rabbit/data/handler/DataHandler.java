@@ -100,7 +100,7 @@ public class DataHandler {
    * <li>{@link LaunchEvent}</li>
    * <li>{@link TaskFileEvent}</li>
    * <li>{@link SessionEvent}</li>
-   * <li>TODO {@link JavaEvent}</li>
+   * <li>{@link JavaEvent}</li>
    * </ul>
    * </p>
    * 
@@ -125,7 +125,7 @@ public class DataHandler {
    * <li>{@link LaunchDataDescriptor}</li>
    * <li>{@link TaskFileDataDescriptor}</li>
    * <li>{@link SessionDataDescriptor}</li>
-   * <li>TODO {@link JavaDataDescriptor}</li>
+   * <li>{@link JavaDataDescriptor}</li>
    * </ul>
    * </p>
    * 

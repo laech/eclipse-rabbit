@@ -30,6 +30,7 @@ import org.junit.runners.Suite.SuiteClasses;
   LaunchEventTest.class,
   TaskFileEventTest.class,
   SessionEventTest.class,
+  JavaEventTest.class,
 //
 })
 public class AllTests {

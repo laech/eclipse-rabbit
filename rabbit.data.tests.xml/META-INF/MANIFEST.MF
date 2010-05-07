@@ -14,7 +14,8 @@ Require-Bundle: rabbit.data,
  org.eclipse.core.runtime,
  rabbit.common,
  org.eclipse.mylyn.tasks.core,
- org.eclipse.mylyn.tasks.ui
+ org.eclipse.mylyn.tasks.ui,
+ org.eclipse.jdt.core
 Export-Package: rabbit.data.test.xml,
  rabbit.data.test.xml.access,
  rabbit.data.test.xml.convert,
