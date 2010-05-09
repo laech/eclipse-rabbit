@@ -4,8 +4,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.Objects;
 
+import org.eclipse.ui.IPerspectiveDescriptor;
+import org.eclipse.ui.PlatformUI;
 import org.joda.time.LocalDate;
 
+import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 
 /**
@@ -50,6 +53,16 @@ public class PerspectiveDataDescriptor extends ValueDescriptor {
     return des.getDate().equals(getDate())
         && des.getPerspectiveId().equals(getPerspectiveId())
         && des.getValue() == getValue();
+  }
+  
+  /**
+   * Finds the perspective that has the same ID as {@link #getPerspectiveId()}.
+   * @return The perspective, or null if not found.
+   */
+  @CheckForNull
+  public IPerspectiveDescriptor findPerspective() {
+    return PlatformUI.getWorkbench().getPerspectiveRegistry()
+        .findPerspectiveWithId(getPerspectiveId());
   }
 
   /**

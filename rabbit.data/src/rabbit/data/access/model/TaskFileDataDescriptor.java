@@ -22,8 +22,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.base.Objects;
 
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.mylyn.tasks.core.ITask;
+import org.eclipse.mylyn.tasks.ui.TasksUi;
 import org.joda.time.LocalDate;
 
+import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 
 /**
@@ -70,6 +73,23 @@ public class TaskFileDataDescriptor extends FileDataDescriptor {
         && des.getFilePath().equals(getFilePath())
         && des.getTaskId().equals(getTaskId())
         && des.getValue() == getValue();
+  }
+  
+  /**
+   * Finds the task that has the same handle identifier as
+   * {@link TaskId#getHandleIdentifier()} and has the same creation date as
+   * {@link TaskId#getCreationDate()}.
+   * 
+   * @return The task, or null if not found.
+   * @see #getTaskId()
+   */
+  @CheckForNull
+  public ITask findTask() {
+    ITask task = TasksUi.getRepositoryModel().getTask(getTaskId().getHandleIdentifier());
+    if (task != null && !getTaskId().getCreationDate().equals(task.getCreationDate())) {
+      task = null;
+    }
+    return task;
   }
 
   /**

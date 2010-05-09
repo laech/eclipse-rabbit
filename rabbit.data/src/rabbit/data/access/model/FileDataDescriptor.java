@@ -4,9 +4,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.Objects;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
 import org.joda.time.LocalDate;
 
+import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 
 /**
@@ -50,6 +53,22 @@ public class FileDataDescriptor extends ValueDescriptor {
     FileDataDescriptor des = (FileDataDescriptor) obj;
     return des.getDate().equals(getDate()) && des.getValue() == getValue()
         && des.getFilePath().equals(getFilePath());
+  }
+
+  /**
+   * Finds the file from the workspace that has the file path of this object.
+   * 
+   * @return The file handle, or {@code null} if the path is invalid for a
+   *         workspace file.
+   * @see #getFilePath()
+   */
+  @CheckForNull
+  public IFile findFile() {
+    if (getFilePath().segmentCount() >= 2) {
+      return ResourcesPlugin.getWorkspace().getRoot().getFile(getFilePath());
+    } else {
+      return null;
+    }
   }
 
   /**

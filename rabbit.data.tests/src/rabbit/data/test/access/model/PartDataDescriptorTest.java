@@ -6,6 +6,7 @@ import com.google.common.base.Objects;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import org.joda.time.LocalDate;
@@ -52,6 +53,23 @@ public class PartDataDescriptorTest extends ValueDescriptorTest {
 
     des2 = createDescriptor(date, value, id + '.');
     assertFalse(des1.equals(des2));
+  }
+  
+  @Test
+  public void testFindPart() {
+    // A valid editor ID:
+    String partId = "org.eclipse.ui.DefaultTextEditor";
+    assertEquals(partId, createDescriptor(new LocalDate(), 1, partId).findPart()
+        .getId());
+    
+    // A valid view ID:
+    partId = "org.eclipse.ui.navigator.ProjectExplorer";
+    assertEquals(partId, createDescriptor(new LocalDate(), 1, partId).findPart()
+        .getId());
+    
+    // An invalid ID:
+    partId = "not.exist";
+    assertNull(createDescriptor(new LocalDate(), 1, partId).findPart());
   }
 
   @Test

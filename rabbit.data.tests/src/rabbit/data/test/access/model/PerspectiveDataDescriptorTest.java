@@ -6,6 +6,7 @@ import com.google.common.base.Objects;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import org.joda.time.LocalDate;
@@ -19,6 +20,17 @@ public class PerspectiveDataDescriptorTest extends ValueDescriptorTest {
   @Test(expected = NullPointerException.class)
   public void testConstructor_perspectiveIdNull() {
     createDescriptor(new LocalDate(), 1, null);
+  }
+  
+  @Test
+  public void testFindPerspective() {
+    // A valid perspective ID:
+    String id = "org.eclipse.ui.resourcePerspective";
+    assertEquals(id, createDescriptor(new LocalDate(), 1, id).findPerspective().getId());
+    
+    // An invalid perspective ID:
+    id = "not.exist";
+    assertNull(createDescriptor(new LocalDate(), 2, id).findPerspective());
   }
 
   @Test

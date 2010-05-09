@@ -11,13 +11,16 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.joda.time.LocalDate;
 import org.junit.Test;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @see LaunchDataDescriptor
@@ -116,6 +119,22 @@ public class LaunchDataDescriptorTest extends DateDescriptorTest {
   public void testCosntructor_launchConfigNull() {
     createDescriptor(new LocalDate(), null, 2, 2, Collections
         .<IPath> emptySet());
+  }
+  
+  @Test
+  public void testFindFiles() {
+    IPath validFilePath = new Path("/project/file.txt");
+    IPath invalidFilePath = new Path("/");
+    
+    LaunchDataDescriptor des = createDescriptor(new LocalDate(),
+        createLaunchConfiguration(), 1, 1, 
+        Arrays.asList(validFilePath, invalidFilePath));
+
+    // The file with invalid path should be ignored, so the set should only 
+    // contain one file with the valid path.
+    Set<IFile> files = des.findFiles();
+    assertEquals(1, files.size());
+    assertEquals(validFilePath, files.iterator().next().getFullPath());
   }
 
   @Test

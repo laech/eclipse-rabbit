@@ -6,8 +6,10 @@ import com.google.common.base.Objects;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import org.eclipse.debug.core.ILaunchManager;
 import org.junit.Test;
 
 /**
@@ -34,6 +36,28 @@ public class LaunchConfigurationDescriptorTest {
   public void testGetName() {
     String name = "aName";
     assertEquals(name, createDescriptor(name, "", "").getLaunchName());
+  }
+  
+  @Test
+  public void testFindLaunchConfigurationType() {
+    // A valid type id:
+    String typeId = "org.eclipse.jdt.launching.localJavaApplication";
+    assertEquals(typeId, createDescriptor("a", "run", typeId)
+        .findLaunchConfigurationType().getIdentifier());
+    
+    // An invalid type id:
+    typeId = "not.exist.type.id";
+    assertNull(createDescriptor("a", "run", typeId)
+        .findLaunchConfigurationType());
+  }
+  
+  @Test
+  public void testFindLaunchMode() {
+    String modeId = ILaunchManager.DEBUG_MODE;
+    assertEquals(modeId, createDescriptor("a", modeId, "typeId")
+        .findLaunchMode().getIdentifier());
+    
+    assertNull(createDescriptor("a", "invalid", "typeId").findLaunchMode());
   }
 
   @Test

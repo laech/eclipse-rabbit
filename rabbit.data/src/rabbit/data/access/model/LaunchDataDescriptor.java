@@ -5,6 +5,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableSet;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
 import org.joda.time.LocalDate;
 
@@ -73,6 +76,26 @@ public class LaunchDataDescriptor extends DateDescriptor {
         && des.getTotalDuration() == getTotalDuration()
         && des.getFilePaths().equals(getFilePaths())
         && des.getLaunchDescriptor().equals(getLaunchDescriptor());
+  }
+
+  /**
+   * Finds the associate files of this launch. The files does not need to exist
+   * in the workspace, but their paths must be valid, files with invalid paths
+   * are excluded by this method.
+   * 
+   * @return An unmodifiable set of files, or an empty set if no files.
+   * @see #getFilePaths()
+   */
+  @Nonnull
+  public Set<IFile> findFiles() {
+    ImmutableSet.Builder<IFile> builder = ImmutableSet.builder();
+    IWorkspaceRoot workspace = ResourcesPlugin.getWorkspace().getRoot();
+    for (IPath path : getFilePaths()) {
+      if (path.segmentCount() >= 2) {
+        builder.add(workspace.getFile(path));
+      }
+    }
+    return builder.build();
   }
 
   /**

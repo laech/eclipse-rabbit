@@ -4,8 +4,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.Objects;
 
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.IWorkbenchPartDescriptor;
+import org.eclipse.ui.PlatformUI;
 import org.joda.time.LocalDate;
 
+import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 
 /**
@@ -30,6 +34,21 @@ public class PartDataDescriptor extends ValueDescriptor {
     super(date, duration);
     checkNotNull(partId);
     this.partId = partId;
+  }
+  
+  /**
+   * Finds the workbench part (either an editor or a view) that has the same ID
+   * as {@link #getPartId()}.
+   * @return The workbench part, or null if not found.
+   */
+  @CheckForNull
+  public IWorkbenchPartDescriptor findPart() {
+    IWorkbench workbench = PlatformUI.getWorkbench();
+    IWorkbenchPartDescriptor des = workbench.getViewRegistry().find(getPartId());
+    if (des == null) {
+      des = workbench.getEditorRegistry().findEditor(getPartId());
+    }
+    return des;
   }
 
   /**

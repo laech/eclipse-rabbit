@@ -6,6 +6,7 @@ import com.google.common.base.Objects;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import org.eclipse.core.runtime.IPath;
@@ -56,9 +57,18 @@ public class FileDataDescriptorTest extends ValueDescriptorTest {
     des2 = createDescriptor(date, val, path.append("1"));
     assertFalse(des1.equals(des2));
   }
+  
+  @Test
+  public void testFindFile() {
+    IPath path = new Path("/p/a.txt");
+    assertEquals(path, createDescriptor(new LocalDate(), 1, path).findFile().getFullPath());
+    
+    path = new Path("/");
+    assertNull(createDescriptor(new LocalDate(), 1, path).findFile());
+  }
 
   @Test
-  public void testGetFileId() {
+  public void testGetFilePath() {
     IPath path = new Path("/p/f/a");
     assertEquals(path, createDescriptor(new LocalDate(), 1, path).getFilePath());
   }

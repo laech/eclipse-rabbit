@@ -23,6 +23,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaCore;
 import org.joda.time.LocalDate;
 
+import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 
 /**
@@ -51,6 +52,31 @@ public class JavaDataDescriptor extends ValueDescriptor {
     this.handleIdentifier = handlerIdentifier;
   }
 
+  @Override
+  public boolean equals(Object obj) {
+    if (obj == null) return false;
+    if (obj == this) return true;
+    if (!obj.getClass().equals(getClass())) return false;
+    
+    JavaDataDescriptor des = (JavaDataDescriptor) obj;
+    return Objects.equal(des.getDate(), getDate())
+        && Objects.equal(des.getHandleIdentifier(), getHandleIdentifier())
+        && des.getValue() == getValue();
+  }
+  
+  /**
+   * Finds the Java element that has the handle identifier. The returned element
+   * does not need to exist within the workspace.
+   * 
+   * @return The Java element, or null if one cannot be create using the handle
+   *         identifier.
+   * @see #getHandleIdentifier()
+   */
+  @CheckForNull
+  public IJavaElement findElement() {
+    return JavaCore.create(getHandleIdentifier());
+  }
+  
   /**
    * Gets the handle identifier of the java element.
    * 
@@ -66,17 +92,5 @@ public class JavaDataDescriptor extends ValueDescriptor {
   @Override
   public int hashCode() {
     return Objects.hashCode(getDate(), getHandleIdentifier());
-  }
-  
-  @Override
-  public boolean equals(Object obj) {
-    if (obj == null) return false;
-    if (obj == this) return true;
-    if (!obj.getClass().equals(getClass())) return false;
-    
-    JavaDataDescriptor des = (JavaDataDescriptor) obj;
-    return Objects.equal(des.getDate(), getDate())
-        && Objects.equal(des.getHandleIdentifier(), getHandleIdentifier())
-        && des.getValue() == getValue();
   }
 }

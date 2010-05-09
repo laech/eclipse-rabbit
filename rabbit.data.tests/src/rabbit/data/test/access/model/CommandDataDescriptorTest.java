@@ -6,6 +6,7 @@ import com.google.common.base.Objects;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import org.joda.time.LocalDate;
@@ -58,6 +59,12 @@ public class CommandDataDescriptorTest extends ValueDescriptorTest {
 
     des2 = createDescriptor(date, val, id + "1");
     assertFalse(des1.equals(des2));
+  }
+  
+  @Test
+  public void testFindCommand() {
+    String id = "command.a.b.c";
+    assertNotNull(createDescriptor(new LocalDate(), 1, id).findCommand());
   }
 
   @Test

@@ -5,6 +5,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.Objects;
 
+import org.eclipse.core.commands.Command;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.commands.ICommandService;
 import org.joda.time.LocalDate;
 
 import javax.annotation.Nonnull;
@@ -49,6 +52,18 @@ public class CommandDataDescriptor extends ValueDescriptor {
     CommandDataDescriptor des = (CommandDataDescriptor) obj;
     return des.getDate().equals(getDate()) && des.getValue() == getValue()
         && des.getCommandId().equals(getCommandId());
+  }
+  
+  /**
+   * Finds the command from the workbench that has the command ID of this
+   * object. If no command has the ID, then an undefined command is returned.
+   * @return The command, either defined or undefined.
+   */
+  @Nonnull
+  public Command findCommand() {
+    ICommandService service = (ICommandService) PlatformUI.getWorkbench()
+        .getService(ICommandService.class);
+    return service.getCommand(getCommandId());
   }
 
   /**
