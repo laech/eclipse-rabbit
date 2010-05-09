@@ -11,5 +11,7 @@ Require-Bundle: org.eclipse.ui,
  rabbit.tracking;bundle-version="1.1.0",
  org.eclipse.jdt.ui,
  org.eclipse.ui.editors,
- org.eclipse.core.runtime
+ org.eclipse.core.runtime,
+ org.eclipse.jface.text
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Export-Package: rabbit.tracking.internal.trackers;x-internal:=true
