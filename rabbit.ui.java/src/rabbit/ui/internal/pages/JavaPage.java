@@ -18,6 +18,7 @@ package rabbit.ui.internal.pages;
 import rabbit.data.access.IAccessor;
 import rabbit.data.access.model.JavaDataDescriptor;
 import rabbit.data.handler.DataHandler;
+import rabbit.ui.internal.SharedImages;
 import rabbit.ui.internal.actions.CollapseAllAction;
 import rabbit.ui.internal.actions.DropDownAction;
 import rabbit.ui.internal.actions.ExpandAllAction;
@@ -138,22 +139,51 @@ public class JavaPage extends AbstractAccessorPage {
     
     IAction collapse = new CollapseAllAction(getViewer());
     
-    ICategory cat = JavaCategory.PACKAGE;
-    IAction groupByPkg = new Action(cat.getText(), cat.getImageDescriptor()) {
+    ICategory cat = JavaCategory.DATE;
+    IAction groupByDate = new Action(cat.getText(), cat.getImageDescriptor()) {
       @Override public void run() {
-        contentProvider.setSelectedCategories(JavaCategory.PACKAGE, 
-            JavaCategory.TYPE_ROOT, JavaCategory.TYPE, JavaCategory.METHOD);
+        contentProvider.setSelectedCategories(
+            JavaCategory.DATE,
+            JavaCategory.PROJECT,
+            JavaCategory.PACKAGE_ROOT,
+            JavaCategory.PACKAGE,
+            JavaCategory.TYPE_ROOT,
+            JavaCategory.TYPE,
+            JavaCategory.METHOD);
       }
     };
     
     cat = JavaCategory.PROJECT;
-    IAction groupByPrj = new Action(cat.getText(), cat.getImageDescriptor()) {
+    IAction groupByProj = new Action(cat.getText(), cat.getImageDescriptor()) {
       @Override public void run() {
-        contentProvider.setSelectedCategories(JavaCategory.PROJECT,
-            JavaCategory.PACKAGE_ROOT, JavaCategory.PACKAGE, 
-            JavaCategory.TYPE_ROOT, JavaCategory.TYPE, JavaCategory.METHOD);
+        contentProvider.setSelectedCategories(
+            JavaCategory.PROJECT,
+            JavaCategory.PACKAGE_ROOT,
+            JavaCategory.PACKAGE,
+            JavaCategory.TYPE_ROOT,
+            JavaCategory.TYPE,
+            JavaCategory.METHOD);
       }
     };
+    
+    ICategory[] categories = new ICategory[] {
+        JavaCategory.METHOD,
+        JavaCategory.TYPE,
+        JavaCategory.TYPE_ROOT,
+        JavaCategory.PACKAGE,
+        JavaCategory.PACKAGE_ROOT,
+        JavaCategory.PROJECT,
+        JavaCategory.DATE
+    };
+    IAction[] hightlightActions = new IAction[categories.length];
+    for (int i = 0; i < hightlightActions.length; i++) {
+      final ICategory category = categories[i];
+      hightlightActions[i] = new Action(category.getText(), category.getImageDescriptor()) {
+        @Override public void run() {
+          contentProvider.setPaintCategory(category);
+        }
+      };
+    }
     
     IContributionItem[] items = new IContributionItem[] {
         new ActionContributionItem(filter),
@@ -163,9 +193,13 @@ public class JavaPage extends AbstractAccessorPage {
             collapse,
             new ExpandAllAction(getViewer()))),
         new ActionContributionItem(new GroupByAction(contentProvider, 
-            groupByPkg, 
-            groupByPkg, 
-            groupByPrj)),
+            groupByProj, 
+            groupByProj, 
+            groupByDate)),
+        new ActionContributionItem(new DropDownAction(
+            "Hightlight " + hightlightActions[0].getText(), SharedImages.BRUSH, 
+            hightlightActions[0], 
+            hightlightActions)),
     };
     
     for (IContributionItem item : items) {

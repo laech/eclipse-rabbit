@@ -40,7 +40,6 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeRoot;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.ui.ISharedImages;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -86,8 +85,6 @@ public class JavaPageContentProvider extends AbstractValueContentProvider {
     TYPE_ROOT   ("Files", images.getImageDescriptor(IMG_OBJS_CUNIT)),
     TYPE        ("Types", images.getImageDescriptor(IMG_OBJS_CLASS)),
     METHOD      ("Methods", images.getImageDescriptor(IMG_OBJS_PUBLIC)),
-    
-//    TYPE_MEMBER ("Type Members", images.getImageDescriptor(IMG_OBJS_PUBLIC)),
     ;
     
     private String text;
@@ -119,65 +116,6 @@ public class JavaPageContentProvider extends AbstractValueContentProvider {
   public JavaPageContentProvider(TreeViewer treeViewer) {
     super(treeViewer);
   }
-  
-//  @Override
-//  public boolean shouldFilter(Object element) {
-//    return false;
-//    boolean filter = super.shouldFilter(element);
-//    if (!filter) {
-//      Object value = ((TreeNode) element).getValue();
-//      if (value instanceof IJavaElement) {
-//        if (isAnoynmousType((IJavaElement) value) || 
-//            isField((IJavaElement) value) || 
-//            isInnerType((IJavaElement) value)) {
-//          return true;
-//        }
-//      }
-//    }
-//    return filter;
-    
-////    return false;
-//    if (!(element instanceof TreeNode))
-//      return true;
-////
-//    TreeNode node = (TreeNode) element;
-////    for (ICategory cat : selectedCategories) {
-////      // Shows the elements of the currently visible categories:
-////      Predicate<Object> predicate = getCategorizers().get(cat);
-////      if (predicate != null && predicate.apply(node.getValue())) {
-////        return false;
-////      }
-////    }
-////    
-//    Object value = node.getValue();
-//    if (value instanceof IJavaElement) {
-//      if (isAnoynmousType((IJavaElement) value) || 
-//          isField((IJavaElement) value) || 
-//          isInnerType((IJavaElement) value)) {
-//        return true;
-//      }
-//    }
-//    
-//    for (ICategory cat : selectedCategories) {
-//      // Shows the elements of the currently visible categories:
-//      Predicate<Object> predicate = getCategorizers().get(cat);
-//      if (predicate != null && predicate.apply(value)) {
-//        return false;
-//      }
-//    }
-//    
-////    if (value instanceof IType) {
-////      // Hides inner classes:
-////      return !(((IType) value).getParent() instanceof ITypeRoot);
-////    } else if (value instanceof IMethod) {
-////      // Hides methods of inner classes:
-////      return !(((IMethod) value).getParent().getParent() instanceof ITypeRoot);
-////    } else {
-////      // Hides everything else, fields ect.
-////      return true;
-////    }
-//    return true;
-//  }
   
   private boolean isInnerType(IJavaElement type) {
     return type.getElementType() == IJavaElement.TYPE
@@ -223,19 +161,9 @@ public class JavaPageContentProvider extends AbstractValueContentProvider {
     Collection<JavaDataDescriptor> data = (Collection<JavaDataDescriptor>) newInput;
     for (JavaDataDescriptor des : data) {
 
-      IJavaElement element = null;
-      try {
-        element = JavaCore.create(des.getHandleIdentifier());
-      } catch (Throwable t) {
-        continue;
-      }
+      IJavaElement element = des.findElement();
       if (element == null) {
-        System.err.println("element null");
         continue;
-      }
-      
-      if (element.getElementName().equals("hello")) {
-        System.out.println();
       }
 
       TreeNode node = getRoot();
@@ -244,14 +172,6 @@ public class JavaPageContentProvider extends AbstractValueContentProvider {
 
         if (JavaCategory.DATE == cat) {
           node = TreeNodes.findOrAppend(node, des.getDate());
-          
-//        } else if (JavaCategory.TYPE_MEMBER == cat) {
-//          Predicate<Object> pre = getCategorizers().get(JavaCategory.TYPE_MEMBER);
-//          for (IJavaElement e : elements) {
-//            if (pre.apply(e)) {
-//              node = TreeNodes.findOrAppend(node, e);
-//            }
-//          }
         } else {
           // Else for other JavaCategory:
           Predicate<Object> categorizer = getCategorizers().get(cat);
@@ -270,9 +190,6 @@ public class JavaPageContentProvider extends AbstractValueContentProvider {
           }
         }
       }
-//      for (IJavaElement e : elements) {
-//        node = TreeNodes.findOrAppend(node, e);
-//      }
       TreeNodes.appendToParent(node, des.getValue());
     }
   }
@@ -296,25 +213,11 @@ public class JavaPageContentProvider extends AbstractValueContentProvider {
         JavaCategory.TYPE_ROOT,
         JavaCategory.TYPE,
         JavaCategory.METHOD,
-//        JavaCategory.TYPE_MEMBER,
     };
   }
   
   @Override
   protected ImmutableMap<ICategory, Predicate<Object>> initializeCategorizers() {
-    
-//    Predicate<Object> isMemberOfMainType = new Predicate<Object>() {
-//      @Override public boolean apply(Object input) {
-//        if (input instanceof IMember) {
-//          if (input instanceof IType) { // Identify inner classes
-//            return !(((IType) input).getParent() instanceof ITypeRoot);
-//          }
-//          return true;
-//        }
-//        return false;
-//      }
-//    };
-    
     return ImmutableMap.<ICategory, Predicate<Object>> builder()
         .put(JavaCategory.DATE,         instanceOf(LocalDate.class))
         .put(JavaCategory.PROJECT,      instanceOf(IJavaProject.class))
@@ -323,7 +226,6 @@ public class JavaPageContentProvider extends AbstractValueContentProvider {
         .put(JavaCategory.TYPE_ROOT,    instanceOf(ITypeRoot.class))
         .put(JavaCategory.TYPE,         instanceOf(IType.class))
         .put(JavaCategory.METHOD,       instanceOf(IMethod.class))
-//        .put(JavaCategory.TYPE_MEMBER,  isMemberOfMainType)
         .build();
   }
   
@@ -345,46 +247,4 @@ public class JavaPageContentProvider extends AbstractValueContentProvider {
     }
     return elements;
   }
-  
-//  private List<IJavaElement> getTypeMemberHierarchy(IJavaElement element) {
-//    List<IJavaElement> elementList = Lists.newArrayListWithExpectedSize(2);
-//    Predicate<Object> pre = getCategorizers().get(JavaCategory.TYPE_MEMBER);
-//    if (pre.apply(element)) {
-//      elementList.add(element);
-//    }
-//    while ((element = element.getParent()) instanceof IMember) {
-//      elementList.add(element);
-//    }
-//    return elementList;
-//  }
-  
-//  private List<IJavaElement> getParentMemeberHierarchy(IJavaElement element) {
-//    Predicate<Object> predicate = getCategorizers().get(JavaCategory.MEMBER);
-//    List<IJavaElement> elementList = Lists.newArrayList();
-//    if (predicate.apply(element)) {
-//      elementList.add(element);
-//    }
-//    while ((element = element.getParent()) != null) {
-//      if (predicate.apply(element)) {
-//        elementList.add(0, element);
-//      }
-//    }
-//    return elementList;
-//  }
-  
-//  /**
-//   * Gets the parent of the element who passes the predicate's check.
-//   * @param element The element.
-//   * @param predicate The predicate.
-//   * @return The parent, or null if no parent passes the predicate's check.
-//   */
-//  private IJavaElement getParentElement(IJavaElement element, Predicate<? super IJavaElement> predicate) {
-//    if (element == null) {
-//      return null;
-//    } else if (predicate.apply(element)) {
-//      return element;
-//    } else {
-//      return getParentElement(element.getParent(), predicate);
-//    }
-//  }
 }

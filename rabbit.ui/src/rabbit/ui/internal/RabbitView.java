@@ -243,12 +243,12 @@ public class RabbitView extends ViewPart {
       
       ToolBar bar = new ToolBar(header, toolbarStyle);
       bar.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-      toolkit.adapt(bar);
+      toolkit.adapt(bar, false, false);
       extensionToolBar = new ToolBarManager(bar);
 
       
       bar = new ToolBar(header, toolbarStyle);
-      toolkit.adapt(bar);
+      toolkit.adapt(bar, false, false);
       createToolBarItems(new ToolBarManager(bar));
     }
     displayPanel = toolkit.createComposite(right);

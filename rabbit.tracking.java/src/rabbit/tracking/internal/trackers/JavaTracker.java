@@ -24,6 +24,7 @@ import rabbit.tracking.internal.TrackingPlugin;
 import com.google.common.collect.Sets;
 
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
@@ -46,6 +47,9 @@ import java.util.Observable;
 import java.util.Observer;
 import java.util.Set;
 
+/**
+ * Tracks time spent on Java elements.
+ */
 @SuppressWarnings("restriction")
 public class JavaTracker extends AbstractTracker<JavaEvent> 
     implements IWindowListener, IPartListener, Observer, Listener {
@@ -54,11 +58,16 @@ public class JavaTracker extends AbstractTracker<JavaEvent>
    * Current selected java element, may be null;
    */
   private IJavaElement currentElement = null;
+  
+  /**
+   * Indicates the start time of the current tracking session, < 0 if no session
+   * is started.
+   */
   private long startTime = -1;
   
   /**
    * A set of all text widgets that are currently being listened to.
-   * This set is not synchronized.
+   * This set is not synchronised.
    */
   private final Set<StyledText> registeredWidgets;
   
@@ -67,6 +76,15 @@ public class JavaTracker extends AbstractTracker<JavaEvent>
     registeredWidgets = Sets.newHashSet();
   }
   
+  /*
+   * Listener to listen to keyboard input and mouse input on text widgets of
+   * editors.
+   */
+  @Override
+  public void handleEvent(Event event) {
+    tryStartSession();
+  }
+
   @Override
   public void partActivated(IWorkbenchPart part) {
     tryStartSession(part);
@@ -83,7 +101,7 @@ public class JavaTracker extends AbstractTracker<JavaEvent>
       deregister((JavaEditor) part);
     }
   }
-
+  
   @Override
   public void partDeactivated(IWorkbenchPart part) {
     tryEndSession();
@@ -94,6 +112,12 @@ public class JavaTracker extends AbstractTracker<JavaEvent>
     if (part instanceof JavaEditor) {
       register((JavaEditor) part);
     }
+  }
+
+  @Override
+  public void saveData() {
+    filterData();
+    super.saveData();
   }
 
   @Override
@@ -169,10 +193,29 @@ public class JavaTracker extends AbstractTracker<JavaEvent>
     for (IWorkbenchWindow window : workbench.getWorkbenchWindows()) {
       register(window);
     }
-    
     TrackingPlugin.getDefault().getIdleDetector().addObserver(this);
   }
   
+  /**
+   * Removes the workbench window so that it's no longer being tracked.
+   * @param window The workbench window.
+   */
+  private void deregister(IWorkbenchWindow window) {
+    window.getPartService().removePartListener(this);
+    for (IWorkbenchPage page : window.getPages()) {
+      for (IEditorReference ref : page.getEditorReferences()) {
+        IEditorPart editor = ref.getEditor(false);
+        if (editor instanceof JavaEditor) {
+          deregister((JavaEditor) editor);
+        }
+      }
+    }
+  }
+  
+  /**
+   * Removes the editor no that it's no longer being tracked.
+   * @param editor The editor.
+   */
   private synchronized void deregister(JavaEditor editor) {
     final StyledText widget = editor.getViewer().getTextWidget();
     if (registeredWidgets.contains(widget)) {
@@ -187,6 +230,62 @@ public class JavaTracker extends AbstractTracker<JavaEvent>
     }
   }
   
+  /**
+   * Performs filtering of the data before saving.
+   * <p>
+   * NOTE: Then a user starts to type a new java element, like a method, he/she
+   * knows what the name he/she is going to type for the method, but we have no
+   * way of knowing that, so lots of events may be recorded before he/she
+   * finishes typing the name. For example, if the user want to type "hello" as
+   * the method name, there will be events recorded about the java element
+   * "hel", or "hell", or "hello", we only need one of them ("hello") but we
+   * also want to keep the time about the invalid ones, so before we save the
+   * data, we check for non-existent java elements, and instead of saving the
+   * data under those elements, we save the data under the first existing parent
+   * of the elements, if all parents are missing (e.g. deletes the file), we
+   * save it under the file parent, like "File.java".
+   * </p>
+   */
+  private void filterData() {
+    Set<JavaEvent> filteredData = Sets.newLinkedHashSet();
+    for (JavaEvent event : getData()) {
+      IJavaElement element = event.getElement();
+      // ITypeRoot represents the file, xxx.java. Everything above that is not
+      // modifiable in a JavaEditor, so no need to check them:
+      if (!element.exists()) {
+        for (; !element.exists() && !(element instanceof ITypeRoot); element = element.getParent());
+        filteredData.add(new JavaEvent(event.getTime(), event.getDuration(), element));
+      } else {
+        filteredData.add(event);
+      }
+    }
+    flushData();
+    for (JavaEvent event : filteredData) {
+      addData(event);
+    }
+  }
+  
+  /**
+   * Registers the given workbench window to be tracked.
+   * @param window The workbench window.
+   */
+  private void register(IWorkbenchWindow window) {
+    window.getPartService().addPartListener(this);
+    for (IWorkbenchPage page : window.getPages()) {
+      for (IEditorReference ref : page.getEditorReferences()) {
+        IEditorPart editor = ref.getEditor(false);
+        if (editor instanceof JavaEditor) {
+          register((JavaEditor) editor);
+        }
+      }
+    }
+  }
+
+  /**
+   * Registers the given editor to be tracked. Has no effect if the editor is
+   * already registered.
+   * @param editor The editor.
+   */
   private synchronized void register(JavaEditor editor) {
     final StyledText widget = editor.getViewer().getTextWidget();
     if (!registeredWidgets.contains(widget)) {
@@ -198,30 +297,6 @@ public class JavaTracker extends AbstractTracker<JavaEvent>
         }
       });
       registeredWidgets.add(widget);
-    }
-  }
-  
-  private void deregister(IWorkbenchWindow window) {
-    window.getPartService().removePartListener(this);
-    for (IWorkbenchPage page : window.getPages()) {
-      for (IEditorReference ref : page.getEditorReferences()) {
-        IEditorPart editor = ref.getEditor(false);
-        if (editor instanceof JavaEditor) {
-          deregister((JavaEditor) editor);
-        }
-      }
-    }
-  }
-  
-  private void register(IWorkbenchWindow window) {
-    window.getPartService().addPartListener(this);
-    for (IWorkbenchPage page : window.getPages()) {
-      for (IEditorReference ref : page.getEditorReferences()) {
-        IEditorPart editor = ref.getEditor(false);
-        if (editor instanceof JavaEditor) {
-          register((JavaEditor) editor);
-        }
-      }
     }
   }
 
@@ -247,6 +322,22 @@ public class JavaTracker extends AbstractTracker<JavaEvent>
       System.out.println(currentElement.getHandleIdentifier() + ": " + duration);
     }
     reset();
+  }
+  
+  /**
+   * Tries to start a tracking session, if the current element is not change,
+   * will do nothing, otherwise ends a session if there is one running, then if
+   * the currently selected element in Eclipse's active editor is not null,
+   * starts a new session.
+   * <p>
+   * <strong>NOTE:</strong> Run in UI thread.
+   * </p>
+   */
+  private void tryStartSession() {
+    IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+    if (window != null) {
+      tryStartSession(window.getPartService().getActivePart());
+    }
   }
 
   /**
@@ -284,24 +375,5 @@ public class JavaTracker extends AbstractTracker<JavaEvent>
       startTime = System.currentTimeMillis();
     }
     System.out.println(startTime);
-  }
-  
-  /**
-   * UI thread.
-   */
-  private void tryStartSession() {
-    IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
-    if (window != null) {
-      tryStartSession(window.getPartService().getActivePart());
-    }
-  }
-
-  /*
-   * Listener to listen to keyboard input and mouse input on text widgets of
-   * editors.
-   */
-  @Override
-  public void handleEvent(Event event) {
-    tryStartSession();
   }
 }
