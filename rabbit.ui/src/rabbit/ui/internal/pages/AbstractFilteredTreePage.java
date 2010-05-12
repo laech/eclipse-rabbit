@@ -15,8 +15,6 @@
  */
 package rabbit.ui.internal.pages;
 
-import java.util.Arrays;
-
 import rabbit.ui.IPage;
 import rabbit.ui.internal.RabbitUI;
 import rabbit.ui.internal.viewers.CellPainter;
@@ -44,11 +42,11 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Event;
-import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.ui.dialogs.FilteredTree;
 import org.eclipse.ui.dialogs.PatternFilter;
+
+import java.util.Arrays;
 
 /**
  * Abstract implementation of an {@link IPage} containing a {@link FilteredTree},
@@ -125,15 +123,6 @@ public abstract class AbstractFilteredTreePage implements IPage {
         super.mouseDown(e);
         if (viewer.getTree().getItem(new Point(e.x, e.y)) == null)
           viewer.setSelection(StructuredSelection.EMPTY);
-      }
-    });
-    
-    viewer.getTree().addListener(SWT.MeasureItem, new Listener() {
-      @Override
-      public void handleEvent(Event event) {
-        if (event.height < 20) {
-          event.height = 20;
-        }
       }
     });
 

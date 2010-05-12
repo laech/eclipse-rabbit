@@ -242,6 +242,15 @@ public class PartPageContentProviderTest {
       fail();
     }
   }
+  
+  @Test
+  public void testInputChanged_invalidInput() {
+    try {
+      provider.inputChanged(provider.getViewer(), new Object(), new Object());
+    } catch (Exception e) {
+      fail();
+    }
+  }
 
   @Test
   public void testIsHidingEditors() {

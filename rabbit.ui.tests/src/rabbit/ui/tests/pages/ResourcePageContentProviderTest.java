@@ -271,6 +271,15 @@ public class ResourcePageContentProviderTest {
       fail();
     }
   }
+  
+  @Test
+  public void testInputChanged_invalidInput() {
+    try {
+      provider.inputChanged(page.getViewer(), new Object(), new Object());
+    } catch (Exception e) {
+      fail();
+    }
+  }
 
   @Test
   public void testSetSelectedCategories_emptyArray() {

@@ -61,8 +61,14 @@ public class CommandPageContentProvider extends AbstractValueContentProvider {
     super.doInputChanged(viewer, oldInput, newInput);
     
     getRoot().setChildren(null);
-    Collection<CommandDataDescriptor> data = (Collection<CommandDataDescriptor>) newInput;
-    ICommandService service = (ICommandService) PlatformUI.getWorkbench().getService(ICommandService.class);
+    Collection<CommandDataDescriptor> data = null;
+    try {
+      data = (Collection<CommandDataDescriptor>) newInput;
+    } catch (Exception e) {
+      return;
+    }
+    ICommandService service = (ICommandService) PlatformUI.getWorkbench()
+        .getService(ICommandService.class);
     
     for (CommandDataDescriptor des : data) {
       

@@ -31,8 +31,9 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.PlatformUI;
 import org.joda.time.LocalDate;
 
-// TODO
-@SuppressWarnings("restriction")
+/**
+ * Label provider for {@link JavaPage}
+ */
 public class JavaPageLabelProvider extends LabelProvider
     implements ITableLabelProvider, IColorProvider {
   
@@ -41,6 +42,10 @@ public class JavaPageLabelProvider extends LabelProvider
   private final JavaPageContentProvider contentProvider;
   private final Color gray;
 
+  /**
+   * Constructs a new label provider.
+   * @param contentProvider The content provider.
+   */
   public JavaPageLabelProvider(JavaPageContentProvider contentProvider) {
     checkNotNull(contentProvider);
     dateLabels = new DateLabelProvider();
@@ -116,6 +121,4 @@ public class JavaPageLabelProvider extends LabelProvider
     }
     return null;
   }
-
-  
 }

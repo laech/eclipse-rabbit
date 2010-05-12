@@ -53,8 +53,9 @@ import org.joda.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 
-// TODO
-@SuppressWarnings("restriction")
+/**
+ * Content provider accepts input as {@code Collection<JavaDataDescriptor>}
+ */
 public class JavaPageContentProvider extends AbstractValueContentProvider {
   
   /*
@@ -79,7 +80,8 @@ public class JavaPageContentProvider extends AbstractValueContentProvider {
   public static enum JavaCategory implements ICategory {
     
     DATE        ("Dates", SharedImages.CALENDAR),
-    PROJECT     ("Projects", PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(IDE.SharedImages.IMG_OBJ_PROJECT)),
+    PROJECT     ("Projects", PlatformUI.getWorkbench().getSharedImages()
+                    .getImageDescriptor(IDE.SharedImages.IMG_OBJ_PROJECT)),
     PACKAGE_ROOT("Source Folders", images.getImageDescriptor(IMG_OBJS_PACKFRAG_ROOT)),
     PACKAGE     ("Packages", images.getImageDescriptor(IMG_OBJS_PACKAGE)),
     TYPE_ROOT   ("Files", images.getImageDescriptor(IMG_OBJS_CUNIT)),
@@ -158,7 +160,12 @@ public class JavaPageContentProvider extends AbstractValueContentProvider {
     super.doInputChanged(viewer, oldInput, newInput);
     getRoot().setChildren(null);
 
-    Collection<JavaDataDescriptor> data = (Collection<JavaDataDescriptor>) newInput;
+    Collection<JavaDataDescriptor> data = null;
+    try { // TODO test this on all providers.
+      data = (Collection<JavaDataDescriptor>) newInput;
+    } catch (Exception e) {
+      return;
+    }
     for (JavaDataDescriptor des : data) {
 
       IJavaElement element = des.findElement();

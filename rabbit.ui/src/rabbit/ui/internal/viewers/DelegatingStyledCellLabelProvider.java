@@ -61,8 +61,8 @@ public class DelegatingStyledCellLabelProvider extends StyledCellLabelProvider {
   @Override
   protected void measure(Event event, Object element) {
     super.measure(event, element);
-    if (event.height < 20) {
-      event.height = 20;
+    if (event.height < 19) {
+      event.height = 19;
     }
   }
 }

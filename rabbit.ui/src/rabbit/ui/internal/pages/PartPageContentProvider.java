@@ -151,7 +151,12 @@ public class PartPageContentProvider extends AbstractValueContentProvider {
     super.doInputChanged(viewer, oldInput, newInput);
     getRoot().setChildren(null);
     
-    Collection<PartDataDescriptor> data = (Collection<PartDataDescriptor>) newInput;
+    Collection<PartDataDescriptor> data = null;
+    try {
+      data = (Collection<PartDataDescriptor>) newInput;
+    } catch (Exception e) {
+      return;
+    }
     IEditorRegistry editors = PlatformUI.getWorkbench().getEditorRegistry();
     IViewRegistry views = PlatformUI.getWorkbench().getViewRegistry();
     for (PartDataDescriptor des : data) {

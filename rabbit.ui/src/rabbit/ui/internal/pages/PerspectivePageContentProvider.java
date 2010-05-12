@@ -79,9 +79,14 @@ public class PerspectivePageContentProvider extends AbstractValueContentProvider
   protected void doInputChanged(Viewer viewer, Object oldInput, Object newInput) {
     super.doInputChanged(viewer, oldInput, newInput);
     getRoot().setChildren(null);
-    
+
+    Collection<PerspectiveDataDescriptor> data = null;
+    try {
+      data = (Collection<PerspectiveDataDescriptor>) newInput;
+    } catch (Exception e) {
+      return;
+    }
     IPerspectiveRegistry perspectives = PlatformUI.getWorkbench().getPerspectiveRegistry();
-    Collection<PerspectiveDataDescriptor> data = (Collection<PerspectiveDataDescriptor>) newInput;
     for (PerspectiveDataDescriptor des : data) {
       
       TreeNode node = getRoot();

@@ -18,6 +18,7 @@ package rabbit.ui.internal.pages;
 import rabbit.data.access.IAccessor;
 import rabbit.data.access.model.JavaDataDescriptor;
 import rabbit.data.handler.DataHandler;
+import rabbit.ui.internal.RabbitUI;
 import rabbit.ui.internal.SharedImages;
 import rabbit.ui.internal.actions.CollapseAllAction;
 import rabbit.ui.internal.actions.DropDownAction;
@@ -30,12 +31,16 @@ import rabbit.ui.internal.viewers.CellPainter;
 import rabbit.ui.internal.viewers.DelegatingStyledCellLabelProvider;
 import rabbit.ui.internal.viewers.TreeViewerLabelSorter;
 
+import com.google.common.base.Joiner;
+import com.google.common.collect.Lists;
+
 import org.eclipse.jdt.ui.JavaElementComparator;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.IToolBarManager;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.viewers.TreeNode;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.TreeViewerColumn;
@@ -46,10 +51,16 @@ import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.ui.dialogs.PatternFilter;
 import org.joda.time.LocalDate;
 
-// TODO
-@SuppressWarnings("restriction")
+import java.util.List;
+
+/**
+ * Page to display time spent on Java elements.
+ */
 public class JavaPage extends AbstractAccessorPage {
-  
+
+  // Preference constants:
+  private static final String PREF_SELECTED_CATEGORIES = "JavaPage.SelectedCatgories";
+  private static final String PREF_PAINT_CATEGORY = "JavaPage.PaintCategory";
   
   private final IAccessor<JavaDataDescriptor> accessor;
   private JavaPageContentProvider contentProvider;
@@ -213,4 +224,45 @@ public class JavaPage extends AbstractAccessorPage {
   protected IAccessor<?> getAccessor() {
     return accessor;
   }
+  
+  @Override
+  protected void restoreState() {
+    super.restoreState();
+    IPreferenceStore store = RabbitUI.getDefault().getPreferenceStore();
+
+    // Restores the selected categories of the content provider:
+    String[] categoryStr = store.getString(PREF_SELECTED_CATEGORIES).split(",");
+    List<JavaCategory> cats = Lists.newArrayList();
+    for (String str : categoryStr) {
+      try {
+        cats.add(Enum.valueOf(JavaCategory.class, str));
+      } catch (IllegalArgumentException e) {
+        // Ignore invalid elements.
+      }
+    }
+    contentProvider.setSelectedCategories(cats.toArray(new ICategory[cats.size()]));
+
+    // Restores the paint category of the content provider:
+    String paintStr = store.getString(PREF_PAINT_CATEGORY);
+    try {
+      JavaCategory cat = Enum.valueOf(JavaCategory.class, paintStr);
+      contentProvider.setPaintCategory(cat);
+    } catch (IllegalArgumentException e) {
+      // Just let the content provider use its default paint category.
+    }
+  }
+
+  @Override
+  protected void saveState() {
+    super.saveState();
+    IPreferenceStore store = RabbitUI.getDefault().getPreferenceStore();
+
+    // Saves the selected categories of the content provider:
+    ICategory[] categories = contentProvider.getSelectedCategories();
+    store.setValue(PREF_SELECTED_CATEGORIES, Joiner.on(",").join(categories));
+
+    // Saves the paint category of the content provider:
+    store.setValue(PREF_PAINT_CATEGORY, contentProvider.getPaintCategory().toString());
+  }
+
 }

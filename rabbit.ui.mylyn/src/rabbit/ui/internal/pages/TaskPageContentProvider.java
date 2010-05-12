@@ -101,7 +101,14 @@ public class TaskPageContentProvider extends AbstractValueContentProvider {
   @Override
   protected void doInputChanged(Viewer viewer, Object oldInput, Object newInput) {
     super.doInputChanged(viewer, oldInput, newInput);
-    reorganizeData((Collection<TaskFileDataDescriptor>) newInput);
+    
+    Collection<TaskFileDataDescriptor> data = null;
+    try {
+      data = (Collection<TaskFileDataDescriptor>) newInput;
+    } catch (Exception e) {
+      return;
+    }
+    reorganizeData(data);
   }
 
   @Override

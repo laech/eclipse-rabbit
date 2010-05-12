@@ -65,8 +65,14 @@ public class ResourcePageContentProvider extends AbstractValueContentProvider {
   
   @SuppressWarnings("unchecked")
   @Override
-  public void doInputChanged(Viewer viewer, Object oldInput, Object newInput) {
-    reorganizeData((Collection<FileDataDescriptor>) newInput);
+  protected void doInputChanged(Viewer viewer, Object oldInput, Object newInput) {
+    Collection<FileDataDescriptor> data = null;
+    try {
+      data = (Collection<FileDataDescriptor>) newInput;
+    } catch (Exception e) {
+      return;
+    }
+    reorganizeData(data);
   }
 
   @Override

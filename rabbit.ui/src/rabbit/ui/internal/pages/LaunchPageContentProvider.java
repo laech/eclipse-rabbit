@@ -235,7 +235,13 @@ public class LaunchPageContentProvider extends AbstractCategoryContentProvider {
   @SuppressWarnings("unchecked")
   @Override
   protected void doInputChanged(Viewer viewer, Object oldInput, Object newInput) {
-    reorganizeData((Collection<LaunchDataDescriptor>) newInput);
+    Collection<LaunchDataDescriptor> data = null;
+    try {
+      data = (Collection<LaunchDataDescriptor>) newInput;
+    } catch (Exception e) {
+      return;
+    }
+    reorganizeData(data);
   }
 
   @Override
