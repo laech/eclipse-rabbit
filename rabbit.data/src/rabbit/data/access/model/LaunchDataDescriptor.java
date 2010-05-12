@@ -18,7 +18,7 @@ import javax.annotation.Nonnull;
 /**
  * Date descriptor for launch events.
  */
-public class LaunchDataDescriptor extends DateDescriptor {
+public final class LaunchDataDescriptor extends DateDescriptor {
 
   @Nonnull
   private final ImmutableSet<IPath> filePaths;
@@ -87,7 +87,7 @@ public class LaunchDataDescriptor extends DateDescriptor {
    * @see #getFilePaths()
    */
   @Nonnull
-  public Set<IFile> findFiles() {
+  public final Set<IFile> findFiles() {
     ImmutableSet.Builder<IFile> builder = ImmutableSet.builder();
     IWorkspaceRoot workspace = ResourcesPlugin.getWorkspace().getRoot();
     for (IPath path : getFilePaths()) {
@@ -104,7 +104,7 @@ public class LaunchDataDescriptor extends DateDescriptor {
    * @return An unmodifiable set of paths of the files involved, never null.
    */
   @Nonnull
-  public Set<IPath> getFilePaths() {
+  public final Set<IPath> getFilePaths() {
     return filePaths;
   }
 
@@ -114,7 +114,7 @@ public class LaunchDataDescriptor extends DateDescriptor {
    * @return The launch configuration description, never null.
    */
   @Nonnull
-  public LaunchConfigurationDescriptor getLaunchDescriptor() {
+  public final LaunchConfigurationDescriptor getLaunchDescriptor() {
     return launch;
   }
 
@@ -123,7 +123,7 @@ public class LaunchDataDescriptor extends DateDescriptor {
    * 
    * @return
    */
-  public long getTotalDuration() {
+  public final long getTotalDuration() {
     return totalDuration;
   }
 
@@ -132,7 +132,7 @@ public class LaunchDataDescriptor extends DateDescriptor {
    * 
    * @return The number of time this launch configuration is executed.
    */
-  public int getLaunchCount() {
+  public final int getLaunchCount() {
     return count;
   }
 }

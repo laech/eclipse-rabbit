@@ -47,7 +47,7 @@ public class ContinuousEvent extends DiscreteEvent {
    * 
    * @return The duration in milliseconds.
    */
-  public long getDuration() {
+  public final long getDuration() {
     return duration;
   }
 }

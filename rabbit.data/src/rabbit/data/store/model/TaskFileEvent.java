@@ -59,7 +59,7 @@ public class TaskFileEvent extends FileEvent {
    * @return The task.
    */
   @Nonnull
-  public ITask getTask() {
+  public final ITask getTask() {
     return task;
   }
 }

@@ -45,7 +45,7 @@ public class DiscreteEvent {
    * @return The event time.
    */
   @Nonnull
-  public DateTime getTime() {
+  public final DateTime getTime() {
     return time;
   }
 }

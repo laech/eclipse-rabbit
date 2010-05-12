@@ -79,7 +79,7 @@ public class LaunchEvent extends ContinuousEvent {
    *         empty collection.
    */
   @Nonnull
-  public Set<IPath> getFilePaths() {
+  public final Set<IPath> getFilePaths() {
     return filePaths;
   }
 
@@ -89,7 +89,7 @@ public class LaunchEvent extends ContinuousEvent {
    * @return The launch.
    */
   @Nonnull
-  public ILaunch getLaunch() {
+  public final ILaunch getLaunch() {
     return launch;
   }
 
@@ -99,7 +99,7 @@ public class LaunchEvent extends ContinuousEvent {
    * @return The launch configuration.
    */
   @Nonnull
-  public ILaunchConfiguration getLaunchConfiguration() {
+  public final ILaunchConfiguration getLaunchConfiguration() {
     return config;
   }
 }

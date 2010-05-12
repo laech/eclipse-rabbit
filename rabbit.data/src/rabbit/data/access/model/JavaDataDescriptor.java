@@ -73,7 +73,7 @@ public class JavaDataDescriptor extends ValueDescriptor {
    * @see #getHandleIdentifier()
    */
   @CheckForNull
-  public IJavaElement findElement() {
+  public final IJavaElement findElement() {
     return JavaCore.create(getHandleIdentifier());
   }
   
@@ -85,7 +85,7 @@ public class JavaDataDescriptor extends ValueDescriptor {
    * @see JavaCore#create(String)
    */
   @Nonnull
-  public String getHandleIdentifier() {
+  public final String getHandleIdentifier() {
     return handleIdentifier;
   }
   

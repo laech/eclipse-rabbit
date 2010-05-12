@@ -28,7 +28,7 @@ import javax.annotation.Nonnull;
 public class PerspectiveEvent extends ContinuousEvent {
 
   @Nonnull
-  private IPerspectiveDescriptor perspective;
+  private final IPerspectiveDescriptor perspective;
 
   /**
    * Constructs a perspective event.
@@ -54,7 +54,7 @@ public class PerspectiveEvent extends ContinuousEvent {
    * @return The perspective.
    */
   @Nonnull
-  public IPerspectiveDescriptor getPerspective() {
+  public final IPerspectiveDescriptor getPerspective() {
     return perspective;
   }
 }

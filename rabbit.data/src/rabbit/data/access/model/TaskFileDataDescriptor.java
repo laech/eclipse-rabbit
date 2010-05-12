@@ -84,7 +84,7 @@ public class TaskFileDataDescriptor extends FileDataDescriptor {
    * @see #getTaskId()
    */
   @CheckForNull
-  public ITask findTask() {
+  public final ITask findTask() {
     ITask task = TasksUi.getRepositoryModel().getTask(getTaskId().getHandleIdentifier());
     if (task != null && !getTaskId().getCreationDate().equals(task.getCreationDate())) {
       task = null;
@@ -97,7 +97,7 @@ public class TaskFileDataDescriptor extends FileDataDescriptor {
    * @return The task ID.
    */
   @Nonnull
-  public TaskId getTaskId() {
+  public final TaskId getTaskId() {
     return taskId;
   }
 }

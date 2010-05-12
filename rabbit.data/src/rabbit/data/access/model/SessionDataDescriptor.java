@@ -40,12 +40,4 @@ public class SessionDataDescriptor extends ValueDescriptor {
     SessionDataDescriptor des = (SessionDataDescriptor) obj;
     return des.getDate().equals(getDate()) && des.getValue() == getValue();
   }
-
-  /**
-   * @return The duration in milliseconds.
-   */
-  @Override
-  public long getValue() {
-    return super.getValue();
-  }
 }

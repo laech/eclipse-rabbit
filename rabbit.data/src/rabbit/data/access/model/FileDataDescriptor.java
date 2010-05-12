@@ -63,7 +63,7 @@ public class FileDataDescriptor extends ValueDescriptor {
    * @see #getFilePath()
    */
   @CheckForNull
-  public IFile findFile() {
+  public final IFile findFile() {
     if (getFilePath().segmentCount() >= 2) {
       return ResourcesPlugin.getWorkspace().getRoot().getFile(getFilePath());
     } else {
@@ -77,15 +77,7 @@ public class FileDataDescriptor extends ValueDescriptor {
    * @return The path, never null.
    */
   @Nonnull
-  public IPath getFilePath() {
+  public final IPath getFilePath() {
     return filePath;
-  }
-
-  /**
-   * @return The duration in milliseconds.
-   */
-  @Override
-  public long getValue() {
-    return super.getValue();
   }
 }

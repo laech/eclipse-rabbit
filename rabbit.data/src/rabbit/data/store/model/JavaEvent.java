@@ -46,7 +46,7 @@ public class JavaEvent extends ContinuousEvent {
   }
 
   @Nonnull
-  public IJavaElement getElement() {
+  public final IJavaElement getElement() {
     return element;
   }
 }

@@ -49,7 +49,7 @@ public class DateDescriptor {
    * @return The date, never null.
    */
   @Nonnull
-  public LocalDate getDate() {
+  public final LocalDate getDate() {
     return date;
   }
 }

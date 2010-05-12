@@ -48,7 +48,7 @@ public class LaunchConfigurationDescriptor {
    * @return The launch configuration type, or null if not found.
    */
   @CheckForNull
-  public ILaunchConfigurationType findLaunchConfigurationType() {
+  public final ILaunchConfigurationType findLaunchConfigurationType() {
     return DebugPlugin.getDefault().getLaunchManager()
         .getLaunchConfigurationType(getLaunchTypeId());
   }
@@ -58,7 +58,7 @@ public class LaunchConfigurationDescriptor {
    * @return The launch mode, or null if not found.
    */
   @CheckForNull
-  public ILaunchMode findLaunchMode() {
+  public final ILaunchMode findLaunchMode() {
     return DebugPlugin.getDefault().getLaunchManager()
         .getLaunchMode(getLaunchModeId());
   }
@@ -69,7 +69,7 @@ public class LaunchConfigurationDescriptor {
    * @return The ID of the launch mode, never null.
    */
   @Nonnull
-  public String getLaunchModeId() {
+  public final String getLaunchModeId() {
     return launchModeId;
   }
 
@@ -79,7 +79,7 @@ public class LaunchConfigurationDescriptor {
    * @return The ID of the launch type, never null.
    */
   @Nonnull
-  public String getLaunchTypeId() {
+  public final String getLaunchTypeId() {
     return launchTypeId;
   }
 
@@ -89,7 +89,7 @@ public class LaunchConfigurationDescriptor {
    * @return The name of the launch configuration, never null.
    */
   @Nonnull
-  public String getLaunchName() {
+  public final String getLaunchName() {
     return launchName;
   }
 

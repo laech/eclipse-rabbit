@@ -27,7 +27,8 @@ import javax.annotation.Nonnull;
  */
 public class PartEvent extends ContinuousEvent {
 
-  private IWorkbenchPart workbenchPart;
+  @Nonnull
+  private final IWorkbenchPart workbenchPart;
 
   /**
    * Constructs a new event.
@@ -52,7 +53,7 @@ public class PartEvent extends ContinuousEvent {
    * @return The workbench part.
    */
   @Nonnull
-  public IWorkbenchPart getWorkbenchPart() {
+  public final IWorkbenchPart getWorkbenchPart() {
     return workbenchPart;
   }
 }

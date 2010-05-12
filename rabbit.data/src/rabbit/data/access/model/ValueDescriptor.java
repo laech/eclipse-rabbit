@@ -52,7 +52,7 @@ public class ValueDescriptor extends DateDescriptor {
    * 
    * @return The value.
    */
-  public long getValue() {
+  public final long getValue() {
     return value;
   }
 }

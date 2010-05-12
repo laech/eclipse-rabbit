@@ -42,7 +42,7 @@ public class PartDataDescriptor extends ValueDescriptor {
    * @return The workbench part, or null if not found.
    */
   @CheckForNull
-  public IWorkbenchPartDescriptor findPart() {
+  public final IWorkbenchPartDescriptor findPart() {
     IWorkbench workbench = PlatformUI.getWorkbench();
     IWorkbenchPartDescriptor des = workbench.getViewRegistry().find(getPartId());
     if (des == null) {
@@ -57,18 +57,10 @@ public class PartDataDescriptor extends ValueDescriptor {
    * @return The part ID, never null.
    */
   @Nonnull
-  public String getPartId() {
+  public final String getPartId() {
     return partId;
   }
-
-  /**
-   * @return The duration in milliseconds.
-   */
-  @Override
-  public long getValue() {
-    return super.getValue();
-  }
-
+  
   @Override
   public int hashCode() {
     return Objects.hashCode(getDate(), getPartId());

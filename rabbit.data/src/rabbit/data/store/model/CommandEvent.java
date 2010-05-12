@@ -49,7 +49,7 @@ public class CommandEvent extends DiscreteEvent {
    * @return The execution event.
    */
   @Nonnull
-  public ExecutionEvent getExecutionEvent() {
+  public final ExecutionEvent getExecutionEvent() {
     return event;
   }
 }

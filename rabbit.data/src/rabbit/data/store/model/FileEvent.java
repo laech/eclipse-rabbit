@@ -60,7 +60,7 @@ public class FileEvent extends ContinuousEvent {
    * @return The file path, never null.
    */
   @Nonnull
-  public IPath getFilePath() {
+  public final IPath getFilePath() {
     return filePath;
   }
 }

@@ -60,7 +60,7 @@ public class CommandDataDescriptor extends ValueDescriptor {
    * @return The command, either defined or undefined.
    */
   @Nonnull
-  public Command findCommand() {
+  public final Command findCommand() {
     ICommandService service = (ICommandService) PlatformUI.getWorkbench()
         .getService(ICommandService.class);
     return service.getCommand(getCommandId());
@@ -72,15 +72,7 @@ public class CommandDataDescriptor extends ValueDescriptor {
    * @return The command ID, never null.
    */
   @Nonnull
-  public String getCommandId() {
+  public final String getCommandId() {
     return commandId;
-  }
-
-  /**
-   * @return The command execution count.
-   */
-  @Override
-  public long getValue() {
-    return super.getValue();
   }
 }

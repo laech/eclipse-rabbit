@@ -60,7 +60,7 @@ public class PerspectiveDataDescriptor extends ValueDescriptor {
    * @return The perspective, or null if not found.
    */
   @CheckForNull
-  public IPerspectiveDescriptor findPerspective() {
+  public final IPerspectiveDescriptor findPerspective() {
     return PlatformUI.getWorkbench().getPerspectiveRegistry()
         .findPerspectiveWithId(getPerspectiveId());
   }
@@ -71,15 +71,7 @@ public class PerspectiveDataDescriptor extends ValueDescriptor {
    * @return The ID of the perspective, never null.
    */
   @Nonnull
-  public String getPerspectiveId() {
+  public final String getPerspectiveId() {
     return perspectiveId;
-  }
-
-  /**
-   * @return The duration in milliseconds.
-   */
-  @Override
-  public long getValue() {
-    return super.getValue();
   }
 }
