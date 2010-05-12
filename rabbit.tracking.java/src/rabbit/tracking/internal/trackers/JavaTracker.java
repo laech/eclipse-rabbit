@@ -48,7 +48,7 @@ import java.util.Observer;
 import java.util.Set;
 
 /**
- * Tracks time spent on Java elements.
+ * Tracks time spent on Java elements such as classes, methods.
  */
 @SuppressWarnings("restriction")
 public class JavaTracker extends AbstractTracker<JavaEvent> 
@@ -194,6 +194,13 @@ public class JavaTracker extends AbstractTracker<JavaEvent>
       register(window);
     }
     TrackingPlugin.getDefault().getIdleDetector().addObserver(this);
+    
+    // If there is an Java editor already active, start tracking:
+    PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+      @Override public void run() {
+        tryStartSession();        
+      }
+    });
   }
   
   /**
@@ -319,7 +326,6 @@ public class JavaTracker extends AbstractTracker<JavaEvent>
     long duration = System.currentTimeMillis() - startTime;
     if (duration > 0) {
       addData(new JavaEvent(new DateTime(), duration, currentElement));
-      System.out.println(currentElement.getHandleIdentifier() + ": " + duration);
     }
     reset();
   }
@@ -349,7 +355,6 @@ public class JavaTracker extends AbstractTracker<JavaEvent>
    * @param activePart The currently active part of the workbench, may be null.
    */
   private void tryStartSession(IWorkbenchPart activePart) {
-    
     if (!(activePart instanceof JavaEditor)) {
       if (currentElement != null) {
         tryEndSession();
@@ -374,6 +379,5 @@ public class JavaTracker extends AbstractTracker<JavaEvent>
       currentElement = element;
       startTime = System.currentTimeMillis();
     }
-    System.out.println(startTime);
   }
 }
