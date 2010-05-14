@@ -33,6 +33,13 @@ public class DateLabelProvider extends LabelProvider {
 
   private final Image dateImage;
   private final DateTimeFormatter formatter;
+
+  /**
+   * Variable indicates the end of today in milliseconds, if
+   * {@link System#currentTimeMillis()} is greater than this value, then
+   * tomorrow is now.
+   */
+  private long todayEnd;
   private LocalDate today;
 
   /**
@@ -42,6 +49,7 @@ public class DateLabelProvider extends LabelProvider {
     formatter = DateTimeFormat.longDate();
     dateImage = SharedImages.CALENDAR.createImage();
     today = new LocalDate();
+    todayEnd = today.toInterval().getEndMillis();
   }
 
   @Override
@@ -54,6 +62,7 @@ public class DateLabelProvider extends LabelProvider {
 
   @Override
   public String getText(@Nullable Object element) {
+    checkTime();
     if (element instanceof LocalDate) {
       LocalDate date = (LocalDate) element;
       String text = formatter.print(date);
@@ -72,6 +81,16 @@ public class DateLabelProvider extends LabelProvider {
   public void dispose() {
     super.dispose();
     dateImage.dispose();
+  }
+  
+  /**TODO
+   * Checks the current time and update if needed.
+   */
+  private void checkTime() {
+    if (System.currentTimeMillis() > todayEnd) {
+      today = new LocalDate();
+      todayEnd = today.toInterval().getEndMillis();
+    }
   }
 
   /**TODO
