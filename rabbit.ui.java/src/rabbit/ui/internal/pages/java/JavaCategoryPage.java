@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package rabbit.ui.internal.pages;
+package rabbit.ui.internal.pages.java;
 
 import rabbit.ui.IPage;
 import rabbit.ui.Preference;

@@ -117,7 +117,6 @@ public class PartPageContentProvider extends AbstractValueContentProvider {
   }
   
   /**
-   * TODO test
    * Sets whether editors should be hidden.
    * @param hide True to hide editors, false to show editors.
    */
@@ -132,7 +131,7 @@ public class PartPageContentProvider extends AbstractValueContentProvider {
   }
   
   /**
-   * Sets whether views should be hiden.
+   * Sets whether views should be hidden.
    * @param hide True to hide views, false to show views.
    */
   public void setHideViews(boolean hide) {

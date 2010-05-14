@@ -24,7 +24,6 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.ide.IDE;
 
 /**
- *TODO complete and test
  * Internal enum of categories, shared by pages.
  */
 public enum Category implements ICategory {

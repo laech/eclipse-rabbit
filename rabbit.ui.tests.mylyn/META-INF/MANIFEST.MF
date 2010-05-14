@@ -17,5 +17,5 @@ Require-Bundle: rabbit.data,
  org.junit4,
  rabbit.ui.tests,
  rabbit.common
-Export-Package: rabbit.ui.tests.pages,
+Export-Package: rabbit.ui.tests.pages.mylyn,
  rabbit.ui.tests.util

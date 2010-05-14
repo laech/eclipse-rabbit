@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package rabbit.ui.internal.pages;
+package rabbit.ui.internal.pages.java;
 
 import rabbit.data.access.model.JavaDataDescriptor;
-import rabbit.ui.internal.SharedImages;
+import rabbit.ui.internal.pages.AbstractValueContentProvider;
 import rabbit.ui.internal.util.ICategory;
 import rabbit.ui.internal.viewers.TreeNodes;
 
@@ -26,12 +26,6 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 
-import static org.eclipse.jdt.ui.ISharedImages.IMG_OBJS_CLASS;
-import static org.eclipse.jdt.ui.ISharedImages.IMG_OBJS_CUNIT;
-import static org.eclipse.jdt.ui.ISharedImages.IMG_OBJS_PACKAGE;
-import static org.eclipse.jdt.ui.ISharedImages.IMG_OBJS_PACKFRAG_ROOT;
-import static org.eclipse.jdt.ui.ISharedImages.IMG_OBJS_PUBLIC;
-
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModel;
 import org.eclipse.jdt.core.IJavaProject;
@@ -40,14 +34,9 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeRoot;
-import org.eclipse.jdt.ui.ISharedImages;
-import org.eclipse.jdt.ui.JavaUI;
-import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.TreeNode;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.ide.IDE;
 import org.joda.time.LocalDate;
 
 import java.util.Collection;
@@ -74,42 +63,6 @@ public class JavaPageContentProvider extends AbstractValueContentProvider {
    * the tree mode, we still use those to calculate duration for parent elements.
    */
   
-  /**
-   * Categories supported by this content provider.
-   */
-  public static enum JavaCategory implements ICategory {
-    
-    DATE        ("Dates", SharedImages.CALENDAR),
-    PROJECT     ("Projects", PlatformUI.getWorkbench().getSharedImages()
-                    .getImageDescriptor(IDE.SharedImages.IMG_OBJ_PROJECT)),
-    PACKAGE_ROOT("Source Folders", images.getImageDescriptor(IMG_OBJS_PACKFRAG_ROOT)),
-    PACKAGE     ("Packages", images.getImageDescriptor(IMG_OBJS_PACKAGE)),
-    TYPE_ROOT   ("Files", images.getImageDescriptor(IMG_OBJS_CUNIT)),
-    TYPE        ("Types", images.getImageDescriptor(IMG_OBJS_CLASS)),
-    METHOD      ("Methods", images.getImageDescriptor(IMG_OBJS_PUBLIC)),
-    ;
-    
-    private String text;
-    private ImageDescriptor image;
-    
-    private JavaCategory(String text, ImageDescriptor image) {
-      this.text = text;
-      this.image = image;
-    }
-
-    @Override
-    public ImageDescriptor getImageDescriptor() {
-      return image;
-    }
-
-    @Override
-    public String getText() {
-      return text;
-    }
-  }
-  
-  private static final ISharedImages images = JavaUI.getSharedImages();
-
   /**
    * Constructs a new content provider for the given viewer.
    * @param treeViewer The viewer.
@@ -161,7 +114,7 @@ public class JavaPageContentProvider extends AbstractValueContentProvider {
     getRoot().setChildren(null);
 
     Collection<JavaDataDescriptor> data = null;
-    try { // TODO test this on all providers.
+    try {
       data = (Collection<JavaDataDescriptor>) newInput;
     } catch (Exception e) {
       return;

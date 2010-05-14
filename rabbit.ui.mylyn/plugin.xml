@@ -4,7 +4,7 @@
    <extension
          point="rabbit.ui.pages">
       <page
-            class="rabbit.ui.internal.pages.TaskPage"
+            class="rabbit.ui.internal.pages.mylyn.TaskPage"
             description="Time spent on resources while working on tasks"
             icon="icons/full/obj16/task.gif"
             id="rabbit.mylyn.ui.pages.task"

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package rabbit.ui.internal.pages;
+package rabbit.ui.internal.pages.java;
 
 import rabbit.data.access.IAccessor;
 import rabbit.data.access.model.JavaDataDescriptor;
@@ -25,7 +25,7 @@ import rabbit.ui.internal.actions.DropDownAction;
 import rabbit.ui.internal.actions.ExpandAllAction;
 import rabbit.ui.internal.actions.GroupByAction;
 import rabbit.ui.internal.actions.ShowHideFilterControlAction;
-import rabbit.ui.internal.pages.JavaPageContentProvider.JavaCategory;
+import rabbit.ui.internal.pages.AbstractAccessorPage;
 import rabbit.ui.internal.util.ICategory;
 import rabbit.ui.internal.viewers.CellPainter;
 import rabbit.ui.internal.viewers.DelegatingStyledCellLabelProvider;

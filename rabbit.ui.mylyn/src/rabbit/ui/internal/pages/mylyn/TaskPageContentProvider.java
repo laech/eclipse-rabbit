@@ -13,11 +13,11 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package rabbit.ui.internal.pages;
+package rabbit.ui.internal.pages.mylyn;
 
 import rabbit.data.access.model.TaskFileDataDescriptor;
 import rabbit.data.common.TaskId;
-import rabbit.ui.internal.SharedImages;
+import rabbit.ui.internal.pages.AbstractValueContentProvider;
 import rabbit.ui.internal.util.ICategory;
 import rabbit.ui.internal.util.UnrecognizedTask;
 import rabbit.ui.internal.viewers.TreeNodes;
@@ -34,17 +34,12 @@ import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.TreeNode;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.mylyn.tasks.core.IRepositoryModel;
 import org.eclipse.mylyn.tasks.core.ITask;
 import org.eclipse.mylyn.tasks.ui.TasksUi;
-import org.eclipse.mylyn.tasks.ui.TasksUiImages;
-import org.eclipse.ui.ISharedImages;
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.ide.IDE;
 import org.joda.time.LocalDate;
 
 import java.util.Collection;
@@ -53,41 +48,6 @@ import java.util.Collection;
  * Content provider accepts input as {@code Collection<TaskFileDataDescriptor}
  */
 public class TaskPageContentProvider extends AbstractValueContentProvider {
-  
-  /**
-   * TODO
-   */
-  public enum Category implements ICategory {
-
-    /***/
-    FILE("Files", PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(ISharedImages.IMG_OBJ_FILE)),
-    /***/
-    FOLDER("Folders", PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(ISharedImages.IMG_OBJ_FOLDER)),
-    /***/
-    PROJECT("Projects", PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(IDE.SharedImages.IMG_OBJ_PROJECT)),
-    /***/
-    TASK("Tasks", TasksUiImages.TASK),
-    /***/
-    DATE("Dates", SharedImages.CALENDAR);
-
-    private final String text;
-    private final ImageDescriptor image;
-    
-    private Category(String text, ImageDescriptor image) {
-      this.text = text;
-      this.image = image;
-    }
-    
-    @Override
-    public ImageDescriptor getImageDescriptor() {
-      return image;
-    }
-    
-    @Override
-    public String getText() {
-      return text;
-    }
-  }
 
   /**
    * Constructs a new content provider for the given viewer.
@@ -113,30 +73,30 @@ public class TaskPageContentProvider extends AbstractValueContentProvider {
 
   @Override
   protected ICategory[] getAllSupportedCategories() {
-    return Category.values();
+    return MylynCategory.values();
   }
   
   @Override
   protected ICategory getDefaultPaintCategory() {
-    return Category.TASK;
+    return MylynCategory.TASK;
   }
 
   @Override
   protected ICategory[] getDefaultSelectedCategories() {
-    return new ICategory[] { Category.TASK, 
-                             Category.PROJECT, 
-                             Category.FOLDER, 
-                             Category.FILE };
+    return new ICategory[] { MylynCategory.TASK, 
+                             MylynCategory.PROJECT, 
+                             MylynCategory.FOLDER, 
+                             MylynCategory.FILE };
   }
 
   @Override
   protected ImmutableMap<ICategory, Predicate<Object>> initializeCategorizers() {
     return ImmutableBiMap.<ICategory, Predicate<Object>> builder()
-        .put(Category.DATE,    Predicates.instanceOf(LocalDate.class))
-        .put(Category.TASK,    Predicates.instanceOf(ITask.class))
-        .put(Category.PROJECT, Predicates.instanceOf(IProject.class))
-        .put(Category.FOLDER,  Predicates.instanceOf(IFolder.class))
-        .put(Category.FILE,    Predicates.instanceOf(IFile.class))
+        .put(MylynCategory.DATE,    Predicates.instanceOf(LocalDate.class))
+        .put(MylynCategory.TASK,    Predicates.instanceOf(ITask.class))
+        .put(MylynCategory.PROJECT, Predicates.instanceOf(IProject.class))
+        .put(MylynCategory.FOLDER,  Predicates.instanceOf(IFolder.class))
+        .put(MylynCategory.FILE,    Predicates.instanceOf(IFile.class))
         .build();
   }
   
@@ -150,10 +110,10 @@ public class TaskPageContentProvider extends AbstractValueContentProvider {
       TreeNode node = getRoot();
       for (ICategory cat : selectedCategories) {
         
-        if (Category.DATE == cat) {
+        if (MylynCategory.DATE == cat) {
           node = TreeNodes.findOrAppend(node, des.getDate());
           
-        } else if (Category.TASK == cat) {
+        } else if (MylynCategory.TASK == cat) {
           TaskId id = des.getTaskId();
           ITask task = repo.getTask(id.getHandleIdentifier());
           if (task != null && !id.getCreationDate().equals(task.getCreationDate()))
@@ -176,14 +136,14 @@ public class TaskPageContentProvider extends AbstractValueContentProvider {
           }
           IFile file = workspace.getFile(path);
 
-          if (Category.PROJECT == cat)
+          if (MylynCategory.PROJECT == cat)
             node = TreeNodes.findOrAppend(node, file.getProject());
           
-          else if (Category.FOLDER == cat 
+          else if (MylynCategory.FOLDER == cat 
               && file.getFullPath().segmentCount() > 2) // Parent != Project
             node = TreeNodes.findOrAppend(node, file.getParent());
           
-          else if (Category.FILE == cat)
+          else if (MylynCategory.FILE == cat)
             node = TreeNodes.findOrAppend(node, file);
         }
       }

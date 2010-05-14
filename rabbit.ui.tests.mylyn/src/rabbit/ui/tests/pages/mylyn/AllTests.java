@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package rabbit.ui.tests.pages;
+package rabbit.ui.tests.pages.mylyn;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
@@ -24,6 +24,7 @@ import org.junit.runners.Suite;
   TaskPageDecoratingLabelProviderTest.class,
   TaskPageLabelProviderTest.class,
   TaskPageTest.class,
+  MylynCategoryTest.class,
 })
 public class AllTests {
 

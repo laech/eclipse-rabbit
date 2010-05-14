@@ -13,14 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package rabbit.ui.internal.pages;
+package rabbit.ui.internal.pages.java;
 
 import static rabbit.ui.internal.util.DurationFormat.format;
 
+import rabbit.ui.internal.pages.DateLabelProvider;
+
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import org.eclipse.jdt.core.IClassFile;
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.ui.ISharedImages;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
+import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jface.viewers.IColorProvider;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
@@ -40,8 +50,12 @@ public class JavaPageLabelProvider extends LabelProvider
   private final DateLabelProvider dateLabels;
   private final JavaElementLabelProvider javaLabels;
   private final JavaPageContentProvider contentProvider;
-  private final Color gray;
+  private final Color missingColor;
+  private final Image missingTypeImage;
+  private final Image missingMethodImage;
 
+  private final ISharedImages javaImages;
+  
   /**
    * Constructs a new label provider.
    * @param contentProvider The content provider.
@@ -54,36 +68,24 @@ public class JavaPageLabelProvider extends LabelProvider
         JavaElementLabelProvider.SHOW_RETURN_TYPE |
         JavaElementLabelProvider.SHOW_SMALL_ICONS);
     this.contentProvider = contentProvider;
-    gray = PlatformUI.getWorkbench().getDisplay().getSystemColor(SWT.COLOR_DARK_GRAY);
+    missingColor = PlatformUI.getWorkbench().getDisplay().getSystemColor(SWT.COLOR_DARK_GRAY);
+    missingTypeImage = SharedImages.TYPE_ALT.createImage();
+    missingMethodImage = SharedImages.METHOD_ALT.createImage();
+    javaImages = JavaUI.getSharedImages();
   }
   
   @Override
   public void dispose() {
     super.dispose();
+    missingMethodImage.dispose();
+    missingTypeImage.dispose();
     dateLabels.dispose();
     javaLabels.dispose();
   }
   
   @Override
-  public String getText(Object element) {
-    if (element instanceof TreeNode) {
-      element = ((TreeNode) element).getValue();
-    }
-    if (element instanceof LocalDate) {
-      return dateLabels.getText(element);
-    }
-    return javaLabels.getText(element);
-  }
-  
-  @Override
-  public Image getImage(Object element) {
-    if (element instanceof TreeNode) {
-      element = ((TreeNode) element).getValue();
-    }
-    if (element instanceof LocalDate) {
-      return dateLabels.getImage(element);
-    }
-    return javaLabels.getImage(element);
+  public Color getBackground(Object element) {
+    return null;
   }
 
   @Override
@@ -107,18 +109,62 @@ public class JavaPageLabelProvider extends LabelProvider
   }
 
   @Override
-  public Color getBackground(Object element) {
-    return null;
-  }
-
-  @Override
   public Color getForeground(Object element) {
     if (element instanceof TreeNode) {
       element = ((TreeNode) element).getValue();
     }
     if (element instanceof IJavaElement) {
-      return ((IJavaElement) element).exists() ? null : gray;
+      return ((IJavaElement) element).exists() ? null : missingColor;
     }
     return null;
+  }
+
+  @Override
+  public Image getImage(Object element) {
+    if (element instanceof TreeNode) {
+      element = ((TreeNode) element).getValue();
+    }
+    if (element instanceof IJavaElement) {
+      if (((IJavaElement) element).exists()) {
+        return javaLabels.getImage(element);
+      } else {
+        return getMissingImage((IJavaElement) element);
+      }
+    }
+    return dateLabels.getImage(element);
+  }
+  
+  @Override
+  public String getText(Object element) {
+    if (element instanceof TreeNode) {
+      element = ((TreeNode) element).getValue();
+    }
+    if (element instanceof LocalDate) {
+      return dateLabels.getText(element);
+    }
+    return javaLabels.getText(element);
+  }
+  
+  /**
+   * Gets the images for the elements that are no longer exist.
+   * @param element The element that is no longer exist.
+   * @return An image.
+   */
+  protected Image getMissingImage(IJavaElement element) {
+    if (element instanceof IPackageFragmentRoot) {
+      return javaImages.getImage(ISharedImages.IMG_OBJS_PACKFRAG_ROOT);
+    } else if (element instanceof IPackageFragment) {
+      return javaImages.getImage(ISharedImages.IMG_OBJS_PACKAGE);
+    } else if (element instanceof ICompilationUnit) {
+      return javaImages.getImage(ISharedImages.IMG_OBJS_CUNIT);
+    } else if (element instanceof IClassFile) {
+      return javaImages.getImage(ISharedImages.IMG_OBJS_CFILE);
+    } else if (element instanceof IType) {
+      return missingTypeImage;
+    } else if (element instanceof IMethod) {
+      return missingMethodImage;
+    } else {
+      return javaLabels.getImage(element);
+    }
   }
 }

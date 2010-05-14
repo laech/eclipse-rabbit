@@ -24,12 +24,25 @@ import org.eclipse.jface.viewers.StyledCellLabelProvider;
 import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.swt.widgets.Event;
 
-// TODO
+/**
+ * A cell label provider that updates the content of the cell using an
+ * {@link ILabelProvider}.
+ */
 public class DelegatingStyledCellLabelProvider extends StyledCellLabelProvider {
   
   private final ILabelProvider labelProvider;
   private final boolean shouldDispose;
-  
+
+  /**
+   * Constructs a new label provider.
+   * 
+   * @param labelProvider The actual label provider to get the elements' labels.
+   *          Can also be an {@link IFontProvider} and/or an
+   *          {@link IColorProvider}.
+   * @param shouldDispose If true, the given label provider will be disposed
+   *          when this object is disposed. If false, the given label provider
+   *          will not be disposed when this object is disposed.
+   */
   public DelegatingStyledCellLabelProvider(ILabelProvider labelProvider, boolean shouldDispose) {
     checkNotNull(labelProvider);
     this.labelProvider = labelProvider;
@@ -39,14 +52,15 @@ public class DelegatingStyledCellLabelProvider extends StyledCellLabelProvider {
   @Override
   public void update(ViewerCell cell) {
     super.update(cell);
-    cell.setText(labelProvider.getText(cell.getElement()));
-    cell.setImage(labelProvider.getImage(cell.getElement()));
+    Object element = cell.getElement();
+    cell.setText(labelProvider.getText(element));
+    cell.setImage(labelProvider.getImage(element));
     if (labelProvider instanceof IFontProvider) {
-      cell.setFont(((IFontProvider) labelProvider).getFont(cell.getText()));
+      cell.setFont(((IFontProvider) labelProvider).getFont(element));
     }
     if (labelProvider instanceof IColorProvider) {
-      cell.setForeground(((IColorProvider) labelProvider).getForeground(cell.getElement()));
-      cell.setBackground(((IColorProvider) labelProvider).getBackground(cell.getElement()));
+      cell.setForeground(((IColorProvider) labelProvider).getForeground(element));
+      cell.setBackground(((IColorProvider) labelProvider).getBackground(element));
     }
   }
   
@@ -61,8 +75,8 @@ public class DelegatingStyledCellLabelProvider extends StyledCellLabelProvider {
   @Override
   protected void measure(Event event, Object element) {
     super.measure(event, element);
-    if (event.height < 19) {
-      event.height = 19;
+    if (event.height < 20) {
+      event.height = 20;
     }
   }
 }

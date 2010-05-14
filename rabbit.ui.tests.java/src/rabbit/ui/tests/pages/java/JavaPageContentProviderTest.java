@@ -1,9 +1,9 @@
-package rabbit.ui.tests.pages;
+package rabbit.ui.tests.pages.java;
 
 import rabbit.data.access.model.JavaDataDescriptor;
-import rabbit.ui.internal.pages.JavaPage;
-import rabbit.ui.internal.pages.JavaPageContentProvider;
-import rabbit.ui.internal.pages.JavaPageContentProvider.JavaCategory;
+import rabbit.ui.internal.pages.java.JavaCategory;
+import rabbit.ui.internal.pages.java.JavaPage;
+import rabbit.ui.internal.pages.java.JavaPageContentProvider;
 import rabbit.ui.internal.util.ICategory;
 
 import com.google.common.collect.Sets;

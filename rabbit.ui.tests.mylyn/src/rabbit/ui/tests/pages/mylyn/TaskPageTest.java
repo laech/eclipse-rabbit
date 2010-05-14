@@ -13,12 +13,12 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package rabbit.ui.tests.pages;
+package rabbit.ui.tests.pages.mylyn;
 
 import rabbit.ui.internal.pages.AbstractFilteredTreePage;
-import rabbit.ui.internal.pages.TaskPage;
-import rabbit.ui.internal.pages.TaskPageContentProvider;
-import rabbit.ui.internal.pages.TaskPageContentProvider.Category;
+import rabbit.ui.internal.pages.mylyn.MylynCategory;
+import rabbit.ui.internal.pages.mylyn.TaskPage;
+import rabbit.ui.internal.pages.mylyn.TaskPageContentProvider;
 import rabbit.ui.internal.util.ICategory;
 import rabbit.ui.tests.pages.AbstractFilteredTreePageTest;
 
@@ -38,11 +38,11 @@ public class TaskPageTest extends AbstractFilteredTreePageTest {
     TaskPageContentProvider contents = (TaskPageContentProvider) page
         .getViewer().getContentProvider();
     
-    ICategory[] categories = new ICategory[] { Category.DATE, Category.FILE };
+    ICategory[] categories = new ICategory[] { MylynCategory.DATE, MylynCategory.FILE };
     contents.setSelectedCategories(categories);
     saveState(page);
     
-    contents.setSelectedCategories(new ICategory[] { Category.FOLDER });
+    contents.setSelectedCategories(new ICategory[] { MylynCategory.FOLDER });
     restoreState(page);
     assertArrayEquals(categories, contents.getSelectedCategories());
   }
@@ -52,11 +52,11 @@ public class TaskPageTest extends AbstractFilteredTreePageTest {
     TaskPageContentProvider contents = (TaskPageContentProvider) page
         .getViewer().getContentProvider();
     
-    Category paintCategory = Category.FILE;
+    MylynCategory paintCategory = MylynCategory.FILE;
     contents.setPaintCategory(paintCategory);
     saveState(page);
     
-    contents.setPaintCategory(Category.DATE);
+    contents.setPaintCategory(MylynCategory.DATE);
     restoreState(page);
     assertEquals(paintCategory, contents.getPaintCategory());
   }

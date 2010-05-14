@@ -1,11 +1,11 @@
-package rabbit.ui.tests.pages;
+package rabbit.ui.tests.pages.java;
 
 import static rabbit.ui.internal.util.DurationFormat.format;
 
 import rabbit.data.access.model.JavaDataDescriptor;
-import rabbit.ui.internal.pages.JavaPageContentProvider;
-import rabbit.ui.internal.pages.JavaPageLabelProvider;
-import rabbit.ui.internal.pages.JavaPageContentProvider.JavaCategory;
+import rabbit.ui.internal.pages.java.JavaCategory;
+import rabbit.ui.internal.pages.java.JavaPageContentProvider;
+import rabbit.ui.internal.pages.java.JavaPageLabelProvider;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;

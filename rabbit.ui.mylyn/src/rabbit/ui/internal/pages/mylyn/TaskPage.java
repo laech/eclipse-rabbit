@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package rabbit.ui.internal.pages;
+package rabbit.ui.internal.pages.mylyn;
 
 import rabbit.data.access.IAccessor;
 import rabbit.data.access.model.TaskFileDataDescriptor;
@@ -25,7 +25,7 @@ import rabbit.ui.internal.actions.DropDownAction;
 import rabbit.ui.internal.actions.ExpandAllAction;
 import rabbit.ui.internal.actions.GroupByAction;
 import rabbit.ui.internal.actions.ShowHideFilterControlAction;
-import rabbit.ui.internal.pages.TaskPageContentProvider.Category;
+import rabbit.ui.internal.pages.AbstractAccessorPage;
 import rabbit.ui.internal.util.ICategory;
 import rabbit.ui.internal.viewers.CellPainter;
 import rabbit.ui.internal.viewers.DelegatingStyledCellLabelProvider;
@@ -74,7 +74,7 @@ public class TaskPage extends AbstractAccessorPage {
     filterAction.run(); // Hides the filter control
     
     ICategory[] categories = new ICategory[] {
-      Category.FILE, Category.FOLDER, Category.PROJECT, Category.TASK, Category.DATE  
+      MylynCategory.FILE, MylynCategory.FOLDER, MylynCategory.PROJECT, MylynCategory.TASK, MylynCategory.DATE  
     };
     IAction[] colorByActions = new IAction[categories.length];
     for (int i = 0; i < colorByActions.length; i++) {
@@ -177,10 +177,10 @@ public class TaskPage extends AbstractAccessorPage {
 
     // Restores the selected categories of the content provider:
     String[] categoryStr = store.getString(PREF_SELECTED_CATEGORIES).split(",");
-    List<Category> cats = Lists.newArrayList();
+    List<MylynCategory> cats = Lists.newArrayList();
     for (String str : categoryStr) {
       try {
-        cats.add(Enum.valueOf(Category.class, str));
+        cats.add(Enum.valueOf(MylynCategory.class, str));
       } catch (IllegalArgumentException e) {
         // Ignore invalid elements.
       }
@@ -190,7 +190,7 @@ public class TaskPage extends AbstractAccessorPage {
     // Restores the paint category of the content provider:
     String paintStr = store.getString(PREF_PAINT_CATEGORY);
     try {
-      Category cat = Enum.valueOf(Category.class, paintStr);
+      MylynCategory cat = Enum.valueOf(MylynCategory.class, paintStr);
       contentProvider.setPaintCategory(cat);
     } catch (IllegalArgumentException e) {
       // Just let the content provider use its default paint category.
@@ -212,7 +212,7 @@ public class TaskPage extends AbstractAccessorPage {
 
   private IAction newGroupByDatesAction() {
     final ICategory[] cats = new ICategory[] { 
-      Category.DATE, Category.TASK, Category.PROJECT, Category.FOLDER, Category.FILE };
+      MylynCategory.DATE, MylynCategory.TASK, MylynCategory.PROJECT, MylynCategory.FOLDER, MylynCategory.FILE };
     
     IAction action = new Action(cats[0].getText(), cats[0].getImageDescriptor()) {
       @Override
@@ -225,7 +225,7 @@ public class TaskPage extends AbstractAccessorPage {
 
   private IAction newGroupByTasksAction() {
     final ICategory[] cats = new ICategory[] { 
-      Category.TASK, Category.PROJECT, Category.FOLDER, Category.FILE };
+      MylynCategory.TASK, MylynCategory.PROJECT, MylynCategory.FOLDER, MylynCategory.FILE };
     
     IAction action = new Action(cats[0].getText(), cats[0].getImageDescriptor()) {
       @Override

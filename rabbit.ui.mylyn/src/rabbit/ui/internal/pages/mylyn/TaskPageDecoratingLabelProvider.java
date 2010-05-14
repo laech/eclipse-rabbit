@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package rabbit.ui.internal.pages;
+package rabbit.ui.internal.pages.mylyn;
 
 import static rabbit.ui.internal.util.DurationFormat.format;
 

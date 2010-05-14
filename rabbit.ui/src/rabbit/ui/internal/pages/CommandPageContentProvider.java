@@ -34,7 +34,6 @@ import org.joda.time.LocalDate;
 import java.util.Collection;
 
 /**
- * TODO test 
  * Acceptable input for this content provider is 
  * {@code Collection<CommandDataDescriptor>}.
  * <p>

@@ -13,15 +13,15 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package rabbit.ui.tests.pages;
+package rabbit.ui.tests.pages.mylyn;
 
 import static rabbit.ui.internal.util.DurationFormat.format;
 
 import rabbit.data.common.TaskId;
-import rabbit.ui.internal.pages.TaskPageContentProvider;
-import rabbit.ui.internal.pages.TaskPageDecoratingLabelProvider;
-import rabbit.ui.internal.pages.TaskPageLabelProvider;
-import rabbit.ui.internal.pages.TaskPageContentProvider.Category;
+import rabbit.ui.internal.pages.mylyn.MylynCategory;
+import rabbit.ui.internal.pages.mylyn.TaskPageContentProvider;
+import rabbit.ui.internal.pages.mylyn.TaskPageDecoratingLabelProvider;
+import rabbit.ui.internal.pages.mylyn.TaskPageLabelProvider;
 import rabbit.ui.internal.util.UnrecognizedTask;
 
 import static org.junit.Assert.assertEquals;
@@ -118,7 +118,7 @@ public class TaskPageDecoratingLabelProviderTest {
     String dateStr = labelHelper.getText(dateNode);
 
     // Show task only:
-    contentProvider.setPaintCategory(Category.TASK);
+    contentProvider.setPaintCategory(MylynCategory.TASK);
     assertEquals(normalTaskStr, labelProvider.getColumnText(normalTaskNode, 0));
     assertEquals(missingTaskStr, labelProvider.getColumnText(missingTaskNode, 0));
     assertEquals(projectStr, labelProvider.getColumnText(projectNode, 0));
@@ -134,7 +134,7 @@ public class TaskPageDecoratingLabelProviderTest {
     assertNull(labelProvider.getColumnText(dateNode, 1));
 
     // Show project only:
-    contentProvider.setPaintCategory(Category.PROJECT);
+    contentProvider.setPaintCategory(MylynCategory.PROJECT);
     assertEquals(normalTaskStr, labelProvider.getColumnText(normalTaskNode, 0));
     assertEquals(missingTaskStr, labelProvider.getColumnText(missingTaskNode, 0));
     assertEquals(projectStr, labelProvider.getColumnText(projectNode, 0));
@@ -150,7 +150,7 @@ public class TaskPageDecoratingLabelProviderTest {
     assertNull(labelProvider.getColumnText(dateNode, 1));
 
     // Show folder only:
-    contentProvider.setPaintCategory(Category.FOLDER);
+    contentProvider.setPaintCategory(MylynCategory.FOLDER);
     assertEquals(normalTaskStr, labelProvider.getColumnText(normalTaskNode, 0));
     assertEquals(missingTaskStr, labelProvider.getColumnText(missingTaskNode, 0));
     assertEquals(projectStr, labelProvider.getColumnText(projectNode, 0));
@@ -166,7 +166,7 @@ public class TaskPageDecoratingLabelProviderTest {
     assertNull(labelProvider.getColumnText(dateNode, 1));
 
     // Show file:
-    contentProvider.setPaintCategory(Category.FILE);
+    contentProvider.setPaintCategory(MylynCategory.FILE);
     assertEquals(normalTaskStr, labelProvider.getColumnText(normalTaskNode, 0));
     assertEquals(missingTaskStr, labelProvider.getColumnText(missingTaskNode, 0));
     assertEquals(projectStr, labelProvider.getColumnText(projectNode, 0));
@@ -183,7 +183,7 @@ public class TaskPageDecoratingLabelProviderTest {
     
 
     // Show date:
-    contentProvider.setPaintCategory(Category.DATE);
+    contentProvider.setPaintCategory(MylynCategory.DATE);
     assertEquals(normalTaskStr, labelProvider.getColumnText(normalTaskNode, 0));
     assertEquals(missingTaskStr, labelProvider.getColumnText(missingTaskNode, 0));
     assertEquals(projectStr, labelProvider.getColumnText(projectNode, 0));

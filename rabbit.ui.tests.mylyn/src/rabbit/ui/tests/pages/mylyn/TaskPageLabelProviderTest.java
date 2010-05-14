@@ -13,10 +13,10 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package rabbit.ui.tests.pages;
+package rabbit.ui.tests.pages.mylyn;
 
 import rabbit.data.common.TaskId;
-import rabbit.ui.internal.pages.TaskPageLabelProvider;
+import rabbit.ui.internal.pages.mylyn.TaskPageLabelProvider;
 import rabbit.ui.internal.util.UnrecognizedTask;
 
 import static org.junit.Assert.assertEquals;

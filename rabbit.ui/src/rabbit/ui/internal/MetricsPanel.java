@@ -17,29 +17,22 @@ package rabbit.ui.internal;
 
 import rabbit.ui.internal.util.PageDescriptor;
 import rabbit.ui.internal.viewers.DelegatingStyledCellLabelProvider;
+import rabbit.ui.internal.viewers.PageDescriptorContentProvider;
+import rabbit.ui.internal.viewers.PageDescriptorLabelProvider;
 
-import org.eclipse.jface.resource.ImageRegistry;
-import org.eclipse.jface.viewers.CellLabelProvider;
-import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.DoubleClickEvent;
-import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.IDoubleClickListener;
-import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TreeViewer;
-import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.jface.window.ToolTip;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
-
-import java.util.Collection;
 
 /**
  * A panel containing a collection of available metrics.
@@ -63,13 +56,13 @@ public class MetricsPanel {
    * @param parent The parent composite.
    */
   public void createContents(Composite parent) {
-    final TreeViewer viewer = new TreeViewer(parent, SWT.SINGLE | SWT.V_SCROLL
-        | SWT.H_SCROLL);
-    viewer.setContentProvider(createContentProvider());
-    viewer.setComparator(new ViewerComparator());
-
+    int style = SWT.SINGLE | SWT.V_SCROLL | SWT.H_SCROLL;
+    final TreeViewer viewer = new TreeViewer(parent, style);
     ColumnViewerToolTipSupport.enableFor(viewer, ToolTip.NO_RECREATE);
-    viewer.setLabelProvider(createLabelProvider());
+    viewer.setContentProvider(new PageDescriptorContentProvider());
+    viewer.setComparator(new ViewerComparator());
+    viewer.setLabelProvider(new DelegatingStyledCellLabelProvider(
+        new PageDescriptorLabelProvider(), true));
 
     viewer.addDoubleClickListener(new IDoubleClickListener() {
       @Override
@@ -96,76 +89,5 @@ public class MetricsPanel {
 
     viewer.setInput(RabbitUI.getDefault().loadRootPages());
     viewer.expandAll();
-  }
-
-  private IContentProvider createContentProvider() {
-    return new AbstractTreeContentProvider() {
-
-      @Override
-      public Object[] getChildren(Object o) {
-        return ((PageDescriptor) o).getChildren().toArray();
-      }
-
-      @Override
-      public Object[] getElements(Object inputElement) {
-        return ((Collection<?>) inputElement).toArray();
-      }
-
-      @Override
-      public boolean hasChildren(Object o) {
-        return (o instanceof PageDescriptor)
-            && !((PageDescriptor) o).getChildren().isEmpty();
-      }
-    };
-  }
-
-  private CellLabelProvider createLabelProvider() {
-    ILabelProvider provider =  new ColumnLabelProvider() {
-
-      private final ImageRegistry images = new ImageRegistry();
-
-      @Override
-      public void dispose() {
-        super.dispose();
-        images.dispose();
-      }
-      
-      @Override
-      public void update(ViewerCell cell) {
-        super.update(cell);
-        cell.setText(getText(cell.getElement()));
-        cell.setImage(getImage(cell.getElement()));
-      }
-
-      @Override
-      public Image getImage(Object element) {
-        PageDescriptor page = (PageDescriptor) element;
-        if (page.getImage() == null) {
-          return null;
-        }
-        Image image = images.get(page.getName());
-        if (image == null) {
-          image = page.getImage().createImage();
-          images.put(page.getName(), image);
-        }
-        return image;
-      }
-
-      @Override
-      public String getText(Object element) {
-        return ((PageDescriptor) element).getName();
-      }
-
-      @Override
-      public String getToolTipText(Object element) {
-        return ((PageDescriptor) element).getDescription();
-      }
-
-      @Override
-      public boolean useNativeToolTip(Object object) {
-        return true;
-      }
-    };
-    return new DelegatingStyledCellLabelProvider(provider, true);
   }
 }
