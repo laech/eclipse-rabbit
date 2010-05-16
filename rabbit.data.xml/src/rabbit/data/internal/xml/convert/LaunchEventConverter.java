@@ -26,6 +26,11 @@ import org.eclipse.core.runtime.IPath;
  */
 public class LaunchEventConverter extends
     AbstractConverter<LaunchEvent, LaunchEventType> {
+  
+  /**
+   * Represents an unknown launch type.
+   */
+  private static final String UNKNOWN_TYPE = "Unknown";
 
   @Override
   protected LaunchEventType doConvert(LaunchEvent element) {
@@ -36,11 +41,9 @@ public class LaunchEventConverter extends
     type.setTotalDuration(element.getDuration());
     type.setName(element.getLaunchConfiguration().getName());
     try {
-      type.setLaunchTypeId(element.getLaunchConfiguration().getType()
-          .getIdentifier());
+      type.setLaunchTypeId(element.getLaunchConfiguration().getType().getIdentifier());
     } catch (CoreException ex) {
-      System.out.println(getClass() + ": " + ex.getMessage());
-      type.setLaunchTypeId(null);
+      type.setLaunchTypeId(UNKNOWN_TYPE);
     }
     type.setLaunchModeId(element.getLaunch().getLaunchMode());
     type.setCount(1);

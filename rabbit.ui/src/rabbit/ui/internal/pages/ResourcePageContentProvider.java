@@ -121,7 +121,6 @@ public class ResourcePageContentProvider extends AbstractValueContentProvider {
         path = new Path(pathStr.replace(":", ""));
       }
       IFile file = workspace.getFile(path);
-      System.out.println(des.getFilePath());
       IProject project = file.getProject();
       IContainer folder = file.getParent();
 

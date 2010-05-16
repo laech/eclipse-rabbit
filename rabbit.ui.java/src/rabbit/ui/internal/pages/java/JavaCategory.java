@@ -17,7 +17,7 @@ package rabbit.ui.internal.pages.java;
 
 import rabbit.ui.internal.util.ICategory;
 
-import static org.eclipse.jdt.ui.ISharedImages.IMG_OBJS_CLASS;
+import static org.eclipse.jdt.ui.ISharedImages.*;
 import static org.eclipse.jdt.ui.ISharedImages.IMG_OBJS_CUNIT;
 import static org.eclipse.jdt.ui.ISharedImages.IMG_OBJS_PACKAGE;
 import static org.eclipse.jdt.ui.ISharedImages.IMG_OBJS_PACKFRAG_ROOT;
@@ -56,6 +56,9 @@ public enum JavaCategory implements ICategory {
   
   /** Java method category */
   METHOD      ("Methods", getSharedImages().getImageDescriptor(IMG_OBJS_PUBLIC)),
+  
+  /** Java member category, includes {@link #TYPE} and {@link #METHOD} */
+  MEMBER      ("Java Members", getSharedImages().getImageDescriptor(IMG_FIELD_PUBLIC)),
   ;
   
   @Nonnull private final String text;

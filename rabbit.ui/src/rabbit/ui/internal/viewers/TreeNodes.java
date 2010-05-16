@@ -15,11 +15,14 @@
  */
 package rabbit.ui.internal.viewers;
 
+import com.google.common.base.Objects;
 import com.google.common.base.Predicate;
 
 import org.eclipse.jface.viewers.TreeNode;
 
 import java.util.Arrays;
+
+import javax.annotation.Nullable;
 
 /**
  * Class containing utility methods for working with {@link TreeNode}.
@@ -49,23 +52,22 @@ public class TreeNodes {
   }
 
   /**
-   * Finds a child node who has the given value (using
-   * {@link Object#equals(Object)}). This method only looks at the immediate
-   * children of the parent node.
+   * Finds a child node who has the given value. This method only looks at the
+   * immediate children of the parent node.
    * 
    * @param parent The parent node.
-   * @param childValue The value of the child node.
+   * @param childValue The value of the child node, may be null.
    * @return The child node who has the value, or null if no immediate child of
    *         the parent has that value.
    * @see #findChildRecursively(TreeNode, Object)
    */
-  public static TreeNode findChild(TreeNode parent, Object childValue) {
+  public static TreeNode findChild(TreeNode parent, @Nullable Object childValue) {
     TreeNode[] oldChildren = parent.getChildren();
     if (oldChildren == null)
       return null;
 
     for (TreeNode node : oldChildren) {
-      if (childValue.equals(node.getValue()))
+      if (Objects.equal(childValue, node.getValue()))
         return node;
     }
     return null;
@@ -80,7 +82,7 @@ public class TreeNodes {
    * @return The max value of the subtree.
    * @see #intValueOfSubtree(TreeNode)
    */
-  public static int findMaxInt(TreeNode root,Predicate<Object> predicate) {
+  public static int findMaxInt(TreeNode root, Predicate<Object> predicate) {
     if (predicate.apply(root.getValue()))
       return intValueOfSubtree(root);
 

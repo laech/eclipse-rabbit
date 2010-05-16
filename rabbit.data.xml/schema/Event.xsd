@@ -140,7 +140,7 @@
         </xs:sequence>
         <xs:attribute name="name" type="xs:string" use="required" />
         <xs:attribute name="launchModeId" type="xs:string" use="required" />
-        <xs:attribute name="launchTypeId" type="xs:string" use="optional" />
+        <xs:attribute name="launchTypeId" type="xs:string" use="required" />
         <xs:attribute name="totalDuration" type="durationType" use="required" />
       </xs:extension>
     </xs:complexContent>

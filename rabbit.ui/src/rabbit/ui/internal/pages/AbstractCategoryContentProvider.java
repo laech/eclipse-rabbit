@@ -165,7 +165,7 @@ public abstract class AbstractCategoryContentProvider extends
    * @param cat The category.
    */
   public void setPaintCategory(ICategory cat) {
-    if (paintCategory != cat && allCategories.contains(cat)) {
+    if (paintCategory != cat && isPaintCategory(cat)) {
       paintCategory = cat;
       getViewer().getTree().setRedraw(false);
       getViewer().refresh();
@@ -214,6 +214,20 @@ public abstract class AbstractCategoryContentProvider extends
         return false;
     }
     return true;
+  }
+
+  /**
+   * Method to check whether the given category is a paint category, the default
+   * implementation returns true if {@link #getAllSupportedCategories()}
+   * contains the given category, subclass may override.
+   * 
+   * @param category The category.
+   * @return True if the category is supported, false otherwise.
+   * @see #getPaintCategory()
+   * @see #setPaintCategory(ICategory)
+   */
+  protected boolean isPaintCategory(ICategory category) {
+    return allCategories.contains(category);
   }
 
   /**

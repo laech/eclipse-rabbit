@@ -71,6 +71,83 @@ public class JavaPage extends AbstractAccessorPage {
   }
 
   @Override
+  public IContributionItem[] createToolBarItems(IToolBarManager toolBar) {
+    ShowHideFilterControlAction filter = new ShowHideFilterControlAction(getFilteredTree());
+    filter.run();
+    
+    IAction collapse = new CollapseAllAction(getViewer());
+    
+    ICategory cat = JavaCategory.DATE;
+    IAction groupByDate = new Action(cat.getText(), cat.getImageDescriptor()) {
+      @Override public void run() {
+        contentProvider.setSelectedCategories(
+            JavaCategory.DATE,
+            JavaCategory.PROJECT,
+            JavaCategory.PACKAGE_ROOT,
+            JavaCategory.PACKAGE,
+            JavaCategory.TYPE_ROOT,
+            JavaCategory.TYPE,
+            JavaCategory.METHOD);
+      }
+    };
+    
+    cat = JavaCategory.PROJECT;
+    IAction groupByProj = new Action(cat.getText(), cat.getImageDescriptor()) {
+      @Override public void run() {
+        contentProvider.setSelectedCategories(
+            JavaCategory.PROJECT,
+            JavaCategory.PACKAGE_ROOT,
+            JavaCategory.PACKAGE,
+            JavaCategory.TYPE_ROOT,
+            JavaCategory.TYPE,
+            JavaCategory.METHOD);
+      }
+    };
+    
+    ICategory[] categories = new ICategory[] {
+        JavaCategory.METHOD,
+        JavaCategory.TYPE,
+        JavaCategory.TYPE_ROOT,
+        JavaCategory.PACKAGE,
+        JavaCategory.PACKAGE_ROOT,
+        JavaCategory.PROJECT,
+        JavaCategory.DATE
+    };
+    IAction[] hightlightActions = new IAction[categories.length];
+    for (int i = 0; i < hightlightActions.length; i++) {
+      final ICategory category = categories[i];
+      hightlightActions[i] = new Action(category.getText(), category.getImageDescriptor()) {
+        @Override public void run() {
+          contentProvider.setPaintCategory(category);
+        }
+      };
+    }
+    
+    IContributionItem[] items = new IContributionItem[] {
+        new ActionContributionItem(filter),
+        new ActionContributionItem(new DropDownAction(
+            collapse.getText(), collapse.getImageDescriptor(), 
+            collapse, 
+            collapse,
+            new ExpandAllAction(getViewer()))),
+        new ActionContributionItem(new GroupByAction(contentProvider, 
+            groupByProj, 
+            groupByProj, 
+            groupByDate)),
+        new ActionContributionItem(new DropDownAction(
+            "Highlight " + hightlightActions[0].getText(), SharedImages.BRUSH, 
+            hightlightActions[0], 
+            hightlightActions)),
+    };
+    
+    for (IContributionItem item : items) {
+      toolBar.add(item);
+    }
+    
+    return items;
+  }
+
+  @Override
   protected CellPainter createCellPainter() {
     return new CellPainter(contentProvider);
   }
@@ -136,93 +213,16 @@ public class JavaPage extends AbstractAccessorPage {
   }
 
   @Override
+  protected IAccessor<?> getAccessor() {
+    return accessor;
+  }
+
+  @Override
   protected void initializeViewer(TreeViewer viewer) {
     contentProvider = new JavaPageContentProvider(viewer);
     labelProvider = new JavaPageLabelProvider(contentProvider);
     viewer.setContentProvider(contentProvider);
     viewer.setLabelProvider(labelProvider);
-  }
-
-  @Override
-  public IContributionItem[] createToolBarItems(IToolBarManager toolBar) {
-    ShowHideFilterControlAction filter = new ShowHideFilterControlAction(getFilteredTree());
-    filter.run();
-    
-    IAction collapse = new CollapseAllAction(getViewer());
-    
-    ICategory cat = JavaCategory.DATE;
-    IAction groupByDate = new Action(cat.getText(), cat.getImageDescriptor()) {
-      @Override public void run() {
-        contentProvider.setSelectedCategories(
-            JavaCategory.DATE,
-            JavaCategory.PROJECT,
-            JavaCategory.PACKAGE_ROOT,
-            JavaCategory.PACKAGE,
-            JavaCategory.TYPE_ROOT,
-            JavaCategory.TYPE,
-            JavaCategory.METHOD);
-      }
-    };
-    
-    cat = JavaCategory.PROJECT;
-    IAction groupByProj = new Action(cat.getText(), cat.getImageDescriptor()) {
-      @Override public void run() {
-        contentProvider.setSelectedCategories(
-            JavaCategory.PROJECT,
-            JavaCategory.PACKAGE_ROOT,
-            JavaCategory.PACKAGE,
-            JavaCategory.TYPE_ROOT,
-            JavaCategory.TYPE,
-            JavaCategory.METHOD);
-      }
-    };
-    
-    ICategory[] categories = new ICategory[] {
-        JavaCategory.METHOD,
-        JavaCategory.TYPE,
-        JavaCategory.TYPE_ROOT,
-        JavaCategory.PACKAGE,
-        JavaCategory.PACKAGE_ROOT,
-        JavaCategory.PROJECT,
-        JavaCategory.DATE
-    };
-    IAction[] hightlightActions = new IAction[categories.length];
-    for (int i = 0; i < hightlightActions.length; i++) {
-      final ICategory category = categories[i];
-      hightlightActions[i] = new Action(category.getText(), category.getImageDescriptor()) {
-        @Override public void run() {
-          contentProvider.setPaintCategory(category);
-        }
-      };
-    }
-    
-    IContributionItem[] items = new IContributionItem[] {
-        new ActionContributionItem(filter),
-        new ActionContributionItem(new DropDownAction(
-            collapse.getText(), collapse.getImageDescriptor(), 
-            collapse, 
-            collapse,
-            new ExpandAllAction(getViewer()))),
-        new ActionContributionItem(new GroupByAction(contentProvider, 
-            groupByProj, 
-            groupByProj, 
-            groupByDate)),
-        new ActionContributionItem(new DropDownAction(
-            "Hightlight " + hightlightActions[0].getText(), SharedImages.BRUSH, 
-            hightlightActions[0], 
-            hightlightActions)),
-    };
-    
-    for (IContributionItem item : items) {
-      toolBar.add(item);
-    }
-    
-    return items;
-  }
-
-  @Override
-  protected IAccessor<?> getAccessor() {
-    return accessor;
   }
   
   @Override

@@ -29,6 +29,7 @@ import com.google.common.collect.Lists;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModel;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
@@ -46,21 +47,48 @@ import java.util.List;
  * Content provider accepts input as {@code Collection<JavaDataDescriptor>}
  */
 public class JavaPageContentProvider extends AbstractValueContentProvider {
-  
+
   /*
    * This content provider will only show the following elements inside a java
    * class type:
    * 
-   * Java types, and methods.
+   * Java types, and methods. Includes inner types such as inner
+   * classes/interfaces, and their methods.
    * 
    * Elements such as fields, imports, anonymous inner classes are hidden away.
    * For a number of reasons, for example: imports are not that useful to see;
-   * anonymous classes do not have unique identifiers; the concept of "time 
-   * spent working on a field" is very blur.
+   * anonymous classes do not have unique identifiers; the concept of "time
+   * spent working on a field" is not practical.
    * 
-   * Hiding those elements in the viewer will NOT affect the duration of parent 
-   * elements or any other elements, because the hidden elements are still in 
-   * the tree mode, we still use those to calculate duration for parent elements.
+   * Hiding those elements in the viewer will NOT affect the duration of parent
+   * elements or any other elements, because the hidden elements are still in
+   * the tree mode, we still use those to calculate duration for parent
+   * elements.
+   */
+
+  /*
+   * The following categories are used to structure the data:
+   * 
+   * JavaCategory.PROJECT, 
+   * JavaCategory.PACKAGE_ROOT, 
+   * JavaCategory.PACKAGE,
+   * JavaCategory.TYPE_ROOT,
+   * JavaCategory.MEMBER,
+   * 
+   * The following categories are used to paint the corresponding elements in
+   * the viewer:
+   * 
+   * JavaCategory.PROJECT, 
+   * JavaCategory.PACKAGE_ROOT, 
+   * JavaCategory.PACKAGE,
+   * JavaCategory.TYPE_ROOT,
+   * JavaCategory.TYPE,
+   * JavaCategory.METHOD,
+   * 
+   * The difference between the two is that when we structure the data, we use
+   * JavaCategory.MEMBER instead of JavaCategory.TYPE and JavaCategory.METHOD, 
+   * MEMBER includes both TYPE and METHOD so that the structure of the class is
+   * maintained when we build the tree. 
    */
   
   /**
@@ -70,22 +98,6 @@ public class JavaPageContentProvider extends AbstractValueContentProvider {
    */
   public JavaPageContentProvider(TreeViewer treeViewer) {
     super(treeViewer);
-  }
-  
-  private boolean isInnerType(IJavaElement type) {
-    return type.getElementType() == IJavaElement.TYPE
-        && type.getParent().getElementType() == IJavaElement.TYPE;
-  }
-  
-  private boolean isAnoynmousType(IJavaElement type) {
-    if (type.getElementType() == IJavaElement.TYPE) {
-      return type.getParent().getElementType() == IJavaElement.METHOD;
-    }
-    return false;
-  }
-  
-  private boolean isField(IJavaElement element) {
-    return element.getElementType() == IJavaElement.FIELD;
   }
   
   @Override
@@ -106,7 +118,12 @@ public class JavaPageContentProvider extends AbstractValueContentProvider {
     }
     return false;
   }
-
+  
+  @Override
+  public void setPaintCategory(ICategory cat) {
+    super.setPaintCategory(cat);
+  }
+  
   @SuppressWarnings("unchecked")
   @Override
   protected void doInputChanged(Viewer viewer, Object oldInput, Object newInput) {
@@ -140,12 +157,14 @@ public class JavaPageContentProvider extends AbstractValueContentProvider {
           }
 
           for (IJavaElement e : elements) {
-            if (isAnoynmousType(e) || isField(e) || isInnerType(e)) {
-              break; // We don't want to show any of these and their children.
+            
+            // We don't want to show any of the fields and anonymous classes:
+            if (isAnonymousType(e) || isField(e)) {
+              break;
             }
+            
             if (categorizer.apply(e)) {
               node = TreeNodes.findOrAppend(node, e);
-              break;
             }
           }
         }
@@ -153,17 +172,24 @@ public class JavaPageContentProvider extends AbstractValueContentProvider {
       TreeNodes.appendToParent(node, des.getValue());
     }
   }
-
+  
   @Override
   protected ICategory[] getAllSupportedCategories() {
-    return JavaCategory.values();
+    // Not that we exclude TYPE and METHOD, because MEMBER includes both:
+    return new ICategory[] {
+        JavaCategory.PROJECT,
+        JavaCategory.PACKAGE_ROOT,
+        JavaCategory.PACKAGE,
+        JavaCategory.TYPE_ROOT,
+        JavaCategory.MEMBER,
+    };
   }
-
+  
   @Override
   protected ICategory getDefaultPaintCategory() {
     return JavaCategory.METHOD;
   }
-
+  
   @Override
   protected ICategory[] getDefaultSelectedCategories() {
     return new ICategory[] { 
@@ -171,11 +197,10 @@ public class JavaPageContentProvider extends AbstractValueContentProvider {
         JavaCategory.PACKAGE_ROOT,
         JavaCategory.PACKAGE,
         JavaCategory.TYPE_ROOT,
-        JavaCategory.TYPE,
-        JavaCategory.METHOD,
+        JavaCategory.MEMBER,
     };
   }
-  
+
   @Override
   protected ImmutableMap<ICategory, Predicate<Object>> initializeCategorizers() {
     return ImmutableMap.<ICategory, Predicate<Object>> builder()
@@ -186,9 +211,15 @@ public class JavaPageContentProvider extends AbstractValueContentProvider {
         .put(JavaCategory.TYPE_ROOT,    instanceOf(ITypeRoot.class))
         .put(JavaCategory.TYPE,         instanceOf(IType.class))
         .put(JavaCategory.METHOD,       instanceOf(IMethod.class))
+        .put(JavaCategory.MEMBER,       instanceOf(IMember.class))
         .build();
   }
-  
+
+  @Override
+  protected boolean isPaintCategory(ICategory category) {
+    return (category instanceof JavaCategory);
+  }
+
   /**
    * Gets the hierarchy of from the element to the project.
    * 
@@ -207,4 +238,30 @@ public class JavaPageContentProvider extends AbstractValueContentProvider {
     }
     return elements;
   }
+
+  /**
+   * Checks whether the given Java element is an anonymous type.
+   * @param type The element to check.
+   * @return True if the element is anonymous, false otherwise.
+   */
+  private boolean isAnonymousType(IJavaElement type) {
+    if (type.getElementType() == IJavaElement.TYPE) {
+      return type.getParent().getElementType() == IJavaElement.METHOD;
+    }
+    return false;
+  }
+  
+  /**
+   * Checks whether the given Java element is a field.
+   * @param element The element to check.
+   * @return True if the element is a field, false otherwise.
+   */
+  private boolean isField(IJavaElement element) {
+    return element.getElementType() == IJavaElement.FIELD;
+  }
+//  
+//  private boolean isInnerType(IJavaElement type) {
+//    return type.getElementType() == IJavaElement.TYPE
+//        && type.getParent().getElementType() == IJavaElement.TYPE;
+//  }
 }
