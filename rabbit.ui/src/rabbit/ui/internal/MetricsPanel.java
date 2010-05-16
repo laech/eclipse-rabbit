@@ -16,7 +16,6 @@
 package rabbit.ui.internal;
 
 import rabbit.ui.internal.util.PageDescriptor;
-import rabbit.ui.internal.viewers.DelegatingStyledCellLabelProvider;
 import rabbit.ui.internal.viewers.PageDescriptorContentProvider;
 import rabbit.ui.internal.viewers.PageDescriptorLabelProvider;
 
@@ -33,6 +32,8 @@ import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.jface.window.ToolTip;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Listener;
 
 /**
  * A panel containing a collection of available metrics.
@@ -61,8 +62,14 @@ public class MetricsPanel {
     ColumnViewerToolTipSupport.enableFor(viewer, ToolTip.NO_RECREATE);
     viewer.setContentProvider(new PageDescriptorContentProvider());
     viewer.setComparator(new ViewerComparator());
-    viewer.setLabelProvider(new DelegatingStyledCellLabelProvider(
-        new PageDescriptorLabelProvider(), true));
+    viewer.setLabelProvider(new PageDescriptorLabelProvider());
+    
+    viewer.getTree().addListener(SWT.MeasureItem, new Listener() {
+      @Override
+      public void handleEvent(Event event) {
+        event.height = (event.height < 20) ? 20 : event.height;
+      }
+    });
 
     viewer.addDoubleClickListener(new IDoubleClickListener() {
       @Override

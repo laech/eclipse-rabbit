@@ -19,10 +19,8 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
 @RunWith(Suite.class)
-@Suite.SuiteClasses( { // 
-//
-
-CollectionContentProviderTest.class, //
+@Suite.SuiteClasses( { 
+    CollectionContentProviderTest.class, //
 
     // Command page related:
     CommandPageContentProviderTest.class, //

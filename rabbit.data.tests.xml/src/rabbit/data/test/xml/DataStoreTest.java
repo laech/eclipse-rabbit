@@ -37,6 +37,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * @see DataStore
+ */
+@SuppressWarnings("restriction")
 public class DataStoreTest {
 
   private DataStore store = DataStore.PART_STORE;
@@ -49,7 +53,7 @@ public class DataStoreTest {
   @Test
   public void testGetDataFiles() throws IOException {
 
-    LocalDate lowerBound = new LocalDate(1, 1, 1);
+    LocalDate lowerBound = new LocalDate(1, 1, 10);
     LocalDate upperBound = new LocalDate(3, 1, 1);
 
     LocalDate insideLowerBound = lowerBound.plusMonths(1);
@@ -88,7 +92,7 @@ public class DataStoreTest {
     List<File> result = new ArrayList<File>();
     IPath[] storagePaths = XmlPlugin.getDefault().getStoragePaths();
     MutableDateTime date = start.toDateTime(new LocalTime(0, 0, 0)).toMutableDateTime();
-    while (date.compareTo(end) <= 0) {
+    while (new LocalDate(date.toInstant().getMillis()).compareTo(end) <= 0) {
 
       for (IPath path : storagePaths) {
         File f = store.getDataFile(new LocalDate(date.getMillis()), path);

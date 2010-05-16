@@ -18,6 +18,9 @@ package rabbit.tracking.tests;
 import rabbit.tracking.ITracker;
 import rabbit.tracking.internal.TrackingPlugin;
 
+import com.google.common.collect.ImmutableCollection;
+import com.google.common.collect.ImmutableSet;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -30,12 +33,12 @@ import org.junit.Test;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Set;
 
 /**
  * Test for {@link RabbitCorePlugin}
  */
+@SuppressWarnings("restriction")
 public class TrackingPluginTest {
 
   private static TrackingPlugin plugin = TrackingPlugin.getDefault();
@@ -109,8 +112,11 @@ public class TrackingPluginTest {
 
     TrackingPlugin rc = new TrackingPlugin();
     rc.start(plugin.getBundle().getBundleContext());
-    getTrackers(rc).clear();
-    getTrackers(rc).add(tracker);
+    
+    Field field = TrackingPlugin.class.getDeclaredField("trackers");
+    field.setAccessible(true);
+    field.set(rc, ImmutableSet.<ITracker<?>> of(tracker));
+    
     rc.saveCurrentData();
     assertTrue(tracker.getData().isEmpty());
     rc.stop(rc.getBundle().getBundleContext());
@@ -119,13 +125,13 @@ public class TrackingPluginTest {
   @Test
   public void testSetEnableTrackers() throws Exception {
     Method m = TrackingPlugin.class.getDeclaredMethod("setEnableTrackers",
-        Collection.class, boolean.class);
+        ImmutableCollection.class, boolean.class);
     m.setAccessible(true);
 
-    Set<ITracker<?>> trackers = new HashSet<ITracker<?>>();
-    trackers.add(TestUtil.newTracker());
-    trackers.add(TestUtil.newTracker());
-    trackers.add(TestUtil.newTracker());
+    Set<ITracker<Object>> trackers = ImmutableSet.of(
+        TestUtil.newTracker(),
+        TestUtil.newTracker(),
+        TestUtil.newTracker());
 
     // Test all trackers are disable.
     m.invoke(plugin, trackers, false);

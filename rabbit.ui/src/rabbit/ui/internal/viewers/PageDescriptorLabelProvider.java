@@ -18,14 +18,17 @@ package rabbit.ui.internal.viewers;
 import rabbit.ui.internal.util.PageDescriptor;
 
 import org.eclipse.jface.resource.ImageRegistry;
-import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.StyledCellLabelProvider;
 import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Event;
 
 /**
  * Label provider for {@link PageDescriptor}.
  */
-public class PageDescriptorLabelProvider extends ColumnLabelProvider {
+public class PageDescriptorLabelProvider extends StyledCellLabelProvider 
+    implements ILabelProvider {
   
   private final ImageRegistry images;
   
@@ -39,11 +42,11 @@ public class PageDescriptorLabelProvider extends ColumnLabelProvider {
     super.dispose();
     images.dispose();
   }
-
+  
   @Override
   public Image getImage(Object element) {
     if (!(element instanceof PageDescriptor)) {
-      return super.getImage(element);
+      return null;
     }
     
     PageDescriptor page = (PageDescriptor) element;
@@ -57,11 +60,11 @@ public class PageDescriptorLabelProvider extends ColumnLabelProvider {
     }
     return image;
   }
-
+  
   @Override
   public String getText(Object element) {
     if (!(element instanceof PageDescriptor)) {
-      return super.getText(element);
+      return element.toString();
     }
     return ((PageDescriptor) element).getName();
   }
@@ -84,5 +87,11 @@ public class PageDescriptorLabelProvider extends ColumnLabelProvider {
   @Override
   public boolean useNativeToolTip(Object object) {
     return true;
+  }
+
+  @Override
+  protected void measure(Event event, Object element) {
+    super.measure(event, element);
+    event.height = (event.height < 20) ? 20 : event.height;
   }
 }

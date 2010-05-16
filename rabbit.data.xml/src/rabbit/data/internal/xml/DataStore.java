@@ -22,7 +22,6 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.joda.time.LocalDate;
-import org.joda.time.MutableDateTime;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -61,34 +60,30 @@ public enum DataStore implements IDataStore {
   public File getDataFile(LocalDate date) {
     return getDataFile(date, getStorageLocation());
   }
-
+  
   @Override
   public File getDataFile(LocalDate date, IPath location) {
     return location.append(id + "-" + date.toString("yyyy-MM"))
         .addFileExtension("xml").toFile();
   }
-  
-  private MutableDateTime dateHelper = new MutableDateTime(0);
 
   @Override
-  public List<File> getDataFiles(LocalDate startDate, LocalDate endDate) {
-    // Note that the dayOfMonth doesn't matter here as we are only comparing
-    // the year and monthOfYear.
-    dateHelper.setDate(startDate.getYear(), startDate.getMonthOfYear(), 1);
+  public List<File> getDataFiles(LocalDate start, LocalDate end) {
+    // Work out the number of months between the two dates, regardless of the
+    // dateOfMonth of each date:
+    int numMonths = (end.getYear() - start.getYear()) * 12;
+    numMonths += end.getMonthOfYear() - start.getMonthOfYear();
 
     List<File> result = new ArrayList<File>();
     IPath[] storagePaths = XmlPlugin.getDefault().getStoragePaths();
-    while (dateHelper.getYear() <= endDate.getYear()
-        && dateHelper.getMonthOfYear() <= endDate.getMonthOfYear()) {
+    for (; numMonths >= 0; numMonths--) {
       
       for (IPath path : storagePaths) {
-        File f = getDataFile(new LocalDate(dateHelper.getMillis()), path);
+        File f = getDataFile(end.minusMonths(numMonths), path);
         if (f.exists()) {
           result.add(f);
         }
       }
-      
-      dateHelper.addMonths(1);
     }
     return result;
   }
