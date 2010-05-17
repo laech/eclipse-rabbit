@@ -21,6 +21,9 @@ import rabbit.ui.internal.viewers.CellPainter;
 import rabbit.ui.internal.viewers.TreeViewerSorter;
 import rabbit.ui.internal.viewers.CellPainter.IValueProvider;
 
+import com.google.common.base.Joiner;
+import com.google.common.collect.Lists;
+
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.viewers.DoubleClickEvent;
@@ -46,7 +49,7 @@ import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.ui.dialogs.FilteredTree;
 import org.eclipse.ui.dialogs.PatternFilter;
 
-import java.util.Arrays;
+import java.util.List;
 
 /**
  * Abstract implementation of an {@link IPage} containing a {@link FilteredTree},
@@ -223,28 +226,31 @@ public abstract class AbstractFilteredTreePage implements IPage {
 
   /** Restores the state of the page. */
   protected void restoreState() {
-    IPreferenceStore store = RabbitUI.getDefault().getPreferenceStore();
-    for (TreeColumn column : getViewer().getTree().getColumns()) {
-      int width = store.getInt(getWidthPreferenceString(column));
-      if (width > 0) {
-        column.setWidth(width);
+    TreeColumn[] columns = getViewer().getTree().getColumns();
+    IPreferenceStore pref = RabbitUI.getDefault().getPreferenceStore();
+    String[] widthStr = pref.getString(getWidthPreferenceString()).split(",");
+    for (int i = 0; (i < widthStr.length) && (i < columns.length); i++) {
+      try {
+        int width = Integer.parseInt(widthStr[i]);
+        columns[i].setWidth(width);
+      } catch (NumberFormatException e) {
+        // Leave the column to its default width.
       }
     }
   }
 
   /** Saves the state of the page. */
   protected void saveState() {
-    IPreferenceStore store = RabbitUI.getDefault().getPreferenceStore();
-    for (TreeColumn column : getViewer().getTree().getColumns()) {
-      store.setValue(getWidthPreferenceString(column), column.getWidth());
+    TreeColumn[] columns = getViewer().getTree().getColumns();
+    List<Integer> widths = Lists.newArrayListWithCapacity(columns.length);
+    for (TreeColumn column : columns) {
+      widths.add(column.getWidth());
     }
+    IPreferenceStore pref = RabbitUI.getDefault().getPreferenceStore();
+    pref.setValue(getWidthPreferenceString(), Joiner.on(',').join(widths));
   }
 
-  private String getWidthPreferenceString(TreeColumn column) {
-    String string = column.getText();
-    if (string == null || string.equals("")) {
-      string = "" + Arrays.asList(getViewer().getTree().getColumns()).indexOf(column);
-    }
-    return getClass().getSimpleName() + '.' + string + "Width";
+  private String getWidthPreferenceString() {
+    return getClass().getSimpleName() + '.' + "ColumnWidths";
   }
 }
