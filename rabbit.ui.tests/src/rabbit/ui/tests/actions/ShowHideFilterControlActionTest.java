@@ -44,7 +44,7 @@ public class ShowHideFilterControlActionTest {
   public static void beforeClass() {
     shell = new Shell(PlatformUI.getWorkbench().getDisplay());
     shell.setLayout(new FillLayout());
-    tree = new FilteredTree(shell, SWT.NONE, new PatternFilter(), true);
+    tree = new FilteredTree(shell, SWT.NONE, new PatternFilter());
   }
 
   @AfterClass

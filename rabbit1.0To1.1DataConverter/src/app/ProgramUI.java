@@ -6,8 +6,7 @@ import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
+import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
@@ -15,8 +14,9 @@ import javax.swing.UnsupportedLookAndFeelException;
 /**
  * The user interface for this program.
  */
-@SuppressWarnings("serial")
 public class ProgramUI extends JFrame {
+
+  private static final long serialVersionUID = 1L;
 
   /**
    * Constructor.
@@ -26,21 +26,28 @@ public class ProgramUI extends JFrame {
     setLocationByPlatform(true);
     setTitle("Rabbit Data Converter");
 
-    final JLabel label = new JLabel();
-    label.setText("Converts Rabbit 1.0 data files to Rabbit 1.1 format");
-    JPanel panel = new JPanel();
-    add(panel, BorderLayout.NORTH);
-    panel.add(label);
+    final JTextArea textArea = new JTextArea();
+    textArea.setEditable(false);
+    textArea.append(
+        "This tool converts Rabbit 1.0 data files to the 1.1 format.\n\n" +
+    		"Please uninstall Rabbit 1.0 from Eclipse by removing\n" +
+    		"  - rabbit.core_1.0.0.xxx.jar and\n" +
+    		"  - rabbit.ui_1.0.0_xxx.jar\n" +
+    		"before running this tool.\n\n");
+    add(textArea, BorderLayout.CENTER);
 
     final JButton button = new JButton();
     button.setText("Start");
     button.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
-        button.setText("Working...");
+        button.setEnabled(false);
+        textArea.append("Running...\n");
         // OK to run this in UI thread, workload is small
         Program.run();
-        label.setText("All operations have finished.");
+        textArea.append("Done! All operations have finished.\n");
+        
+        button.setEnabled(true);
         button.setText("Exit");
         button.removeActionListener(this);
         button.addActionListener(new ActionListener() {
@@ -51,11 +58,9 @@ public class ProgramUI extends JFrame {
         });
       }
     });
-    panel = new JPanel();
-    add(panel, BorderLayout.CENTER);
-    panel.add(button);
+    add(button, BorderLayout.SOUTH);
 
-    pack();
+    setSize(500, 400);
   }
 
   public static void main(String[] args) {
