@@ -126,7 +126,7 @@ public class StoragePathPreferencePage extends PreferencePage implements
       Label description = new Label(pathGroup, SWT.WRAP);
       description
           .setText("Please use a dedicated folder to prevent Rabbit from messing "
-              + "up your files.\nIt's a rabbit after all.");
+              + "up your files.\nIt's a rabbit after all!");
       GridDataFactory.fillDefaults().span(3, 1).applyTo(description);
 
       new Label(pathGroup, SWT.NONE).setText("Location:");

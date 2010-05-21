@@ -26,32 +26,46 @@ import org.eclipse.jface.resource.ImageDescriptor;
  */
 public class SharedImages {
 
+  /** Refresh image. */
   public static final ImageDescriptor REFRESH = getObj16("refresh.gif");
 
+  /** Expand all image. */
   public static final ImageDescriptor EXPAND_ALL = getObj16("expandall.gif");
+  
+  /** Collapse all image. */
+  public static final ImageDescriptor COLLAPSE_ALL = getObj16("collapseall.gif");
 
+  /** Calendar image. */
   public static final ImageDescriptor CALENDAR = getObj16("calendar.png");
 
-  public static final ImageDescriptor TIME_HIERARCHY = getObj16("time-hierarchy.png");
-
+  /** Generic element image. */
   public static final ImageDescriptor ELEMENT = getObj16("element.gif");
 
+  /** Tree hierarchy image. */
   public static final ImageDescriptor HIERARCHY = getObj16("hierarchical.gif");
 
+  /** Color brush image. */
   public static final ImageDescriptor BRUSH = getObj16("line-color.gif");
 
+  /** Search image. */
   public static final ImageDescriptor SEARCH = getObj16("search.gif");
   
+  /** Launch type image. */
   public static final ImageDescriptor LAUNCH_TYPE = getObj16("launch-type.gif");
   
+  /** Launch mode image. */
   public static final ImageDescriptor LAUNCH_MODE = getObj16("launch-mode.gif");
   
+  /** Launch image. */
   public static final ImageDescriptor LAUNCH = getObj16("run.gif");
   
+  /** Default perspective image. */
   public static final ImageDescriptor PERSPECTIVE = getObj16("defaultpersp.gif");
   
+  /** Editor area image. */
   public static final ImageDescriptor EDITOR = getObj16("editor-highlight.gif");
   
+  /** View area image. */
   public static final ImageDescriptor VIEW = getObj16("view-highlight.gif");
   
   /**

@@ -15,12 +15,12 @@
  */
 package rabbit.ui.internal.actions;
 
+import rabbit.ui.internal.SharedImages;
+
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.TreeViewer;
-import org.eclipse.ui.ISharedImages;
-import org.eclipse.ui.PlatformUI;
 
 /**
  * Collapses all elements in a tree viewer.
@@ -35,8 +35,7 @@ public class CollapseAllAction extends Action {
    * @param viewer The viewer to perform action on.
    */
   public CollapseAllAction(TreeViewer viewer) {
-    super("Collapse All", PlatformUI.getWorkbench().getSharedImages()
-        .getImageDescriptor(ISharedImages.IMG_ELCL_COLLAPSEALL));
+    super("Collapse All", SharedImages.COLLAPSE_ALL);
     checkNotNull(viewer);
     this.viewer = viewer;
   }
