@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <description name="Rabbit">
+      Update site for Rabbit
+   </description>
+   <feature url="features/rabbit.feature_1.1.0.201005221946.jar" id="rabbit.feature" version="1.1.0.201005221946">
+      <category name="rabbit"/>
+   </feature>
+   <feature url="features/rabbit.feature.jdt_1.0.0.201005221946.jar" id="rabbit.feature.jdt" version="1.0.0.201005221946">
+      <category name="rabbit"/>
+   </feature>
+   <feature url="features/rabbit.feature.mylyn_1.0.0.201005221946.jar" id="rabbit.feature.mylyn" version="1.0.0.201005221946">
+      <category name="rabbit"/>
+   </feature>
+   <category-def name="rabbit" label="Rabbit"/>
+</site>
