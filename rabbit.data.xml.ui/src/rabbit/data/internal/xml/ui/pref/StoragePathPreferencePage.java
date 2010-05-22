@@ -17,9 +17,7 @@ package rabbit.data.internal.xml.ui.pref;
 
 import rabbit.data.internal.xml.XmlPlugin;
 
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.jface.dialogs.ErrorDialog;
+import org.apache.commons.io.FileUtils;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.preference.PreferencePage;
@@ -40,11 +38,8 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
+import java.io.FileFilter;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 
 public class StoragePathPreferencePage extends PreferencePage implements
     IWorkbenchPreferencePage {
@@ -69,41 +64,58 @@ public class StoragePathPreferencePage extends PreferencePage implements
   @Override
   public boolean performOk() {
 
-    if (!XmlPlugin.getDefault().getStoragePathRoot().toOSString().equals(
-        storageText.getText())) {
-
-      File newRoot = new File(storageText.getText().trim());
-
-      // Make sure the directory exists:
-      if (!newRoot.exists() && !newRoot.mkdirs()) {
-        setErrorMessage("Error creating the new directory.");
-        return false;
-      }
-
-      // Try to create folder to see if we have write permission:
-      File tmp = new File(newRoot, "." + System.nanoTime());
-      if (!tmp.mkdir()) {
-        setErrorMessage("Error writing to the selected directory.");
-        return false;
-      }
-      tmp.delete();
-
-      File oldRoot = XmlPlugin.getDefault().getStoragePathRoot().toFile();
-      if (oldRoot.list().length > 0
-          && MessageDialog.openQuestion(getShell(), "Copy Exsiting Data?",
-              "Would you like to copy the existing data "
-                  + "over to the new storage location for Rabbit?")) {
-        try {
-          copyDirectory(oldRoot, newRoot);
-        } catch (IOException e) {
-          ErrorDialog.openError(getShell(), "Error Copying Files", e
-              .getMessage(), new Status(IStatus.ERROR, XmlPlugin.PLUGIN_ID, e
-              .getMessage(), e));
-        }
-      }
-
-      XmlPlugin.getDefault().setStoragePathRoot(newRoot);
+    final File oldRoot = XmlPlugin.getDefault().getStoragePathRoot().toFile();
+    final File newRoot = new File(storageText.getText());
+    
+    // Nothing to do if directory is unchanged:
+    if (oldRoot.equals(newRoot)) {
+      return true;
     }
+    
+    // Create the new directory and check read/write permissions:
+    boolean dirCreated = newRoot.exists();
+    if (!dirCreated) {
+      dirCreated = newRoot.mkdirs();
+    }
+    if (!dirCreated || !newRoot.canRead() || !newRoot.canWrite()) {
+      MessageDialog.openError(getShell(), "Error", "Error occurred while " +
+      		"accessing the new directory, please select another directory.");
+      return false;
+    }
+
+    String title = "Copy Exsiting Data?";
+    String message = "Would you like to copy the existing data "
+        + "over to the new storage location for Rabbit?";
+    if (MessageDialog.openQuestion(getShell(), title, message)) {
+      try {
+        
+        /*
+         * This filter ensures that we don't enter an endless recursion (happens
+         * when the source directory or the destination directory is the parent
+         * or child of the other) while copying the data. Basically is to copy
+         * everything except copying the source and destination folders
+         * themselves.
+         */
+        FileFilter filter = new FileFilter() {
+          @Override public boolean accept(File pathname) {
+            if (pathname.equals(newRoot) || pathname.equals(oldRoot)) {
+              return false;
+            } else {
+              return true;
+            }
+          }
+        };
+        FileUtils.copyDirectory(oldRoot, newRoot, filter);
+        
+      } catch (IOException e) {
+        MessageDialog.openError(getShell(), "Error", 
+            "Error occurred while copying data, please select another directory.");
+        return false;
+      }
+    }
+
+    XmlPlugin.getDefault().setStoragePathRoot(newRoot);
+    setMessage("Storage location have been successfully changed.");
 
     return true;
   }
@@ -124,21 +136,17 @@ public class StoragePathPreferencePage extends PreferencePage implements
     pathGroup.setLayout(new GridLayout(3, false));
     {
       Label description = new Label(pathGroup, SWT.WRAP);
-      description
-          .setText("Please use a dedicated folder to prevent Rabbit from messing "
-              + "up your files.\nIt's a rabbit after all!");
+      description.setText("Please use a dedicated folder to prevent Rabbit" +
+      		" from messing up your files.\nIt's a rabbit after all!");
       GridDataFactory.fillDefaults().span(3, 1).applyTo(description);
 
       new Label(pathGroup, SWT.NONE).setText("Location:");
 
       storageText = new Text(pathGroup, SWT.BORDER);
-      storageText.setText(XmlPlugin.getDefault().getStoragePathRoot()
-          .toOSString());
-      storageText
-          .setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+      storageText.setText(XmlPlugin.getDefault().getStoragePathRoot().toOSString());
+      storageText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
       storageText.addListener(SWT.KeyUp, new Listener() {
-        @Override
-        public void handleEvent(Event event) {
+        @Override public void handleEvent(Event event) {
           setErrorMessage(null);
         }
       });
@@ -146,20 +154,14 @@ public class StoragePathPreferencePage extends PreferencePage implements
       Button browse = new Button(pathGroup, SWT.PUSH);
       browse.setText("    Browse...    ");
       browse.addListener(SWT.Selection, new Listener() {
-        @Override
-        public void handleEvent(Event event) {
+        @Override public void handleEvent(Event event) {
           DirectoryDialog dialog = new DirectoryDialog(getShell());
-          dialog
-              .setMessage("Select a folder for storing data collected by Rabbit.");
+          dialog.setMessage("Select a folder for storing data collected by Rabbit.");
 
           String path = dialog.open();
-          if (!path.toLowerCase().endsWith("rabbit")) {
-            if (!path.endsWith(File.separator)) {
-              path += File.separator;
-            }
-            path += "Rabbit";
+          if (path != null) {
+            storageText.setText(path);
           }
-          storageText.setText(path);
           setErrorMessage(null);
         }
       });
@@ -169,44 +171,7 @@ public class StoragePathPreferencePage extends PreferencePage implements
 
   @Override
   protected void performDefaults() {
-    storageText.setText(XmlPlugin.getDefault().getStoragePathRoot()
-        .toOSString());
+    storageText.setText(XmlPlugin.getDefault().getStoragePathRoot().toOSString());
     super.performDefaults();
-  }
-
-  /**
-   * Copies everything in the source directory to the destination.
-   * 
-   * @param source The source directory.
-   * @param destination The destination directory.
-   * @throws IOException If errors occur while moving a file/directory.
-   */
-  private void copyDirectory(File source, File destination) throws IOException {
-    if (source.isDirectory()) {
-      if (!destination.exists()) {
-        if (!destination.mkdirs()) {
-          throw new IOException(
-              "Cannot create folder, perhaps no write permission?");
-        }
-      }
-
-      String[] children = source.list();
-      for (int i = 0; i < children.length; i++) {
-        copyDirectory(new File(source, children[i]), new File(destination,
-            children[i]));
-      }
-    } else {
-
-      InputStream in = new FileInputStream(source);
-      OutputStream out = new FileOutputStream(destination);
-
-      byte[] buf = new byte[1024];
-      int len;
-      while ((len = in.read(buf)) > 0) {
-        out.write(buf, 0, len);
-      }
-      in.close();
-      out.close();
-    }
   }
 }

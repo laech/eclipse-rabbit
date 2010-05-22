@@ -34,6 +34,7 @@ import java.io.File;
 /**
  * Test for {@link RabbitPreferencePage}
  */
+@SuppressWarnings("restriction")
 @RunWith(SWTBotJunit4ClassRunner.class)
 public class StoragePathPreferencePageTest {
 
