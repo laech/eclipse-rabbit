@@ -86,8 +86,7 @@ public class JavaPage extends AbstractAccessorPage {
             JavaCategory.PACKAGE_ROOT,
             JavaCategory.PACKAGE,
             JavaCategory.TYPE_ROOT,
-            JavaCategory.TYPE,
-            JavaCategory.METHOD);
+            JavaCategory.MEMBER);
       }
     };
     
@@ -99,8 +98,7 @@ public class JavaPage extends AbstractAccessorPage {
             JavaCategory.PACKAGE_ROOT,
             JavaCategory.PACKAGE,
             JavaCategory.TYPE_ROOT,
-            JavaCategory.TYPE,
-            JavaCategory.METHOD);
+            JavaCategory.MEMBER);
       }
     };
     

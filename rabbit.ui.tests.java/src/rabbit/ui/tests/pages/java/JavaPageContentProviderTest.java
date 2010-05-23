@@ -31,6 +31,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.Set;
 
 /**
@@ -38,6 +39,17 @@ import java.util.Set;
  */
 @SuppressWarnings("restriction")
 public class JavaPageContentProviderTest {
+  
+  /**
+   * Note that JavaPageContentProvider accepts:
+   * JavaCategory.DATE
+   * JavaCategory.PROJECT
+   * JavaCategory.PACKAGE_ROOT
+   * JavaCategory.PACKAGE
+   * JavaCategory.TYPE_ROOT
+   * JavaCategory.MEMBER
+   * for structuring the data.
+   */
   
   private static Shell shell;
   private static JavaPage page;
@@ -80,7 +92,13 @@ public class JavaPageContentProviderTest {
     assertEquals(0, Sets.intersection(selected, unselected).size());
     
     Set<ICategory> all = Sets.union(selected, unselected);
-    Set<JavaCategory> set = Sets.newHashSet(JavaCategory.values());
+    Set<JavaCategory> set = EnumSet.of(
+        JavaCategory.DATE, 
+        JavaCategory.PROJECT,
+        JavaCategory.PACKAGE_ROOT,
+        JavaCategory.PACKAGE,
+        JavaCategory.TYPE_ROOT,
+        JavaCategory.MEMBER);
     assertEquals(set.size(), all.size());
     assertEquals(0, Sets.difference(all, set).size());
   }
@@ -149,9 +167,9 @@ public class JavaPageContentProviderTest {
     assertTrue(dates.contains(d1.getDate()));
     assertTrue(dates.contains(d2.getDate()));
 
-    provider.setSelectedCategories(JavaCategory.TYPE);
+    provider.setSelectedCategories(JavaCategory.PACKAGE);
     assertEquals(1, provider.getElements(null).length);
-    assertEquals(new TreeNode(type), provider.getElements(null)[0]);
+    assertEquals(new TreeNode(packageFragment), provider.getElements(null)[0]);
   }
 
   @Test
@@ -166,16 +184,6 @@ public class JavaPageContentProviderTest {
     page.getViewer().setInput(Arrays.asList(d1, d2));
     provider.setSelectedCategories(JavaCategory.DATE);
     provider.setPaintCategory(JavaCategory.DATE);
-    assertEquals(d1.getValue(), provider.getMaxValue());
-
-    // TYPE
-    // Set to JavaCategory.TYPE so that the two data descriptors representing the
-    // same file will be merged as a single tree node:
-    provider.setSelectedCategories(JavaCategory.TYPE);
-    provider.setPaintCategory(JavaCategory.TYPE);
-    assertEquals(d1.getValue() + d2.getValue(), provider.getMaxValue());
-    // Separate the data descriptors by dates:
-    provider.setSelectedCategories(JavaCategory.DATE, JavaCategory.TYPE);
     assertEquals(d1.getValue(), provider.getMaxValue());
 
     // TYPE_ROOT
@@ -202,10 +210,22 @@ public class JavaPageContentProviderTest {
     provider.setPaintCategory(JavaCategory.PACKAGE_ROOT);
     assertEquals(d1.getValue() + d2.getValue(), provider.getMaxValue());
     
-    // METHOD
-    provider.setSelectedCategories(JavaCategory.METHOD);
+    // MEMBER - TYPE
+    provider.setSelectedCategories(JavaCategory.MEMBER);
+    provider.setPaintCategory(JavaCategory.TYPE);
+    assertEquals(d1.getValue() + d2.getValue(), provider.getMaxValue());
+    provider.setSelectedCategories(JavaCategory.DATE, JavaCategory.MEMBER);
+    assertEquals(d1.getValue(), provider.getMaxValue());
+    
+    // MEMBER - METHOD
+    provider.setSelectedCategories(JavaCategory.MEMBER);
     provider.setPaintCategory(JavaCategory.METHOD);
     assertEquals(d1.getValue() + d2.getValue(), provider.getMaxValue());
+    provider.setSelectedCategories(JavaCategory.DATE, JavaCategory.MEMBER);
+    assertEquals(d1.getValue(), provider.getMaxValue());
+
+    // No need to test structuring the data by TYPE, or METHOD, as they are not
+    // supported by the content provider.
   }
 
   @Test
@@ -213,7 +233,7 @@ public class JavaPageContentProviderTest {
     assertNotNull(provider.getSelectedCategories());
     // Should never be empty, if set to empty or null, defaults should be used:
     assertFalse(provider.getSelectedCategories().length == 0);
-    ICategory[] categories = new ICategory[] { JavaCategory.DATE, JavaCategory.TYPE };
+    ICategory[] categories = new ICategory[] { JavaCategory.DATE, JavaCategory.MEMBER };
     provider.setSelectedCategories(categories);
     assertArrayEquals(categories, provider.getSelectedCategories());
 
@@ -225,11 +245,15 @@ public class JavaPageContentProviderTest {
   @Test
   public void testGetUnselectedCategories() {
     Set<JavaCategory> all = Sets.newHashSet(JavaCategory.values());
+    // These two are excluded
+    all.remove(JavaCategory.TYPE);
+    all.remove(JavaCategory.METHOD);
+    
     ICategory[] categories = all.toArray(new ICategory[all.size()]);
     provider.setSelectedCategories(categories);
     assertEquals(0, provider.getUnselectedCategories().length);
 
-    categories = new ICategory[] { JavaCategory.DATE, JavaCategory.TYPE };
+    categories = new ICategory[] { JavaCategory.DATE, JavaCategory.MEMBER };
     provider.setSelectedCategories(categories);
 
     Set<JavaCategory> unselect = Sets.difference(all, Sets.newHashSet(categories));
@@ -249,7 +273,7 @@ public class JavaPageContentProviderTest {
     page.getViewer().setInput(Arrays.asList(d1, d2));
 
     TreeNode root = provider.getRoot();
-    provider.setSelectedCategories(JavaCategory.TYPE);
+    provider.setSelectedCategories(JavaCategory.PACKAGE);
     TreeNode fileNode = root.getChildren()[0];
     assertEquals(d1.getValue() + d2.getValue(), provider.getValue(fileNode));
 
@@ -297,7 +321,7 @@ public class JavaPageContentProviderTest {
   @Test
   public void testSetSelectedCategories_emptyArray() {
     try {
-      ICategory[] cats = new ICategory[] { JavaCategory.TYPE, JavaCategory.PACKAGE };
+      ICategory[] cats = new ICategory[] { JavaCategory.TYPE_ROOT, JavaCategory.PACKAGE };
       provider.setSelectedCategories(cats);
       assertArrayEquals(cats, provider.getSelectedCategories());
 
@@ -308,8 +332,7 @@ public class JavaPageContentProviderTest {
           JavaCategory.PACKAGE_ROOT, 
           JavaCategory.PACKAGE, 
           JavaCategory.TYPE_ROOT,
-          JavaCategory.TYPE,
-          JavaCategory.METHOD
+          JavaCategory.MEMBER
       };
       assertArrayEquals(cats, provider.getSelectedCategories());
 
@@ -321,7 +344,7 @@ public class JavaPageContentProviderTest {
   @Test
   public void testSetSelectedCategories_emptyVararg() {
     try {
-      ICategory[] cats = new ICategory[] { JavaCategory.TYPE, JavaCategory.PACKAGE };
+      ICategory[] cats = new ICategory[] { JavaCategory.TYPE_ROOT, JavaCategory.PACKAGE };
       provider.setSelectedCategories(cats);
       assertArrayEquals(cats, provider.getSelectedCategories());
 
@@ -332,8 +355,7 @@ public class JavaPageContentProviderTest {
           JavaCategory.PACKAGE_ROOT, 
           JavaCategory.PACKAGE, 
           JavaCategory.TYPE_ROOT,
-          JavaCategory.TYPE,
-          JavaCategory.METHOD 
+          JavaCategory.MEMBER 
       };
       assertArrayEquals(cats, provider.getSelectedCategories());
 
@@ -356,16 +378,8 @@ public class JavaPageContentProviderTest {
     provider.setPaintCategory(JavaCategory.DATE);
     assertEquals(d1.getValue(), provider.getMaxValue());
 
-    provider.setSelectedCategories(JavaCategory.TYPE);
-    provider.setPaintCategory(JavaCategory.TYPE);
-    assertEquals(d1.getValue() + d2.getValue(), provider.getMaxValue());
-
     provider.setSelectedCategories(JavaCategory.TYPE_ROOT);
     provider.setPaintCategory(JavaCategory.TYPE_ROOT);
-    assertEquals(d1.getValue() + d2.getValue(), provider.getMaxValue());
-
-    provider.setSelectedCategories(JavaCategory.METHOD);
-    provider.setPaintCategory(JavaCategory.METHOD);
     assertEquals(d1.getValue() + d2.getValue(), provider.getMaxValue());
 
     provider.setSelectedCategories(JavaCategory.PACKAGE);
@@ -379,15 +393,23 @@ public class JavaPageContentProviderTest {
     provider.setSelectedCategories(JavaCategory.PACKAGE_ROOT);
     provider.setPaintCategory(JavaCategory.PACKAGE_ROOT);
     assertEquals(d1.getValue() + d2.getValue(), provider.getMaxValue());
+
+    provider.setSelectedCategories(JavaCategory.MEMBER);
+    provider.setPaintCategory(JavaCategory.TYPE);
+    assertEquals(d1.getValue() + d2.getValue(), provider.getMaxValue());
+
+    provider.setSelectedCategories(JavaCategory.MEMBER);
+    provider.setPaintCategory(JavaCategory.METHOD);
+    assertEquals(d1.getValue() + d2.getValue(), provider.getMaxValue());
   }
 
   @Test
   public void testSetSelectedCategories() {
-    ICategory[] cats = new ICategory[] { JavaCategory.TYPE, JavaCategory.PACKAGE };
+    ICategory[] cats = new ICategory[] { JavaCategory.PACKAGE_ROOT, JavaCategory.PACKAGE };
     provider.setSelectedCategories(cats);
     assertArrayEquals(cats, provider.getSelectedCategories());
 
-    cats = new ICategory[] { JavaCategory.TYPE, JavaCategory.DATE, JavaCategory.PROJECT };
+    cats = new ICategory[] { JavaCategory.TYPE_ROOT, JavaCategory.DATE, JavaCategory.PROJECT };
     provider.setSelectedCategories(cats);
     assertArrayEquals(cats, provider.getSelectedCategories());
   }
@@ -446,23 +468,14 @@ public class JavaPageContentProviderTest {
     assertFalse(provider.shouldFilter(typeRootNode));
     assertTrue(provider.shouldFilter(typeNode));
     assertTrue(provider.shouldFilter(methodNode));
-
-    provider.setSelectedCategories(JavaCategory.TYPE);
+    
+    provider.setSelectedCategories(JavaCategory.MEMBER);
     assertTrue(provider.shouldFilter(dateNode));
     assertTrue(provider.shouldFilter(projectNode));
     assertTrue(provider.shouldFilter(packageRootNode));
     assertTrue(provider.shouldFilter(packageNode));
     assertTrue(provider.shouldFilter(typeRootNode));
     assertFalse(provider.shouldFilter(typeNode));
-    assertTrue(provider.shouldFilter(methodNode));
-
-    provider.setSelectedCategories(JavaCategory.METHOD);
-    assertTrue(provider.shouldFilter(dateNode));
-    assertTrue(provider.shouldFilter(projectNode));
-    assertTrue(provider.shouldFilter(packageRootNode));
-    assertTrue(provider.shouldFilter(packageNode));
-    assertTrue(provider.shouldFilter(typeRootNode));
-    assertTrue(provider.shouldFilter(typeNode));
     assertFalse(provider.shouldFilter(methodNode));
   }
 

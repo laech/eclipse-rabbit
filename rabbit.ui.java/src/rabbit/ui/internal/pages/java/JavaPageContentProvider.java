@@ -69,6 +69,7 @@ public class JavaPageContentProvider extends AbstractValueContentProvider {
   /*
    * The following categories are used to structure the data:
    * 
+   * JavaCategory.DATE,
    * JavaCategory.PROJECT, 
    * JavaCategory.PACKAGE_ROOT, 
    * JavaCategory.PACKAGE,
@@ -78,6 +79,7 @@ public class JavaPageContentProvider extends AbstractValueContentProvider {
    * The following categories are used to paint the corresponding elements in
    * the viewer:
    * 
+   * JavaCategory.DATE
    * JavaCategory.PROJECT, 
    * JavaCategory.PACKAGE_ROOT, 
    * JavaCategory.PACKAGE,
@@ -176,13 +178,10 @@ public class JavaPageContentProvider extends AbstractValueContentProvider {
   @Override
   protected ICategory[] getAllSupportedCategories() {
     // Not that we exclude TYPE and METHOD, because MEMBER includes both:
-    return new ICategory[] {
-        JavaCategory.PROJECT,
-        JavaCategory.PACKAGE_ROOT,
-        JavaCategory.PACKAGE,
-        JavaCategory.TYPE_ROOT,
-        JavaCategory.MEMBER,
-    };
+    List<JavaCategory> categories = Lists.newArrayList(JavaCategory.values());
+    categories.remove(JavaCategory.TYPE);
+    categories.remove(JavaCategory.METHOD);
+    return categories.toArray(new ICategory[categories.size()]);
   }
   
   @Override
