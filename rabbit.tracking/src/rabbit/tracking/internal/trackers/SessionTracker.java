@@ -26,6 +26,7 @@ import org.joda.time.DateTime;
 
 import java.util.Observable;
 import java.util.Observer;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Tracks duration of Eclipse sessions.
@@ -34,22 +35,25 @@ public class SessionTracker extends AbstractTracker<SessionEvent> implements
     Observer {
 
   /**
-   * Variable to indicate the start time of a session, in milliseconds. If the 
+   * Variable to indicate the start time of a session, in nanoseconds. If the 
    * value is less than zero, that means a session has not been started. The
-   * value must be reset to a negative value after a session is finished.
+   * value must be reset to a negative value after a session is finished. Note
+   * that is important to use {@link System#nanoTime()} to set this time,
+   * because {@link System#nanoTime()} is independent of the system time, which
+   * won't cause errors when the user changes the system time.
    */
-  private long startTime = -1;
+  private long startNanoTime = -1;
   
   /**
-   * Updates {@link #startTime} to {@link System#currentTimeMillis()} only if
+   * Updates {@link #startNanoTime} to {@link System#nanoTime()} only if
    * there is a currently active workbench window.
    */
-  private final Runnable updateStartTime = new Runnable() {
+  private final Runnable updateStartNanoTime = new Runnable() {
     @Override public void run() {
       // Check for active shell instead of active workbench window to include
       // dialogs:
       if (PlatformUI.getWorkbench().getDisplay().getActiveShell() != null) {
-        startTime = System.currentTimeMillis();
+        startNanoTime = System.nanoTime();
       }
     }
   };
@@ -94,12 +98,12 @@ public class SessionTracker extends AbstractTracker<SessionEvent> implements
    * Tries to end a tracking session if there is a started session.
    */
   private void tryEndSession() {
-    if (startTime < 0) {
+    if (startNanoTime < 0) {
       return;
     }
-    long duration = System.currentTimeMillis() - startTime;
-    if (duration > 0) {
-      addData(new SessionEvent(new DateTime(), duration));
+    long durationMillis = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startNanoTime);
+    if (durationMillis > 0) {
+      addData(new SessionEvent(new DateTime(), durationMillis));
     }
     resetSession();
   }
@@ -108,13 +112,13 @@ public class SessionTracker extends AbstractTracker<SessionEvent> implements
    * Reset, to be called at end of each tracking session.
    */
   private void resetSession() {
-    startTime = -1;
+    startNanoTime = -1;
   }
   
   /**
    * Tries to start a tracking session if there is any active workbench window.
    */
   private void tryStartSession() {
-    PlatformUI.getWorkbench().getDisplay().syncExec(updateStartTime);
+    PlatformUI.getWorkbench().getDisplay().syncExec(updateStartNanoTime);
   }
 }

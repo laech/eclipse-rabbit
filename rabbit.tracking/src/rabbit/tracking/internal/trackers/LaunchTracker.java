@@ -38,6 +38,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Tracks launch events.
@@ -53,8 +54,8 @@ public class LaunchTracker extends AbstractTracker<LaunchEvent> implements
    */
   private Map<ILaunch, ILaunchConfiguration> launchConfigs;
 
-  /** A map of launches and their start time. */
-  private Map<ILaunch, Long> launchTimes;
+  /** A map of launches and their start time in nanoseconds. */
+  private Map<ILaunch, Long> launchNanoTimes;
 
   /** A map of launches and the files involved (for debug launches). */
   private Map<ILaunch, Set<IPath>> launchFiles;
@@ -63,7 +64,7 @@ public class LaunchTracker extends AbstractTracker<LaunchEvent> implements
    * Constructs a new tracker.
    */
   public LaunchTracker() {
-    launchTimes = new HashMap<ILaunch, Long>();
+    launchNanoTimes = new HashMap<ILaunch, Long>();
     launchFiles = new HashMap<ILaunch, Set<IPath>>();
     launchConfigs = new HashMap<ILaunch, ILaunchConfiguration>();
   }
@@ -119,23 +120,22 @@ public class LaunchTracker extends AbstractTracker<LaunchEvent> implements
 
     // Records the start time of this launch:
     if (event.getKind() == DebugEvent.CREATE) {
-      launchTimes.put(launch, System.currentTimeMillis());
+      launchNanoTimes.put(launch, System.nanoTime());
       launchConfigs.put(launch, launch.getLaunchConfiguration());
     }
 
     // Calculate duration of this launch:
     else if (event.getKind() == DebugEvent.TERMINATE) {
 
-      Long startTime = launchTimes.get(launch);
-      if (startTime == null) {
-        System.err.println("Launch start time not recorded.");
+      Long startNanoTime = launchNanoTimes.get(launch);
+      if (startNanoTime == null) {
+        // System.err.println("Launch start time not recorded.");
         return;
       }
 
-      DateTime endTime = new DateTime();
-      long duration = endTime.getMillis() - startTime;
-      if (duration <= 0) {
-        System.err.println("Launch duration is <= 0.");
+      long durationMillis = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startNanoTime);
+      if (durationMillis <= 0) {
+        // System.err.println("Launch duration is <= 0.");
         return;
       }
 
@@ -146,10 +146,10 @@ public class LaunchTracker extends AbstractTracker<LaunchEvent> implements
 
       ILaunchConfiguration config = launchConfigs.get(launch);
       if (config == null) {
-        System.err.println("handleProcessEvent: Launch configuration is null.");
+        // System.err.println("handleProcessEvent: Launch configuration is null.");
         return;
       }
-      addData(new LaunchEvent(endTime, duration, launch, config, filePaths));
+      addData(new LaunchEvent(new DateTime(), durationMillis, launch, config, filePaths));
     }
   }
 
@@ -169,7 +169,7 @@ public class LaunchTracker extends AbstractTracker<LaunchEvent> implements
     ILaunch launch = thread.getLaunch();
     ILaunchConfiguration config = launchConfigs.get(launch);
     if (config == null) {
-      System.err.println("handleThreadEvent: Launch configuration is null.");
+      // System.err.println("handleThreadEvent: Launch configuration is null.");
       return;
     }
 

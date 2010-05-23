@@ -45,9 +45,9 @@ public final class IdleDetector extends Observable implements Listener {
   private Display display;
   private boolean isRunning;
   private boolean isActive;
-  private long lastEventTime;
-  private long idleInterval;
-  private long runDelay;
+  private long lastEventNanoTime;
+  private long idleIntervalMillis;
+  private long runDelayMillis;
 
   private Runnable taskCode = new Runnable() {
     @Override
@@ -55,8 +55,9 @@ public final class IdleDetector extends Observable implements Listener {
       if (!isActive) {
         return;
       }
-      long duration = now() - lastEventTime;
-      if (duration > idleInterval) {
+      long durationMillis 
+          = TimeUnit.NANOSECONDS.toMillis(nowNanoTime() - lastEventNanoTime);
+      if (durationMillis > idleIntervalMillis) {
         isActive = false;
         setChanged();
         notifyObservers();
@@ -100,8 +101,8 @@ public final class IdleDetector extends Observable implements Listener {
     }
     isRunning = false;
     isActive = false;
-    runDelay = delay;
-    idleInterval = idleTime;
+    runDelayMillis = delay;
+    idleIntervalMillis = idleTime;
     display = disp;
   }
 
@@ -115,16 +116,16 @@ public final class IdleDetector extends Observable implements Listener {
   }
 
   public long getIdleInterval() {
-    return idleInterval;
+    return idleIntervalMillis;
   }
 
   public long getRunDelay() {
-    return runDelay;
+    return runDelayMillis;
   }
 
   @Override
   public void handleEvent(Event event) {
-    lastEventTime = now();
+    lastEventNanoTime = nowNanoTime();
     if (!isActive) {
       isActive = true;
       setChanged();
@@ -171,10 +172,10 @@ public final class IdleDetector extends Observable implements Listener {
     if (run) {
       isRunning = true;
       isActive = true;
-      lastEventTime = now();
+      lastEventNanoTime = nowNanoTime();
       display.syncExec(addFilters);
       timer = new ScheduledThreadPoolExecutor(1);
-      currentTask = timer.scheduleWithFixedDelay(taskCode, runDelay, runDelay,
+      currentTask = timer.scheduleWithFixedDelay(taskCode, runDelayMillis, runDelayMillis,
           TimeUnit.MILLISECONDS);
     } else {
       display.syncExec(removeFilters);
@@ -186,11 +187,11 @@ public final class IdleDetector extends Observable implements Listener {
   }
 
   /**
-   * Gets the current time in milliseconds.
+   * Gets the current time in nanoseconds, using {@link System#nanoTime()}.
    * 
-   * @return The current time in milliseconds.
+   * @return The current time in nanoseconds.
    */
-  private long now() {
-    return TimeUnit.NANOSECONDS.toMillis(System.nanoTime());
+  private long nowNanoTime() {
+    return System.nanoTime();
   }
 }

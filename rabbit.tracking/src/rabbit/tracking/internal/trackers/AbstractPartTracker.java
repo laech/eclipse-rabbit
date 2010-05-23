@@ -32,6 +32,7 @@ import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Defines common behaviors for part trackers.
@@ -41,7 +42,11 @@ import java.util.Set;
 public abstract class AbstractPartTracker<E> extends AbstractTracker<E>
     implements IPartListener, IWindowListener, Observer {
 
-  private long start;
+  /**
+   * Indicates the start time (nanoseconds) of a tracking session on a workbench
+   * part. Set using {@link System#nanoTime()}
+   */
+  private long startNanoTime;
   private Map<IWorkbenchPart, Boolean> partStates;
 
   private Runnable idleDetectorCode;
@@ -51,7 +56,7 @@ public abstract class AbstractPartTracker<E> extends AbstractTracker<E>
    */
   public AbstractPartTracker() {
     super();
-    start = Long.MAX_VALUE;
+    startNanoTime = Long.MAX_VALUE;
     partStates = new HashMap<IWorkbenchPart, Boolean>();
 
     idleDetectorCode = new Runnable() {
@@ -60,8 +65,7 @@ public abstract class AbstractPartTracker<E> extends AbstractTracker<E>
         if (!isEnabled()) {
           return;
         }
-        IWorkbenchWindow win = PlatformUI.getWorkbench()
-            .getActiveWorkbenchWindow();
+        IWorkbenchWindow win = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
         if (win == null) {
           return;
         }
@@ -188,13 +192,13 @@ public abstract class AbstractPartTracker<E> extends AbstractTracker<E>
       return;
     }
     partStates.put(part, Boolean.FALSE);
-    long duration = System.currentTimeMillis() - start;
-    if (duration <= 0) {
+    long durationMillis = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startNanoTime);
+    if (durationMillis <= 0) {
       return;
     }
 
-    start = Long.MAX_VALUE;
-    E event = tryCreateEvent(new DateTime(), duration, part);
+    startNanoTime = Long.MAX_VALUE;
+    E event = tryCreateEvent(new DateTime(), durationMillis, part);
     if (event != null) {
       addData(event);
     }
@@ -204,7 +208,7 @@ public abstract class AbstractPartTracker<E> extends AbstractTracker<E>
    * Starts a new session.
    */
   protected void startSession(IWorkbenchPart part) {
-    start = System.currentTimeMillis();
+    startNanoTime = System.nanoTime();
     partStates.put(part, Boolean.TRUE);
   }
 
@@ -212,7 +216,7 @@ public abstract class AbstractPartTracker<E> extends AbstractTracker<E>
    * Try to create an event. This method is called when a session ends.
    * 
    * @param endTime The end time of the event.
-   * @param duration The duration of the event.
+   * @param duration The duration of the event in milliseconds.
    * @param part The workbench part of the event.
    * @return An event, or null if one should not be created.
    */

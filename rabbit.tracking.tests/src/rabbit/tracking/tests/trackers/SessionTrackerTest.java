@@ -33,6 +33,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Observable;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @see SessionTracker
@@ -62,38 +63,38 @@ public class SessionTrackerTest extends AbstractTrackerTest<SessionEvent> {
   @Test
   public void testEnableThenDisable() throws Exception {
     DateTime before = new DateTime();
-    long duration = 20;
+    long durationMillis = 10;
     tracker.setEnabled(true);
-    Thread.sleep(duration);
+    TimeUnit.MILLISECONDS.sleep(durationMillis);
     tracker.setEnabled(false);
     DateTime after = new DateTime();
     
     Collection<SessionEvent> data = tracker.getData();
     assertEquals(1, data.size());
     SessionEvent event = data.iterator().next();
-    assertTrue(event.getDuration() >= duration);
-    assertTrue(event.getDuration() <= duration + 100);
-    assertTrue(before.isBefore(event.getTime()));
-    assertTrue(after.isAfter(event.getTime()));
+    assertTrue(event.getDuration() <= durationMillis);
+    assertTrue(event.getDuration() + 10 >= durationMillis);
+    assertTrue(before.compareTo(event.getTime()) <= 0);
+    assertTrue(after.compareTo(event.getTime()) >= 0);
   }
   
   @Test
   public void testIdleDetector_whenTrackerIsEnabled() throws Exception {
     DateTime before = new DateTime();
-    long duration = 20;
+    long durationMillis = 20;
     tracker.setEnabled(true);
     assertEquals(0, tracker.getData().size());
-    Thread.sleep(duration);
+    TimeUnit.MILLISECONDS.sleep(durationMillis);
     callIdleDetectorToNotify();
     DateTime after = new DateTime();
     
     Collection<SessionEvent> data = tracker.getData();
     assertEquals(1, data.size());
     SessionEvent event = data.iterator().next();
-    assertTrue(event.getDuration() >= duration);
-    assertTrue(event.getDuration() <= duration + 100);
-    assertTrue(before.isBefore(event.getTime()));
-    assertTrue(after.isAfter(event.getTime()));
+    assertTrue(event.getDuration() <= durationMillis);
+    assertTrue(event.getDuration() + 10 >= durationMillis);
+    assertTrue(before.compareTo(event.getTime()) <= 0);
+    assertTrue(after.compareTo(event.getTime()) >= 0);
   }
   
   @Test

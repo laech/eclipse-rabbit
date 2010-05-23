@@ -315,7 +315,8 @@ public abstract class AbstractPartTrackerTest<E extends ContinuousEvent>
     assertTrue(start <= event.getTime().getMillis());
     assertTrue(end >= event.getTime().getMillis());
     assertTrue((end - start) >= event.getDuration());
-    assertTrue(sleepDuration <= event.getDuration());
+    assertTrue(sleepDuration - 10 <= event.getDuration());
+    assertTrue(sleepDuration + 10 >= event.getDuration());
     assertTrue(hasSamePart(event, editor));
   }
 
@@ -329,13 +330,14 @@ public abstract class AbstractPartTrackerTest<E extends ContinuousEvent>
     uiSleep(sleepDuration);
     callIdleDetectorToNotify();
     long end = System.currentTimeMillis();
-
+    
     assertEquals(1, tracker.getData().size());
     E event = tracker.getData().iterator().next();
     assertTrue(start <= event.getTime().getMillis());
     assertTrue(end >= event.getTime().getMillis());
     assertTrue((end - start) >= event.getDuration());
-    assertTrue(sleepDuration <= event.getDuration());
+    assertTrue(sleepDuration - 10 <= event.getDuration());
+    assertTrue(sleepDuration + 10 >= event.getDuration());
     assertTrue(hasSamePart(event, editor));
   }
 

@@ -46,6 +46,7 @@ import org.joda.time.DateTime;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Tracks time spent on Java elements such as classes, methods.
@@ -61,9 +62,9 @@ public class JavaTracker extends AbstractTracker<JavaEvent>
   
   /**
    * Indicates the start time of the current tracking session, < 0 if no session
-   * is started.
+   * is started. Set using {@link System#nanoTime()}.
    */
-  private long startTime = -1;
+  private long startNanoTime = -1;
   
   /**
    * A set of all text widgets that are currently being listened to.
@@ -311,7 +312,7 @@ public class JavaTracker extends AbstractTracker<JavaEvent>
    * Reset to indicate no session is being tracked.
    */
   private void reset() {
-    startTime = -1;
+    startNanoTime = -1;
     currentElement = null;
   }
 
@@ -319,13 +320,13 @@ public class JavaTracker extends AbstractTracker<JavaEvent>
    * Ends a tracking session if there is one, and calls {@link #reset()} after.
    */
   private void tryEndSession() {
-    if (startTime < 0) {
+    if (startNanoTime < 0) {
       return;
     }
         
-    long duration = System.currentTimeMillis() - startTime;
-    if (duration > 0) {
-      addData(new JavaEvent(new DateTime(), duration, currentElement));
+    long durationMills = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startNanoTime);
+    if (durationMills > 0) {
+      addData(new JavaEvent(new DateTime(), durationMills, currentElement));
     }
     reset();
   }
@@ -377,7 +378,7 @@ public class JavaTracker extends AbstractTracker<JavaEvent>
     tryEndSession();
     if (element != null) {
       currentElement = element;
-      startTime = System.currentTimeMillis();
+      startNanoTime = System.nanoTime();
     }
   }
 }

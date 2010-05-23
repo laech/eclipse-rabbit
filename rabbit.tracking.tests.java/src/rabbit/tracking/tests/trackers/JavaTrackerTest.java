@@ -370,8 +370,8 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
     JavaEvent event = events.iterator().next();
     assertTrue(before.isBefore(event.getTime()));
     assertTrue(after.isAfter(event.getTime()));
-    assertTrue(timeout <= event.getDuration());
-    assertTrue(timeout + 100 >= event.getDuration());
+    assertTrue(timeout - 10 <= event.getDuration());
+    assertTrue(timeout + 10 >= event.getDuration());
     
     final IJavaElement[] elementArray = new IJavaElement[1];
     PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
@@ -453,8 +453,8 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
     JavaEvent event = events.iterator().next();
     assertTrue(before.compareTo(event.getTime()) <= 0);
     assertTrue(after.compareTo(event.getTime()) >= 0);
-    assertTrue(timeout <= event.getDuration());
-    assertTrue(timeout + 100 >= event.getDuration());
+    assertTrue(timeout - 10 <= event.getDuration());
+    assertTrue(timeout + 10 >= event.getDuration());
 
     // Test the data is placed under the root element:
     assertEquals(typeRoot, event.getElement());
@@ -577,8 +577,8 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
     JavaEvent event = events.iterator().next();
     assertTrue(before.compareTo(event.getTime()) <= 0);
     assertTrue(after.compareTo(event.getTime()) >= 0);
-    assertTrue(timeout <= event.getDuration());
-    assertTrue(timeout + 100 >= event.getDuration());
+    assertTrue(timeout - 10 <= event.getDuration());
+    assertTrue(timeout + 10 >= event.getDuration());
 
     // Now check that the element is the parent of the package declaration
     // instead of the deleted package declaration itself:
@@ -619,8 +619,8 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
     JavaEvent event = events.iterator().next();
     assertTrue(before.compareTo(event.getTime()) <= 0);
     assertTrue(after.compareTo(event.getTime()) >= 0);
-    assertTrue(timeout <= event.getDuration());
-    assertTrue(timeout + 100 >= event.getDuration());
+    assertTrue(timeout - 10 <= event.getDuration());
+    assertTrue(timeout + 10 >= event.getDuration());
 
     final IJavaElement[] elementArray = new IJavaElement[1];
     PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
@@ -746,8 +746,8 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
     JavaEvent event = events.iterator().next();
     assertTrue(before.compareTo(event.getTime()) <= 0);
     assertTrue(after.compareTo(event.getTime()) >= 0);
-    assertTrue(timeout <= event.getDuration());
-    assertTrue(timeout + 100 >= event.getDuration());
+    assertTrue(timeout - 10 <= event.getDuration());
+    assertTrue(timeout + 10 >= event.getDuration());
 
     final IJavaElement[] elementArray = new IJavaElement[1];
     PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
@@ -791,7 +791,7 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
     event = events.iterator().next();
     assertTrue(before.compareTo(event.getTime()) <= 0);
     assertTrue(after.compareTo(event.getTime()) >= 0);
-    assertTrue(timeout <= event.getDuration());
+    assertTrue(timeout - 10 <= event.getDuration());
     assertTrue(timeout + 100 >= event.getDuration());
 
     final IJavaElement[] elementArray2 = new IJavaElement[1];
