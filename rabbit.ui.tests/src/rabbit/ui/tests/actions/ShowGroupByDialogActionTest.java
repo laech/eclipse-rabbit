@@ -15,23 +15,7 @@
  */
 package rabbit.ui.tests.actions;
 
-import rabbit.ui.internal.SharedImages;
 import rabbit.ui.internal.actions.ShowGroupByDialogAction;
-import rabbit.ui.internal.util.ICategory;
-import rabbit.ui.internal.util.ICategoryProvider;
-
-import com.google.common.collect.Sets;
-import com.google.common.collect.Sets.SetView;
-
-import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Event;
-import org.eclipse.swtbot.eclipse.finder.SWTWorkbenchBot;
-import org.eclipse.ui.PlatformUI;
-import org.junit.Test;
-
-import java.util.Arrays;
-import java.util.Set;
 
 /**
  * TODO finish test
@@ -41,59 +25,59 @@ import java.util.Set;
 @SuppressWarnings("restriction")
 public class ShowGroupByDialogActionTest {
 
-  /** Enum for testing. */
-  private static enum Category implements ICategory {
+//  /** Enum for testing. */
+//  private static enum Category implements ICategory {
+//
+//    DATE("Dates", SharedImages.CALENDAR), // 
+//    BRUSH("Brushes", SharedImages.BRUSH);
+//
+//    private String text;
+//    private ImageDescriptor image;
+//
+//    private Category(String text, ImageDescriptor image) {
+//      this.text = text;
+//      this.image = image;
+//    }
+//
+//    @Override
+//    public ImageDescriptor getImageDescriptor() {
+//      return image;
+//    }
+//
+//    @Override
+//    public String getText() {
+//      return text;
+//    }
+//  }
 
-    DATE("Dates", SharedImages.CALENDAR), // 
-    BRUSH("Brushes", SharedImages.BRUSH);
-
-    private String text;
-    private ImageDescriptor image;
-
-    private Category(String text, ImageDescriptor image) {
-      this.text = text;
-      this.image = image;
-    }
-
-    @Override
-    public ImageDescriptor getImageDescriptor() {
-      return image;
-    }
-
-    @Override
-    public String getText() {
-      return text;
-    }
-  }
-
-  /** Provider for testing. */
-  private static class CategoryProvider implements ICategoryProvider {
-
-    private Set<? extends ICategory> all = Sets.newHashSet(Category.DATE,
-        Category.BRUSH);
-    private Set<ICategory> selected = Sets.newLinkedHashSet();
-
-    private CategoryProvider() {
-      selected.add(Category.DATE);
-    }
-
-    @Override
-    public ICategory[] getSelectedCategories() {
-      return selected.toArray(new ICategory[selected.size()]);
-    }
-
-    @Override
-    public ICategory[] getUnselectedCategories() {
-      SetView<? extends ICategory> set = Sets.difference(all, selected);
-      return set.toArray(new ICategory[set.size()]);
-    }
-
-    @Override
-    public void setSelectedCategories(ICategory... categories) {
-      selected.clear();
-      selected.addAll(Arrays.asList(categories));
-    }
-
-  }
+//  /** Provider for testing. */
+//  private static class CategoryProvider implements ICategoryProvider {
+//
+//    private Set<? extends ICategory> all = Sets.newHashSet(Category.DATE,
+//        Category.BRUSH);
+//    private Set<ICategory> selected = Sets.newLinkedHashSet();
+//
+//    private CategoryProvider() {
+//      selected.add(Category.DATE);
+//    }
+//
+//    @Override
+//    public ICategory[] getSelectedCategories() {
+//      return selected.toArray(new ICategory[selected.size()]);
+//    }
+//
+//    @Override
+//    public ICategory[] getUnselectedCategories() {
+//      SetView<? extends ICategory> set = Sets.difference(all, selected);
+//      return set.toArray(new ICategory[set.size()]);
+//    }
+//
+//    @Override
+//    public void setSelectedCategories(ICategory... categories) {
+//      selected.clear();
+//      selected.addAll(Arrays.asList(categories));
+//    }
+//
+//  }
 
 }

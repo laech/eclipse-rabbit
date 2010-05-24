@@ -45,6 +45,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Test for {@link IdleDetector}
  */
+@SuppressWarnings("restriction")
 @RunWith(SWTBotJunit4ClassRunner.class)
 public class IdleDetectorTest {
 

@@ -35,6 +35,7 @@ import java.util.Set;
 /**
  * Test for {@link XmlPlugin}
  */
+@SuppressWarnings("restriction")
 public class XmlPluginTest {
 
   private static XmlPlugin plugin = XmlPlugin.getDefault();

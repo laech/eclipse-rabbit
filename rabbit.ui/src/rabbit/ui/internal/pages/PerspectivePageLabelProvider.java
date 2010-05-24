@@ -32,8 +32,6 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.model.PerspectiveLabelProvider;
 import org.joda.time.LocalDate;
 
-import javax.annotation.OverridingMethodsMustInvokeSuper;
-
 /**
  * Label provider for a {@link PerspectivePage}.
  */
@@ -120,14 +118,5 @@ public class PerspectivePageLabelProvider extends LabelProvider implements
       return gray;
     else
       return null;
-  }
-
-  /**
-   * Updates the state of this label provider, this method should be called when
-   * the input of the viewer is changed.
-   */
-  @OverridingMethodsMustInvokeSuper
-  public void updateState() {
-    dateLabels.updateState();
   }
 }

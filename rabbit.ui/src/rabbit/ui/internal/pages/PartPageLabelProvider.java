@@ -31,8 +31,6 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.PlatformUI;
 import org.joda.time.LocalDate;
 
-import javax.annotation.OverridingMethodsMustInvokeSuper;
-
 /**
  * Label provider for a {@link PartPage}
  */
@@ -116,14 +114,5 @@ public class PartPageLabelProvider extends LabelProvider implements
       element = ((TreeNode) element).getValue();
     
     return (element instanceof UndefinedWorkbenchPartDescriptor) ? gray : null;
-  }
-
-  /**
-   * Updates the state of this label provider, this method should be called when
-   * the input of the viewer is changed.
-   */
-  @OverridingMethodsMustInvokeSuper
-  public void updateState() {
-    dateLabels.updateState();
   }
 }

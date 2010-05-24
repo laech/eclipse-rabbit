@@ -24,7 +24,6 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
 import javax.annotation.Nullable;
-import javax.annotation.OverridingMethodsMustInvokeSuper;
 
 /**
  * Label provider for {@link LocalDate} elements.
@@ -34,13 +33,13 @@ public class DateLabelProvider extends LabelProvider {
   private final Image dateImage;
   private final DateTimeFormatter formatter;
 
+  private LocalDate today;
   /**
    * Variable indicates the end of today in milliseconds, if
-   * {@link System#currentTimeMillis()} is greater than this value, then
-   * tomorrow is now.
+   * {@link System#currentTimeMillis()} is greater than this value, then this
+   * and the {@link #today} variable will need to be updated.
    */
   private long todayEnd;
-  private LocalDate today;
 
   /**
    * Constructor.
@@ -63,6 +62,7 @@ public class DateLabelProvider extends LabelProvider {
   @Override
   public String getText(@Nullable Object element) {
     checkTime();
+    
     if (element instanceof LocalDate) {
       LocalDate date = (LocalDate) element;
       String text = formatter.print(date);
@@ -91,14 +91,5 @@ public class DateLabelProvider extends LabelProvider {
       today = new LocalDate();
       todayEnd = today.toInterval().getEndMillis();
     }
-  }
-
-  /**TODO
-   * Updates the state of this label provider, this method should be called when
-   * the input of the viewer is changed.
-   */
-  @OverridingMethodsMustInvokeSuper
-  public void updateState() {
-    today = new LocalDate();
   }
 }

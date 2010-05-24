@@ -66,12 +66,13 @@ public abstract class AbstractFilteredTreePage implements IPage {
   public AbstractFilteredTreePage() {
   }
   
-  
+  @SuppressWarnings("deprecation")
   @Override
   public void createContents(Composite parent) {
     GridLayoutFactory.fillDefaults().margins(0, 0).applyTo(parent);
     
     int style = SWT.VIRTUAL | SWT.V_SCROLL | SWT.H_SCROLL;
+    // Need to use this constructor to work with Eclipse 3.4:
     filteredTree = new FilteredTree(parent, style, createFilter());
     filteredTree.setBackground(parent.getBackground());
     filteredTree.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));

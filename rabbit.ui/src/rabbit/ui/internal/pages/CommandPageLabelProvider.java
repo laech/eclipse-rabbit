@@ -28,8 +28,6 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.PlatformUI;
 
-import javax.annotation.OverridingMethodsMustInvokeSuper;
-
 /**
  * Label provider for a {@link CommandPage}.
  */
@@ -132,14 +130,5 @@ public class CommandPageLabelProvider extends LabelProvider implements
       return commandLabels.getText(element);
     else
       return dateLabels.getText(element);
-  }
-
-  /**
-   * Updates the state of this label provider, this method should be called when
-   * the input of the viewer is changed.
-   */
-  @OverridingMethodsMustInvokeSuper
-  public void updateState() {
-    dateLabels.updateState();
   }
 }

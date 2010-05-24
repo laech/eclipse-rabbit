@@ -34,6 +34,7 @@ import java.util.Iterator;
 /**
  * Test for {@link PartTracker}
  */
+@SuppressWarnings("restriction")
 @RunWith(SWTBotJunit4ClassRunner.class)
 public class PartTrackerTest extends AbstractPartTrackerTest<PartEvent> {
 

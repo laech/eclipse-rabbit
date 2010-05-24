@@ -31,6 +31,7 @@ import java.util.Collections;
 /**
  * Test for {@link CollectionContentProvider}
  */
+@SuppressWarnings("restriction")
 public class CollectionContentProviderTest {
 
   private CollectionContentProvider provider = new CollectionContentProvider();

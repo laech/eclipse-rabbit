@@ -25,6 +25,10 @@ import java.io.File;
 
 import javax.xml.bind.JAXBElement;
 
+/**
+ * @see JaxbUtil
+ */
+@SuppressWarnings("restriction")
 public class JaxbUtilTest {
 
   private ObjectFactory objectFactory = new ObjectFactory();

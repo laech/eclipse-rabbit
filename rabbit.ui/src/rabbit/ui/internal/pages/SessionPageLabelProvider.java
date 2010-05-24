@@ -23,8 +23,6 @@ import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
 
-import javax.annotation.OverridingMethodsMustInvokeSuper;
-
 /**
  * A label provider for a {@link SessionPage}
  */
@@ -82,14 +80,5 @@ public class SessionPageLabelProvider extends LabelProvider implements
     default:
       return null;
     }
-  }
-
-  /**
-   * Updates the state of this label provider, this method should be called when
-   * the input of the viewer is changed.
-   */
-  @OverridingMethodsMustInvokeSuper
-  public void updateState() {
-    dateLabels.updateState();
   }
 }

@@ -30,6 +30,7 @@ import org.junit.runner.RunWith;
 /**
  * Test for {@link RabbitPreferencePage}
  */
+@SuppressWarnings("restriction")
 @RunWith(SWTBotJunit4ClassRunner.class)
 public class RabbitPreferencePageTest {
 

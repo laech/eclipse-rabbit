@@ -90,8 +90,6 @@ public class SessionPage extends AbstractFilteredTreePage
 
   @Override
   public Job updateJob(final Preference p) {
-    labels.updateState();
-    
     return AbstractAccessorPage.newUpdateJob(getViewer(), p, accessor, Job.SHORT);
   }
   
