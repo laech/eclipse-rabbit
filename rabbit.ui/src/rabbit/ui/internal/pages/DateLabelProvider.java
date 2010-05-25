@@ -83,7 +83,7 @@ public class DateLabelProvider extends LabelProvider {
     dateImage.dispose();
   }
   
-  /**TODO
+  /**
    * Checks the current time and update if needed.
    */
   private void checkTime() {

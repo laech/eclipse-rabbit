@@ -46,6 +46,11 @@ import org.eclipse.swt.widgets.TreeColumn;
  */
 public class TreeViewerLabelSorter extends TreeViewerSorter {
 
+  /**
+   * Constructor.
+   * @param parent The parent viewer.
+   * @throws NullPointerException If argument is null.
+   */
   public TreeViewerLabelSorter(TreeViewer parent) {
     super(parent);
   }
@@ -57,26 +62,22 @@ public class TreeViewerLabelSorter extends TreeViewerSorter {
     String s1 = null;
     String s2 = null;
 
-    if (provider instanceof ILabelProvider) {
-      s1 = ((ILabelProvider) provider).getText(e1);
-      s2 = ((ILabelProvider) provider).getText(e2);
-
-    } else if (provider instanceof ITableLabelProvider) {
+    if (provider instanceof ITableLabelProvider) {
       int index = 0;
       if (getSelectedColumn() != null) {
         index = getViewer().getTree().indexOf(getSelectedColumn());
       }
       s1 = ((ITableLabelProvider) provider).getColumnText(e1, index);
       s2 = ((ITableLabelProvider) provider).getColumnText(e2, index);
+      
+    } else if (provider instanceof ILabelProvider) {
+      s1 = ((ILabelProvider) provider).getText(e1);
+      s2 = ((ILabelProvider) provider).getText(e2);
     }
-
-    int value = 0;
-    if (s1 != null && s2 != null) {
-      value = s1.compareToIgnoreCase(s2);
-    } else {
-      value = (s1 == null) ? -1 : 1;
-    }
-    return value;
+    
+    if (s1 == null) { s1 = ""; }
+    if (s2 == null) { s2 = ""; }
+    return s1.compareToIgnoreCase(s2);
   }
 
 }
