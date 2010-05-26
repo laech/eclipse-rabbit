@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package rabbit.data.xml.access;
+package rabbit.data.internal.xml.access;
 
 import rabbit.data.access.model.JavaDataDescriptor;
 import rabbit.data.internal.xml.AbstractDataNodeAccessor;

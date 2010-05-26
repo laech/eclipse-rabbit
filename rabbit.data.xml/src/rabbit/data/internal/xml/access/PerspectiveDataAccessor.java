@@ -13,63 +13,67 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package rabbit.data.xml.access;
+package rabbit.data.internal.xml.access;
 
-import rabbit.data.access.model.FileDataDescriptor;
+import rabbit.data.access.model.PerspectiveDataDescriptor;
 import rabbit.data.internal.xml.AbstractDataNodeAccessor;
 import rabbit.data.internal.xml.DataStore;
 import rabbit.data.internal.xml.IDataStore;
-import rabbit.data.internal.xml.merge.FileEventTypeMerger;
+import rabbit.data.internal.xml.merge.PerspectiveEventTypeMerger;
 import rabbit.data.internal.xml.schema.events.EventListType;
-import rabbit.data.internal.xml.schema.events.FileEventListType;
-import rabbit.data.internal.xml.schema.events.FileEventType;
+import rabbit.data.internal.xml.schema.events.PerspectiveEventListType;
+import rabbit.data.internal.xml.schema.events.PerspectiveEventType;
 
-import org.eclipse.core.runtime.Path;
 import org.joda.time.LocalDate;
 
 import java.util.Collection;
 
 /**
- * Accesses file event data.
+ * Accesses perspective event data.
  */
-public class FileDataAccessor
+public class PerspectiveDataAccessor
     extends
-    AbstractDataNodeAccessor<FileDataDescriptor, FileEventType, FileEventListType> {
+    AbstractDataNodeAccessor<PerspectiveDataDescriptor, PerspectiveEventType, PerspectiveEventListType> {
 
-  public FileDataAccessor() {
+  /**
+   * Constructor.
+   */
+  public PerspectiveDataAccessor() {
   }
 
   @Override
-  protected FileDataDescriptor createDataNode(LocalDate cal, FileEventType type) {
+  protected PerspectiveDataDescriptor createDataNode(LocalDate cal,
+      PerspectiveEventType type) {
+
     try {
-      return new FileDataDescriptor(cal, type.getDuration(), new Path(type.getFilePath()));
+      return new PerspectiveDataDescriptor(cal, type.getDuration(), type
+          .getPerspectiveId());
+
     } catch (NullPointerException e) {
       return null;
     } catch (IllegalArgumentException e) {
       return null;
-    } catch (Throwable t) {
-      return null; // This one is for the construction of the path.
     }
   }
 
   @Override
-  protected Collection<FileEventType> getElements(FileEventListType list) {
-    return list.getFileEvent();
+  protected Collection<PerspectiveEventType> getElements(
+      PerspectiveEventListType list) {
+    return list.getPerspectiveEvent();
   }
 
   @Override
-  protected Collection<FileEventListType> getCategories(EventListType doc) {
-    return doc.getFileEvents();
+  protected Collection<PerspectiveEventListType> getCategories(EventListType doc) {
+    return doc.getPerspectiveEvents();
   }
 
   @Override
   protected IDataStore getDataStore() {
-    return DataStore.FILE_STORE;
+    return DataStore.PERSPECTIVE_STORE;
   }
 
   @Override
-  protected FileEventTypeMerger createMerger() {
-    return new FileEventTypeMerger();
+  protected PerspectiveEventTypeMerger createMerger() {
+    return new PerspectiveEventTypeMerger();
   }
-
 }

@@ -13,18 +13,19 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package rabbit.data.xml.store;
+package rabbit.data.internal.xml.store;
 
 import rabbit.data.internal.xml.AbstractStorer;
 import rabbit.data.internal.xml.DataStore;
 import rabbit.data.internal.xml.IDataStore;
-import rabbit.data.internal.xml.convert.CommandEventConverter;
-import rabbit.data.internal.xml.merge.CommandEventTypeMerger;
+import rabbit.data.internal.xml.convert.IConverter;
+import rabbit.data.internal.xml.convert.PartEventConverter;
 import rabbit.data.internal.xml.merge.IMerger;
-import rabbit.data.internal.xml.schema.events.CommandEventListType;
-import rabbit.data.internal.xml.schema.events.CommandEventType;
+import rabbit.data.internal.xml.merge.PartEventTypeMerger;
 import rabbit.data.internal.xml.schema.events.EventListType;
-import rabbit.data.store.model.CommandEvent;
+import rabbit.data.internal.xml.schema.events.PartEventListType;
+import rabbit.data.internal.xml.schema.events.PartEventType;
+import rabbit.data.store.model.PartEvent;
 
 import java.util.List;
 
@@ -32,60 +33,60 @@ import javax.annotation.Nonnull;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 /**
- * Stores {@link CommandEvent}
+ * Stores {@link PartEvent}
  */
-public final class CommandEventStorer extends
-    AbstractStorer<CommandEvent, CommandEventType, CommandEventListType> {
+public final class PartEventStorer extends
+    AbstractStorer<PartEvent, PartEventType, PartEventListType> {
 
-  private static final CommandEventStorer INSTANCE = new CommandEventStorer();
+  private static final PartEventStorer INSTANCE = new PartEventStorer();
 
   /**
    * Gets the shared instance of this class.
    * 
    * @return The shared instance of this class.
    */
-  public static CommandEventStorer getInstance() {
+  public static PartEventStorer getInstance() {
     return INSTANCE;
   }
 
   @Nonnull
-  private final CommandEventConverter converter;
+  private final PartEventConverter converter;
   @Nonnull
-  private final CommandEventTypeMerger merger;
+  private final PartEventTypeMerger merger;
 
-  private CommandEventStorer() {
-    converter = new CommandEventConverter();
-    merger = new CommandEventTypeMerger();
+  private PartEventStorer() {
+    converter = new PartEventConverter();
+    merger = new PartEventTypeMerger();
   }
 
   @Override
-  protected List<CommandEventListType> getCategories(EventListType events) {
-    return events.getCommandEvents();
+  protected List<PartEventListType> getCategories(EventListType events) {
+    return events.getPartEvents();
   }
 
   @Override
-  protected CommandEventConverter getConverter() {
+  protected IConverter<PartEvent, PartEventType> getConverter() {
     return converter;
   }
 
   @Override
   protected IDataStore getDataStore() {
-    return DataStore.COMMAND_STORE;
+    return DataStore.PART_STORE;
   }
 
   @Override
-  protected List<CommandEventType> getElements(CommandEventListType list) {
-    return list.getCommandEvent();
+  protected List<PartEventType> getElements(PartEventListType list) {
+    return list.getPartEvent();
   }
 
   @Override
-  protected IMerger<CommandEventType> getMerger() {
+  protected IMerger<PartEventType> getMerger() {
     return merger;
   }
 
   @Override
-  protected CommandEventListType newCategory(XMLGregorianCalendar date) {
-    CommandEventListType type = objectFactory.createCommandEventListType();
+  protected PartEventListType newCategory(XMLGregorianCalendar date) {
+    PartEventListType type = objectFactory.createPartEventListType();
     type.setDate(date);
     return type;
   }

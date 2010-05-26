@@ -17,9 +17,9 @@ package rabbit.data.test.xml.store;
 
 import rabbit.data.internal.xml.schema.events.PerspectiveEventListType;
 import rabbit.data.internal.xml.schema.events.PerspectiveEventType;
+import rabbit.data.internal.xml.store.PerspectiveEventStorer;
 import rabbit.data.store.model.PerspectiveEvent;
 import rabbit.data.test.xml.AbstractStorerTest;
-import rabbit.data.xml.store.PerspectiveEventStorer;
 
 import com.google.common.base.Objects;
 

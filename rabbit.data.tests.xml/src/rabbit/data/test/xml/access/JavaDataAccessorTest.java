@@ -18,10 +18,10 @@ package rabbit.data.test.xml.access;
 import static rabbit.data.internal.xml.DatatypeUtil.toXmlDate;
 
 import rabbit.data.access.model.JavaDataDescriptor;
+import rabbit.data.internal.xml.access.JavaDataAccessor;
 import rabbit.data.internal.xml.schema.events.JavaEventListType;
 import rabbit.data.internal.xml.schema.events.JavaEventType;
 import rabbit.data.test.xml.AbstractDataNodeAccessorTest;
-import rabbit.data.xml.access.JavaDataAccessor;
 
 import static org.junit.Assert.assertEquals;
 

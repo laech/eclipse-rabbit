@@ -1,4 +1,4 @@
-package rabbit.data.xml.access;
+package rabbit.data.internal.xml.access;
 
 import rabbit.data.access.model.SessionDataDescriptor;
 import rabbit.data.internal.xml.AbstractDataNodeAccessor;

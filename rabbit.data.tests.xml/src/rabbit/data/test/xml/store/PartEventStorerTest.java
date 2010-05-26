@@ -17,9 +17,9 @@ package rabbit.data.test.xml.store;
 
 import rabbit.data.internal.xml.schema.events.PartEventListType;
 import rabbit.data.internal.xml.schema.events.PartEventType;
+import rabbit.data.internal.xml.store.PartEventStorer;
 import rabbit.data.store.model.PartEvent;
 import rabbit.data.test.xml.AbstractStorerTest;
-import rabbit.data.xml.store.PartEventStorer;
 
 import com.google.common.base.Objects;
 

@@ -13,48 +13,39 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package rabbit.data.xml.access;
+package rabbit.data.internal.xml.access;
 
-import rabbit.data.access.model.PartDataDescriptor;
+import rabbit.data.access.model.CommandDataDescriptor;
 import rabbit.data.internal.xml.AbstractDataNodeAccessor;
 import rabbit.data.internal.xml.DataStore;
 import rabbit.data.internal.xml.IDataStore;
-import rabbit.data.internal.xml.merge.PartEventTypeMerger;
+import rabbit.data.internal.xml.merge.CommandEventTypeMerger;
+import rabbit.data.internal.xml.schema.events.CommandEventListType;
+import rabbit.data.internal.xml.schema.events.CommandEventType;
 import rabbit.data.internal.xml.schema.events.EventListType;
-import rabbit.data.internal.xml.schema.events.PartEventListType;
-import rabbit.data.internal.xml.schema.events.PartEventType;
 
 import org.joda.time.LocalDate;
 
 import java.util.Collection;
 
 /**
- * Accesses workbench part event data.
+ * Accesses command event data.
  */
-public class PartDataAccessor
+public class CommandDataAccessor
     extends
-    AbstractDataNodeAccessor<PartDataDescriptor, PartEventType, PartEventListType> {
+    AbstractDataNodeAccessor<CommandDataDescriptor, CommandEventType, CommandEventListType> {
 
-  /**
-   * Constructor.
-   */
-  public PartDataAccessor() {
+  public CommandDataAccessor() {
   }
 
   @Override
-  protected Collection<PartEventListType> getCategories(EventListType doc) {
-    return doc.getPartEvents();
-  }
+  protected CommandDataDescriptor createDataNode(LocalDate cal,
+      CommandEventType type) {
 
-  @Override
-  protected IDataStore getDataStore() {
-    return DataStore.PART_STORE;
-  }
-
-  @Override
-  protected PartDataDescriptor createDataNode(LocalDate cal, PartEventType type) {
     try {
-      return new PartDataDescriptor(cal, type.getDuration(), type.getPartId());
+      return new CommandDataDescriptor(cal, type.getCount(), type
+          .getCommandId());
+
     } catch (NullPointerException e) {
       return null;
     } catch (IllegalArgumentException e) {
@@ -63,12 +54,23 @@ public class PartDataAccessor
   }
 
   @Override
-  protected Collection<PartEventType> getElements(PartEventListType list) {
-    return list.getPartEvent();
+  protected Collection<CommandEventListType> getCategories(EventListType doc) {
+    return doc.getCommandEvents();
   }
 
   @Override
-  protected PartEventTypeMerger createMerger() {
-    return new PartEventTypeMerger();
+  protected IDataStore getDataStore() {
+    return DataStore.COMMAND_STORE;
   }
+
+  @Override
+  protected Collection<CommandEventType> getElements(CommandEventListType list) {
+    return list.getCommandEvent();
+  }
+
+  @Override
+  protected CommandEventTypeMerger createMerger() {
+    return new CommandEventTypeMerger();
+  }
+
 }

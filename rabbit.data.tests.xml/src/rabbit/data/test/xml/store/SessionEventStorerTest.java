@@ -17,9 +17,9 @@ package rabbit.data.test.xml.store;
 
 import rabbit.data.internal.xml.schema.events.SessionEventListType;
 import rabbit.data.internal.xml.schema.events.SessionEventType;
+import rabbit.data.internal.xml.store.SessionEventStorer;
 import rabbit.data.store.model.SessionEvent;
 import rabbit.data.test.xml.AbstractStorerTest;
-import rabbit.data.xml.store.SessionEventStorer;
 
 import org.joda.time.DateTime;
 import org.junit.Ignore;

@@ -17,9 +17,9 @@ package rabbit.data.test.xml.store;
 
 import rabbit.data.internal.xml.schema.events.JavaEventListType;
 import rabbit.data.internal.xml.schema.events.JavaEventType;
+import rabbit.data.internal.xml.store.JavaEventStorer;
 import rabbit.data.store.model.JavaEvent;
 import rabbit.data.test.xml.AbstractStorerTest;
-import rabbit.data.xml.store.JavaEventStorer;
 
 import org.eclipse.jdt.core.JavaCore;
 import org.joda.time.DateTime;

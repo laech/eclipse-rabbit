@@ -16,10 +16,10 @@
 package rabbit.data.test.xml.access;
 
 import rabbit.data.access.model.PerspectiveDataDescriptor;
+import rabbit.data.internal.xml.access.PerspectiveDataAccessor;
 import rabbit.data.internal.xml.schema.events.PerspectiveEventListType;
 import rabbit.data.internal.xml.schema.events.PerspectiveEventType;
 import rabbit.data.test.xml.AbstractDataNodeAccessorTest;
-import rabbit.data.xml.access.PerspectiveDataAccessor;
 
 import static org.junit.Assert.assertEquals;
 

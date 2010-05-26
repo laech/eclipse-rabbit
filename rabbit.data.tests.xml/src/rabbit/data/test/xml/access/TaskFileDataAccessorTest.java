@@ -17,11 +17,11 @@ package rabbit.data.test.xml.access;
 
 import rabbit.data.access.model.TaskFileDataDescriptor;
 import rabbit.data.internal.xml.DatatypeUtil;
+import rabbit.data.internal.xml.access.TaskFileDataAccessor;
 import rabbit.data.internal.xml.schema.events.TaskFileEventListType;
 import rabbit.data.internal.xml.schema.events.TaskFileEventType;
 import rabbit.data.internal.xml.schema.events.TaskIdType;
 import rabbit.data.test.xml.AbstractDataNodeAccessorTest;
-import rabbit.data.xml.access.TaskFileDataAccessor;
 
 import static org.junit.Assert.assertEquals;
 

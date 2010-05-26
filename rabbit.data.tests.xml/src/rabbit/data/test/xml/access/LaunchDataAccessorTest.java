@@ -17,10 +17,10 @@ package rabbit.data.test.xml.access;
 
 import rabbit.data.access.model.LaunchDataDescriptor;
 import rabbit.data.internal.xml.DatatypeUtil;
+import rabbit.data.internal.xml.access.LaunchDataAccessor;
 import rabbit.data.internal.xml.schema.events.LaunchEventListType;
 import rabbit.data.internal.xml.schema.events.LaunchEventType;
 import rabbit.data.test.xml.AbstractDataNodeAccessorTest;
-import rabbit.data.xml.access.LaunchDataAccessor;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;

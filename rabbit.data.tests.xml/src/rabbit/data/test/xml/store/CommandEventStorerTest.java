@@ -17,9 +17,9 @@ package rabbit.data.test.xml.store;
 
 import rabbit.data.internal.xml.schema.events.CommandEventListType;
 import rabbit.data.internal.xml.schema.events.CommandEventType;
+import rabbit.data.internal.xml.store.CommandEventStorer;
 import rabbit.data.store.model.CommandEvent;
 import rabbit.data.test.xml.AbstractStorerTest;
-import rabbit.data.xml.store.CommandEventStorer;
 
 import com.google.common.base.Objects;
 

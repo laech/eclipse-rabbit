@@ -16,10 +16,10 @@
 package rabbit.data.test.xml.access;
 
 import rabbit.data.access.model.CommandDataDescriptor;
+import rabbit.data.internal.xml.access.CommandDataAccessor;
 import rabbit.data.internal.xml.schema.events.CommandEventListType;
 import rabbit.data.internal.xml.schema.events.CommandEventType;
 import rabbit.data.test.xml.AbstractDataNodeAccessorTest;
-import rabbit.data.xml.access.CommandDataAccessor;
 
 import static org.junit.Assert.assertEquals;
 

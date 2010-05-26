@@ -13,64 +13,63 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package rabbit.data.xml.access;
+package rabbit.data.internal.xml.access;
 
-import rabbit.data.access.model.CommandDataDescriptor;
+import rabbit.data.access.model.FileDataDescriptor;
 import rabbit.data.internal.xml.AbstractDataNodeAccessor;
 import rabbit.data.internal.xml.DataStore;
 import rabbit.data.internal.xml.IDataStore;
-import rabbit.data.internal.xml.merge.CommandEventTypeMerger;
-import rabbit.data.internal.xml.schema.events.CommandEventListType;
-import rabbit.data.internal.xml.schema.events.CommandEventType;
+import rabbit.data.internal.xml.merge.FileEventTypeMerger;
 import rabbit.data.internal.xml.schema.events.EventListType;
+import rabbit.data.internal.xml.schema.events.FileEventListType;
+import rabbit.data.internal.xml.schema.events.FileEventType;
 
+import org.eclipse.core.runtime.Path;
 import org.joda.time.LocalDate;
 
 import java.util.Collection;
 
 /**
- * Accesses command event data.
+ * Accesses file event data.
  */
-public class CommandDataAccessor
+public class FileDataAccessor
     extends
-    AbstractDataNodeAccessor<CommandDataDescriptor, CommandEventType, CommandEventListType> {
+    AbstractDataNodeAccessor<FileDataDescriptor, FileEventType, FileEventListType> {
 
-  public CommandDataAccessor() {
+  public FileDataAccessor() {
   }
 
   @Override
-  protected CommandDataDescriptor createDataNode(LocalDate cal,
-      CommandEventType type) {
-
+  protected FileDataDescriptor createDataNode(LocalDate cal, FileEventType type) {
     try {
-      return new CommandDataDescriptor(cal, type.getCount(), type
-          .getCommandId());
-
+      return new FileDataDescriptor(cal, type.getDuration(), new Path(type.getFilePath()));
     } catch (NullPointerException e) {
       return null;
     } catch (IllegalArgumentException e) {
       return null;
+    } catch (Throwable t) {
+      return null; // This one is for the construction of the path.
     }
   }
 
   @Override
-  protected Collection<CommandEventListType> getCategories(EventListType doc) {
-    return doc.getCommandEvents();
+  protected Collection<FileEventType> getElements(FileEventListType list) {
+    return list.getFileEvent();
+  }
+
+  @Override
+  protected Collection<FileEventListType> getCategories(EventListType doc) {
+    return doc.getFileEvents();
   }
 
   @Override
   protected IDataStore getDataStore() {
-    return DataStore.COMMAND_STORE;
+    return DataStore.FILE_STORE;
   }
 
   @Override
-  protected Collection<CommandEventType> getElements(CommandEventListType list) {
-    return list.getCommandEvent();
-  }
-
-  @Override
-  protected CommandEventTypeMerger createMerger() {
-    return new CommandEventTypeMerger();
+  protected FileEventTypeMerger createMerger() {
+    return new FileEventTypeMerger();
   }
 
 }

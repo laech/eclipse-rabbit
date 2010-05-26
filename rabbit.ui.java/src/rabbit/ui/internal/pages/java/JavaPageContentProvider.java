@@ -21,11 +21,13 @@ import rabbit.ui.internal.util.ICategory;
 import rabbit.ui.internal.viewers.TreeNodes;
 
 import static com.google.common.base.Predicates.instanceOf;
+import static com.google.common.base.Predicates.or;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 
+import org.eclipse.jdt.core.IInitializer;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModel;
 import org.eclipse.jdt.core.IJavaProject;
@@ -209,7 +211,8 @@ public class JavaPageContentProvider extends AbstractValueContentProvider {
         .put(JavaCategory.PACKAGE,      instanceOf(IPackageFragment.class))
         .put(JavaCategory.TYPE_ROOT,    instanceOf(ITypeRoot.class))
         .put(JavaCategory.TYPE,         instanceOf(IType.class))
-        .put(JavaCategory.METHOD,       instanceOf(IMethod.class))
+        .put(JavaCategory.METHOD,    or(instanceOf(IMethod.class), 
+                                        instanceOf(IInitializer.class)))
         .put(JavaCategory.MEMBER,       instanceOf(IMember.class))
         .build();
   }

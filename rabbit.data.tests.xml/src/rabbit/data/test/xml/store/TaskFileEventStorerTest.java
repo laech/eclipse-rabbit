@@ -17,9 +17,9 @@ package rabbit.data.test.xml.store;
 
 import rabbit.data.internal.xml.schema.events.TaskFileEventListType;
 import rabbit.data.internal.xml.schema.events.TaskFileEventType;
+import rabbit.data.internal.xml.store.TaskFileEventStorer;
 import rabbit.data.store.model.TaskFileEvent;
 import rabbit.data.test.xml.AbstractStorerTest;
-import rabbit.data.xml.store.TaskFileEventStorer;
 
 import com.google.common.base.Objects;
 

@@ -2,10 +2,10 @@ package rabbit.data.test.xml.access;
 
 import rabbit.data.access.model.SessionDataDescriptor;
 import rabbit.data.internal.xml.DatatypeUtil;
+import rabbit.data.internal.xml.access.SessionDataAccessor;
 import rabbit.data.internal.xml.schema.events.SessionEventListType;
 import rabbit.data.internal.xml.schema.events.SessionEventType;
 import rabbit.data.test.xml.AbstractDataNodeAccessorTest;
-import rabbit.data.xml.access.SessionDataAccessor;
 
 import static org.junit.Assert.assertEquals;
 

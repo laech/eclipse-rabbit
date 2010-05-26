@@ -16,10 +16,10 @@
 package rabbit.data.test.xml.access;
 
 import rabbit.data.access.model.PartDataDescriptor;
+import rabbit.data.internal.xml.access.PartDataAccessor;
 import rabbit.data.internal.xml.schema.events.PartEventListType;
 import rabbit.data.internal.xml.schema.events.PartEventType;
 import rabbit.data.test.xml.AbstractDataNodeAccessorTest;
-import rabbit.data.xml.access.PartDataAccessor;
 
 import static org.junit.Assert.assertEquals;
 

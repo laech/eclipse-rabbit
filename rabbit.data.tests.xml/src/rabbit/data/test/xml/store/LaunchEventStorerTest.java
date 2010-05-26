@@ -17,9 +17,9 @@ package rabbit.data.test.xml.store;
 
 import rabbit.data.internal.xml.schema.events.LaunchEventListType;
 import rabbit.data.internal.xml.schema.events.LaunchEventType;
+import rabbit.data.internal.xml.store.LaunchEventStorer;
 import rabbit.data.store.model.LaunchEvent;
 import rabbit.data.test.xml.AbstractStorerTest;
-import rabbit.data.xml.store.LaunchEventStorer;
 
 import com.google.common.base.Objects;
 

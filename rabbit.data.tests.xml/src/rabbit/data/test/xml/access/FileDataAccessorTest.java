@@ -16,10 +16,10 @@
 package rabbit.data.test.xml.access;
 
 import rabbit.data.access.model.FileDataDescriptor;
+import rabbit.data.internal.xml.access.FileDataAccessor;
 import rabbit.data.internal.xml.schema.events.FileEventListType;
 import rabbit.data.internal.xml.schema.events.FileEventType;
 import rabbit.data.test.xml.AbstractDataNodeAccessorTest;
-import rabbit.data.xml.access.FileDataAccessor;
 
 import static org.junit.Assert.assertEquals;
 

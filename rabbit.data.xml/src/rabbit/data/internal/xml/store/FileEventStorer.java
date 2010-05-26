@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package rabbit.data.xml.store;
+package rabbit.data.internal.xml.store;
 
 import rabbit.data.internal.xml.AbstractStorer;
 import rabbit.data.internal.xml.DataStore;

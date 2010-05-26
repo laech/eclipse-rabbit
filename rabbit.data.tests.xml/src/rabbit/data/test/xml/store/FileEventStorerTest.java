@@ -17,9 +17,9 @@ package rabbit.data.test.xml.store;
 
 import rabbit.data.internal.xml.schema.events.FileEventListType;
 import rabbit.data.internal.xml.schema.events.FileEventType;
+import rabbit.data.internal.xml.store.FileEventStorer;
 import rabbit.data.store.model.FileEvent;
 import rabbit.data.test.xml.AbstractStorerTest;
-import rabbit.data.xml.store.FileEventStorer;
 
 import com.google.common.base.Objects;
 
