@@ -33,9 +33,29 @@ import org.joda.time.DateTime;
 public class CommandTracker extends AbstractTracker<CommandEvent> implements
     IExecutionListener {
 
+  /*
+   * We only record commands that have been successfully executed, therefore we
+   * only use postExecuteSuccess(String, Object) to record the event.
+   * 
+   * Note that preExecute(String, ExecutionEvent) will always be called when a
+   * command is called to be execute, even if the command is non-executable at
+   * that moment. For example, when there is nothing to undo in an editor, the
+   * "Undo" menu is disabled, but if the user uses Ctrl+Z, the undo command will
+   * still be called. Therefore we don't use preExecute(String, ExecutionEvent).
+   */
+
+  /**
+   * The last recorded ExecutionEvent, to be updated every time
+   * {@link #preExecute(String, ExecutionEvent)} is called. We need this because
+   * {@link #postExecuteSuccess(String, Object)} does not have an
+   * {@link ExecutionEvent} parameter. This variable is null from the beginning.
+   */
+  private ExecutionEvent lastEvent;
+  
   /** Constructor. */
   public CommandTracker() {
     super();
+    lastEvent = null;
   }
 
   @Override
@@ -48,11 +68,14 @@ public class CommandTracker extends AbstractTracker<CommandEvent> implements
 
   @Override
   public void postExecuteSuccess(String commandId, Object returnValue) {
+    if (lastEvent != null && lastEvent.getCommand().getId().equals(commandId)) {
+      addData(new CommandEvent(new DateTime(), lastEvent));
+    }
   }
 
   @Override
   public void preExecute(String commandId, ExecutionEvent event) {
-    addData(new CommandEvent(new DateTime(), event));
+    lastEvent = event;
   }
 
   @Override

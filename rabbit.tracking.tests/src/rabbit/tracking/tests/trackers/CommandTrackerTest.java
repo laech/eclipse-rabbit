@@ -26,6 +26,9 @@ import org.eclipse.core.commands.Command;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.commands.IHandler;
+import org.eclipse.core.commands.NotEnabledException;
+import org.eclipse.core.commands.NotHandledException;
+import org.eclipse.core.commands.common.NotDefinedException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.commands.ICommandService;
 import org.eclipse.ui.handlers.IHandlerService;
@@ -63,7 +66,7 @@ public class CommandTrackerTest extends AbstractTrackerTest<CommandEvent> {
   }
 
   @Test
-  public void testExecution() throws Exception {
+  public void testExecution_success() throws Exception {
     tracker.setEnabled(true);
 
     String name = "cmdName";
@@ -83,6 +86,22 @@ public class CommandTrackerTest extends AbstractTrackerTest<CommandEvent> {
     assertEquals(command, e.getExecutionEvent().getCommand());
     assertTrue(start <= e.getTime().getMillis());
     assertTrue(end >= e.getTime().getMillis());
+  }
+  
+  @Test
+  public void testExecution_failure() throws Exception {
+    tracker.setEnabled(true);
+    try {
+      getHandlerService().executeCommand("notSuchCommandId", null);
+      
+      // An exception is guaranteed to be thrown, we just need to make sure such
+      // command event is not recorded.
+    } catch (ExecutionException e) {
+    } catch (NotHandledException e) {
+    } catch (NotEnabledException e) {
+    } catch (NotDefinedException e) {
+    }
+    assertEquals(0, tracker.getData().size());
   }
 
   @Override
