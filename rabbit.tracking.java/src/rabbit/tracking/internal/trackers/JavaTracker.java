@@ -24,6 +24,7 @@ import rabbit.tracking.internal.TrackingPlugin;
 import com.google.common.collect.Sets;
 
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
@@ -48,12 +49,37 @@ import java.util.Observer;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+import javax.annotation.Nullable;
+
 /**
  * Tracks time spent on Java elements such as classes, methods.
  */
 @SuppressWarnings("restriction")
 public class JavaTracker extends AbstractTracker<JavaEvent> 
     implements IWindowListener, IPartListener, Observer, Listener {
+
+  /*
+   * Note that a lot of elements may be tracked by this tracker, and many of
+   * them are of no interest to us, for example, invalid elements, anonymous
+   * classes (their have no unique identifier) etc. Therefore we should perform
+   * filtering on the data before saving. Filtering the data does not remove the
+   * elements we don't want, instead we replace the element with a parent which
+   * is of our interest. For example, a data node before filter may be
+   * "the user spent 2 minutes on elementA", and after filter it may be
+   * "the user spent 2 minutes on the parent of elementA", where "elementA" is
+   * of no interest to us, but the parent of the element does.
+   * 
+   * The following element types are of interest to us:
+   * 
+   * * Type elements (classes, interfaces etc) that are not anonymous. * Methods
+   * (includes constructors) that are not enclosed in anonymous types. * Static
+   * initializers.
+   * 
+   * Other elements will be converted.
+   * 
+   * (A secrete note: doing so also reduces the size of the data files on disk,
+   * shhhh!)
+   */
   
   /**
    * Current selected java element, may be null;
@@ -228,8 +254,7 @@ public class JavaTracker extends AbstractTracker<JavaEvent>
     final StyledText widget = editor.getViewer().getTextWidget();
     if (registeredWidgets.contains(widget)) {
       PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
-        @Override
-        public void run() {
+        @Override public void run() {
           widget.removeListener(SWT.KeyDown, JavaTracker.this);
           widget.removeListener(SWT.MouseDown, JavaTracker.this);
         }
@@ -263,16 +288,78 @@ public class JavaTracker extends AbstractTracker<JavaEvent>
       if (!element.exists()) {
         for (; !element.exists() && !(element instanceof ITypeRoot); element = element.getParent());
         filteredData.add(new JavaEvent(event.getTime(), event.getDuration(), element));
+        
       } else {
-        filteredData.add(event);
+        IJavaElement actual = null;
+        try {
+          actual = filterElement(element);
+        } catch (JavaModelException e) {
+          actual = null;
+          e.printStackTrace();
+        }
+        
+        if (actual == null) {
+          filteredData.add(event);
+        } else {
+          filteredData.add(new JavaEvent(event.getTime(), event.getDuration(), actual));
+        }
       }
     }
+    // Replace the old data with the filtered:
     flushData();
     for (JavaEvent event : filteredData) {
       addData(event);
     }
   }
   
+  /**
+   * Gets the actual element that we want before saving. One of the following
+   * types is returned:
+   * 
+   * <ul>
+   * <li>A type that is not anonymous.</li>
+   * <li>A method that is not enclosed in an anonymous type.</li>
+   * <li>An initializer.</li>
+   * <li>A compilation unit.</li>
+   * <li>A class file.</li>
+   * <li>Null</li>
+   * </ul>
+   * 
+   * @param element The element to filter.
+   * @return A filtered element, or null if not found.
+   * @throws JavaModelException If this element does not exist or if an
+   *           exception occurs while accessing its corresponding resource.
+   */
+  private IJavaElement filterElement(@Nullable IJavaElement element)
+      throws JavaModelException {
+    
+    if (element == null) {
+      return null;
+    }
+    
+    switch (element.getElementType()) {
+    case IJavaElement.TYPE:
+      if (((IType) element).isAnonymous()) {
+        return filterElement(element.getParent());
+      }
+      return element;
+      
+    case IJavaElement.METHOD:
+      if (((IType) element.getParent()).isAnonymous()) {
+        return filterElement(element.getParent());
+      }
+      return element;
+      
+    case IJavaElement.INITIALIZER:
+    case IJavaElement.COMPILATION_UNIT:
+    case IJavaElement.CLASS_FILE:
+      return element;
+      
+    default:
+      return filterElement(element.getParent());
+    }
+  }
+
   /**
    * Registers the given workbench window to be tracked.
    * @param window The workbench window.

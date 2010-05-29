@@ -21,6 +21,8 @@ import rabbit.tracking.internal.TrackingPlugin;
 import rabbit.tracking.internal.trackers.AbstractTracker;
 import rabbit.tracking.internal.trackers.JavaTracker;
 
+import static org.eclipse.jdt.internal.ui.actions.SelectionConverter.getElementAtOffset;
+import static org.eclipse.jdt.internal.ui.actions.SelectionConverter.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -30,9 +32,10 @@ import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.ui.actions.OpenJavaPerspectiveAction;
 import org.eclipse.jface.text.BadLocationException;
@@ -171,8 +174,8 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
     JavaEvent event = events.iterator().next();
     assertTrue(before.compareTo(event.getTime()) <= 0);
     assertTrue(after.compareTo(event.getTime()) >= 0);
-    assertTrue(timeout <= event.getDuration());
-    assertTrue(timeout + 100 >= event.getDuration());
+    assertTrue(timeout - 20 <= event.getDuration());
+    assertTrue(timeout + 20 >= event.getDuration());
 
     final IJavaElement[] elementArray = new IJavaElement[1];
     PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
@@ -180,7 +183,7 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
       public void run() {
         try {
           // The package declaration element:
-          elementArray[0] = SelectionConverter.getElementAtOffset(editor);
+          elementArray[0] = getElementAtOffset(editor);
         } catch (JavaModelException e) {
           fail(e.getMessage());
         }
@@ -224,8 +227,8 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
     JavaEvent event = events.iterator().next();
     assertTrue(before.compareTo(event.getTime()) <= 0);
     assertTrue(after.compareTo(event.getTime()) >= 0);
-    assertTrue(timeout <= event.getDuration());
-    assertTrue(timeout + 100 >= event.getDuration());
+    assertTrue(timeout - 20 <= event.getDuration());
+    assertTrue(timeout + 20 >= event.getDuration());
 
     final IJavaElement[] elementArray = new IJavaElement[1];
     PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
@@ -233,7 +236,7 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
       public void run() {
         try {
           // The package declaration element:
-          elementArray[0] = SelectionConverter.getElementAtOffset(editor);
+          elementArray[0] = getElementAtOffset(editor);
         } catch (JavaModelException e) {
           fail(e.getMessage());
         }
@@ -262,7 +265,7 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
     assertTrue(before.compareTo(event.getTime()) <= 0);
     assertTrue(after.compareTo(event.getTime()) >= 0);
     assertTrue(timeout <= event.getDuration());
-    assertTrue(timeout + 100 >= event.getDuration());
+    assertTrue(timeout + 200 >= event.getDuration());
 
     final IJavaElement[] elementArray2 = new IJavaElement[1];
     PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
@@ -270,7 +273,7 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
       public void run() {
         try {
           // The package declaration element:
-          elementArray2[0] = SelectionConverter.getElementAtOffset(editor);
+          elementArray2[0] = getElementAtOffset(editor);
         } catch (JavaModelException e) {
           fail(e.getMessage());
         }
@@ -308,7 +311,7 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
       public void run() {
         try {
           // The package declaration element:
-          elementArray[0] = SelectionConverter.getElementAtOffset(editor);
+          elementArray[0] = getElementAtOffset(editor);
         } catch (JavaModelException e) {
           fail(e.getMessage());
         }
@@ -345,8 +348,8 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
     
     // Set the editor to select the package declaration:
     String content = getDocument(editor).get();
-    int offset = content.indexOf(PACKAGE_NAME);
-    int length = PACKAGE_NAME.length();
+    int offset = content.indexOf(CLASS_NAME);
+    int length = CLASS_NAME.length();
     final ITextSelection selection = new TextSelection(offset, length);
     PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
       @Override
@@ -370,8 +373,8 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
     JavaEvent event = events.iterator().next();
     assertTrue(before.isBefore(event.getTime()));
     assertTrue(after.isAfter(event.getTime()));
-    assertTrue(timeout - 10 <= event.getDuration());
-    assertTrue(timeout + 10 >= event.getDuration());
+    assertTrue(timeout - 20 <= event.getDuration());
+    assertTrue(timeout + 20 >= event.getDuration());
     
     final IJavaElement[] elementArray = new IJavaElement[1];
     PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
@@ -379,13 +382,98 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
       public void run() {
         try {
           // The package declaration element:
-          elementArray[0] = SelectionConverter.getElementAtOffset(editor);
+          elementArray[0] = getElementAtOffset(editor);
         } catch (JavaModelException e) {
           fail(e.getMessage());
         }
       }
     });
     assertEquals(elementArray[0], event.getElement());
+  }
+  
+  /**
+   * Test an event on an anonymous. This event should be filtered on save, so
+   * that instead of showing a user spent x amount of time on the anonymous
+   * class, we show that a user spent x amount of time on the anonymous's parent
+   * type element (a method or a type that is not anonymous).
+   */
+  @Test
+  public void testFilter_anonymousClass() throws Exception {
+    /*
+     * Here we test that: a method containing an anonymous Runnable which also
+     * contains another anonymous Runnable, and the most inner Runnable is
+     * selected (to emulate that the user is working on that), then when filter
+     * on save the data should indicate that the user has spent x amount of time
+     * working on the method, not any of the Runnable's.
+     */
+    
+    final JavaEditor editor = closeAndOpenEditor();
+    final IDocument document = getDocument(editor);
+    PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+      @Override public void run() {
+        String anonymousClassText = "void aMethod() {" + //
+            "  new Runnable() { " + // 
+            "    public void run(){" + //
+            "      new Runnable() {" +
+            "        public void run() {}" +
+            "      };" + //
+            "    } " + //
+            "  };" + //
+        		"}"; //
+        String content = document.get();
+        int offset = content.indexOf("{") + 1;
+        int length = 0;
+        try {
+          document.replace(offset, length, anonymousClassText);
+        } catch (BadLocationException e) {
+          fail(e.getMessage());
+        }
+        
+        content = document.get();
+        offset = content.indexOf("Runnable", content.indexOf("Runnable") + 1);
+        length = "Runnable".length();
+        ITextSelection selection = new TextSelection(offset, length);
+        editor.getSelectionProvider().setSelection(selection);
+      }
+    });
+    
+    long duration = 30;
+    DateTime before = new DateTime();
+    tracker.setEnabled(true);
+    TimeUnit.MILLISECONDS.sleep(duration);
+    tracker.setEnabled(false);
+    DateTime after = new DateTime();
+    
+    // Ask the tracker to save the data, the data should be appropriately 
+    // filtered
+    tracker.saveData();
+
+    Collection<JavaEvent> events = tracker.getData();
+    assertEquals(1, events.size());
+
+    final JavaEvent event = events.iterator().next();
+    assertTrue(before.compareTo(event.getTime()) <= 0);
+    assertTrue(after.compareTo(event.getTime()) >= 0);
+    assertTrue(duration - 20 <= event.getDuration());
+    assertTrue(duration + 20 >= event.getDuration());
+    
+    final IJavaElement[] elementArray = new IJavaElement[1];
+    PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+      @Override
+      public void run() {
+        try {
+          // The package declaration element:
+          elementArray[0] = getElementAtOffset(editor);
+        } catch (JavaModelException e) {
+          fail(e.getMessage());
+        }
+      }
+    });
+    assertEquals(elementArray[0].getElementType(), IJavaElement.TYPE);
+    assertTrue(((IType) elementArray[0]).isAnonymous());
+    // getParent().getParent().getParent() will give us the method:
+    assertEquals(event.getElement().getElementType(), IJavaElement.METHOD);
+    assertEquals("aMethod", event.getElement().getElementName());
   }
   
   /**
@@ -398,7 +486,7 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
    * @see #testFilterDeletedElements_typeMembers()
    */
   @Test
-  public void testFilterDeletedElements_mainType() throws Exception {
+  public void testFilter_deletedElement_mainType() throws Exception {
     
     String newClassName = CLASS_NAME + "abc";
     
@@ -453,8 +541,8 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
     JavaEvent event = events.iterator().next();
     assertTrue(before.compareTo(event.getTime()) <= 0);
     assertTrue(after.compareTo(event.getTime()) >= 0);
-    assertTrue(timeout - 10 <= event.getDuration());
-    assertTrue(timeout + 10 >= event.getDuration());
+    assertTrue(timeout - 20 <= event.getDuration());
+    assertTrue(timeout + 20 >= event.getDuration());
 
     // Test the data is placed under the root element:
     assertEquals(typeRoot, event.getElement());
@@ -466,11 +554,11 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
    * deleted field should be store as the parent's data.
    * <p>
    * For example: If we have a field called "fieldA" under the class "ClassA"
-   * and the tracker has recorded that the user has spent 10 seconds working on
+   * and the tracker has recorded that the user has spent 20 seconds working on
    * the field, but the field is then deleted from the class. So when the
    * tracker saves the data, instead of saving
-   * "The user has spent 10 seconds working on fieldA" we store
-   * "The user has spent 10 seconds working on classA".
+   * "The user has spent 20 seconds working on fieldA" we store
+   * "The user has spent 20 seconds working on classA".
    * </p>
    * <p>
    * Another important purpose of this feature is that: Then a user starts to
@@ -490,7 +578,7 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
    * @see #testFilterDeletedElements_mainType()
    */
   @Test
-  public void testFilterDeletedElements_typeMembers() throws Exception {
+  public void testFilter_deletedElement_typeMembers() throws Exception {
     final JavaEditor editor = closeAndOpenEditor();
     final IDocument document = getDocument(editor);
     
@@ -537,7 +625,7 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
       @Override public void run() {
         try {
           // The field element:
-          elementArray[0] = SelectionConverter.getElementAtOffset(editor);
+          elementArray[0] = getElementAtOffset(editor);
         } catch (JavaModelException e) {
           fail(e.getMessage());
         }
@@ -577,13 +665,591 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
     JavaEvent event = events.iterator().next();
     assertTrue(before.compareTo(event.getTime()) <= 0);
     assertTrue(after.compareTo(event.getTime()) >= 0);
-    assertTrue(timeout - 10 <= event.getDuration());
-    assertTrue(timeout + 10 >= event.getDuration());
+    assertTrue(timeout - 20 <= event.getDuration());
+    assertTrue(timeout + 20 >= event.getDuration());
 
     // Now check that the element is the parent of the package declaration
     // instead of the deleted package declaration itself:
     assertEquals(elementArray[0].getParent(), event.getElement());
   }
+  
+  /**
+   * Test an event on an import statement. This event should be filtered on
+   * save, so that instead of showing a user spent x amount of time on the
+   * import statement , we show that a user spent x amount of time on the 
+   * type root (ITypeRoot) element, (a.k.a the Java file).
+   */
+  @Test
+  public void testFilter_existingElement_importStatement() throws Exception {
+    final JavaEditor editor = closeAndOpenEditor();
+    final IDocument document = getDocument(editor);
+    PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+      @Override public void run() {
+        String importStatement = "import java.util.*;";
+        String content = document.get();
+        int offset = content.indexOf(";") + 1; // Position after package declaration
+        int length = 0;
+        try {
+          document.replace(offset, length, importStatement);
+        } catch (BadLocationException e) {
+          fail(e.getMessage());
+        }
+        
+        content = document.get();
+        offset = content.indexOf(importStatement);
+        length = importStatement.length();
+        ITextSelection selection = new TextSelection(offset, length);
+        editor.getSelectionProvider().setSelection(selection);
+      }
+    });
+    
+    long duration = 30;
+    DateTime before = new DateTime();
+    tracker.setEnabled(true);
+    TimeUnit.MILLISECONDS.sleep(duration);
+    tracker.setEnabled(false);
+    DateTime after = new DateTime();
+    
+    // Ask the tracker to save the data, the data should be appropriately 
+    // filtered
+    tracker.saveData();
+
+    Collection<JavaEvent> events = tracker.getData();
+    assertEquals(1, events.size());
+
+    final JavaEvent event = events.iterator().next();
+    assertTrue(before.compareTo(event.getTime()) <= 0);
+    assertTrue(after.compareTo(event.getTime()) >= 0);
+    assertTrue(duration - 20 <= event.getDuration());
+    assertTrue(duration + 20 >= event.getDuration());
+    
+    final ITypeRoot[] elementArray = new ITypeRoot[1];
+    PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+      @Override
+      public void run() {
+        elementArray[0] = getInputAsTypeRoot(editor);
+      }
+    });
+    assertEquals(elementArray[0], event.getElement());
+  }
+
+  /**
+   * Test an event on a static initializer. This event should not be filtered on
+   * save.
+   */
+  @Test
+  public void testFilter_existingElement_initializer() throws Exception {
+    final JavaEditor editor = closeAndOpenEditor();
+    final IDocument document = getDocument(editor);
+    final String staticName = "static";
+    PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+      @Override public void run() {
+        String methodText = staticName + " {}";
+        String content = document.get();
+        int offset = content.indexOf("{") + 1;
+        int length = 0;
+        try {
+          document.replace(offset, length, methodText);
+        } catch (BadLocationException e) {
+          fail(e.getMessage());
+        }
+        
+        content = document.get();
+        offset = content.indexOf(staticName);
+        length = staticName.length();
+        ITextSelection selection = new TextSelection(offset, length);
+        editor.getSelectionProvider().setSelection(selection);
+      }
+    });
+    
+    long duration = 30;
+    DateTime before = new DateTime();
+    tracker.setEnabled(true);
+    TimeUnit.MILLISECONDS.sleep(duration);
+    tracker.setEnabled(false);
+    DateTime after = new DateTime();
+    
+    // Ask the tracker to save the data, the data should be appropriately 
+    // filtered
+    tracker.saveData();
+
+    Collection<JavaEvent> events = tracker.getData();
+    assertEquals(1, events.size());
+
+    final JavaEvent event = events.iterator().next();
+    assertTrue(before.compareTo(event.getTime()) <= 0);
+    assertTrue(after.compareTo(event.getTime()) >= 0);
+    assertTrue(duration - 50 <= event.getDuration());
+    assertTrue(duration + 50 >= event.getDuration());
+    
+    final IJavaElement[] elementArray = new IJavaElement[1];
+    PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+      @Override
+      public void run() {
+        try {
+          // The package declaration element:
+          elementArray[0] = getElementAtOffset(editor);
+        } catch (JavaModelException e) {
+          fail(e.getMessage());
+        }
+      }
+    });
+    assertEquals(elementArray[0].getElementType(), IJavaElement.INITIALIZER);
+    assertEquals(elementArray[0], event.getElement());
+  }
+  
+  /**
+   * Test an event on a method, that is a member of an anonymous class. This
+   * event should be filtered so that we so the user has spent x amount of
+   * time on the method's first non-anonymous parent.
+   */
+  @Test
+  public void testFilter_existingElement_methodParentIsAnonymous() throws Exception {
+    final JavaEditor editor = closeAndOpenEditor();
+    final IDocument document = getDocument(editor);
+    PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+      @Override public void run() {
+        String anonymousClassText = "void aMethod() {" + //
+            "  new Runnable() { " + // 
+            "    public void run(){" + //
+            "      new Runnable() {" +
+            "        public void run() {}" +
+            "      };" + //
+            "    } " + //
+            "  };" + //
+            "}"; //
+        String content = document.get();
+        int offset = content.indexOf("{") + 1;
+        int length = 0;
+        try {
+          document.replace(offset, length, anonymousClassText);
+        } catch (BadLocationException e) {
+          fail(e.getMessage());
+        }
+        
+        content = document.get();
+        offset = content.indexOf("run", content.indexOf("run") + 1);
+        length = "run".length();
+        ITextSelection selection = new TextSelection(offset, length);
+        editor.getSelectionProvider().setSelection(selection);
+      }
+    });
+    
+    long duration = 30;
+    DateTime before = new DateTime();
+    tracker.setEnabled(true);
+    TimeUnit.MILLISECONDS.sleep(duration);
+    tracker.setEnabled(false);
+    DateTime after = new DateTime();
+    
+    // Ask the tracker to save the data, the data should be appropriately 
+    // filtered
+    tracker.saveData();
+
+    Collection<JavaEvent> events = tracker.getData();
+    assertEquals(1, events.size());
+
+    final JavaEvent event = events.iterator().next();
+    assertTrue(before.compareTo(event.getTime()) <= 0);
+    assertTrue(after.compareTo(event.getTime()) >= 0);
+    assertTrue(duration - 20 <= event.getDuration());
+    assertTrue(duration + 20 >= event.getDuration());
+    
+    final IJavaElement[] elementArray = new IJavaElement[1];
+    PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+      @Override
+      public void run() {
+        try {
+          // The package declaration element:
+          elementArray[0] = getElementAtOffset(editor);
+        } catch (JavaModelException e) {
+          fail(e.getMessage());
+        }
+      }
+    });
+    assertEquals(elementArray[0].getElementType(), IJavaElement.METHOD);
+    assertEquals("aMethod", event.getElement().getElementName());
+    assertEquals(event.getElement().getElementType(), IJavaElement.METHOD);
+  }
+
+  /**
+   * Test an event on a method, that is a member of a non-anonymous class. This
+   * event should not be filtered on save.
+   */
+  @Test
+  public void testFilter_existingElement_methodParentNotAnonymous() throws Exception {
+    final JavaEditor editor = closeAndOpenEditor();
+    final IDocument document = getDocument(editor);
+    final String methodName = "aMethodName";
+    PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+      @Override public void run() {
+        String methodText = "void " + methodName + "() {}";
+        String content = document.get();
+        int offset = content.indexOf("{") + 1;
+        int length = 0;
+        try {
+          document.replace(offset, length, methodText);
+        } catch (BadLocationException e) {
+          fail(e.getMessage());
+        }
+        
+        content = document.get();
+        offset = content.indexOf(methodName);
+        length = methodName.length();
+        ITextSelection selection = new TextSelection(offset, length);
+        editor.getSelectionProvider().setSelection(selection);
+      }
+    });
+    
+    long duration = 30;
+    DateTime before = new DateTime();
+    tracker.setEnabled(true);
+    TimeUnit.MILLISECONDS.sleep(duration);
+    tracker.setEnabled(false);
+    DateTime after = new DateTime();
+    
+    // Ask the tracker to save the data, the data should be appropriately 
+    // filtered
+    tracker.saveData();
+
+    Collection<JavaEvent> events = tracker.getData();
+    assertEquals(1, events.size());
+
+    final JavaEvent event = events.iterator().next();
+    assertTrue(before.compareTo(event.getTime()) <= 0);
+    assertTrue(after.compareTo(event.getTime()) >= 0);
+    assertTrue(duration - 20 <= event.getDuration());
+    assertTrue(duration + 20 >= event.getDuration());
+    
+    final IJavaElement[] elementArray = new IJavaElement[1];
+    PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+      @Override
+      public void run() {
+        try {
+          // The package declaration element:
+          elementArray[0] = getElementAtOffset(editor);
+        } catch (JavaModelException e) {
+          fail(e.getMessage());
+        }
+      }
+    });
+    assertEquals(elementArray[0].getElementType(), IJavaElement.METHOD);
+    assertEquals(elementArray[0], event.getElement());
+  }
+
+  /**
+   * Test an event on an package declaration. This event should be filtered on save, so
+   * that instead of showing a user spent x amount of time on the package
+   * declaration , we show that a user spent x amount of time on the main type
+   * element.
+   */
+  @Test
+  public void testFilter_existingElement_packageDeclaration() throws Exception {
+    final JavaEditor editor = closeAndOpenEditor();
+    final IDocument document = getDocument(editor);
+    PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+      @Override public void run() {
+        String content = document.get();
+        int offset = content.indexOf(PACKAGE_NAME);
+        int length = PACKAGE_NAME.length();
+        ITextSelection selection = new TextSelection(offset, length);
+        editor.getSelectionProvider().setSelection(selection);
+      }
+    });
+    
+    long duration = 30;
+    DateTime before = new DateTime();
+    tracker.setEnabled(true);
+    TimeUnit.MILLISECONDS.sleep(duration);
+    tracker.setEnabled(false);
+    DateTime after = new DateTime();
+    
+    // Ask the tracker to save the data, the data should be appropriately 
+    // filtered
+    tracker.saveData();
+
+    Collection<JavaEvent> events = tracker.getData();
+    assertEquals(1, events.size());
+
+    final JavaEvent event = events.iterator().next();
+    assertTrue(before.compareTo(event.getTime()) <= 0);
+    assertTrue(after.compareTo(event.getTime()) >= 0);
+    assertTrue(duration - 20 <= event.getDuration());
+    assertTrue(duration + 20 >= event.getDuration());
+    
+    final IJavaElement[] elementArray = new IJavaElement[1];
+    PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+      @Override
+      public void run() {
+        try {
+          // The package declaration element:
+          elementArray[0] = getElementAtOffset(editor);
+        } catch (JavaModelException e) {
+          fail(e.getMessage());
+        }
+      }
+    });
+    assertEquals(elementArray[0].getElementType(), IJavaElement.PACKAGE_DECLARATION);
+    assertEquals(elementArray[0].getParent(), event.getElement());
+  }
+  
+  /**
+   * Test an event on an anonymous type. This event should be filtered so that
+   * we show the user has spent x amount of time on the type's first
+   * non-anonymous parent.
+   */
+  @Test
+  public void testFilter_existingElement_typeAnonymous() throws Exception {
+    final JavaEditor editor = closeAndOpenEditor();
+    final IDocument document = getDocument(editor);
+    PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+      @Override public void run() {
+        String anonymousClassText = "void aMethod() {" + //
+            "  new Runnable() { " + // 
+            "    public void run(){" + //
+            "    } " + //
+            "  };" + //
+            "}"; //
+        String content = document.get();
+        int offset = content.indexOf("{") + 1;
+        int length = 0;
+        try {
+          document.replace(offset, length, anonymousClassText);
+        } catch (BadLocationException e) {
+          fail(e.getMessage());
+        }
+        
+        content = document.get();
+        offset = content.indexOf("Runnable");
+        length = "Runnable".length();
+        ITextSelection selection = new TextSelection(offset, length);
+        editor.getSelectionProvider().setSelection(selection);
+      }
+    });
+    
+    long duration = 30;
+    DateTime before = new DateTime();
+    tracker.setEnabled(true);
+    TimeUnit.MILLISECONDS.sleep(duration);
+    tracker.setEnabled(false);
+    DateTime after = new DateTime();
+    
+    // Ask the tracker to save the data, the data should be appropriately 
+    // filtered
+    tracker.saveData();
+
+    Collection<JavaEvent> events = tracker.getData();
+    assertEquals(1, events.size());
+
+    final JavaEvent event = events.iterator().next();
+    assertTrue(before.compareTo(event.getTime()) <= 0);
+    assertTrue(after.compareTo(event.getTime()) >= 0);
+    assertTrue(duration - 20 <= event.getDuration());
+    assertTrue(duration + 20 >= event.getDuration());
+    
+    final IJavaElement[] elementArray = new IJavaElement[1];
+    PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+      @Override
+      public void run() {
+        try {
+          // The package declaration element:
+          elementArray[0] = getElementAtOffset(editor);
+        } catch (JavaModelException e) {
+          fail(e.getMessage());
+        }
+      }
+    });
+    assertEquals(elementArray[0].getElementType(), IJavaElement.TYPE);
+    assertEquals("aMethod", event.getElement().getElementName());
+    assertEquals(event.getElement().getElementType(), IJavaElement.METHOD);
+  }
+
+  /**
+   * Test an event on an inner class. This event should be not filtered on save.
+   */
+  @Test
+  public void testFilter_existingElement_typeInner() throws Exception {
+    final JavaEditor editor = closeAndOpenEditor();
+    final IDocument document = getDocument(editor);
+    final String innerClassName = "anInnerClassName";
+    PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+      @Override public void run() {
+        String innerClassText = "\nstatic class " + innerClassName + " {}";
+        String content = document.get();
+        int offset = content.indexOf("{") + 1;
+        int length = 0;
+        try {
+          document.replace(offset, length, innerClassText);
+        } catch (BadLocationException e) {
+          fail(e.getMessage());
+        }
+        
+        content = document.get();
+        offset = content.indexOf(innerClassName);
+        length = innerClassName.length();
+        ITextSelection selection = new TextSelection(offset, length);
+        editor.getSelectionProvider().setSelection(selection);
+      }
+    });
+    
+    long duration = 30;
+    DateTime before = new DateTime();
+    tracker.setEnabled(true);
+    TimeUnit.MILLISECONDS.sleep(duration);
+    tracker.setEnabled(false);
+    DateTime after = new DateTime();
+    
+    // Ask the tracker to save the data, the data should be appropriately 
+    // filtered
+    tracker.saveData();
+
+    Collection<JavaEvent> events = tracker.getData();
+    assertEquals(1, events.size());
+
+    final JavaEvent event = events.iterator().next();
+    assertTrue(before.compareTo(event.getTime()) <= 0);
+    assertTrue(after.compareTo(event.getTime()) >= 0);
+    assertTrue(duration - 20 <= event.getDuration());
+    assertTrue(duration + 20 >= event.getDuration());
+    
+    final IJavaElement[] elementArray = new IJavaElement[1];
+    PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+      @Override
+      public void run() {
+        try {
+          // The package declaration element:
+          elementArray[0] = getElementAtOffset(editor);
+        } catch (JavaModelException e) {
+          fail(e.getMessage());
+        }
+      }
+    });
+    assertEquals(elementArray[0].getElementType(), IJavaElement.TYPE);
+    assertEquals(elementArray[0].getElementName(), innerClassName);
+    assertEquals(elementArray[0], event.getElement());
+  }
+
+  /**
+   * Test an event on a normal Java type (not anonymous, not inner class). This
+   * event should not be filtered on save.
+   */
+  @Test
+  public void testFilter_existingElement_typeNormal() throws Exception {
+    final JavaEditor editor = closeAndOpenEditor();
+    PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+      @Override public void run() {
+        String content = getDocument(editor).get();
+        int offset = content.indexOf(CLASS_NAME);
+        int length = CLASS_NAME.length();
+        final ITextSelection selection = new TextSelection(offset, length);
+        editor.getSelectionProvider().setSelection(selection);
+      }
+    });
+
+    DateTime before = new DateTime();
+    tracker.setEnabled(true);
+    TimeUnit.MILLISECONDS.sleep(30);
+    tracker.setEnabled(false);
+    DateTime after = new DateTime();
+    
+    // Ask the tracker to save the data, the data should be appropriately 
+    // filtered
+    tracker.saveData();
+
+    Collection<JavaEvent> events = tracker.getData();
+    assertEquals(1, events.size());
+
+    long duration = after.getMillis() - before.getMillis();
+    final JavaEvent event = events.iterator().next();
+    assertTrue(before.compareTo(event.getTime()) <= 0);
+    assertTrue(after.compareTo(event.getTime()) >= 0);
+    assertTrue(duration - 20 <= event.getDuration());
+    assertTrue(duration + 20 >= event.getDuration());
+    
+    final IJavaElement[] elementArray = new IJavaElement[1];
+    PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+      @Override
+      public void run() {
+        try {
+          // The package declaration element:
+          elementArray[0] = getElementAtOffset(editor);
+        } catch (JavaModelException e) {
+          fail(e.getMessage());
+        }
+      }
+    });
+    assertEquals(elementArray[0].getElementType(), IJavaElement.TYPE);
+    assertEquals(elementArray[0], event.getElement());
+  }
+
+  /**
+   * Test an event on a field. This event should be filtered on save, so that
+   * instead of showing a user spent x amount of time on the field, we show that
+   * a user spent x amount of time on the field's parent type.
+   */
+  @Test
+  public void testFilter_exsitingElement_field() throws Exception {
+    final JavaEditor editor = closeAndOpenEditor();
+    final IDocument document = getDocument(editor);
+    final String fieldName = "aFieldName";
+    PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+      @Override public void run() {
+        String methodText = "private int " + fieldName + " = 1;";
+        String content = document.get();
+        int offset = content.indexOf("{") + 1;
+        int length = 0;
+        try {
+          document.replace(offset, length, methodText);
+        } catch (BadLocationException e) {
+          fail(e.getMessage());
+        }
+        
+        content = document.get();
+        offset = content.indexOf(fieldName);
+        length = fieldName.length();
+        ITextSelection selection = new TextSelection(offset, length);
+        editor.getSelectionProvider().setSelection(selection);
+      }
+    });
+    
+    long duration = 30;
+    DateTime before = new DateTime();
+    tracker.setEnabled(true);
+    TimeUnit.MILLISECONDS.sleep(duration);
+    tracker.setEnabled(false);
+    DateTime after = new DateTime();
+    
+    // Ask the tracker to save the data, the data should be appropriately 
+    // filtered
+    tracker.saveData();
+
+    Collection<JavaEvent> events = tracker.getData();
+    assertEquals(1, events.size());
+
+    final JavaEvent event = events.iterator().next();
+    assertTrue(before.compareTo(event.getTime()) <= 0);
+    assertTrue(after.compareTo(event.getTime()) >= 0);
+    assertTrue(duration - 50 <= event.getDuration());
+    assertTrue(duration + 50 >= event.getDuration());
+    
+    // The filtered event should be on the field's parent, not on the field itself:
+    final IJavaElement[] elementArray = new IJavaElement[1];
+    PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+      @Override
+      public void run() {
+        try {
+          // The package declaration element:
+          elementArray[0] = getElementAtOffset(editor);
+        } catch (JavaModelException e) {
+          fail(e.getMessage());
+        }
+      }
+    });
+    assertEquals(elementArray[0].getElementType(), IJavaElement.FIELD);
+    assertEquals(elementArray[0].getParent(), event.getElement());
+  }
+  
+  
   
   /**
    * Tests when the user becomes inactive.
@@ -619,8 +1285,8 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
     JavaEvent event = events.iterator().next();
     assertTrue(before.compareTo(event.getTime()) <= 0);
     assertTrue(after.compareTo(event.getTime()) >= 0);
-    assertTrue(timeout - 10 <= event.getDuration());
-    assertTrue(timeout + 10 >= event.getDuration());
+    assertTrue(timeout - 20 <= event.getDuration());
+    assertTrue(timeout + 20 >= event.getDuration());
 
     final IJavaElement[] elementArray = new IJavaElement[1];
     PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
@@ -628,7 +1294,7 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
       public void run() {
         try {
           // The package declaration element:
-          elementArray[0] = SelectionConverter.getElementAtOffset(editor);
+          elementArray[0] = getElementAtOffset(editor);
         } catch (JavaModelException e) {
           fail(e.getMessage());
         }
@@ -679,8 +1345,8 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
     JavaEvent event = events.iterator().next();
     assertTrue(before.compareTo(event.getTime()) <= 0);
     assertTrue(after.compareTo(event.getTime()) >= 0);
-    assertTrue(timeout <= event.getDuration());
-    assertTrue(timeout + 100 >= event.getDuration());
+    assertTrue(timeout - 20 <= event.getDuration());
+    assertTrue(timeout + 20 >= event.getDuration());
 
     final IJavaElement[] elementArray = new IJavaElement[1];
     PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
@@ -688,7 +1354,7 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
       public void run() {
         try {
           // The package declaration element:
-          elementArray[0] = SelectionConverter.getElementAtOffset(editor);
+          elementArray[0] = getElementAtOffset(editor);
         } catch (JavaModelException e) {
           fail(e.getMessage());
         }
@@ -746,8 +1412,8 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
     JavaEvent event = events.iterator().next();
     assertTrue(before.compareTo(event.getTime()) <= 0);
     assertTrue(after.compareTo(event.getTime()) >= 0);
-    assertTrue(timeout - 10 <= event.getDuration());
-    assertTrue(timeout + 10 >= event.getDuration());
+    assertTrue(timeout - 20 <= event.getDuration());
+    assertTrue(timeout + 20 >= event.getDuration());
 
     final IJavaElement[] elementArray = new IJavaElement[1];
     PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
@@ -755,7 +1421,7 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
       public void run() {
         try {
           // The package declaration element:
-          elementArray[0] = SelectionConverter.getElementAtOffset(editor);
+          elementArray[0] = getElementAtOffset(editor);
         } catch (JavaModelException e) {
           fail(e.getMessage());
         }
@@ -791,8 +1457,8 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
     event = events.iterator().next();
     assertTrue(before.compareTo(event.getTime()) <= 0);
     assertTrue(after.compareTo(event.getTime()) >= 0);
-    assertTrue(timeout - 10 <= event.getDuration());
-    assertTrue(timeout + 100 >= event.getDuration());
+    assertTrue(timeout - 20 <= event.getDuration());
+    assertTrue(timeout + 200 >= event.getDuration());
 
     final IJavaElement[] elementArray2 = new IJavaElement[1];
     PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
@@ -800,7 +1466,7 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
       public void run() {
         try {
           // The package declaration element:
-          elementArray2[0] = SelectionConverter.getElementAtOffset(editor);
+          elementArray2[0] = getElementAtOffset(editor);
         } catch (JavaModelException e) {
           fail(e.getMessage());
         }
@@ -875,7 +1541,7 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
   
   @Override
   protected JavaEvent createEvent() {
-    return new JavaEvent(new DateTime(), 10, 
+    return new JavaEvent(new DateTime(), 20, 
         JavaCore.create("=Enfo/src<enfo{EnfoPlugin.java"));
   }
 
