@@ -22,6 +22,7 @@ import rabbit.ui.internal.viewers.TreeNodes;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableBiMap;
+import com.google.common.collect.Maps;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
@@ -37,6 +38,7 @@ import org.eclipse.jface.viewers.Viewer;
 import org.joda.time.LocalDate;
 
 import java.util.Collection;
+import java.util.Map;
 
 /**
  * Content provider for a {@link TreeViewer} that accepts input as a
@@ -70,6 +72,7 @@ public class ResourcePageContentProvider extends AbstractValueContentProvider {
     try {
       data = (Collection<FileDataDescriptor>) newInput;
     } catch (Exception e) {
+      System.err.println(e.getMessage());
       return;
     }
     reorganizeData(data);
@@ -109,6 +112,7 @@ public class ResourcePageContentProvider extends AbstractValueContentProvider {
 
     ICategory[] categories = getSelectedCategories();
     IWorkspaceRoot workspace = ResourcesPlugin.getWorkspace().getRoot();
+    Map<IPath, IFile> fileCache = Maps.newHashMap();
     for (FileDataDescriptor des : data) {
 
       IPath path = des.getFilePath();
@@ -120,7 +124,12 @@ public class ResourcePageContentProvider extends AbstractValueContentProvider {
       if (pathStr.contains(":")) {
         path = new Path(pathStr.replace(":", ""));
       }
-      IFile file = workspace.getFile(path);
+      
+      IFile file = fileCache.get(path);
+      if (file == null) {
+        file = workspace.getFile(path);
+        fileCache.put(path, file);
+      }
       IProject project = file.getProject();
       IContainer folder = file.getParent();
 

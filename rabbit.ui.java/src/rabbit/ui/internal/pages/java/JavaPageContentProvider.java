@@ -26,6 +26,7 @@ import static com.google.common.base.Predicates.or;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
 import org.eclipse.jdt.core.IInitializer;
 import org.eclipse.jdt.core.IJavaElement;
@@ -44,6 +45,7 @@ import org.joda.time.LocalDate;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Content provider accepts input as {@code Collection<JavaDataDescriptor>}
@@ -138,13 +140,21 @@ public class JavaPageContentProvider extends AbstractValueContentProvider {
     try {
       data = (Collection<JavaDataDescriptor>) newInput;
     } catch (Exception e) {
+      System.err.println(e.getMessage());
       return;
     }
+    
+    Map<String, IJavaElement> elementCache = Maps.newHashMap();
     for (JavaDataDescriptor des : data) {
-
-      IJavaElement element = des.findElement();
+      
+      IJavaElement element = elementCache.get(des.getHandleIdentifier());
       if (element == null) {
-        continue;
+        element = des.findElement();
+        if (element == null) {
+          continue;
+        } else {
+          elementCache.put(des.getHandleIdentifier(), element);
+        }
       }
 
       TreeNode node = getRoot();

@@ -66,6 +66,7 @@ public class TaskPageContentProvider extends AbstractValueContentProvider {
     try {
       data = (Collection<TaskFileDataDescriptor>) newInput;
     } catch (Exception e) {
+      System.err.println(e.getMessage());
       return;
     }
     reorganizeData(data);

@@ -83,14 +83,16 @@ public class SessionTracker extends AbstractTracker<SessionEvent> implements
 
   @Override
   public void update(Observable observable, Object arg) {
-    if (observable != TrackingPlugin.getDefault().getIdleDetector() || !isEnabled()) {
+    if (!isEnabled()) {
       return;
     }
     
-    if (((IdleDetector) observable).isUserActive()) {
-      tryStartSession();
-    } else {
-      tryEndSession();
+    if (observable == TrackingPlugin.getDefault().getIdleDetector()) {
+      if (((IdleDetector) observable).isUserActive()) {
+        tryStartSession();
+      } else {
+        tryEndSession();
+      };
     }
   }
   

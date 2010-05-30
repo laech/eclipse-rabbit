@@ -154,6 +154,7 @@ public class PartPageContentProvider extends AbstractValueContentProvider {
     try {
       data = (Collection<PartDataDescriptor>) newInput;
     } catch (Exception e) {
+      System.err.println(e.getMessage());
       return;
     }
     IEditorRegistry editors = PlatformUI.getWorkbench().getEditorRegistry();

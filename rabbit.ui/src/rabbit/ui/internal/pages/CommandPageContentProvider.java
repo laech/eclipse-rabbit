@@ -64,6 +64,7 @@ public class CommandPageContentProvider extends AbstractValueContentProvider {
     try {
       data = (Collection<CommandDataDescriptor>) newInput;
     } catch (Exception e) {
+      System.err.println(e.getMessage());
       return;
     }
     ICommandService service = (ICommandService) PlatformUI.getWorkbench()

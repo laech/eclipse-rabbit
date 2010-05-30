@@ -84,6 +84,7 @@ public class PerspectivePageContentProvider extends AbstractValueContentProvider
     try {
       data = (Collection<PerspectiveDataDescriptor>) newInput;
     } catch (Exception e) {
+      System.err.println(e.getMessage());
       return;
     }
     IPerspectiveRegistry perspectives = PlatformUI.getWorkbench().getPerspectiveRegistry();

@@ -53,7 +53,7 @@ public class ProgramUI extends JFrame {
         button.addActionListener(new ActionListener() {
           @Override
           public void actionPerformed(ActionEvent e) {
-            System.exit(0);
+            dispose();
           }
         });
       }
@@ -66,10 +66,15 @@ public class ProgramUI extends JFrame {
   public static void main(String[] args) {
     try {
       UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+      
     } catch (ClassNotFoundException e) {
+      System.err.println(e.getMessage());
     } catch (InstantiationException e) {
+      System.err.println(e.getMessage());
     } catch (IllegalAccessException e) {
+      System.err.println(e.getMessage());
     } catch (UnsupportedLookAndFeelException e) {
+      System.err.println(e.getMessage());
     }
 
     SwingUtilities.invokeLater(new Runnable() {

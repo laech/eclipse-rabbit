@@ -149,21 +149,23 @@ public class JavaTracker extends AbstractTracker<JavaEvent>
 
   @Override
   public void update(Observable o, Object arg) {
-    if (o != TrackingPlugin.getDefault().getIdleDetector() || !isEnabled()) {
+    if (!isEnabled()) {
       return;
     }
     
-    if (((IdleDetector) o).isUserActive()) {
-      PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
-        @Override public void run() {
-          IWorkbenchWindow win = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
-          if (win != null) {
-            tryStartSession(win.getPartService().getActivePart());
+    if (o == TrackingPlugin.getDefault().getIdleDetector()) {
+      if (((IdleDetector) o).isUserActive()) {
+        PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+          @Override public void run() {
+            IWorkbenchWindow win = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+            if (win != null) {
+              tryStartSession(win.getPartService().getActivePart());
+            }
           }
-        }
-      });
-    } else {
-      tryEndSession();
+        });
+      } else {
+        tryEndSession();
+      }
     }
   }
 
@@ -259,7 +261,7 @@ public class JavaTracker extends AbstractTracker<JavaEvent>
           widget.removeListener(SWT.MouseDown, JavaTracker.this);
         }
       });
-      registeredWidgets.remove(registeredWidgets);
+      registeredWidgets.remove(widget);
     }
   }
   

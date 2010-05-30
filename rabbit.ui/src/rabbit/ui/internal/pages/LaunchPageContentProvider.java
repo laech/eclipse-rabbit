@@ -239,6 +239,7 @@ public class LaunchPageContentProvider extends AbstractCategoryContentProvider {
     try {
       data = (Collection<LaunchDataDescriptor>) newInput;
     } catch (Exception e) {
+      System.err.println(e.getMessage());
       return;
     }
     reorganizeData(data);
