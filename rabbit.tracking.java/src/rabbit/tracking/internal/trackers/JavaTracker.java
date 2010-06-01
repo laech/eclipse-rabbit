@@ -33,6 +33,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorReference;
 import org.eclipse.ui.IPartListener;
@@ -431,7 +432,8 @@ public class JavaTracker extends AbstractTracker<JavaEvent>
    */
   private void tryStartSession() {
     IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
-    if (window != null) {
+    Shell shell = window.getShell();
+    if (window != null && shell == shell.getDisplay().getActiveShell()) {
       tryStartSession(window.getPartService().getActivePart());
     }
   }

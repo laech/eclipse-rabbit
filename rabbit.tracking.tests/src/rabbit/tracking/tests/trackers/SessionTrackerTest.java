@@ -23,8 +23,10 @@ import rabbit.tracking.internal.trackers.SessionTracker;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 import org.joda.time.DateTime;
 import org.junit.Test;
@@ -59,11 +61,32 @@ public class SessionTrackerTest extends AbstractTrackerTest<SessionEvent> {
     assertEquals(count + 1, TrackingPlugin.getDefault().getIdleDetector().countObservers());
   }
   
+  /**
+   * Test when the tracker is set to be enabled, if there is no active workbench
+   * window, no data will be recorded.
+   */
+  @Test
+  public void testEnable_noActiveWorkbenchWindow() throws Exception {
+    IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+    window.getShell().setMinimized(true);
+    try {
+      tracker.setEnabled(true);
+      TimeUnit.MILLISECONDS.sleep(30);
+      tracker.setEnabled(false);
+      assertEquals(0, tracker.getData().size());
+
+    } catch (InterruptedException e) {
+      fail(e.getMessage());
+
+    } finally {
+      window.getShell().setMinimized(false);
+    }
+  }
 
   @Test
   public void testEnableThenDisable() throws Exception {
     DateTime before = new DateTime();
-    long durationMillis = 10;
+    long durationMillis = 20;
     tracker.setEnabled(true);
     TimeUnit.MILLISECONDS.sleep(durationMillis);
     tracker.setEnabled(false);
@@ -72,7 +95,7 @@ public class SessionTrackerTest extends AbstractTrackerTest<SessionEvent> {
     Collection<SessionEvent> data = tracker.getData();
     assertEquals(1, data.size());
     SessionEvent event = data.iterator().next();
-    assertTrue(event.getDuration() <= durationMillis);
+    assertTrue(event.getDuration() - 10 <= durationMillis);
     assertTrue(event.getDuration() + 10 >= durationMillis);
     assertTrue(before.compareTo(event.getTime()) <= 0);
     assertTrue(after.compareTo(event.getTime()) >= 0);
@@ -91,7 +114,7 @@ public class SessionTrackerTest extends AbstractTrackerTest<SessionEvent> {
     Collection<SessionEvent> data = tracker.getData();
     assertEquals(1, data.size());
     SessionEvent event = data.iterator().next();
-    assertTrue(event.getDuration() <= durationMillis);
+    assertTrue(event.getDuration() - 10 <= durationMillis);
     assertTrue(event.getDuration() + 10 >= durationMillis);
     assertTrue(before.compareTo(event.getTime()) <= 0);
     assertTrue(after.compareTo(event.getTime()) >= 0);

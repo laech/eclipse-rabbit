@@ -229,8 +229,8 @@ public abstract class AbstractPartTrackerTest<E extends ContinuousEvent>
     E event = tracker.getData().iterator().next();
     assertTrue(start <= event.getTime().getMillis());
     assertTrue(end >= event.getTime().getMillis());
-    assertTrue((end - start) >= event.getDuration());
-    assertTrue(sleepDuration <= event.getDuration());
+    assertTrue((end - start) + 10 >= event.getDuration());
+    assertTrue(sleepDuration - 10 <= event.getDuration());
     assertTrue(hasSamePart(event, editor));
   }
 
@@ -250,8 +250,8 @@ public abstract class AbstractPartTrackerTest<E extends ContinuousEvent>
     E event = tracker.getData().iterator().next();
     assertTrue(start <= event.getTime().getMillis());
     assertTrue(end >= event.getTime().getMillis());
-    assertTrue((end - start) >= event.getDuration());
-    assertTrue(sleepDuration <= event.getDuration());
+    assertTrue((end - start) + 10 >= event.getDuration());
+    assertTrue(sleepDuration - 10 <= event.getDuration());
     assertTrue(hasSamePart(event, editor));
   }
 
@@ -272,8 +272,8 @@ public abstract class AbstractPartTrackerTest<E extends ContinuousEvent>
     E event = tracker.getData().iterator().next();
     assertTrue(start <= event.getTime().getMillis());
     assertTrue(end >= event.getTime().getMillis());
-    assertTrue((end - start) >= event.getDuration());
-    assertTrue(sleepDuration <= event.getDuration());
+    assertTrue((end - start) + 10 >= event.getDuration());
+    assertTrue(sleepDuration - 10 <= event.getDuration());
     assertTrue(hasSamePart(event, editor));
   }
 
@@ -298,6 +298,35 @@ public abstract class AbstractPartTrackerTest<E extends ContinuousEvent>
     callIdleDetectorToNotify();
     assertTrue(tracker.getData().isEmpty());
   }
+  
+  /**
+   * Test when the tracker is set to be enabled, if there is no active workbench
+   * window, no data will be recorded.
+   */
+  @Test
+  public void testEnable_noActiveWorkbenchWindow() throws Exception {
+    PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+      @Override
+      public void run() {
+        PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell().setMinimized(true);
+      }
+    });
+
+    try {
+      tracker.setEnabled(true);
+      TimeUnit.MILLISECONDS.sleep(30);
+      tracker.setEnabled(false);
+      assertEquals(0, tracker.getData().size());
+
+    } finally {
+      PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+        @Override
+        public void run() {
+          PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell().setMinimized(false);
+        }
+      });
+    }
+  }
 
   @Test
   public void testEnableThenDisable() throws Exception {
@@ -315,8 +344,8 @@ public abstract class AbstractPartTrackerTest<E extends ContinuousEvent>
     assertTrue(start <= event.getTime().getMillis());
     assertTrue(end >= event.getTime().getMillis());
     assertTrue((end - start) >= event.getDuration());
-    assertTrue(sleepDuration - 10 <= event.getDuration());
-    assertTrue(sleepDuration + 10 >= event.getDuration());
+    assertTrue(sleepDuration - 20 <= event.getDuration());
+    assertTrue(sleepDuration + 20 >= event.getDuration());
     assertTrue(hasSamePart(event, editor));
   }
 

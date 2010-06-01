@@ -311,6 +311,29 @@ public class PerspectiveTrackerTest extends
     assertTrue(tracker.getData().isEmpty());
   }
 
+  /**
+   * Test when the tracker is set to be enabled, if there is no active workbench
+   * window, no data will be recorded.
+   */
+  @Test
+  public void testEnable_noActiveWorkbenchWindow() throws Exception {
+    for (IWorkbenchWindow win : PlatformUI.getWorkbench().getWorkbenchWindows()) {
+      win.getShell().setMinimized(true);
+    }
+    
+    try {
+      tracker.setEnabled(true);
+      TimeUnit.MILLISECONDS.sleep(50);
+      tracker.setEnabled(false);
+      assertEquals(0, tracker.getData().size());
+
+    } finally {
+      for (IWorkbenchWindow win : PlatformUI.getWorkbench().getWorkbenchWindows()) {
+        win.getShell().setMinimized(false);
+      }
+    }
+  }
+
   @Test
   public void testEnableThenDisable() throws InterruptedException {
     long duration = 20;

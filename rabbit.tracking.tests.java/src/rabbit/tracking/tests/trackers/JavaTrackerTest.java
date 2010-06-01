@@ -22,7 +22,7 @@ import rabbit.tracking.internal.trackers.AbstractTracker;
 import rabbit.tracking.internal.trackers.JavaTracker;
 
 import static org.eclipse.jdt.internal.ui.actions.SelectionConverter.getElementAtOffset;
-import static org.eclipse.jdt.internal.ui.actions.SelectionConverter.*;
+import static org.eclipse.jdt.internal.ui.actions.SelectionConverter.getInputAsTypeRoot;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -42,6 +42,7 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.TextSelection;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swtbot.eclipse.finder.SWTWorkbenchBot;
 import org.eclipse.swtbot.eclipse.finder.waits.Conditions;
@@ -342,6 +343,55 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
     assertEquals(elementArray[0], event.getElement());
   }
   
+  /**
+   * When the tracker is set to enable, but if there is no active workbench
+   * window, no data will be collected.
+   */
+  @Test
+  public void testEnable_noActiveWorkbenchWindow() throws Exception {
+    final Shell[] shellHolder = new Shell[1];
+    final JavaEditor editor = closeAndOpenEditor();
+    
+    // Set the editor to select the package declaration:
+    String content = getDocument(editor).get();
+    int offset = content.indexOf(CLASS_NAME);
+    int length = CLASS_NAME.length();
+    final ITextSelection selection = new TextSelection(offset, length);
+    PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+      @Override public void run() {
+        editor.getSelectionProvider().setSelection(selection);
+        
+        // Open a new shell to cause the workbench window to lose focus:
+        final Shell shell = new Shell(Display.getCurrent());
+        shell.open();
+        shell.forceActive();
+        
+        shellHolder[0] = shell;
+      }
+    });
+    
+    try {
+      tracker.setEnabled(true);
+      TimeUnit.MILLISECONDS.sleep(30);
+      tracker.setEnabled(false);
+      assertEquals(0, tracker.getData().size());
+      
+    } catch (InterruptedException e) {
+      fail(e.getMessage());
+      
+    } finally {
+      final Shell shell = shellHolder[0];
+      if (shell != null) {
+        PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+          @Override public void run() {
+            shell.dispose();
+          }
+        });
+      }
+    }
+    
+  }
+  
   @Test
   public void testEnableThenDisable() throws Exception {
     final JavaEditor editor = closeAndOpenEditor();
@@ -371,8 +421,8 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
     assertEquals(1, events.size());
 
     JavaEvent event = events.iterator().next();
-    assertTrue(before.isBefore(event.getTime()));
-    assertTrue(after.isAfter(event.getTime()));
+    assertTrue(before.compareTo(event.getTime()) <= 0);
+    assertTrue(after.compareTo(event.getTime()) >= 0);
     assertTrue(timeout - 20 <= event.getDuration());
     assertTrue(timeout + 20 >= event.getDuration());
     

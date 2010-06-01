@@ -17,6 +17,7 @@ package rabbit.tracking.internal.trackers;
 
 import rabbit.tracking.internal.TrackingPlugin;
 
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IPartListener;
 import org.eclipse.ui.IPartService;
 import org.eclipse.ui.IWindowListener;
@@ -174,7 +175,10 @@ public abstract class AbstractPartTracker<E> extends AbstractTracker<E>
       @Override
       public void run() {
         IWorkbenchWindow win = wb.getActiveWorkbenchWindow();
-        if (win != null && win.getPartService().getActivePart() != null) {
+        Shell shell = win.getShell();
+        if (win != null &&
+            shell == shell.getDisplay().getActiveShell() &&
+            win.getPartService().getActivePart() != null) {
           startSession(win.getPartService().getActivePart());
         }
       }

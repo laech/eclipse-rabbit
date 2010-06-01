@@ -171,9 +171,10 @@ public class PerspectiveTracker extends AbstractTracker<PerspectiveEvent>
           return;
         }
         IWorkbenchWindow win = workbench.getActiveWorkbenchWindow();
-        if (win == null) {
+        if (win == null || win.getShell() != win.getShell().getDisplay().getActiveShell()) {
           return;
         }
+        
         IWorkbenchPage page = win.getActivePage();
         if (page == null) {
           return;
@@ -227,6 +228,10 @@ public class PerspectiveTracker extends AbstractTracker<PerspectiveEvent>
   }
 
   private void tryStartSession(IWorkbenchWindow win) {
+    if (win.getShell() != win.getShell().getDisplay().getActiveShell()) {
+      return;
+    }
+    
     IWorkbenchPage page = win.getActivePage();
     if (page == null) {
       return;
