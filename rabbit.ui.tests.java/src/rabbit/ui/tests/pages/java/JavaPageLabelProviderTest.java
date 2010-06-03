@@ -116,8 +116,8 @@ public class JavaPageLabelProviderTest {
     
     contentProvider.getViewer().setInput(Arrays.asList(des));
     
-    contentProvider.setSelectedCategories(JavaCategory.TYPE);
-    contentProvider.setPaintCategory(JavaCategory.TYPE);
+    contentProvider.setSelectedCategories(JavaCategory.MEMBER);
+    contentProvider.setPaintCategory(JavaCategory.MEMBER);
     TreeNode node = contentProvider.getRoot().getChildren()[0];
     assertEquals(des.getValue(), contentProvider.getValue(node));
     assertEquals(format(contentProvider.getValue(node)), 

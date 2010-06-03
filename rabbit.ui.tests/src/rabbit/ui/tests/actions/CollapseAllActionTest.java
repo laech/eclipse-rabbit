@@ -20,13 +20,13 @@ import rabbit.ui.internal.actions.CollapseAllAction;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -63,8 +63,7 @@ public class CollapseAllActionTest {
 
   @Test
   public void testImageDescriptor() {
-    assertSame(PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(
-        ISharedImages.IMG_ELCL_COLLAPSEALL), action.getImageDescriptor());
+    assertNotNull(action.getImageDescriptor());
   }
 
   @Test
