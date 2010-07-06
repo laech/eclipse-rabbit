@@ -141,24 +141,12 @@ public class Program {
         "perspectiveEvents-2010-04.xml",
         "perspectiveEvents-2010-05.xml",
         "perspectiveEvents-2010-06.xml",
-        "perspectiveEvents-2010-07.xml",
-        "perspectiveEvents-2010-08.xml",
-        "perspectiveEvents-2010-09.xml",
-        "perspectiveEvents-2010-10.xml",
-        "perspectiveEvents-2010-11.xml",
-        "perspectiveEvents-2010-12.xml",
     };
     String[] fileEventFileNames = new String[] {
         "fileEvents-2010-03.xml",
         "fileEvents-2010-04.xml",
         "fileEvents-2010-05.xml",
         "fileEvents-2010-06.xml",
-        "fileEvents-2010-07.xml",
-        "fileEvents-2010-08.xml",
-        "fileEvents-2010-09.xml",
-        "fileEvents-2010-10.xml",
-        "fileEvents-2010-11.xml",
-        "fileEvents-2010-12.xml",
     };
     
     String path = System.getProperty("user.home") + File.separator + "Rabbit";
