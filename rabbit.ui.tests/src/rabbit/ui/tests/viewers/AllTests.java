@@ -26,6 +26,7 @@ import org.junit.runners.Suite.SuiteClasses;
   PageDescriptorLabelProviderTest.class,
   TreeNodesTest.class,
   TreeViewerLabelSorterTest.class,
+  DeepPatternFilterTest.class,
 })
 public class AllTests {
 

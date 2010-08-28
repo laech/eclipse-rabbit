@@ -27,6 +27,7 @@ import rabbit.ui.internal.actions.GroupByAction;
 import rabbit.ui.internal.actions.ShowHideFilterControlAction;
 import rabbit.ui.internal.util.ICategory;
 import rabbit.ui.internal.viewers.CellPainter;
+import rabbit.ui.internal.viewers.DeepPatternFilter;
 import rabbit.ui.internal.viewers.DelegatingStyledCellLabelProvider;
 import rabbit.ui.internal.viewers.TreeViewerLabelSorter;
 import rabbit.ui.internal.viewers.TreeViewerSorter;
@@ -136,7 +137,7 @@ public class ResourcePage extends AbstractAccessorPage {
 
   @Override
   protected PatternFilter createFilter() {
-    return new PatternFilter();
+    return new DeepPatternFilter();
   }
 
   @Override
