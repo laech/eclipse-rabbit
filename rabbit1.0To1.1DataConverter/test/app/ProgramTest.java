@@ -194,6 +194,61 @@ public class ProgramTest {
     assertEquals(filePath2, event.getAttribute("filePath"));
     assertEquals(String.valueOf(duration2), event.getAttribute("duration"));
   }
+  
+  @Test
+  public void testHandleFileEventFile_alreadyConvertedFile() throws Exception {
+    /*
+     * Builds an file event XML document that has the new format, calling 
+     * converting on it should not change anything.
+     * 
+     * <events>
+     *   <fileEvents date="2010-01-01">
+     *     <fileEvent filePath="/a/b.txt" duration="10" />
+     *   </fileEvents>
+     * </events>
+     */
+    
+    final String fileId = "1";
+    final String filePath = "/a/b.txt";
+    final String date = "2010-01-01";
+    final String duration = "10";
+    Map<String, String> fileIdToPath = new HashMap<String, String>();
+    fileIdToPath.put(fileId, filePath);
+    
+    Document doc = builder.newDocument();
+    Element root = doc.createElement("events");
+    doc.appendChild(root);
+    
+    Element fileEvents = doc.createElement("fileEvents");
+    fileEvents.setAttribute("date", date);
+    root.appendChild(fileEvents);
+    
+    Element event = doc.createElement("fileEvent");
+    event.setAttribute("filePath", filePath);
+    event.setAttribute("duration", duration);
+    fileEvents.appendChild(event);
+    
+    File file = File.createTempFile("abc", "123");
+    transformer.transform(new DOMSource(doc), new StreamResult(file));
+    
+    Program.handleFileEventFile(file, fileIdToPath);
+    
+    doc = builder.parse(file);
+    root = (Element) doc.getFirstChild();
+    assertEquals("events", root.getNodeName());
+    
+    NodeList list = root.getChildNodes();
+    assertEquals(1, list.getLength());
+    fileEvents = (Element) list.item(0);
+    assertEquals("fileEvents", fileEvents.getNodeName());
+    assertEquals(date, fileEvents.getAttribute("date"));
+    
+    assertEquals(1, fileEvents.getElementsByTagName("fileEvent").getLength());
+    event = (Element) fileEvents.getElementsByTagName("fileEvent").item(0);
+    assertEquals("fileEvent", event.getNodeName());
+    assertEquals(duration, event.getAttribute("duration"));
+    assertEquals(filePath, event.getAttribute("filePath"));
+  }
 
   @Test
   public void testLoadResourceMappings() throws Exception {

@@ -134,21 +134,6 @@ public class Program {
   }
   
   public static void run() {
-    System.out.println("Working...");
-    
-    String[] perspectiveEventFileNames = new String[] {
-        "perspectiveEvents-2010-03.xml",
-        "perspectiveEvents-2010-04.xml",
-        "perspectiveEvents-2010-05.xml",
-        "perspectiveEvents-2010-06.xml",
-    };
-    String[] fileEventFileNames = new String[] {
-        "fileEvents-2010-03.xml",
-        "fileEvents-2010-04.xml",
-        "fileEvents-2010-05.xml",
-        "fileEvents-2010-06.xml",
-    };
-    
     String path = System.getProperty("user.home") + File.separator + "Rabbit";
     File home = new File(path);
     File[] subdirs = home.listFiles();
@@ -161,19 +146,15 @@ public class Program {
     Set<File> fileEventFiles = new HashSet<File>();
     for (File dir : subdirs) {
       
-      // Loads the perspective event files to be processed:
-      for (String fileName : perspectiveEventFileNames) {
-        File file = new File(dir.getAbsoluteFile() + File.separator + fileName);
-        if (file.exists()) {
-          perspectiveEventFiles.add(file);
+      // Loads the files to be processed:
+      for (File f : dir.listFiles()) {
+        if (f.isDirectory()) {
+          continue;
         }
-      }
-      
-      // Loads the file event files to be processed:
-      for (String fileName : fileEventFileNames) {
-        File file = new File(dir.getAbsoluteFile() + File.separator + fileName);
-        if (file.exists()) {
-          fileEventFiles.add(file);
+        if (f.getName().startsWith("perspectiveEvents")) {
+          perspectiveEventFiles.add(f);
+        } else if (f.getName().startsWith("fileEvents")) {
+          fileEventFiles.add(f);
         }
       }
       
@@ -248,6 +229,10 @@ public class Program {
         
         Element event = (Element) oldEvents.item(j);
         String fileId = event.getAttribute(ATTR_FILE_ID);
+        if (fileId.equals("")) {
+          continue; // No fileId, can't be processed, may be converted already?
+        }
+        
         String filePath = fileIdToPath.get(fileId);
         if (filePath != null) {
           event.setAttribute(ATTR_FILE_PATH, filePath);
