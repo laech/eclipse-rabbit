@@ -30,18 +30,41 @@ import javax.annotation.Nullable;
 public class TreeNodes {
 
   /**
-   * Appends a child node to a parent node.
+   * Appends a child node to a parent node. Calling this method is equal to 
+   * calling {@link #appendToParent(TreeNode, Object, true)}.
+   * 
    * 
    * @param parent The parent node.
    * @param newChildValue The value of the child node to be created.
    * @return A new {@code TreeNode} containing the value.
+   * @deprecated User {@link #appendToParent(TreeNode, Object, boolean)} instead.
    */
+  @Deprecated
   public static TreeNode appendToParent(TreeNode parent, Object newChildValue) {
+    return appendToParent(parent, newChildValue, true);
+  }
+  
+  /**
+   * Appends a child node to a parent node.
+   * 
+   * @param parent The parent node.
+   * @param newChildValue The value of the child node to be created.
+   * @param identityNode True to create an {@link IdentityNode}, false to create
+   *          a regular {@link TreeNode}.
+   * @return A new {@code TreeNode} containing the value.
+   */
+  public static TreeNode appendToParent(TreeNode parent, Object newChildValue, boolean identityNode) {
     TreeNode[] oldChildren = parent.getChildren();
     if (oldChildren == null)
       oldChildren = new TreeNode[0];
 
-    TreeNode newChild = new TreeNode(newChildValue);
+    
+    TreeNode newChild = null;
+    if (identityNode) {
+      newChild = new IdentityNode(newChildValue);
+    } else {
+      newChild = new TreeNode(newChildValue);
+    }
     newChild.setParent(parent);
 
     TreeNode[] newChildren = Arrays.copyOf(oldChildren, oldChildren.length + 1);
