@@ -37,7 +37,7 @@ public class TreeNodes {
    * @param parent The parent node.
    * @param newChildValue The value of the child node to be created.
    * @return A new {@code TreeNode} containing the value.
-   * @deprecated User {@link #appendToParent(TreeNode, Object, boolean)} instead.
+   * @deprecated Use {@link #appendToParent(TreeNode, Object, boolean)} instead.
    */
   @Deprecated
   public static TreeNode appendToParent(TreeNode parent, Object newChildValue) {
@@ -150,7 +150,7 @@ public class TreeNodes {
 
   /**
    * Try to find a child node who has the given value, if not found, one will be
-   * created.
+   * created using {@link #appendToParent(TreeNode, Object)}.
    * 
    * @param parent The parent node.
    * @param childValue The value of the child node.
