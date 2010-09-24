@@ -38,7 +38,7 @@ public class LaunchEventConverter extends
     for (IPath path : element.getFilePaths()) {
       type.getFilePath().add(path.toString());
     }
-    type.setTotalDuration(element.getDuration());
+    type.setTotalDuration(element.getInterval().toDurationMillis());
     type.setName(element.getLaunchConfiguration().getName());
     try {
       type.setLaunchTypeId(element.getLaunchConfiguration().getType().getIdentifier());

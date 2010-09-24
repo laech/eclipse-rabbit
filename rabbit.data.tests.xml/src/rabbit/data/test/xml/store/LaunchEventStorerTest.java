@@ -36,6 +36,7 @@ import org.eclipse.debug.core.Launch;
 import org.eclipse.debug.internal.core.LaunchConfiguration;
 import org.eclipse.debug.internal.core.LaunchConfigurationType;
 import org.joda.time.DateTime;
+import org.joda.time.Interval;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -113,7 +114,8 @@ public class LaunchEventStorerTest extends
     Set<IPath> fileIds = new HashSet<IPath>();
     fileIds.add(new Path("/ab1c"));
     fileIds.add(new Path("/d1ef"));
-    return new LaunchEvent(dateTime, duration, launch, config, fileIds);
+    return new LaunchEvent(new Interval(dateTime, dateTime.plus(duration)),
+        launch, config, fileIds);
   }
 
   @Override
@@ -123,7 +125,8 @@ public class LaunchEventStorerTest extends
     ILaunch launch = new Launch(config, ILaunchManager.PROFILE_MODE, null);
     Set<IPath> fileIds = new HashSet<IPath>();
     fileIds.add(new Path("/1ab1c"));
-    return new LaunchEvent(dateTime, duration, launch, config, fileIds);
+    return new LaunchEvent(new Interval(dateTime, dateTime.plus(duration)),
+        launch, config, fileIds);
   }
 
   @Override

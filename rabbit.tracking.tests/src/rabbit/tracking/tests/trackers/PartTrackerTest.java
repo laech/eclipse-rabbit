@@ -17,6 +17,7 @@ package rabbit.tracking.tests.trackers;
 
 import rabbit.data.store.model.PartEvent;
 import rabbit.tracking.internal.trackers.PartTracker;
+import rabbit.tracking.internal.util.WorkbenchUtil;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -25,7 +26,7 @@ import static org.junit.Assert.fail;
 import org.eclipse.swtbot.swt.finder.junit.SWTBotJunit4ClassRunner;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPart;
-import org.joda.time.DateTime;
+import org.joda.time.Interval;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -39,15 +40,19 @@ import java.util.Iterator;
 public class PartTrackerTest extends AbstractPartTrackerTest<PartEvent> {
 
   @Test
-  public void testNewWindow() {
-    long sleepDuration = 15;
-    long start = System.currentTimeMillis();
+  public void testNewWindow() throws Exception {
     tracker.setEnabled(true);
     openNewWindow();
-    IEditorPart editor = openNewEditor();
-    uiSleep(sleepDuration);
-    openNewEditor();
-    long end = System.currentTimeMillis();
+
+    long preStart = System.currentTimeMillis();
+    IEditorPart editor = openNewEditor(); // Start
+    long postStart = System.currentTimeMillis();
+
+    bot.sleep(20);
+
+    long preEnd = System.currentTimeMillis();
+    openNewEditor(); // End
+    long postEnd = System.currentTimeMillis();
 
     // One for the original window,
     // one for the newly opened window's default active view,
@@ -62,18 +67,18 @@ public class PartTrackerTest extends AbstractPartTrackerTest<PartEvent> {
       }
       event = it.next();
     }
+
+    long start = event.getInterval().getStartMillis();
+    long end = event.getInterval().getEndMillis();
+    checkTime(preStart, start, postStart, preEnd, end, postEnd);
     assertTrue(hasSamePart(event, editor));
-    assertTrue(start <= event.getTime().getMillis());
-    assertTrue(end >= event.getTime().getMillis());
-    assertTrue(sleepDuration <= event.getDuration());
-    assertTrue((end - start) >= event.getDuration());
 
     bot.activeShell().close();
   }
 
   @Override
   protected PartEvent createEvent() {
-    return new PartEvent(new DateTime(), 10, getActiveWindow()
+    return new PartEvent(new Interval(0, 1), WorkbenchUtil.getActiveWindow()
         .getPartService().getActivePart());
   }
 
@@ -85,19 +90,5 @@ public class PartTrackerTest extends AbstractPartTrackerTest<PartEvent> {
   @Override
   protected boolean hasSamePart(PartEvent event, IWorkbenchPart part) {
     return event.getWorkbenchPart().equals(part);
-  }
-
-  @Override
-  protected void internalAssertAccuracy(PartEvent event, IWorkbenchPart part,
-      long durationInMillis, int size, DateTime start, DateTime end) {
-
-    assertEquals(size, tracker.getData().size());
-    assertEquals(part, event.getWorkbenchPart());
-    assertTrue(start.compareTo(event.getTime()) <= 0);
-    assertTrue(end.compareTo(event.getTime()) >= 0);
-
-    // 1/10 of a second is acceptable?
-    assertTrue(durationInMillis - 100 <= event.getDuration());
-    assertTrue(durationInMillis + 100 >= event.getDuration());
   }
 }

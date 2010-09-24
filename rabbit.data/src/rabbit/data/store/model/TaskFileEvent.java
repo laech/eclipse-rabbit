@@ -15,42 +15,30 @@
  */
 package rabbit.data.store.model;
 
-
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.mylyn.tasks.core.ITask;
-import org.joda.time.DateTime;
-
-import javax.annotation.Nonnull;
+import org.joda.time.Interval;
 
 /**
  * Represents a task event.
  */
 public class TaskFileEvent extends FileEvent {
 
-  @Nonnull
   private final ITask task;
 
   /**
    * Constructs a new event.
    * 
-   * @param endTime The end time of the event.
-   * @param duration The duration of the event, in milliseconds.
+   * @param interval The time interval.
    * @param filePath The path of the file.
    * @param task The task that was working on.
-   * @throws IllegalArgumentException If duration is negative.
-   * @throws NullPointerException If time is null, or file path is null, or task
-   *           is null.
+   * @throws NullPointerException If any of the arguments are null.
    */
-  public TaskFileEvent(@Nonnull DateTime endTime, 
-                                long duration, 
-                       @Nonnull IPath filePath, 
-                       @Nonnull ITask task) {
-    
-    super(endTime, duration, filePath);
-    checkNotNull(task);
-    this.task = task;
+  public TaskFileEvent(Interval interval, IPath filePath, ITask task) {
+    super(interval, filePath);
+    this.task = checkNotNull(task);
   }
 
   /**
@@ -58,7 +46,6 @@ public class TaskFileEvent extends FileEvent {
    * 
    * @return The task.
    */
-  @Nonnull
   public final ITask getTask() {
     return task;
   }

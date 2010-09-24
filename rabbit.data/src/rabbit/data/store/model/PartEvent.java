@@ -18,33 +18,25 @@ package rabbit.data.store.model;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.eclipse.ui.IWorkbenchPart;
-import org.joda.time.DateTime;
-
-import javax.annotation.Nonnull;
+import org.joda.time.Interval;
 
 /**
  * Represents a workbench part event.
  */
 public class PartEvent extends ContinuousEvent {
 
-  @Nonnull
   private final IWorkbenchPart workbenchPart;
 
   /**
    * Constructs a new event.
    * 
-   * @param endTime The end time of the event.
-   * @param duration The duration of the event, in milliseconds.
+   * @param interval The time interval.
    * @param part The workbench part.
-   * @throws NullPointerException If time is null or part is null.
-   * @throws IllegalArgumentException If duration is negative.
+   * @throws NullPointerException If any of the arguments are null.
    */
-  public PartEvent(@Nonnull DateTime endTime, long duration,
-      @Nonnull IWorkbenchPart part) {
-    super(endTime, duration);
-    checkNotNull(part, "WorkbenchPart cannot be null");
-
-    this.workbenchPart = part;
+  public PartEvent(Interval interval, IWorkbenchPart part) {
+    super(interval);
+    this.workbenchPart = checkNotNull(part);
   }
 
   /**
@@ -52,7 +44,6 @@ public class PartEvent extends ContinuousEvent {
    * 
    * @return The workbench part.
    */
-  @Nonnull
   public final IWorkbenchPart getWorkbenchPart() {
     return workbenchPart;
   }

@@ -22,6 +22,7 @@ import rabbit.data.store.model.SessionEvent;
 import rabbit.data.test.xml.AbstractStorerTest;
 
 import org.joda.time.DateTime;
+import org.joda.time.Interval;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -34,12 +35,12 @@ public class SessionEventStorerTest extends
 
   @Override
   protected SessionEvent createEvent(DateTime dateTime) throws Exception {
-    return new SessionEvent(dateTime, 12);
+    return new SessionEvent(new Interval(dateTime, dateTime.plus(1)));
   }
 
   @Override
   protected SessionEvent createEventDiff(DateTime dateTime) throws Exception {
-    return new SessionEvent(dateTime, 129834);
+    return new SessionEvent(new Interval(dateTime, dateTime.plus(2)));
   }
 
   @Override

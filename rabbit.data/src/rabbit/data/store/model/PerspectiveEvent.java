@@ -18,34 +18,25 @@ package rabbit.data.store.model;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.eclipse.ui.IPerspectiveDescriptor;
-import org.joda.time.DateTime;
-
-import javax.annotation.Nonnull;
+import org.joda.time.Interval;
 
 /**
  * Represents a perspective event.
  */
 public class PerspectiveEvent extends ContinuousEvent {
 
-  @Nonnull
   private final IPerspectiveDescriptor perspective;
 
   /**
    * Constructs a perspective event.
    * 
-   * @param endTime The end time of the event.
-   * @param duration The duration in milliseconds.
+   * @param interval The time interval.
    * @param perspective The perspective.
-   * @throws NullPointerException If time is null or perspective is null.
-   * @throws IllegalArgumentException If duration is negative.
+   * @throws NullPointerException If any of the arguments are null.
    */
-  public PerspectiveEvent(@Nonnull DateTime endTime, long duration,
-      @Nonnull IPerspectiveDescriptor perspective) {
-
-    super(endTime, duration);
-    checkNotNull(perspective, "Perspective cannot be null");
-
-    this.perspective = perspective;
+  public PerspectiveEvent(Interval interval, IPerspectiveDescriptor perspective) {
+    super(interval);
+    this.perspective = checkNotNull(perspective);
   }
 
   /**
@@ -53,7 +44,6 @@ public class PerspectiveEvent extends ContinuousEvent {
    * 
    * @return The perspective.
    */
-  @Nonnull
   public final IPerspectiveDescriptor getPerspective() {
     return perspective;
   }

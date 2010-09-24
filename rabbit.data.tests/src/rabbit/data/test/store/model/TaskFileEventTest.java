@@ -24,7 +24,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.mylyn.internal.tasks.core.LocalTask;
 import org.eclipse.mylyn.tasks.core.ITask;
-import org.joda.time.DateTime;
+import org.joda.time.Interval;
 import org.junit.Test;
 
 /**
@@ -35,26 +35,26 @@ public class TaskFileEventTest extends FileEventTest {
 
   @Test(expected = NullPointerException.class)
   public void testConstructor_taskNull() {
-    new TaskFileEvent(new DateTime(), 1, 
-        Path.fromPortableString("/p/a.txt"), null);
+    new TaskFileEvent(new Interval(0, 1), Path.fromPortableString("/p/a.txt"),
+        null);
   }
 
   @Test
   public void testGetTask() {
     ITask task = new LocalTask("abc", "def");
-    assertEquals(task, new TaskFileEvent(new DateTime(), 1, 
-        Path.fromPortableString("/p/a.txt"), task).getTask());
+    assertEquals(
+        task,
+        new TaskFileEvent(new Interval(0, 1), Path
+            .fromPortableString("/p/a.txt"), task).getTask());
   }
-  
+
   @Override
-  protected final FileEvent createEvent(DateTime time, long duration, IPath filePath) {
-    return createEvent(time, duration, filePath, new LocalTask("a", "1"));
+  protected final FileEvent createEvent(Interval interval, IPath filePath) {
+    return createEvent(interval, filePath, new LocalTask("a", "1"));
   }
-  
-  /**
-   * @see TaskFileEvent#TaskEvent(DateTime, long, IPath, ITask)
-   */
-  protected TaskFileEvent createEvent(DateTime time, long duration, IPath filePath, ITask task) {
-    return new TaskFileEvent(time, duration, filePath, task);
+
+  protected TaskFileEvent createEvent(Interval interval, IPath filePath,
+      ITask task) {
+    return new TaskFileEvent(interval, filePath, task);
   }
 }

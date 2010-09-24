@@ -1,17 +1,17 @@
 /*
  * Copyright 2010 The Rabbit Eclipse Plug-in Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
  */
 package rabbit.tracking.internal.trackers;
 
@@ -20,40 +20,55 @@ import rabbit.data.store.IStorer;
 import rabbit.data.store.model.SessionEvent;
 import rabbit.tracking.internal.IdleDetector;
 import rabbit.tracking.internal.TrackingPlugin;
+import rabbit.tracking.internal.util.Recorder;
+import rabbit.tracking.internal.util.Recorder.Record;
 
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
-import org.joda.time.DateTime;
+import org.joda.time.Interval;
 
 import java.util.Observable;
 import java.util.Observer;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Tracks duration of Eclipse sessions.
  */
-public class SessionTracker extends AbstractTracker<SessionEvent> implements
-    Observer {
+public class SessionTracker extends AbstractTracker<SessionEvent> {
 
-  /**
-   * Variable to indicate the start time of a session, in nanoseconds. If the 
-   * value is less than zero, that means a session has not been started. The
-   * value must be reset to a negative value after a session is finished. Note
-   * that is important to use {@link System#nanoTime()} to set this time,
-   * because {@link System#nanoTime()} is independent of the system time, which
-   * won't cause errors when the user changes the system time.
-   */
-  private long startNanoTime = -1;
-  
-  /**
-   * Updates {@link #startNanoTime} to {@link System#nanoTime()} only if
-   * there is a currently active workbench window.
-   */
-  private final Runnable updateStartNanoTime = new Runnable() {
-    @Override public void run() {
+  private final Recorder<Object> recorder = new Recorder<Object>();
+
+  private final Observer observer = new Observer() {
+    @Override
+    public void update(Observable o, Object arg) {
+      if (!isEnabled()) {
+        return;
+      }
+
+      if (o == TrackingPlugin.getDefault().getIdleDetector()) {
+        IdleDetector dt = (IdleDetector) o;
+        if (dt.isUserActive()) {
+          PlatformUI.getWorkbench().getDisplay().syncExec(startRecorder);
+        } else {
+          recorder.stop();
+        }
+
+      } else if (o == recorder) {
+        Record<Object> r = recorder.getLastRecord();
+        long start = r.getStartTimeMillis();
+        long end = r.getEndTimeMillis();
+        addData(new SessionEvent(new Interval(start, end)));
+      }
+    }
+  };
+
+  private final Runnable startRecorder = new Runnable() {
+    @Override
+    public void run() {
       // Check for active shell instead of active workbench window to include
-      // dialogs:
-      if (PlatformUI.getWorkbench().getDisplay().getActiveShell() != null) {
-        startNanoTime = System.nanoTime();
+      // dialogs (!shell.getMinimized() is also important, why?):
+      Shell shell = PlatformUI.getWorkbench().getDisplay().getActiveShell();
+      if (shell != null && !shell.getMinimized()) {
+        recorder.start();
       }
     }
   };
@@ -62,6 +77,7 @@ public class SessionTracker extends AbstractTracker<SessionEvent> implements
    * Constructor.
    */
   public SessionTracker() {
+    recorder.addObserver(observer);
   }
 
   @Override
@@ -71,56 +87,13 @@ public class SessionTracker extends AbstractTracker<SessionEvent> implements
 
   @Override
   protected void doDisable() {
-    TrackingPlugin.getDefault().getIdleDetector().deleteObserver(this);
-    tryEndSession();
+    TrackingPlugin.getDefault().getIdleDetector().deleteObserver(observer);
+    recorder.stop();
   }
 
   @Override
   protected void doEnable() {
-    TrackingPlugin.getDefault().getIdleDetector().addObserver(this);
-    tryStartSession();
-  }
-
-  @Override
-  public void update(Observable observable, Object arg) {
-    if (!isEnabled()) {
-      return;
-    }
-    
-    if (observable == TrackingPlugin.getDefault().getIdleDetector()) {
-      if (((IdleDetector) observable).isUserActive()) {
-        tryStartSession();
-      } else {
-        tryEndSession();
-      };
-    }
-  }
-  
-  /**
-   * Tries to end a tracking session if there is a started session.
-   */
-  private void tryEndSession() {
-    if (startNanoTime < 0) {
-      return;
-    }
-    long durationMillis = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startNanoTime);
-    if (durationMillis > 0) {
-      addData(new SessionEvent(new DateTime(), durationMillis));
-    }
-    resetSession();
-  }
-  
-  /**
-   * Reset, to be called at end of each tracking session.
-   */
-  private void resetSession() {
-    startNanoTime = -1;
-  }
-  
-  /**
-   * Tries to start a tracking session if there is any active workbench window.
-   */
-  private void tryStartSession() {
-    PlatformUI.getWorkbench().getDisplay().syncExec(updateStartNanoTime);
+    TrackingPlugin.getDefault().getIdleDetector().addObserver(observer);
+    PlatformUI.getWorkbench().getDisplay().syncExec(startRecorder);
   }
 }

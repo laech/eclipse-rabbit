@@ -1,17 +1,17 @@
 /*
  * Copyright 2010 The Rabbit Eclipse Plug-in Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
  */
 package rabbit.data.test.xml.convert;
 
@@ -35,6 +35,7 @@ import org.eclipse.debug.core.Launch;
 import org.eclipse.debug.internal.core.LaunchConfiguration;
 import org.eclipse.debug.internal.core.LaunchConfigurationType;
 import org.joda.time.DateTime;
+import org.joda.time.Interval;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -61,7 +62,8 @@ public class LaunchEventConverterTest extends
     filePaths.add(new Path("/abc"));
     filePaths.add(new Path("/def"));
 
-    LaunchEvent event = new LaunchEvent(time, duration, launch, config, filePaths);
+    LaunchEvent event = new LaunchEvent(new Interval(time.getMillis(),
+        time.getMillis() + duration), launch, config, filePaths);
     LaunchEventType type = converter.convert(event);
 
     assertEquals(1, type.getCount());
@@ -75,7 +77,7 @@ public class LaunchEventConverterTest extends
     }
   }
 
-//Empty class for testing.
+  // Empty class for testing.
   private static class ConfigurationElementForTest extends
       ConfigurationElementHandle {
 

@@ -18,116 +18,112 @@ package rabbit.tracking.internal.trackers;
 import rabbit.data.handler.DataHandler;
 import rabbit.data.store.IStorer;
 import rabbit.data.store.model.PerspectiveEvent;
+import rabbit.tracking.internal.IdleDetector;
 import rabbit.tracking.internal.TrackingPlugin;
+import rabbit.tracking.internal.util.Recorder;
+import rabbit.tracking.internal.util.WorkbenchUtil;
 
 import org.eclipse.ui.IPerspectiveDescriptor;
-import org.eclipse.ui.IPerspectiveListener3;
+import org.eclipse.ui.IPerspectiveListener;
 import org.eclipse.ui.IWindowListener;
-import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PerspectiveAdapter;
 import org.eclipse.ui.PlatformUI;
-import org.joda.time.DateTime;
+import org.joda.time.Interval;
 
+import java.util.Observable;
 import java.util.Observer;
-import java.util.concurrent.TimeUnit;
+
+import javax.annotation.Nullable;
 
 /**
  * Tracker for tracking on perspective usage.
  */
-public class PerspectiveTracker extends AbstractTracker<PerspectiveEvent>
-    implements IPerspectiveListener3, IWindowListener, Observer {
+public class PerspectiveTracker extends AbstractTracker<PerspectiveEvent> {
 
-  /** Start time of a session, in nanoseconds. */
-  private long start;
-  private IPerspectiveDescriptor currentPerspective;
+  /**
+   * A recorder for recording the time.
+   */
+  private final Recorder<IPerspectiveDescriptor> recorder = new Recorder<IPerspectiveDescriptor>();
+
+  /**
+   * An observer observing on the {@link #recorder} and user activeness.
+   */
+  private final Observer observer = new Observer() {
+
+    @Override
+    public void update(Observable o, Object arg) {
+      if (!isEnabled()) {
+        return;
+      }
+
+      if (o == TrackingPlugin.getDefault().getIdleDetector()) {
+        if (((IdleDetector) o).isUserActive()) {
+          checkStart();
+        } else {
+          recorder.stop();
+        }
+
+      } else if (o == recorder) {
+        long start = recorder.getLastRecord().getStartTimeMillis();
+        long end = recorder.getLastRecord().getEndTimeMillis();
+        IPerspectiveDescriptor p = recorder.getLastRecord().getUserData();
+        addData(new PerspectiveEvent(new Interval(start, end), p));
+      }
+    }
+  };
+
+  /**
+   * A perspective listener for tracking time spent on perspectives.
+   */
+  private final IPerspectiveListener persplistener = new PerspectiveAdapter() {
+
+    @Override
+    public void perspectiveActivated(IWorkbenchPage page,
+        IPerspectiveDescriptor perspective) {
+      recorder.start(perspective);
+    }
+
+    @Override
+    public void perspectiveDeactivated(IWorkbenchPage page,
+        IPerspectiveDescriptor perspective) {
+      recorder.stop();
+    }
+  };
+
+  private final IWindowListener winlistener = new IWindowListener() {
+
+    @Override
+    public void windowActivated(IWorkbenchWindow win) {
+      recorder.start(WorkbenchUtil.getPerspective(win));
+    }
+
+    @Override
+    public void windowClosed(IWorkbenchWindow win) {
+      win.removePerspectiveListener(persplistener);
+      recorder.stop();
+    }
+
+    @Override
+    public void windowDeactivated(IWorkbenchWindow win) {
+      recorder.stop();
+    }
+
+    @Override
+    public void windowOpened(IWorkbenchWindow win) {
+      win.addPerspectiveListener(persplistener);
+      if (WorkbenchUtil.isActiveShell(win)) {
+        checkStart(win);
+      }
+    }
+  };
 
   /**
    * Constructor.
    */
   public PerspectiveTracker() {
-    super();
-  }
-
-  @Override
-  public void perspectiveActivated(IWorkbenchPage page,
-      IPerspectiveDescriptor perspective) {
-    startSession(perspective);
-    /*
-     * Note: perspectiveActivated is also called when a new perspective is
-     * opened and become active.
-     */
-  }
-
-  @Override
-  public void perspectiveChanged(IWorkbenchPage page,
-      IPerspectiveDescriptor perspective, IWorkbenchPartReference partRef,
-      String changeId) {
-  }
-
-  @Override
-  public void perspectiveChanged(IWorkbenchPage page,
-      IPerspectiveDescriptor perspective, String changeId) {
-  }
-
-  @Override
-  public void perspectiveClosed(IWorkbenchPage page,
-      IPerspectiveDescriptor perspective) {
-  }
-
-  @Override
-  public void perspectiveDeactivated(IWorkbenchPage page,
-      IPerspectiveDescriptor perspective) {
-    tryEndSession();
-    /*
-     * Note: perspectiveDeactivated is also called when an active perspective is
-     * closed.
-     */
-  }
-
-  @Override
-  public void perspectiveOpened(IWorkbenchPage page,
-      IPerspectiveDescriptor perspective) {
-  }
-
-  @Override
-  public void perspectiveSavedAs(IWorkbenchPage page,
-      IPerspectiveDescriptor oldPerspective,
-      IPerspectiveDescriptor newPerspective) {
-  }
-
-  @Override
-  public void update(java.util.Observable o, Object arg) {
-    if (o == TrackingPlugin.getDefault().getIdleDetector() && isEnabled()) {
-      checkState(TrackingPlugin.getDefault().getIdleDetector().isUserActive());
-    }
-  }
-
-  @Override
-  public void windowActivated(IWorkbenchWindow window) {
-    // Starts tracking if there is an active perspective in this window.
-    tryStartSession(window);
-  }
-
-  @Override
-  public void windowClosed(IWorkbenchWindow window) {
-    window.removePerspectiveListener(this);
-    // Stops tracking if there is an active perspective in this window.
-    tryEndSession();
-  }
-
-  @Override
-  public void windowDeactivated(IWorkbenchWindow window) {
-    // Stops tracking if there is an active perspective in this window.
-    tryEndSession();
-  }
-
-  @Override
-  public void windowOpened(IWorkbenchWindow window) {
-    window.addPerspectiveListener(this);
-    // Starts tracking if there is an active perspective in this window.
-    tryStartSession(window);
+    recorder.addObserver(observer);
   }
 
   @Override
@@ -137,108 +133,48 @@ public class PerspectiveTracker extends AbstractTracker<PerspectiveEvent>
 
   @Override
   protected void doDisable() {
-    checkState(false);
+    recorder.stop();
     for (IWorkbenchWindow win : getWorkbenchWindows()) {
-      win.removePerspectiveListener(this);
+      win.removePerspectiveListener(persplistener);
     }
-    TrackingPlugin.getDefault().getIdleDetector().deleteObserver(this);
-    PlatformUI.getWorkbench().removeWindowListener(this);
+    TrackingPlugin.getDefault().getIdleDetector().deleteObserver(observer);
+    PlatformUI.getWorkbench().removeWindowListener(winlistener);
   }
 
   @Override
   protected void doEnable() {
-    checkState(true);
+    checkStart();
     for (IWorkbenchWindow win : getWorkbenchWindows()) {
-      win.addPerspectiveListener(this);
+      win.addPerspectiveListener(persplistener);
     }
-    TrackingPlugin.getDefault().getIdleDetector().addObserver(this);
-    PlatformUI.getWorkbench().addWindowListener(this);
+    TrackingPlugin.getDefault().getIdleDetector().addObserver(observer);
+    PlatformUI.getWorkbench().addWindowListener(winlistener);
   }
 
   /**
-   * Checks the current workbench state, and perform the appropriate actions.
-   * 
-   * @param startSession true to indicate a new session should be started, false
-   *          to indicate a session should be ended.
+   * Checks the conditions and starts recording if OK.
    */
-  private void checkState(final boolean startSession) {
-    final IWorkbench workbench = PlatformUI.getWorkbench();
-    workbench.getDisplay().syncExec(new Runnable() {
-      @Override
-      public void run() {
-        if (startSession == false) {
-          tryEndSession();
-          return;
-        }
-        IWorkbenchWindow win = workbench.getActiveWorkbenchWindow();
-        if (win == null || win.getShell() != win.getShell().getDisplay().getActiveShell()) {
-          return;
-        }
-        
-        IWorkbenchPage page = win.getActivePage();
-        if (page == null) {
-          return;
-        }
-        if (page.getPerspective() != null) {
-          startSession(page.getPerspective());
-        }
-      }
-    });
+  private void checkStart() {
+    checkStart(WorkbenchUtil.getActiveWindow());
   }
 
   /**
-   * Gets all currently opened workbench windows.
+   * Checks the conditions and starts recording if OK.
    * 
-   * @return The currently opened workbench windows.
+   * @param activeWin The current active window.
+   */
+  private void checkStart(@Nullable IWorkbenchWindow activeWin) {
+    IPerspectiveDescriptor p = WorkbenchUtil.getPerspective(activeWin);
+    if (p != null) {
+      recorder.start(p);
+    }
+  }
+
+  /**
+   * @return All workbench windows.
    */
   private IWorkbenchWindow[] getWorkbenchWindows() {
     return PlatformUI.getWorkbench().getWorkbenchWindows();
-  }
-
-  /**
-   * Starts a session.
-   * 
-   * @param p The perspective.
-   * @throws NullPointerException If the parameter is null.
-   */
-  private void startSession(IPerspectiveDescriptor p) {
-    if (p == null) {
-      throw new NullPointerException();
-    }
-    start = System.nanoTime();
-    currentPerspective = p;
-  }
-
-  /**
-   * Ends a session.
-   * 
-   * @param p The perspective to generate an event object from.
-   */
-  private void tryEndSession() {
-    if (start == Long.MAX_VALUE || currentPerspective == null) {
-      return;
-    }
-    long duration = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - start);
-    if (duration > 0) {
-      addData(new PerspectiveEvent(new DateTime(), duration,
-          currentPerspective));
-    }
-    start = Long.MAX_VALUE;
-    currentPerspective = null;
-  }
-
-  private void tryStartSession(IWorkbenchWindow win) {
-    if (win.getShell() != win.getShell().getDisplay().getActiveShell()) {
-      return;
-    }
-    
-    IWorkbenchPage page = win.getActivePage();
-    if (page == null) {
-      return;
-    }
-    if (page.getPerspective() != null) {
-      startSession(page.getPerspective());
-    }
   }
 
 }

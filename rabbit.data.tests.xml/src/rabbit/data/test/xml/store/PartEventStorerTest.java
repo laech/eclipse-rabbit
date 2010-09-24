@@ -27,6 +27,7 @@ import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.joda.time.DateTime;
+import org.joda.time.Interval;
 
 /**
  * @see PartEventStorer
@@ -40,7 +41,7 @@ public class PartEventStorerTest extends
     try {
       IViewPart view = PlatformUI.getWorkbench().getActiveWorkbenchWindow()
           .getActivePage().showView("org.eclipse.ui.views.TaskList");
-      return new PartEvent(dateTime, 11110, view);
+      return new PartEvent(new Interval(dateTime, dateTime.plus(1)), view);
 
     } catch (PartInitException e) {
       e.printStackTrace();
@@ -49,12 +50,11 @@ public class PartEventStorerTest extends
   }
 
   @Override
-  protected PartEvent createEventDiff(final DateTime eventTime)
-      throws Exception {
+  protected PartEvent createEventDiff(final DateTime time) throws Exception {
     try {
       IViewPart view = PlatformUI.getWorkbench().getActiveWorkbenchWindow()
           .getActivePage().showView("org.eclipse.ui.navigator.ProjectExplorer");
-      return new PartEvent(eventTime, 110, view);
+      return new PartEvent(new Interval(time, time.plus(2)), view);
 
     } catch (PartInitException e) {
       e.printStackTrace();

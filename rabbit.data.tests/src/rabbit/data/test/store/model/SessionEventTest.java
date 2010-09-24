@@ -18,7 +18,7 @@ package rabbit.data.test.store.model;
 import rabbit.data.store.model.ContinuousEvent;
 import rabbit.data.store.model.SessionEvent;
 
-import org.joda.time.DateTime;
+import org.joda.time.Interval;
 
 /**
  * @see SessionEvent
@@ -26,7 +26,7 @@ import org.joda.time.DateTime;
 public class SessionEventTest extends ContinuousEventTest {
 
   @Override
-  protected ContinuousEvent createEvent(DateTime time, long duration) {
-    return new SessionEvent(time, duration);
+  protected ContinuousEvent createEvent(Interval interval) {
+    return new SessionEvent(interval);
   }
 }

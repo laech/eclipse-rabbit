@@ -21,21 +21,21 @@ import static org.junit.Assert.assertEquals;
 
 import org.eclipse.ui.IPerspectiveDescriptor;
 import org.eclipse.ui.PlatformUI;
-import org.joda.time.DateTime;
+import org.joda.time.Interval;
 import org.junit.Test;
 
 /**
- * Test for {@link PerspectiveEvent}
+ * @see PerspectiveEvent
  */
 public class PerspectiveEventTest extends ContinuousEventTest {
 
   IPerspectiveDescriptor pers = PlatformUI.getWorkbench()
       .getPerspectiveRegistry().getPerspectives()[1];
-  private PerspectiveEvent event = createEvent(new DateTime(), 19);
+  private PerspectiveEvent event = createEvent(new Interval(0, 1));
 
   @Test(expected = NullPointerException.class)
   public void testConstructor_withPerspectiveNull() {
-    new PerspectiveEvent(new DateTime(), 10, null);
+    new PerspectiveEvent(new Interval(0, 1), null);
   }
 
   @Test
@@ -44,8 +44,8 @@ public class PerspectiveEventTest extends ContinuousEventTest {
   }
 
   @Override
-  protected PerspectiveEvent createEvent(DateTime time, long duration) {
-    return new PerspectiveEvent(time, duration, PlatformUI.getWorkbench()
+  protected PerspectiveEvent createEvent(Interval interval) {
+    return new PerspectiveEvent(interval, PlatformUI.getWorkbench()
         .getPerspectiveRegistry().getPerspectives()[1]);
   }
 }

@@ -23,6 +23,7 @@ import static org.junit.Assert.assertEquals;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaCore;
 import org.joda.time.DateTime;
+import org.joda.time.Interval;
 import org.junit.Test;
 
 /**
@@ -32,28 +33,24 @@ public class JavaEventTest extends ContinuousEventTest {
   
   @Test(expected = NullPointerException.class)
   public void testConstructor_javaElementNull() {
-    createEvent(new DateTime(), 1, null);
+    createEvent(new Interval(0, 1), null);
   }
   
   @Test
   public void testGetJavaElement() {
     IJavaElement element = JavaCore.create("=Enfo/src<enfo{EnfoPlugin.java");
-    assertEquals(element, createEvent(new DateTime(), 1, element).getElement());
+    assertEquals(element, createEvent(new Interval(0, 1), element).getElement());
   }
 
   @Override
-  protected final ContinuousEvent createEvent(DateTime time, long duration) {
-    return createEvent(time, duration, JavaCore.create("=Enfo/src<enfo{EnfoPlugin.java"));
+  protected final ContinuousEvent createEvent(Interval interval) {
+    return createEvent(interval, JavaCore.create("=Enfo/src<enfo{EnfoPlugin.java"));
   }
   
   /**
    * @see JavaEvent#JavaEvent(DateTime, long, IJavaElement)
-   * @param time
-   * @param duration
-   * @param element
-   * @return
    */
-  protected JavaEvent createEvent(DateTime time, long duration, IJavaElement element) {
-    return new JavaEvent(time, duration, element);
+  protected JavaEvent createEvent(Interval interval, IJavaElement element) {
+    return new JavaEvent(interval, element);
   }
 }

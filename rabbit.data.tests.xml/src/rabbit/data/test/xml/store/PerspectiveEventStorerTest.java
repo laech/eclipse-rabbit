@@ -26,6 +26,7 @@ import com.google.common.base.Objects;
 import org.eclipse.ui.IPerspectiveDescriptor;
 import org.eclipse.ui.PlatformUI;
 import org.joda.time.DateTime;
+import org.joda.time.Interval;
 
 /**
  * @see PerspectiveEventStorer
@@ -39,14 +40,14 @@ public class PerspectiveEventStorerTest
   protected PerspectiveEvent createEvent(DateTime dateTime) {
     IPerspectiveDescriptor p = PlatformUI.getWorkbench()
         .getPerspectiveRegistry().getPerspectives()[0];
-    return new PerspectiveEvent(dateTime, 1924, p);
+    return new PerspectiveEvent(new Interval(dateTime, dateTime.plus(1)), p);
   }
 
   @Override
   protected PerspectiveEvent createEventDiff(DateTime dateTime) {
     IPerspectiveDescriptor p = PlatformUI.getWorkbench()
         .getPerspectiveRegistry().getPerspectives()[1];
-    return new PerspectiveEvent(dateTime, 11094, p);
+    return new PerspectiveEvent(new Interval(dateTime, dateTime.plus(2)), p);
   }
 
   @Override

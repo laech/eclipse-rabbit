@@ -22,7 +22,7 @@ import rabbit.data.store.model.SessionEvent;
 
 import static org.junit.Assert.assertEquals;
 
-import org.joda.time.DateTime;
+import org.joda.time.Interval;
 
 /**
  * @see SessionEventConverter
@@ -38,13 +38,13 @@ public class SessionEventConverterTest extends
 
   @Override
   public void testConvert() throws Exception {
-    SessionEvent event = new SessionEvent(new DateTime(), 101);
+    SessionEvent event = new SessionEvent(new Interval(0, 1));
     SessionEventType type = converter.convert(event);
-    assertEquals(event.getDuration(), type.getDuration());
+    assertEquals(event.getInterval().toDurationMillis(), type.getDuration());
     
-    event = new SessionEvent(new DateTime(), 198347);
+    event = new SessionEvent(new Interval(0, 1));
     type = converter.convert(event);
-    assertEquals(event.getDuration(), type.getDuration());
+    assertEquals(event.getInterval().toDurationMillis(), type.getDuration());
   }
 
 }

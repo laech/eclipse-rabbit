@@ -25,6 +25,7 @@ import com.google.common.base.Objects;
 
 import org.eclipse.core.runtime.Path;
 import org.joda.time.DateTime;
+import org.joda.time.Interval;
 
 /**
  * @see FileEventStorer
@@ -39,13 +40,13 @@ public class FileEventStorerTest extends
   }
 
   @Override
-  protected FileEvent createEvent(DateTime dateTime) {
-    return new FileEvent(dateTime, 10, new Path("/some"));
+  protected FileEvent createEvent(DateTime t) {
+    return new FileEvent(new Interval(t, t.plus(1)), new Path("/some"));
   }
 
   @Override
-  protected FileEvent createEventDiff(DateTime dateTime) {
-    return new FileEvent(dateTime, 10, new Path("/some/some"));
+  protected FileEvent createEventDiff(DateTime t) {
+    return new FileEvent(new Interval(t, t.plus(2)), new Path("/some/some"));
   }
 
   @Override

@@ -23,12 +23,11 @@ import rabbit.tracking.internal.trackers.SessionTracker;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 import org.joda.time.DateTime;
+import org.joda.time.Interval;
 import org.junit.Test;
 
 import java.lang.reflect.Field;
@@ -43,43 +42,20 @@ import java.util.concurrent.TimeUnit;
 @SuppressWarnings("restriction")
 public class SessionTrackerTest extends AbstractTrackerTest<SessionEvent> {
 
-  @Override
-  protected SessionEvent createEvent() {
-    return new SessionEvent(new DateTime(), 13223);
-  }
-
-  @Override
-  protected AbstractTracker<SessionEvent> createTracker() {
-    return new SessionTracker();
-  }
-  
-  @Test
-  public void testObserverIsAdded() {
-    tracker.setEnabled(false); // It should remove itself from the observable
-    int count = TrackingPlugin.getDefault().getIdleDetector().countObservers();
-    tracker.setEnabled(true); // It should add itself to the observable
-    assertEquals(count + 1, TrackingPlugin.getDefault().getIdleDetector().countObservers());
-  }
-  
   /**
    * Test when the tracker is set to be enabled, if there is no active workbench
    * window, no data will be recorded.
    */
   @Test
   public void testEnable_noActiveWorkbenchWindow() throws Exception {
-    IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
-    window.getShell().setMinimized(true);
+    Shell shell = minimizeActiveShell();
     try {
       tracker.setEnabled(true);
       TimeUnit.MILLISECONDS.sleep(30);
       tracker.setEnabled(false);
       assertEquals(0, tracker.getData().size());
-
-    } catch (InterruptedException e) {
-      fail(e.getMessage());
-
     } finally {
-      window.getShell().setMinimized(false);
+      shell.setMinimized(false);
     }
   }
 
@@ -91,16 +67,53 @@ public class SessionTrackerTest extends AbstractTrackerTest<SessionEvent> {
     TimeUnit.MILLISECONDS.sleep(durationMillis);
     tracker.setEnabled(false);
     DateTime after = new DateTime();
-    
+
     Collection<SessionEvent> data = tracker.getData();
     assertEquals(1, data.size());
     SessionEvent event = data.iterator().next();
-    assertTrue(event.getDuration() - 10 <= durationMillis);
-    assertTrue(event.getDuration() + 10 >= durationMillis);
+    assertTrue(event.getInterval().toDurationMillis() - 10 <= durationMillis);
+    assertTrue(event.getInterval().toDurationMillis() + 10 >= durationMillis);
     assertTrue(before.compareTo(event.getTime()) <= 0);
     assertTrue(after.compareTo(event.getTime()) >= 0);
   }
-  
+
+  @Test
+  public void testEnableThenDisable_whenNoActiveShell() throws Exception {
+    Shell shell = minimizeActiveShell();
+    try {
+      tracker.setEnabled(true);
+      tracker.flushData();
+      Thread.sleep(10);
+      tracker.setEnabled(false);
+      assertEquals(0, tracker.getData().size());
+    } finally {
+      shell.setMinimized(false);
+    }
+  }
+
+  @Test
+  public void testIdleDetector_whenNoActiveShell() throws Exception {
+    Shell shell = minimizeActiveShell();
+    try {
+      tracker.setEnabled(true);
+      tracker.flushData();
+      Thread.sleep(10);
+      callIdleDetectorToNotify();
+      assertEquals(0, tracker.getData().size());
+    } finally {
+      shell.setMinimized(false);
+    }
+  }
+
+  @Test
+  public void testIdleDetector_whenTrackerIsDisabled() throws Exception {
+    tracker.setEnabled(false);
+    tracker.flushData();
+    Thread.sleep(10);
+    callIdleDetectorToNotify();
+    assertEquals(0, tracker.getData().size());
+  }
+
   @Test
   public void testIdleDetector_whenTrackerIsEnabled() throws Exception {
     DateTime before = new DateTime();
@@ -110,55 +123,25 @@ public class SessionTrackerTest extends AbstractTrackerTest<SessionEvent> {
     TimeUnit.MILLISECONDS.sleep(durationMillis);
     callIdleDetectorToNotify();
     DateTime after = new DateTime();
-    
+
     Collection<SessionEvent> data = tracker.getData();
     assertEquals(1, data.size());
     SessionEvent event = data.iterator().next();
-    assertTrue(event.getDuration() - 10 <= durationMillis);
-    assertTrue(event.getDuration() + 10 >= durationMillis);
+    assertTrue(event.getInterval().toDurationMillis() - 10 <= durationMillis);
+    assertTrue(event.getInterval().toDurationMillis() + 10 >= durationMillis);
     assertTrue(before.compareTo(event.getTime()) <= 0);
     assertTrue(after.compareTo(event.getTime()) >= 0);
   }
-  
+
   @Test
-  public void testIdleDetector_whenTrackerIsDisabled() throws Exception {
-    tracker.setEnabled(false);
-    tracker.flushData();
-    Thread.sleep(10);
-    callIdleDetectorToNotify();
-    assertEquals(0, tracker.getData().size());
+  public void testObserverIsAdded() {
+    tracker.setEnabled(false); // It should remove itself from the observable
+    int count = TrackingPlugin.getDefault().getIdleDetector().countObservers();
+    tracker.setEnabled(true); // It should add itself to the observable
+    assertEquals(count + 1, TrackingPlugin.getDefault().getIdleDetector()
+        .countObservers());
   }
-  
-  @Test
-  public void testIdleDetector_whenNoActiveShell() throws Exception {
-    Shell shell = PlatformUI.getWorkbench().getDisplay().getActiveShell();
-    shell.setMinimized(true);
-    
-    tracker.setEnabled(true);
-    tracker.flushData();
-    Thread.sleep(10);
-    callIdleDetectorToNotify();
-    assertEquals(0, tracker.getData().size());
-    
-    // Restore, might be important for other tests:
-    shell.setMinimized(false);
-  }
-  
-  @Test
-  public void testEnableThenDisable_whenNoActiveShell() throws Exception {
-    Shell shell = PlatformUI.getWorkbench().getDisplay().getActiveShell();
-    shell.setMinimized(true);
-    
-    tracker.setEnabled(true);
-    tracker.flushData();
-    Thread.sleep(10);
-    tracker.setEnabled(false);
-    assertEquals(0, tracker.getData().size());
-    
-    // Restore, might be important for other tests:
-    shell.setMinimized(false);
-  }
-  
+
   protected void callIdleDetectorToNotify() throws Exception {
     Field isActive = IdleDetector.class.getDeclaredField("isActive");
     isActive.setAccessible(true);
@@ -166,7 +149,8 @@ public class SessionTrackerTest extends AbstractTrackerTest<SessionEvent> {
     Method setChanged = Observable.class.getDeclaredMethod("setChanged");
     setChanged.setAccessible(true);
 
-    Method notifyObservers = Observable.class.getDeclaredMethod("notifyObservers");
+    Method notifyObservers = Observable.class
+        .getDeclaredMethod("notifyObservers");
     notifyObservers.setAccessible(true);
 
     IdleDetector detector = TrackingPlugin.getDefault().getIdleDetector();
@@ -175,5 +159,21 @@ public class SessionTrackerTest extends AbstractTrackerTest<SessionEvent> {
     setChanged.invoke(detector);
     notifyObservers.invoke(detector);
     detector.setRunning(false);
+  }
+
+  @Override
+  protected SessionEvent createEvent() {
+    return new SessionEvent(new Interval(10, 2000));
+  }
+
+  @Override
+  protected AbstractTracker<SessionEvent> createTracker() {
+    return new SessionTracker();
+  }
+
+  private Shell minimizeActiveShell() {
+    Shell shell = PlatformUI.getWorkbench().getDisplay().getActiveShell();
+    shell.setMinimized(true);
+    return shell;
   }
 }

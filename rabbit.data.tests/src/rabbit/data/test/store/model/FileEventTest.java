@@ -21,7 +21,7 @@ import static org.junit.Assert.assertEquals;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
-import org.joda.time.DateTime;
+import org.joda.time.Interval;
 import org.junit.Test;
 
 /**
@@ -31,25 +31,25 @@ public class FileEventTest extends ContinuousEventTest {
 
   @Test(expected = NullPointerException.class)
   public void testContructor_fileIdNull() {
-    createEvent(new DateTime(), 10, null);
+    createEvent(new Interval(0, 1), null);
   }
 
   @Test
   public void testGetFilePath() {
     IPath path = Path.fromPortableString("/project/folder/me.txt");
-    FileEvent event = createEvent(new DateTime(), 10, path);
+    FileEvent event = createEvent(new Interval(0, 1), path);
     assertEquals(path, event.getFilePath());
   }
 
   @Override
-  protected final FileEvent createEvent(DateTime time, long duration) {
-    return createEvent(time, duration, Path.fromPortableString("/p/f/a.txt"));
+  protected final FileEvent createEvent(Interval interval) {
+    return createEvent(interval, Path.fromPortableString("/p/f/a.txt"));
   }
   
   /**
-   * @see FileEvent#FileEvent(DateTime, long, IPath)
+   * @see FileEvent#FileEvent(Interval, IPath)
    */
-  protected FileEvent createEvent(DateTime time, long duration, IPath filePath) {
-    return new FileEvent(time, duration, filePath);
+  protected FileEvent createEvent(Interval interval, IPath filePath) {
+    return new FileEvent(interval, filePath);
   }
 }

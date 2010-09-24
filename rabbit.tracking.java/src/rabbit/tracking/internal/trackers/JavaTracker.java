@@ -1,17 +1,17 @@
 /*
  * Copyright 2010 The Rabbit Eclipse Plug-in Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
- *
+ * 
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
  */
 package rabbit.tracking.internal.trackers;
 
@@ -20,6 +20,8 @@ import rabbit.data.store.IStorer;
 import rabbit.data.store.model.JavaEvent;
 import rabbit.tracking.internal.IdleDetector;
 import rabbit.tracking.internal.TrackingPlugin;
+import rabbit.tracking.internal.util.Recorder;
+import rabbit.tracking.internal.util.WorkbenchUtil;
 
 import com.google.common.collect.Sets;
 
@@ -33,7 +35,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorReference;
 import org.eclipse.ui.IPartListener;
@@ -43,12 +44,11 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
-import org.joda.time.DateTime;
+import org.joda.time.Interval;
 
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Nullable;
 
@@ -56,8 +56,7 @@ import javax.annotation.Nullable;
  * Tracks time spent on Java elements such as classes, methods.
  */
 @SuppressWarnings("restriction")
-public class JavaTracker extends AbstractTracker<JavaEvent> 
-    implements IWindowListener, IPartListener, Observer, Listener {
+public class JavaTracker extends AbstractTracker<JavaEvent> {
 
   /*
    * Note that a lot of elements may be tracked by this tracker, and many of
@@ -72,74 +71,147 @@ public class JavaTracker extends AbstractTracker<JavaEvent>
    * 
    * The following element types are of interest to us:
    * 
-   * * Type elements (classes, interfaces etc) that are not anonymous. * Methods
-   * (includes constructors) that are not enclosed in anonymous types. * Static
-   * initializers.
+   * 1) Type elements (classes, interfaces etc) that are not anonymous. 2)
+   * Methods (includes constructors) that are not enclosed in anonymous types.
+   * 3) Static initializers.
+   * 
    * 
    * Other elements will be converted.
    * 
    * (A secrete note: doing so also reduces the size of the data files on disk,
    * shhhh!)
    */
-  
+
   /**
-   * Current selected java element, may be null;
-   */
-  private IJavaElement currentElement = null;
-  
-  /**
-   * Indicates the start time of the current tracking session, < 0 if no session
-   * is started. Set using {@link System#nanoTime()}.
-   */
-  private long startNanoTime = -1;
-  
-  /**
-   * A set of all text widgets that are currently being listened to.
-   * This set is not synchronised.
+   * A set of all text widgets that are currently being listened to. This set is
+   * not synchronised.
    */
   private final Set<StyledText> registeredWidgets;
-  
-  public JavaTracker() {
-    super();
-    registeredWidgets = Sets.newHashSet();
-  }
-  
-  /*
+
+  /**
+   * Recorder for recording time duration.
+   */
+  private final Recorder<IJavaElement> recorder = new Recorder<IJavaElement>();
+
+  /**
+   * A part listener listening for Java editor events.
+   */
+  private final IPartListener partListener = new IPartListener() {
+
+    @Override
+    public void partActivated(IWorkbenchPart part) {
+      checkStart(part);
+    }
+
+    @Override
+    public void partBroughtToTop(IWorkbenchPart part) {
+      // Do nothing.
+    }
+
+    @Override
+    public void partClosed(IWorkbenchPart part) {
+      if (part instanceof JavaEditor) {
+        deregister((JavaEditor) part);
+      }
+    }
+
+    @Override
+    public void partDeactivated(IWorkbenchPart part) {
+      if (part instanceof JavaEditor) {
+        recorder.stop();
+      }
+    }
+
+    @Override
+    public void partOpened(IWorkbenchPart part) {
+      if (part instanceof JavaEditor) {
+        register((JavaEditor) part);
+      }
+    }
+  };
+
+  /**
+   * A window listener listening to window focus.
+   */
+  private final IWindowListener winListener = new IWindowListener() {
+
+    @Override
+    public void windowActivated(IWorkbenchWindow window) {
+      checkStart(window.getPartService().getActivePart());
+    }
+
+    @Override
+    public void windowClosed(IWorkbenchWindow window) {
+      recorder.stop();
+      deregister(window);
+
+      window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+      if (window != null) {
+        checkStart(window.getPartService().getActivePart());
+      }
+    }
+
+    @Override
+    public void windowDeactivated(IWorkbenchWindow window) {
+      recorder.stop();
+    }
+
+    @Override
+    public void windowOpened(IWorkbenchWindow window) {
+      register(window);
+      if (window.getWorkbench().getActiveWorkbenchWindow() == window) {
+        checkStart(window.getPartService().getActivePart());
+      }
+    }
+  };
+
+  /**
+   * An observer observing on the {@link #recorder} and use activeness.
+   */
+  private final Observer observer = new Observer() {
+    @Override
+    public void update(Observable o, Object arg) {
+      if (!isEnabled()) {
+        return;
+      }
+
+      if (o == TrackingPlugin.getDefault().getIdleDetector()) {
+        if (((IdleDetector) o).isUserActive()) {
+          IWorkbenchWindow win = WorkbenchUtil.getActiveWindow();
+          if (win != null && WorkbenchUtil.isActiveShell(win)) {
+            checkStart(win.getPartService().getActivePart());
+          }
+        } else {
+          recorder.stop();
+        }
+      } else if (o == recorder) {
+        long start = recorder.getLastRecord().getStartTimeMillis();
+        long end = recorder.getLastRecord().getEndTimeMillis();
+        IJavaElement element = recorder.getLastRecord().getUserData();
+        addData(new JavaEvent(new Interval(start, end), element));
+      }
+    }
+  };
+
+  /**
    * Listener to listen to keyboard input and mouse input on text widgets of
    * editors.
    */
-  @Override
-  public void handleEvent(Event event) {
-    tryStartSession();
-  }
+  private final Listener listener = new Listener() {
 
-  @Override
-  public void partActivated(IWorkbenchPart part) {
-    tryStartSession(part);
-  }
-  
-  @Override
-  public void partBroughtToTop(IWorkbenchPart part) {
-    // Do nothing.
-  }
-  
-  @Override
-  public void partClosed(IWorkbenchPart part) {
-    if (part instanceof JavaEditor) {
-      deregister((JavaEditor) part);
+    @Override
+    public void handleEvent(Event event) {
+      checkStart();
     }
-  }
-  
-  @Override
-  public void partDeactivated(IWorkbenchPart part) {
-    tryEndSession();
-  }
+  };
 
-  @Override
-  public void partOpened(IWorkbenchPart part) {
-    if (part instanceof JavaEditor) {
-      register((JavaEditor) part);
-    }
+  /**
+   * Constructor.
+   */
+  public JavaTracker() {
+    super();
+    registeredWidgets = Sets.newHashSet();
+    recorder.addObserver(observer);
   }
 
   @Override
@@ -149,96 +221,91 @@ public class JavaTracker extends AbstractTracker<JavaEvent>
   }
 
   @Override
-  public void update(Observable o, Object arg) {
-    if (!isEnabled()) {
-      return;
-    }
-    
-    if (o == TrackingPlugin.getDefault().getIdleDetector()) {
-      if (((IdleDetector) o).isUserActive()) {
-        PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
-          @Override public void run() {
-            IWorkbenchWindow win = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
-            if (win != null) {
-              tryStartSession(win.getPartService().getActivePart());
-            }
-          }
-        });
-      } else {
-        tryEndSession();
-      }
-    }
-  }
-
-  @Override
-  public void windowActivated(IWorkbenchWindow window) {
-    tryStartSession(window.getPartService().getActivePart());
-  }
-
-  @Override
-  public void windowClosed(IWorkbenchWindow window) {
-    tryEndSession();
-    deregister(window);
-    
-    window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
-    if (window != null) {
-      tryStartSession(window.getPartService().getActivePart());
-    }
-  }
-
-  @Override
-  public void windowDeactivated(IWorkbenchWindow window) {
-    tryEndSession();
-  }
-
-  @Override
-  public void windowOpened(IWorkbenchWindow window) {
-    register(window);
-    if (window.getWorkbench().getActiveWorkbenchWindow() == window) {
-      tryStartSession(window.getPartService().getActivePart());
-    }
-  }
-
-  @Override
   protected IStorer<JavaEvent> createDataStorer() {
     return DataHandler.getStorer(JavaEvent.class);
   }
 
   @Override
   protected void doDisable() {
-    tryEndSession();
-    TrackingPlugin.getDefault().getIdleDetector().deleteObserver(this);
-    
+    recorder.stop();
+    TrackingPlugin.getDefault().getIdleDetector().deleteObserver(observer);
+
     IWorkbench workbench = PlatformUI.getWorkbench();
-    workbench.removeWindowListener(this);
+    workbench.removeWindowListener(winListener);
     for (IWorkbenchWindow window : workbench.getWorkbenchWindows()) {
       deregister(window);
     }
   }
-  
+
   @Override
   protected void doEnable() {
     IWorkbench workbench = PlatformUI.getWorkbench();
-    workbench.addWindowListener(this);
+    workbench.addWindowListener(winListener);
     for (IWorkbenchWindow window : workbench.getWorkbenchWindows()) {
       register(window);
     }
-    TrackingPlugin.getDefault().getIdleDetector().addObserver(this);
-    
+    TrackingPlugin.getDefault().getIdleDetector().addObserver(observer);
+
     // If there is an Java editor already active, start tracking:
     PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
-      @Override public void run() {
-        tryStartSession();        
+      @Override
+      public void run() {
+        checkStart();
       }
     });
   }
-  
+
+  /**
+   * Tries to start a tracking session, if the current element is not change,
+   * will do nothing, otherwise ends a session if there is one running, then if
+   * the currently selected element in Eclipse's active editor is not null,
+   * starts a new session.
+   * <p>
+   * <strong>NOTE:</strong> Run in UI thread.
+   * </p>
+   */
+  private void checkStart() {
+    PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+      
+      @Override
+      public void run() {
+        IWorkbenchWindow win = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+//        if (win.) {
+          checkStart(win.getPartService().getActivePart());
+//        }
+      }
+    });
+  }
+
+  /**
+   * Tries to start a tracking session, if the current element is not change,
+   * will do nothing, otherwise ends a session if there is one running, then if
+   * the currently selected element in Eclipse's active editor is not null,
+   * starts a new session.
+   * 
+   * @param activePart The currently active part of the workbench, may be null.
+   */
+  private void checkStart(IWorkbenchPart activePart) {
+    if (!(activePart instanceof JavaEditor)) {
+      return;
+    }
+
+    IJavaElement element = null;
+    try {
+      element = SelectionConverter.getElementAtOffset((JavaEditor) activePart);
+      recorder.start(element);
+    } catch (JavaModelException e) {
+      // Nothing we can do.
+    }
+  }
+
   /**
    * Removes the workbench window so that it's no longer being tracked.
+   * 
    * @param window The workbench window.
    */
   private void deregister(IWorkbenchWindow window) {
-    window.getPartService().removePartListener(this);
+    window.getPartService().removePartListener(partListener);
     for (IWorkbenchPage page : window.getPages()) {
       for (IEditorReference ref : page.getEditorReferences()) {
         IEditorPart editor = ref.getEditor(false);
@@ -248,24 +315,26 @@ public class JavaTracker extends AbstractTracker<JavaEvent>
       }
     }
   }
-  
+
   /**
    * Removes the editor no that it's no longer being tracked.
+   * 
    * @param editor The editor.
    */
   private synchronized void deregister(JavaEditor editor) {
     final StyledText widget = editor.getViewer().getTextWidget();
     if (registeredWidgets.contains(widget)) {
       PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
-        @Override public void run() {
-          widget.removeListener(SWT.KeyDown, JavaTracker.this);
-          widget.removeListener(SWT.MouseDown, JavaTracker.this);
+        @Override
+        public void run() {
+          widget.removeListener(SWT.KeyDown, listener);
+          widget.removeListener(SWT.MouseDown, listener);
         }
       });
       registeredWidgets.remove(widget);
     }
   }
-  
+
   /**
    * Performs filtering of the data before saving.
    * <p>
@@ -289,9 +358,11 @@ public class JavaTracker extends AbstractTracker<JavaEvent>
       // ITypeRoot represents the file, xxx.java. Everything above that is not
       // modifiable in a JavaEditor, so no need to check them:
       if (!element.exists()) {
-        for (; !element.exists() && !(element instanceof ITypeRoot); element = element.getParent());
-        filteredData.add(new JavaEvent(event.getTime(), event.getDuration(), element));
-        
+        for (; !element.exists() && !(element instanceof ITypeRoot); element = element
+            .getParent())
+          ;
+        filteredData.add(new JavaEvent(event.getInterval(), element));
+
       } else {
         IJavaElement actual = null;
         try {
@@ -300,11 +371,11 @@ public class JavaTracker extends AbstractTracker<JavaEvent>
           actual = null;
           e.printStackTrace();
         }
-        
+
         if (actual == null) {
           filteredData.add(event);
         } else {
-          filteredData.add(new JavaEvent(event.getTime(), event.getDuration(), actual));
+          filteredData.add(new JavaEvent(event.getInterval(), actual));
         }
       }
     }
@@ -314,7 +385,7 @@ public class JavaTracker extends AbstractTracker<JavaEvent>
       addData(event);
     }
   }
-  
+
   /**
    * Gets the actual element that we want before saving. One of the following
    * types is returned:
@@ -335,29 +406,29 @@ public class JavaTracker extends AbstractTracker<JavaEvent>
    */
   private IJavaElement filterElement(@Nullable IJavaElement element)
       throws JavaModelException {
-    
+
     if (element == null) {
       return null;
     }
-    
+
     switch (element.getElementType()) {
     case IJavaElement.TYPE:
       if (((IType) element).isAnonymous()) {
         return filterElement(element.getParent());
       }
       return element;
-      
+
     case IJavaElement.METHOD:
       if (((IType) element.getParent()).isAnonymous()) {
         return filterElement(element.getParent());
       }
       return element;
-      
+
     case IJavaElement.INITIALIZER:
     case IJavaElement.COMPILATION_UNIT:
     case IJavaElement.CLASS_FILE:
       return element;
-      
+
     default:
       return filterElement(element.getParent());
     }
@@ -365,10 +436,11 @@ public class JavaTracker extends AbstractTracker<JavaEvent>
 
   /**
    * Registers the given workbench window to be tracked.
+   * 
    * @param window The workbench window.
    */
   private void register(IWorkbenchWindow window) {
-    window.getPartService().addPartListener(this);
+    window.getPartService().addPartListener(partListener);
     for (IWorkbenchPage page : window.getPages()) {
       for (IEditorReference ref : page.getEditorReferences()) {
         IEditorPart editor = ref.getEditor(false);
@@ -382,6 +454,7 @@ public class JavaTracker extends AbstractTracker<JavaEvent>
   /**
    * Registers the given editor to be tracked. Has no effect if the editor is
    * already registered.
+   * 
    * @param editor The editor.
    */
   private synchronized void register(JavaEditor editor) {
@@ -390,86 +463,11 @@ public class JavaTracker extends AbstractTracker<JavaEvent>
       PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
         @Override
         public void run() {
-          widget.addListener(SWT.KeyDown, JavaTracker.this);
-          widget.addListener(SWT.MouseDown, JavaTracker.this);
+          widget.addListener(SWT.KeyDown, listener);
+          widget.addListener(SWT.MouseDown, listener);
         }
       });
       registeredWidgets.add(widget);
-    }
-  }
-
-  /**
-   * Reset to indicate no session is being tracked.
-   */
-  private void reset() {
-    startNanoTime = -1;
-    currentElement = null;
-  }
-
-  /**
-   * Ends a tracking session if there is one, and calls {@link #reset()} after.
-   */
-  private void tryEndSession() {
-    if (startNanoTime < 0) {
-      return;
-    }
-        
-    long durationMills = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startNanoTime);
-    if (durationMills > 0) {
-      addData(new JavaEvent(new DateTime(), durationMills, currentElement));
-    }
-    reset();
-  }
-  
-  /**
-   * Tries to start a tracking session, if the current element is not change,
-   * will do nothing, otherwise ends a session if there is one running, then if
-   * the currently selected element in Eclipse's active editor is not null,
-   * starts a new session.
-   * <p>
-   * <strong>NOTE:</strong> Run in UI thread.
-   * </p>
-   */
-  private void tryStartSession() {
-    IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
-    Shell shell = window.getShell();
-    if (window != null && shell == shell.getDisplay().getActiveShell()) {
-      tryStartSession(window.getPartService().getActivePart());
-    }
-  }
-
-  /**
-   * Tries to start a tracking session, if the current element is not change,
-   * will do nothing, otherwise ends a session if there is one running, then if
-   * the currently selected element in Eclipse's active editor is not null,
-   * starts a new session.
-   * 
-   * @param activePart The currently active part of the workbench, may be null.
-   */
-  private void tryStartSession(IWorkbenchPart activePart) {
-    if (!(activePart instanceof JavaEditor)) {
-      if (currentElement != null) {
-        tryEndSession();
-      }
-      return;
-    }
-
-    IJavaElement element = null;
-    try {
-      element = SelectionConverter.getElementAtOffset((JavaEditor) activePart);
-    } catch (JavaModelException e) {
-      element = null;
-    }
-
-    // If it's the same element, do nothing
-    if (currentElement != null && currentElement.equals(element)) {
-      return;
-    }
-
-    tryEndSession();
-    if (element != null) {
-      currentElement = element;
-      startNanoTime = System.nanoTime();
     }
   }
 }

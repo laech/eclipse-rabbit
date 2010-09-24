@@ -22,7 +22,7 @@ import rabbit.tracking.internal.trackers.AbstractTracker;
 import rabbit.tracking.internal.trackers.JavaTracker;
 
 import static org.eclipse.jdt.internal.ui.actions.SelectionConverter.getElementAtOffset;
-import static org.eclipse.jdt.internal.ui.actions.SelectionConverter.getInputAsTypeRoot;
+import static org.eclipse.jdt.internal.ui.actions.SelectionConverter.getInput;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -53,7 +53,7 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.FileEditorInput;
-import org.joda.time.DateTime;
+import org.joda.time.Interval;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -72,65 +72,70 @@ import java.util.concurrent.TimeUnit;
 @SuppressWarnings("restriction")
 @RunWith(SWTBotJunit4ClassRunner.class)
 public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
-  
+
   private static final SWTWorkbenchBot BOT = new SWTWorkbenchBot();
   private static final String PROJECT_NAME = System.nanoTime() + "";
   private static final String PACKAGE_NAME = "pkg";
   private static final String CLASS_NAME = "Program";
-  
+
   private static final String JAVA_EDITOR_ID = "org.eclipse.jdt.ui.CompilationUnitEditor";
-  private static final IFile FILE = ResourcesPlugin.getWorkspace().getRoot()
-      .getFile(new Path("/" + PROJECT_NAME + "/src/" + PACKAGE_NAME + "/" + CLASS_NAME + ".java"));
-  
+  private static final IFile FILE = ResourcesPlugin
+      .getWorkspace()
+      .getRoot()
+      .getFile(
+          new Path("/" + PROJECT_NAME + "/src/" + PACKAGE_NAME + "/"
+              + CLASS_NAME + ".java"));
+
   @AfterClass
   public static void afterClass() {
     PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
       @Override
       public void run() {
         PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage()
-          .closeAllEditors(false);
+            .closeAllEditors(false);
       }
     });
   }
-  
+
   @BeforeClass
   public static void beforeClass() {
     // Close the welcome view:
     BOT.viewByTitle("Welcome").close();
-    
+
     // Open the Java perspective:
     BOT.getDisplay().syncExec(new Runnable() {
-      @Override public void run() {
-        new OpenJavaPerspectiveAction().run();      
+      @Override
+      public void run() {
+        new OpenJavaPerspectiveAction().run();
       }
     });
-    
+
     // Create a new project:
     BOT.menu("File").menu("New").menu("Java Project").click();
     BOT.shell("New Java Project").activate();
     BOT.textWithLabel("Project name:").setText(PROJECT_NAME);
     BOT.button("Finish").click();
-    
+
     BOT.waitUntil(Conditions.shellCloses(BOT.shell("New Java Project")));
-    
+
     // Create a new class:
     BOT.menu("File").menu("New").menu("Class").click();
     BOT.textWithLabel("Package:").setText(PACKAGE_NAME);
     BOT.textWithLabel("Name:").setText(CLASS_NAME);
     BOT.button("Finish").click();
-    
+
     BOT.waitUntil(Conditions.shellCloses(BOT.shell("New Java Class")));
-    
+
     // Close all editors:
     PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
       @Override
       public void run() {
         PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage()
-          .closeAllEditors(false);
+            .closeAllEditors(false);
       }
     });
   }
-  
+
   /**
    * Disables the tracker and empties the tracker's data.
    */
@@ -139,7 +144,7 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
     tracker.setEnabled(false);
     tracker.flushData();
   }
-  
+
   /**
    * Tests when the editor is no longer the active part:
    */
@@ -160,23 +165,25 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
     });
 
     // Run the tracker to capture the event:
-    long timeout = 30;
-    DateTime before = new DateTime();
-    tracker.setEnabled(true);
-    TimeUnit.MILLISECONDS.sleep(timeout);
+    long preStart = System.currentTimeMillis();
+    tracker.setEnabled(true); // Start
+    long postStart = System.currentTimeMillis();
+
+    Thread.sleep(20);
     // Sets another view to be active to cause the editor to lose focus:
-    BOT.viewByTitle("Outline").show();
-    DateTime after = new DateTime();
+
+    long preEnd = System.currentTimeMillis();
+    BOT.viewByTitle("Outline").show(); // End
+    long postEnd = System.currentTimeMillis();
 
     // One data should be in the collection (the selected package declaration):
     Collection<JavaEvent> events = tracker.getData();
     assertEquals(1, events.size());
 
     JavaEvent event = events.iterator().next();
-    assertTrue(before.compareTo(event.getTime()) <= 0);
-    assertTrue(after.compareTo(event.getTime()) >= 0);
-    assertTrue(timeout - 20 <= event.getDuration());
-    assertTrue(timeout + 20 >= event.getDuration());
+    long start = event.getInterval().getStartMillis();
+    long end = event.getInterval().getEndMillis();
+    checkTime(preStart, start, postStart, preEnd, end, postEnd);
 
     final IJavaElement[] elementArray = new IJavaElement[1];
     PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
@@ -214,22 +221,24 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
     });
 
     // Now run the tracker to capture the event:
-    long timeout = 30;
-    DateTime before = new DateTime();
+    long preStart = System.currentTimeMillis();
     tracker.setEnabled(true);
-    TimeUnit.MILLISECONDS.sleep(timeout);
+    long postStart = System.currentTimeMillis();
+
+    Thread.sleep(20);
+
+    long preEnd = System.currentTimeMillis();
     BOT.viewByTitle("Outline").show();
-    DateTime after = new DateTime();
+    long postEnd = System.currentTimeMillis();
 
     // One data should be in the collection (the selected package declaration):
     Collection<JavaEvent> events = tracker.getData();
     assertEquals(1, events.size());
 
     JavaEvent event = events.iterator().next();
-    assertTrue(before.compareTo(event.getTime()) <= 0);
-    assertTrue(after.compareTo(event.getTime()) >= 0);
-    assertTrue(timeout - 20 <= event.getDuration());
-    assertTrue(timeout + 20 >= event.getDuration());
+    long start = event.getInterval().getStartMillis();
+    long end = event.getInterval().getEndMillis();
+    checkTime(preStart, start, postStart, preEnd, end, postEnd);
 
     final IJavaElement[] elementArray = new IJavaElement[1];
     PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
@@ -244,29 +253,29 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
       }
     });
     assertEquals(elementArray[0], event.getElement());
-    
-    
-    
-    // Now we activate the editor again to see if the tracker will start to 
+
+    // Now we activate the editor again to see if the tracker will start to
     // track events again:
     tracker.flushData();
 
-    timeout = 30;
-    before = new DateTime();
+    preStart = System.currentTimeMillis();
     BOT.editorByTitle(FILE.getName()).show();
-    TimeUnit.MILLISECONDS.sleep(timeout);
+    postStart = System.currentTimeMillis();
+
+    Thread.sleep(20);
+
+    preEnd = System.currentTimeMillis();
     BOT.viewByTitle("Outline").show();
-    after = new DateTime();
+    postEnd = System.currentTimeMillis();
 
     // One data should be in the collection (the selected package declaration):
     events = tracker.getData();
     assertEquals(1, events.size());
 
     event = events.iterator().next();
-    assertTrue(before.compareTo(event.getTime()) <= 0);
-    assertTrue(after.compareTo(event.getTime()) >= 0);
-    assertTrue(timeout <= event.getDuration());
-    assertTrue(timeout + 200 >= event.getDuration());
+    start = event.getInterval().getStartMillis();
+    end = event.getInterval().getEndMillis();
+    checkTime(preStart, start, postStart, preEnd, end, postEnd);
 
     final IJavaElement[] elementArray2 = new IJavaElement[1];
     PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
@@ -282,16 +291,16 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
     });
     assertEquals(elementArray2[0], event.getElement());
   }
-  
+
   /**
    * Test when the user changes from working on a Java element to another.
    */
   @Test
   public void testElementChanged() throws Exception {
     final JavaEditor editor = closeAndOpenEditor();
-    SWTBotEclipseEditor botEditor = new SWTBotEclipseEditor(
-        BOT.activeEditor().getReference(), BOT);
-    
+    SWTBotEclipseEditor botEditor = new SWTBotEclipseEditor(BOT.activeEditor()
+        .getReference(), BOT);
+
     // Set the editor to select the package declaration:
     IDocument document = getDocument(editor);
     final String content = document.get();
@@ -304,7 +313,7 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
         editor.getSelectionProvider().setSelection(selection);
       }
     });
-    
+
     // Keeps the reference of the package declaration for testing latter:
     final IJavaElement[] elementArray = new IJavaElement[1];
     PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
@@ -318,31 +327,33 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
         }
       }
     });
-    
+
     // Run the tracker to capture the event:
-    long timeout = 30;
-    DateTime before = new DateTime();
+    long preStart = System.currentTimeMillis();
     tracker.setEnabled(true);
-    TimeUnit.MILLISECONDS.sleep(timeout);
+    long postStart = System.currentTimeMillis();
+
+    Thread.sleep(20);
+
     // Change the element the user is working on:
+    long preEnd = System.currentTimeMillis();
     offset = content.indexOf(CLASS_NAME);
     int line = document.getLineOfOffset(offset);
     botEditor.navigateTo(line, 0);
     botEditor.typeText(" ");
-    DateTime after = new DateTime();
-    
+    long postEnd = System.currentTimeMillis();
+
     // One data should be in the collection (the selected package declaration):
     Collection<JavaEvent> events = tracker.getData();
     assertEquals(1, events.size());
 
     JavaEvent event = events.iterator().next();
-    assertTrue(before.isBefore(event.getTime()));
-    assertTrue(after.isAfter(event.getTime()));
-    assertTrue(timeout <= event.getDuration());
-    assertTrue(timeout + 200 >= event.getDuration());
     assertEquals(elementArray[0], event.getElement());
+    long start = event.getInterval().getStartMillis();
+    long end = event.getInterval().getEndMillis();
+    checkTime(preStart, start, postStart, preEnd, end, postEnd);
   }
-  
+
   /**
    * When the tracker is set to enable, but if there is no active workbench
    * window, no data will be collected.
@@ -351,51 +362,53 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
   public void testEnable_noActiveWorkbenchWindow() throws Exception {
     final Shell[] shellHolder = new Shell[1];
     final JavaEditor editor = closeAndOpenEditor();
-    
+
     // Set the editor to select the package declaration:
     String content = getDocument(editor).get();
     int offset = content.indexOf(CLASS_NAME);
     int length = CLASS_NAME.length();
     final ITextSelection selection = new TextSelection(offset, length);
     PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
-      @Override public void run() {
+      @Override
+      public void run() {
         editor.getSelectionProvider().setSelection(selection);
-        
+
         // Open a new shell to cause the workbench window to lose focus:
         final Shell shell = new Shell(Display.getCurrent());
         shell.open();
         shell.forceActive();
-        
+
         shellHolder[0] = shell;
       }
     });
-    
+
     try {
       tracker.setEnabled(true);
-      TimeUnit.MILLISECONDS.sleep(30);
+      Thread.sleep(30);
       tracker.setEnabled(false);
       assertEquals(0, tracker.getData().size());
-      
+
     } catch (InterruptedException e) {
       fail(e.getMessage());
-      
+
     } finally {
       final Shell shell = shellHolder[0];
       if (shell != null) {
         PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
-          @Override public void run() {
+          @Override
+          public void run() {
             shell.dispose();
           }
         });
       }
     }
-    
+
   }
-  
+
   @Test
   public void testEnableThenDisable() throws Exception {
     final JavaEditor editor = closeAndOpenEditor();
-    
+
     // Set the editor to select the package declaration:
     String content = getDocument(editor).get();
     int offset = content.indexOf(CLASS_NAME);
@@ -407,25 +420,27 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
         editor.getSelectionProvider().setSelection(selection);
       }
     });
-    
+
     // Run the tracker to capture the event:
-    long timeout = 30;
-    DateTime before = new DateTime();
+    long preStart = System.currentTimeMillis();
     tracker.setEnabled(true);
-    TimeUnit.MILLISECONDS.sleep(timeout);
+    long postStart = System.currentTimeMillis();
+
+    Thread.sleep(30);
+
+    long preEnd = System.currentTimeMillis();
     tracker.setEnabled(false);
-    DateTime after = new DateTime();
+    long postEnd = System.currentTimeMillis();
 
     // One data should be in the collection (the selected package declaration):
     Collection<JavaEvent> events = tracker.getData();
     assertEquals(1, events.size());
 
     JavaEvent event = events.iterator().next();
-    assertTrue(before.compareTo(event.getTime()) <= 0);
-    assertTrue(after.compareTo(event.getTime()) >= 0);
-    assertTrue(timeout - 20 <= event.getDuration());
-    assertTrue(timeout + 20 >= event.getDuration());
-    
+    long start = event.getInterval().getStartMillis();
+    long end = event.getInterval().getEndMillis();
+    checkTime(preStart, start, postStart, preEnd, end, postEnd);
+
     final IJavaElement[] elementArray = new IJavaElement[1];
     PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
       @Override
@@ -440,7 +455,7 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
     });
     assertEquals(elementArray[0], event.getElement());
   }
-  
+
   /**
    * Test an event on an anonymous. This event should be filtered on save, so
    * that instead of showing a user spent x amount of time on the anonymous
@@ -456,20 +471,24 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
      * on save the data should indicate that the user has spent x amount of time
      * working on the method, not any of the Runnable's.
      */
-    
+
     final JavaEditor editor = closeAndOpenEditor();
     final IDocument document = getDocument(editor);
     PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+
       @Override public void run() {
-        String anonymousClassText = "void aMethod() {" + //
-            "  new Runnable() { " + // 
-            "    public void run(){" + //
+        //@formatter:off
+        String anonymousClassText = 
+            "void aMethod() {" + 
+            "  new Runnable() { " + 
+            "    public void run(){" + 
             "      new Runnable() {" +
             "        public void run() {}" +
-            "      };" + //
-            "    } " + //
-            "  };" + //
-        		"}"; //
+            "      };" + 
+            "    } " + 
+            "  };" +
+        		"}"; 
+        //@formatter:on
         String content = document.get();
         int offset = content.indexOf("{") + 1;
         int length = 0;
@@ -478,7 +497,7 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
         } catch (BadLocationException e) {
           fail(e.getMessage());
         }
-        
+
         content = document.get();
         offset = content.indexOf("Runnable", content.indexOf("Runnable") + 1);
         length = "Runnable".length();
@@ -486,15 +505,18 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
         editor.getSelectionProvider().setSelection(selection);
       }
     });
-    
-    long duration = 30;
-    DateTime before = new DateTime();
+
+    long preStart = System.currentTimeMillis();
     tracker.setEnabled(true);
-    TimeUnit.MILLISECONDS.sleep(duration);
+    long postStart = System.currentTimeMillis();
+
+    Thread.sleep(30);
+
+    long preEnd = System.currentTimeMillis();
     tracker.setEnabled(false);
-    DateTime after = new DateTime();
-    
-    // Ask the tracker to save the data, the data should be appropriately 
+    long postEnd = System.currentTimeMillis();
+
+    // Ask the tracker to save the data, the data should be appropriately
     // filtered
     tracker.saveData();
 
@@ -502,11 +524,10 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
     assertEquals(1, events.size());
 
     final JavaEvent event = events.iterator().next();
-    assertTrue(before.compareTo(event.getTime()) <= 0);
-    assertTrue(after.compareTo(event.getTime()) >= 0);
-    assertTrue(duration - 20 <= event.getDuration());
-    assertTrue(duration + 20 >= event.getDuration());
-    
+    long start = event.getInterval().getStartMillis();
+    long end = event.getInterval().getEndMillis();
+    checkTime(preStart, start, postStart, preEnd, end, postEnd);
+
     final IJavaElement[] elementArray = new IJavaElement[1];
     PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
       @Override
@@ -525,10 +546,10 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
     assertEquals(event.getElement().getElementType(), IJavaElement.METHOD);
     assertEquals("aMethod", event.getElement().getElementName());
   }
-  
+
   /**
-   * This test is for the same purpose as 
-   * {@link #testFilterDeletedElements_typeMembers()}, but with a little 
+   * This test is for the same purpose as
+   * {@link #testFilterDeletedElements_typeMembers()}, but with a little
    * difference, that is, if the whole Java file is deleted, all the data about
    * the Java elements in the file will be stored under the Java file, even
    * though it's deleted.
@@ -537,19 +558,19 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
    */
   @Test
   public void testFilter_deletedElement_mainType() throws Exception {
-    
+
     String newClassName = CLASS_NAME + "abc";
-    
+
     // Create a new class:
     BOT.menu("File").menu("New").menu("Class").click();
     BOT.textWithLabel("Package:").setText(PACKAGE_NAME);
     BOT.textWithLabel("Name:").setText(newClassName);
     BOT.button("Finish").click();
     BOT.waitUntil(Conditions.shellCloses(BOT.shell("New Java Class")));
-    
+
     IFile file = ((IFolder) FILE.getParent()).getFile(newClassName + ".java");
     final JavaEditor editor = closeAndOpenEditor(file);
-    
+
     // Set the editor to select the package declaration:
     String content = getDocument(editor).get();
     int offset = content.indexOf(PACKAGE_NAME);
@@ -561,43 +582,45 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
         editor.getSelectionProvider().setSelection(selection);
       }
     });
-    
+
     // Run the tracker to capture the event:
-    long timeout = 30;
-    DateTime before = new DateTime();
+    long preStart = System.currentTimeMillis();
     tracker.setEnabled(true);
-    TimeUnit.MILLISECONDS.sleep(timeout);
+    long postStart = System.currentTimeMillis();
+
+    Thread.sleep(35);
+
+    long preEnd = System.currentTimeMillis();
     tracker.setEnabled(false);
-    DateTime after = new DateTime();
-    
+    long postEnd = System.currentTimeMillis();
+
     // The document root:
     IJavaElement typeRoot = JavaCore.create(file);
-    
+
     // Delete the file:
     file.delete(true, null);
-    
+
     // Give the deletion some time:
     TimeUnit.SECONDS.sleep(2);
-    
-    // Ask the tracker to save the data, the data should be appropriately 
+
+    // Ask the tracker to save the data, the data should be appropriately
     // filtered
     tracker.saveData();
 
-    // One data should be in the collection (the parent of the previously 
+    // One data should be in the collection (the parent of the previously
     // selected package declaration):
     Collection<JavaEvent> events = tracker.getData();
     assertEquals(1, events.size());
 
     JavaEvent event = events.iterator().next();
-    assertTrue(before.compareTo(event.getTime()) <= 0);
-    assertTrue(after.compareTo(event.getTime()) >= 0);
-    assertTrue(timeout - 20 <= event.getDuration());
-    assertTrue(timeout + 20 >= event.getDuration());
+    long start = event.getInterval().getStartMillis();
+    long end = event.getInterval().getEndMillis();
+    checkTime(preStart, start, postStart, preEnd, end, postEnd);
 
     // Test the data is placed under the root element:
     assertEquals(typeRoot, event.getElement());
   }
-  
+
   /**
    * Tests that if a Java element, a field for example, is deleted from the Java
    * source file, then when we save the tracker's data, the data about the
@@ -631,7 +654,7 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
   public void testFilter_deletedElement_typeMembers() throws Exception {
     final JavaEditor editor = closeAndOpenEditor();
     final IDocument document = getDocument(editor);
-    
+
     // Place a field in the body of the class, note that we don't want to add
     // errors the class:
 
@@ -640,7 +663,8 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
     final String fieldName = "aVeryUniqueFieldName";
     final String fieldStr = "private int " + fieldName + " = 0;";
     PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
-      @Override public void run() {
+      @Override
+      public void run() {
         String content = document.get();
         int offset = content.lastIndexOf('}') - 1;
         try {
@@ -656,23 +680,28 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
     int length = fieldStr.length();
     final ITextSelection selection = new TextSelection(offset, length);
     PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
-      @Override public void run() {
+      @Override
+      public void run() {
         editor.getSelectionProvider().setSelection(selection);
       }
     });
-    
+
     // Run the tracker to capture the event:
-    long timeout = 30;
-    DateTime before = new DateTime();
+    long preStart = System.currentTimeMillis();
     tracker.setEnabled(true);
-    TimeUnit.MILLISECONDS.sleep(timeout);
+    long postStart = System.currentTimeMillis();
+
+    Thread.sleep(25);
+
+    long preEnd = System.currentTimeMillis();
     tracker.setEnabled(false);
-    DateTime after = new DateTime();
-    
+    long postEnd = System.currentTimeMillis();
+
     // Keeps a reference to the field statement first, for testing latter:
     final IJavaElement[] elementArray = new IJavaElement[1];
     PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
-      @Override public void run() {
+      @Override
+      public void run() {
         try {
           // The field element:
           elementArray[0] = getElementAtOffset(editor);
@@ -681,12 +710,13 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
         }
       }
     });
-    
+
     // Now delete the field statement from the source file, note that there
     // is no need to save the document (and we should not save the document,
     // other tests may depend on it):
     PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
-      @Override public void run() {
+      @Override
+      public void run() {
         int offset = document.get().indexOf(fieldStr);
         int length = fieldStr.length();
         try {
@@ -696,55 +726,56 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
         }
       }
     });
-    
+
     // Wait a while to make sure the above operation is finished:
     TimeUnit.SECONDS.sleep(2);
-    
-    // Ask the tracker to save the data, the data should be appropriately 
+
+    // Ask the tracker to save the data, the data should be appropriately
     // filtered
     tracker.saveData();
-    
+
     // Gets the data, the data is remained in the tracker as long as we don't
     // enable it again (according to the contract of the tracker):
     //
-    // One data should be in the collection 
+    // One data should be in the collection
     // (the parent of the selected package declaration):
     Collection<JavaEvent> events = tracker.getData();
     assertEquals(1, events.size());
 
     JavaEvent event = events.iterator().next();
-    assertTrue(before.compareTo(event.getTime()) <= 0);
-    assertTrue(after.compareTo(event.getTime()) >= 0);
-    assertTrue(timeout - 20 <= event.getDuration());
-    assertTrue(timeout + 20 >= event.getDuration());
+    long start = event.getInterval().getStartMillis();
+    long end = event.getInterval().getEndMillis();
+    checkTime(preStart, start, postStart, preEnd, end, postEnd);
 
     // Now check that the element is the parent of the package declaration
     // instead of the deleted package declaration itself:
     assertEquals(elementArray[0].getParent(), event.getElement());
   }
-  
+
   /**
    * Test an event on an import statement. This event should be filtered on
    * save, so that instead of showing a user spent x amount of time on the
-   * import statement , we show that a user spent x amount of time on the 
-   * type root (ITypeRoot) element, (a.k.a the Java file).
+   * import statement , we show that a user spent x amount of time on the type
+   * root (ITypeRoot) element, (a.k.a the Java file).
    */
   @Test
   public void testFilter_existingElement_importStatement() throws Exception {
     final JavaEditor editor = closeAndOpenEditor();
     final IDocument document = getDocument(editor);
     PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
-      @Override public void run() {
+      @Override
+      public void run() {
         String importStatement = "import java.util.*;";
         String content = document.get();
-        int offset = content.indexOf(";") + 1; // Position after package declaration
+        int offset = content.indexOf(";") + 1; // Position after package
+                                               // declaration
         int length = 0;
         try {
           document.replace(offset, length, importStatement);
         } catch (BadLocationException e) {
           fail(e.getMessage());
         }
-        
+
         content = document.get();
         offset = content.indexOf(importStatement);
         length = importStatement.length();
@@ -752,15 +783,18 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
         editor.getSelectionProvider().setSelection(selection);
       }
     });
-    
-    long duration = 30;
-    DateTime before = new DateTime();
+
+    long preStart = System.currentTimeMillis();
     tracker.setEnabled(true);
-    TimeUnit.MILLISECONDS.sleep(duration);
+    long postStart = System.currentTimeMillis();
+
+    Thread.sleep(20);
+
+    long preEnd = System.currentTimeMillis();
     tracker.setEnabled(false);
-    DateTime after = new DateTime();
-    
-    // Ask the tracker to save the data, the data should be appropriately 
+    long postEnd = System.currentTimeMillis();
+
+    // Ask the tracker to save the data, the data should be appropriately
     // filtered
     tracker.saveData();
 
@@ -768,23 +802,22 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
     assertEquals(1, events.size());
 
     final JavaEvent event = events.iterator().next();
-    assertTrue(before.compareTo(event.getTime()) <= 0);
-    assertTrue(after.compareTo(event.getTime()) >= 0);
-    assertTrue(duration - 20 <= event.getDuration());
-    assertTrue(duration + 20 >= event.getDuration());
-    
+    long start = event.getInterval().getStartMillis();
+    long end = event.getInterval().getEndMillis();
+    checkTime(preStart, start, postStart, preEnd, end, postEnd);
+
     final ITypeRoot[] elementArray = new ITypeRoot[1];
     PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
       @Override
       public void run() {
-        elementArray[0] = getInputAsTypeRoot(editor);
+        elementArray[0] = getInput(editor);
       }
     });
     assertEquals(elementArray[0], event.getElement());
   }
 
   /**
-   * Test an event on a static initializer. This event should not be filtered on
+   * Test an event on a static initialiser. This event should not be filtered on
    * save.
    */
   @Test
@@ -793,7 +826,8 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
     final IDocument document = getDocument(editor);
     final String staticName = "static";
     PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
-      @Override public void run() {
+      @Override
+      public void run() {
         String methodText = staticName + " {}";
         String content = document.get();
         int offset = content.indexOf("{") + 1;
@@ -803,7 +837,7 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
         } catch (BadLocationException e) {
           fail(e.getMessage());
         }
-        
+
         content = document.get();
         offset = content.indexOf(staticName);
         length = staticName.length();
@@ -811,15 +845,18 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
         editor.getSelectionProvider().setSelection(selection);
       }
     });
-    
-    long duration = 30;
-    DateTime before = new DateTime();
+
+    long preStart = System.currentTimeMillis();
     tracker.setEnabled(true);
-    TimeUnit.MILLISECONDS.sleep(duration);
+    long postStart = System.currentTimeMillis();
+
+    Thread.sleep(20);
+
+    long preEnd = System.currentTimeMillis();
     tracker.setEnabled(false);
-    DateTime after = new DateTime();
-    
-    // Ask the tracker to save the data, the data should be appropriately 
+    long postEnd = System.currentTimeMillis();
+
+    // Ask the tracker to save the data, the data should be appropriately
     // filtered
     tracker.saveData();
 
@@ -827,11 +864,10 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
     assertEquals(1, events.size());
 
     final JavaEvent event = events.iterator().next();
-    assertTrue(before.compareTo(event.getTime()) <= 0);
-    assertTrue(after.compareTo(event.getTime()) >= 0);
-    assertTrue(duration - 50 <= event.getDuration());
-    assertTrue(duration + 50 >= event.getDuration());
-    
+    long start = event.getInterval().getStartMillis();
+    long end = event.getInterval().getEndMillis();
+    checkTime(preStart, start, postStart, preEnd, end, postEnd);
+
     final IJavaElement[] elementArray = new IJavaElement[1];
     PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
       @Override
@@ -847,27 +883,32 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
     assertEquals(elementArray[0].getElementType(), IJavaElement.INITIALIZER);
     assertEquals(elementArray[0], event.getElement());
   }
-  
+
   /**
    * Test an event on a method, that is a member of an anonymous class. This
-   * event should be filtered so that we so the user has spent x amount of
-   * time on the method's first non-anonymous parent.
+   * event should be filtered so that we so the user has spent x amount of time
+   * on the method's first non-anonymous parent.
    */
   @Test
-  public void testFilter_existingElement_methodParentIsAnonymous() throws Exception {
+  public void testFilter_existingElement_methodParentIsAnonymous()
+      throws Exception {
     final JavaEditor editor = closeAndOpenEditor();
     final IDocument document = getDocument(editor);
     PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+
       @Override public void run() {
-        String anonymousClassText = "void aMethod() {" + //
-            "  new Runnable() { " + // 
-            "    public void run(){" + //
+        //@formatter:off
+        String anonymousClassText = 
+            "void aMethod() {" +
+            "  new Runnable() { " +
+            "    public void run(){" +
             "      new Runnable() {" +
             "        public void run() {}" +
-            "      };" + //
-            "    } " + //
-            "  };" + //
-            "}"; //
+            "      };" +
+            "    } " +
+            "  };" +
+            "}";
+        //@formatter:on
         String content = document.get();
         int offset = content.indexOf("{") + 1;
         int length = 0;
@@ -876,7 +917,7 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
         } catch (BadLocationException e) {
           fail(e.getMessage());
         }
-        
+
         content = document.get();
         offset = content.indexOf("run", content.indexOf("run") + 1);
         length = "run".length();
@@ -884,15 +925,18 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
         editor.getSelectionProvider().setSelection(selection);
       }
     });
-    
-    long duration = 30;
-    DateTime before = new DateTime();
+
+    long preStart = System.currentTimeMillis();
     tracker.setEnabled(true);
-    TimeUnit.MILLISECONDS.sleep(duration);
+    long postStart = System.currentTimeMillis();
+
+    Thread.sleep(20);
+
+    long preEnd = System.currentTimeMillis();
     tracker.setEnabled(false);
-    DateTime after = new DateTime();
-    
-    // Ask the tracker to save the data, the data should be appropriately 
+    long postEnd = System.currentTimeMillis();
+
+    // Ask the tracker to save the data, the data should be appropriately
     // filtered
     tracker.saveData();
 
@@ -900,11 +944,10 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
     assertEquals(1, events.size());
 
     final JavaEvent event = events.iterator().next();
-    assertTrue(before.compareTo(event.getTime()) <= 0);
-    assertTrue(after.compareTo(event.getTime()) >= 0);
-    assertTrue(duration - 20 <= event.getDuration());
-    assertTrue(duration + 20 >= event.getDuration());
-    
+    long start = event.getInterval().getStartMillis();
+    long end = event.getInterval().getEndMillis();
+    checkTime(preStart, start, postStart, preEnd, end, postEnd);
+
     final IJavaElement[] elementArray = new IJavaElement[1];
     PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
       @Override
@@ -927,12 +970,14 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
    * event should not be filtered on save.
    */
   @Test
-  public void testFilter_existingElement_methodParentNotAnonymous() throws Exception {
+  public void testFilter_existingElement_methodParentNotAnonymous()
+      throws Exception {
     final JavaEditor editor = closeAndOpenEditor();
     final IDocument document = getDocument(editor);
     final String methodName = "aMethodName";
     PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
-      @Override public void run() {
+      @Override
+      public void run() {
         String methodText = "void " + methodName + "() {}";
         String content = document.get();
         int offset = content.indexOf("{") + 1;
@@ -942,7 +987,7 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
         } catch (BadLocationException e) {
           fail(e.getMessage());
         }
-        
+
         content = document.get();
         offset = content.indexOf(methodName);
         length = methodName.length();
@@ -950,15 +995,18 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
         editor.getSelectionProvider().setSelection(selection);
       }
     });
-    
-    long duration = 30;
-    DateTime before = new DateTime();
+
+    long preStart = System.currentTimeMillis();
     tracker.setEnabled(true);
-    TimeUnit.MILLISECONDS.sleep(duration);
+    long postStart = System.currentTimeMillis();
+
+    Thread.sleep(30);
+
+    long preEnd = System.currentTimeMillis();
     tracker.setEnabled(false);
-    DateTime after = new DateTime();
-    
-    // Ask the tracker to save the data, the data should be appropriately 
+    long postEnd = System.currentTimeMillis();
+
+    // Ask the tracker to save the data, the data should be appropriately
     // filtered
     tracker.saveData();
 
@@ -966,11 +1014,10 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
     assertEquals(1, events.size());
 
     final JavaEvent event = events.iterator().next();
-    assertTrue(before.compareTo(event.getTime()) <= 0);
-    assertTrue(after.compareTo(event.getTime()) >= 0);
-    assertTrue(duration - 20 <= event.getDuration());
-    assertTrue(duration + 20 >= event.getDuration());
-    
+    long start = event.getInterval().getStartMillis();
+    long end = event.getInterval().getEndMillis();
+    checkTime(preStart, start, postStart, preEnd, end, postEnd);
+
     final IJavaElement[] elementArray = new IJavaElement[1];
     PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
       @Override
@@ -988,17 +1035,18 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
   }
 
   /**
-   * Test an event on an package declaration. This event should be filtered on save, so
-   * that instead of showing a user spent x amount of time on the package
-   * declaration , we show that a user spent x amount of time on the main type
-   * element.
+   * Test an event on an package declaration. This event should be filtered on
+   * save, so that instead of showing a user spent x amount of time on the
+   * package declaration , we show that a user spent x amount of time on the
+   * main type element.
    */
   @Test
   public void testFilter_existingElement_packageDeclaration() throws Exception {
     final JavaEditor editor = closeAndOpenEditor();
     final IDocument document = getDocument(editor);
     PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
-      @Override public void run() {
+      @Override
+      public void run() {
         String content = document.get();
         int offset = content.indexOf(PACKAGE_NAME);
         int length = PACKAGE_NAME.length();
@@ -1006,15 +1054,18 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
         editor.getSelectionProvider().setSelection(selection);
       }
     });
-    
-    long duration = 30;
-    DateTime before = new DateTime();
+
+    long preStart = System.currentTimeMillis();
     tracker.setEnabled(true);
-    TimeUnit.MILLISECONDS.sleep(duration);
+    long postStart = System.currentTimeMillis();
+
+    Thread.sleep(30);
+
+    long preEnd = System.currentTimeMillis();
     tracker.setEnabled(false);
-    DateTime after = new DateTime();
-    
-    // Ask the tracker to save the data, the data should be appropriately 
+    long postEnd = System.currentTimeMillis();
+
+    // Ask the tracker to save the data, the data should be appropriately
     // filtered
     tracker.saveData();
 
@@ -1022,11 +1073,10 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
     assertEquals(1, events.size());
 
     final JavaEvent event = events.iterator().next();
-    assertTrue(before.compareTo(event.getTime()) <= 0);
-    assertTrue(after.compareTo(event.getTime()) >= 0);
-    assertTrue(duration - 20 <= event.getDuration());
-    assertTrue(duration + 20 >= event.getDuration());
-    
+    long start = event.getInterval().getStartMillis();
+    long end = event.getInterval().getEndMillis();
+    checkTime(preStart, start, postStart, preEnd, end, postEnd);
+
     final IJavaElement[] elementArray = new IJavaElement[1];
     PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
       @Override
@@ -1039,10 +1089,11 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
         }
       }
     });
-    assertEquals(elementArray[0].getElementType(), IJavaElement.PACKAGE_DECLARATION);
+    assertEquals(elementArray[0].getElementType(),
+        IJavaElement.PACKAGE_DECLARATION);
     assertEquals(elementArray[0].getParent(), event.getElement());
   }
-  
+
   /**
    * Test an event on an anonymous type. This event should be filtered so that
    * we show the user has spent x amount of time on the type's first
@@ -1053,13 +1104,17 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
     final JavaEditor editor = closeAndOpenEditor();
     final IDocument document = getDocument(editor);
     PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+
       @Override public void run() {
-        String anonymousClassText = "void aMethod() {" + //
-            "  new Runnable() { " + // 
-            "    public void run(){" + //
-            "    } " + //
-            "  };" + //
-            "}"; //
+        //@formatter:off
+        String anonymousClassText = 
+            "void aMethod() {" +
+            "  new Runnable() { " + 
+            "    public void run(){" +
+            "    } " +
+            "  };" +
+            "}";
+        //@formatter:on
         String content = document.get();
         int offset = content.indexOf("{") + 1;
         int length = 0;
@@ -1068,7 +1123,7 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
         } catch (BadLocationException e) {
           fail(e.getMessage());
         }
-        
+
         content = document.get();
         offset = content.indexOf("Runnable");
         length = "Runnable".length();
@@ -1076,15 +1131,18 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
         editor.getSelectionProvider().setSelection(selection);
       }
     });
-    
-    long duration = 30;
-    DateTime before = new DateTime();
+
+    long preStart = System.currentTimeMillis();
     tracker.setEnabled(true);
-    TimeUnit.MILLISECONDS.sleep(duration);
+    long postStart = System.currentTimeMillis();
+
+    Thread.sleep(35);
+
+    long preEnd = System.currentTimeMillis();
     tracker.setEnabled(false);
-    DateTime after = new DateTime();
-    
-    // Ask the tracker to save the data, the data should be appropriately 
+    long postEnd = System.currentTimeMillis();
+
+    // Ask the tracker to save the data, the data should be appropriately
     // filtered
     tracker.saveData();
 
@@ -1092,11 +1150,10 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
     assertEquals(1, events.size());
 
     final JavaEvent event = events.iterator().next();
-    assertTrue(before.compareTo(event.getTime()) <= 0);
-    assertTrue(after.compareTo(event.getTime()) >= 0);
-    assertTrue(duration - 20 <= event.getDuration());
-    assertTrue(duration + 20 >= event.getDuration());
-    
+    long start = event.getInterval().getStartMillis();
+    long end = event.getInterval().getEndMillis();
+    checkTime(preStart, start, postStart, preEnd, end, postEnd);
+
     final IJavaElement[] elementArray = new IJavaElement[1];
     PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
       @Override
@@ -1123,7 +1180,8 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
     final IDocument document = getDocument(editor);
     final String innerClassName = "anInnerClassName";
     PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
-      @Override public void run() {
+      @Override
+      public void run() {
         String innerClassText = "\nstatic class " + innerClassName + " {}";
         String content = document.get();
         int offset = content.indexOf("{") + 1;
@@ -1133,7 +1191,7 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
         } catch (BadLocationException e) {
           fail(e.getMessage());
         }
-        
+
         content = document.get();
         offset = content.indexOf(innerClassName);
         length = innerClassName.length();
@@ -1141,15 +1199,18 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
         editor.getSelectionProvider().setSelection(selection);
       }
     });
-    
-    long duration = 30;
-    DateTime before = new DateTime();
+
+    long preStart = System.currentTimeMillis();
     tracker.setEnabled(true);
-    TimeUnit.MILLISECONDS.sleep(duration);
+    long postStart = System.currentTimeMillis();
+
+    Thread.sleep(20);
+
+    long preEnd = System.currentTimeMillis();
     tracker.setEnabled(false);
-    DateTime after = new DateTime();
-    
-    // Ask the tracker to save the data, the data should be appropriately 
+    long postEnd = System.currentTimeMillis();
+
+    // Ask the tracker to save the data, the data should be appropriately
     // filtered
     tracker.saveData();
 
@@ -1157,11 +1218,10 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
     assertEquals(1, events.size());
 
     final JavaEvent event = events.iterator().next();
-    assertTrue(before.compareTo(event.getTime()) <= 0);
-    assertTrue(after.compareTo(event.getTime()) >= 0);
-    assertTrue(duration - 20 <= event.getDuration());
-    assertTrue(duration + 20 >= event.getDuration());
-    
+    long start = event.getInterval().getStartMillis();
+    long end = event.getInterval().getEndMillis();
+    checkTime(preStart, start, postStart, preEnd, end, postEnd);
+
     final IJavaElement[] elementArray = new IJavaElement[1];
     PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
       @Override
@@ -1187,7 +1247,8 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
   public void testFilter_existingElement_typeNormal() throws Exception {
     final JavaEditor editor = closeAndOpenEditor();
     PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
-      @Override public void run() {
+      @Override
+      public void run() {
         String content = getDocument(editor).get();
         int offset = content.indexOf(CLASS_NAME);
         int length = CLASS_NAME.length();
@@ -1196,26 +1257,28 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
       }
     });
 
-    DateTime before = new DateTime();
+    long preStart = System.currentTimeMillis();
     tracker.setEnabled(true);
-    TimeUnit.MILLISECONDS.sleep(30);
+    long postStart = System.currentTimeMillis();
+
+    Thread.sleep(30);
+
+    long preEnd = System.currentTimeMillis();
     tracker.setEnabled(false);
-    DateTime after = new DateTime();
-    
-    // Ask the tracker to save the data, the data should be appropriately 
+    long postEnd = System.currentTimeMillis();
+
+    // Ask the tracker to save the data, the data should be appropriately
     // filtered
     tracker.saveData();
 
     Collection<JavaEvent> events = tracker.getData();
     assertEquals(1, events.size());
 
-    long duration = after.getMillis() - before.getMillis();
     final JavaEvent event = events.iterator().next();
-    assertTrue(before.compareTo(event.getTime()) <= 0);
-    assertTrue(after.compareTo(event.getTime()) >= 0);
-    assertTrue(duration - 20 <= event.getDuration());
-    assertTrue(duration + 20 >= event.getDuration());
-    
+    long start = event.getInterval().getStartMillis();
+    long end = event.getInterval().getEndMillis();
+    checkTime(preStart, start, postStart, preEnd, end, postEnd);
+
     final IJavaElement[] elementArray = new IJavaElement[1];
     PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
       @Override
@@ -1243,7 +1306,8 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
     final IDocument document = getDocument(editor);
     final String fieldName = "aFieldName";
     PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
-      @Override public void run() {
+      @Override
+      public void run() {
         String methodText = "private int " + fieldName + " = 1;";
         String content = document.get();
         int offset = content.indexOf("{") + 1;
@@ -1253,7 +1317,7 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
         } catch (BadLocationException e) {
           fail(e.getMessage());
         }
-        
+
         content = document.get();
         offset = content.indexOf(fieldName);
         length = fieldName.length();
@@ -1261,15 +1325,18 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
         editor.getSelectionProvider().setSelection(selection);
       }
     });
-    
-    long duration = 30;
-    DateTime before = new DateTime();
+
+    long preStart = System.currentTimeMillis();
     tracker.setEnabled(true);
-    TimeUnit.MILLISECONDS.sleep(duration);
+    long postStart = System.currentTimeMillis();
+
+    Thread.sleep(20);
+
+    long preEnd = System.currentTimeMillis();
     tracker.setEnabled(false);
-    DateTime after = new DateTime();
-    
-    // Ask the tracker to save the data, the data should be appropriately 
+    long postEnd = System.currentTimeMillis();
+
+    // Ask the tracker to save the data, the data should be appropriately
     // filtered
     tracker.saveData();
 
@@ -1277,12 +1344,12 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
     assertEquals(1, events.size());
 
     final JavaEvent event = events.iterator().next();
-    assertTrue(before.compareTo(event.getTime()) <= 0);
-    assertTrue(after.compareTo(event.getTime()) >= 0);
-    assertTrue(duration - 50 <= event.getDuration());
-    assertTrue(duration + 50 >= event.getDuration());
-    
-    // The filtered event should be on the field's parent, not on the field itself:
+    long start = event.getInterval().getStartMillis();
+    long end = event.getInterval().getEndMillis();
+    checkTime(preStart, start, postStart, preEnd, end, postEnd);
+
+    // The filtered event should be on the field's parent, not on the field
+    // itself:
     final IJavaElement[] elementArray = new IJavaElement[1];
     PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
       @Override
@@ -1298,9 +1365,7 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
     assertEquals(elementArray[0].getElementType(), IJavaElement.FIELD);
     assertEquals(elementArray[0].getParent(), event.getElement());
   }
-  
-  
-  
+
   /**
    * Tests when the user becomes inactive.
    */
@@ -1321,22 +1386,24 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
     });
 
     // Run the tracker to capture the event:
-    long timeout = 30;
-    DateTime before = new DateTime();
+    long preStart = System.currentTimeMillis();
     tracker.setEnabled(true);
-    TimeUnit.MILLISECONDS.sleep(timeout);
+    long postStart = System.currentTimeMillis();
+
+    Thread.sleep(30);
+
+    long preEnd = System.currentTimeMillis();
     callIdleDetectorToNotify();
-    DateTime after = new DateTime();
+    long postEnd = System.currentTimeMillis();
 
     // One data should be in the collection (the selected package declaration):
     Collection<JavaEvent> events = tracker.getData();
     assertEquals(1, events.size());
 
     JavaEvent event = events.iterator().next();
-    assertTrue(before.compareTo(event.getTime()) <= 0);
-    assertTrue(after.compareTo(event.getTime()) >= 0);
-    assertTrue(timeout - 20 <= event.getDuration());
-    assertTrue(timeout + 20 >= event.getDuration());
+    long start = event.getInterval().getStartMillis();
+    long end = event.getInterval().getEndMillis();
+    checkTime(preStart, start, postStart, preEnd, end, postEnd);
 
     final IJavaElement[] elementArray = new IJavaElement[1];
     PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
@@ -1351,9 +1418,9 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
       }
     });
     assertEquals(elementArray[0], event.getElement());
-    
+
   }
-  
+
   /**
    * Tests when the window lose focus.
    */
@@ -1374,29 +1441,31 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
     });
 
     // Run the tracker to capture the event:
-    long timeout = 30;
-    DateTime before = new DateTime();
+    long preStart = System.currentTimeMillis();
     tracker.setEnabled(true);
-    TimeUnit.MILLISECONDS.sleep(timeout);
+    long postStart = System.currentTimeMillis();
+
+    Thread.sleep(20);
 
     final Shell shell = BOT.activeShell().widget;
     // Minimize the shell to cause it to lose focus:
+    long preEnd = System.currentTimeMillis();
     BOT.getDisplay().syncExec(new Runnable() {
-      @Override public void run() {
+      @Override
+      public void run() {
         shell.setMinimized(true);
       }
     });
-    DateTime after = new DateTime();
+    long postEnd = System.currentTimeMillis();
 
     // One data should be in the collection (the selected package declaration):
     Collection<JavaEvent> events = tracker.getData();
     assertEquals(1, events.size());
 
     JavaEvent event = events.iterator().next();
-    assertTrue(before.compareTo(event.getTime()) <= 0);
-    assertTrue(after.compareTo(event.getTime()) >= 0);
-    assertTrue(timeout - 20 <= event.getDuration());
-    assertTrue(timeout + 20 >= event.getDuration());
+    long start = event.getInterval().getStartMillis();
+    long end = event.getInterval().getEndMillis();
+    checkTime(preStart, start, postStart, preEnd, end, postEnd);
 
     final IJavaElement[] elementArray = new IJavaElement[1];
     PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
@@ -1414,12 +1483,13 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
 
     // Restore the shell:
     BOT.getDisplay().syncExec(new Runnable() {
-      @Override public void run() {
+      @Override
+      public void run() {
         shell.setMinimized(false);
       }
     });
   }
-  
+
   /**
    * Tests that events are recorded properly with the different states of the
    * window.
@@ -1439,31 +1509,34 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
         editor.getSelectionProvider().setSelection(selection);
       }
     });
-    
+
     final Shell shell = BOT.activeShell().widget;
 
     // Now run the tracker to capture the event:
-    long timeout = 30;
-    DateTime before = new DateTime();
+    long preStart = System.currentTimeMillis();
     tracker.setEnabled(true);
-    TimeUnit.MILLISECONDS.sleep(timeout);
+    long postStart = System.currentTimeMillis();
+
+    Thread.sleep(20);
+
     // Minimize the shell to cause it to lose focus:
+    long preEnd = System.currentTimeMillis();
     BOT.getDisplay().syncExec(new Runnable() {
-      @Override public void run() {
+      @Override
+      public void run() {
         shell.setMinimized(true);
       }
     });
-    DateTime after = new DateTime();
+    long postEnd = System.currentTimeMillis();
 
     // One data should be in the collection (the selected package declaration):
     Collection<JavaEvent> events = tracker.getData();
     assertEquals(1, events.size());
 
     JavaEvent event = events.iterator().next();
-    assertTrue(before.compareTo(event.getTime()) <= 0);
-    assertTrue(after.compareTo(event.getTime()) >= 0);
-    assertTrue(timeout - 20 <= event.getDuration());
-    assertTrue(timeout + 20 >= event.getDuration());
+    long start = event.getInterval().getStartMillis();
+    long end = event.getInterval().getEndMillis();
+    checkTime(preStart, start, postStart, preEnd, end, postEnd);
 
     final IJavaElement[] elementArray = new IJavaElement[1];
     PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
@@ -1479,36 +1552,38 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
     });
     assertEquals(elementArray[0], event.getElement());
 
-    
-  
     // Restore the shell to see if tracker will start tracking again:
     tracker.flushData();
-    
-    timeout = 30;
-    before = new DateTime();
+
+    preStart = System.currentTimeMillis();
     BOT.getDisplay().syncExec(new Runnable() {
-      @Override public void run() {
+      @Override
+      public void run() {
         shell.setMinimized(false);
       }
     });
-    TimeUnit.MILLISECONDS.sleep(timeout);
-    // Minimize the shell to cause it to lose focus:
+    postStart = System.currentTimeMillis();
+
+    Thread.sleep(25);
+
+    // Minimise the shell to cause it to lose focus:
+    preEnd = System.currentTimeMillis();
     BOT.getDisplay().syncExec(new Runnable() {
-      @Override public void run() {
+      @Override
+      public void run() {
         shell.setMinimized(true);
       }
     });
-    after = new DateTime();
+    postEnd = System.currentTimeMillis();
 
     // One data should be in the collection (the selected package declaration):
     events = tracker.getData();
     assertEquals(1, events.size());
 
     event = events.iterator().next();
-    assertTrue(before.compareTo(event.getTime()) <= 0);
-    assertTrue(after.compareTo(event.getTime()) >= 0);
-    assertTrue(timeout - 20 <= event.getDuration());
-    assertTrue(timeout + 200 >= event.getDuration());
+    start = event.getInterval().getStartMillis();
+    end = event.getInterval().getEndMillis();
+    checkTime(preStart, start, postStart, preEnd, end, postEnd);
 
     final IJavaElement[] elementArray2 = new IJavaElement[1];
     PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
@@ -1526,12 +1601,13 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
 
     // Restore the shell:
     BOT.getDisplay().syncExec(new Runnable() {
-      @Override public void run() {
+      @Override
+      public void run() {
         shell.setMinimized(false);
       }
     });
   }
-  
+
   /**
    * Hacks the global idle detector to cause it to notify it's observers.
    */
@@ -1542,7 +1618,8 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
     Method setChanged = Observable.class.getDeclaredMethod("setChanged");
     setChanged.setAccessible(true);
 
-    Method notifyObservers = Observable.class.getDeclaredMethod("notifyObservers");
+    Method notifyObservers = Observable.class
+        .getDeclaredMethod("notifyObservers");
     notifyObservers.setAccessible(true);
 
     IdleDetector detector = TrackingPlugin.getDefault().getIdleDetector();
@@ -1552,19 +1629,21 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
     notifyObservers.invoke(detector);
     detector.setRunning(false);
   }
-  
+
   /**
    * Closes all the editor in the workbench page, contents of editors are not
    * saved. Then opens the Java editor on {@link #FILE}.
+   * 
    * @return The editor.
    */
   protected JavaEditor closeAndOpenEditor() {
     return closeAndOpenEditor(FILE);
   }
-  
+
   /**
    * Closes all the editor in the workbench page, contents of editors are not
    * saved. Then opens the Java editor on the file.
+   * 
    * @param file The file to open.
    * @return The editor.
    */
@@ -1577,7 +1656,7 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
           IWorkbenchPage page = PlatformUI.getWorkbench()
               .getActiveWorkbenchWindow().getActivePage();
           page.closeAllEditors(false);
-          
+
           IEditorInput input = new FileEditorInput(file);
           editorArray[0] = (JavaEditor) page.openEditor(input, JAVA_EDITOR_ID);
         } catch (PartInitException e) {
@@ -1588,10 +1667,10 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
     });
     return editorArray[0];
   }
-  
+
   @Override
   protected JavaEvent createEvent() {
-    return new JavaEvent(new DateTime(), 20, 
+    return new JavaEvent(new Interval(0, 1),
         JavaCore.create("=Enfo/src<enfo{EnfoPlugin.java"));
   }
 
@@ -1602,12 +1681,13 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
 
   /**
    * Gets the document from the editor.
+   * 
    * @param editor The editor.
    * @return The document.
    */
   protected IDocument getDocument(JavaEditor editor) {
-    IDocument doc = editor.getDocumentProvider()
-        .getDocument(editor.getEditorInput());
+    IDocument doc = editor.getDocumentProvider().getDocument(
+        editor.getEditorInput());
     if (doc == null) {
       fail("Document is null");
     }

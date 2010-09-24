@@ -27,7 +27,7 @@ public class PartEventConverter extends
   @Override
   protected PartEventType doConvert(PartEvent element) {
     PartEventType type = new PartEventType();
-    type.setDuration(element.getDuration());
+    type.setDuration(element.getInterval().toDurationMillis());
     type.setPartId(element.getWorkbenchPart().getSite().getId());
     return type;
   }

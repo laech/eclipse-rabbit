@@ -18,8 +18,6 @@ package rabbit.tracking.tests.trackers;
 import rabbit.data.store.model.FileEvent;
 import rabbit.tracking.internal.trackers.FileTracker;
 
-import junit.framework.Assert;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -29,7 +27,7 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.swtbot.swt.finder.junit.SWTBotJunit4ClassRunner;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPart;
-import org.joda.time.DateTime;
+import org.joda.time.Interval;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -43,15 +41,19 @@ import java.util.Iterator;
 public class FileTrackerTest extends AbstractPartTrackerTest<FileEvent> {
 
   @Test
-  public void testNewWindow() {
-    long sleepDuration = 15;
-    long start = System.currentTimeMillis();
+  public void testNewWindow() throws Exception {
     tracker.setEnabled(true);
     openNewWindow();
-    IEditorPart editor = openNewEditor();
-    uiSleep(sleepDuration);
-    openNewEditor();
-    long end = System.currentTimeMillis();
+
+    long preStart = System.currentTimeMillis();
+    IEditorPart editor = openNewEditor(); // Start
+    long postStart = System.currentTimeMillis();
+
+    bot.sleep(20);
+
+    long preEnd = System.currentTimeMillis();
+    openNewEditor(); // End
+    long postEnd = System.currentTimeMillis();
 
     // One for the original window,
     // one for the newly opened window's default active view,
@@ -62,17 +64,19 @@ public class FileTrackerTest extends AbstractPartTrackerTest<FileEvent> {
     Iterator<FileEvent> it = tracker.getData().iterator();
     FileEvent event = it.next();
     assertTrue(hasSamePart(event, editor));
-    assertTrue(start <= event.getTime().getMillis());
-    assertTrue(end >= event.getTime().getMillis());
-    assertTrue(sleepDuration <= event.getDuration());
-    assertTrue((end - start) >= event.getDuration());
+
+    long start = event.getInterval().getStartMillis();
+    long end = event.getInterval().getEndMillis();
+    checkTime(preStart, start, postStart, preEnd, end, postEnd);
+    assertTrue(hasSamePart(event, editor));
 
     bot.activeShell().close();
   }
 
   @Override
   protected FileEvent createEvent() {
-    return new FileEvent(new DateTime(), 10, Path.fromPortableString("/p/f/a.txt"));
+    return new FileEvent(new Interval(0, 1),
+        Path.fromPortableString("/p/f/a.txt"));
   }
 
   @Override
@@ -91,19 +95,4 @@ public class FileTrackerTest extends AbstractPartTrackerTest<FileEvent> {
       return false;
     }
   }
-
-  @Override
-  protected void internalAssertAccuracy(FileEvent event, IWorkbenchPart part,
-      long durationInMillis, int size, DateTime start, DateTime end) {
-
-    // 1/10 of a second is acceptable?
-    Assert.assertTrue(durationInMillis - 100 <= event.getDuration());
-    Assert.assertTrue(durationInMillis + 100 >= event.getDuration());
-    Assert.assertTrue(start.compareTo(event.getTime()) <= 0);
-    Assert.assertTrue(end.compareTo(event.getTime()) >= 0);
-    Assert.assertEquals(size, tracker.getData().size());
-    IFile file = (IFile) ((IEditorPart) part).getEditorInput().getAdapter(IFile.class);
-    Assert.assertEquals(event.getFilePath(), file.getFullPath());
-  }
-
 }

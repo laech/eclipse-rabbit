@@ -27,7 +27,7 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.core.Launch;
 import org.eclipse.debug.internal.core.LaunchConfiguration;
-import org.joda.time.DateTime;
+import org.joda.time.Interval;
 import org.junit.Test;
 
 import java.util.Collections;
@@ -52,7 +52,7 @@ public class LaunchEventTest extends ContinuousEventTest {
     filePaths.add(new Path("/a"));
     filePaths.add(new Path("/b"));
     filePaths.add(new Path("/c"));
-    LaunchEvent event = new LaunchEvent(new DateTime(), 18, new Launch(
+    LaunchEvent event = new LaunchEvent(new Interval(0, 1), new Launch(
         new LaunchConfigurationForTest("a"), ILaunchManager.DEBUG_MODE, null),
         new LaunchConfigurationForTest("asdf"), filePaths);
 
@@ -67,28 +67,28 @@ public class LaunchEventTest extends ContinuousEventTest {
 
   @Test(expected = NullPointerException.class)
   public void testConstructor_fileIdsNull() {
-    new LaunchEvent(new DateTime(), 1, new Launch(
+    new LaunchEvent(new Interval(0, 1), new Launch(
         new LaunchConfigurationForTest("asdfdsf"), ILaunchManager.DEBUG_MODE,
         null), new LaunchConfigurationForTest("adfsdfdsf"), null);
   }
 
   @Test(expected = NullPointerException.class)
   public void testConstructor_launchConfigNull() {
-    new LaunchEvent(new DateTime(), 10, new Launch(
+    new LaunchEvent(new Interval(0, 1), new Launch(
         new LaunchConfigurationForTest("a"), ILaunchManager.DEBUG_MODE, null),
         null, Collections.<IPath> emptySet());
   }
 
   @Test(expected = NullPointerException.class)
   public void testConstructor_launchNull() {
-    new LaunchEvent(new DateTime(), 10, null,
+    new LaunchEvent(new Interval(0, 1), null,
         new LaunchConfigurationForTest("Adfd222"), Collections
             .<IPath> emptySet());
   }
 
   @Test(expected = UnsupportedOperationException.class)
   public void testGetFileIds_unmodifiable() {
-    LaunchEvent event = new LaunchEvent(new DateTime(), 32, new Launch(
+    LaunchEvent event = new LaunchEvent(new Interval(0, 1), new Launch(
         new LaunchConfigurationForTest("a"), ILaunchManager.DEBUG_MODE, null),
         new LaunchConfigurationForTest("a"), new HashSet<IPath>());
     event.getFilePaths().add(new Path("/Should throw exception."));
@@ -98,7 +98,7 @@ public class LaunchEventTest extends ContinuousEventTest {
   public void testGetLaunch() {
     ILaunch launch = new Launch(new LaunchConfigurationForTest("a"),
         ILaunchManager.DEBUG_MODE, null);
-    LaunchEvent event = new LaunchEvent(new DateTime(), 10, launch,
+    LaunchEvent event = new LaunchEvent(new Interval(0, 1), launch,
         new LaunchConfigurationForTest("bbb"), Collections.<IPath> emptySet());
 
     assertSame(launch, event.getLaunch());
@@ -107,7 +107,7 @@ public class LaunchEventTest extends ContinuousEventTest {
   @Test
   public void testGetLaunchConfiguration() {
     ILaunchConfiguration config = new LaunchConfigurationForTest("b");
-    LaunchEvent event = new LaunchEvent(new DateTime(), 101,
+    LaunchEvent event = new LaunchEvent(new Interval(0, 1),
         new Launch(config, ILaunchManager.DEBUG_MODE, null), config,
         Collections.<IPath> emptySet());
 

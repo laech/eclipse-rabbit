@@ -15,39 +15,34 @@
  */
 package rabbit.data.store.model;
 
-import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 
-import org.joda.time.DateTime;
-
-import javax.annotation.Nonnull;
+import org.joda.time.Interval;
 
 /**
  * An event that has a duration.
  */
 public class ContinuousEvent extends DiscreteEvent {
 
-  private final long duration;
+  private final Interval interval;
 
   /**
-   * Constructs a new event.
+   * Constructor.
    * 
-   * @param endTime The end time of the event.
-   * @param duration The duration in milliseconds.
-   * @throws IllegalArgumentException If duration is negative.
-   * @throws NullPointerException If time is null.
+   * @param interval The interval.
+   * @throws NullPointerException If parameter is null.
    */
-  public ContinuousEvent(@Nonnull DateTime endTime, long duration) {
-    super(endTime);
-    checkArgument(duration >= 0, "Duration cannot be negative");
-    this.duration = duration;
+  public ContinuousEvent(Interval interval) {
+    super(checkNotNull(interval).getStart());
+    this.interval = interval;
   }
 
   /**
-   * Gets the duration.
+   * Gets the interval of this event.
    * 
-   * @return The duration in milliseconds.
+   * @return The interval.
    */
-  public final long getDuration() {
-    return duration;
+  public final Interval getInterval() {
+    return interval;
   }
 }

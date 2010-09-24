@@ -27,7 +27,7 @@ public class PerspectiveEventConverter extends
   @Override
   protected PerspectiveEventType doConvert(PerspectiveEvent element) {
     PerspectiveEventType type = new PerspectiveEventType();
-    type.setDuration(element.getDuration());
+    type.setDuration(element.getInterval().toDurationMillis());
     type.setPerspectiveId(element.getPerspective().getId());
     return type;
   }

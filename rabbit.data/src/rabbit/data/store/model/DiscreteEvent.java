@@ -19,8 +19,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.joda.time.DateTime;
 
-import javax.annotation.Nonnull;
-
 /**
  * Represents an event that happened at a particular time.
  */
@@ -34,17 +32,15 @@ public class DiscreteEvent {
    * @param time The event time.
    * @throws NullPointerException If time is null.
    */
-  public DiscreteEvent(@Nonnull DateTime time) {
-    checkNotNull(time, "Time cannot be null.");
-    this.time = time;
+  public DiscreteEvent(DateTime time) {
+    this.time = checkNotNull(time);
   }
 
   /**
-   * Gets the time of the event.
+   * Gets the time the event occurred.
    * 
    * @return The event time.
    */
-  @Nonnull
   public final DateTime getTime() {
     return time;
   }

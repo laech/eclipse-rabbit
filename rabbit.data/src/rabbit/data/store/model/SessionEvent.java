@@ -15,7 +15,7 @@
  */
 package rabbit.data.store.model;
 
-import org.joda.time.DateTime;
+import org.joda.time.Interval;
 
 /**
  * Represents a duration spent using Eclipse.
@@ -25,12 +25,10 @@ public class SessionEvent extends ContinuousEvent {
   /**
    * Constructs a new event.
    * 
-   * @param endTime The end time of the event.
-   * @param duration The duration in milliseconds.
-   * @throws IllegalArgumentException If duration is negative.
+   * @param interval The time interval.
    * @throws NullPointerException If time is null.
    */
-  public SessionEvent(DateTime endTime, long duration) {
-    super(endTime, duration);
+  public SessionEvent(Interval interval) {
+    super(interval);
   }
 }

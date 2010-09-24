@@ -23,7 +23,7 @@ import rabbit.data.store.model.JavaEvent;
 import static org.junit.Assert.assertEquals;
 
 import org.eclipse.jdt.core.JavaCore;
-import org.joda.time.DateTime;
+import org.joda.time.Interval;
 
 /**
  * @see JavaEventConverter
@@ -38,9 +38,9 @@ public class JavaEventConverterTest extends AbstractConverterTest<JavaEvent, Jav
 
   @Override
   public void testConvert() throws Exception {
-    JavaEvent event = new JavaEvent(new DateTime(), 18, JavaCore.create("=Enfo/src<enfo{EnfoPlugin.java"));
+    JavaEvent event = new JavaEvent(new Interval(0, 1), JavaCore.create("=Enfo/src<enfo{EnfoPlugin.java"));
     JavaEventType type = converter.convert(event);
-    assertEquals(event.getDuration(), type.getDuration());
+    assertEquals(event.getInterval().toDurationMillis(), type.getDuration());
     assertEquals(event.getElement().getHandleIdentifier(), type.getHandleIdentifier());
   }
 

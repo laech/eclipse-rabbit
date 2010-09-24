@@ -41,7 +41,7 @@ import org.eclipse.swtbot.swt.finder.junit.SWTBotJunit4ClassRunner;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.FileEditorInput;
-import org.joda.time.DateTime;
+import org.joda.time.Interval;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -183,16 +183,15 @@ public class LaunchTrackerTest extends AbstractTrackerTest<LaunchEvent> {
     // Check the result:
     assertEquals(1, tracker.getData().size());
     LaunchEvent event = tracker.getData().iterator().next();
-    System.out.println(event.getDuration());
-    assertTrue(duration - 200 <= event.getDuration());
-    assertTrue(duration + 200 >= event.getDuration());
+    assertTrue(duration - 200 <= event.getInterval().toDurationMillis());
+    assertTrue(duration + 200 >= event.getInterval().toDurationMillis());
   }
 
   @Override
   protected LaunchEvent createEvent() {
     ILaunch launch = new Launch(new LaunchConfigurationForTest(),
         ILaunchManager.RUN_MODE, null);
-    return new LaunchEvent(new DateTime(), 10, launch, launch
+    return new LaunchEvent(new Interval(0, 1), launch, launch
         .getLaunchConfiguration(), new HashSet<IPath>(Arrays.asList(new Path("/1"), new Path("/2"))));
   }
 

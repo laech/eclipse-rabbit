@@ -16,37 +16,45 @@
 package rabbit.data.test.store.model;
 
 import rabbit.data.store.model.ContinuousEvent;
+import rabbit.data.store.model.DiscreteEvent;
 
 import static org.junit.Assert.assertEquals;
 
 import org.joda.time.DateTime;
+import org.joda.time.Interval;
 import org.junit.Test;
 
 /**
- * Test for {@link ContinuousEvent}
+ * @see ContinuousEvent
  */
 public class ContinuousEventTest extends DiscreteEventTest {
 
-  @Test(expected = IllegalArgumentException.class)
-  public void testConstructor_withNegativeDuration() {
-   createEvent(new DateTime(), -1);
+  @Test(expected = NullPointerException.class)
+  public void testConstructor_argNull() {
+    Interval interval = null;
+    createEvent(interval);
   }
 
   @Test
-  public void testGetDuration() {
-    long duration = 348723;
-    assertEquals(duration, createEvent(new DateTime(), duration).getDuration());
-  }
-
-  @Override
-  protected final ContinuousEvent createEvent(DateTime time) {
-    return createEvent(time, 10);
+  public void testGetInterval() {
+    Interval interval = new Interval(1, 2);
+    assertEquals(interval, createEvent(interval).getInterval());
   }
 
   /**
-   * @see ContinuousEvent#ContinuousEvent(DateTime, long)
+   * @deprecated ContinuesEvent doesn't use an constructor with DateTime, use
+   *             {@link #createEvent(Interval)} instead.
    */
-  protected ContinuousEvent createEvent(DateTime time, long duration) {
-    return new ContinuousEvent(time, duration);
+  @Override
+  @Deprecated
+  protected final DiscreteEvent createEvent(DateTime time) {
+    return super.createEvent(time);
+  }
+
+  /**
+   * @see ContinuousEvent#ContinuousEvent(Interval)
+   */
+  protected ContinuousEvent createEvent(Interval interval) {
+    return new ContinuousEvent(interval);
   }
 }

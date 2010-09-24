@@ -23,62 +23,47 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
-import org.joda.time.DateTime;
+import org.joda.time.Interval;
 
 import java.util.Set;
-
-import javax.annotation.Nonnull;
 
 /**
  * Represents a launch event such as a debug launch.
  */
 public class LaunchEvent extends ContinuousEvent {
 
-  @Nonnull
   private final ILaunch launch;
-  @Nonnull
+
   private final ILaunchConfiguration config;
 
   /** Unmodifiable set of file paths. */
-  @Nonnull
   private final ImmutableSet<IPath> filePaths;
 
   /**
    * Constructs a new event.
    * 
-   * @param endTime The end time of the event.
-   * @param duration The duration of the event, in milliseconds.
+   * @param interval The time interval.
    * @param config The launch configuration.
    * @param filePaths The paths of the files associated with the launch, or an
    *          empty collection.
-   * @throws IllegalArgumentException If duration is negative.
-   * @throws NullPointerException If startTime, or launch, or config, or
-   *           filePaths is null.
+   * @throws NullPointerException If any of the parameters are null.
    * 
    * @see IResource#getFullPath()
    */
-  public LaunchEvent(@Nonnull DateTime endTime, long duration,
-      @Nonnull ILaunch launch, @Nonnull ILaunchConfiguration config,
-      @Nonnull Set<IPath> filePaths) {
-
-    super(endTime, duration);
-
-    checkNotNull(launch, "Launch cannot be null");
-    checkNotNull(config, "Launch configuration cannot be null");
-    checkNotNull(filePaths, "File paths cannot be null");
-
-    this.config = config;
-    this.launch = launch;
-    this.filePaths = ImmutableSet.copyOf(filePaths);
+  public LaunchEvent(Interval interval, ILaunch launch,
+      ILaunchConfiguration config, Set<IPath> filePaths) {
+    super(interval);
+    this.config = checkNotNull(config);
+    this.launch = checkNotNull(launch);
+    this.filePaths = ImmutableSet.copyOf(checkNotNull(filePaths));
   }
 
   /**
-   * Gets the IDs of the files involved.
+   * Gets the paths of the files involved.
    * 
    * @return An unmodifiable collection of IDs of the files involved, or an
    *         empty collection.
    */
-  @Nonnull
   public final Set<IPath> getFilePaths() {
     return filePaths;
   }
@@ -88,7 +73,6 @@ public class LaunchEvent extends ContinuousEvent {
    * 
    * @return The launch.
    */
-  @Nonnull
   public final ILaunch getLaunch() {
     return launch;
   }
@@ -98,7 +82,6 @@ public class LaunchEvent extends ContinuousEvent {
    * 
    * @return The launch configuration.
    */
-  @Nonnull
   public final ILaunchConfiguration getLaunchConfiguration() {
     return config;
   }

@@ -20,46 +20,38 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
-import org.joda.time.DateTime;
+import org.joda.time.Interval;
 
 import java.net.URI;
 
-import javax.annotation.Nonnull;
-
 /**
- * Represents a file event. This object stores the file id instead of the file
- * itself.
+ * Represents a file event.
  */
 public class FileEvent extends ContinuousEvent {
 
-  @Nonnull
   private final IPath filePath;
 
   /**
    * Constructs a new event.
    * 
-   * @param endTime The end time of the event.
-   * @param duration The duration of the event, in milliseconds.
+   * @param interval The interval of this event.
    * @param filePath The path of the file.
-   * @throws IllegalArgumentException If duration is negative.
    * @throws NullPointerException If time is null or file path is null.
    * 
    * @see IResource#getFullPath()
    * @see Path#Path(String)
    * @see URI#getPath()
    */
-  public FileEvent(@Nonnull DateTime endTime, long duration, 
-      @Nonnull IPath filePath) {
-    super(endTime, duration);
-    checkNotNull(filePath);
-    this.filePath = filePath;
+  public FileEvent(Interval interval, IPath filePath) {
+    super(interval);
+    this.filePath = checkNotNull(filePath);
   }
 
   /**
    * Gets the file path.
+   * 
    * @return The file path, never null.
    */
-  @Nonnull
   public final IPath getFilePath() {
     return filePath;
   }

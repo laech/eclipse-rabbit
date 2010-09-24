@@ -18,9 +18,6 @@ package rabbit.tracking.tests.trackers;
 import rabbit.data.store.model.TaskFileEvent;
 import rabbit.tracking.internal.trackers.TaskTracker;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.mylyn.internal.tasks.core.LocalTask;
@@ -30,7 +27,7 @@ import org.eclipse.swtbot.swt.finder.junit.SWTBotJunit4ClassRunner;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PlatformUI;
-import org.joda.time.DateTime;
+import org.joda.time.Interval;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 
@@ -58,7 +55,7 @@ public class TaskTrackerTest extends AbstractPartTrackerTest<TaskFileEvent> {
 
   @Override
   protected TaskFileEvent createEvent() {
-    return new TaskFileEvent(new DateTime(), 187, new Path("/a/b/c"), task);
+    return new TaskFileEvent(new Interval(0, 1), new Path("/a/b/c"), task);
   }
 
   @Override
@@ -75,21 +72,6 @@ public class TaskTrackerTest extends AbstractPartTrackerTest<TaskFileEvent> {
     } else {
       return false;
     }
-  }
-
-  @Override
-  protected void internalAssertAccuracy(TaskFileEvent event, IWorkbenchPart part,
-      long durationInMillis, int size, DateTime start, DateTime end) {
-
-    // 1/10 of a second is acceptable?
-    assertTrue(durationInMillis - 100 <= event.getDuration());
-    assertTrue(durationInMillis + 100 >= event.getDuration());
-    assertTrue(start.compareTo(event.getTime()) <= 0);
-    assertTrue(end.compareTo(event.getTime()) >= 0);
-    assertEquals(size, tracker.getData().size());
-    IFile file = (IFile) ((IEditorPart) part).getEditorInput().getAdapter(IFile.class);
-    assertEquals(event.getFilePath(), file.getFullPath());
-    assertEquals(task, event.getTask());
   }
 
 }

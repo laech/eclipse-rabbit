@@ -29,7 +29,7 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IURIEditorInput;
 import org.eclipse.ui.IWorkbenchPart;
-import org.joda.time.DateTime;
+import org.joda.time.Interval;
 
 import java.net.URI;
 
@@ -48,7 +48,7 @@ public class TaskTracker extends AbstractPartTracker<TaskFileEvent> {
   }
 
   @Override
-  protected TaskFileEvent tryCreateEvent(DateTime endTime, long duration, IWorkbenchPart part) {
+  protected TaskFileEvent tryCreateEvent(long start, long end, IWorkbenchPart part) {
     ITask task = TasksUi.getTaskActivityManager().getActiveTask();
     if (task == null) {
       return null;
@@ -69,13 +69,13 @@ public class TaskTracker extends AbstractPartTracker<TaskFileEvent> {
       if (input instanceof IFileEditorInput) {
         // Contains a file in the workspace
         IFile file = ((IFileEditorInput) input).getFile();
-        return new TaskFileEvent(endTime, duration, file.getFullPath(), task);
+        return new TaskFileEvent(new Interval(start, end), file.getFullPath(), task);
 
       } else if (input instanceof IURIEditorInput) {
         // A file outside of workspace
         URI uri = ((IURIEditorInput) input).getURI();
         IPath path = new Path(uri.getPath());
-        return new TaskFileEvent(endTime, duration, path, task);
+        return new TaskFileEvent(new Interval(start, end), path, task);
       }
     }
     return null;

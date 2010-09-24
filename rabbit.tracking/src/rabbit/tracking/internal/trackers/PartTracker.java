@@ -19,17 +19,17 @@ import rabbit.data.handler.DataHandler;
 import rabbit.data.store.IStorer;
 import rabbit.data.store.model.PartEvent;
 
-import org.eclipse.ui.IPartListener;
-import org.eclipse.ui.IWindowListener;
 import org.eclipse.ui.IWorkbenchPart;
-import org.joda.time.DateTime;
+import org.joda.time.Interval;
 
 /**
  * Tracks workbench part usage.
  */
-public class PartTracker extends AbstractPartTracker<PartEvent> implements
-    IPartListener, IWindowListener {
+public class PartTracker extends AbstractPartTracker<PartEvent> {
 
+  /**
+   * Constructor.
+   */
   public PartTracker() {
     super();
   }
@@ -40,9 +40,7 @@ public class PartTracker extends AbstractPartTracker<PartEvent> implements
   }
 
   @Override
-  protected PartEvent tryCreateEvent(DateTime endTime, long duration,
-      IWorkbenchPart part) {
-    return new PartEvent(endTime, duration, part);
+  protected PartEvent tryCreateEvent(long start, long end, IWorkbenchPart part) {
+    return new PartEvent(new Interval(start, end), part);
   }
-
 }

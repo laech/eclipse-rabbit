@@ -23,6 +23,7 @@ import rabbit.data.test.xml.AbstractStorerTest;
 
 import org.eclipse.jdt.core.JavaCore;
 import org.joda.time.DateTime;
+import org.joda.time.Interval;
 
 /**
  * @see JavaEventStorer
@@ -33,12 +34,14 @@ public class JavaEventStorerTest extends
 
   @Override
   protected JavaEvent createEvent(DateTime dateTime) throws Exception {
-    return new JavaEvent(dateTime, 1, JavaCore.create("=Enfo/src<enfo{EnfoPlugin.java"));
+    return new JavaEvent(new Interval(dateTime, dateTime.plus(1)),
+        JavaCore.create("=Enfo/src<enfo{EnfoPlugin.java"));
   }
 
   @Override
   protected JavaEvent createEventDiff(DateTime dateTime) throws Exception {
-    return new JavaEvent(dateTime, 100, JavaCore.create("=Proj/src<pkg{File.java"));
+    return new JavaEvent(new Interval(dateTime, dateTime.plus(2)),
+        JavaCore.create("=Proj/src<pkg{File.java"));
   }
 
   @Override

@@ -31,7 +31,7 @@ import org.eclipse.debug.core.model.IProcess;
 import org.eclipse.debug.core.model.ISourceLocator;
 import org.eclipse.debug.core.model.IStackFrame;
 import org.eclipse.debug.core.model.IThread;
-import org.joda.time.DateTime;
+import org.joda.time.Interval;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -133,12 +133,12 @@ public class LaunchTracker extends AbstractTracker<LaunchEvent> implements
         return;
       }
 
-      long durationMillis = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startNanoTime);
-      if (durationMillis <= 0) {
-        // System.err.println("Launch duration is <= 0.");
+      long startMillis = TimeUnit.NANOSECONDS.toMillis(startNanoTime);
+      long endMillis = TimeUnit.NANOSECONDS.toMillis(System.nanoTime());
+      if (endMillis <= startMillis) {
         return;
       }
-
+      
       Set<IPath> filePaths = launchFiles.get(launch);
       if (filePaths == null) {
         filePaths = Collections.emptySet();
@@ -149,7 +149,7 @@ public class LaunchTracker extends AbstractTracker<LaunchEvent> implements
         // System.err.println("handleProcessEvent: Launch configuration is null.");
         return;
       }
-      addData(new LaunchEvent(new DateTime(), durationMillis, launch, config, filePaths));
+      addData(new LaunchEvent(new Interval(startMillis, endMillis), launch, config, filePaths));
     }
   }
 

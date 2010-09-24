@@ -15,17 +15,16 @@
  */
 package rabbit.data.store.model;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import org.eclipse.core.commands.ExecutionEvent;
 import org.joda.time.DateTime;
-
-import javax.annotation.Nonnull;
 
 /**
  * A command execution event.
  */
 public class CommandEvent extends DiscreteEvent {
 
-  @Nonnull
   private final ExecutionEvent event;
 
   /**
@@ -35,12 +34,9 @@ public class CommandEvent extends DiscreteEvent {
    * @param event The execution event.
    * @throws NullPointerException If any of the arguments is null.
    */
-  public CommandEvent(@Nonnull DateTime time, @Nonnull ExecutionEvent event) {
+  public CommandEvent(DateTime time, ExecutionEvent event) {
     super(time);
-    if (event == null)
-      throw new NullPointerException("Execution event cannot be null");
-
-    this.event = event;
+    this.event = checkNotNull(event);
   }
 
   /**
@@ -48,7 +44,6 @@ public class CommandEvent extends DiscreteEvent {
    * 
    * @return The execution event.
    */
-  @Nonnull
   public final ExecutionEvent getExecutionEvent() {
     return event;
   }

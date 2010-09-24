@@ -15,229 +15,179 @@
  */
 package rabbit.tracking.internal.trackers;
 
+import rabbit.tracking.internal.IdleDetector;
 import rabbit.tracking.internal.TrackingPlugin;
+import rabbit.tracking.internal.util.Recorder;
+import rabbit.tracking.internal.util.WorkbenchUtil;
 
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IPartListener;
 import org.eclipse.ui.IPartService;
 import org.eclipse.ui.IWindowListener;
-import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
-import org.joda.time.DateTime;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
+
+import javax.annotation.Nullable;
 
 /**
- * Defines common behaviors for part trackers.
+ * Defines common behaviours for part trackers.
  * 
  * @param <E> The event type that is being tracked.
  */
-public abstract class AbstractPartTracker<E> extends AbstractTracker<E>
-    implements IPartListener, IWindowListener, Observer {
+public abstract class AbstractPartTracker<E> extends AbstractTracker<E> {
 
   /**
-   * Indicates the start time (nanoseconds) of a tracking session on a workbench
-   * part. Set using {@link System#nanoTime()}
+   * A recorder for recording the time.
    */
-  private long startNanoTime;
-  private Map<IWorkbenchPart, Boolean> partStates;
+  private final Recorder<IWorkbenchPart> recorder = new Recorder<IWorkbenchPart>();
 
-  private Runnable idleDetectorCode;
+  /**
+   * A part listener for tracking time spent on parts.
+   */
+  private final IPartListener partListener = new IPartListener() {
+
+    @Override
+    public void partActivated(IWorkbenchPart part) {
+      recorder.start(part);
+    }
+
+    @Override
+    public void partBroughtToTop(IWorkbenchPart part) {
+    }
+
+    @Override
+    public void partClosed(IWorkbenchPart part) {
+      if (part.equals(recorder.getUserData())) {
+        recorder.stop();
+      }
+    }
+
+    @Override
+    public void partDeactivated(IWorkbenchPart part) {
+      recorder.stop();
+    }
+
+    @Override
+    public void partOpened(IWorkbenchPart part) {
+      if (part == part.getSite().getPage().getActivePart()) {
+        recorder.start(part);
+      }
+    }
+  };
+
+  /**
+   * A window listener, starts/stops recording depending on the window state.
+   */
+  private final IWindowListener winListener = new IWindowListener() {
+
+    @Override
+    public void windowActivated(IWorkbenchWindow window) {
+      checkStart(window.getPartService().getActivePart());
+    }
+
+    @Override
+    public void windowClosed(IWorkbenchWindow window) {
+      window.getPartService().removePartListener(partListener);
+      recorder.stop();
+    }
+
+    @Override
+    public void windowDeactivated(IWorkbenchWindow window) {
+      recorder.stop();
+    }
+
+    @Override
+    public void windowOpened(IWorkbenchWindow window) {
+      window.getPartService().addPartListener(partListener);
+      if (WorkbenchUtil.isActiveShell(window)) {
+        checkStart(window.getPartService().getActivePart());
+      }
+    }
+  };
+
+  /**
+   * An observer observing on the {@link #recorder} and user activeness.
+   */
+  private final Observer observer = new Observer() {
+
+    @Override
+    public void update(Observable o, Object arg) {
+      if (!isEnabled()) {
+        return;
+      }
+
+      if (o == TrackingPlugin.getDefault().getIdleDetector()) {
+        if (((IdleDetector) o).isUserActive()) {
+          checkStart(WorkbenchUtil.getActivePart());
+        } else {
+          recorder.stop();
+        }
+
+      } else if (o == recorder) {
+        long start = recorder.getLastRecord().getStartTimeMillis();
+        long end = recorder.getLastRecord().getEndTimeMillis();
+        IWorkbenchPart part = recorder.getLastRecord().getUserData();
+        E event = tryCreateEvent(start, end, part);
+        if (event != null) {
+          addData(event);
+        }
+      }
+    }
+  };
 
   /**
    * Constructor.
    */
   public AbstractPartTracker() {
     super();
-    startNanoTime = Long.MAX_VALUE;
-    partStates = new HashMap<IWorkbenchPart, Boolean>();
-
-    idleDetectorCode = new Runnable() {
-      @Override
-      public void run() {
-        if (!isEnabled()) {
-          return;
-        }
-        IWorkbenchWindow win = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
-        if (win == null) {
-          return;
-        }
-        IWorkbenchPart part = win.getPartService().getActivePart();
-        if (part == null) {
-          return;
-        }
-        if (TrackingPlugin.getDefault().getIdleDetector().isUserActive()) {
-          startSession(part);
-        } else {
-          endSession(part);
-        }
-      }
-    };
-  }
-
-  @Override
-  public void partActivated(IWorkbenchPart part) {
-    startSession(part);
-  }
-
-  @Override
-  public void partBroughtToTop(IWorkbenchPart part) {
-  }
-
-  @Override
-  public void partClosed(IWorkbenchPart part) {
-  }
-
-  @Override
-  public void partDeactivated(IWorkbenchPart part) {
-    endSession(part);
-  }
-
-  @Override
-  public void partOpened(IWorkbenchPart p) {
-  }
-
-  @Override
-  public void update(Observable o, Object arg) {
-    if (o == TrackingPlugin.getDefault().getIdleDetector()) {
-      PlatformUI.getWorkbench().getDisplay().syncExec(idleDetectorCode);
-    }
-  }
-
-  @Override
-  public void windowActivated(IWorkbenchWindow window) {
-    if (window.getPartService().getActivePart() != null) {
-      startSession(window.getPartService().getActivePart());
-    }
-  }
-
-  @Override
-  public void windowClosed(IWorkbenchWindow window) {
-    window.getPartService().removePartListener(this);
-    if (window.getPartService().getActivePart() != null) {
-      endSession(window.getPartService().getActivePart());
-    }
-  }
-
-  @Override
-  public void windowDeactivated(IWorkbenchWindow window) {
-    if (window.getPartService().getActivePart() != null) {
-      endSession(window.getPartService().getActivePart());
-    }
-  }
-
-  @Override
-  public void windowOpened(IWorkbenchWindow window) {
-    window.getPartService().addPartListener(this);
-    if (window.getPartService().getActivePart() != null) {
-      startSession(window.getPartService().getActivePart());
-    }
+    recorder.addObserver(observer);
   }
 
   @Override
   protected void doDisable() {
-    TrackingPlugin.getDefault().getIdleDetector().deleteObserver(this);
-    PlatformUI.getWorkbench().removeWindowListener(this);
-    for (IPartService s : getPartServices()) {
-      s.removePartListener(this);
+    TrackingPlugin.getDefault().getIdleDetector().deleteObserver(observer);
+    PlatformUI.getWorkbench().removeWindowListener(winListener);
+    for (IPartService s : WorkbenchUtil.getPartServices()) {
+      s.removePartListener(partListener);
     }
-
-    final IWorkbench wb = PlatformUI.getWorkbench();
-    wb.getDisplay().syncExec(new Runnable() {
-      @Override
-      public void run() {
-        IWorkbenchWindow win = wb.getActiveWorkbenchWindow();
-        if (win != null && win.getPartService().getActivePart() != null) {
-          endSession(win.getPartService().getActivePart());
-        }
-      }
-    });
+    recorder.stop();
   }
 
   @Override
   protected void doEnable() {
-    TrackingPlugin.getDefault().getIdleDetector().addObserver(this);
-    PlatformUI.getWorkbench().addWindowListener(this);
-    for (IPartService s : getPartServices()) {
-      s.addPartListener(this);
+    TrackingPlugin.getDefault().getIdleDetector().addObserver(observer);
+    PlatformUI.getWorkbench().addWindowListener(winListener);
+    for (IPartService s : WorkbenchUtil.getPartServices()) {
+      s.addPartListener(partListener);
     }
-
-    final IWorkbench wb = PlatformUI.getWorkbench();
-    wb.getDisplay().syncExec(new Runnable() {
-      @Override
-      public void run() {
-        IWorkbenchWindow win = wb.getActiveWorkbenchWindow();
-        Shell shell = win.getShell();
-        if (win != null &&
-            shell == shell.getDisplay().getActiveShell() &&
-            win.getPartService().getActivePart() != null) {
-          startSession(win.getPartService().getActivePart());
-        }
-      }
-    });
-  }
-
-  /**
-   * Ends a session.
-   * 
-   * @param part The part to get data from.
-   */
-  protected void endSession(IWorkbenchPart part) {
-    Boolean hasBeenStarted = partStates.get(part);
-    if (hasBeenStarted == null || !hasBeenStarted) {
-      return;
+    IWorkbenchWindow win = WorkbenchUtil.getActiveWindow();
+    if (WorkbenchUtil.isActiveShell(win)) {
+      checkStart(win.getPartService().getActivePart());
     }
-    partStates.put(part, Boolean.FALSE);
-    long durationMillis = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startNanoTime);
-    if (durationMillis <= 0) {
-      return;
-    }
-
-    startNanoTime = Long.MAX_VALUE;
-    E event = tryCreateEvent(new DateTime(), durationMillis, part);
-    if (event != null) {
-      addData(event);
-    }
-  }
-
-  /**
-   * Starts a new session.
-   */
-  protected void startSession(IWorkbenchPart part) {
-    startNanoTime = System.nanoTime();
-    partStates.put(part, Boolean.TRUE);
   }
 
   /**
    * Try to create an event. This method is called when a session ends.
    * 
-   * @param endTime The end time of the event.
-   * @param duration The duration of the event in milliseconds.
+   * @param startMillis The start time of the event in milliseconds.
+   * @param endMillis The end time of the event in milliseconds.
    * @param part The workbench part of the event.
    * @return An event, or null if one should not be created.
    */
-  protected abstract E tryCreateEvent(DateTime endTime, long duration,
+  protected abstract E tryCreateEvent(long startMillis, long endMillis,
       IWorkbenchPart part);
 
   /**
-   * Gets all the {@link IPartService} from the currently opened windows.
+   * If the given part is not null, calls {@link Recorder#start(Object)} on it.
    * 
-   * @return A Set of IPartService.
+   * @param part The workbench part.
    */
-  private Set<IPartService> getPartServices() {
-    Set<IPartService> result = new HashSet<IPartService>();
-    IWorkbenchWindow[] ws = PlatformUI.getWorkbench().getWorkbenchWindows();
-    for (IWorkbenchWindow w : ws) {
-      result.add(w.getPartService());
+  private void checkStart(@Nullable IWorkbenchPart part) {
+    if (part != null) {
+      recorder.start(part);
     }
-    return result;
   }
 }

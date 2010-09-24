@@ -38,7 +38,7 @@ public class TaskFileEventConverter extends
     id.setHandleId(event.getTask().getHandleIdentifier());
 
     TaskFileEventType type = new TaskFileEventType();
-    type.setDuration(event.getDuration());
+    type.setDuration(event.getInterval().toDurationMillis());
     type.setFilePath(event.getFilePath().toString());
     type.setTaskId(id);
     return type;

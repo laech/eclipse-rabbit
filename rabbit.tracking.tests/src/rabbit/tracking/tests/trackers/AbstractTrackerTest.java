@@ -89,6 +89,29 @@ public abstract class AbstractTrackerTest<T> {
     assertNotNull(tracker);
   }
 
+  /**
+   * Checks that this condition is true:
+   * {@code
+   *   preStart <= start <= postStart <= preEnd <= end <= postEnd
+   * }
+   */
+  protected void checkTime(
+    //@formatter:off
+      long preStart, 
+      long start, 
+      long postStart, 
+      long preEnd, 
+      long end, 
+      long postEnd) {
+
+    assertTrue(preStart  <= start);
+    assertTrue(start     <= postStart);
+    assertTrue(postStart <= preEnd);
+    assertTrue(preEnd    <= end);
+    assertTrue(end       <= postEnd);
+    //@formatter:on
+  }
+
   /** Creates an event for testing. */
   protected abstract T createEvent();
 
