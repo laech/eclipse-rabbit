@@ -22,6 +22,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import org.junit.Before;
 import org.junit.Test;
 
 /**
@@ -30,7 +31,12 @@ import org.junit.Test;
 @SuppressWarnings("restriction")
 public abstract class AbstractTrackerTest<T> {
 
-  protected AbstractTracker<T> tracker = createTracker();
+  protected AbstractTracker<T> tracker;
+  
+  @Before
+  public void before() {
+    tracker = createTracker();
+  }
 
   @Test
   public void testAddData() {

@@ -145,10 +145,10 @@ public class JavaTracker extends AbstractTracker<JavaEvent> {
       recorder.stop();
       deregister(window);
 
-      window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
-      if (window != null) {
-        checkStart(window.getPartService().getActivePart());
-      }
+      // window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+      // if (window != null) {
+      // checkStart(window.getPartService().getActivePart());
+      // }
     }
 
     @Override
@@ -199,6 +199,10 @@ public class JavaTracker extends AbstractTracker<JavaEvent> {
    */
   private final Listener listener = new Listener() {
 
+    // This listener used to provide compatibility with Eclipse 3.4, otherwise
+    // org.eclipse.swt.custom.CaretListener might be a better option (Eclipse
+    // * 3.5+).
+
     @Override
     public void handleEvent(Event event) {
       checkStart();
@@ -247,12 +251,7 @@ public class JavaTracker extends AbstractTracker<JavaEvent> {
     TrackingPlugin.getDefault().getIdleDetector().addObserver(observer);
 
     // If there is an Java editor already active, start tracking:
-    PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
-      @Override
-      public void run() {
-        checkStart();
-      }
-    });
+    checkStart();
   }
 
   /**
@@ -260,21 +259,12 @@ public class JavaTracker extends AbstractTracker<JavaEvent> {
    * will do nothing, otherwise ends a session if there is one running, then if
    * the currently selected element in Eclipse's active editor is not null,
    * starts a new session.
-   * <p>
-   * <strong>NOTE:</strong> Run in UI thread.
-   * </p>
    */
   private void checkStart() {
-    PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
-      
-      @Override
-      public void run() {
-        IWorkbenchWindow win = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
-//        if (win.) {
-          checkStart(win.getPartService().getActivePart());
-//        }
-      }
-    });
+    IWorkbenchWindow win = WorkbenchUtil.getActiveWindow();
+    if (WorkbenchUtil.isActiveShell(win)) {
+      checkStart(win.getPartService().getActivePart());
+    }
   }
 
   /**
@@ -285,18 +275,23 @@ public class JavaTracker extends AbstractTracker<JavaEvent> {
    * 
    * @param activePart The currently active part of the workbench, may be null.
    */
-  private void checkStart(IWorkbenchPart activePart) {
+  private void checkStart(final IWorkbenchPart activePart) {
     if (!(activePart instanceof JavaEditor)) {
       return;
     }
 
-    IJavaElement element = null;
-    try {
-      element = SelectionConverter.getElementAtOffset((JavaEditor) activePart);
-      recorder.start(element);
-    } catch (JavaModelException e) {
-      // Nothing we can do.
-    }
+    PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+      @Override
+      public void run() {
+        IJavaElement element = null;
+        try {
+          element = SelectionConverter.getElementAtOffset((JavaEditor) activePart);
+          recorder.start(element);
+        } catch (JavaModelException e) {
+          // Nothing we can do.
+        }
+      }
+    });
   }
 
   /**
@@ -354,22 +349,20 @@ public class JavaTracker extends AbstractTracker<JavaEvent> {
   private void filterData() {
     Set<JavaEvent> filteredData = Sets.newLinkedHashSet();
     for (JavaEvent event : getData()) {
-      IJavaElement element = event.getElement();
+      IJavaElement e = event.getElement();
       // ITypeRoot represents the file, xxx.java. Everything above that is not
       // modifiable in a JavaEditor, so no need to check them:
-      if (!element.exists()) {
-        for (; !element.exists() && !(element instanceof ITypeRoot); element = element
-            .getParent())
-          ;
-        filteredData.add(new JavaEvent(event.getInterval(), element));
+      if (!e.exists()) {
+        for (; !e.exists() && !(e instanceof ITypeRoot); e = e.getParent());
+        filteredData.add(new JavaEvent(event.getInterval(), e));
 
       } else {
         IJavaElement actual = null;
         try {
-          actual = filterElement(element);
-        } catch (JavaModelException e) {
+          actual = filterElement(e);
+        } catch (JavaModelException ex) {
           actual = null;
-          e.printStackTrace();
+          ex.printStackTrace();
         }
 
         if (actual == null) {
@@ -412,25 +405,25 @@ public class JavaTracker extends AbstractTracker<JavaEvent> {
     }
 
     switch (element.getElementType()) {
-    case IJavaElement.TYPE:
-      if (((IType) element).isAnonymous()) {
+      case IJavaElement.TYPE:
+        if (((IType) element).isAnonymous()) {
+          return filterElement(element.getParent());
+        }
+        return element;
+
+      case IJavaElement.METHOD:
+        if (((IType) element.getParent()).isAnonymous()) {
+          return filterElement(element.getParent());
+        }
+        return element;
+
+      case IJavaElement.INITIALIZER:
+      case IJavaElement.COMPILATION_UNIT:
+      case IJavaElement.CLASS_FILE:
+        return element;
+
+      default:
         return filterElement(element.getParent());
-      }
-      return element;
-
-    case IJavaElement.METHOD:
-      if (((IType) element.getParent()).isAnonymous()) {
-        return filterElement(element.getParent());
-      }
-      return element;
-
-    case IJavaElement.INITIALIZER:
-    case IJavaElement.COMPILATION_UNIT:
-    case IJavaElement.CLASS_FILE:
-      return element;
-
-    default:
-      return filterElement(element.getParent());
     }
   }
 
