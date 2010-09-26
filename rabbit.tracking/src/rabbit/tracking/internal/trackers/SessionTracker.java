@@ -22,8 +22,9 @@ import rabbit.tracking.internal.IdleDetector;
 import rabbit.tracking.internal.TrackingPlugin;
 import rabbit.tracking.internal.util.Recorder;
 import rabbit.tracking.internal.util.Recorder.Record;
+import rabbit.tracking.internal.util.WorkbenchUtil;
 
-import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 import org.joda.time.Interval;
 
@@ -66,8 +67,8 @@ public class SessionTracker extends AbstractTracker<SessionEvent> {
     public void run() {
       // Check for active shell instead of active workbench window to include
       // dialogs (!shell.getMinimized() is also important, why?):
-      Shell shell = PlatformUI.getWorkbench().getDisplay().getActiveShell();
-      if (shell != null && !shell.getMinimized()) {
+      IWorkbenchWindow win = WorkbenchUtil.getActiveWindow();
+      if (WorkbenchUtil.isActiveShell(win)) {
         recorder.start();
       }
     }

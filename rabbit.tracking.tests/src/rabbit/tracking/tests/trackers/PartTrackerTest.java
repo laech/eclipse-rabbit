@@ -23,12 +23,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import org.eclipse.swtbot.swt.finder.junit.SWTBotJunit4ClassRunner;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.IWorkbenchWindow;
 import org.joda.time.Interval;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
 import java.util.Iterator;
 
@@ -36,50 +35,52 @@ import java.util.Iterator;
  * Test for {@link PartTracker}
  */
 @SuppressWarnings("restriction")
-@RunWith(SWTBotJunit4ClassRunner.class)
 public class PartTrackerTest extends AbstractPartTrackerTest<PartEvent> {
 
   @Test
   public void testNewWindow() throws Exception {
     tracker.setEnabled(true);
-    openNewWindow();
+    IWorkbenchWindow win = openNewWindow();
 
-    long preStart = System.currentTimeMillis();
-    IEditorPart editor = openNewEditor(); // Start
-    long postStart = System.currentTimeMillis();
+    try {
+      long preStart = System.currentTimeMillis();
+      IEditorPart editor = openNewEditor(); // Start
+      long postStart = System.currentTimeMillis();
 
-    bot.sleep(20);
+      Thread.sleep(20);
 
-    long preEnd = System.currentTimeMillis();
-    openNewEditor(); // End
-    long postEnd = System.currentTimeMillis();
+      long preEnd = System.currentTimeMillis();
+      openNewEditor(); // End
+      long postEnd = System.currentTimeMillis();
 
-    // One for the original window,
-    // one for the newly opened window's default active view,
-    // one for the newly opened editor.
-    assertEquals(3, tracker.getData().size());
+      // One for the original window,
+      // one for the newly opened window's default active view,
+      // one for the newly opened editor.
+      assertEquals(3, tracker.getData().size());
 
-    Iterator<PartEvent> it = tracker.getData().iterator();
-    PartEvent event = it.next();
-    while (!hasSamePart(event, editor)) {
-      if (!it.hasNext()) {
-        fail();
+      Iterator<PartEvent> it = tracker.getData().iterator();
+      PartEvent event = it.next();
+      while (!hasSamePart(event, editor)) {
+        if (!it.hasNext()) {
+          fail();
+        }
+        event = it.next();
       }
-      event = it.next();
+
+      long start = event.getInterval().getStartMillis();
+      long end = event.getInterval().getEndMillis();
+      checkTime(preStart, start, postStart, preEnd, end, postEnd);
+      assertTrue(hasSamePart(event, editor));
+
+    } finally {
+      win.close();
     }
-
-    long start = event.getInterval().getStartMillis();
-    long end = event.getInterval().getEndMillis();
-    checkTime(preStart, start, postStart, preEnd, end, postEnd);
-    assertTrue(hasSamePart(event, editor));
-
-    bot.activeShell().close();
   }
 
   @Override
   protected PartEvent createEvent() {
-    return new PartEvent(new Interval(0, 1), WorkbenchUtil.getActiveWindow()
-        .getPartService().getActivePart());
+    return new PartEvent(new Interval(0, 1),
+        WorkbenchUtil.getActiveWindow().getPartService().getActivePart());
   }
 
   @Override

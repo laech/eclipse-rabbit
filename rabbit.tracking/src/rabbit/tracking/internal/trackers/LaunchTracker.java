@@ -18,6 +18,9 @@ package rabbit.tracking.internal.trackers;
 import rabbit.data.handler.DataHandler;
 import rabbit.data.store.IStorer;
 import rabbit.data.store.model.LaunchEvent;
+import rabbit.tracking.internal.util.Recorder;
+
+import com.google.common.collect.Maps;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IPath;
@@ -34,46 +37,58 @@ import org.eclipse.debug.core.model.IThread;
 import org.joda.time.Interval;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Observable;
+import java.util.Observer;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Tracks launch events.
  */
-public class LaunchTracker extends AbstractTracker<LaunchEvent> implements
-    IDebugEventSetListener {
+public class LaunchTracker extends AbstractTracker<LaunchEvent> {
 
-  /**
-   * A map of launches and launch configurations. The configuration should be
-   * added here as soon as the launch is started, because configuration can be
-   * removed while the launch is running, then
-   * {@link ILaunch#getLaunchConfiguration()} will return null.
-   */
-  private Map<ILaunch, ILaunchConfiguration> launchConfigs;
+  private final IDebugEventSetListener listener = new IDebugEventSetListener() {
+    @Override
+    public void handleDebugEvents(DebugEvent[] events) {
+      for (DebugEvent event : events) {
+        handleDebugEvent(event);
+      }
+    }
+  };
 
-  /** A map of launches and their start time in nanoseconds. */
-  private Map<ILaunch, Long> launchNanoTimes;
+  private final Observer observer = new Observer() {
+    @Override
+    public void update(Observable o, Object arg) {
+      if (recorders.values().contains(o)) {
+        @SuppressWarnings("unchecked")
+        Recorder<ILaunch> recorder = (Recorder<ILaunch>) o;
+        long start = recorder.getLastRecord().getStartTimeMillis();
+        long end = recorder.getLastRecord().getEndTimeMillis();
+        ILaunch launch = recorder.getLastRecord().getUserData();
+        ILaunchConfiguration config = launch.getLaunchConfiguration();
+        if (config == null) {
+          return;
+        }
+        Set<IPath> files = launchFiles.get(launch);
+        if (files == null) {
+          files = Collections.emptySet();
+        }
+        addData(new LaunchEvent(new Interval(start, end), launch, config, files));
+      }
+    }
+  };
 
   /** A map of launches and the files involved (for debug launches). */
-  private Map<ILaunch, Set<IPath>> launchFiles;
+  private final Map<ILaunch, Set<IPath>> launchFiles = Maps.newHashMap();
+
+  /** One recorder for each launch. */
+  private final Map<ILaunch, Recorder<ILaunch>> recorders = Maps.newHashMap();
 
   /**
    * Constructs a new tracker.
    */
   public LaunchTracker() {
-    launchNanoTimes = new HashMap<ILaunch, Long>();
-    launchFiles = new HashMap<ILaunch, Set<IPath>>();
-    launchConfigs = new HashMap<ILaunch, ILaunchConfiguration>();
-  }
-
-  @Override
-  public void handleDebugEvents(DebugEvent[] events) {
-    for (DebugEvent event : events) {
-      handleDebugEvent(event);
-    }
   }
 
   @Override
@@ -84,13 +99,13 @@ public class LaunchTracker extends AbstractTracker<LaunchEvent> implements
   @Override
   protected void doDisable() {
     DebugPlugin debug = DebugPlugin.getDefault();
-    debug.removeDebugEventListener(this);
+    debug.removeDebugEventListener(listener);
   }
 
   @Override
   protected void doEnable() {
     DebugPlugin debug = DebugPlugin.getDefault();
-    debug.addDebugEventListener(this);
+    debug.addDebugEventListener(listener);
   }
 
   /**
@@ -120,36 +135,19 @@ public class LaunchTracker extends AbstractTracker<LaunchEvent> implements
 
     // Records the start time of this launch:
     if (event.getKind() == DebugEvent.CREATE) {
-      launchNanoTimes.put(launch, System.nanoTime());
-      launchConfigs.put(launch, launch.getLaunchConfiguration());
-    }
-
-    // Calculate duration of this launch:
-    else if (event.getKind() == DebugEvent.TERMINATE) {
-
-      Long startNanoTime = launchNanoTimes.get(launch);
-      if (startNanoTime == null) {
-        // System.err.println("Launch start time not recorded.");
-        return;
+      Recorder<ILaunch> r = recorders.get(launch);
+      if (r == null) {
+        r = new Recorder<ILaunch>();
+        r.addObserver(observer);
+        recorders.put(launch, r);
       }
+      r.start(launch);
 
-      long startMillis = TimeUnit.NANOSECONDS.toMillis(startNanoTime);
-      long endMillis = TimeUnit.NANOSECONDS.toMillis(System.nanoTime());
-      if (endMillis <= startMillis) {
-        return;
+    } else if (event.getKind() == DebugEvent.TERMINATE) {
+      Recorder<ILaunch> r = recorders.get(launch);
+      if (r != null) {
+        r.stop();
       }
-      
-      Set<IPath> filePaths = launchFiles.get(launch);
-      if (filePaths == null) {
-        filePaths = Collections.emptySet();
-      }
-
-      ILaunchConfiguration config = launchConfigs.get(launch);
-      if (config == null) {
-        // System.err.println("handleProcessEvent: Launch configuration is null.");
-        return;
-      }
-      addData(new LaunchEvent(new Interval(startMillis, endMillis), launch, config, filePaths));
     }
   }
 
@@ -167,9 +165,8 @@ public class LaunchTracker extends AbstractTracker<LaunchEvent> implements
     }
 
     ILaunch launch = thread.getLaunch();
-    ILaunchConfiguration config = launchConfigs.get(launch);
+    ILaunchConfiguration config = launch.getLaunchConfiguration();
     if (config == null) {
-      // System.err.println("handleThreadEvent: Launch configuration is null.");
       return;
     }
 
@@ -177,7 +174,6 @@ public class LaunchTracker extends AbstractTracker<LaunchEvent> implements
     try {
       stack = thread.getTopStackFrame();
     } catch (DebugException e) {
-      System.err.println(e.getMessage());
       return;
     }
 

@@ -144,11 +144,6 @@ public class JavaTracker extends AbstractTracker<JavaEvent> {
     public void windowClosed(IWorkbenchWindow window) {
       recorder.stop();
       deregister(window);
-
-      // window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
-      // if (window != null) {
-      // checkStart(window.getPartService().getActivePart());
-      // }
     }
 
     @Override

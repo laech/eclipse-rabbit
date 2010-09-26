@@ -26,7 +26,6 @@ import static org.junit.Assert.assertTrue;
 
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
-import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.junit.Test;
 
@@ -41,6 +40,18 @@ import java.util.concurrent.TimeUnit;
  */
 @SuppressWarnings("restriction")
 public class SessionTrackerTest extends AbstractTrackerTest<SessionEvent> {
+
+  @Test
+  public void testDisabled() throws Exception {
+    tracker.setEnabled(false);
+    Thread.sleep(30);
+    Shell shell = minimizeActiveShell();
+    try {
+      assertTrue(tracker.getData().isEmpty());
+    } finally {
+      shell.setMinimized(false);
+    }
+  }
 
   /**
    * Test when the tracker is set to be enabled, if there is no active workbench
@@ -61,20 +72,22 @@ public class SessionTrackerTest extends AbstractTrackerTest<SessionEvent> {
 
   @Test
   public void testEnableThenDisable() throws Exception {
-    DateTime before = new DateTime();
-    long durationMillis = 20;
+    long preStart = System.currentTimeMillis();
     tracker.setEnabled(true);
-    TimeUnit.MILLISECONDS.sleep(durationMillis);
+    long postStart = System.currentTimeMillis();
+
+    Thread.sleep(30);
+
+    long preEnd = System.currentTimeMillis();
     tracker.setEnabled(false);
-    DateTime after = new DateTime();
+    long postEnd = System.currentTimeMillis();
 
     Collection<SessionEvent> data = tracker.getData();
     assertEquals(1, data.size());
     SessionEvent event = data.iterator().next();
-    assertTrue(event.getInterval().toDurationMillis() - 10 <= durationMillis);
-    assertTrue(event.getInterval().toDurationMillis() + 10 >= durationMillis);
-    assertTrue(before.compareTo(event.getTime()) <= 0);
-    assertTrue(after.compareTo(event.getTime()) >= 0);
+    long start = event.getInterval().getStartMillis();
+    long end = event.getInterval().getEndMillis();
+    checkTime(preStart, start, postStart, preEnd, end, postEnd);
   }
 
   @Test
@@ -116,21 +129,23 @@ public class SessionTrackerTest extends AbstractTrackerTest<SessionEvent> {
 
   @Test
   public void testIdleDetector_whenTrackerIsEnabled() throws Exception {
-    DateTime before = new DateTime();
-    long durationMillis = 20;
+    long preStart = System.currentTimeMillis();
     tracker.setEnabled(true);
+    long postStart = System.currentTimeMillis();
+
     assertEquals(0, tracker.getData().size());
-    TimeUnit.MILLISECONDS.sleep(durationMillis);
+    Thread.sleep(20);
+
+    long preEnd = System.currentTimeMillis();
     callIdleDetectorToNotify();
-    DateTime after = new DateTime();
+    long postEnd = System.currentTimeMillis();
 
     Collection<SessionEvent> data = tracker.getData();
     assertEquals(1, data.size());
     SessionEvent event = data.iterator().next();
-    assertTrue(event.getInterval().toDurationMillis() - 10 <= durationMillis);
-    assertTrue(event.getInterval().toDurationMillis() + 10 >= durationMillis);
-    assertTrue(before.compareTo(event.getTime()) <= 0);
-    assertTrue(after.compareTo(event.getTime()) >= 0);
+    long start = event.getInterval().getStartMillis();
+    long end = event.getInterval().getEndMillis();
+    checkTime(preStart, start, postStart, preEnd, end, postEnd);
   }
 
   @Test
@@ -138,8 +153,8 @@ public class SessionTrackerTest extends AbstractTrackerTest<SessionEvent> {
     tracker.setEnabled(false); // It should remove itself from the observable
     int count = TrackingPlugin.getDefault().getIdleDetector().countObservers();
     tracker.setEnabled(true); // It should add itself to the observable
-    assertEquals(count + 1, TrackingPlugin.getDefault().getIdleDetector()
-        .countObservers());
+    assertEquals(count + 1,
+        TrackingPlugin.getDefault().getIdleDetector().countObservers());
   }
 
   protected void callIdleDetectorToNotify() throws Exception {
@@ -149,8 +164,7 @@ public class SessionTrackerTest extends AbstractTrackerTest<SessionEvent> {
     Method setChanged = Observable.class.getDeclaredMethod("setChanged");
     setChanged.setAccessible(true);
 
-    Method notifyObservers = Observable.class
-        .getDeclaredMethod("notifyObservers");
+    Method notifyObservers = Observable.class.getDeclaredMethod("notifyObservers");
     notifyObservers.setAccessible(true);
 
     IdleDetector detector = TrackingPlugin.getDefault().getIdleDetector();

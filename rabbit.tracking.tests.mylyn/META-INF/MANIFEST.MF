@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: rabbit.tracking.tests.mylyn
 Bundle-SymbolicName: rabbit.tracking.tests.mylyn
-Bundle-Version: 1.0.0.qualifier
+Bundle-Version: 1.1.0.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Require-Bundle: rabbit.data.handler,
  rabbit.tracking.tests,
@@ -11,10 +11,8 @@ Require-Bundle: rabbit.data.handler,
  org.eclipse.ui,
  org.eclipse.mylyn.tasks.core,
  org.eclipse.mylyn.tasks.ui,
- org.eclipse.swtbot.junit4_x,
  rabbit.data,
  rabbit.common,
  rabbit.tracking.mylyn,
- org.eclipse.core.runtime,
- org.eclipse.swtbot.eclipse.finder
+ org.eclipse.core.runtime
 Export-Package: rabbit.tracking.tests.trackers

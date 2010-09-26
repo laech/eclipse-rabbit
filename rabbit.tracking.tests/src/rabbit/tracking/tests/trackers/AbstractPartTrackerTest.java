@@ -23,24 +23,23 @@ import rabbit.tracking.internal.util.WorkbenchUtil;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.swtbot.eclipse.finder.SWTWorkbenchBot;
-import org.eclipse.swtbot.swt.finder.junit.SWTBotJunit4ClassRunner;
+import org.eclipse.jdt.ui.actions.OpenJavaBrowsingPerspectiveAction;
+import org.eclipse.ui.IEditorDescriptor;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.WorkbenchException;
 import org.eclipse.ui.part.FileEditorInput;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -54,18 +53,14 @@ import java.util.Observable;
  * Test {@link AbstractPartTracker}
  */
 @SuppressWarnings("restriction")
-@RunWith(SWTBotJunit4ClassRunner.class)
 public abstract class AbstractPartTrackerTest<E extends ContinuousEvent>
     extends AbstractTrackerTest<E> {
 
   protected AbstractPartTracker<E> tracker;
 
-  protected static SWTWorkbenchBot bot;
-
   @BeforeClass
   public static void setUpBeforeClass() {
-    bot = new SWTWorkbenchBot();
-    bot.viewByTitle("Welcome").close();
+    new OpenJavaBrowsingPerspectiveAction().run();
   }
 
   @Before
@@ -81,7 +76,7 @@ public abstract class AbstractPartTrackerTest<E extends ContinuousEvent>
     tracker.setEnabled(true);
     long postStart = System.currentTimeMillis();
 
-    bot.sleep(20);
+    Thread.sleep(20);
 
     long preEnd = System.currentTimeMillis();
     openNewEditor();
@@ -105,11 +100,9 @@ public abstract class AbstractPartTrackerTest<E extends ContinuousEvent>
     long postStart = System.currentTimeMillis();
 
     assertTrue(tracker.getData().isEmpty());
-    bot.sleep(20);
+    Thread.sleep(20);
 
     long preEnd = System.currentTimeMillis();
-    bot.activeEditor().close();
-    
     editor.getEditorSite().getPage().closeEditor(editor, false);
     long postEnd = System.currentTimeMillis();
 
@@ -124,7 +117,7 @@ public abstract class AbstractPartTrackerTest<E extends ContinuousEvent>
 
   @Test
   public void testCloseWindow() throws Exception {
-    openNewWindow();
+    IWorkbenchWindow win = openNewWindow();
     IEditorPart editor = openNewEditor();
 
     long preStart = System.currentTimeMillis();
@@ -132,10 +125,10 @@ public abstract class AbstractPartTrackerTest<E extends ContinuousEvent>
     long postStart = System.currentTimeMillis();
 
     assertTrue(tracker.getData().isEmpty());
-    bot.sleep(20);
+    Thread.sleep(20);
 
     long preEnd = System.currentTimeMillis();
-    bot.activeShell().close();
+    win.close();
     long postEnd = System.currentTimeMillis();
 
     assertEquals(1, tracker.getData().size());
@@ -152,19 +145,19 @@ public abstract class AbstractPartTrackerTest<E extends ContinuousEvent>
     tracker.setEnabled(false);
 
     // Test IPerspectiveListener.
-    bot.sleep(30);
+    Thread.sleep(30);
     openNewEditor();
 
     assertTrue(tracker.getData().isEmpty());
 
     // Test IWindowListener.
-    bot.sleep(20);
-    openNewWindow();
+    Thread.sleep(20);
+    IWorkbenchWindow win = openNewWindow();
     assertTrue(tracker.getData().isEmpty());
-    bot.activeShell().close();
+    win.close();
 
     // Test IdleDetector
-    bot.sleep(20);
+    Thread.sleep(20);
     callIdleDetectorToNotify();
     assertTrue(tracker.getData().isEmpty());
   }
@@ -175,27 +168,17 @@ public abstract class AbstractPartTrackerTest<E extends ContinuousEvent>
    */
   @Test
   public void testEnable_noActiveWorkbenchWindow() throws Exception {
-    final IWorkbenchWindow win = WorkbenchUtil.getActiveWindow();
-    bot.getDisplay().syncExec(new Runnable() {
-      @Override
-      public void run() {
-        win.getShell().setMinimized(true);
-      }
-    });
+    IWorkbenchWindow win = WorkbenchUtil.getActiveWindow();
+    win.getShell().setMinimized(true);
 
     try {
       tracker.setEnabled(true);
-      bot.sleep(20);
+      Thread.sleep(20);
       tracker.setEnabled(false);
       assertEquals(0, tracker.getData().size());
 
     } finally {
-      bot.getDisplay().syncExec(new Runnable() {
-        @Override
-        public void run() {
-          win.getShell().setMinimized(false);
-        }
-      });
+      win.getShell().setMinimized(false);
     }
   }
 
@@ -207,7 +190,7 @@ public abstract class AbstractPartTrackerTest<E extends ContinuousEvent>
     tracker.setEnabled(true);
     long postStart = System.currentTimeMillis();
 
-    bot.sleep(20);
+    Thread.sleep(20);
 
     long preEnd = System.currentTimeMillis();
     tracker.setEnabled(false);
@@ -230,7 +213,7 @@ public abstract class AbstractPartTrackerTest<E extends ContinuousEvent>
     tracker.setEnabled(true);
     long postStart = System.currentTimeMillis();
 
-    bot.sleep(20);
+    Thread.sleep(20);
 
     long preEnd = System.currentTimeMillis();
     callIdleDetectorToNotify();
@@ -258,16 +241,17 @@ public abstract class AbstractPartTrackerTest<E extends ContinuousEvent>
   public void testWindowDeactivated() throws Exception {
     IEditorPart editor = openNewEditor();
 
+    IWorkbenchWindow win = null;
     try {
       long preStart = System.currentTimeMillis();
       tracker.setEnabled(true);
       long postStart = System.currentTimeMillis();
 
       assertEquals(0, tracker.getData().size());
-      bot.sleep(30);
+      Thread.sleep(30);
 
       long preEnd = System.currentTimeMillis();
-      bot.menu("Window").menu("New Window").click();
+      win = openNewWindow();
       long postEnd = System.currentTimeMillis();
 
       assertEquals(1, tracker.getData().size());
@@ -279,7 +263,9 @@ public abstract class AbstractPartTrackerTest<E extends ContinuousEvent>
       checkTime(preStart, start, postStart, preEnd, end, postEnd);
 
     } finally {
-      bot.activeShell().close();
+      if (win != null) {
+        win.close();
+      }
     }
   }
 
@@ -290,8 +276,7 @@ public abstract class AbstractPartTrackerTest<E extends ContinuousEvent>
     Method setChanged = Observable.class.getDeclaredMethod("setChanged");
     setChanged.setAccessible(true);
 
-    Method notifyObservers = Observable.class
-        .getDeclaredMethod("notifyObservers");
+    Method notifyObservers = Observable.class.getDeclaredMethod("notifyObservers");
     notifyObservers.setAccessible(true);
 
     IdleDetector detector = TrackingPlugin.getDefault().getIdleDetector();
@@ -350,24 +335,11 @@ public abstract class AbstractPartTrackerTest<E extends ContinuousEvent>
    * 
    * @return The newly opened editor.
    */
-  protected IEditorPart openNewEditor() {
-    final IEditorPart[] editor = new IEditorPart[1];
-    bot.getDisplay().syncExec(new Runnable() {
-
-      @Override
-      public void run() {
-        try {
-          editor[0] = WorkbenchUtil
-              .getActiveWindow()
-              .getActivePage()
-              .openEditor(new FileEditorInput(getFileForTesting()),
-                  "org.eclipse.ui.DefaultTextEditor", true);
-        } catch (Exception e) {
-          fail(e.getMessage());
-        }
-      }
-    });
-    return editor[0];
+  protected IEditorPart openNewEditor() throws Exception {
+    IEditorDescriptor desc = PlatformUI.getWorkbench().getEditorRegistry().getDefaultEditor(
+        "a.txt");
+    return PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(
+        new FileEditorInput(getFileForTesting()), desc.getId(), true);
   }
 
   /**
@@ -376,7 +348,7 @@ public abstract class AbstractPartTrackerTest<E extends ContinuousEvent>
    * @return The newly opened window.
    */
   protected IWorkbenchWindow openNewWindow() throws WorkbenchException {
-    return WorkbenchUtil.getActiveWindow().getWorkbench()
-        .openWorkbenchWindow(null);
+    return PlatformUI.getWorkbench().getActiveWorkbenchWindow().getWorkbench().openWorkbenchWindow(
+        null);
   }
 }

@@ -33,7 +33,6 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.commands.ICommandService;
 import org.eclipse.ui.handlers.IHandlerService;
 import org.joda.time.DateTime;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Collections;
@@ -44,19 +43,12 @@ import java.util.Collections;
 @SuppressWarnings("restriction")
 public class CommandTrackerTest extends AbstractTrackerTest<CommandEvent> {
 
-  private CommandTracker tracker;
-
-  @Before
-  public void setUp() {
-    tracker = createTracker();
-  }
-
   @Test
   public void testDisabled() throws Exception {
     tracker.setEnabled(false);
 
-    Command command = getCommandService().getCommand(
-        System.currentTimeMillis() + "." + System.nanoTime());
+    String commandId = System.currentTimeMillis() + "." + System.nanoTime();
+    Command command = getCommandService().getCommand(commandId);
     command.define("a", "b", getCommandService().getDefinedCategories()[0]);
 
     getHandlerService().activateHandler(command.getId(), createHandler());
@@ -71,10 +63,10 @@ public class CommandTrackerTest extends AbstractTrackerTest<CommandEvent> {
 
     String name = "cmdName";
     String description = "cmdDescription";
-    Command command = getCommandService().getCommand(
-        System.currentTimeMillis() + "." + System.nanoTime());
-    command.define(name, description, getCommandService()
-        .getDefinedCategories()[0]);
+    String id = System.currentTimeMillis() + "." + System.nanoTime();
+    Command command = getCommandService().getCommand(id);
+    command.define(name, description,
+        getCommandService().getDefinedCategories()[0]);
 
     long start = System.currentTimeMillis();
     getHandlerService().activateHandler(command.getId(), createHandler());
@@ -87,13 +79,13 @@ public class CommandTrackerTest extends AbstractTrackerTest<CommandEvent> {
     assertTrue(start <= e.getTime().getMillis());
     assertTrue(end >= e.getTime().getMillis());
   }
-  
+
   @Test
   public void testExecution_failure() throws Exception {
     tracker.setEnabled(true);
     try {
       getHandlerService().executeCommand("notSuchCommandId", null);
-      
+
       // An exception is guaranteed to be thrown, we just need to make sure such
       // command event is not recorded.
     } catch (ExecutionException e) {
@@ -116,7 +108,7 @@ public class CommandTrackerTest extends AbstractTrackerTest<CommandEvent> {
 
   private ExecutionEvent createExecutionEvent(String commandId) {
     return new ExecutionEvent(getCommandService().getCommand(commandId),
-        Collections.EMPTY_MAP, null, null);
+        Collections.emptyMap(), null, null);
   }
 
   private IHandler createHandler() {

@@ -23,13 +23,10 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.mylyn.internal.tasks.core.LocalTask;
 import org.eclipse.mylyn.tasks.core.ITask;
 import org.eclipse.mylyn.tasks.ui.TasksUi;
-import org.eclipse.swtbot.swt.finder.junit.SWTBotJunit4ClassRunner;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPart;
-import org.eclipse.ui.PlatformUI;
 import org.joda.time.Interval;
 import org.junit.Before;
-import org.junit.runner.RunWith;
 
 import java.util.Date;
 
@@ -37,7 +34,6 @@ import java.util.Date;
  * @see TaskTracker
  */
 @SuppressWarnings("restriction")
-@RunWith(SWTBotJunit4ClassRunner.class)
 public class TaskTrackerTest extends AbstractPartTrackerTest<TaskFileEvent> {
 
   private ITask task;
@@ -46,11 +42,7 @@ public class TaskTrackerTest extends AbstractPartTrackerTest<TaskFileEvent> {
   public void setUpActiveTask() {
     task = new LocalTask(System.currentTimeMillis() + "", "what?");
     task.setCreationDate(new Date());
-    PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
-      @Override public void run() {
-        TasksUi.getTaskActivityManager().activateTask(task); 
-      }
-    });
+    TasksUi.getTaskActivityManager().activateTask(task); 
   }
 
   @Override

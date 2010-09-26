@@ -24,12 +24,11 @@ import static org.junit.Assert.assertTrue;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.swtbot.swt.finder.junit.SWTBotJunit4ClassRunner;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.IWorkbenchWindow;
 import org.joda.time.Interval;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
 import java.util.Iterator;
 
@@ -37,40 +36,42 @@ import java.util.Iterator;
  * Test for {@link FileTracker}
  */
 @SuppressWarnings("restriction")
-@RunWith(SWTBotJunit4ClassRunner.class)
 public class FileTrackerTest extends AbstractPartTrackerTest<FileEvent> {
 
   @Test
   public void testNewWindow() throws Exception {
     tracker.setEnabled(true);
-    openNewWindow();
+    IWorkbenchWindow win = openNewWindow();
 
-    long preStart = System.currentTimeMillis();
-    IEditorPart editor = openNewEditor(); // Start
-    long postStart = System.currentTimeMillis();
+    try {
+      long preStart = System.currentTimeMillis();
+      IEditorPart editor = openNewEditor(); // Start
+      long postStart = System.currentTimeMillis();
 
-    bot.sleep(20);
+      Thread.sleep(20);
 
-    long preEnd = System.currentTimeMillis();
-    openNewEditor(); // End
-    long postEnd = System.currentTimeMillis();
+      long preEnd = System.currentTimeMillis();
+      openNewEditor(); // End
+      long postEnd = System.currentTimeMillis();
 
-    // One for the original window,
-    // one for the newly opened window's default active view,
-    // But both are views, not editors,so they are not added,
-    // one for the newly opened editor.
-    assertEquals(1, tracker.getData().size());
+      // One for the original window,
+      // one for the newly opened window's default active view,
+      // But both are views, not editors,so they are not added,
+      // one for the newly opened editor.
+      assertEquals(1, tracker.getData().size());
 
-    Iterator<FileEvent> it = tracker.getData().iterator();
-    FileEvent event = it.next();
-    assertTrue(hasSamePart(event, editor));
+      Iterator<FileEvent> it = tracker.getData().iterator();
+      FileEvent event = it.next();
+      assertTrue(hasSamePart(event, editor));
 
-    long start = event.getInterval().getStartMillis();
-    long end = event.getInterval().getEndMillis();
-    checkTime(preStart, start, postStart, preEnd, end, postEnd);
-    assertTrue(hasSamePart(event, editor));
+      long start = event.getInterval().getStartMillis();
+      long end = event.getInterval().getEndMillis();
+      checkTime(preStart, start, postStart, preEnd, end, postEnd);
+      assertTrue(hasSamePart(event, editor));
 
-    bot.activeShell().close();
+    } finally {
+      win.close();
+    }
   }
 
   @Override

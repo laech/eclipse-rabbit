@@ -155,7 +155,10 @@ public class PerspectiveTracker extends AbstractTracker<PerspectiveEvent> {
    * Checks the conditions and starts recording if OK.
    */
   private void checkStart() {
-    checkStart(WorkbenchUtil.getActiveWindow());
+    IWorkbenchWindow win = WorkbenchUtil.getActiveWindow();
+    if (WorkbenchUtil.isActiveShell(win)) {
+      checkStart(win);
+    }
   }
 
   /**
