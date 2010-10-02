@@ -6,8 +6,6 @@ Bundle-Version: 1.2.0.qualifier
 Fragment-Host: rabbit.data.xml
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Require-Bundle: rabbit.data,
- rabbit.data.handler,
- rabbit.tracking,
  org.eclipse.ui,
  org.eclipse.debug.core,
  org.junit4,

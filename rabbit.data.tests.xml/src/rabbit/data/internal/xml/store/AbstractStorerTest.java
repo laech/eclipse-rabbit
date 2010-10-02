@@ -92,7 +92,7 @@ public abstract class AbstractStorerTest<E extends DiscreteEvent, T, S extends E
     assertEquals(1, data.size());
     assertEquals(toXmlDate(event.getTime()), data.get(0).getDate());
     
-    List<T> elements = getElements(storer, data.get(0));
+    List<T> elements = storer.getElements(data.get(0));
     assertEquals(1, elements.size());
     T element = elements.get(0);
     assertTrue(equal(getConverter(storer).convert(event), element));
@@ -132,7 +132,7 @@ public abstract class AbstractStorerTest<E extends DiscreteEvent, T, S extends E
     S category = categories.iterator().next();
     assertEquals(toXmlDate(event.getTime()), category.getDate());
 
-    List<T> elements = getElements(storer, category);
+    List<T> elements = storer.getElements(category);
     assertEquals(1, elements.size());
     T element = elements.iterator().next();
     assertTrue(equal(getConverter(storer).convert(event), element));
@@ -150,10 +150,10 @@ public abstract class AbstractStorerTest<E extends DiscreteEvent, T, S extends E
     S category = categories.iterator().next();
     assertEquals(toXmlDate(event1.getTime()), category.getDate());
 
-    List<T> elements = getElements(storer, category);
+    List<T> elements = storer.getElements(category);
     T t1 = getConverter(storer).convert(event1);
     T t2 = getConverter(storer).convert(event2);
-    IMerger<T> merger = getMerger(storer);
+    IMerger<T> merger = storer.getMerger();
     if (merger != null) { // Elements are mergeable
       assertEquals(1, elements.size());
 
@@ -194,11 +194,11 @@ public abstract class AbstractStorerTest<E extends DiscreteEvent, T, S extends E
     assertEquals(toXmlDate(event1.getTime()), category1.getDate());
     assertEquals(toXmlDate(event2.getTime()), category2.getDate());
 
-    List<T> elements = getElements(storer, category1);
+    List<T> elements = storer.getElements(category1);
     assertEquals(1, elements.size());
     assertTrue(equal(getConverter(storer).convert(event1), elements.get(0)));
 
-    elements = getElements(storer, category2);
+    elements = storer.getElements(category2);
     assertEquals(1, elements.size());
     assertTrue(equal(getConverter(storer).convert(event2), elements.get(0)));
   }
@@ -218,7 +218,7 @@ public abstract class AbstractStorerTest<E extends DiscreteEvent, T, S extends E
     S category = categories.iterator().next();
     assertEquals(toXmlDate(event2.getTime()), category.getDate());
 
-    List<T> elements = getElements(storer, category);
+    List<T> elements = storer.getElements(category);
     assertEquals(1, elements.size());
     T element = elements.iterator().next();
     assertTrue(equal(getConverter(storer).convert(event2), element));
@@ -236,7 +236,7 @@ public abstract class AbstractStorerTest<E extends DiscreteEvent, T, S extends E
     S category = categories.iterator().next();
     assertEquals(toXmlDate(event1.getTime()), category.getDate());
 
-    List<T> elements = getElements(storer, category);
+    List<T> elements = storer.getElements(category);
     assertEquals(2, elements.size());
 
     T t1 = getConverter(storer).convert(event1);
@@ -248,7 +248,7 @@ public abstract class AbstractStorerTest<E extends DiscreteEvent, T, S extends E
   @Test
   public void testNewCateogry() throws Exception {
     XMLGregorianCalendar date = newCalendar();
-    S category = newCategory(storer, date);
+    S category = storer.newCategory(date);
     assertNotNull(category);
     assertEquals(date, category.getDate());
   }
@@ -317,42 +317,6 @@ public abstract class AbstractStorerTest<E extends DiscreteEvent, T, S extends E
     Method method = AbstractStorer.class.getDeclaredMethod("getDataStore");
     method.setAccessible(true);
     return (IDataStore) method.invoke(storer);
-  }
-
-  /**
-   * Calls the protected method {@code AbstractStorer.getElements(S)}.
-   */
-  @SuppressWarnings("unchecked")
-  protected List<T> getElements(AbstractStorer<E, T, S> storer, S events)
-      throws Exception {
-
-    Method method = AbstractStorer.class.getDeclaredMethod("getElements",
-        EventGroupType.class);
-    method.setAccessible(true);
-    return (List<T>) method.invoke(storer, events);
-  }
-
-  /**
-   * Calls the protected method AbstractStorer.getMerger()
-   */
-  @SuppressWarnings("unchecked")
-  protected IMerger<T> getMerger(AbstractStorer<E, T, S> storer)
-      throws Exception {
-    Method method = AbstractStorer.class.getDeclaredMethod("getMerger");
-    method.setAccessible(true);
-    return (IMerger<T>) method.invoke(storer);
-  }
-
-  /**
-   * Calls the protected method {@code AbstractStorer.newXmlTypeHolder(Calendar}
-   */
-  @SuppressWarnings("unchecked")
-  protected S newCategory(AbstractStorer storer, XMLGregorianCalendar cal)
-      throws Exception {
-    Method method = AbstractStorer.class.getDeclaredMethod("newCategory",
-        XMLGregorianCalendar.class);
-    method.setAccessible(true);
-    return (S) method.invoke(storer, cal);
   }
 
   private XMLGregorianCalendar newCalendar() {

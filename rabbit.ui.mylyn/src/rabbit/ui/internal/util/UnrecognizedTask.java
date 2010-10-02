@@ -61,7 +61,6 @@ public final class UnrecognizedTask implements ITask {
     return false;
   }
 
-  @SuppressWarnings("unchecked")
   @Override
   public Object getAdapter(Class adapter) {
     return null;
