@@ -16,5 +16,5 @@ Require-Bundle: rabbit.data,
  org.junit4,
  rabbit.common
 Fragment-Host: rabbit.ui.mylyn
-Export-Package: rabbit.ui.tests.pages.mylyn,
- rabbit.ui.tests.util
+Export-Package: rabbit.ui.internal.pages.mylyn,
+ rabbit.ui.internal.util
