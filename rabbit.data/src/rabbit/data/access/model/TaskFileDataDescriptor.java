@@ -19,60 +19,34 @@ import rabbit.data.common.TaskId;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Objects;
-
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.mylyn.tasks.core.ITask;
 import org.eclipse.mylyn.tasks.ui.TasksUi;
+import org.joda.time.Duration;
 import org.joda.time.LocalDate;
-
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
 
 /**
  * Data descriptor for a task file event.
  */
 public class TaskFileDataDescriptor extends FileDataDescriptor {
   
-  @Nonnull
   private final TaskId taskId;
 
   /**
    * Constructs a new data descriptor.
    * 
    * @param date The date of the data.
-   * @param value The duration of the event, in milliseconds.
+   * @param duration The duration.
    * @param filePath The path of the file.
    * @param taskId The ID of the task.
-   * @throws NullPointerException If date is null, or filePath is null, or
-   *           taskId is null.
-   * @throws IllegalArgumentException If value < 0;
+   * @throws NullPointerException If any of the arguments are null.
    */
-  public TaskFileDataDescriptor(@Nonnull LocalDate date, 
-                                         long value, 
-                                @Nonnull IPath filePath, 
-                                @Nonnull TaskId taskId) {
-    super(date, value, filePath);
-    checkNotNull(taskId, "Task ID cannot be null");
-    this.taskId = taskId;
-  }
-  
-  @Override
-  public int hashCode() {
-    return Objects.hashCode(getDate(), getFilePath(), getTaskId());
-  }
-  
-  @Override
-  public boolean equals(Object obj) {
-    if (obj == null) return false;
-    if (obj == this) return true;
-    if (obj.getClass() != getClass()) return false;
-    
-    TaskFileDataDescriptor des = (TaskFileDataDescriptor) obj;
-    return des.getDate().equals(getDate())
-        && des.getFilePath().equals(getFilePath())
-        && des.getTaskId().equals(getTaskId())
-        && des.getValue() == getValue();
+  public TaskFileDataDescriptor(LocalDate date, 
+                                Duration duration, 
+                                IPath filePath, 
+                                TaskId taskId) {
+    super(date, duration, filePath);
+    this.taskId = checkNotNull(taskId);
   }
   
   /**
@@ -83,7 +57,6 @@ public class TaskFileDataDescriptor extends FileDataDescriptor {
    * @return The task, or null if not found.
    * @see #getTaskId()
    */
-  @CheckForNull
   public final ITask findTask() {
     ITask task = TasksUi.getRepositoryModel().getTask(getTaskId().getHandleIdentifier());
     if (task != null && !getTaskId().getCreationDate().equals(task.getCreationDate())) {
@@ -96,7 +69,6 @@ public class TaskFileDataDescriptor extends FileDataDescriptor {
    * Gets the ID of the task.
    * @return The task ID.
    */
-  @Nonnull
   public final TaskId getTaskId() {
     return taskId;
   }

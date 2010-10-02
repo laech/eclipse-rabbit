@@ -17,8 +17,6 @@ package rabbit.data.internal.xml.convert;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import javax.annotation.Nonnull;
-
 /**
  * Abstract {@link IConverter} class containing default implementations.
  * 
@@ -44,7 +42,6 @@ public abstract class AbstractConverter<F, T> implements IConverter<F, T> {
    * @param element The element to convert from.
    * @return A converted element.
    */
-  @Nonnull
   protected abstract T doConvert(F element);
 
 }

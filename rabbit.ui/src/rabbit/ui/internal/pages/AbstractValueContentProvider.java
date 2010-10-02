@@ -27,8 +27,6 @@ import org.eclipse.jface.viewers.Viewer;
 
 import java.util.IdentityHashMap;
 
-import javax.annotation.Nonnull;
-
 /**
  * Internal subclass of {@link AbstractCategoryContentProvider} that also
  * behaviors as an {@link IValueProvider}.
@@ -65,7 +63,6 @@ public abstract class AbstractValueContentProvider
    * durations (10 minutes and 20 minutes).
    * </p>
    */
-  @Nonnull
   private IdentityHashMap<TreeNode, Long> treeNodeValues;
 
   /** {@link #getMaxValue()} */

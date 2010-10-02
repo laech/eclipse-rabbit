@@ -16,7 +16,6 @@
 package rabbit.data.internal.xml.access;
 
 import rabbit.data.access.model.FileDataDescriptor;
-import rabbit.data.internal.xml.AbstractDataNodeAccessorTest;
 import rabbit.data.internal.xml.DataStore;
 import rabbit.data.internal.xml.merge.FileEventTypeMerger;
 import rabbit.data.internal.xml.schema.events.FileEventListType;
@@ -73,11 +72,19 @@ public class FileDataAccessorTest
   public void testCreateDataNode() throws Exception {
     LocalDate date = new LocalDate();
     FileEventType type = createElement();
-    FileDataDescriptor des = createDataNode(accessor, date, type);
+    FileDataDescriptor des = accessor.createDataNode(date, type);
 
     assertEquals(date, des.getDate());
-    assertEquals(type.getDuration(), des.getValue());
+    assertEquals(type.getDuration(), des.getDuration().getMillis());
     assertEquals(type.getFilePath(), des.getFilePath().toString());
+  }
+
+  @Override
+  protected boolean areEqual(FileDataDescriptor expected,
+      FileDataDescriptor actual) {
+    return expected.getDate().equals(actual.getDate())
+        && expected.getDuration().equals(actual.getDuration())
+        && expected.getFilePath().equals(actual.getFilePath());
   }
 
 }

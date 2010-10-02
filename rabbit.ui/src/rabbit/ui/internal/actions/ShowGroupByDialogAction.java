@@ -26,15 +26,12 @@ import org.eclipse.jface.action.IAction;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Shell;
 
-import javax.annotation.Nonnull;
-
 // TODO test
 /**
  * Action to open a {@link GroupByDialog}
  */
 public class ShowGroupByDialogAction extends Action {
 
-  @Nonnull
   private ICategoryProvider provider;
 
   /**
@@ -43,7 +40,7 @@ public class ShowGroupByDialogAction extends Action {
    * @param provider The category provider.
    * @throws NullPointerException If the provider is null.
    */
-  public ShowGroupByDialogAction(@Nonnull ICategoryProvider provider) {
+  public ShowGroupByDialogAction(ICategoryProvider provider) {
     this("Advanced...", IAction.AS_PUSH_BUTTON, provider);
   }
 
@@ -56,7 +53,7 @@ public class ShowGroupByDialogAction extends Action {
    * @throws NullPointerException If the provider is null.
    */
   public ShowGroupByDialogAction(String text, int style,
-      @Nonnull ICategoryProvider provider) {
+      ICategoryProvider provider) {
 
     super(text, style);
     checkNotNull(provider);

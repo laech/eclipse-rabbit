@@ -16,7 +16,6 @@
 package rabbit.data.internal.xml.access;
 
 import rabbit.data.access.model.CommandDataDescriptor;
-import rabbit.data.internal.xml.AbstractDataNodeAccessor;
 import rabbit.data.internal.xml.IDataStore;
 import rabbit.data.internal.xml.StoreNames;
 import rabbit.data.internal.xml.merge.IMerger;

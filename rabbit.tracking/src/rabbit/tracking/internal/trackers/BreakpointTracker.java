@@ -36,6 +36,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 // TODO remove
+@Deprecated
 public class BreakpointTracker extends AbstractTracker<BreakpointEvent>
     implements IBreakpointListener {
 

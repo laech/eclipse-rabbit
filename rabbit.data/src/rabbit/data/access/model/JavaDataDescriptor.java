@@ -17,53 +17,33 @@ package rabbit.data.access.model;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Objects;
-
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaCore;
+import org.joda.time.Duration;
 import org.joda.time.LocalDate;
-
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
 
 /**
  * Data descriptor for time spent on java elements.
  */
-public class JavaDataDescriptor extends ValueDescriptor {
+public class JavaDataDescriptor extends DurationDescriptor {
 
-  @Nonnull
   private final String handleIdentifier;
 
   /**
    * Constructs a new data descriptor.
    * 
    * @param date The date of the data.
-   * @param value The value of the data.
+   * @param duration The duration of the data.
    * @param handlerIdentifier The handle identifier of the java element.
-   * @throws NullPointerException If date is null, or handleIdentifier is null.
-   * @throws IllegalArgumentException If value < 0.
+   * @throws NullPointerException If any of the arguments are null.
    * @see IJavaElement#getHandleIdentifier()
    * @see JavaCore#create(String)
    */
-  public JavaDataDescriptor(@Nonnull LocalDate date, long value,
-      @Nonnull String handlerIdentifier) {
-    super(date, value);
-    checkNotNull(handlerIdentifier);
-    this.handleIdentifier = handlerIdentifier;
+  public JavaDataDescriptor(LocalDate date, Duration duration, String handlerIdentifier) {
+    super(date, duration);
+    this.handleIdentifier = checkNotNull(handlerIdentifier);
   }
 
-  @Override
-  public boolean equals(Object obj) {
-    if (obj == null) return false;
-    if (obj == this) return true;
-    if (!obj.getClass().equals(getClass())) return false;
-    
-    JavaDataDescriptor des = (JavaDataDescriptor) obj;
-    return Objects.equal(des.getDate(), getDate())
-        && Objects.equal(des.getHandleIdentifier(), getHandleIdentifier())
-        && des.getValue() == getValue();
-  }
-  
   /**
    * Finds the Java element that has the handle identifier. The returned element
    * does not need to exist within the workspace.
@@ -72,11 +52,10 @@ public class JavaDataDescriptor extends ValueDescriptor {
    *         identifier.
    * @see #getHandleIdentifier()
    */
-  @CheckForNull
   public final IJavaElement findElement() {
     return JavaCore.create(getHandleIdentifier());
   }
-  
+
   /**
    * Gets the handle identifier of the java element.
    * 
@@ -84,13 +63,8 @@ public class JavaDataDescriptor extends ValueDescriptor {
    * @see IJavaElement#getHandleIdentifier()
    * @see JavaCore#create(String)
    */
-  @Nonnull
   public final String getHandleIdentifier() {
     return handleIdentifier;
   }
-  
-  @Override
-  public int hashCode() {
-    return Objects.hashCode(getDate(), getHandleIdentifier());
-  }
+
 }

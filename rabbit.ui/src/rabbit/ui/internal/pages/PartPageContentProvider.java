@@ -176,7 +176,7 @@ public class PartPageContentProvider extends AbstractValueContentProvider {
           node = TreeNodes.findOrAppend(node, part);
         }
       }
-      TreeNodes.appendToParent(node, des.getValue());
+      TreeNodes.appendToParent(node, des.getDuration().getMillis(), true);
     }
   }
 

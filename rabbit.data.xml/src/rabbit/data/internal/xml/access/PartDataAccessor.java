@@ -16,7 +16,6 @@
 package rabbit.data.internal.xml.access;
 
 import rabbit.data.access.model.PartDataDescriptor;
-import rabbit.data.internal.xml.AbstractDataNodeAccessor;
 import rabbit.data.internal.xml.IDataStore;
 import rabbit.data.internal.xml.StoreNames;
 import rabbit.data.internal.xml.merge.IMerger;
@@ -27,6 +26,7 @@ import rabbit.data.internal.xml.schema.events.PartEventType;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
+import org.joda.time.Duration;
 import org.joda.time.LocalDate;
 
 import java.util.Collection;
@@ -60,7 +60,8 @@ public class PartDataAccessor
   @Override
   protected PartDataDescriptor createDataNode(LocalDate cal, PartEventType type) {
     try {
-      return new PartDataDescriptor(cal, type.getDuration(), type.getPartId());
+      return new PartDataDescriptor(cal, new Duration(type.getDuration()),
+          type.getPartId());
     } catch (NullPointerException e) {
       return null;
     } catch (IllegalArgumentException e) {

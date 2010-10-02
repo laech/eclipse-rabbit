@@ -17,8 +17,6 @@ package rabbit.data.store;
 
 import java.util.Collection;
 
-import javax.annotation.Nonnull;
-
 /**
  * Represents a storer that stores a particular type of objects.
  * 
@@ -36,13 +34,13 @@ public interface IStorer<T> {
    * 
    * @param col The collection of objects.
    */
-  void insert(@Nonnull Collection<? extends T> collection);
+  void insert(Collection<? extends T> collection);
 
   /**
    * Inserts an object to be stored.
    * 
    * @param e The object.
    */
-  void insert(@Nonnull T element);
+  void insert(T element);
 
 }

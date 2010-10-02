@@ -81,7 +81,9 @@ public class CommandPageContentProvider extends AbstractValueContentProvider {
           node = TreeNodes.findOrAppend(node, command);
         }
       }
-      TreeNodes.appendToParent(node, des.getValue());
+      
+      // Cast count to long for this content provider to work:
+      TreeNodes.appendToParent(node, (long) des.getCount(), true);
     }
   }
   

@@ -16,7 +16,6 @@
 package rabbit.data.internal.xml.access;
 
 import rabbit.data.access.model.PerspectiveDataDescriptor;
-import rabbit.data.internal.xml.AbstractDataNodeAccessorTest;
 import rabbit.data.internal.xml.DataStore;
 import rabbit.data.internal.xml.merge.PerspectiveEventTypeMerger;
 import rabbit.data.internal.xml.schema.events.PerspectiveEventListType;
@@ -70,11 +69,19 @@ public class PerspectiveDataAccessorTest
   public void testCreateDataNode() throws Exception {
     LocalDate date = new LocalDate();
     PerspectiveEventType e = createElement();
-    PerspectiveDataDescriptor des = createDataNode(accessor, date, e);
+    PerspectiveDataDescriptor des = accessor.createDataNode(date, e);
 
     assertEquals(date, des.getDate());
-    assertEquals(e.getDuration(), des.getValue());
+    assertEquals(e.getDuration(), des.getDuration().getMillis());
     assertEquals(e.getPerspectiveId(), des.getPerspectiveId());
+  }
+
+  @Override
+  protected boolean areEqual(PerspectiveDataDescriptor expected,
+      PerspectiveDataDescriptor actual) {
+    return expected.getDate().equals(actual.getDate())
+        && expected.getDuration().equals(actual.getDuration())
+        && expected.getPerspectiveId().equals(actual.getPerspectiveId());
   }
 
 }

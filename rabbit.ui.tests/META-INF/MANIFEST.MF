@@ -1,11 +1,11 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: rabbit.ui.tests
-Bundle-SymbolicName: rabbit.ui.tests;singleton:=true
+Bundle-SymbolicName: rabbit.ui.tests
 Bundle-Version: 1.2.0.qualifier
+Fragment-Host: rabbit.ui
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Require-Bundle: org.eclipse.core.resources,
- rabbit.ui,
  rabbit.data,
  rabbit.data.handler,
  org.junit4,
@@ -17,7 +17,7 @@ Require-Bundle: org.eclipse.core.resources,
  org.eclipse.ui.forms,
  org.eclipse.debug.ui,
  rabbit.common
-Export-Package: rabbit.ui.tests,
- rabbit.ui.tests.pages,
- rabbit.ui.tests.pref,
- rabbit.ui.tests.util
+Export-Package: rabbit.ui.internal,
+ rabbit.ui.internal.pages,
+ rabbit.ui.internal.pref,
+ rabbit.ui.internal.util

@@ -25,8 +25,6 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Menu;
 
-import javax.annotation.Nonnull;
-
 /**
  * An action that has a drop down menu.
  */
@@ -46,7 +44,7 @@ public class DropDownAction extends Action implements IMenuCreator {
    * @throws NullPointerException If default action is null.
    */
   public DropDownAction(String text, ImageDescriptor image,
-      @Nonnull IAction defaultAction, IAction... menuItems) {
+      IAction defaultAction, IAction... menuItems) {
     super(text, IAction.AS_DROP_DOWN_MENU);
     checkNotNull(defaultAction);
 

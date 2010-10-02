@@ -149,7 +149,7 @@ public class ResourcePageContentProvider extends AbstractValueContentProvider {
           node = TreeNodes.findOrAppend(node, file);
         }
       }
-      TreeNodes.appendToParent(node, des.getValue());
+      TreeNodes.appendToParent(node, des.getDuration().getMillis(), true);
     }
   }
 }

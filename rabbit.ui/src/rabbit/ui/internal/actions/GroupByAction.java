@@ -27,8 +27,6 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 
-import javax.annotation.Nonnull;
-
 /**
  * Action to contain a list of "Group by" actions and an extra action at the end
  * to show the group by dialog. The text of this action is the text of the
@@ -36,7 +34,6 @@ import javax.annotation.Nonnull;
  */
 public class GroupByAction extends DropDownAction {
 
-  @Nonnull
   private ICategoryProvider categoryProvider;
 
   /**
@@ -49,8 +46,8 @@ public class GroupByAction extends DropDownAction {
    * @throws NullPointerException If category provider is null, or default
    *           action is null.
    */
-  public GroupByAction(@Nonnull ICategoryProvider categoryProvider,
-      @Nonnull IAction defaultAction, IAction... menuItems) {
+  public GroupByAction(ICategoryProvider categoryProvider,
+      IAction defaultAction, IAction... menuItems) {
     super("Group by " + defaultAction.getText(), SharedImages.HIERARCHY,
         defaultAction, menuItems);
 
@@ -63,7 +60,6 @@ public class GroupByAction extends DropDownAction {
    * 
    * @return The provider.
    */
-  @Nonnull
   public ICategoryProvider getCategoryProvider() {
     return categoryProvider;
   }

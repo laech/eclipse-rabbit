@@ -2,15 +2,12 @@ package rabbit.data.test.access.model;
 
 import rabbit.data.access.model.FileDataDescriptor;
 
-import com.google.common.base.Objects;
-
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
+import org.joda.time.Duration;
 import org.joda.time.LocalDate;
 import org.junit.Test;
 
@@ -21,61 +18,32 @@ public class FileDataDescriptorTest extends ValueDescriptorTest {
 
   @Test(expected = NullPointerException.class)
   public void testConstructor_fileIdNull() {
-    createDescriptor(new LocalDate(), 1, null);
+    createDescriptor(new LocalDate(), new Duration(1), null);
   }
 
-  @Override
-  public void testHashCode() {
-    long val = 1983;
-    IPath path = new Path("/p/f/a");
-    LocalDate date = new LocalDate();
-    int hashCode = Objects.hashCode(date, path);
-    assertEquals(hashCode, createDescriptor(date, val, path).hashCode());
-  }
-  
-  @Override
-  public void testEquals() {
-    long val = 1983;
-    IPath path = new Path("/p/f/a");
-    LocalDate date = new LocalDate();
-    
-    FileDataDescriptor des1 = createDescriptor(date, val, path);
-    assertTrue(des1.equals(des1));
-    assertFalse(des1.equals(null));
-    assertFalse(des1.equals(""));
-    
-    FileDataDescriptor des2 = createDescriptor(date, val, path);
-    assertTrue(des1.equals(des2));
-    assertTrue(des2.equals(des1));
-    
-    des2 = createDescriptor(date.plusDays(1), val, path);
-    assertFalse(des1.equals(des2));
-    
-    des2 = createDescriptor(date, val + 1, path);
-    assertFalse(des1.equals(des2));
-    
-    des2 = createDescriptor(date, val, path.append("1"));
-    assertFalse(des1.equals(des2));
-  }
-  
   @Test
   public void testFindFile() {
     IPath path = new Path("/p/a.txt");
-    assertEquals(path, createDescriptor(new LocalDate(), 1, path).findFile().getFullPath());
-    
+    assertEquals(
+        path,
+        createDescriptor(new LocalDate(), new Duration(1), path).findFile().getFullPath());
+
     path = new Path("/");
-    assertNull(createDescriptor(new LocalDate(), 1, path).findFile());
+    assertNull(createDescriptor(new LocalDate(), new Duration(1), path).findFile());
   }
 
   @Test
   public void testGetFilePath() {
     IPath path = new Path("/p/f/a");
-    assertEquals(path, createDescriptor(new LocalDate(), 1, path).getFilePath());
+    assertEquals(path,
+        createDescriptor(new LocalDate(), new Duration(1), path).getFilePath());
   }
 
   @Override
-  protected final FileDataDescriptor createDescriptor(LocalDate date, long duration) {
-    return createDescriptor(date, duration, Path.fromPortableString("/p/f/a.txt"));
+  protected final FileDataDescriptor createDescriptor(LocalDate date,
+      Duration duration) {
+    return createDescriptor(date, duration,
+        Path.fromPortableString("/p/f/a.txt"));
   }
 
   /**
@@ -87,8 +55,8 @@ public class FileDataDescriptorTest extends ValueDescriptorTest {
    * @return A descriptor created using the parameters.
    * @see FileDataDescriptor#FileDataDescriptor(LocalDate, long, String)
    */
-  protected FileDataDescriptor createDescriptor(LocalDate date, long duration,
-      IPath filePath) {
+  protected FileDataDescriptor createDescriptor(LocalDate date,
+      Duration duration, IPath filePath) {
     return new FileDataDescriptor(date, duration, filePath);
   }
 

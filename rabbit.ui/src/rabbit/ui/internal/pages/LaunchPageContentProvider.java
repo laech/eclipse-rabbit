@@ -312,8 +312,8 @@ public class LaunchPageContentProvider extends AbstractCategoryContentProvider {
 
       // Attach the Integer value of launch count, and Long value of the total
       // duration count at the end:
-      TreeNodes.appendToParent(launchNode, des.getLaunchCount());
-      TreeNodes.appendToParent(launchNode, des.getTotalDuration());
+      TreeNodes.appendToParent(launchNode, des.getLaunchCount(), true);
+      TreeNodes.appendToParent(launchNode, des.getDuration().getMillis(), true);
 
       // Adds the resources (if any) to the end of the leaf:
       for (IPath filePath : des.getFilePaths()) {

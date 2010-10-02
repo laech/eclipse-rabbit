@@ -40,6 +40,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jface.viewers.TreeNode;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
+import org.joda.time.Duration;
 import org.joda.time.LocalDate;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -75,30 +76,31 @@ public class TaskPageContentProviderTest {
     page.createContents(shell);
     provider = new TaskPageContentProvider(page.getViewer());
     page.getViewer().setContentProvider(provider);
-    
+
     IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
     project = root.getProject("p");
     folder = project.getFolder("f");
     file = folder.getFile("a");
   }
-  
+
   @Test
   public void testCategories() {
     Set<ICategory> selected = Sets.newHashSet(provider.getSelectedCategories());
     Set<ICategory> unselected = Sets.newHashSet(provider.getUnselectedCategories());
     assertEquals(0, Sets.intersection(selected, unselected).size());
-    
+
     Set<ICategory> all = Sets.union(selected, unselected);
-    Set<MylynCategory> set = Sets.newHashSet(MylynCategory.DATE, MylynCategory.TASK, 
-        MylynCategory.PROJECT, MylynCategory.FOLDER, MylynCategory.FILE);
+    Set<MylynCategory> set = Sets.newHashSet(MylynCategory.DATE,
+        MylynCategory.TASK, MylynCategory.PROJECT, MylynCategory.FOLDER,
+        MylynCategory.FILE);
     assertEquals(set.size(), all.size());
     assertEquals(0, Sets.difference(all, set).size());
   }
 
   @Test
   public void testHasChildren() throws Exception {
-    TaskFileDataDescriptor des = new TaskFileDataDescriptor(new LocalDate(), 
-        1009823, file.getFullPath(), new TaskId("1", new Date()));
+    TaskFileDataDescriptor des = new TaskFileDataDescriptor(new LocalDate(),
+        new Duration(12234), file.getFullPath(), new TaskId("1", new Date()));
     page.getViewer().setInput(Arrays.asList(des));
 
     TreeNode root = provider.getRoot();
@@ -114,10 +116,10 @@ public class TaskPageContentProviderTest {
   public void testGetChildren() throws Exception {
     // Two data descriptor of different dates, same file, different value:
     TaskId id = new TaskId("1", new Date());
-    TaskFileDataDescriptor d1 = new TaskFileDataDescriptor(
-        new LocalDate(), 1009823, file.getFullPath(), id);
+    TaskFileDataDescriptor d1 = new TaskFileDataDescriptor(new LocalDate(),
+        new Duration(12234), file.getFullPath(), id);
     TaskFileDataDescriptor d2 = new TaskFileDataDescriptor(
-        d1.getDate().minusDays(1), 123, file.getFullPath(), id);
+        d1.getDate().minusDays(1), new Duration(123), file.getFullPath(), id);
 
     page.getViewer().setInput(Arrays.asList(d1, d2));
 
@@ -132,7 +134,8 @@ public class TaskPageContentProviderTest {
     assertEquals(2, dateNodes.length);
     assertTrue(dateNodes[0].getValue() instanceof LocalDate);
     assertTrue(dateNodes[1].getValue() instanceof LocalDate);
-    Set<Object> set = Sets.newHashSet(dateNodes[0].getValue(), dateNodes[1].getValue());
+    Set<Object> set = Sets.newHashSet(dateNodes[0].getValue(),
+        dateNodes[1].getValue());
     assertTrue(set.contains(d1.getDate()));
     assertTrue(set.contains(d2.getDate()));
   }
@@ -141,10 +144,10 @@ public class TaskPageContentProviderTest {
   public void testGetElement() throws Exception {
     // Two data descriptor of different dates, same file, different value:
     TaskId id = new TaskId("1", new Date());
-    TaskFileDataDescriptor d1 = new TaskFileDataDescriptor(
-        new LocalDate(), 1009823, file.getFullPath(), id);
+    TaskFileDataDescriptor d1 = new TaskFileDataDescriptor(new LocalDate(),
+        new Duration(12234), file.getFullPath(), id);
     TaskFileDataDescriptor d2 = new TaskFileDataDescriptor(
-        d1.getDate().minusDays(1), 123, file.getFullPath(), id);
+        d1.getDate().minusDays(1), new Duration(124), file.getFullPath(), id);
 
     page.getViewer().setInput(Arrays.asList(d1, d2));
 
@@ -170,45 +173,49 @@ public class TaskPageContentProviderTest {
   public void testGetMaxValue() {
     // Two data descriptor of different dates, same file, different value:
     TaskId id = new TaskId("1", new Date());
-    TaskFileDataDescriptor d1 = new TaskFileDataDescriptor(
-        new LocalDate(), 1009823, file.getFullPath(), id);
+    TaskFileDataDescriptor d1 = new TaskFileDataDescriptor(new LocalDate(),
+        new Duration(12234), file.getFullPath(), id);
     TaskFileDataDescriptor d2 = new TaskFileDataDescriptor(
-        d1.getDate().minusDays(1), 123, file.getFullPath(), id);
+        d1.getDate().minusDays(1), new Duration(123), file.getFullPath(), id);
 
     // Date
     page.getViewer().setInput(Arrays.asList(d1, d2));
     provider.setSelectedCategories(MylynCategory.DATE);
     provider.setPaintCategory(MylynCategory.DATE);
-    assertEquals(d1.getValue(), provider.getMaxValue());
+    assertEquals(d1.getDuration().getMillis(), provider.getMaxValue());
 
     // File
     // Set to Category.FILE so that the two data descriptors representing the
     // same file will be merged as a single tree node:
     provider.setSelectedCategories(MylynCategory.FILE);
     provider.setPaintCategory(MylynCategory.FILE);
-    assertEquals(d1.getValue() + d2.getValue(), provider.getMaxValue());
+    assertEquals(d1.getDuration().getMillis() + d2.getDuration().getMillis(),
+        provider.getMaxValue());
     // Separate the data descriptors by dates:
     provider.setSelectedCategories(MylynCategory.DATE, MylynCategory.FILE);
-    assertEquals(d1.getValue(), provider.getMaxValue());
+    assertEquals(d1.getDuration().getMillis(), provider.getMaxValue());
 
     // Folder
     provider.setSelectedCategories(MylynCategory.FOLDER);
     provider.setPaintCategory(MylynCategory.FOLDER);
-    assertEquals(d1.getValue() + d2.getValue(), provider.getMaxValue());
+    assertEquals(d1.getDuration().getMillis() + d2.getDuration().getMillis(),
+        provider.getMaxValue());
     provider.setSelectedCategories(MylynCategory.DATE, MylynCategory.FOLDER);
-    assertEquals(d1.getValue(), provider.getMaxValue());
+    assertEquals(d1.getDuration().getMillis(), provider.getMaxValue());
 
     // Project
     provider.setSelectedCategories(MylynCategory.PROJECT);
     provider.setPaintCategory(MylynCategory.PROJECT);
-    assertEquals(d1.getValue() + d2.getValue(), provider.getMaxValue());
+    assertEquals(d1.getDuration().getMillis() + d2.getDuration().getMillis(),
+        provider.getMaxValue());
     provider.setSelectedCategories(MylynCategory.DATE, MylynCategory.PROJECT);
-    assertEquals(d1.getValue(), provider.getMaxValue());
-    
+    assertEquals(d1.getDuration().getMillis(), provider.getMaxValue());
+
     // Task
     provider.setSelectedCategories(MylynCategory.TASK);
     provider.setPaintCategory(MylynCategory.TASK);
-    assertEquals(d1.getValue() + d2.getValue(), provider.getMaxValue());
+    assertEquals(d1.getDuration().getMillis() + d2.getDuration().getMillis(),
+        provider.getMaxValue());
   }
 
   @Test
@@ -216,11 +223,12 @@ public class TaskPageContentProviderTest {
     assertNotNull(provider.getSelectedCategories());
     // Should never be empty, if set to empty or null, defaults should be used:
     assertFalse(provider.getSelectedCategories().length == 0);
-    ICategory[] categories = new ICategory[] { MylynCategory.DATE, MylynCategory.FILE };
+    ICategory[] categories = new ICategory[]{
+        MylynCategory.DATE, MylynCategory.FILE};
     provider.setSelectedCategories(categories);
     assertArrayEquals(categories, provider.getSelectedCategories());
 
-    categories = new ICategory[] { MylynCategory.PROJECT, MylynCategory.FOLDER };
+    categories = new ICategory[]{MylynCategory.PROJECT, MylynCategory.FOLDER};
     provider.setSelectedCategories(categories);
     assertArrayEquals(categories, provider.getSelectedCategories());
   }
@@ -232,44 +240,45 @@ public class TaskPageContentProviderTest {
     provider.setSelectedCategories(categories);
     assertEquals(0, provider.getUnselectedCategories().length);
 
-    categories = new ICategory[] { MylynCategory.DATE, MylynCategory.FILE };
+    categories = new ICategory[]{MylynCategory.DATE, MylynCategory.FILE};
     provider.setSelectedCategories(categories);
 
-    Set<MylynCategory> unselect = Sets.difference(all, Sets.newHashSet(categories));
+    Set<MylynCategory> unselect = Sets.difference(all,
+        Sets.newHashSet(categories));
     assertEquals(unselect.size(), provider.getUnselectedCategories().length);
-    assertTrue(unselect.containsAll(Arrays.asList(provider
-        .getUnselectedCategories())));
+    assertTrue(unselect.containsAll(Arrays.asList(provider.getUnselectedCategories())));
   }
 
   @Test
   public void testGetValue() throws Exception {
     // Two data descriptor of different dates, same file, different value:
     TaskId id = new TaskId("1", new Date());
-    TaskFileDataDescriptor d1 = new TaskFileDataDescriptor(
-        new LocalDate(), 1009823, file.getFullPath(), id);
+    TaskFileDataDescriptor d1 = new TaskFileDataDescriptor(new LocalDate(),
+        new Duration(12234), file.getFullPath(), id);
     TaskFileDataDescriptor d2 = new TaskFileDataDescriptor(
-        d1.getDate().minusDays(1), 123, file.getFullPath(), id);
+        d1.getDate().minusDays(1), new Duration(123), file.getFullPath(), id);
 
     page.getViewer().setInput(Arrays.asList(d1, d2));
 
     TreeNode root = provider.getRoot();
     provider.setSelectedCategories(MylynCategory.FILE);
     TreeNode fileNode = root.getChildren()[0];
-    assertEquals(d1.getValue() + d2.getValue(), provider.getValue(fileNode));
+    assertEquals(d1.getDuration().getMillis() + d2.getDuration().getMillis(),
+        provider.getValue(fileNode));
 
     provider.setSelectedCategories(MylynCategory.DATE);
     TreeNode[] dateNodes = root.getChildren();
     assertEquals(2, dateNodes.length);
-    assertEquals(d1.getValue(), provider.getValue(dateNodes[0]));
-    assertEquals(d2.getValue(), provider.getValue(dateNodes[1]));
+    assertEquals(d1.getDuration().getMillis(), provider.getValue(dateNodes[0]));
+    assertEquals(d2.getDuration().getMillis(), provider.getValue(dateNodes[1]));
   }
 
   @Test
   public void testInputChanged_clearsOldData() throws Exception {
     TaskId id = new TaskId("1", new Date());
-    TaskFileDataDescriptor des = new TaskFileDataDescriptor(
-        new LocalDate(), 1009823, file.getFullPath(), id);
-    
+    TaskFileDataDescriptor des = new TaskFileDataDescriptor(new LocalDate(),
+        new Duration(12234), file.getFullPath(), id);
+
     page.getViewer().setInput(Arrays.asList(des));
     TreeNode root = provider.getRoot();
     assertFalse(root.getChildren() == null || root.getChildren().length == 0);
@@ -298,19 +307,20 @@ public class TaskPageContentProviderTest {
       fail();
     }
   }
-  
+
   @Test
   public void testSetSelectedCategories_emptyArray() {
     try {
-      ICategory[] cats = new ICategory[] { MylynCategory.FILE, MylynCategory.FOLDER };
+      ICategory[] cats = new ICategory[]{
+          MylynCategory.FILE, MylynCategory.FOLDER};
       provider.setSelectedCategories(cats);
       assertArrayEquals(cats, provider.getSelectedCategories());
 
       provider.setSelectedCategories(new ICategory[0]);
       // The defaults:
-      cats = new ICategory[] { 
-          MylynCategory.TASK, MylynCategory.PROJECT, MylynCategory.FOLDER, MylynCategory.FILE 
-      };
+      cats = new ICategory[]{
+          MylynCategory.TASK, MylynCategory.PROJECT, MylynCategory.FOLDER,
+          MylynCategory.FILE};
       assertArrayEquals(cats, provider.getSelectedCategories());
 
     } catch (Exception e) {
@@ -321,15 +331,16 @@ public class TaskPageContentProviderTest {
   @Test
   public void testSetSelectedCategories_emptyVararg() {
     try {
-      ICategory[] cats = new ICategory[] { MylynCategory.FILE, MylynCategory.FOLDER };
+      ICategory[] cats = new ICategory[]{
+          MylynCategory.FILE, MylynCategory.FOLDER};
       provider.setSelectedCategories(cats);
       assertArrayEquals(cats, provider.getSelectedCategories());
 
       provider.setSelectedCategories();
       // The defaults:
-      cats = new ICategory[] { 
-          MylynCategory.TASK, MylynCategory.PROJECT, MylynCategory.FOLDER, MylynCategory.FILE 
-      };
+      cats = new ICategory[]{
+          MylynCategory.TASK, MylynCategory.PROJECT, MylynCategory.FOLDER,
+          MylynCategory.FILE};
       assertArrayEquals(cats, provider.getSelectedCategories());
 
     } catch (Exception e) {
@@ -341,67 +352,73 @@ public class TaskPageContentProviderTest {
   public void testSetPaintCategory() {
     // Two data descriptor of different dates, same file, different value:
     TaskId id = new TaskId("1", new Date());
-    TaskFileDataDescriptor d1 = new TaskFileDataDescriptor(
-        new LocalDate(), 1009823, file.getFullPath(), id);
+    TaskFileDataDescriptor d1 = new TaskFileDataDescriptor(new LocalDate(),
+        new Duration(12234), file.getFullPath(), id);
     TaskFileDataDescriptor d2 = new TaskFileDataDescriptor(
-        d1.getDate().minusDays(1), 123, file.getFullPath(), id);
+        d1.getDate().minusDays(1), new Duration(123), file.getFullPath(), id);
 
     page.getViewer().setInput(Arrays.asList(d1, d2));
 
     provider.setSelectedCategories(MylynCategory.DATE);
     provider.setPaintCategory(MylynCategory.DATE);
-    assertEquals(d1.getValue(), provider.getMaxValue());
+    assertEquals(d1.getDuration().getMillis(), provider.getMaxValue());
 
     provider.setSelectedCategories(MylynCategory.FILE);
     provider.setPaintCategory(MylynCategory.FILE);
-    assertEquals(d1.getValue() + d2.getValue(), provider.getMaxValue());
+    assertEquals(d1.getDuration().getMillis() + d2.getDuration().getMillis(),
+        provider.getMaxValue());
 
     provider.setSelectedCategories(MylynCategory.FOLDER);
     provider.setPaintCategory(MylynCategory.FOLDER);
-    assertEquals(d1.getValue() + d2.getValue(), provider.getMaxValue());
+    assertEquals(d1.getDuration().getMillis() + d2.getDuration().getMillis(),
+        provider.getMaxValue());
 
     provider.setSelectedCategories(MylynCategory.PROJECT);
     provider.setPaintCategory(MylynCategory.PROJECT);
-    assertEquals(d1.getValue() + d2.getValue(), provider.getMaxValue());
-    
+    assertEquals(d1.getDuration().getMillis() + d2.getDuration().getMillis(),
+        provider.getMaxValue());
+
     provider.setSelectedCategories(MylynCategory.TASK);
     provider.setPaintCategory(MylynCategory.TASK);
-    assertEquals(d1.getValue() + d2.getValue(), provider.getMaxValue());
+    assertEquals(d1.getDuration().getMillis() + d2.getDuration().getMillis(),
+        provider.getMaxValue());
   }
 
   @Test
   public void testSetSelectedCategories() {
-    ICategory[] cats = new ICategory[] { MylynCategory.FILE, MylynCategory.FOLDER };
+    ICategory[] cats = new ICategory[]{MylynCategory.FILE, MylynCategory.FOLDER};
     provider.setSelectedCategories(cats);
     assertArrayEquals(cats, provider.getSelectedCategories());
 
-    cats = new ICategory[] { MylynCategory.FILE, MylynCategory.DATE, MylynCategory.PROJECT };
+    cats = new ICategory[]{
+        MylynCategory.FILE, MylynCategory.DATE, MylynCategory.PROJECT};
     provider.setSelectedCategories(cats);
     assertArrayEquals(cats, provider.getSelectedCategories());
   }
 
   @Test
   public void testShouldFilter() {
-    TreeNode taskNode = new TreeNode(new UnrecognizedTask(new TaskId("1", new Date())));
+    TreeNode taskNode = new TreeNode(new UnrecognizedTask(new TaskId("1",
+        new Date())));
     TreeNode dateNode = new TreeNode(new LocalDate());
     TreeNode projectNode = new TreeNode(file.getProject());
     TreeNode folderNode = new TreeNode((IFolder) file.getParent());
     TreeNode fileNode = new TreeNode(file);
-    
+
     provider.setSelectedCategories(MylynCategory.TASK);
     assertFalse(provider.shouldFilter(taskNode));
     assertTrue(provider.shouldFilter(dateNode));
     assertTrue(provider.shouldFilter(projectNode));
     assertTrue(provider.shouldFilter(folderNode));
     assertTrue(provider.shouldFilter(fileNode));
-    
+
     provider.setSelectedCategories(MylynCategory.DATE);
     assertTrue(provider.shouldFilter(taskNode));
     assertFalse(provider.shouldFilter(dateNode));
     assertTrue(provider.shouldFilter(projectNode));
     assertTrue(provider.shouldFilter(folderNode));
     assertTrue(provider.shouldFilter(fileNode));
-    
+
     provider.setSelectedCategories(MylynCategory.FILE);
     assertTrue(provider.shouldFilter(taskNode));
     assertTrue(provider.shouldFilter(dateNode));
@@ -426,26 +443,27 @@ public class TaskPageContentProviderTest {
 
   @Test
   public void testShouldPaint() {
-    TreeNode taskNode = new TreeNode(new UnrecognizedTask(new TaskId("1", new Date())));
+    TreeNode taskNode = new TreeNode(new UnrecognizedTask(new TaskId("1",
+        new Date())));
     TreeNode dateNode = new TreeNode(new LocalDate());
     TreeNode projectNode = new TreeNode(file.getProject());
     TreeNode folderNode = new TreeNode((IFolder) file.getParent());
     TreeNode fileNode = new TreeNode(file);
-    
+
     provider.setPaintCategory(MylynCategory.TASK);
     assertTrue(provider.shouldPaint(taskNode));
     assertFalse(provider.shouldPaint(dateNode));
     assertFalse(provider.shouldPaint(projectNode));
     assertFalse(provider.shouldPaint(folderNode));
     assertFalse(provider.shouldPaint(fileNode));
-    
+
     provider.setPaintCategory(MylynCategory.DATE);
     assertFalse(provider.shouldPaint(taskNode));
     assertTrue(provider.shouldPaint(dateNode));
     assertFalse(provider.shouldPaint(projectNode));
     assertFalse(provider.shouldPaint(folderNode));
     assertFalse(provider.shouldPaint(fileNode));
-    
+
     provider.setPaintCategory(MylynCategory.FILE);
     assertFalse(provider.shouldPaint(taskNode));
     assertFalse(provider.shouldPaint(dateNode));

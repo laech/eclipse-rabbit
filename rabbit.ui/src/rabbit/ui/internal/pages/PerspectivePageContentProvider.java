@@ -103,7 +103,7 @@ public class PerspectivePageContentProvider extends AbstractValueContentProvider
           node = TreeNodes.findOrAppend(node, persp);
         }
       }
-      TreeNodes.appendToParent(node, des.getValue());
+      TreeNodes.appendToParent(node, des.getDuration().getMillis(), true);
     }
   }
 }

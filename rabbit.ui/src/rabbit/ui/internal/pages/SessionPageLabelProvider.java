@@ -73,7 +73,7 @@ public class SessionPageLabelProvider extends LabelProvider implements
 
     case 1:
       if (element instanceof SessionDataDescriptor)
-        return format(((SessionDataDescriptor) element).getValue());
+        return format(((SessionDataDescriptor) element).getDuration().getMillis());
       else
         return null;
 

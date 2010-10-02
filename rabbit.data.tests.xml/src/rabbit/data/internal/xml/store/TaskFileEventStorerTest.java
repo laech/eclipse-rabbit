@@ -15,7 +15,6 @@
  */
 package rabbit.data.internal.xml.store;
 
-import rabbit.data.internal.xml.AbstractStorerTest;
 import rabbit.data.internal.xml.DataStore;
 import rabbit.data.internal.xml.convert.TaskFileEventConverter;
 import rabbit.data.internal.xml.merge.TaskFileEventTypeMerger;

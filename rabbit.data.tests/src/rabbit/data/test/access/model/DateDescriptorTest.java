@@ -4,7 +4,6 @@ import rabbit.data.access.model.DateDescriptor;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 import org.joda.time.LocalDate;
 import org.junit.Test;
@@ -18,29 +17,21 @@ public class DateDescriptorTest {
   public void testConstructor_null() {
     createDescriptor(null);
   }
-  
-  @Test
-  public void testHashCode() {
-    LocalDate date = new LocalDate();
-    assertEquals(date.hashCode(), createDescriptor(date).hashCode());
-  }
-  
-  @Test
-  public void testEquals() {
-    LocalDate date = new LocalDate();
-    DateDescriptor des1 = createDescriptor(date);
-    assertTrue(des1.equals(des1));
-    assertFalse(des1.equals(null));
-    assertFalse(des1.equals(""));
-    assertFalse(des1.equals(createDescriptor(date.plusDays(1))));
-    assertTrue(des1.equals(createDescriptor(date)));
-  }
 
   @Test
   public void testGetDate() {
     LocalDate date = new LocalDate();
     DateDescriptor des = createDescriptor(date);
     assertEquals(date, des.getDate());
+  }
+
+  @Test
+  public void testEquals() {
+    // Each instance is meant to be unique, otherwise some data will be lost
+    // when storing in hash collections:
+    LocalDate date = new LocalDate();
+    assertFalse(createDescriptor(date).equals(
+        createDescriptor(date)));
   }
 
   /**

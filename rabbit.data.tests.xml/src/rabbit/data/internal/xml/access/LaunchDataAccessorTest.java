@@ -16,7 +16,6 @@
 package rabbit.data.internal.xml.access;
 
 import rabbit.data.access.model.LaunchDataDescriptor;
-import rabbit.data.internal.xml.AbstractDataNodeAccessorTest;
 import rabbit.data.internal.xml.DataStore;
 import rabbit.data.internal.xml.DatatypeUtil;
 import rabbit.data.internal.xml.merge.LaunchEventTypeMerger;
@@ -86,15 +85,25 @@ public class LaunchDataAccessorTest
   public void testCreateDataNode() throws Exception {
     LocalDate date = new LocalDate();
     LaunchEventType e = createElement();
-    LaunchDataDescriptor des = createDataNode(accessor, date, e);
+    LaunchDataDescriptor des = accessor.createDataNode(date, e);
     
     assertEquals(date, des.getDate());
     assertEquals(e.getCount(), des.getLaunchCount());
-    assertEquals(e.getTotalDuration(), des.getTotalDuration());
+    assertEquals(e.getTotalDuration(), des.getDuration().getMillis());
     assertEquals(e.getLaunchModeId(), des.getLaunchDescriptor().getLaunchModeId());
     assertEquals(e.getLaunchTypeId(), des.getLaunchDescriptor().getLaunchTypeId());
     assertEquals(e.getName(), des.getLaunchDescriptor().getLaunchName());
     assertEquals(e.getFilePath().size(), des.getFilePaths().size());
     assertTrue(e.getFilePath().containsAll(des.getFilePaths()));
+  }
+
+  @Override
+  protected boolean areEqual(LaunchDataDescriptor expected,
+      LaunchDataDescriptor actual) {
+    return expected.getDate().equals(actual.getDate())
+        && expected.getDuration().equals(actual.getDuration())
+        && expected.getFilePaths().equals(actual.getFilePaths())
+        && expected.getLaunchDescriptor().equals(actual.getLaunchDescriptor())
+        && expected.getLaunchCount() == actual.getLaunchCount();
   }
 }

@@ -16,11 +16,11 @@
 package rabbit.ui.tests.pages.mylyn;
 
 import rabbit.ui.internal.pages.AbstractFilteredTreePage;
+import rabbit.ui.internal.pages.AbstractFilteredTreePageTest;
 import rabbit.ui.internal.pages.mylyn.MylynCategory;
 import rabbit.ui.internal.pages.mylyn.TaskPage;
 import rabbit.ui.internal.pages.mylyn.TaskPageContentProvider;
 import rabbit.ui.internal.util.ICategory;
-import rabbit.ui.tests.pages.AbstractFilteredTreePageTest;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;

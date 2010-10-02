@@ -1,43 +1,21 @@
 package rabbit.data.access.model;
 
-import com.google.common.base.Objects;
-
+import org.joda.time.Duration;
 import org.joda.time.LocalDate;
-
-import javax.annotation.Nonnull;
 
 /**
  * Data descriptor for session events.
  */
-public class SessionDataDescriptor extends ValueDescriptor {
+public class SessionDataDescriptor extends DurationDescriptor {
 
   /**
    * Constructs a new data descriptor.
    * 
    * @param date The date of the data.
-   * @param duration The duration in milliseconds.
-   * @throws NullPointerException If date is null.
-   * @throws IllegalArgumentException If duration < 0.
+   * @param duration The duration.
+   * @throws NullPointerException If any of the arguments are null.
    */
-  public SessionDataDescriptor(@Nonnull LocalDate date, long duration) {
+  public SessionDataDescriptor(LocalDate date, Duration duration) {
     super(date, duration);
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hashCode(getDate());
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (null == obj)
-      return false;
-    if (this == obj)
-      return true;
-    if (getClass() != obj.getClass())
-      return false;
-
-    SessionDataDescriptor des = (SessionDataDescriptor) obj;
-    return des.getDate().equals(getDate()) && des.getValue() == getValue();
   }
 }

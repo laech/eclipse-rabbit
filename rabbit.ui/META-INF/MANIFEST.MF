@@ -15,6 +15,7 @@ Require-Bundle: org.eclipse.ui,
  rabbit.tracking;bundle-version="1.1.0",
  rabbit.common;bundle-version="1.0.0"
 Bundle-ActivationPolicy: lazy
+Eclipse-ExtensibleAPI: true
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: rabbit.ui,
  rabbit.ui.internal;x-friends:="rabbit.ui.mylyn,rabbit.ui.java",

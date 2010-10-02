@@ -30,7 +30,6 @@ import java.util.Date;
 /**
  * @see UnrecognizedTask
  */
-@SuppressWarnings("restriction")
 public class UnrecognizedTaskTest {
   
   @Test

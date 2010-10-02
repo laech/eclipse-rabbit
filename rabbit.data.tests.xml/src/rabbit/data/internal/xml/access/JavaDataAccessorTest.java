@@ -18,7 +18,6 @@ package rabbit.data.internal.xml.access;
 import static rabbit.data.internal.xml.DatatypeUtil.toXmlDate;
 
 import rabbit.data.access.model.JavaDataDescriptor;
-import rabbit.data.internal.xml.AbstractDataNodeAccessorTest;
 import rabbit.data.internal.xml.DataStore;
 import rabbit.data.internal.xml.merge.JavaEventTypeMerger;
 import rabbit.data.internal.xml.schema.events.JavaEventListType;
@@ -52,9 +51,9 @@ public class JavaDataAccessorTest extends
     type.setDuration(value);
     type.setHandleIdentifier(id);
     
-    JavaDataDescriptor des = createDataNode(accessor, date, type);
+    JavaDataDescriptor des = accessor.createDataNode(date, type);
     assertEquals(date, des.getDate());
-    assertEquals(value, des.getValue());
+    assertEquals(value, des.getDuration().getMillis());
     assertEquals(id, des.getHandleIdentifier());
   }
 
@@ -86,6 +85,14 @@ public class JavaDataAccessorTest extends
   @Override
   protected void setValue(JavaEventType type, long usage) {
     type.setDuration(usage);
+  }
+
+  @Override
+  protected boolean areEqual(JavaDataDescriptor expected,
+      JavaDataDescriptor actual) {
+    return expected.getDate().equals(actual.getDate())
+        && expected.getDuration().equals(actual.getDuration())
+        && expected.getHandleIdentifier().equals(actual.getHandleIdentifier());
   }
 
 }

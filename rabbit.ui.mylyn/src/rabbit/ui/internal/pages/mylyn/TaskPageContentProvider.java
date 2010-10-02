@@ -149,7 +149,7 @@ public class TaskPageContentProvider extends AbstractValueContentProvider {
         }
       }
       
-      TreeNodes.appendToParent(node, des.getValue());
+      TreeNodes.appendToParent(node, des.getDuration().getMillis(), true);
     }
   }
 }

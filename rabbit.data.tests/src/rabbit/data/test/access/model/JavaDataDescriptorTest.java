@@ -17,13 +17,10 @@ package rabbit.data.test.access.model;
 
 import rabbit.data.access.model.JavaDataDescriptor;
 
-import com.google.common.base.Objects;
-
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 
+import org.joda.time.Duration;
 import org.joda.time.LocalDate;
 import org.junit.Test;
 
@@ -34,67 +31,40 @@ public class JavaDataDescriptorTest extends ValueDescriptorTest {
 
   @Test(expected = NullPointerException.class)
   public void testConstructor_handleIdNull() {
-    createDescriptor(new LocalDate(), 1, null);
+    createDescriptor(new LocalDate(), new Duration(1), null);
   }
 
   @Test
   public void testFindElement() {
     // A valid handle identifier:
     String handleId = "=J/src<java.something{InterfaceA.java";
-    assertEquals(handleId, createDescriptor(new LocalDate(), 1, handleId)
-        .findElement().getHandleIdentifier());
-    
+    assertEquals(handleId, createDescriptor(new LocalDate(), new Duration(1),
+        handleId).findElement().getHandleIdentifier());
+
     // An invalid handle identifier:
     handleId = "abc";
-    assertNull(createDescriptor(new LocalDate(), 1, handleId).findElement());
+    assertNull(createDescriptor(new LocalDate(), new Duration(1), handleId).findElement());
   }
 
   @Test
   public void testGetHandleIdentifier() {
     String handleId = "abc";
-    assertEquals(handleId, createDescriptor(new LocalDate(), 1, handleId)
-        .getHandleIdentifier());
+    assertEquals(handleId, createDescriptor(new LocalDate(), new Duration(1),
+        handleId).getHandleIdentifier());
   }
 
   @Override
-  protected final JavaDataDescriptor createDescriptor(LocalDate date, long value) {
+  protected final JavaDataDescriptor createDescriptor(LocalDate date,
+      Duration value) {
     return createDescriptor(date, value, "someHandle");
   }
 
   /**
-   * @see JavaDataDescriptor#JavaDataDescriptor(LocalDate, long, String)
+   * @see JavaDataDescriptor#JavaDataDescriptor(LocalDate, Duration, String)
    */
-  protected JavaDataDescriptor createDescriptor(LocalDate date, long value,
+  protected JavaDataDescriptor createDescriptor(LocalDate date, Duration value,
       String handleId) {
     return new JavaDataDescriptor(date, value, handleId);
   }
 
-  @Override
-  public void testHashCode() {
-    JavaDataDescriptor des = createDescriptor(new LocalDate(), 1);
-    assertEquals(Objects.hashCode(des.getDate(), des.getHandleIdentifier()),
-        des.hashCode());
-  }
-
-  @Override
-  public void testEquals() {
-    JavaDataDescriptor d1 = createDescriptor(new LocalDate(), 1);
-    JavaDataDescriptor d2 = createDescriptor(d1.getDate(), d1.getValue(), d1
-        .getHandleIdentifier());
-    assertTrue(d1.equals(d2));
-    assertTrue(d1.equals(d1));
-    assertFalse(d1.equals(null));
-
-    d2 = createDescriptor(d1.getDate().minusDays(1), d1.getValue(), d1
-        .getHandleIdentifier());
-    assertFalse(d1.equals(d2));
-
-    d2 = createDescriptor(d1.getDate(), d1.getValue() + 1, d1
-        .getHandleIdentifier());
-    assertFalse(d1.equals(d2));
-
-    d2 = createDescriptor(d1.getDate(), d1.getValue(), d1.getHandleIdentifier()
-        + "1");
-    assertFalse(d1.equals(d2));
-  }
 }

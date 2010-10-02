@@ -20,11 +20,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import org.eclipse.debug.core.model.IBreakpoint;
 import org.joda.time.DateTime;
 
-import javax.annotation.Nonnull;
-
 /**
  * Represents a breakpoint event.
  */
+@Deprecated
 public class BreakpointEvent extends DiscreteEvent {
 
   /**
@@ -41,9 +40,7 @@ public class BreakpointEvent extends DiscreteEvent {
     DISABLED;
   }
 
-  @Nonnull
   private final IBreakpoint breakpoint;
-  @Nonnull
   private final Status status;
 
   /**
@@ -54,8 +51,7 @@ public class BreakpointEvent extends DiscreteEvent {
    * @param status The status of this event.
    * @throws NullPointerException If any of the arguments is null.
    */
-  public BreakpointEvent(@Nonnull DateTime time,
-      @Nonnull IBreakpoint breakpoint, @Nonnull Status status) {
+  public BreakpointEvent(DateTime time, IBreakpoint breakpoint, Status status) {
     super(time);
 
     checkNotNull(breakpoint, "Breakpoint cannot be null");
@@ -70,7 +66,6 @@ public class BreakpointEvent extends DiscreteEvent {
    * 
    * @return The breakpoint.
    */
-  @Nonnull
   public IBreakpoint getBreakpoint() {
     return breakpoint;
   }
@@ -80,7 +75,6 @@ public class BreakpointEvent extends DiscreteEvent {
    * 
    * @return The breakpoint status.
    */
-  @Nonnull
   public Status getStatus() {
     return status;
   }

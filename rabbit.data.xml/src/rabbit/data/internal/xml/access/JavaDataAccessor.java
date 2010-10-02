@@ -16,7 +16,6 @@
 package rabbit.data.internal.xml.access;
 
 import rabbit.data.access.model.JavaDataDescriptor;
-import rabbit.data.internal.xml.AbstractDataNodeAccessor;
 import rabbit.data.internal.xml.IDataStore;
 import rabbit.data.internal.xml.StoreNames;
 import rabbit.data.internal.xml.merge.IMerger;
@@ -27,6 +26,7 @@ import rabbit.data.internal.xml.schema.events.JavaEventType;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
+import org.joda.time.Duration;
 import org.joda.time.LocalDate;
 
 import java.util.Collection;
@@ -55,7 +55,7 @@ public class JavaDataAccessor
   @Override
   protected JavaDataDescriptor createDataNode(LocalDate cal, JavaEventType type) {
     try {
-      return new JavaDataDescriptor(cal, type.getDuration(),
+      return new JavaDataDescriptor(cal, new Duration(type.getDuration()),
           type.getHandleIdentifier());
     } catch (NullPointerException e) {
       return null;

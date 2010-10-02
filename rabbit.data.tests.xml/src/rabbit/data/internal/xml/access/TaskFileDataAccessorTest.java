@@ -16,7 +16,6 @@
 package rabbit.data.internal.xml.access;
 
 import rabbit.data.access.model.TaskFileDataDescriptor;
-import rabbit.data.internal.xml.AbstractDataNodeAccessorTest;
 import rabbit.data.internal.xml.DataStore;
 import rabbit.data.internal.xml.DatatypeUtil;
 import rabbit.data.internal.xml.merge.TaskFileEventTypeMerger;
@@ -59,8 +58,8 @@ public class TaskFileDataAccessorTest extends
     type.setFilePath(fileId);
     type.setTaskId(id);
     
-    TaskFileDataDescriptor des = createDataNode(accessor, eventDate, type);
-    assertEquals(duration, des.getValue());
+    TaskFileDataDescriptor des = accessor.createDataNode(eventDate, type);
+    assertEquals(duration, des.getDuration().getMillis());
     assertEquals(eventDate, des.getDate());
     assertEquals(fileId, des.getFilePath().toString());
     assertEquals(handleId, des.getTaskId().getHandleIdentifier());
@@ -101,5 +100,14 @@ public class TaskFileDataAccessorTest extends
   @Override
   protected void setValue(TaskFileEventType type, long value) {
     type.setDuration(value);
+  }
+
+  @Override
+  protected boolean areEqual(TaskFileDataDescriptor expected,
+      TaskFileDataDescriptor actual) {
+    return expected.getDate().equals(actual.getDate())
+        && expected.getDuration().equals(actual.getDuration())
+        && expected.getFilePath().equals(actual.getFilePath())
+        && expected.getTaskId().equals(actual.getTaskId());
   }
 }

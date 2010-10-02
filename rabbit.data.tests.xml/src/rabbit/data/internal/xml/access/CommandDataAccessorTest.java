@@ -16,7 +16,6 @@
 package rabbit.data.internal.xml.access;
 
 import rabbit.data.access.model.CommandDataDescriptor;
-import rabbit.data.internal.xml.AbstractDataNodeAccessorTest;
 import rabbit.data.internal.xml.DataStore;
 import rabbit.data.internal.xml.merge.CommandEventTypeMerger;
 import rabbit.data.internal.xml.schema.events.CommandEventListType;
@@ -73,11 +72,18 @@ public class CommandDataAccessorTest
   public void testCreateDataNode() throws Exception {
     LocalDate date = new LocalDate();
     CommandEventType type = createElement();
-    CommandDataDescriptor des = createDataNode(accessor, date, type);
+    CommandDataDescriptor des = accessor.createDataNode(date, type);
 
     assertEquals(date, des.getDate());
     assertEquals(type.getCommandId(), des.getCommandId());
-    assertEquals(type.getCount(), des.getValue());
+    assertEquals(type.getCount(), des.getCount());
+  }
+
+  @Override
+  protected boolean areEqual(CommandDataDescriptor expected, CommandDataDescriptor actual) {
+    return expected.getCommandId().equals(actual.getCommandId())
+        && expected.getDate().equals(actual.getDate())
+        && expected.getCount() == actual.getCount();
   }
 
 }

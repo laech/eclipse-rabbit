@@ -16,7 +16,6 @@
 package rabbit.data.internal.xml.access;
 
 import rabbit.data.access.model.PerspectiveDataDescriptor;
-import rabbit.data.internal.xml.AbstractDataNodeAccessor;
 import rabbit.data.internal.xml.IDataStore;
 import rabbit.data.internal.xml.StoreNames;
 import rabbit.data.internal.xml.merge.IMerger;
@@ -27,6 +26,7 @@ import rabbit.data.internal.xml.schema.events.PerspectiveEventType;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
+import org.joda.time.Duration;
 import org.joda.time.LocalDate;
 
 import java.util.Collection;
@@ -59,8 +59,8 @@ public class PerspectiveDataAccessor extends
       PerspectiveEventType type) {
 
     try {
-      return new PerspectiveDataDescriptor(cal, type.getDuration(), type
-          .getPerspectiveId());
+      return new PerspectiveDataDescriptor(cal, new Duration(type.getDuration()),
+          type.getPerspectiveId());
 
     } catch (NullPointerException e) {
       return null;

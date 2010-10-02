@@ -16,7 +16,6 @@
 package rabbit.data.internal.xml.access;
 
 import rabbit.data.access.model.PartDataDescriptor;
-import rabbit.data.internal.xml.AbstractDataNodeAccessorTest;
 import rabbit.data.internal.xml.DataStore;
 import rabbit.data.internal.xml.merge.PartEventTypeMerger;
 import rabbit.data.internal.xml.schema.events.PartEventListType;
@@ -73,10 +72,18 @@ public class PartDataAccessorTest
   public void testCreateDataNode() throws Exception {
     LocalDate date = new LocalDate();
     PartEventType type = createElement();
-    PartDataDescriptor des = createDataNode(accessor, date, type);
+    PartDataDescriptor des = accessor.createDataNode(date, type);
     
     assertEquals(date, des.getDate());
     assertEquals(type.getPartId(), des.getPartId());
-    assertEquals(type.getDuration(), des.getValue());
+    assertEquals(type.getDuration(), des.getDuration().getMillis());
+  }
+
+  @Override
+  protected boolean areEqual(PartDataDescriptor expected,
+      PartDataDescriptor actual) {
+    return expected.getDate().equals(actual.getDate())
+        && expected.getDuration().equals(actual.getDuration())
+        && expected.getPartId().equals(actual.getPartId());
   }
 }

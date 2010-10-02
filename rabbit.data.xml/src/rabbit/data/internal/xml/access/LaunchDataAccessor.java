@@ -17,7 +17,6 @@ package rabbit.data.internal.xml.access;
 
 import rabbit.data.access.model.LaunchConfigurationDescriptor;
 import rabbit.data.access.model.LaunchDataDescriptor;
-import rabbit.data.internal.xml.AbstractDataNodeAccessor;
 import rabbit.data.internal.xml.IDataStore;
 import rabbit.data.internal.xml.StoreNames;
 import rabbit.data.internal.xml.merge.IMerger;
@@ -31,6 +30,7 @@ import com.google.inject.name.Named;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
+import org.joda.time.Duration;
 import org.joda.time.LocalDate;
 
 import java.util.Collection;
@@ -70,7 +70,7 @@ public class LaunchDataAccessor
         paths.add(new Path(str));
       }
       return new LaunchDataDescriptor(cal, des, type.getCount(),
-          type.getTotalDuration(), paths);
+          new Duration(type.getTotalDuration()), paths);
 
     } catch (NullPointerException e) {
       return null;

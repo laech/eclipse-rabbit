@@ -10,8 +10,6 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.jdt.core,
  org.eclipse.core.resources,
  rabbit.common,
- rabbit.ui.java,
- rabbit.data,
- rabbit.ui,
- rabbit.ui.tests
+ rabbit.data
+Fragment-Host: rabbit.ui.java
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6

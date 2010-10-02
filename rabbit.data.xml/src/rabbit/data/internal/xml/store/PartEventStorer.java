@@ -15,7 +15,6 @@
  */
 package rabbit.data.internal.xml.store;
 
-import rabbit.data.internal.xml.AbstractStorer;
 import rabbit.data.internal.xml.IDataStore;
 import rabbit.data.internal.xml.StoreNames;
 import rabbit.data.internal.xml.convert.IConverter;

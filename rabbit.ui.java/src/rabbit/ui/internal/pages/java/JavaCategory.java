@@ -28,8 +28,6 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.ide.IDE;
 
-import javax.annotation.Nonnull;
-
 /**
  * Categories supported by {@link JavaPageContentProvider}.
  */
@@ -61,10 +59,10 @@ public enum JavaCategory implements ICategory {
   MEMBER      ("Java Members", getSharedImages().getImageDescriptor(IMG_FIELD_PUBLIC)),
   ;
   
-  @Nonnull private final String text;
-  @Nonnull private final ImageDescriptor image;
+  private final String text;
+  private final ImageDescriptor image;
   
-  private JavaCategory(@Nonnull String text, @Nonnull ImageDescriptor image) {
+  private JavaCategory(String text, ImageDescriptor image) {
     this.text = text;
     this.image = image;
   }

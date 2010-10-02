@@ -78,7 +78,7 @@ public class SessionPage extends AbstractFilteredTreePage
   @Override
   public long getValue(Object o) {
     if (o instanceof SessionDataDescriptor)
-      return ((SessionDataDescriptor) o).getValue();
+      return ((SessionDataDescriptor) o).getDuration().getMillis();
     else
       return 0;
   }
@@ -153,8 +153,8 @@ public class SessionPage extends AbstractFilteredTreePage
         maxValue = 0;
         Collection<SessionDataDescriptor> data = (Collection<SessionDataDescriptor>) newInput;
         for (SessionDataDescriptor des : data) {
-          if (des.getValue() > maxValue) {
-            maxValue = des.getValue();
+          if (des.getDuration().getMillis() > maxValue) {
+            maxValue = des.getDuration().getMillis();
           }
         }
       }

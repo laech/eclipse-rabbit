@@ -15,12 +15,9 @@
  */
 package rabbit.data.access;
 
-import com.google.common.collect.ImmutableCollection;
-
 import org.joda.time.LocalDate;
 
-import javax.annotation.CheckReturnValue;
-import javax.annotation.Nonnull;
+import java.util.Collection;
 
 /**
  * Represents a data accessor to get data out of a data store.
@@ -37,8 +34,5 @@ public interface IAccessor<T> {
    * @return A collection of data, or an empty collection if no data is found.
    * @throws NullPointerException If any of the arguments is null.
    */
-  @Nonnull
-  @CheckReturnValue
-  ImmutableCollection<T> getData(@Nonnull LocalDate start,
-                                 @Nonnull LocalDate end);
+  Collection<T> getData(LocalDate start, LocalDate end);
 }

@@ -1,7 +1,6 @@
 package rabbit.data.internal.xml.access;
 
 import rabbit.data.access.model.SessionDataDescriptor;
-import rabbit.data.internal.xml.AbstractDataNodeAccessor;
 import rabbit.data.internal.xml.IDataStore;
 import rabbit.data.internal.xml.StoreNames;
 import rabbit.data.internal.xml.merge.IMerger;
@@ -12,6 +11,7 @@ import rabbit.data.internal.xml.schema.events.SessionEventType;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
+import org.joda.time.Duration;
 import org.joda.time.LocalDate;
 
 import java.util.Collection;
@@ -43,7 +43,7 @@ public class SessionDataAccessor extends
   protected SessionDataDescriptor createDataNode(LocalDate cal,
       SessionEventType type) {
     if (cal != null && type.getDuration() >= 0) {
-      return new SessionDataDescriptor(cal, type.getDuration());
+      return new SessionDataDescriptor(cal, new Duration(type.getDuration()));
     } else {
       return null;
     }

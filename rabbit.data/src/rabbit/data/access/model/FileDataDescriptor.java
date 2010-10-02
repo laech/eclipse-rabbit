@@ -2,22 +2,17 @@ package rabbit.data.access.model;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Objects;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
+import org.joda.time.Duration;
 import org.joda.time.LocalDate;
-
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
 
 /**
  * Data descriptor for a file event.
  */
-public class FileDataDescriptor extends ValueDescriptor {
+public class FileDataDescriptor extends DurationDescriptor {
 
-  @Nonnull
   private final IPath filePath;
 
   /**
@@ -29,30 +24,9 @@ public class FileDataDescriptor extends ValueDescriptor {
    * @throws NullPointerException If date is null, or filePath is null.
    * @throws IllegalArgumentException If value < 0;
    */
-  public FileDataDescriptor(@Nonnull LocalDate date, long value,
-      @Nonnull IPath filePath) {
-    super(date, value);
-    checkNotNull(filePath, "File ID cannot be null");
-    this.filePath = filePath;
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hashCode(getDate(), getFilePath());
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (null == obj)
-      return false;
-    if (this == obj)
-      return true;
-    if (getClass() != obj.getClass())
-      return false;
-
-    FileDataDescriptor des = (FileDataDescriptor) obj;
-    return des.getDate().equals(getDate()) && des.getValue() == getValue()
-        && des.getFilePath().equals(getFilePath());
+  public FileDataDescriptor(LocalDate date, Duration duration, IPath filePath) {
+    super(date, duration);
+    this.filePath = checkNotNull(filePath);
   }
 
   /**
@@ -62,7 +36,6 @@ public class FileDataDescriptor extends ValueDescriptor {
    *         workspace file.
    * @see #getFilePath()
    */
-  @CheckForNull
   public final IFile findFile() {
     if (getFilePath().segmentCount() >= 2) {
       return ResourcesPlugin.getWorkspace().getRoot().getFile(getFilePath());
@@ -76,7 +49,6 @@ public class FileDataDescriptor extends ValueDescriptor {
    * 
    * @return The path, never null.
    */
-  @Nonnull
   public final IPath getFilePath() {
     return filePath;
   }

@@ -8,19 +8,13 @@ import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunchConfigurationType;
 import org.eclipse.debug.core.ILaunchMode;
 
-import javax.annotation.CheckForNull;
-import javax.annotation.Nonnull;
-
 /**
  * Data descriptor for launch configurations.
  */
 public class LaunchConfigurationDescriptor {
 
-  @Nonnull
   private final String launchName;
-  @Nonnull
   private final String launchModeId;
-  @Nonnull
   private final String launchTypeId;
 
   /**
@@ -31,15 +25,13 @@ public class LaunchConfigurationDescriptor {
    * @param launchTypeId The ID of the launch type.
    * @throws NullPointerException If any of the arguments is null.
    */
-  public LaunchConfigurationDescriptor(@Nonnull String name,
-      @Nonnull String launchModeId, @Nonnull String launchTypeId) {
-    checkNotNull(name);
-    checkNotNull(launchModeId);
-    checkNotNull(launchTypeId);
-
-    this.launchName = name;
-    this.launchModeId = launchModeId;
-    this.launchTypeId = launchTypeId;
+  public LaunchConfigurationDescriptor(String name, 
+                                       String launchModeId, 
+                                       String launchTypeId) {
+    
+    this.launchName = checkNotNull(name);
+    this.launchModeId = checkNotNull(launchModeId);
+    this.launchTypeId = checkNotNull(launchTypeId);
   }
   
   /**
@@ -47,7 +39,6 @@ public class LaunchConfigurationDescriptor {
    * {@link #getLaunchTypeId()}.
    * @return The launch configuration type, or null if not found.
    */
-  @CheckForNull
   public final ILaunchConfigurationType findLaunchConfigurationType() {
     return DebugPlugin.getDefault().getLaunchManager()
         .getLaunchConfigurationType(getLaunchTypeId());
@@ -57,7 +48,6 @@ public class LaunchConfigurationDescriptor {
    * Finds the launch mode that has the same ID as {@link #getLaunchModeId()}.
    * @return The launch mode, or null if not found.
    */
-  @CheckForNull
   public final ILaunchMode findLaunchMode() {
     return DebugPlugin.getDefault().getLaunchManager()
         .getLaunchMode(getLaunchModeId());
@@ -68,7 +58,6 @@ public class LaunchConfigurationDescriptor {
    * 
    * @return The ID of the launch mode, never null.
    */
-  @Nonnull
   public final String getLaunchModeId() {
     return launchModeId;
   }
@@ -78,7 +67,6 @@ public class LaunchConfigurationDescriptor {
    * 
    * @return The ID of the launch type, never null.
    */
-  @Nonnull
   public final String getLaunchTypeId() {
     return launchTypeId;
   }
@@ -88,7 +76,6 @@ public class LaunchConfigurationDescriptor {
    * 
    * @return The name of the launch configuration, never null.
    */
-  @Nonnull
   public final String getLaunchName() {
     return launchName;
   }

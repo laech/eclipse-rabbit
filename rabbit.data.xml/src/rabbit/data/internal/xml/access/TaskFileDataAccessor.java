@@ -17,7 +17,6 @@ package rabbit.data.internal.xml.access;
 
 import rabbit.data.access.model.TaskFileDataDescriptor;
 import rabbit.data.common.TaskId;
-import rabbit.data.internal.xml.AbstractDataNodeAccessor;
 import rabbit.data.internal.xml.IDataStore;
 import rabbit.data.internal.xml.StoreNames;
 import rabbit.data.internal.xml.merge.IMerger;
@@ -29,6 +28,7 @@ import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
 import org.eclipse.core.runtime.Path;
+import org.joda.time.Duration;
 import org.joda.time.LocalDate;
 
 import java.util.Collection;
@@ -66,8 +66,8 @@ public class TaskFileDataAccessor extends
     try {
       TaskId id = new TaskId(type.getTaskId().getHandleId(),
           type.getTaskId().getCreationDate().toGregorianCalendar().getTime());
-      return new TaskFileDataDescriptor(cal, type.getDuration(), new Path(
-          type.getFilePath()), id);
+      return new TaskFileDataDescriptor(cal,new Duration(type.getDuration()), 
+          new Path(type.getFilePath()), id);
 
     } catch (Exception e) {
       return null;

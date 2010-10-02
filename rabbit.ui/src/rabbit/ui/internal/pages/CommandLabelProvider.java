@@ -29,7 +29,6 @@ import org.eclipse.ui.commands.ICommandImageService;
 
 import java.util.Map;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 /**
@@ -37,7 +36,6 @@ import javax.annotation.Nullable;
  */
 public class CommandLabelProvider extends LabelProvider {
 
-  @Nonnull
   private final ICommandImageService service;
 
   /**
@@ -45,11 +43,9 @@ public class CommandLabelProvider extends LabelProvider {
    * {@link Image#isDisposed()} on the image before calling
    * {@link Image#dispose()}.
    */
-  @Nonnull
   private final Map<String, Image> images;
 
   /** The image to return if the command has no image. */
-  @Nonnull
   private final Image genericImage;
 
   /**

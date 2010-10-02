@@ -26,7 +26,6 @@ import java.lang.reflect.Field;
 /**
  * @see MylynCategory
  */
-@SuppressWarnings("restriction")
 public class MylynCategoryTest {
 
   @Test

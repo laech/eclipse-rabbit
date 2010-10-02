@@ -183,7 +183,7 @@ public class JavaPageContentProvider extends AbstractValueContentProvider {
           }
         }
       }
-      TreeNodes.appendToParent(node, des.getValue());
+      TreeNodes.appendToParent(node, des.getDuration().getMillis(), true);
     }
   }
   
@@ -271,9 +271,4 @@ public class JavaPageContentProvider extends AbstractValueContentProvider {
   private boolean isField(IJavaElement element) {
     return element.getElementType() == IJavaElement.FIELD;
   }
-//  
-//  private boolean isInnerType(IJavaElement type) {
-//    return type.getElementType() == IJavaElement.TYPE
-//        && type.getParent().getElementType() == IJavaElement.TYPE;
-//  }
 }

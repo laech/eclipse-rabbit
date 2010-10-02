@@ -16,7 +16,6 @@
 package rabbit.data.internal.xml.access;
 
 import rabbit.data.access.model.FileDataDescriptor;
-import rabbit.data.internal.xml.AbstractDataNodeAccessor;
 import rabbit.data.internal.xml.IDataStore;
 import rabbit.data.internal.xml.StoreNames;
 import rabbit.data.internal.xml.merge.IMerger;
@@ -28,6 +27,7 @@ import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
 import org.eclipse.core.runtime.Path;
+import org.joda.time.Duration;
 import org.joda.time.LocalDate;
 
 import java.util.Collection;
@@ -56,8 +56,8 @@ public class FileDataAccessor
   @Override
   protected FileDataDescriptor createDataNode(LocalDate cal, FileEventType type) {
     try {
-      return new FileDataDescriptor(cal, type.getDuration(), new Path(
-          type.getFilePath()));
+      return new FileDataDescriptor(cal, new Duration(type.getDuration()),
+          new Path(type.getFilePath()));
     } catch (NullPointerException e) {
       return null;
     } catch (IllegalArgumentException e) {

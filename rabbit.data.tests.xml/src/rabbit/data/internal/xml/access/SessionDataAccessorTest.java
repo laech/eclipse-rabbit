@@ -1,7 +1,6 @@
 package rabbit.data.internal.xml.access;
 
 import rabbit.data.access.model.SessionDataDescriptor;
-import rabbit.data.internal.xml.AbstractDataNodeAccessorTest;
 import rabbit.data.internal.xml.DataStore;
 import rabbit.data.internal.xml.DatatypeUtil;
 import rabbit.data.internal.xml.merge.SessionEventTypeMerger;
@@ -32,9 +31,9 @@ public class SessionDataAccessorTest extends
     long duration = 982387934;
     SessionEventType type = new SessionEventType();
     type.setDuration(duration);
-    SessionDataDescriptor des = createDataNode(accessor, date, type);
+    SessionDataDescriptor des = accessor.createDataNode(date, type);
     assertEquals(date, des.getDate());
-    assertEquals(duration, des.getValue());
+    assertEquals(duration, des.getDuration());
   }
 
   @Override
@@ -64,5 +63,12 @@ public class SessionDataAccessorTest extends
   @Override
   protected void setValue(SessionEventType type, long usage) {
     type.setDuration(usage);
+  }
+
+  @Override
+  protected boolean areEqual(SessionDataDescriptor expected,
+      SessionDataDescriptor actual) {
+    return expected.getDate().equals(actual.getDate())
+        && expected.getDuration().equals(actual.getDuration());
   }
 }

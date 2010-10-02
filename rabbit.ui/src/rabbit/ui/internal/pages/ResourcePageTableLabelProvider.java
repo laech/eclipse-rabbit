@@ -24,8 +24,6 @@ import org.eclipse.jface.viewers.IColorProvider;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.swt.graphics.Image;
 
-import javax.annotation.Nonnull;
-
 /**
  * Label provider for {@link ResourcePage}
  */
@@ -40,13 +38,9 @@ public class ResourcePageTableLabelProvider extends DecoratingLabelProvider
    * @param contentProvider The content provider of the viewer.
    * @throws NullPointerException If argument is null.
    */
-  public ResourcePageTableLabelProvider(
-      @Nonnull ResourcePageContentProvider contentProvider) {
-
+  public ResourcePageTableLabelProvider(ResourcePageContentProvider contentProvider) {
     super(new ResourcePageLabelProvider(), null);
-    
-    checkNotNull(contentProvider);
-    contents = contentProvider;
+    contents = checkNotNull(contentProvider);;
   }
 
   @Override public Image getColumnImage(Object element, int columnIndex) {
