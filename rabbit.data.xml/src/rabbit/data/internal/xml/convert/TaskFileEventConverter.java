@@ -28,6 +28,9 @@ import java.util.GregorianCalendar;
 public class TaskFileEventConverter extends
     AbstractConverter<TaskFileEvent, TaskFileEventType> {
 
+  public TaskFileEventConverter() {
+  }
+  
   @Override
   protected TaskFileEventType doConvert(TaskFileEvent event) {
     GregorianCalendar creationDate = new GregorianCalendar();

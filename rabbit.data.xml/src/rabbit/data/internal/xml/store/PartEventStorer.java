@@ -16,20 +16,20 @@
 package rabbit.data.internal.xml.store;
 
 import rabbit.data.internal.xml.AbstractStorer;
-import rabbit.data.internal.xml.DataStore;
 import rabbit.data.internal.xml.IDataStore;
+import rabbit.data.internal.xml.StoreNames;
 import rabbit.data.internal.xml.convert.IConverter;
-import rabbit.data.internal.xml.convert.PartEventConverter;
 import rabbit.data.internal.xml.merge.IMerger;
-import rabbit.data.internal.xml.merge.PartEventTypeMerger;
 import rabbit.data.internal.xml.schema.events.EventListType;
 import rabbit.data.internal.xml.schema.events.PartEventListType;
 import rabbit.data.internal.xml.schema.events.PartEventType;
 import rabbit.data.store.model.PartEvent;
 
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
+
 import java.util.List;
 
-import javax.annotation.Nonnull;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 /**
@@ -38,25 +38,20 @@ import javax.xml.datatype.XMLGregorianCalendar;
 public final class PartEventStorer extends
     AbstractStorer<PartEvent, PartEventType, PartEventListType> {
 
-  private static final PartEventStorer INSTANCE = new PartEventStorer();
-
   /**
-   * Gets the shared instance of this class.
+   * Constructor.
    * 
-   * @return The shared instance of this class.
+   * @param converter Converter for converting an event to its corresponding XML
+   *          type.
+   * @param merger Merger for merging two XML types.
+   * @param store The data store to store the data to.
    */
-  public static PartEventStorer getInstance() {
-    return INSTANCE;
-  }
-
-  @Nonnull
-  private final PartEventConverter converter;
-  @Nonnull
-  private final PartEventTypeMerger merger;
-
-  private PartEventStorer() {
-    converter = new PartEventConverter();
-    merger = new PartEventTypeMerger();
+  @Inject
+  PartEventStorer(
+      IConverter<PartEvent, PartEventType> converter,
+      IMerger<PartEventType> merger, 
+      @Named(StoreNames.PART_STORE) IDataStore store) {
+    super(converter, merger, store);
   }
 
   @Override
@@ -65,23 +60,8 @@ public final class PartEventStorer extends
   }
 
   @Override
-  protected IConverter<PartEvent, PartEventType> getConverter() {
-    return converter;
-  }
-
-  @Override
-  protected IDataStore getDataStore() {
-    return DataStore.PART_STORE;
-  }
-
-  @Override
   protected List<PartEventType> getElements(PartEventListType list) {
     return list.getPartEvent();
-  }
-
-  @Override
-  protected IMerger<PartEventType> getMerger() {
-    return merger;
   }
 
   @Override

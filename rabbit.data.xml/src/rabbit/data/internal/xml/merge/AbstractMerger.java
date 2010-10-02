@@ -23,6 +23,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @param <T> The object type to merge.
  */
 public abstract class AbstractMerger<T> implements IMerger<T> {
+  
+  protected AbstractMerger() {
+  }
 
   @Override
   public final boolean isMergeable(T t1, T t2) {

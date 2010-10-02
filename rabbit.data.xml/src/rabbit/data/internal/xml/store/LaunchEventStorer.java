@@ -16,52 +16,42 @@
 package rabbit.data.internal.xml.store;
 
 import rabbit.data.internal.xml.AbstractStorer;
-import rabbit.data.internal.xml.DataStore;
 import rabbit.data.internal.xml.IDataStore;
+import rabbit.data.internal.xml.StoreNames;
 import rabbit.data.internal.xml.convert.IConverter;
-import rabbit.data.internal.xml.convert.LaunchEventConverter;
 import rabbit.data.internal.xml.merge.IMerger;
-import rabbit.data.internal.xml.merge.LaunchEventTypeMerger;
 import rabbit.data.internal.xml.schema.events.EventListType;
 import rabbit.data.internal.xml.schema.events.LaunchEventListType;
 import rabbit.data.internal.xml.schema.events.LaunchEventType;
 import rabbit.data.store.model.LaunchEvent;
 
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
+
 import java.util.List;
 
-import javax.annotation.Nonnull;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 /**
  * Stores {@link LaunchEvent}
  */
-public class LaunchEventStorer extends
+public final class LaunchEventStorer extends
     AbstractStorer<LaunchEvent, LaunchEventType, LaunchEventListType> {
 
-  private static LaunchEventStorer INSTANCE = new LaunchEventStorer();
-
   /**
-   * Gets the shared instance of this class.
+   * Constructor.
    * 
-   * @return The shared instance.
+   * @param converter Converter for converting an event to its corresponding XML
+   *          type.
+   * @param merger Merger for merging two XML types.
+   * @param store The data store to store the data to.
    */
-  public static LaunchEventStorer getInstance() {
-    return INSTANCE;
-  }
-
-  @Nonnull
-  private final LaunchEventConverter converter;
-  @Nonnull
-  private final LaunchEventTypeMerger merger;
-
-  private LaunchEventStorer() {
-    converter = new LaunchEventConverter();
-    merger = new LaunchEventTypeMerger();
-  }
-
-  @Override
-  protected IDataStore getDataStore() {
-    return DataStore.LAUNCH_STORE;
+  @Inject
+  LaunchEventStorer(
+      IConverter<LaunchEvent, LaunchEventType> converter,
+      IMerger<LaunchEventType> merger, 
+      @Named(StoreNames.LAUNCH_STORE) IDataStore store) {
+    super(converter, merger, store);
   }
 
   @Override
@@ -79,15 +69,5 @@ public class LaunchEventStorer extends
     LaunchEventListType type = objectFactory.createLaunchEventListType();
     type.setDate(date);
     return type;
-  }
-
-  @Override
-  protected IConverter<LaunchEvent, LaunchEventType> getConverter() {
-    return converter;
-  }
-
-  @Override
-  protected IMerger<LaunchEventType> getMerger() {
-    return merger;
   }
 }

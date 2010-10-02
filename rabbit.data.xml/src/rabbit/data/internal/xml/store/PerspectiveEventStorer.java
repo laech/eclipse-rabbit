@@ -16,48 +16,42 @@
 package rabbit.data.internal.xml.store;
 
 import rabbit.data.internal.xml.AbstractStorer;
-import rabbit.data.internal.xml.DataStore;
 import rabbit.data.internal.xml.IDataStore;
+import rabbit.data.internal.xml.StoreNames;
 import rabbit.data.internal.xml.convert.IConverter;
-import rabbit.data.internal.xml.convert.PerspectiveEventConverter;
 import rabbit.data.internal.xml.merge.IMerger;
-import rabbit.data.internal.xml.merge.PerspectiveEventTypeMerger;
 import rabbit.data.internal.xml.schema.events.EventListType;
 import rabbit.data.internal.xml.schema.events.PerspectiveEventListType;
 import rabbit.data.internal.xml.schema.events.PerspectiveEventType;
 import rabbit.data.store.model.PerspectiveEvent;
 
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
+
 import java.util.List;
 
-import javax.annotation.Nonnull;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 /**
  * Stores {@link PerspectiveEvent}.
  */
-public final class PerspectiveEventStorer
-    extends
+public final class PerspectiveEventStorer extends 
     AbstractStorer<PerspectiveEvent, PerspectiveEventType, PerspectiveEventListType> {
 
-  private static final PerspectiveEventStorer INSTANCE = new PerspectiveEventStorer();
-
   /**
-   * Gets the shared instance of this class.
+   * Constructor.
    * 
-   * @return The shared instance of this class.
+   * @param converter Converter for converting an event to its corresponding XML
+   *          type.
+   * @param merger Merger for merging two XML types.
+   * @param store The data store to store the data to.
    */
-  public static PerspectiveEventStorer getInstance() {
-    return INSTANCE;
-  }
-
-  @Nonnull
-  private final PerspectiveEventConverter converter;
-  @Nonnull
-  private final PerspectiveEventTypeMerger merger;
-
-  private PerspectiveEventStorer() {
-    converter = new PerspectiveEventConverter();
-    merger = new PerspectiveEventTypeMerger();
+  @Inject 
+  PerspectiveEventStorer(
+      IConverter<PerspectiveEvent, PerspectiveEventType> converter,
+      IMerger<PerspectiveEventType> merger, 
+      @Named(StoreNames.PERSPECTIVE_STORE) IDataStore store) {
+    super(converter, merger, store);
   }
 
   @Override
@@ -66,23 +60,8 @@ public final class PerspectiveEventStorer
   }
 
   @Override
-  protected IConverter<PerspectiveEvent, PerspectiveEventType> getConverter() {
-    return converter;
-  }
-
-  @Override
-  protected IDataStore getDataStore() {
-    return DataStore.PERSPECTIVE_STORE;
-  }
-
-  @Override
   protected List<PerspectiveEventType> getElements(PerspectiveEventListType list) {
     return list.getPerspectiveEvent();
-  }
-
-  @Override
-  protected IMerger<PerspectiveEventType> getMerger() {
-    return merger;
   }
 
   @Override

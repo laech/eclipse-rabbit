@@ -24,6 +24,9 @@ import rabbit.data.store.model.FileEvent;
 public class FileEventConverter extends
     AbstractConverter<FileEvent, FileEventType> {
 
+  public FileEventConverter() {
+  }
+  
   @Override
   protected FileEventType doConvert(FileEvent element) {
     FileEventType type = new FileEventType();

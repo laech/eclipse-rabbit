@@ -21,6 +21,9 @@ import rabbit.data.internal.xml.schema.events.PartEventType;
  * Merger for {@link PartEventType}.
  */
 public class PartEventTypeMerger extends AbstractMerger<PartEventType> {
+  
+  public PartEventTypeMerger() {
+  }
 
   @Override
   protected boolean doIsMergeable(PartEventType t1, PartEventType t2) {

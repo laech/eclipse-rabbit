@@ -28,6 +28,8 @@ import rabbit.data.internal.xml.schema.events.ObjectFactory;
 import rabbit.data.store.IStorer;
 import rabbit.data.store.model.DiscreteEvent;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.joda.time.DateTime;
@@ -57,15 +59,33 @@ public abstract class AbstractStorer<E extends DiscreteEvent, T, S extends Event
   protected final ObjectFactory objectFactory;
 
   /** Data in memory, not yet saved. */
-  private Set<S> data;
+  private final Set<S> data;
 
   /** The current month. */
   private LocalDate currentMonth;
 
+  /** Converter for converting an event to its corresponding XML type. */
+  private final IConverter<E, T> converter;
+
+  /** Merger for merging two XML types. */
+  private final IMerger<T> merger;
+
+  /** The data store to store the data to. */
+  private final IDataStore store;
+
   /**
    * Constructor.
+   * 
+   * @param converter Converter for converting an event to its corresponding XML
+   *          type.
+   * @param merger Merger for merging two XML types.
+   * @param store The data store to store the data to.
    */
-  public AbstractStorer() {
+  protected AbstractStorer(IConverter<E, T> converter, IMerger<T> merger,
+      IDataStore store) {
+    this.converter = checkNotNull(converter);
+    this.merger = checkNotNull(merger);
+    this.store = checkNotNull(store);
     data = new LinkedHashSet<S>();
     currentMonth = new LocalDate();
     objectFactory = new ObjectFactory();
@@ -102,10 +122,8 @@ public abstract class AbstractStorer<E extends DiscreteEvent, T, S extends Event
     }
 
     if (!getDataStore().write(events, f)) {
-      XmlPlugin.getDefault().getLog()
-          .log(
-              new Status(IStatus.ERROR, XmlPlugin.PLUGIN_ID,
-                  "Unable to save data."));
+      XmlPlugin.getDefault().getLog().log(
+          new Status(IStatus.ERROR, XmlPlugin.PLUGIN_ID, "Unable to save data."));
     }
     data.clear();
   }
@@ -145,28 +163,6 @@ public abstract class AbstractStorer<E extends DiscreteEvent, T, S extends Event
   }
 
   /**
-   * Gets the merger for merging identical elements.
-   * 
-   * @return An {@linkplain IMerger}, or null if all elements are to be treated
-   *         uniquely.
-   */
-  protected abstract IMerger<T> getMerger();
-
-  /**
-   * Gets a converter for converting events to XML types.
-   * 
-   * @return A converter, must not be null.
-   */
-  protected abstract IConverter<E, T> getConverter();
-
-  /**
-   * Gets the data store.
-   * 
-   * @return The data store.
-   */
-  protected abstract IDataStore getDataStore();
-
-  /**
    * Gets the XML categories for grouping the event objects by date in a
    * {@link EventListType}.
    * 
@@ -176,12 +172,40 @@ public abstract class AbstractStorer<E extends DiscreteEvent, T, S extends Event
   protected abstract List<S> getCategories(EventListType events);
 
   /**
+   * Gets a converter for converting events to XML types.
+   * 
+   * @return A converter, must not be null.
+   */
+  protected final IConverter<E, T> getConverter() {
+    return converter;
+  }
+
+  /**
+   * Gets the data store.
+   * 
+   * @return The data store.
+   */
+  protected final IDataStore getDataStore() {
+    return store;
+  }
+
+  /**
    * Gets the XML elements from the given group.
    * 
    * @param list The group holding the XML types.
    * @return A list of XML elements.
    */
   protected abstract List<T> getElements(S list);
+
+  /**
+   * Gets the merger for merging identical elements.
+   * 
+   * @return An {@linkplain IMerger}, or null if all elements are to be treated
+   *         uniquely.
+   */
+  protected final IMerger<T> getMerger() {
+    return merger;
+  }
 
   /**
    * Creates a new category from the given date.

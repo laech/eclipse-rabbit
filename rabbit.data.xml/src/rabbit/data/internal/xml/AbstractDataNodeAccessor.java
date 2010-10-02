@@ -21,6 +21,8 @@ import rabbit.data.internal.xml.merge.IMerger;
 import rabbit.data.internal.xml.merge.Mergers;
 import rabbit.data.internal.xml.schema.events.EventGroupType;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableSet;
@@ -52,9 +54,34 @@ public abstract class AbstractDataNodeAccessor<E, T, S extends EventGroupType>
   @CheckForNull
   protected final IMerger<T> merger;
 
-  public AbstractDataNodeAccessor() {
-    merger = createMerger();
+  /**
+   * Constructor.
+   * 
+   * @param store The data store to get the data from.
+   * @param merger The merger for merging XML data nodes.
+   * @throws NullPointerException If any arguments are null.
+   */
+  protected AbstractDataNodeAccessor(IDataStore store, IMerger<T> merger) {
+    super(store);
+    this.merger = checkNotNull(merger);
   }
+
+  /**
+   * @return The merger for merging XML data nodes.
+   */
+  public final IMerger<T> getMerger() {
+    return merger;
+  }
+  
+  /**
+   * Creates a data node.
+   * 
+   * @param cal The date of the XML type.
+   * @param type The XML type.
+   * @return A data node, or null if one cannot be created.
+   */
+  @CheckForNull
+  protected abstract E createDataNode(LocalDate cal, T type);
 
   @Override
   protected ImmutableCollection<E> filter(List<S> data) {
@@ -70,8 +97,7 @@ public abstract class AbstractDataNodeAccessor<E, T, S extends EventGroupType>
     }
 
     ImmutableSet.Builder<E> result = ImmutableSet.builder();
-    for (Entry<XMLGregorianCalendar, Collection<T>> entry : multimap.asMap()
-        .entrySet()) {
+    for (Entry<XMLGregorianCalendar, Collection<T>> entry : multimap.asMap().entrySet()) {
 
       LocalDate date = toLocalDate(entry.getKey());
       for (T type : entry.getValue()) {
@@ -82,23 +108,6 @@ public abstract class AbstractDataNodeAccessor<E, T, S extends EventGroupType>
     }
     return result.build();
   }
-
-  /**
-   * Creates a merger for merging identical elements.
-   * 
-   * @return A merger, or null if all elements are to be treated uniquely.
-   */
-  protected abstract IMerger<T> createMerger();
-
-  /**
-   * Creates a data node.
-   * 
-   * @param cal The date of the XML type.
-   * @param type The XML type.
-   * @return A data node, or null if one cannot be created.
-   */
-  @CheckForNull
-  protected abstract E createDataNode(LocalDate cal, T type);
 
   /**
    * Gets a collection of types from the given category.

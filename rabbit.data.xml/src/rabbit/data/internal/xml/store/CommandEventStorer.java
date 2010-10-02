@@ -16,19 +16,20 @@
 package rabbit.data.internal.xml.store;
 
 import rabbit.data.internal.xml.AbstractStorer;
-import rabbit.data.internal.xml.DataStore;
 import rabbit.data.internal.xml.IDataStore;
-import rabbit.data.internal.xml.convert.CommandEventConverter;
-import rabbit.data.internal.xml.merge.CommandEventTypeMerger;
+import rabbit.data.internal.xml.StoreNames;
+import rabbit.data.internal.xml.convert.IConverter;
 import rabbit.data.internal.xml.merge.IMerger;
 import rabbit.data.internal.xml.schema.events.CommandEventListType;
 import rabbit.data.internal.xml.schema.events.CommandEventType;
 import rabbit.data.internal.xml.schema.events.EventListType;
 import rabbit.data.store.model.CommandEvent;
 
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
+
 import java.util.List;
 
-import javax.annotation.Nonnull;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 /**
@@ -37,25 +38,20 @@ import javax.xml.datatype.XMLGregorianCalendar;
 public final class CommandEventStorer extends
     AbstractStorer<CommandEvent, CommandEventType, CommandEventListType> {
 
-  private static final CommandEventStorer INSTANCE = new CommandEventStorer();
-
   /**
-   * Gets the shared instance of this class.
+   * Constructor.
    * 
-   * @return The shared instance of this class.
+   * @param converter Converter for converting an event to its corresponding XML
+   *          type.
+   * @param merger Merger for merging two XML types.
+   * @param store The data store to store the data to.
    */
-  public static CommandEventStorer getInstance() {
-    return INSTANCE;
-  }
-
-  @Nonnull
-  private final CommandEventConverter converter;
-  @Nonnull
-  private final CommandEventTypeMerger merger;
-
-  private CommandEventStorer() {
-    converter = new CommandEventConverter();
-    merger = new CommandEventTypeMerger();
+  @Inject
+  CommandEventStorer(
+      IConverter<CommandEvent, CommandEventType> converter,
+      IMerger<CommandEventType> merger,
+      @Named(StoreNames.COMMAND_STORE) IDataStore store) {
+    super(converter, merger, store);
   }
 
   @Override
@@ -64,23 +60,8 @@ public final class CommandEventStorer extends
   }
 
   @Override
-  protected CommandEventConverter getConverter() {
-    return converter;
-  }
-
-  @Override
-  protected IDataStore getDataStore() {
-    return DataStore.COMMAND_STORE;
-  }
-
-  @Override
   protected List<CommandEventType> getElements(CommandEventListType list) {
     return list.getCommandEvent();
-  }
-
-  @Override
-  protected IMerger<CommandEventType> getMerger() {
-    return merger;
   }
 
   @Override

@@ -23,6 +23,9 @@ import rabbit.data.store.model.CommandEvent;
  */
 public class CommandEventConverter extends
     AbstractConverter<CommandEvent, CommandEventType> {
+  
+  public CommandEventConverter() {
+  }
 
   @Override
   protected CommandEventType doConvert(CommandEvent element) {

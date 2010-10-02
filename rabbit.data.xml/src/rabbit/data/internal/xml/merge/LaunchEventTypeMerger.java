@@ -25,6 +25,9 @@ import java.util.Set;
  * Merger for {@link LaunchEventType}.
  */
 public class LaunchEventTypeMerger extends AbstractMerger<LaunchEventType> {
+  
+  public LaunchEventTypeMerger() {
+  }
 
   @Override
   protected boolean doIsMergeable(LaunchEventType t1, LaunchEventType t2) {

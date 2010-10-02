@@ -3,10 +3,10 @@ Bundle-ManifestVersion: 2
 Bundle-Name: rabbit.data.tests.xml
 Bundle-SymbolicName: rabbit.data.tests.xml
 Bundle-Version: 1.2.0.qualifier
+Fragment-Host: rabbit.data.xml
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Require-Bundle: rabbit.data,
  rabbit.data.handler,
- rabbit.data.xml,
  rabbit.tracking,
  org.eclipse.ui,
  org.eclipse.debug.core,
@@ -16,8 +16,8 @@ Require-Bundle: rabbit.data,
  org.eclipse.mylyn.tasks.core,
  org.eclipse.mylyn.tasks.ui,
  org.eclipse.jdt.core
-Export-Package: rabbit.data.test.xml,
- rabbit.data.test.xml.access,
- rabbit.data.test.xml.convert,
- rabbit.data.test.xml.merge,
- rabbit.data.test.xml.store
+Export-Package: rabbit.data.internal.xml,
+ rabbit.data.internal.xml.access,
+ rabbit.data.internal.xml.convert,
+ rabbit.data.internal.xml.merge,
+ rabbit.data.internal.xml.store

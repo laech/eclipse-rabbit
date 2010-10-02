@@ -21,6 +21,9 @@ import rabbit.data.internal.xml.schema.events.SessionEventType;
  * Merges {@link SessionEventType} elements.
  */
 public class SessionEventTypeMerger extends AbstractMerger<SessionEventType> {
+  
+  public SessionEventTypeMerger() {
+  }
 
   @Override
   protected boolean doIsMergeable(SessionEventType t1, SessionEventType t2) {

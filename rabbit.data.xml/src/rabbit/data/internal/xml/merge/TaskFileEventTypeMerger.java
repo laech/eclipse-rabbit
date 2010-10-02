@@ -25,7 +25,8 @@ import javax.xml.datatype.XMLGregorianCalendar;
  */
 public class TaskFileEventTypeMerger extends AbstractMerger<TaskFileEventType> {
   
-  public TaskFileEventTypeMerger() {}
+  public TaskFileEventTypeMerger() {
+  }
 
   @Override
   protected boolean doIsMergeable(TaskFileEventType t1, TaskFileEventType t2) {

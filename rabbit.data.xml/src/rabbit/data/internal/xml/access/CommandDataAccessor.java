@@ -17,12 +17,15 @@ package rabbit.data.internal.xml.access;
 
 import rabbit.data.access.model.CommandDataDescriptor;
 import rabbit.data.internal.xml.AbstractDataNodeAccessor;
-import rabbit.data.internal.xml.DataStore;
 import rabbit.data.internal.xml.IDataStore;
-import rabbit.data.internal.xml.merge.CommandEventTypeMerger;
+import rabbit.data.internal.xml.StoreNames;
+import rabbit.data.internal.xml.merge.IMerger;
 import rabbit.data.internal.xml.schema.events.CommandEventListType;
 import rabbit.data.internal.xml.schema.events.CommandEventType;
 import rabbit.data.internal.xml.schema.events.EventListType;
+
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
 
 import org.joda.time.LocalDate;
 
@@ -35,7 +38,18 @@ public class CommandDataAccessor
     extends
     AbstractDataNodeAccessor<CommandDataDescriptor, CommandEventType, CommandEventListType> {
 
-  public CommandDataAccessor() {
+  /**
+   * Constructor.
+   * 
+   * @param store The data store to get the data from.
+   * @param merger The merger for merging XML data nodes.
+   * @throws NullPointerException If any arguments are null.
+   */
+  @Inject
+  CommandDataAccessor(
+      @Named(StoreNames.COMMAND_STORE) IDataStore store,
+      IMerger<CommandEventType> merger) {
+    super(store, merger);
   }
 
   @Override
@@ -43,8 +57,8 @@ public class CommandDataAccessor
       CommandEventType type) {
 
     try {
-      return new CommandDataDescriptor(cal, type.getCount(), type
-          .getCommandId());
+      return new CommandDataDescriptor(cal, type.getCount(),
+          type.getCommandId());
 
     } catch (NullPointerException e) {
       return null;
@@ -59,18 +73,8 @@ public class CommandDataAccessor
   }
 
   @Override
-  protected IDataStore getDataStore() {
-    return DataStore.COMMAND_STORE;
-  }
-
-  @Override
   protected Collection<CommandEventType> getElements(CommandEventListType list) {
     return list.getCommandEvent();
-  }
-
-  @Override
-  protected CommandEventTypeMerger createMerger() {
-    return new CommandEventTypeMerger();
   }
 
 }

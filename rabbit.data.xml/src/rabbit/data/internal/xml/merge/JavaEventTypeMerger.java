@@ -21,6 +21,9 @@ import rabbit.data.internal.xml.schema.events.JavaEventType;
  * Merges {@link JavaEventType}s.
  */
 public class JavaEventTypeMerger extends AbstractMerger<JavaEventType> {
+  
+  public JavaEventTypeMerger() {
+  }
 
   @Override
   protected boolean doIsMergeable(JavaEventType t1, JavaEventType t2) {

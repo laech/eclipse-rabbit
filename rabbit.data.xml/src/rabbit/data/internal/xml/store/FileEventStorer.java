@@ -16,20 +16,20 @@
 package rabbit.data.internal.xml.store;
 
 import rabbit.data.internal.xml.AbstractStorer;
-import rabbit.data.internal.xml.DataStore;
 import rabbit.data.internal.xml.IDataStore;
-import rabbit.data.internal.xml.convert.FileEventConverter;
+import rabbit.data.internal.xml.StoreNames;
 import rabbit.data.internal.xml.convert.IConverter;
-import rabbit.data.internal.xml.merge.FileEventTypeMerger;
 import rabbit.data.internal.xml.merge.IMerger;
 import rabbit.data.internal.xml.schema.events.EventListType;
 import rabbit.data.internal.xml.schema.events.FileEventListType;
 import rabbit.data.internal.xml.schema.events.FileEventType;
 import rabbit.data.store.model.FileEvent;
 
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
+
 import java.util.List;
 
-import javax.annotation.Nonnull;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 /**
@@ -38,30 +38,19 @@ import javax.xml.datatype.XMLGregorianCalendar;
 public final class FileEventStorer extends
     AbstractStorer<FileEvent, FileEventType, FileEventListType> {
 
-  private static final FileEventStorer INSTANCE = new FileEventStorer();
-
   /**
-   * Gets the shared instance of this class.
+   * Constructor.
    * 
-   * @return The shared instance of this class.
+   * @param converter Converter for converting an event to its corresponding XML
+   *          type.
+   * @param merger Merger for merging two XML types.
+   * @param store The data store to store the data to.
    */
-  public static FileEventStorer getInstance() {
-    return INSTANCE;
-  }
-
-  @Nonnull
-  private final FileEventConverter converter;
-  @Nonnull
-  private final FileEventTypeMerger merger;
-
-  private FileEventStorer() {
-    converter = new FileEventConverter();
-    merger = new FileEventTypeMerger();
-  }
-
-  @Override
-  protected IDataStore getDataStore() {
-    return DataStore.FILE_STORE;
+  @Inject
+  FileEventStorer(IConverter<FileEvent, FileEventType> converter,
+      IMerger<FileEventType> merger,
+      @Named(StoreNames.FILE_STORE) IDataStore store) {
+    super(converter, merger, store);
   }
 
   @Override
@@ -79,15 +68,5 @@ public final class FileEventStorer extends
     FileEventListType type = objectFactory.createFileEventListType();
     type.setDate(date);
     return type;
-  }
-
-  @Override
-  protected IConverter<FileEvent, FileEventType> getConverter() {
-    return converter;
-  }
-
-  @Override
-  protected IMerger<FileEventType> getMerger() {
-    return merger;
   }
 }

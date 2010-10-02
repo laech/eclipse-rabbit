@@ -16,20 +16,20 @@
 package rabbit.data.internal.xml.store;
 
 import rabbit.data.internal.xml.AbstractStorer;
-import rabbit.data.internal.xml.DataStore;
 import rabbit.data.internal.xml.IDataStore;
+import rabbit.data.internal.xml.StoreNames;
 import rabbit.data.internal.xml.convert.IConverter;
-import rabbit.data.internal.xml.convert.TaskFileEventConverter;
 import rabbit.data.internal.xml.merge.IMerger;
-import rabbit.data.internal.xml.merge.TaskFileEventTypeMerger;
 import rabbit.data.internal.xml.schema.events.EventListType;
 import rabbit.data.internal.xml.schema.events.TaskFileEventListType;
 import rabbit.data.internal.xml.schema.events.TaskFileEventType;
 import rabbit.data.store.model.TaskFileEvent;
 
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
+
 import java.util.List;
 
-import javax.annotation.Nonnull;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 /**
@@ -38,50 +38,30 @@ import javax.xml.datatype.XMLGregorianCalendar;
 public final class TaskFileEventStorer extends
     AbstractStorer<TaskFileEvent, TaskFileEventType, TaskFileEventListType> {
 
-  private static final TaskFileEventStorer INSTANCE = new TaskFileEventStorer();
-
   /**
-   * Gets the shared instance of this class.
+   * Constructor.
    * 
-   * @return The shared instance.
+   * @param converter Converter for converting an event to its corresponding XML
+   *          type.
+   * @param merger Merger for merging two XML types.
+   * @param store The data store to store the data to.
    */
-  public static TaskFileEventStorer getInstance() {
-    return INSTANCE;
-  }
-  
-  @Nonnull
-  private final IMerger<TaskFileEventType> merger;
-  @Nonnull
-  private final IConverter<TaskFileEvent, TaskFileEventType> converter;
-
-  private TaskFileEventStorer() {
-    merger = new TaskFileEventTypeMerger();
-    converter = new TaskFileEventConverter();
+  @Inject
+  TaskFileEventStorer(
+      IConverter<TaskFileEvent, TaskFileEventType> converter,
+      IMerger<TaskFileEventType> merger, 
+      @Named(StoreNames.TASK_STORE) IDataStore store) {
+    super(converter, merger, store);
   }
 
   @Override
   protected List<TaskFileEventListType> getCategories(EventListType events) {
     return events.getTaskFileEvents();
   }
-
-  @Override
-  protected IConverter<TaskFileEvent, TaskFileEventType> getConverter() {
-    return converter;
-  }
-
-  @Override
-  protected IDataStore getDataStore() {
-    return DataStore.TASK_STORE;
-  }
-
+  
   @Override
   protected List<TaskFileEventType> getElements(TaskFileEventListType list) {
     return list.getTaskFileEvent();
-  }
-
-  @Override
-  protected IMerger<TaskFileEventType> getMerger() {
-    return merger;
   }
 
   @Override

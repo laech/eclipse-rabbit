@@ -21,6 +21,8 @@ import rabbit.data.access.IAccessor;
 import rabbit.data.internal.xml.schema.events.EventGroupType;
 import rabbit.data.internal.xml.schema.events.EventListType;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import com.google.common.collect.ImmutableCollection;
 
 import org.joda.time.LocalDate;
@@ -44,8 +46,16 @@ import javax.xml.datatype.XMLGregorianCalendar;
 public abstract class AbstractAccessor<T, E, S extends EventGroupType>
     implements IAccessor<T> {
 
-  /** Constructor. */
-  public AbstractAccessor() {
+  private final IDataStore store;
+
+  /**
+   * Constructor.
+   * 
+   * @param store The data store to get the data from.
+   * @throws NullPointerException If any arguments are null.
+   */
+  protected AbstractAccessor(IDataStore store) {
+    this.store = checkNotNull(store);
   }
 
   @Override
@@ -78,7 +88,9 @@ public abstract class AbstractAccessor<T, E, S extends EventGroupType>
    * 
    * @return The data store.
    */
-  protected abstract IDataStore getDataStore();
+  protected final IDataStore getDataStore() {
+    return store;
+  }
 
   /**
    * Gets the data from the XML files.
@@ -95,9 +107,10 @@ public abstract class AbstractAccessor<T, E, S extends EventGroupType>
     List<File> files = getDataStore().getDataFiles(start, end);
     for (File f : files) {
       for (S list : getCategories(getDataStore().read(f))) {
-        
+
         XMLGregorianCalendar date = list.getDate();
-        if (date == null) continue;
+        if (date == null)
+          continue;
 
         if (date.compare(startXmlCal) >= 0
             && list.getDate().compare(endXmlCal) <= 0) {

@@ -23,6 +23,9 @@ import rabbit.data.store.model.PartEvent;
  */
 public class PartEventConverter extends
     AbstractConverter<PartEvent, PartEventType> {
+  
+  public PartEventConverter() {
+  }
 
   @Override
   protected PartEventType doConvert(PartEvent element) {

@@ -17,12 +17,15 @@ package rabbit.data.internal.xml.access;
 
 import rabbit.data.access.model.FileDataDescriptor;
 import rabbit.data.internal.xml.AbstractDataNodeAccessor;
-import rabbit.data.internal.xml.DataStore;
 import rabbit.data.internal.xml.IDataStore;
-import rabbit.data.internal.xml.merge.FileEventTypeMerger;
+import rabbit.data.internal.xml.StoreNames;
+import rabbit.data.internal.xml.merge.IMerger;
 import rabbit.data.internal.xml.schema.events.EventListType;
 import rabbit.data.internal.xml.schema.events.FileEventListType;
 import rabbit.data.internal.xml.schema.events.FileEventType;
+
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
 
 import org.eclipse.core.runtime.Path;
 import org.joda.time.LocalDate;
@@ -36,13 +39,25 @@ public class FileDataAccessor
     extends
     AbstractDataNodeAccessor<FileDataDescriptor, FileEventType, FileEventListType> {
 
-  public FileDataAccessor() {
+  /**
+   * Constructor.
+   * 
+   * @param store The data store to get the data from.
+   * @param merger The merger for merging XML data nodes.
+   * @throws NullPointerException If any arguments are null.
+   */
+  @Inject
+  FileDataAccessor(
+      @Named(StoreNames.FILE_STORE) IDataStore store,
+      IMerger<FileEventType> merger) {
+    super(store, merger);
   }
 
   @Override
   protected FileDataDescriptor createDataNode(LocalDate cal, FileEventType type) {
     try {
-      return new FileDataDescriptor(cal, type.getDuration(), new Path(type.getFilePath()));
+      return new FileDataDescriptor(cal, type.getDuration(), new Path(
+          type.getFilePath()));
     } catch (NullPointerException e) {
       return null;
     } catch (IllegalArgumentException e) {
@@ -61,15 +76,4 @@ public class FileDataAccessor
   protected Collection<FileEventListType> getCategories(EventListType doc) {
     return doc.getFileEvents();
   }
-
-  @Override
-  protected IDataStore getDataStore() {
-    return DataStore.FILE_STORE;
-  }
-
-  @Override
-  protected FileEventTypeMerger createMerger() {
-    return new FileEventTypeMerger();
-  }
-
 }

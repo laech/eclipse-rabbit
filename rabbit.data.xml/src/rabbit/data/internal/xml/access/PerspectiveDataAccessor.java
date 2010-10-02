@@ -17,12 +17,15 @@ package rabbit.data.internal.xml.access;
 
 import rabbit.data.access.model.PerspectiveDataDescriptor;
 import rabbit.data.internal.xml.AbstractDataNodeAccessor;
-import rabbit.data.internal.xml.DataStore;
 import rabbit.data.internal.xml.IDataStore;
-import rabbit.data.internal.xml.merge.PerspectiveEventTypeMerger;
+import rabbit.data.internal.xml.StoreNames;
+import rabbit.data.internal.xml.merge.IMerger;
 import rabbit.data.internal.xml.schema.events.EventListType;
 import rabbit.data.internal.xml.schema.events.PerspectiveEventListType;
 import rabbit.data.internal.xml.schema.events.PerspectiveEventType;
+
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
 
 import org.joda.time.LocalDate;
 
@@ -31,14 +34,24 @@ import java.util.Collection;
 /**
  * Accesses perspective event data.
  */
-public class PerspectiveDataAccessor
-    extends
-    AbstractDataNodeAccessor<PerspectiveDataDescriptor, PerspectiveEventType, PerspectiveEventListType> {
+public class PerspectiveDataAccessor extends 
+    AbstractDataNodeAccessor<PerspectiveDataDescriptor, 
+                             PerspectiveEventType, 
+                             PerspectiveEventListType> {
+
 
   /**
    * Constructor.
+   * 
+   * @param store The data store to get the data from.
+   * @param merger The merger for merging XML data nodes.
+   * @throws NullPointerException If any arguments are null.
    */
-  public PerspectiveDataAccessor() {
+  @Inject
+  PerspectiveDataAccessor(
+      @Named(StoreNames.PERSPECTIVE_STORE) IDataStore store,
+      IMerger<PerspectiveEventType> merger) {
+    super(store, merger);
   }
 
   @Override
@@ -65,15 +78,5 @@ public class PerspectiveDataAccessor
   @Override
   protected Collection<PerspectiveEventListType> getCategories(EventListType doc) {
     return doc.getPerspectiveEvents();
-  }
-
-  @Override
-  protected IDataStore getDataStore() {
-    return DataStore.PERSPECTIVE_STORE;
-  }
-
-  @Override
-  protected PerspectiveEventTypeMerger createMerger() {
-    return new PerspectiveEventTypeMerger();
   }
 }

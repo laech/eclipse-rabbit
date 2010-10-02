@@ -18,15 +18,16 @@ package rabbit.data.internal.xml.access;
 import rabbit.data.access.model.LaunchConfigurationDescriptor;
 import rabbit.data.access.model.LaunchDataDescriptor;
 import rabbit.data.internal.xml.AbstractDataNodeAccessor;
-import rabbit.data.internal.xml.DataStore;
 import rabbit.data.internal.xml.IDataStore;
+import rabbit.data.internal.xml.StoreNames;
 import rabbit.data.internal.xml.merge.IMerger;
-import rabbit.data.internal.xml.merge.LaunchEventTypeMerger;
 import rabbit.data.internal.xml.schema.events.EventListType;
 import rabbit.data.internal.xml.schema.events.LaunchEventListType;
 import rabbit.data.internal.xml.schema.events.LaunchEventType;
 
 import com.google.common.collect.Sets;
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
@@ -41,6 +42,20 @@ import java.util.Set;
 public class LaunchDataAccessor
     extends
     AbstractDataNodeAccessor<LaunchDataDescriptor, LaunchEventType, LaunchEventListType> {
+ 
+  /**
+   * Constructor.
+   * 
+   * @param store The data store to get the data from.
+   * @param merger The merger for merging XML data nodes.
+   * @throws NullPointerException If any arguments are null.
+   */
+  @Inject
+  LaunchDataAccessor(
+      @Named(StoreNames.LAUNCH_STORE) IDataStore store, 
+      IMerger<LaunchEventType> merger) {
+    super(store, merger);
+  }
 
   @Override
   protected LaunchDataDescriptor createDataNode(LocalDate cal,
@@ -54,8 +69,8 @@ public class LaunchDataAccessor
       for (String str : type.getFilePath()) {
         paths.add(new Path(str));
       }
-      return new LaunchDataDescriptor(cal, des, type.getCount(), type
-          .getTotalDuration(), paths);
+      return new LaunchDataDescriptor(cal, des, type.getCount(),
+          type.getTotalDuration(), paths);
 
     } catch (NullPointerException e) {
       return null;
@@ -73,15 +88,4 @@ public class LaunchDataAccessor
   protected Collection<LaunchEventListType> getCategories(EventListType doc) {
     return doc.getLaunchEvents();
   }
-
-  @Override
-  protected IDataStore getDataStore() {
-    return DataStore.LAUNCH_STORE;
-  }
-
-  @Override
-  protected IMerger<LaunchEventType> createMerger() {
-    return new LaunchEventTypeMerger();
-  }
-
 }

@@ -21,6 +21,9 @@ import rabbit.data.internal.xml.schema.events.CommandEventType;
  * Merger for {@link CommandEventType}.
  */
 public class CommandEventTypeMerger extends AbstractMerger<CommandEventType> {
+  
+  public CommandEventTypeMerger() {
+  }
 
   @Override
   protected CommandEventType doMerge(CommandEventType t1, CommandEventType t2) {

@@ -23,6 +23,9 @@ import rabbit.data.store.model.SessionEvent;
  */
 public class SessionEventConverter extends 
     AbstractConverter<SessionEvent, SessionEventType> {
+  
+  public SessionEventConverter() {
+  }
 
   @Override
   protected SessionEventType doConvert(SessionEvent event) {

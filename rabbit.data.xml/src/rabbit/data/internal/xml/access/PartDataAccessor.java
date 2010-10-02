@@ -17,12 +17,15 @@ package rabbit.data.internal.xml.access;
 
 import rabbit.data.access.model.PartDataDescriptor;
 import rabbit.data.internal.xml.AbstractDataNodeAccessor;
-import rabbit.data.internal.xml.DataStore;
 import rabbit.data.internal.xml.IDataStore;
-import rabbit.data.internal.xml.merge.PartEventTypeMerger;
+import rabbit.data.internal.xml.StoreNames;
+import rabbit.data.internal.xml.merge.IMerger;
 import rabbit.data.internal.xml.schema.events.EventListType;
 import rabbit.data.internal.xml.schema.events.PartEventListType;
 import rabbit.data.internal.xml.schema.events.PartEventType;
+
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
 
 import org.joda.time.LocalDate;
 
@@ -37,18 +40,21 @@ public class PartDataAccessor
 
   /**
    * Constructor.
+   * 
+   * @param store The data store to get the data from.
+   * @param merger The merger for merging XML data nodes.
+   * @throws NullPointerException If any arguments are null.
    */
-  public PartDataAccessor() {
+  @Inject
+  PartDataAccessor(
+      @Named(StoreNames.PART_STORE) IDataStore store, 
+      IMerger<PartEventType> merger) {
+    super(store, merger);
   }
 
   @Override
   protected Collection<PartEventListType> getCategories(EventListType doc) {
     return doc.getPartEvents();
-  }
-
-  @Override
-  protected IDataStore getDataStore() {
-    return DataStore.PART_STORE;
   }
 
   @Override
@@ -65,10 +71,5 @@ public class PartDataAccessor
   @Override
   protected Collection<PartEventType> getElements(PartEventListType list) {
     return list.getPartEvent();
-  }
-
-  @Override
-  protected PartEventTypeMerger createMerger() {
-    return new PartEventTypeMerger();
   }
 }

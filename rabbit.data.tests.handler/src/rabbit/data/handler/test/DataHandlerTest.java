@@ -34,6 +34,7 @@ import rabbit.data.store.model.SessionEvent;
 import rabbit.data.store.model.TaskFileEvent;
 
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 import org.junit.Test;
 
@@ -41,9 +42,9 @@ import org.junit.Test;
  * @see DataHandler
  */
 public class DataHandlerTest {
-  
+
   @Test
-  public void testGetStorer() {
+  public void testGetStorer_notNull() {
     assertNotNull(DataHandler.getStorer(PerspectiveEvent.class));
     assertNotNull(DataHandler.getStorer(CommandEvent.class));
     assertNotNull(DataHandler.getStorer(FileEvent.class));
@@ -55,7 +56,12 @@ public class DataHandlerTest {
   }
   
   @Test
-  public void testGetAccessor() {
+  public void testGetStorer_null() {
+    assertNull(DataHandler.getStorer(Object.class));
+  }
+
+  @Test
+  public void testGetAccessor_notNull() {
     assertNotNull(DataHandler.getAccessor(PerspectiveDataDescriptor.class));
     assertNotNull(DataHandler.getAccessor(CommandDataDescriptor.class));
     assertNotNull(DataHandler.getAccessor(FileDataDescriptor.class));
@@ -64,5 +70,10 @@ public class DataHandlerTest {
     assertNotNull(DataHandler.getAccessor(TaskFileDataDescriptor.class));
     assertNotNull(DataHandler.getAccessor(LaunchDataDescriptor.class));
     assertNotNull(DataHandler.getAccessor(JavaDataDescriptor.class));
+  }
+
+  @Test
+  public void testGetAccessor_null() {
+    assertNull(DataHandler.getAccessor(Object.class));
   }
 }

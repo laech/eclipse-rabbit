@@ -31,6 +31,9 @@ public class LaunchEventConverter extends
    * Represents an unknown launch type.
    */
   private static final String UNKNOWN_TYPE = "Unknown";
+  
+  public LaunchEventConverter() {
+  }
 
   @Override
   protected LaunchEventType doConvert(LaunchEvent element) {

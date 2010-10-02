@@ -24,22 +24,10 @@ import rabbit.data.access.model.PartDataDescriptor;
 import rabbit.data.access.model.PerspectiveDataDescriptor;
 import rabbit.data.access.model.SessionDataDescriptor;
 import rabbit.data.access.model.TaskFileDataDescriptor;
-import rabbit.data.internal.xml.access.CommandDataAccessor;
-import rabbit.data.internal.xml.access.FileDataAccessor;
-import rabbit.data.internal.xml.access.JavaDataAccessor;
-import rabbit.data.internal.xml.access.LaunchDataAccessor;
-import rabbit.data.internal.xml.access.PartDataAccessor;
-import rabbit.data.internal.xml.access.PerspectiveDataAccessor;
-import rabbit.data.internal.xml.access.SessionDataAccessor;
-import rabbit.data.internal.xml.access.TaskFileDataAccessor;
-import rabbit.data.internal.xml.store.CommandEventStorer;
-import rabbit.data.internal.xml.store.FileEventStorer;
-import rabbit.data.internal.xml.store.JavaEventStorer;
-import rabbit.data.internal.xml.store.LaunchEventStorer;
-import rabbit.data.internal.xml.store.PartEventStorer;
-import rabbit.data.internal.xml.store.PerspectiveEventStorer;
-import rabbit.data.internal.xml.store.SessionEventStorer;
-import rabbit.data.internal.xml.store.TaskFileEventStorer;
+import rabbit.data.internal.xml.access.AccessorModule;
+import rabbit.data.internal.xml.convert.ConverterModule;
+import rabbit.data.internal.xml.merge.MergerModule;
+import rabbit.data.internal.xml.store.StorerModule;
 import rabbit.data.store.IStorer;
 import rabbit.data.store.model.CommandEvent;
 import rabbit.data.store.model.FileEvent;
@@ -50,42 +38,25 @@ import rabbit.data.store.model.PerspectiveEvent;
 import rabbit.data.store.model.SessionEvent;
 import rabbit.data.store.model.TaskFileEvent;
 
-import com.google.common.collect.BiMap;
-import com.google.common.collect.ImmutableBiMap;
+import com.google.inject.ConfigurationException;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import com.google.inject.Key;
+import com.google.inject.util.Types;
 
 /**
  * Handler class provider common classes to access the data.
  */
 public class DataHandler {
 
-  /** Unmodifiable BiMap<T, IStorer<T> */
-  private static final BiMap<Class<?>, IStorer<?>> storers;
-  
-  /** Unmodifiable BiMap<T, IAccessor<T> */
-  private static final BiMap<Class<?>, IAccessor<?>> accessors;
+  private static final Injector injector;
 
   static {
-    storers = ImmutableBiMap.<Class<?>, IStorer<?>>builder()
-        .put(PerspectiveEvent.class, PerspectiveEventStorer.getInstance())
-        .put(CommandEvent.class, CommandEventStorer.getInstance())
-        .put(FileEvent.class, FileEventStorer.getInstance())
-        .put(PartEvent.class, PartEventStorer.getInstance())
-        .put(LaunchEvent.class, LaunchEventStorer.getInstance())
-        .put(TaskFileEvent.class, TaskFileEventStorer.getInstance())
-        .put(SessionEvent.class, SessionEventStorer.getInstance())
-        .put(JavaEvent.class, JavaEventStorer.getInstance())
-        .build();
-
-    accessors = ImmutableBiMap.<Class<?>, IAccessor<?>>builder()
-        .put(PerspectiveDataDescriptor.class, new PerspectiveDataAccessor())
-        .put(CommandDataDescriptor.class, new CommandDataAccessor())
-        .put(SessionDataDescriptor.class, new SessionDataAccessor())
-        .put(LaunchDataDescriptor.class, new LaunchDataAccessor())
-        .put(PartDataDescriptor.class, new PartDataAccessor())
-        .put(FileDataDescriptor.class, new FileDataAccessor())
-        .put(TaskFileDataDescriptor.class, new TaskFileDataAccessor())
-        .put(JavaDataDescriptor.class, new JavaDataAccessor())
-        .build();
+    injector = Guice.createInjector(
+        new AccessorModule(),
+        new StorerModule(), 
+        new ConverterModule(), 
+        new MergerModule());
   }
 
   /**
@@ -104,15 +75,20 @@ public class DataHandler {
    * </ul>
    * </p>
    * 
-   * @param objectClass The class of the type.
+   * @param clazz The class of the type.
    * @return A storer that stores the objects of the given type, or null.
    */
   @SuppressWarnings("unchecked")
-  public static <T> IStorer<T> getStorer(Class<T> objectClass) {
-    Object storer = storers.get(objectClass);
-    return (null == storer) ? null : (IStorer<T>) storer;
+  public static <T> IStorer<T> getStorer(Class<T> clazz) {
+    try {
+      Key<?> k = Key.get(Types.newParameterizedType(IStorer.class, clazz));
+      return (IStorer<T>) injector.getInstance(k);
+
+    } catch (ConfigurationException e) {
+      return null;
+    }
   }
-  
+
   /**
    * Gets an accessor that gets the stored data.
    * <p>
@@ -129,13 +105,18 @@ public class DataHandler {
    * </ul>
    * </p>
    * 
-   * @param objectClass The class of the type.
+   * @param clazz The class of the type.
    * @return An accessor that get the data of the given type, or null.
    */
   @SuppressWarnings("unchecked")
-  public static <T> IAccessor<T> getAccessor(Class<T> objectClass) {
-    IAccessor<?> accessor = accessors.get(objectClass);
-    return (null == accessor) ? null : (IAccessor<T>) accessor;
+  public static <T> IAccessor<T> getAccessor(Class<T> clazz) {
+    try {
+      Key<?> k = Key.get(Types.newParameterizedType(IAccessor.class, clazz));
+      return (IAccessor<T>) injector.getInstance(k);
+
+    } catch (ConfigurationException e) {
+      return null;
+    }
   }
 
   private DataHandler() {

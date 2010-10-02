@@ -23,6 +23,9 @@ import rabbit.data.internal.xml.schema.events.PerspectiveEventType;
 public class PerspectiveEventTypeMerger extends
     AbstractMerger<PerspectiveEventType> {
 
+  public PerspectiveEventTypeMerger() {
+  }
+  
   @Override
   protected boolean doIsMergeable(PerspectiveEventType t1, PerspectiveEventType t2) {
     return (t1.getPerspectiveId() != null)

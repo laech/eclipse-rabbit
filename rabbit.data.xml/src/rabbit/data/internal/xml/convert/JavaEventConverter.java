@@ -22,6 +22,9 @@ import rabbit.data.store.model.JavaEvent;
  * Converts {@link JavaEvent} to {@link JavaEventType}
  */
 public class JavaEventConverter extends AbstractConverter<JavaEvent, JavaEventType> {
+  
+  public JavaEventConverter() {
+  }
 
   @Override
   protected JavaEventType doConvert(JavaEvent event) {

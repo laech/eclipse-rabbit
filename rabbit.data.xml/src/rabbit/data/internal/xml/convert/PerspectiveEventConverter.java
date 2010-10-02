@@ -24,6 +24,9 @@ import rabbit.data.store.model.PerspectiveEvent;
 public class PerspectiveEventConverter extends
     AbstractConverter<PerspectiveEvent, PerspectiveEventType> {
 
+  public PerspectiveEventConverter() {
+  }
+  
   @Override
   protected PerspectiveEventType doConvert(PerspectiveEvent element) {
     PerspectiveEventType type = new PerspectiveEventType();

@@ -18,13 +18,15 @@ package rabbit.data.internal.xml.access;
 import rabbit.data.access.model.TaskFileDataDescriptor;
 import rabbit.data.common.TaskId;
 import rabbit.data.internal.xml.AbstractDataNodeAccessor;
-import rabbit.data.internal.xml.DataStore;
 import rabbit.data.internal.xml.IDataStore;
+import rabbit.data.internal.xml.StoreNames;
 import rabbit.data.internal.xml.merge.IMerger;
-import rabbit.data.internal.xml.merge.TaskFileEventTypeMerger;
 import rabbit.data.internal.xml.schema.events.EventListType;
 import rabbit.data.internal.xml.schema.events.TaskFileEventListType;
 import rabbit.data.internal.xml.schema.events.TaskFileEventType;
+
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
 
 import org.eclipse.core.runtime.Path;
 import org.joda.time.LocalDate;
@@ -35,7 +37,23 @@ import java.util.Collection;
  * Gets task data.
  */
 public class TaskFileDataAccessor extends
-    AbstractDataNodeAccessor<TaskFileDataDescriptor, TaskFileEventType, TaskFileEventListType> {
+    AbstractDataNodeAccessor<TaskFileDataDescriptor, 
+                             TaskFileEventType, 
+                             TaskFileEventListType> {
+
+  /**
+   * Constructor.
+   * 
+   * @param store The data store to get the data from.
+   * @param merger The merger for merging XML data nodes.
+   * @throws NullPointerException If any arguments are null.
+   */
+  @Inject
+  TaskFileDataAccessor(
+      @Named(StoreNames.TASK_STORE) IDataStore store,
+      IMerger<TaskFileEventType> merger) {
+    super(store, merger);
+  }
 
   @Override
   protected Collection<TaskFileEventListType> getCategories(EventListType doc) {
@@ -43,29 +61,22 @@ public class TaskFileDataAccessor extends
   }
 
   @Override
-  protected IDataStore getDataStore() {
-    return DataStore.TASK_STORE;
-  }
-
-  @Override
-  protected TaskFileDataDescriptor createDataNode(LocalDate cal, TaskFileEventType type) {
+  protected TaskFileDataDescriptor createDataNode(LocalDate cal,
+      TaskFileEventType type) {
     try {
-      TaskId id = new TaskId(type.getTaskId().getHandleId(), 
+      TaskId id = new TaskId(type.getTaskId().getHandleId(),
           type.getTaskId().getCreationDate().toGregorianCalendar().getTime());
-      return new TaskFileDataDescriptor(cal, type.getDuration(), new Path(type.getFilePath()), id);
-      
+      return new TaskFileDataDescriptor(cal, type.getDuration(), new Path(
+          type.getFilePath()), id);
+
     } catch (Exception e) {
       return null;
     }
   }
 
   @Override
-  protected IMerger<TaskFileEventType> createMerger() {
-    return new TaskFileEventTypeMerger();
-  }
-
-  @Override
-  protected Collection<TaskFileEventType> getElements(TaskFileEventListType category) {
+  protected Collection<TaskFileEventType> getElements(
+      TaskFileEventListType category) {
     return category.getTaskFileEvent();
   }
 }

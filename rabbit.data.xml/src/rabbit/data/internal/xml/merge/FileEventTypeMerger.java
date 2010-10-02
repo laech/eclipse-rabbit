@@ -21,6 +21,9 @@ import rabbit.data.internal.xml.schema.events.FileEventType;
  * Merger for {@link FileEventType}.
  */
 public class FileEventTypeMerger extends AbstractMerger<FileEventType> {
+  
+  public FileEventTypeMerger() {
+  }
 
   @Override
   protected FileEventType doMerge(FileEventType t1, FileEventType t2) {

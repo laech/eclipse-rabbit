@@ -16,16 +16,17 @@
 package rabbit.data.internal.xml.store;
 
 import rabbit.data.internal.xml.AbstractStorer;
-import rabbit.data.internal.xml.DataStore;
 import rabbit.data.internal.xml.IDataStore;
+import rabbit.data.internal.xml.StoreNames;
 import rabbit.data.internal.xml.convert.IConverter;
-import rabbit.data.internal.xml.convert.SessionEventConverter;
 import rabbit.data.internal.xml.merge.IMerger;
-import rabbit.data.internal.xml.merge.SessionEventTypeMerger;
 import rabbit.data.internal.xml.schema.events.EventListType;
 import rabbit.data.internal.xml.schema.events.SessionEventListType;
 import rabbit.data.internal.xml.schema.events.SessionEventType;
 import rabbit.data.store.model.SessionEvent;
+
+import com.google.inject.Inject;
+import com.google.inject.name.Named;
 
 import java.util.List;
 
@@ -34,28 +35,23 @@ import javax.xml.datatype.XMLGregorianCalendar;
 /**
  * Stores {@link SessionEvent}
  */
-public class SessionEventStorer extends 
+public final class SessionEventStorer extends 
     AbstractStorer<SessionEvent, SessionEventType, SessionEventListType> {
   
-  private static SessionEventStorer INSTANCE = new SessionEventStorer();
-  
   /**
-   * Gets the shared instance of this class.
-   * @return The shared instance;
+   * Constructor.
+   * 
+   * @param converter Converter for converting an event to its corresponding XML
+   *          type.
+   * @param merger Merger for merging two XML types.
+   * @param store The data store to store the data to.
    */
-  public static SessionEventStorer getInstance() {
-    return INSTANCE;
-  }
-  
-  private final IMerger<SessionEventType> merger;
-  private final IConverter<SessionEvent, SessionEventType> converter;
-  
-  /**
-   * Private constructor.
-   */
-  private SessionEventStorer() {
-    merger = new SessionEventTypeMerger();
-    converter = new SessionEventConverter();
+  @Inject
+  SessionEventStorer(
+      IConverter<SessionEvent, SessionEventType> converter,
+      IMerger<SessionEventType> merger, 
+      @Named(StoreNames.SESSION_STORE) IDataStore store) {
+    super(converter, merger, store);
   }
 
   @Override
@@ -64,23 +60,8 @@ public class SessionEventStorer extends
   }
 
   @Override
-  protected IConverter<SessionEvent, SessionEventType> getConverter() {
-    return converter;
-  }
-
-  @Override
-  protected IDataStore getDataStore() {
-    return DataStore.SESSION_STORE;
-  }
-
-  @Override
   protected List<SessionEventType> getElements(SessionEventListType list) {
     return list.getSessionEvent();
-  }
-
-  @Override
-  protected IMerger<SessionEventType> getMerger() {
-    return merger;
   }
 
   @Override
