@@ -21,7 +21,6 @@ import rabbit.ui.internal.util.ICategoryProvider;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.Predicate;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 
@@ -44,17 +43,17 @@ import java.util.Set;
  * value of each {@code TreeNode} can be put into an {@link ICategory}, using a
  * {@link Predicate}.
  */
-public abstract class AbstractCategoryContentProvider extends
-    TreeNodeContentProvider implements ICategoryProvider {
+abstract class AbstractCategoryContentProvider 
+    extends TreeNodeContentProvider implements ICategoryProvider {
 
   /**
    * An unmodifiable set of all the categories supported by this content
    * provider.
    */
   protected final Set<ICategory> allCategories;
-  
+
   /**
-   * An unmodifiable map contain categories and predicates to categorize the 
+   * An unmodifiable map contain categories and predicates to categorize the
    * elements.
    */
   private final Map<ICategory, Predicate<Object>> categorizers;
@@ -75,42 +74,44 @@ public abstract class AbstractCategoryContentProvider extends
 
   /**
    * Constructor.
+   * 
    * @param treeViewer The viewer of this content provider.
    * @throws NullPointerException If argument is null.
    */
-  public AbstractCategoryContentProvider(TreeViewer treeViewer) {
-    checkNotNull(treeViewer);
-    treeViewer.addFilter(new ViewerFilter() {
+  AbstractCategoryContentProvider(TreeViewer treeViewer) {
+    viewer = checkNotNull(treeViewer);
+    viewer.addFilter(new ViewerFilter() {
       @Override
-      public boolean select(Viewer viewer, Object parentElement, Object element) {
+      public boolean select(Viewer viewer, Object parent, Object element) {
         return !shouldFilter(element);
       }
     });
-    
-    viewer = treeViewer;
+
     root = new TreeNode(new Object());
     allCategories = ImmutableSet.of(getAllSupportedCategories());
 
     selectedCategories = Sets.newLinkedHashSet();
-    for (ICategory category : getDefaultSelectedCategories())
+    for (ICategory category : getDefaultSelectedCategories()) {
       selectedCategories.add(category);
+    }
 
     categorizers = initializeCategorizers();
     paintCategory = getDefaultPaintCategory();
   }
 
   /**
-   * Gets the map contain categories and predicates to categorize
-   * the elements.
+   * Gets the map contain categories and predicates to categorize the elements.
+   * 
    * @return The map, unmodifiable.
    */
   public Map<ICategory, Predicate<Object>> getCategorizers() {
     return categorizers;
   }
-  
+
   @Override
   public Object[] getElements(Object inputElement) {
-    return (getRoot().getChildren() != null) ? getRoot().getChildren()
+    return (getRoot().getChildren() != null) 
+        ? getRoot().getChildren()
         : new Object[0];
   }
 
@@ -124,8 +125,9 @@ public abstract class AbstractCategoryContentProvider extends
   }
 
   /**
-   * Gets the root of the content tree. The returned root will always be the 
+   * Gets the root of the content tree. The returned root will always be the
    * same object, therefore it could be cached.
+   * 
    * @return The root.
    */
   public final TreeNode getRoot() {
@@ -145,6 +147,7 @@ public abstract class AbstractCategoryContentProvider extends
 
   /**
    * Gets the viewer of this content provider.
+   * 
    * @return The viewer.
    */
   public TreeViewer getViewer() {
@@ -155,8 +158,9 @@ public abstract class AbstractCategoryContentProvider extends
   public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
     super.inputChanged(viewer, oldInput, newInput);
     getRoot().setChildren(null);
-    if (newInput != null)
+    if (newInput != null) {
       doInputChanged(viewer, oldInput, newInput);
+    }
   }
 
   /**
@@ -181,13 +185,15 @@ public abstract class AbstractCategoryContentProvider extends
     if (categories == null || categories.length == 0)
       categories = getDefaultSelectedCategories();
 
-    if (Arrays.equals(categories, selectedCategories.toArray()))
+    if (Arrays.equals(categories, selectedCategories.toArray())) {
       return; // Nothing to do if same.
+    }
 
     selectedCategories.clear();
     for (ICategory category : categories) {
-      if (allCategories.contains(category))
+      if (allCategories.contains(category)) {
         selectedCategories.add(category);
+      }
     }
 
     getViewer().getTree().setRedraw(false);
@@ -204,14 +210,16 @@ public abstract class AbstractCategoryContentProvider extends
    * @return True if the element should be hidden, false otherwise.
    */
   public boolean shouldFilter(Object element) {
-    if (!(element instanceof TreeNode))
+    if (!(element instanceof TreeNode)) {
       return true;
+    }
 
     TreeNode node = (TreeNode) element;
     for (ICategory cat : selectedCategories) {
       Predicate<Object> predicate = getCategorizers().get(cat);
-      if (predicate != null && predicate.apply(node.getValue()))
+      if (predicate != null && predicate.apply(node.getValue())) {
         return false;
+      }
     }
     return true;
   }
@@ -243,6 +251,7 @@ public abstract class AbstractCategoryContentProvider extends
 
   /**
    * Gets all the categories supported by this content provider.
+   * 
    * @return All the categories supported by this content provider.
    */
   protected abstract ICategory[] getAllSupportedCategories();
@@ -256,13 +265,15 @@ public abstract class AbstractCategoryContentProvider extends
 
   /**
    * Gets the default selected categories of this content provider.
+   * 
    * @return An ordered array of default category selection.
    */
   protected abstract ICategory[] getDefaultSelectedCategories();
 
   /**
    * Gets the mapping of categories and classes defined by subclasses.
+   * 
    * @return The mapping of categories and classes.
    */
-  protected abstract ImmutableMap<ICategory, Predicate<Object>> initializeCategorizers();
+  protected abstract Map<ICategory, Predicate<Object>> initializeCategorizers();
 }

@@ -63,7 +63,8 @@ import java.util.List;
 /**
  * A page for displaying time spent working on different files.
  */
-public class ResourcePage extends AbstractAccessorPage {
+public class ResourcePage extends InternalPage<FileDataDescriptor>
+    implements ResourcePageContentProvider.IProvider {
 
   // Preference constants:
   private static final String PREF_SELECTED_CATEGORIES = "ResourcePage.SelectedCatgories";
@@ -176,7 +177,7 @@ public class ResourcePage extends AbstractAccessorPage {
   }
 
   @Override
-  protected IAccessor<?> getAccessor() {
+  protected IAccessor<FileDataDescriptor> getAccessor() {
     return DataHandler.getAccessor(FileDataDescriptor.class);
   }
 

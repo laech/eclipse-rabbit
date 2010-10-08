@@ -19,6 +19,7 @@ import rabbit.data.access.model.LaunchConfigurationDescriptor;
 import rabbit.data.access.model.LaunchDataDescriptor;
 import rabbit.ui.internal.pages.Category;
 import rabbit.ui.internal.pages.LaunchPageContentProvider;
+import rabbit.ui.internal.pages.LaunchPageContentProvider.IProvider;
 import rabbit.ui.internal.util.ICategory;
 import rabbit.ui.internal.util.Pair;
 import rabbit.ui.internal.util.UndefinedLaunchConfigurationType;
@@ -50,6 +51,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
 
@@ -111,7 +113,7 @@ public class LaunchPageContentProviderTest {
     LaunchDataDescriptor d2 = new LaunchDataDescriptor(d1.getDate(), debugMode,
         19, new Duration(1200), Collections.<IPath> emptySet());
 
-    provider.getViewer().setInput(Arrays.asList(d1, d2));
+    provider.getViewer().setInput(newInput(d1, d2));
     provider.setSelectedCategories(Category.LAUNCH_MODE, Category.DATE);
 
     // We should have two different modes:
@@ -144,7 +146,7 @@ public class LaunchPageContentProviderTest {
         d1.getDate().plusDays(1), config, 110, new Duration(1800),
         Collections.<IPath> emptySet());
 
-    provider.getViewer().setInput(Arrays.asList(d1, d2));
+    provider.getViewer().setInput(newInput(d1, d2));
 
     provider.setSelectedCategories(Category.DATE);
     // Passing null is OK, the provider should return the children of its "root"
@@ -189,7 +191,7 @@ public class LaunchPageContentProviderTest {
         19, new Duration(1200), Collections.<IPath> emptySet());
 
     IValueProvider values = provider.getLaunchCountValueProvider();
-    provider.getViewer().setInput(Arrays.asList(d1, d2));
+    provider.getViewer().setInput(newInput(d1, d2));
     provider.setSelectedCategories(Category.DATE, Category.LAUNCH_TYPE,
         Category.LAUNCH, Category.LAUNCH_MODE);
 
@@ -228,7 +230,7 @@ public class LaunchPageContentProviderTest {
     LaunchDataDescriptor d2 = new LaunchDataDescriptor(d1.getDate(), debugMode,
         19, new Duration(1200), Collections.<IPath> emptySet());
 
-    provider.getViewer().setInput(Arrays.asList(d1, d2));
+    provider.getViewer().setInput(newInput(d1, d2));
     provider.setSelectedCategories(Category.DATE, Category.LAUNCH_TYPE,
         Category.LAUNCH, Category.LAUNCH_MODE);
     IValueProvider values = provider.getLaunchCountValueProvider();
@@ -325,7 +327,7 @@ public class LaunchPageContentProviderTest {
 
     provider.setSelectedCategories(Category.DATE, Category.LAUNCH_TYPE,
         Category.LAUNCH, Category.LAUNCH_MODE);
-    provider.getViewer().setInput(Arrays.asList(d1, d2));
+    provider.getViewer().setInput(newInput(d1, d2));
     IValueProvider values = provider.getLaunchDurationValueProvider();
     TreeNode root = provider.getRoot();
 
@@ -398,7 +400,7 @@ public class LaunchPageContentProviderTest {
     LaunchDataDescriptor des = new LaunchDataDescriptor(new LocalDate(),
         runMode, 1, new Duration(10), Collections.<IPath> emptySet());
 
-    provider.getViewer().setInput(Arrays.asList(des));
+    provider.getViewer().setInput(newInput(des));
 
     TreeNode root = provider.getRoot();
     provider.setSelectedCategories(Category.DATE);
@@ -558,5 +560,13 @@ public class LaunchPageContentProviderTest {
     assertFalse(values.shouldPaint(projectNode));
     assertFalse(values.shouldPaint(folderNode));
     assertFalse(values.shouldPaint(fileNode));
+  }
+  
+  static IProvider newInput(final LaunchDataDescriptor... data) {
+    return new IProvider() {
+      @Override public Collection<LaunchDataDescriptor> get() {
+        return Arrays.asList(data);
+      }
+    };
   }
 }

@@ -27,7 +27,6 @@ import rabbit.ui.internal.actions.GroupByAction;
 import rabbit.ui.internal.actions.ShowHideFilterControlAction;
 import rabbit.ui.internal.util.ICategory;
 import rabbit.ui.internal.viewers.CellPainter;
-import rabbit.ui.internal.viewers.DelegatingStyledCellLabelProvider;
 import rabbit.ui.internal.viewers.TreeViewerLabelSorter;
 import rabbit.ui.internal.viewers.TreeViewerSorter;
 
@@ -42,7 +41,6 @@ import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.viewers.TreeNode;
 import org.eclipse.jface.viewers.TreeViewer;
-import org.eclipse.jface.viewers.TreeViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
@@ -56,7 +54,8 @@ import java.util.List;
 /**
  * A page displays workbench part usage.
  */
-public class PartPage extends AbstractAccessorPage {
+public class PartPage extends InternalPage<PartDataDescriptor>
+    implements PartPageContentProvider.IProvider {
 
   // Preference constants:
   private static final String PREF_SELECTED_CATEGORIES = "PartPage.SelectedCatgories";
@@ -74,13 +73,12 @@ public class PartPage extends AbstractAccessorPage {
 
   @Override
   public void createColumns(TreeViewer viewer) {
-    TreeViewerColumn viewerColumn = new TreeViewerColumn(viewer, SWT.LEFT);
-    viewerColumn.getColumn().setText("Name");
-    viewerColumn.getColumn().setWidth(200);
-    viewerColumn.getColumn().addSelectionListener(createInitialComparator(viewer));
-    viewerColumn.setLabelProvider(new DelegatingStyledCellLabelProvider(labels, false));
+    TreeColumn column = new TreeColumn(viewer.getTree(), SWT.LEFT);
+    column.setText("Name");
+    column.setWidth(200);
+    column.addSelectionListener(createInitialComparator(viewer));
 
-    TreeColumn column = new TreeColumn(viewer.getTree(), SWT.RIGHT);
+    column = new TreeColumn(viewer.getTree(), SWT.RIGHT);
     column.addSelectionListener(getValueSorter());
     column.setText("Usage");
     column.setWidth(200);
@@ -166,7 +164,7 @@ public class PartPage extends AbstractAccessorPage {
       }
     };
   }
-
+  
   @Override
   protected PatternFilter createFilter() {
     return new PatternFilter();
@@ -188,9 +186,9 @@ public class PartPage extends AbstractAccessorPage {
       }
     };
   }
-  
+
   @Override
-  protected IAccessor<?> getAccessor() {
+  protected IAccessor<PartDataDescriptor> getAccessor() {
     return DataHandler.getAccessor(PartDataDescriptor.class);
   }
 

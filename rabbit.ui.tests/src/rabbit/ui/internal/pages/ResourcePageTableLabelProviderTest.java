@@ -18,11 +18,6 @@ package rabbit.ui.internal.pages;
 import static rabbit.ui.internal.util.DurationFormat.format;
 
 import rabbit.data.access.model.FileDataDescriptor;
-import rabbit.ui.internal.pages.Category;
-import rabbit.ui.internal.pages.ResourcePage;
-import rabbit.ui.internal.pages.ResourcePageContentProvider;
-import rabbit.ui.internal.pages.ResourcePageLabelProvider;
-import rabbit.ui.internal.pages.ResourcePageTableLabelProvider;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -43,8 +38,6 @@ import org.joda.time.LocalDate;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-
-import java.util.Arrays;
 
 /**
  * @see ResourcePageTableLabelProvider
@@ -144,7 +137,7 @@ public class ResourcePageTableLabelProviderTest {
      */
     contents.setSelectedCategories(Category.DATE, Category.PROJECT,
         Category.FOLDER, Category.FILE);
-    viewer.setInput(Arrays.asList(des1, des2));
+    viewer.setInput(ResourcePageContentProviderTest.newInput(des1, des2));
 
     TreeNode root = contents.getRoot();
     TreeNode dateNode = root.getChildren()[0];

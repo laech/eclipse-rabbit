@@ -18,11 +18,6 @@ package rabbit.ui.internal.pages;
 import static rabbit.ui.internal.util.DurationFormat.format;
 
 import rabbit.data.access.model.PartDataDescriptor;
-import rabbit.ui.internal.pages.Category;
-import rabbit.ui.internal.pages.DateLabelProvider;
-import rabbit.ui.internal.pages.PartPageContentProvider;
-import rabbit.ui.internal.pages.PartPageLabelProvider;
-import rabbit.ui.internal.pages.WorkbenchPartLabelProvider;
 import rabbit.ui.internal.util.UndefinedWorkbenchPartDescriptor;
 
 import static org.junit.Assert.assertEquals;
@@ -41,8 +36,6 @@ import org.joda.time.LocalDate;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-
-import java.util.Arrays;
 
 /**
  * Test for {@link PartPageLabelProvider}
@@ -144,7 +137,7 @@ public class PartPageLabelProviderTest {
     LocalDate date = new LocalDate();
     d1 = new PartDataDescriptor(date, new Duration(11), defined.getId());
     d2 = new PartDataDescriptor(date, new Duration(12), undefined.getId());
-    contents.getViewer().setInput(Arrays.asList(d1, d2));
+    contents.getViewer().setInput(PartPageContentProviderTest.newInput(d1, d2));
 
     contents.setSelectedCategories(Category.WORKBENCH_TOOL);
     contents.setPaintCategory(Category.WORKBENCH_TOOL);

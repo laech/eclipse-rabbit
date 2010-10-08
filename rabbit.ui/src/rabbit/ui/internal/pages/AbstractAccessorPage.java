@@ -14,7 +14,9 @@ import org.joda.time.LocalDate;
 /**
  * Abstract class defines common behaviors for pages which use an
  * {@link IAccessor} to get the data.
+ * @deprecated To be removed.
  */
+@Deprecated
 public abstract class AbstractAccessorPage extends AbstractFilteredTreePage {
 
   /**

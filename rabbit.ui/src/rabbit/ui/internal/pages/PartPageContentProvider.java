@@ -28,18 +28,16 @@ import org.eclipse.jface.viewers.TreeNode;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.ui.IEditorDescriptor;
-import org.eclipse.ui.IEditorRegistry;
 import org.eclipse.ui.IWorkbenchPartDescriptor;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.views.IViewDescriptor;
-import org.eclipse.ui.views.IViewRegistry;
 import org.joda.time.LocalDate;
 
 import java.util.Collection;
+import java.util.Collections;
 
 /**
- * Content provider for a {@code TreeViewer}. Acceptable input is {@code
- * Collection<PartDataDescriptor>}. *
+ * Content provider for a {@code TreeViewer}. Acceptable input is 
+ * {@link PartPageContentProvider.IProvider}.
  * <p>
  * The following {@link ICategory}s are supported:
  * <ul>
@@ -48,7 +46,13 @@ import java.util.Collection;
  * </ul>
  * </p>
  */
-public class PartPageContentProvider extends AbstractValueContentProvider {
+class PartPageContentProvider extends AbstractValueContentProvider {
+
+  /**
+   * Provides objects of type {@link PartDataDescriptor}.
+   */
+  static interface IProvider extends rabbit.ui.IProvider<PartDataDescriptor> {
+  }
   
   private boolean hideEditors = false;
   private boolean hideViews = false;
@@ -73,30 +77,12 @@ public class PartPageContentProvider extends AbstractValueContentProvider {
     }
   };
 
-  @Override
-  public boolean shouldFilter(Object element) {
-    boolean shouldFilter = super.shouldFilter(element);
-    if (!shouldFilter) {
-      if (element instanceof TreeNode) {
-        element = ((TreeNode) element).getValue();
-      }
-      if (element instanceof IEditorDescriptor) {
-        return isHidingEditors();
-      } else if (element instanceof IViewDescriptor) {
-        return isHidingViews();
-      } else {
-        return false;
-      }
-    }
-    return shouldFilter;
-  }
-  
   /**
    * Constructs a new content provider for the given viewer.
    * @param treeViewer The viewer.
    * @throws NullPointerException If argument is null.
    */
-  public PartPageContentProvider(TreeViewer treeViewer) {
+  PartPageContentProvider(TreeViewer treeViewer) {
     super(treeViewer);
   }
   
@@ -143,36 +129,46 @@ public class PartPageContentProvider extends AbstractValueContentProvider {
       getViewer().getTree().setRedraw(true);
     }
   }
+  
+  @Override
+  public boolean shouldFilter(Object element) {
+    boolean shouldFilter = super.shouldFilter(element);
+    if (!shouldFilter) {
+      if (element instanceof TreeNode) {
+        element = ((TreeNode) element).getValue();
+      }
+      if (element instanceof IEditorDescriptor) {
+        return isHidingEditors();
+      } else if (element instanceof IViewDescriptor) {
+        return isHidingViews();
+      } else {
+        return false;
+      }
+    }
+    return shouldFilter;
+  }
 
-  @SuppressWarnings("unchecked")
   @Override
   protected void doInputChanged(Viewer viewer, Object oldInput, Object newInput) {
     super.doInputChanged(viewer, oldInput, newInput);
     getRoot().setChildren(null);
     
-    Collection<PartDataDescriptor> data = null;
-    try {
-      data = (Collection<PartDataDescriptor>) newInput;
-    } catch (Exception e) {
-      System.err.println(e.getMessage());
-      return;
+    Collection<PartDataDescriptor> data = Collections.emptyList();
+    if (newInput instanceof PartPageContentProvider.IProvider) {
+      data = ((PartPageContentProvider.IProvider) newInput).get();
     }
-    IEditorRegistry editors = PlatformUI.getWorkbench().getEditorRegistry();
-    IViewRegistry views = PlatformUI.getWorkbench().getViewRegistry();
+    
     for (PartDataDescriptor des : data) {
-      
       TreeNode node = getRoot();
       for (ICategory cat : selectedCategories) {
         if (Category.DATE == cat) {
           node = TreeNodes.findOrAppend(node, des.getDate());
           
         } else if (Category.WORKBENCH_TOOL == cat) {
-          IWorkbenchPartDescriptor part = editors.findEditor(des.getPartId());
-          if (part == null) 
-            part = views.find(des.getPartId());
-          if (part == null)
+          IWorkbenchPartDescriptor part = des.findPart();
+          if (part == null) {
             part = new UndefinedWorkbenchPartDescriptor(des.getPartId());
-          
+          }
           node = TreeNodes.findOrAppend(node, part);
         }
       }

@@ -17,6 +17,7 @@ package rabbit.ui.internal.pages;
 
 import rabbit.data.access.model.CommandDataDescriptor;
 import rabbit.ui.internal.util.ICategory;
+import rabbit.ui.internal.util.ICategoryProvider;
 import rabbit.ui.internal.viewers.TreeNodes;
 
 import com.google.common.base.Predicate;
@@ -27,15 +28,14 @@ import org.eclipse.core.commands.Command;
 import org.eclipse.jface.viewers.TreeNode;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.commands.ICommandService;
 import org.joda.time.LocalDate;
 
 import java.util.Collection;
+import java.util.Collections;
 
 /**
- * Acceptable input for this content provider is 
- * {@code Collection<CommandDataDescriptor>}.
+ * Acceptable input for this content provider is an instance of 
+ * {@link IProvider}.
  * <p>
  * This {@link ICategoryProvider} supports the following {@link ICategory}:
  * <ul>
@@ -44,40 +44,42 @@ import java.util.Collection;
  * </ul>
  * </p>
  */
-public class CommandPageContentProvider extends AbstractValueContentProvider {
+class CommandPageContentProvider extends AbstractValueContentProvider {
+  
+  /**
+   * A provider that provides collection of {@link CommandDataDescriptor} 
+   * objects. 
+   */
+  static interface IProvider extends rabbit.ui.IProvider<CommandDataDescriptor> {
+  }
 
   /**
    * Constructs a new content provider for the given viewer.
    * @param treeViewer The viewer of this content provider.
    */
-  public CommandPageContentProvider(TreeViewer treeViewer) {
+  CommandPageContentProvider(TreeViewer treeViewer) {
     super(treeViewer);
   }
   
-  @SuppressWarnings("unchecked")
   @Override
   protected void doInputChanged(Viewer viewer, Object oldInput, Object newInput) {
     super.doInputChanged(viewer, oldInput, newInput);
-    
     getRoot().setChildren(null);
-    Collection<CommandDataDescriptor> data = null;
-    try {
-      data = (Collection<CommandDataDescriptor>) newInput;
-    } catch (Exception e) {
-      System.err.println(e.getMessage());
-      return;
-    }
-    ICommandService service = (ICommandService) PlatformUI.getWorkbench()
-        .getService(ICommandService.class);
     
+    Collection<CommandDataDescriptor> data = Collections.emptyList();
+    if (newInput instanceof IProvider) {
+      data = ((IProvider) newInput).get();
+    }
+
     for (CommandDataDescriptor des : data) {
-      
       TreeNode node = getRoot();
-      for (ICategory category : selectedCategories) {
+      for (ICategory category : getSelectedCategories()) {
+        
         if (Category.DATE == category) {
           node = TreeNodes.findOrAppend(node, des.getDate());
+          
         } else if (Category.COMMAND == category) {
-          Command command = service.getCommand(des.getCommandId());
+          Command command = des.findCommand();
           node = TreeNodes.findOrAppend(node, command);
         }
       }

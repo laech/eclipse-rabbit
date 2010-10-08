@@ -16,8 +16,7 @@
 package rabbit.ui.internal.pages;
 
 import rabbit.data.access.model.PerspectiveDataDescriptor;
-import rabbit.ui.internal.pages.Category;
-import rabbit.ui.internal.pages.PerspectivePageContentProvider;
+import rabbit.ui.internal.pages.PerspectivePageContentProvider.IProvider;
 import rabbit.ui.internal.util.ICategory;
 import rabbit.ui.internal.util.UndefinedPerspectiveDescriptor;
 
@@ -42,6 +41,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Set;
 
 /**
@@ -83,7 +83,7 @@ public class PerspectivePageContentProviderTest {
   public void testHasChildren() throws Exception {
     PerspectiveDataDescriptor des = new PerspectiveDataDescriptor(
         new LocalDate(), new Duration(1), "id");
-    provider.getViewer().setInput(Arrays.asList(des));
+    provider.getViewer().setInput(newInput(des));
 
     TreeNode root = provider.getRoot();
     provider.setSelectedCategories(Category.DATE);
@@ -102,7 +102,7 @@ public class PerspectivePageContentProviderTest {
     PerspectiveDataDescriptor d2 = new PerspectiveDataDescriptor(
         d1.getDate().minusDays(1), new Duration(1), d1.getPerspectiveId());
 
-    provider.getViewer().setInput(Arrays.asList(d1, d2));
+    provider.getViewer().setInput(newInput(d1, d2));
 
     TreeNode root = provider.getRoot();
     // Set the data to categorize by perspective, then by dates:
@@ -129,7 +129,7 @@ public class PerspectivePageContentProviderTest {
     PerspectiveDataDescriptor d2 = new PerspectiveDataDescriptor(
         d1.getDate().minusDays(1), new Duration(1), d1.getPerspectiveId());
 
-    provider.getViewer().setInput(Arrays.asList(d1, d2));
+    provider.getViewer().setInput(newInput(d1, d2));
 
     provider.setSelectedCategories(Category.DATE);
     // Passing null is OK, the provider should return the children of its "root"
@@ -158,7 +158,7 @@ public class PerspectivePageContentProviderTest {
         d1.getDate().minusDays(1), new Duration(2), d1.getPerspectiveId());
 
     // Date
-    provider.getViewer().setInput(Arrays.asList(d1, d2));
+    provider.getViewer().setInput(newInput(d1, d2));
     provider.setSelectedCategories(Category.DATE);
     provider.setPaintCategory(Category.DATE);
     assertEquals(d1.getDuration().getMillis(), provider.getMaxValue());
@@ -213,7 +213,7 @@ public class PerspectivePageContentProviderTest {
     PerspectiveDataDescriptor d2 = new PerspectiveDataDescriptor(
         d1.getDate().minusDays(1), new Duration(2), d1.getPerspectiveId());
 
-    provider.getViewer().setInput(Arrays.asList(d1, d2));
+    provider.getViewer().setInput(newInput(d1, d2));
 
     TreeNode root = provider.getRoot();
     provider.setSelectedCategories(Category.PERSPECTIVE);
@@ -232,7 +232,7 @@ public class PerspectivePageContentProviderTest {
   public void testInputChanged_clearsOldData() throws Exception {
     PerspectiveDataDescriptor des = new PerspectiveDataDescriptor(
         new LocalDate(), new Duration(1), "id");
-    provider.getViewer().setInput(Arrays.asList(des));
+    provider.getViewer().setInput(newInput(des));
     TreeNode root = provider.getRoot();
     assertFalse(root.getChildren() == null || root.getChildren().length == 0);
     try {
@@ -303,7 +303,7 @@ public class PerspectivePageContentProviderTest {
     PerspectiveDataDescriptor d2 = new PerspectiveDataDescriptor(
         d1.getDate().minusDays(1), new Duration(2), d1.getPerspectiveId());
 
-    provider.getViewer().setInput(Arrays.asList(d1, d2));
+    provider.getViewer().setInput(newInput(d1, d2));
 
     provider.setSelectedCategories(Category.DATE);
     provider.setPaintCategory(Category.DATE);
@@ -352,5 +352,13 @@ public class PerspectivePageContentProviderTest {
     provider.setPaintCategory(Category.PERSPECTIVE);
     assertFalse(provider.shouldPaint(dateNode));
     assertTrue(provider.shouldPaint(perspectiveNode));
+  }
+  
+  static IProvider newInput(final PerspectiveDataDescriptor... data) {
+    return new IProvider() {
+      @Override public Collection<PerspectiveDataDescriptor> get() {
+        return Arrays.asList(data);
+      }
+    };
   }
 }

@@ -28,15 +28,14 @@ import org.eclipse.jface.viewers.TreeNode;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.ui.IPerspectiveDescriptor;
-import org.eclipse.ui.IPerspectiveRegistry;
-import org.eclipse.ui.PlatformUI;
 import org.joda.time.LocalDate;
 
 import java.util.Collection;
+import java.util.Collections;
 
 /**
- * Content provider for a {@code TreeViewer}. Accepts input as {@code
- * Collection<PerspectiveDataDescriptor>}. *
+ * Content provider for a {@code TreeViewer}. Accepts input as
+ * {@link PerspectivePageContentProvider.IProvider}.
  * <p>
  * The following {@link ICategory}s are supported:
  * <ul>
@@ -45,10 +44,49 @@ import java.util.Collection;
  * </ul>
  * </p>
  */
-public class PerspectivePageContentProvider extends AbstractValueContentProvider {
+class PerspectivePageContentProvider extends AbstractValueContentProvider {
 
-  public PerspectivePageContentProvider(TreeViewer viewer) {
+  /**
+   * Provides objects of type {@link PerspectiveDataDescriptor}.
+   */
+  static interface IProvider extends rabbit.ui.IProvider<PerspectiveDataDescriptor> {
+  }
+
+  /**
+   * Constructor.
+   * @param viewer The viewer.
+   * @throws NullPointerException If argument is null.
+   */
+  PerspectivePageContentProvider(TreeViewer viewer) {
     super(viewer);
+  }
+
+  @Override
+  protected void doInputChanged(Viewer viewer, Object oldInput, Object newInput) {
+    super.doInputChanged(viewer, oldInput, newInput);
+    getRoot().setChildren(null);
+
+    Collection<PerspectiveDataDescriptor> data = Collections.emptySet();
+    if (newInput instanceof IProvider) {
+      data = ((IProvider) newInput).get();
+    }
+    
+    for (PerspectiveDataDescriptor des : data) {
+      TreeNode node = getRoot();
+      for (ICategory cat : selectedCategories) {
+        if (Category.DATE == cat) {
+          node = TreeNodes.findOrAppend(node, des.getDate());
+          
+        } else if (Category.PERSPECTIVE == cat) {
+          IPerspectiveDescriptor persp = des.findPerspective();
+          if (persp == null) {
+            persp = new UndefinedPerspectiveDescriptor(des.getPerspectiveId());
+          }
+          node = TreeNodes.findOrAppend(node, persp);
+        }
+      }
+      TreeNodes.appendToParent(node, des.getDuration().getMillis(), true);
+    }
   }
 
   @Override
@@ -72,38 +110,5 @@ public class PerspectivePageContentProvider extends AbstractValueContentProvider
         .put(Category.DATE, Predicates.instanceOf(LocalDate.class))
         .put(Category.PERSPECTIVE, Predicates.instanceOf(IPerspectiveDescriptor.class))
         .build();
-  }
-
-  @SuppressWarnings("unchecked")
-  @Override
-  protected void doInputChanged(Viewer viewer, Object oldInput, Object newInput) {
-    super.doInputChanged(viewer, oldInput, newInput);
-    getRoot().setChildren(null);
-
-    Collection<PerspectiveDataDescriptor> data = null;
-    try {
-      data = (Collection<PerspectiveDataDescriptor>) newInput;
-    } catch (Exception e) {
-      System.err.println(e.getMessage());
-      return;
-    }
-    IPerspectiveRegistry perspectives = PlatformUI.getWorkbench().getPerspectiveRegistry();
-    for (PerspectiveDataDescriptor des : data) {
-      
-      TreeNode node = getRoot();
-      for (ICategory cat : selectedCategories) {
-        if (Category.DATE == cat) {
-          node = TreeNodes.findOrAppend(node, des.getDate());
-          
-        } else if (Category.PERSPECTIVE == cat) {
-          IPerspectiveDescriptor persp = perspectives.findPerspectiveWithId(des.getPerspectiveId());
-          if (persp == null)
-            persp = new UndefinedPerspectiveDescriptor(des.getPerspectiveId());
-          
-          node = TreeNodes.findOrAppend(node, persp);
-        }
-      }
-      TreeNodes.appendToParent(node, des.getDuration().getMillis(), true);
-    }
   }
 }

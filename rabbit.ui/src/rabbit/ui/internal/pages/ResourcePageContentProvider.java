@@ -41,8 +41,8 @@ import java.util.Collection;
 import java.util.Map;
 
 /**
- * Content provider for a {@link TreeViewer} that accepts input as a
- * {@link Collection} of {@link FileDataDescriptor}.
+ * Content provider for a {@link TreeViewer} that accepts input as 
+ * {@link ResourcePageContentProvider.IProvider}.
  * <p>
  * The following {@link ICategory}s are supported:
  * <ul>
@@ -53,8 +53,14 @@ import java.util.Map;
  * </ul>
  * </p>
  */
-public class ResourcePageContentProvider extends AbstractValueContentProvider {
-
+class ResourcePageContentProvider extends AbstractValueContentProvider {
+  
+  /**
+   * Provides objects of type {@link FileDataDescriptor}.
+   */
+  static interface IProvider extends rabbit.ui.IProvider<FileDataDescriptor> {
+  }
+  
   /**
    * Constructor a content provider for the given viewer.
    * 
@@ -65,17 +71,11 @@ public class ResourcePageContentProvider extends AbstractValueContentProvider {
     super(viewer);
   }
   
-  @SuppressWarnings("unchecked")
   @Override
   protected void doInputChanged(Viewer viewer, Object oldInput, Object newInput) {
-    Collection<FileDataDescriptor> data = null;
-    try {
-      data = (Collection<FileDataDescriptor>) newInput;
-    } catch (Exception e) {
-      System.err.println(e.getMessage());
-      return;
+    if (newInput instanceof ResourcePageContentProvider.IProvider) {
+      reorganizeData(((ResourcePageContentProvider.IProvider) newInput).get());
     }
-    reorganizeData(data);
   }
 
   @Override

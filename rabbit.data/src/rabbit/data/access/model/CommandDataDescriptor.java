@@ -13,6 +13,9 @@ import org.joda.time.LocalDate;
  */
 public class CommandDataDescriptor extends DateDescriptor {
 
+  private static final ICommandService SERVICE = (ICommandService) PlatformUI
+      .getWorkbench().getService(ICommandService.class);
+  
   private final String commandId;
   private final int count;
 
@@ -44,9 +47,7 @@ public class CommandDataDescriptor extends DateDescriptor {
    * @return The command, either defined or undefined.
    */
   public final Command findCommand() {
-    ICommandService service = (ICommandService) PlatformUI.getWorkbench().getService(
-        ICommandService.class);
-    return service.getCommand(getCommandId());
+    return SERVICE.getCommand(getCommandId());
   }
 
   /**

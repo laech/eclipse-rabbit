@@ -18,10 +18,6 @@ package rabbit.ui.internal.pages;
 import static rabbit.ui.internal.util.DurationFormat.format;
 
 import rabbit.data.access.model.PerspectiveDataDescriptor;
-import rabbit.ui.internal.pages.Category;
-import rabbit.ui.internal.pages.DateLabelProvider;
-import rabbit.ui.internal.pages.PerspectivePageContentProvider;
-import rabbit.ui.internal.pages.PerspectivePageLabelProvider;
 import rabbit.ui.internal.util.UndefinedPerspectiveDescriptor;
 
 import static org.junit.Assert.assertEquals;
@@ -41,8 +37,6 @@ import org.joda.time.LocalDate;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-
-import java.util.Arrays;
 
 /**
  * @see PerspectivePageLabelProvider
@@ -144,7 +138,7 @@ public class PerspectivePageLabelProviderTest {
     LocalDate date = new LocalDate();
     d1 = new PerspectiveDataDescriptor(date, new Duration(45), defined.getId());
     d2 = new PerspectiveDataDescriptor(date, new Duration(1), undefined.getId());
-    contents.getViewer().setInput(Arrays.asList(d1, d2));
+    contents.getViewer().setInput(PerspectivePageContentProviderTest.newInput(d1, d2));
 
     contents.setSelectedCategories(Category.PERSPECTIVE);
     contents.setPaintCategory(Category.PERSPECTIVE);

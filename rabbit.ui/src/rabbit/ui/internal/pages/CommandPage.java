@@ -27,7 +27,6 @@ import rabbit.ui.internal.actions.GroupByAction;
 import rabbit.ui.internal.actions.ShowHideFilterControlAction;
 import rabbit.ui.internal.util.ICategory;
 import rabbit.ui.internal.viewers.CellPainter;
-import rabbit.ui.internal.viewers.DelegatingStyledCellLabelProvider;
 import rabbit.ui.internal.viewers.TreeViewerLabelSorter;
 import rabbit.ui.internal.viewers.TreeViewerSorter;
 
@@ -42,7 +41,6 @@ import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.viewers.TreeNode;
 import org.eclipse.jface.viewers.TreeViewer;
-import org.eclipse.jface.viewers.TreeViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.TreeColumn;
@@ -54,7 +52,8 @@ import java.util.List;
 /**
  * A page for displaying command usage.
  */
-public class CommandPage extends AbstractAccessorPage {
+public class CommandPage extends InternalPage<CommandDataDescriptor>
+    implements CommandPageContentProvider.IProvider {
   
   // Preference constants:
   private static final String PREF_SELECTED_CATEGORIES = "CommandPage.SelectedCatgories";
@@ -62,23 +61,22 @@ public class CommandPage extends AbstractAccessorPage {
 
   private CommandPageContentProvider contents;
   private CommandPageLabelProvider labels;
-  
+
   /**
    * Constructor.
    */
   public CommandPage() {
     super();
   }
-
+  
   @Override
   public void createColumns(TreeViewer viewer) {
-    TreeViewerColumn viewerColumn = new TreeViewerColumn(viewer, SWT.LEFT);
-    viewerColumn.getColumn().setText("Name");
-    viewerColumn.getColumn().setWidth(150);
-    viewerColumn.getColumn().addSelectionListener(createInitialComparator(viewer));
-    viewerColumn.setLabelProvider(new DelegatingStyledCellLabelProvider(labels, false));
-
     TreeColumn column = new TreeColumn(viewer.getTree(), SWT.LEFT);
+    column.setText("Name");
+    column.setWidth(150);
+    column.addSelectionListener(createInitialComparator(viewer));
+    
+    column = new TreeColumn(viewer.getTree(), SWT.LEFT);
     column.addSelectionListener(new TreeViewerLabelSorter(viewer));
     column.setText("Description");
     column.setWidth(200);
@@ -88,10 +86,11 @@ public class CommandPage extends AbstractAccessorPage {
     column.setText("Usage Count");
     column.setWidth(100);
   }
-  
+
   @Override
   public IContributionItem[] createToolBarItems(IToolBarManager toolBar) {
-    ShowHideFilterControlAction filterAction = new ShowHideFilterControlAction(getFilteredTree());
+    ShowHideFilterControlAction filterAction = 
+        new ShowHideFilterControlAction(getFilteredTree());
     filterAction.run();
     
     final ICategory cmd = Category.COMMAND;
@@ -142,7 +141,7 @@ public class CommandPage extends AbstractAccessorPage {
   protected CellPainter createCellPainter() {
     return new CellPainter(contents);
   }
-
+  
   @Override
   protected PatternFilter createFilter() {
     return new PatternFilter();
@@ -168,10 +167,10 @@ public class CommandPage extends AbstractAccessorPage {
   }
 
   @Override
-  protected IAccessor<?> getAccessor() {
+  protected IAccessor<CommandDataDescriptor> getAccessor() {
     return DataHandler.getAccessor(CommandDataDescriptor.class);
   }
-
+  
   @Override
   protected void initializeViewer(TreeViewer viewer) {
     contents = new CommandPageContentProvider(viewer);

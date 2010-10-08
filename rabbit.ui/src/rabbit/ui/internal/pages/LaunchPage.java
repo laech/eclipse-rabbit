@@ -28,7 +28,6 @@ import rabbit.ui.internal.actions.ShowHideFilterControlAction;
 import rabbit.ui.internal.util.ICategory;
 import rabbit.ui.internal.viewers.CellPainter;
 import rabbit.ui.internal.viewers.DeepPatternFilter;
-import rabbit.ui.internal.viewers.DelegatingStyledCellLabelProvider;
 import rabbit.ui.internal.viewers.TreeViewerLabelSorter;
 import rabbit.ui.internal.viewers.TreeViewerSorter;
 
@@ -57,7 +56,8 @@ import java.util.List;
 /**
  * Displays launch events.
  */
-public class LaunchPage extends AbstractAccessorPage {
+public class LaunchPage extends InternalPage<LaunchDataDescriptor>
+    implements LaunchPageContentProvider.IProvider {
   
   // Preference constants:
   private static final String PREF_SELECTED_CATEGORIES = "LaunchPage.SelectedCatgories";
@@ -157,20 +157,20 @@ public class LaunchPage extends AbstractAccessorPage {
       protected int doCompare(Viewer v, Object e1, Object e2) {
         long count1 = contents.getLaunchCountValueProvider().getValue(e1);
         long count2 = contents.getLaunchCountValueProvider().getValue(e2);
-        if (count1 == count2)
+        if (count1 == count2) {
           return 0;
-        else
+        } else {
           return (count1 > count2) ? 1 : -1;
+        }
       }
     };
     
-    TreeViewerColumn viewerColumn = new TreeViewerColumn(viewer, SWT.LEFT);
-    viewerColumn.getColumn().setText("Name");
-    viewerColumn.getColumn().setWidth(180);
-    viewerColumn.getColumn().addSelectionListener(createInitialComparator(viewer));
-    viewerColumn.setLabelProvider(new DelegatingStyledCellLabelProvider(labels, false));
+    TreeColumn column = new TreeColumn(viewer.getTree(), SWT.LEFT);
+    column.setText("Name");
+    column.setWidth(180);
+    column.addSelectionListener(createInitialComparator(viewer));
 
-    TreeColumn column = new TreeColumn(viewer.getTree(), SWT.RIGHT);
+    column = new TreeColumn(viewer.getTree(), SWT.RIGHT);
     column.setText("Count");
     column.setWidth(80);
     column.addSelectionListener(countSorter);
@@ -185,12 +185,12 @@ public class LaunchPage extends AbstractAccessorPage {
     column.setText("Total Duration");
     column.addSelectionListener(getValueSorter());
   }
-
+  
   @Override
   protected PatternFilter createFilter() {
     return new DeepPatternFilter();
   }
-
+  
   @Override
   protected TreeViewerLabelSorter createInitialComparator(TreeViewer viewer) {
     return new TreeViewerLabelSorter(viewer) {
@@ -208,9 +208,9 @@ public class LaunchPage extends AbstractAccessorPage {
       }
     };
   }
-
+  
   @Override
-  protected IAccessor<?> getAccessor() {
+  protected IAccessor<LaunchDataDescriptor> getAccessor() {
     return DataHandler.getAccessor(LaunchDataDescriptor.class);
   }
 
@@ -221,7 +221,7 @@ public class LaunchPage extends AbstractAccessorPage {
     viewer.setContentProvider(contents);
     viewer.setLabelProvider(labels);
   }
-  
+
   @Override
   protected void restoreState() {
     super.restoreState();
@@ -248,7 +248,7 @@ public class LaunchPage extends AbstractAccessorPage {
       // Just let the content provider use its default paint category.
     }
   }
-  
+
   @Override
   protected void saveState() {
     super.saveState();

@@ -19,6 +19,7 @@ import rabbit.data.access.model.FileDataDescriptor;
 import rabbit.ui.internal.pages.Category;
 import rabbit.ui.internal.pages.ResourcePage;
 import rabbit.ui.internal.pages.ResourcePageContentProvider;
+import rabbit.ui.internal.pages.ResourcePageContentProvider.IProvider;
 import rabbit.ui.internal.util.ICategory;
 
 import com.google.common.collect.Sets;
@@ -45,6 +46,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Set;
 
 /**
@@ -96,7 +98,7 @@ public class ResourcePageContentProviderTest {
   public void testHasChildren() throws Exception {
     FileDataDescriptor des = new FileDataDescriptor(new LocalDate(),
         new Duration(1009823), file.getFullPath());
-    page.getViewer().setInput(Arrays.asList(des));
+    page.getViewer().setInput(newInput(des));
 
     TreeNode root = provider.getRoot();
     provider.setSelectedCategories(Category.PROJECT);
@@ -115,7 +117,7 @@ public class ResourcePageContentProviderTest {
     FileDataDescriptor d2 = new FileDataDescriptor(d1.getDate().minusDays(1),
         new Duration(12), file.getFullPath());
 
-    page.getViewer().setInput(Arrays.asList(d1, d2));
+    page.getViewer().setInput(newInput(d1, d2));
 
     TreeNode root = provider.getRoot();
     // Set the data to categorize by file, then by dates:
@@ -142,7 +144,7 @@ public class ResourcePageContentProviderTest {
     FileDataDescriptor d2 = new FileDataDescriptor(d1.getDate().minusDays(1),
         new Duration(123), file.getFullPath());
 
-    page.getViewer().setInput(Arrays.asList(d1, d2));
+    page.getViewer().setInput(newInput(d1, d2));
 
     provider.setSelectedCategories(Category.DATE);
     // Passing null is OK, the provider should return the children of its "root"
@@ -171,7 +173,7 @@ public class ResourcePageContentProviderTest {
         new Duration(12), file.getFullPath());
 
     // Date
-    page.getViewer().setInput(Arrays.asList(d1, d2));
+    page.getViewer().setInput(newInput(d1, d2));
     provider.setSelectedCategories(Category.DATE);
     provider.setPaintCategory(Category.DATE);
     assertEquals(d1.getDuration().getMillis(), provider.getMaxValue());
@@ -242,7 +244,7 @@ public class ResourcePageContentProviderTest {
     FileDataDescriptor d2 = new FileDataDescriptor(d1.getDate().minusDays(1),
         new Duration(123), file.getFullPath());
 
-    page.getViewer().setInput(Arrays.asList(d1, d2));
+    page.getViewer().setInput(newInput(d1, d2));
 
     TreeNode root = provider.getRoot();
     provider.setSelectedCategories(Category.FILE);
@@ -261,7 +263,7 @@ public class ResourcePageContentProviderTest {
   public void testInputChanged_clearsOldData() throws Exception {
     FileDataDescriptor des = new FileDataDescriptor(new LocalDate(),
         new Duration(1009823), file.getFullPath());
-    page.getViewer().setInput(Arrays.asList(des));
+    page.getViewer().setInput(newInput(des));
     TreeNode root = provider.getRoot();
     assertFalse(root.getChildren() == null || root.getChildren().length == 0);
     try {
@@ -332,7 +334,7 @@ public class ResourcePageContentProviderTest {
     FileDataDescriptor d2 = new FileDataDescriptor(d1.getDate().minusDays(1),
         new Duration(123), file.getFullPath());
 
-    page.getViewer().setInput(Arrays.asList(d1, d2));
+    page.getViewer().setInput(newInput(d1, d2));
 
     provider.setSelectedCategories(Category.DATE);
     provider.setPaintCategory(Category.DATE);
@@ -427,5 +429,13 @@ public class ResourcePageContentProviderTest {
     assertTrue(provider.shouldPaint(projectNode));
     assertFalse(provider.shouldPaint(folderNode));
     assertFalse(provider.shouldPaint(fileNode));
+  }
+  
+  static IProvider newInput(final FileDataDescriptor... data) {
+    return new IProvider() {
+      @Override public Collection<FileDataDescriptor> get() {
+        return Arrays.asList(data);
+      }
+    };
   }
 }

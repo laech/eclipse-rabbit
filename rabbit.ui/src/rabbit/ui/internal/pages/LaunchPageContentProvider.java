@@ -49,8 +49,8 @@ import java.util.Collection;
 import java.util.IdentityHashMap;
 
 /**
- * Acceptable input for this content provider is {@code
- * Collection<LaunchDataDescriptor>}
+ * Acceptable input for this content provider is a instance of 
+ * {@link LaunchPageContentProvider.IProvider}.
  * <p>
  * The following {@link ICategory}s are supported:
  * <ul>
@@ -61,7 +61,13 @@ import java.util.IdentityHashMap;
  * </ul>
  * </p>
  */
-public class LaunchPageContentProvider extends AbstractCategoryContentProvider {
+class LaunchPageContentProvider extends AbstractCategoryContentProvider {
+  
+  /**
+   * Provides objects of type {@link LaunchDataDescriptor}.
+   */
+  static interface IProvider extends rabbit.ui.IProvider<LaunchDataDescriptor> {
+  }
 
   /*
    * This content provider builds a tree from the input data, and every leaf
@@ -170,7 +176,7 @@ public class LaunchPageContentProvider extends AbstractCategoryContentProvider {
    * @param viewer The viewer this content provider is for.
    * @throws NullPointerException If viewer is null.
    */
-  public LaunchPageContentProvider(TreeViewer viewer) {
+  LaunchPageContentProvider(TreeViewer viewer) {
     super(viewer);
     launchCounts = Maps.newIdentityHashMap();
     launchDurations = Maps.newIdentityHashMap();
@@ -232,17 +238,11 @@ public class LaunchPageContentProvider extends AbstractCategoryContentProvider {
     return super.shouldFilter(element);
   }
 
-  @SuppressWarnings("unchecked")
   @Override
   protected void doInputChanged(Viewer viewer, Object oldInput, Object newInput) {
-    Collection<LaunchDataDescriptor> data = null;
-    try {
-      data = (Collection<LaunchDataDescriptor>) newInput;
-    } catch (Exception e) {
-      System.err.println(e.getMessage());
-      return;
+    if (newInput instanceof LaunchPageContentProvider.IProvider) {
+      reorganizeData(((LaunchPageContentProvider.IProvider) newInput).get());
     }
-    reorganizeData(data);
   }
 
   @Override
@@ -275,8 +275,6 @@ public class LaunchPageContentProvider extends AbstractCategoryContentProvider {
    * Reorganizes the data according to {@link #getSelectedCategories()}.
    */
   private void reorganizeData(Collection<LaunchDataDescriptor> data) {
-    getRoot().setChildren(null);
-
     ICategory[] categories = getSelectedCategories();
     ILaunchManager manager = DebugPlugin.getDefault().getLaunchManager();
     IWorkspaceRoot workspace = ResourcesPlugin.getWorkspace().getRoot();
@@ -340,8 +338,9 @@ public class LaunchPageContentProvider extends AbstractCategoryContentProvider {
   }
 
   private boolean shouldPaint(Object element) {
-    if (!(element instanceof TreeNode))
+    if (!(element instanceof TreeNode)) {
       return false;
+    }
 
     TreeNode node = (TreeNode) element;
     return getCategorizers().get(getPaintCategory()).apply(node.getValue());

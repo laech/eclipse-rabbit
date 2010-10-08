@@ -19,10 +19,6 @@ import static rabbit.ui.internal.util.DurationFormat.format;
 
 import rabbit.data.access.model.LaunchConfigurationDescriptor;
 import rabbit.data.access.model.LaunchDataDescriptor;
-import rabbit.ui.internal.pages.Category;
-import rabbit.ui.internal.pages.LaunchPageContentProvider;
-import rabbit.ui.internal.pages.LaunchPageLabelProvider;
-import rabbit.ui.internal.pages.ResourcePageLabelProvider;
 import rabbit.ui.internal.util.Pair;
 import rabbit.ui.internal.util.UndefinedLaunchConfigurationType;
 import rabbit.ui.internal.util.UndefinedLaunchMode;
@@ -50,7 +46,6 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import java.util.Arrays;
 import java.util.Collections;
 
 /**
@@ -183,7 +178,7 @@ public class LaunchPageLabelProviderTest {
     LaunchDataDescriptor d2 = new LaunchDataDescriptor(date, debugMode, 19,
         new Duration(1200), Collections.<IPath> emptySet());
 
-    viewer.setInput(Arrays.asList(d1, d2));
+    viewer.setInput(LaunchPageContentProviderTest.newInput(d1, d2));
     contents.setSelectedCategories(Category.DATE, Category.LAUNCH_TYPE,
         Category.LAUNCH, Category.LAUNCH_MODE);
 
@@ -258,7 +253,7 @@ public class LaunchPageLabelProviderTest {
     LaunchDataDescriptor d2 = new LaunchDataDescriptor(date, debugMode, 11,
         new Duration(1200), Collections.<IPath> emptySet());
 
-    viewer.setInput(Arrays.asList(d1, d2));
+    viewer.setInput(LaunchPageContentProviderTest.newInput(d1, d2));
     contents.setSelectedCategories(Category.DATE, Category.LAUNCH_TYPE,
         Category.LAUNCH, Category.LAUNCH_MODE);
 

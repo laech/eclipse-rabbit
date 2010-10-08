@@ -16,11 +16,6 @@
 package rabbit.ui.internal.pages;
 
 import rabbit.data.access.model.CommandDataDescriptor;
-import rabbit.ui.internal.pages.Category;
-import rabbit.ui.internal.pages.CommandLabelProvider;
-import rabbit.ui.internal.pages.CommandPageContentProvider;
-import rabbit.ui.internal.pages.CommandPageLabelProvider;
-import rabbit.ui.internal.pages.DateLabelProvider;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -38,8 +33,6 @@ import org.joda.time.LocalDate;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-
-import java.util.Arrays;
 
 /**
  * Test for {@link CommandPageLabelProvider}
@@ -146,7 +139,7 @@ public class CommandPageLabelProviderTest {
     LocalDate date = new LocalDate();
     d1 = new CommandDataDescriptor(date, 11, defined.getId());
     d2 = new CommandDataDescriptor(date, 102, undefined.getId());
-    contents.getViewer().setInput(Arrays.asList(d1, d2));
+    contents.getViewer().setInput(CommandPageContentProviderTest.newInput(d1, d2));
 
     contents.setSelectedCategories(Category.COMMAND);
     contents.setPaintCategory(Category.COMMAND);

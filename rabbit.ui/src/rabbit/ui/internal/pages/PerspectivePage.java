@@ -27,7 +27,6 @@ import rabbit.ui.internal.actions.GroupByAction;
 import rabbit.ui.internal.actions.ShowHideFilterControlAction;
 import rabbit.ui.internal.util.ICategory;
 import rabbit.ui.internal.viewers.CellPainter;
-import rabbit.ui.internal.viewers.DelegatingStyledCellLabelProvider;
 import rabbit.ui.internal.viewers.TreeViewerLabelSorter;
 import rabbit.ui.internal.viewers.TreeViewerSorter;
 
@@ -42,7 +41,6 @@ import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.viewers.TreeNode;
 import org.eclipse.jface.viewers.TreeViewer;
-import org.eclipse.jface.viewers.TreeViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
@@ -56,7 +54,8 @@ import java.util.List;
 /**
  * A page displays perspective usage.
  */
-public class PerspectivePage extends AbstractAccessorPage {
+public class PerspectivePage extends InternalPage<PerspectiveDataDescriptor>
+    implements PerspectivePageContentProvider.IProvider {
   
   // Preference constants:
   private static final String PREF_SELECTED_CATEGORIES = "PerspectivePage.SelectedCatgories";
@@ -65,40 +64,26 @@ public class PerspectivePage extends AbstractAccessorPage {
   private PerspectivePageContentProvider contents;
   private PerspectivePageLabelProvider labels;
   
-  @Override
-  protected IAccessor<?> getAccessor() {
-    return DataHandler.getAccessor(PerspectiveDataDescriptor.class);
-  }
-
   /**
    * Constructs a new page.
    */
   public PerspectivePage() {
     super();
   }
-  
-  @Override
-  protected void initializeViewer(TreeViewer viewer) {
-    contents = new PerspectivePageContentProvider(viewer);
-    labels = new PerspectivePageLabelProvider(contents);
-    viewer.setContentProvider(contents);
-    viewer.setLabelProvider(labels);
-  }
 
   @Override
   public void createColumns(TreeViewer viewer) {
-    TreeViewerColumn viewerColumn = new TreeViewerColumn(viewer, SWT.LEFT);
-    viewerColumn.getColumn().setText("Name");
-    viewerColumn.getColumn().setWidth(200);
-    viewerColumn.getColumn().addSelectionListener(createInitialComparator(viewer));
-    viewerColumn.setLabelProvider(new DelegatingStyledCellLabelProvider(labels, false));
+    TreeColumn column = new TreeColumn(viewer.getTree(), SWT.LEFT);
+    column.setText("Name");
+    column.setWidth(200);
+    column.addSelectionListener(createInitialComparator(viewer));
 
-    TreeColumn column = new TreeColumn(viewer.getTree(), SWT.RIGHT);
+    column = new TreeColumn(viewer.getTree(), SWT.RIGHT);
     column.setText("Usage");
     column.setWidth(200);
     column.addSelectionListener(getValueSorter());
   }
-
+  
   @Override
   public IContributionItem[] createToolBarItems(IToolBarManager toolBar) {
     final ICategory date = Category.DATE;
@@ -159,6 +144,11 @@ public class PerspectivePage extends AbstractAccessorPage {
   }
 
   @Override
+  protected PatternFilter createFilter() {
+    return new PatternFilter();
+  }
+
+  @Override
   protected TreeViewerSorter createInitialComparator(TreeViewer viewer) {
     return new TreeViewerLabelSorter(viewer) {
       @Override
@@ -175,8 +165,16 @@ public class PerspectivePage extends AbstractAccessorPage {
   }
 
   @Override
-  protected PatternFilter createFilter() {
-    return new PatternFilter();
+  protected IAccessor<PerspectiveDataDescriptor> getAccessor() {
+    return DataHandler.getAccessor(PerspectiveDataDescriptor.class);
+  }
+
+  @Override
+  protected void initializeViewer(TreeViewer viewer) {
+    contents = new PerspectivePageContentProvider(viewer);
+    labels = new PerspectivePageLabelProvider(contents);
+    viewer.setContentProvider(contents);
+    viewer.setLabelProvider(labels);
   }  
   
   @Override

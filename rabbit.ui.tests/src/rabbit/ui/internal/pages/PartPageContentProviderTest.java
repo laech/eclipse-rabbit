@@ -44,6 +44,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Set;
 
 /**
@@ -90,7 +91,7 @@ public class PartPageContentProviderTest {
     PartDataDescriptor d2 = new PartDataDescriptor(d1.getDate().minusDays(1),
         new Duration(2), d1.getPartId());
 
-    provider.getViewer().setInput(Arrays.asList(d1, d2));
+    provider.getViewer().setInput(newInput(d1, d2));
 
     TreeNode root = provider.getRoot();
     // Set the data to categorize by part, then by dates:
@@ -117,7 +118,7 @@ public class PartPageContentProviderTest {
     PartDataDescriptor d2 = new PartDataDescriptor(d1.getDate().minusDays(1),
         new Duration(2), d1.getPartId());
 
-    provider.getViewer().setInput(Arrays.asList(d1, d2));
+    provider.getViewer().setInput(newInput(d1, d2));
 
     provider.setSelectedCategories(Category.DATE);
     // Passing null is OK, the provider should return the children of its "root"
@@ -146,7 +147,7 @@ public class PartPageContentProviderTest {
         new Duration(2), d1.getPartId());
 
     // Date
-    provider.getViewer().setInput(Arrays.asList(d1, d2));
+    provider.getViewer().setInput(newInput(d1, d2));
     provider.setSelectedCategories(Category.DATE);
     provider.setPaintCategory(Category.DATE);
     assertEquals(d1.getDuration().getMillis(), provider.getMaxValue());
@@ -202,7 +203,7 @@ public class PartPageContentProviderTest {
     PartDataDescriptor d2 = new PartDataDescriptor(d1.getDate().minusDays(1),
         new Duration(2), d1.getPartId());
 
-    provider.getViewer().setInput(Arrays.asList(d1, d2));
+    provider.getViewer().setInput(newInput(d1, d2));
 
     TreeNode root = provider.getRoot();
     provider.setSelectedCategories(Category.WORKBENCH_TOOL);
@@ -221,7 +222,7 @@ public class PartPageContentProviderTest {
   public void testHasChildren() throws Exception {
     PartDataDescriptor des = new PartDataDescriptor(new LocalDate(),
         new Duration(1), "id");
-    provider.getViewer().setInput(Arrays.asList(des));
+    provider.getViewer().setInput(newInput(des));
 
     TreeNode root = provider.getRoot();
     provider.setSelectedCategories(Category.DATE);
@@ -236,7 +237,7 @@ public class PartPageContentProviderTest {
   public void testInputChanged_clearsOldData() throws Exception {
     PartDataDescriptor des = new PartDataDescriptor(new LocalDate(),
         new Duration(1), "id");
-    provider.getViewer().setInput(Arrays.asList(des));
+    provider.getViewer().setInput(newInput(des));
     TreeNode root = provider.getRoot();
     assertFalse(root.getChildren() == null || root.getChildren().length == 0);
     try {
@@ -313,7 +314,7 @@ public class PartPageContentProviderTest {
         new Duration(1), editor.getId());
     PartDataDescriptor viewDes = new PartDataDescriptor(new LocalDate(),
         new Duration(editorDes.getDuration().getMillis() - 1), view.getId());
-    provider.getViewer().setInput(Arrays.asList(editorDes, viewDes));
+    provider.getViewer().setInput(newInput(editorDes, viewDes));
 
     provider.setHideEditors(true);
     assertEquals(viewDes.getDuration().getMillis(), provider.getMaxValue());
@@ -351,7 +352,7 @@ public class PartPageContentProviderTest {
         new Duration(10), view.getId());
     PartDataDescriptor editorDes = new PartDataDescriptor(new LocalDate(),
         new Duration(viewDes.getDuration().getMillis() - 1), editor.getId());
-    provider.getViewer().setInput(Arrays.asList(editorDes, viewDes));
+    provider.getViewer().setInput(newInput(editorDes, viewDes));
 
     provider.setHideViews(true);
     assertEquals(editorDes.getDuration().getMillis(), provider.getMaxValue());
@@ -377,7 +378,7 @@ public class PartPageContentProviderTest {
     PartDataDescriptor d2 = new PartDataDescriptor(d1.getDate().minusDays(1),
         new Duration(2), d1.getPartId());
 
-    provider.getViewer().setInput(Arrays.asList(d1, d2));
+    provider.getViewer().setInput(newInput(d1, d2));
 
     provider.setSelectedCategories(Category.DATE);
     provider.setPaintCategory(Category.DATE);
@@ -460,5 +461,13 @@ public class PartPageContentProviderTest {
     provider.setPaintCategory(Category.WORKBENCH_TOOL);
     assertFalse(provider.shouldPaint(dateNode));
     assertTrue(provider.shouldPaint(partNode));
+  }
+  
+  static PartPageContentProvider.IProvider newInput(final PartDataDescriptor... data) {
+    return new PartPageContentProvider.IProvider() {
+      @Override public Collection<PartDataDescriptor> get() {
+        return Arrays.asList(data);
+      }
+    };
   }
 }
