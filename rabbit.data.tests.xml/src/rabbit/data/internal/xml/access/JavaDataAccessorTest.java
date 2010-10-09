@@ -33,7 +33,7 @@ import java.util.List;
  * @see JavaDataAccessor
  */
 public class JavaDataAccessorTest extends 
-    AbstractDataNodeAccessorTest<JavaDataDescriptor, JavaEventType, JavaEventListType> {
+    AbstractNodeAccessorTest<JavaDataDescriptor, JavaEventType, JavaEventListType> {
 
   @Override
   protected JavaDataAccessor create() {

@@ -29,7 +29,7 @@ import java.util.List;
 
 public class PerspectiveDataAccessorTest
     extends
-    AbstractDataNodeAccessorTest<PerspectiveDataDescriptor, PerspectiveEventType, PerspectiveEventListType> {
+    AbstractNodeAccessorTest<PerspectiveDataDescriptor, PerspectiveEventType, PerspectiveEventListType> {
 
   @Override
   protected PerspectiveDataAccessor create() {

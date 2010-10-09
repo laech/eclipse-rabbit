@@ -44,7 +44,7 @@ public final class LaunchDataDescriptor extends DurationDescriptor {
     checkArgument(count >= 0);
 
     this.filePaths = ImmutableSet.copyOf(checkNotNull(filePaths));
-    this.launch = checkNotNull(launch);;
+    this.launch = checkNotNull(launch);
     this.count = count;
   }
 

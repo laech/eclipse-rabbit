@@ -18,13 +18,14 @@ package rabbit.data.internal.xml;
 import rabbit.data.internal.xml.schema.events.EventListType;
 import rabbit.data.internal.xml.schema.events.ObjectFactory;
 
+import com.google.common.collect.Lists;
+
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.joda.time.LocalDate;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.xml.bind.JAXBElement;
@@ -35,15 +36,16 @@ import javax.xml.bind.JAXBException;
  */
 public enum DataStore implements IDataStore {
 
-  COMMAND_STORE("commandEvents"), 
-  PART_STORE("partEvents"), 
-  PERSPECTIVE_STORE("perspectiveEvents"), 
-  FILE_STORE("fileEvents"),
-  TASK_STORE("taskEvents"),
-  LAUNCH_STORE("launchEvents"),
-  SESSION_STORE("sessionEvents"),
-  JAVA_STORE("javaEvents");
-  
+  //@formatter:off
+  COMMAND_STORE     ("commandEvents"),
+  PART_STORE        ("partEvents"),
+  PERSPECTIVE_STORE ("perspectiveEvents"),
+  FILE_STORE        ("fileEvents"),
+  TASK_STORE        ("taskEvents"),
+  LAUNCH_STORE      ("launchEvents"),
+  SESSION_STORE     ("sessionEvents"),
+  JAVA_STORE        ("javaEvents");
+  //@formatter:on
 
   /**
    * An object factory for creating XML object types.
@@ -60,7 +62,7 @@ public enum DataStore implements IDataStore {
   public File getDataFile(LocalDate date) {
     return getDataFile(date, getStorageLocation());
   }
-  
+
   @Override
   public File getDataFile(LocalDate date, IPath location) {
     return location.append(id + "-" + date.toString("yyyy-MM"))
@@ -69,20 +71,26 @@ public enum DataStore implements IDataStore {
 
   @Override
   public List<File> getDataFiles(LocalDate start, LocalDate end) {
+    List<File> result = Lists.newLinkedList();
+    IPath[] storagePaths = XmlPlugin.getDefault().getStoragePaths();
+    for (IPath path : storagePaths) {
+      result.addAll(getDataFiles(start, end, path));
+    }
+    return result;
+  }
+
+  @Override
+  public List<File> getDataFiles(LocalDate start, LocalDate end, IPath location) {
     // Work out the number of months between the two dates, regardless of the
     // dateOfMonth of each date:
     int numMonths = (end.getYear() - start.getYear()) * 12;
     numMonths += end.getMonthOfYear() - start.getMonthOfYear();
 
-    List<File> result = new ArrayList<File>();
-    IPath[] storagePaths = XmlPlugin.getDefault().getStoragePaths();
+    List<File> result = Lists.newLinkedList();
     for (; numMonths >= 0; numMonths--) {
-      
-      for (IPath path : storagePaths) {
-        File f = getDataFile(end.minusMonths(numMonths), path);
-        if (f.exists()) {
-          result.add(f);
-        }
+      File f = getDataFile(end.minusMonths(numMonths), location);
+      if (f.exists()) {
+        result.add(f);
       }
     }
     return result;
@@ -94,10 +102,13 @@ public enum DataStore implements IDataStore {
     File f = path.toFile();
     if (!f.exists()) {
       if (!f.mkdirs()) {
-        XmlPlugin.getDefault().getLog().log(
-            new Status(IStatus.ERROR, XmlPlugin.PLUGIN_ID,
-                "Unable to create storage location. Perhaps no write permission?\n"
-                    + f.getAbsolutePath()));
+        XmlPlugin
+            .getDefault()
+            .getLog()
+            .log(
+                new Status(IStatus.ERROR, XmlPlugin.PLUGIN_ID,
+                    "Unable to create storage location. Perhaps no write permission?\n"
+                        + f.getAbsolutePath()));
       }
     }
     return path;
@@ -121,8 +132,11 @@ public enum DataStore implements IDataStore {
     } catch (Exception e) {
       // XML file not valid?
 
-      XmlPlugin.getDefault().getLog().log(
-          new Status(IStatus.ERROR, XmlPlugin.PLUGIN_ID, e.getMessage(), e));
+      XmlPlugin
+          .getDefault()
+          .getLog()
+          .log(
+              new Status(IStatus.ERROR, XmlPlugin.PLUGIN_ID, e.getMessage(), e));
       return objectFactory.createEventListType();
     }
     return objectFactory.createEventListType();
@@ -137,9 +151,12 @@ public enum DataStore implements IDataStore {
       JaxbUtil.marshal(objectFactory.createEvents(doc), f);
       return true;
     } catch (JAXBException e) {
-      XmlPlugin.getDefault().getLog().log(
-          new Status(IStatus.ERROR, XmlPlugin.PLUGIN_ID,
-              "Unable to save data.", e));
+      XmlPlugin
+          .getDefault()
+          .getLog()
+          .log(
+              new Status(IStatus.ERROR, XmlPlugin.PLUGIN_ID,
+                  "Unable to save data.", e));
       return false;
     }
   }

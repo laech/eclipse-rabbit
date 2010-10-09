@@ -15,16 +15,19 @@
  */
 package rabbit.data.internal.xml;
 
-import rabbit.data.internal.xml.DataStore;
-import rabbit.data.internal.xml.XmlPlugin;
 import rabbit.data.internal.xml.schema.events.ObjectFactory;
 
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.junit.matchers.JUnitMatchers.hasItems;
 
+import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
 import org.joda.time.MutableDateTime;
@@ -49,8 +52,11 @@ public class DataStoreTest {
     assertNotNull(store.getDataFile(new LocalDate()));
   }
 
+  /**
+   * {@link IDataStore#getDataFiles(LocalDate, LocalDate)}
+   */
   @Test
-  public void testGetDataFiles() throws IOException {
+  public void testGetDataFiles_startEnd() throws IOException {
 
     LocalDate lowerBound = new LocalDate(1, 1, 10);
     LocalDate upperBound = new LocalDate(3, 1, 1);
@@ -74,13 +80,10 @@ public class DataStoreTest {
     for (File f : returnedFiles) {
       assertTrue(files.contains(f));
     }
-
     assertEquals(0, store.getDataFiles(upperBound, lowerBound).size());
-
+    
     for (File f : files) {
-      if (!f.delete()) {
-        System.out.println("File is not deleted.");
-      }
+      FileUtils.forceDelete(f);
     }
     assertEquals(0, store.getDataFiles(lowerBound, upperBound).size());
 
@@ -104,6 +107,42 @@ public class DataStoreTest {
     assertEquals(result.size(), store.getDataFiles(start, end).size());
   }
 
+  /**
+   * @see IDataStore#getDataFiles(LocalDate, LocalDate, IPath)
+   */
+  @Test
+  public void testGetDataFiles_startEndLocation() throws Exception {
+
+    LocalDate lowerBound = new LocalDate(1, 1, 10);
+    LocalDate upperBound = new LocalDate(3, 1, 1);
+
+    LocalDate insideLowerBound = lowerBound.plusMonths(1);
+    LocalDate insideUpperBound = upperBound.minusMonths(1);
+    
+    IPath path = new Path(System.getProperty("java.io.tmpdir"));
+
+    Set<File> expectedFiles = new HashSet<File>();
+    expectedFiles.add(store.getDataFile(lowerBound, path));
+    expectedFiles.add(store.getDataFile(upperBound, path));
+    expectedFiles.add(store.getDataFile(insideLowerBound, path));
+    expectedFiles.add(store.getDataFile(insideUpperBound, path));
+    for (File f : expectedFiles) {
+      if (!f.exists() && !f.createNewFile()) {
+          throw new RuntimeException();
+      }
+    }
+
+    List<File> actualFiles = store.getDataFiles(lowerBound, upperBound, path);
+    assertThat(actualFiles.size(), equalTo(expectedFiles.size()));
+    assertThat(actualFiles, hasItems(expectedFiles.toArray(new File[0])));
+    assertTrue(store.getDataFiles(upperBound, lowerBound, path).isEmpty());
+    
+    for (File f : expectedFiles) {
+      FileUtils.forceDelete(f);
+    }
+    assertTrue(store.getDataFiles(lowerBound, upperBound, path).isEmpty());
+  }
+  
   @Test
   public void testGetStorageLocation() {
     assertNotNull(store.getStorageLocation());

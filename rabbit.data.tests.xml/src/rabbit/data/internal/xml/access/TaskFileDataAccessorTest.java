@@ -33,7 +33,7 @@ import java.util.List;
  * @see TaskFileDataAccessor
  */
 public class TaskFileDataAccessorTest extends
-    AbstractDataNodeAccessorTest<TaskFileDataDescriptor, TaskFileEventType, TaskFileEventListType> {
+    AbstractNodeAccessorTest<TaskFileDataDescriptor, TaskFileEventType, TaskFileEventListType> {
 
   @Override
   protected TaskFileDataAccessor create() {

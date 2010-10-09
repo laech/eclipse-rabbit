@@ -18,21 +18,26 @@ package rabbit.data.internal.xml.access;
 import static rabbit.data.internal.xml.DatatypeUtil.toXmlDate;
 
 import rabbit.data.access.IAccessor;
+import rabbit.data.access.model.WorkspaceStorage;
 import rabbit.data.internal.xml.IDataStore;
+import rabbit.data.internal.xml.XmlPlugin;
 import rabbit.data.internal.xml.schema.events.EventGroupType;
 import rabbit.data.internal.xml.schema.events.EventListType;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.collect.ImmutableCollection;
+import com.google.common.collect.LinkedListMultimap;
+import com.google.common.collect.Multimap;
 
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
 import org.joda.time.LocalDate;
 
 import java.io.File;
 import java.util.Calendar;
 import java.util.Collection;
-import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import javax.xml.datatype.XMLGregorianCalendar;
 
@@ -60,7 +65,7 @@ public abstract class AbstractAccessor<T, E, S extends EventGroupType>
   }
 
   @Override
-  public ImmutableCollection<T> getData(LocalDate start, LocalDate end) {
+  public Collection<T> getData(LocalDate start, LocalDate end) {
     if (start == null || end == null) {
       throw new NullPointerException();
     }
@@ -74,7 +79,7 @@ public abstract class AbstractAccessor<T, E, S extends EventGroupType>
    *          {@link #getData(Calendar, Calendar)}.
    * @return The filtered data.
    */
-  protected abstract ImmutableCollection<T> filter(List<S> data);
+  protected abstract Collection<T> filter(Multimap<WorkspaceStorage, S> data);
 
   /**
    * Gets the collection of categories from the given parameter.
@@ -94,29 +99,44 @@ public abstract class AbstractAccessor<T, E, S extends EventGroupType>
   }
 
   /**
-   * Gets the data from the XML files.
+   * Gets the data from the XML files. TODO
    * 
    * @param start The start date of the data to get.
    * @param end The end date of the data to get.
    * @return The data between the dates, inclusive.
    */
-  protected List<S> getXmlData(LocalDate start, LocalDate end) {
-    List<S> data = new LinkedList<S>();
-    XMLGregorianCalendar startXmlCal = toXmlDate(start);
-    XMLGregorianCalendar endXmlCal = toXmlDate(end);
+  protected Multimap<WorkspaceStorage, S> getXmlData(LocalDate start,
+      LocalDate end) {
 
-    List<File> files = getDataStore().getDataFiles(start, end);
-    for (File f : files) {
-      for (S list : getCategories(getDataStore().read(f))) {
+    XMLGregorianCalendar startDate = toXmlDate(start);
+    XMLGregorianCalendar endDate = toXmlDate(end);
+    XmlPlugin plugin = XmlPlugin.getDefault();
+
+    IPath[] storagePaths = plugin.getStoragePaths();
+    Multimap<WorkspaceStorage, S> data = LinkedListMultimap
+        .create(storagePaths.length);
+    Multimap<WorkspaceStorage, File> files = LinkedListMultimap
+        .create(storagePaths.length);
+
+    for (IPath path : storagePaths) {
+      List<File> fileList = getDataStore().getDataFiles(start, end, path);
+      IPath workspacePath = null;
+      String workspacePathString = plugin.getProperty(path.toOSString());
+      if (workspacePathString != null) {
+        workspacePath = new Path(workspacePathString);
+      }
+      files.putAll(new WorkspaceStorage(path, workspacePath), fileList);
+    }
+
+    for (Map.Entry<WorkspaceStorage, File> entry : files.entries()) {
+      for (S list : getCategories(getDataStore().read(entry.getValue()))) {
 
         XMLGregorianCalendar date = list.getDate();
-        if (date == null)
-          continue;
-
-        if (date.compare(startXmlCal) >= 0
-            && list.getDate().compare(endXmlCal) <= 0) {
-
-          data.add(list);
+        if (date == null) {
+          continue; // Ignore invalid data.
+        }
+        if (startDate.compare(date) <= 0 && date.compare(endDate) <= 0) {
+          data.put(entry.getKey(), list);
         }
       }
     }

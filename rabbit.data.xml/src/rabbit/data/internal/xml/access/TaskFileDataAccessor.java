@@ -37,7 +37,7 @@ import java.util.Collection;
  * Gets task data.
  */
 public class TaskFileDataAccessor extends
-    AbstractDataNodeAccessor<TaskFileDataDescriptor, 
+    AbstractNodeAccessor<TaskFileDataDescriptor, 
                              TaskFileEventType, 
                              TaskFileEventListType> {
 

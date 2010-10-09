@@ -32,7 +32,7 @@ import java.util.List;
  */
 public class PartDataAccessorTest
     extends
-    AbstractDataNodeAccessorTest<PartDataDescriptor, PartEventType, PartEventListType> {
+    AbstractNodeAccessorTest<PartDataDescriptor, PartEventType, PartEventListType> {
 
   @Override
   protected PartDataAccessor create() {

@@ -15,8 +15,6 @@
  */
 package rabbit.data.internal.xml;
 
-import rabbit.data.internal.xml.XmlPlugin;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -101,8 +99,6 @@ public class XmlPluginTest {
       if (file.isDirectory()) {
         paths.add(Path.fromOSString(file.getAbsolutePath()));
       }
-
-      System.out.println(file.getName());
     }
     assertEquals(paths.size(), plugin.getStoragePaths().length);
     for (IPath path : plugin.getStoragePaths()) {

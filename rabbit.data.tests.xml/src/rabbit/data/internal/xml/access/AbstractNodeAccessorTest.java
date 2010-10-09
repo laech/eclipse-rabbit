@@ -40,12 +40,12 @@ import java.util.Map.Entry;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 /**
- * @see AbstractDataNodeAccessor
+ * @see AbstractNodeAccessor
  */
-public abstract class AbstractDataNodeAccessorTest<E, T, S extends EventGroupType>
+public abstract class AbstractNodeAccessorTest<E, T, S extends EventGroupType>
     extends AbstractAccessorTest<E, T, S> {
 
-  protected AbstractDataNodeAccessor<E, T, S> accessor = create();
+  protected AbstractNodeAccessor<E, T, S> accessor = create();
 
   @Test
   public abstract void testCreateDataNode() throws Exception;
@@ -61,10 +61,10 @@ public abstract class AbstractDataNodeAccessorTest<E, T, S extends EventGroupTyp
   }
 
   @Override
-  protected abstract AbstractDataNodeAccessor<E, T, S> create();
+  protected abstract AbstractNodeAccessor<E, T, S> create();
 
   @Override
-  protected void assertValues(Collection<E> expected, EventListType events)
+  protected void assertValues(Collection<E> actual, EventListType events)
       throws Exception {
 
     IMerger<T> merger = accessor.getMerger();
@@ -77,20 +77,20 @@ public abstract class AbstractDataNodeAccessorTest<E, T, S extends EventGroupTyp
         map.get(category.getDate()).addAll(getElements(category));
     }
 
-    Set<E> actual = Sets.newHashSet();
+    Set<E> expected = Sets.newHashSet();
     for (Entry<XMLGregorianCalendar, Collection<T>> entry : map.asMap().entrySet()) {
       LocalDate date = toLocalDate(entry.getKey());
       for (T type : entry.getValue()) {
         E element = accessor.createDataNode(date, type);
         if (element != null)
-          actual.add(element);
+          expected.add(element);
       }
     }
 
-    assertEquals(actual.size(), expected.size());
-    for (E expectedE : expected) {
+    assertEquals(expected.size(), actual.size());
+    for (E expectedE : actual) {
       boolean hasMatch = false;
-      for (Iterator<E> it = actual.iterator(); it.hasNext();) {
+      for (Iterator<E> it = expected.iterator(); it.hasNext();) {
         if (areEqual(expectedE, it.next())) {
           hasMatch = true;
           it.remove();

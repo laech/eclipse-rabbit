@@ -37,7 +37,7 @@ import java.util.Collection;
  */
 public class FileDataAccessor
     extends
-    AbstractDataNodeAccessor<FileDataDescriptor, FileEventType, FileEventListType> {
+    AbstractNodeAccessor<FileDataDescriptor, FileEventType, FileEventListType> {
 
   /**
    * Constructor.

@@ -17,7 +17,7 @@ import java.util.List;
  * @see SessionDataAccessor
  */
 public class SessionDataAccessorTest extends 
-    AbstractDataNodeAccessorTest<SessionDataDescriptor, SessionEventType, SessionEventListType> {
+    AbstractNodeAccessorTest<SessionDataDescriptor, SessionEventType, SessionEventListType> {
 
   @Override
   protected SessionDataAccessor create() {

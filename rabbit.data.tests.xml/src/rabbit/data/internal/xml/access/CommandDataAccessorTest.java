@@ -32,7 +32,7 @@ import java.util.List;
  */
 public class CommandDataAccessorTest
     extends
-    AbstractDataNodeAccessorTest<CommandDataDescriptor, CommandEventType, CommandEventListType> {
+    AbstractNodeAccessorTest<CommandDataDescriptor, CommandEventType, CommandEventListType> {
 
   @Override
   protected CommandDataAccessor create() {

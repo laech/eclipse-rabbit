@@ -35,7 +35,7 @@ import java.util.Collection;
  * Accesses perspective event data.
  */
 public class PerspectiveDataAccessor extends 
-    AbstractDataNodeAccessor<PerspectiveDataDescriptor, 
+    AbstractNodeAccessor<PerspectiveDataDescriptor, 
                              PerspectiveEventType, 
                              PerspectiveEventListType> {
 

@@ -25,7 +25,6 @@ import rabbit.data.internal.xml.schema.events.ObjectFactory;
 import static org.junit.Assert.assertNotNull;
 
 import org.eclipse.core.runtime.IPath;
-import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.joda.time.MutableDateTime;
 import org.junit.AfterClass;
@@ -81,7 +80,7 @@ public abstract class AbstractAccessorTest<T, E, S extends EventGroupType> {
   }
 
   @Test
-  public void testGetData_listsWithDifferentDates() throws Exception {
+  public void testGetData() throws Exception {
     String id = "qfnnvkfde877thfg";
 
     // 1:
@@ -123,52 +122,6 @@ public abstract class AbstractAccessorTest<T, E, S extends EventGroupType> {
         .getTimeInMillis())), events);
   }
 
-  /**
-   * Tests that two lists with the same date are stored, then getting the data
-   * out should return the combined data. Note that although two lists with the
-   * same date should not have happened.
-   */
-  @Test
-  public void testGetData_listsWithSameDate() throws Exception {
-    DateTime date = new DateTime();
-    String id = "qfnnvkfde877thfg";
-
-    // 1:
-
-    int count1 = 1232948;
-    E type1 = createElement();
-    setId(type1, id);
-    setValue(type1, count1);
-
-    S list1 = createCategory();
-    XMLGregorianCalendar start = toXmlDate(date);
-    list1.setDate(start);
-    getElements(list1).add(type1);
-
-    // 2:
-
-    int count2 = 2342817;
-    E type2 = createElement();
-    setId(type2, id);
-    setValue(type2, count2);
-
-    S list2 = createCategory();
-    XMLGregorianCalendar end = toXmlDate(date);
-    list2.setDate(end);
-    getElements(list2).add(type2);
-
-    EventListType events = objectFactory.createEventListType();
-    accessor.getCategories(events).add(list1);
-    accessor.getCategories(events).add(list2);
-
-    File f = accessor.getDataStore().getDataFile(date.toLocalDate());
-    accessor.getDataStore().write(events, f);
-
-    assertValues(accessor.getData(new LocalDate(start.toGregorianCalendar()
-        .getTimeInMillis()), new LocalDate(end.toGregorianCalendar()
-        .getTimeInMillis())), events);
-  }
-
   @Test(expected = NullPointerException.class)
   public void testGetData_startDateNull() {
     accessor.getData(null, new LocalDate());
@@ -183,8 +136,8 @@ public abstract class AbstractAccessorTest<T, E, S extends EventGroupType> {
    * Checks the values are OK against the two parameters, one is returned by the
    * IAccessor, one is the raw data.
    */
-  protected abstract void assertValues(Collection<T> expected, EventListType events)
-      throws Exception;
+  protected abstract void assertValues(
+      Collection<T> actual, EventListType events) throws Exception;
 
   /** Creates a subject for testing. */
   protected abstract AbstractAccessor<T, E, S> create();

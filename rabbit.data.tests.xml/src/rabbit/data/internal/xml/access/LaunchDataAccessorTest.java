@@ -36,7 +36,7 @@ import java.util.List;
  */
 public class LaunchDataAccessorTest
     extends
-    AbstractDataNodeAccessorTest<LaunchDataDescriptor, LaunchEventType, LaunchEventListType> {
+    AbstractNodeAccessorTest<LaunchDataDescriptor, LaunchEventType, LaunchEventListType> {
 
 
   @Override

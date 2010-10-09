@@ -36,7 +36,7 @@ import java.util.Collection;
  */
 public class PartDataAccessor
     extends
-    AbstractDataNodeAccessor<PartDataDescriptor, PartEventType, PartEventListType> {
+    AbstractNodeAccessor<PartDataDescriptor, PartEventType, PartEventListType> {
 
   /**
    * Constructor.

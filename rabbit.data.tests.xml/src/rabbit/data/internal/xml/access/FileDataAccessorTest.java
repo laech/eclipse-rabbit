@@ -32,7 +32,7 @@ import java.util.List;
  */
 public class FileDataAccessorTest
     extends
-    AbstractDataNodeAccessorTest<FileDataDescriptor, FileEventType, FileEventListType> {
+    AbstractNodeAccessorTest<FileDataDescriptor, FileEventType, FileEventListType> {
 
   @Override
   protected FileDataAccessor create() {

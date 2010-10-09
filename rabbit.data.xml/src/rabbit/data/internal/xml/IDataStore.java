@@ -46,7 +46,7 @@ public interface IDataStore {
   File getDataFile(LocalDate date, IPath location);
 
   /**
-   * Gets the data files for between the given dates, inclusively, of all the
+   * Gets the data files between the given dates, inclusively, of all the
    * workspaces.
    * 
    * @param start The start date.
@@ -54,6 +54,17 @@ public interface IDataStore {
    * @return A list of files that are physically existing across all workspaces.
    */
   List<File> getDataFiles(LocalDate start, LocalDate end);
+
+  /**
+   * Gets the data files between the given dates, inclusively, of the given
+   * path.
+   * 
+   * @param start The start date.
+   * @param end The end date.
+   * @param location The folder location.
+   * @return A list of files that are physically existing in the folder.
+   */
+  List<File> getDataFiles(LocalDate start, LocalDate end, IPath location);
 
   /**
    * Gets the storage location, if the location does not exist, it will be

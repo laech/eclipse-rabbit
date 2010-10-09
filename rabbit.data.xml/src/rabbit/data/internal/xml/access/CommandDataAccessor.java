@@ -35,7 +35,7 @@ import java.util.Collection;
  */
 public class CommandDataAccessor
     extends
-    AbstractDataNodeAccessor<CommandDataDescriptor, CommandEventType, CommandEventListType> {
+    AbstractNodeAccessor<CommandDataDescriptor, CommandEventType, CommandEventListType> {
 
   /**
    * Constructor.

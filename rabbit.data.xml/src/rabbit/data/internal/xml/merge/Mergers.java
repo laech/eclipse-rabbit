@@ -20,6 +20,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import java.util.Collection;
 import java.util.Iterator;
 
+import javax.annotation.Nullable;
+
 /**
  * Utility class for working with {@link IMerger}.
  */
@@ -28,56 +30,70 @@ public class Mergers {
   /**
    * Merges a collection of elements into another collection. If any of the
    * element is not merged with another element, it will be added to the
-   * collection instead.
+   * collection instead. If merger is null, the second collection is simply 
+   * added to the first collection.
    * 
    * @param merger The merger to use.
-   * @param mergeTo The collection to merge the elements to.
-   * @param elementsToMerge The elements to be merged into the collection.
-   * @throws NullPointerException If any of the arguments are null.
+   * @param to The collection to merge the elements to.
+   * @param from The elements to be merged into the collection.
+   * @return The to collection.
+   * @throws NullPointerException If any of the collections are null.
    */
-  public static <T> void merge(IMerger<T> merger, Collection<T> mergeTo,
-      Collection<T> elementsToMerge) {
+  public static <T> Collection<T> merge(
+      @Nullable IMerger<T> merger, Collection<T> to, Collection<T> from) {
 
-    checkNotNull(merger);
-    checkNotNull(mergeTo);
-    checkNotNull(elementsToMerge);
-
-    for (T element : elementsToMerge) {
-      merge(merger, mergeTo, element);
+    checkNotNull(to);
+    checkNotNull(from);
+    
+    if (merger == null) {
+      to.addAll(from);
+      return to;
     }
+
+    for (T element : from) {
+      merge(merger, to, element);
+    }
+    return to;
   }
 
   /**
-   * Merges a element into a collection. If the element is not merged with
-   * another element, it will be added to the collection instead.
+   * Merges a element into a collection. If merger is null or the element is not
+   * merged with another element, it will be added to the collection instead.
    * 
    * @param merger The merger to use.
-   * @param mergeTo The collection to merge the element to.
+   * @param collection The collection to merge the element to.
    * @param elementsToMerge The element to be merged into the collection.
+   * @return The collection.
    * @throws NullPointerException If any of the arguments are null.
    */
-  public static <T> void merge(IMerger<T> merger, Collection<T> mergeTo,
-      T elementToMerge) {
+  public static <T> Collection<T> merge(
+      @Nullable IMerger<T> merger, Collection<T> collection, T item) {
 
-    checkNotNull(merger);
-    checkNotNull(mergeTo);
-    checkNotNull(elementToMerge);
+    checkNotNull(collection);
+    checkNotNull(item);
+    
+    if (merger == null) {
+      collection.add(item);
+      return collection;
+    }
 
     T mergedElement = null;
-    for (Iterator<T> iterator = mergeTo.iterator(); iterator.hasNext();) {
-      T element = iterator.next();
-      if (merger.isMergeable(element, elementToMerge)) {
-        mergedElement = merger.merge(element, elementToMerge);
+    for (Iterator<T> it = collection.iterator(); it.hasNext();) {
+      T element = it.next();
+      if (merger.isMergeable(element, item)) {
+        mergedElement = merger.merge(element, item);
 
         // Removes the old one, the new one will be added after the loop:
-        iterator.remove();
+        it.remove();
         break;
       }
     }
 
-    if (mergedElement == null)
-      mergeTo.add(elementToMerge);
-    else
-      mergeTo.add(mergedElement);
+    if (mergedElement == null) {
+      collection.add(item);
+    } else {
+      collection.add(mergedElement);
+    }
+    return collection;
   }
 }

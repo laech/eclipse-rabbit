@@ -20,7 +20,7 @@ import java.util.Collection;
  * Accesses session data events.
  */
 public class SessionDataAccessor extends
-    AbstractDataNodeAccessor<SessionDataDescriptor, 
+    AbstractNodeAccessor<SessionDataDescriptor, 
                              SessionEventType, 
                              SessionEventListType> {
 

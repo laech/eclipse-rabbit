@@ -41,7 +41,7 @@ import java.util.Set;
  */
 public class LaunchDataAccessor
     extends
-    AbstractDataNodeAccessor<LaunchDataDescriptor, LaunchEventType, LaunchEventListType> {
+    AbstractNodeAccessor<LaunchDataDescriptor, LaunchEventType, LaunchEventListType> {
  
   /**
    * Constructor.
