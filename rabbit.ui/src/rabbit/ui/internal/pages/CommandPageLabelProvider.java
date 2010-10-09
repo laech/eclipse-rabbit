@@ -15,6 +15,8 @@
  */
 package rabbit.ui.internal.pages;
 
+import rabbit.ui.internal.viewers.CellPainter.IValueProvider;
+
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.eclipse.core.commands.Command;
@@ -37,17 +39,16 @@ public class CommandPageLabelProvider extends LabelProvider implements
   private final Color gray;
   private final DateLabelProvider dateLabels;
   private final CommandLabelProvider commandLabels;
-  private final CommandPageContentProvider contentProvider;
+  private final IValueProvider values;
 
   /**
    * Constructor.
    * 
-   * @param contents The content provider of the page.
+   * @param valueProvider The value provider to provide execution counts.
    * @throws NullPointerException If argument is null.
    */
-  public CommandPageLabelProvider(CommandPageContentProvider contents) {
-    checkNotNull(contents);
-    contentProvider = contents;
+  public CommandPageLabelProvider(IValueProvider valueProvider) {
+    values = checkNotNull(valueProvider);
     dateLabels = new DateLabelProvider();
     commandLabels = new CommandLabelProvider();
     gray = PlatformUI.getWorkbench().getDisplay().getSystemColor(
@@ -91,8 +92,8 @@ public class CommandPageLabelProvider extends LabelProvider implements
       return null;
 
     case 2:
-      if (contentProvider.shouldPaint(element))
-        return String.valueOf(contentProvider.getValue(element));
+      if (values.shouldPaint(element))
+        return String.valueOf(values.getValue(element));
       else
         return null;
 

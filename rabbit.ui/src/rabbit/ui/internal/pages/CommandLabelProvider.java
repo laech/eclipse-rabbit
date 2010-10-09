@@ -15,8 +15,6 @@
  */
 package rabbit.ui.internal.pages;
 
-import rabbit.ui.internal.SharedImages;
-
 import com.google.common.collect.Maps;
 
 import org.eclipse.core.commands.Command;
@@ -45,15 +43,11 @@ public class CommandLabelProvider extends LabelProvider {
    */
   private final Map<String, Image> images;
 
-  /** The image to return if the command has no image. */
-  private final Image genericImage;
-
   /**
    * Constructor.
    */
   public CommandLabelProvider() {
     images = Maps.newLinkedHashMap();
-    genericImage = SharedImages.ELEMENT.createImage();
     service = (ICommandImageService) PlatformUI.getWorkbench().getService(
         ICommandImageService.class);
   }
@@ -78,11 +72,9 @@ public class CommandLabelProvider extends LabelProvider {
       if (image == null) {
         ImageDescriptor des = service.getImageDescriptor(commandId);
 
-        if (des != null)
+        if (des != null) {
           image = des.createImage();
-        else
-          image = genericImage;
-
+        }
         images.put(commandId, image);
       }
       return image;
@@ -93,7 +85,6 @@ public class CommandLabelProvider extends LabelProvider {
   @Override
   public void dispose() {
     super.dispose();
-    genericImage.dispose();
     for (Image img : images.values()) {
       if (img != null && !img.isDisposed())
         img.dispose();

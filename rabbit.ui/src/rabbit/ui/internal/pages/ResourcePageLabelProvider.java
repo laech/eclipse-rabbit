@@ -15,11 +15,12 @@
  */
 package rabbit.ui.internal.pages;
 
+import rabbit.ui.internal.viewers.TreeNodes;
+
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.jface.viewers.IColorProvider;
 import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.viewers.TreeNode;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
@@ -60,34 +61,25 @@ public class ResourcePageLabelProvider extends LabelProvider implements
 
   @Override
   public Color getForeground(Object element) {
-    if (element instanceof TreeNode) {
-      Object value = ((TreeNode) element).getValue();
-      if (value instanceof IResource && !((IResource) value).exists()) {
-        return gray;
-      }
+    Object value = TreeNodes.getObject(element);
+    if (value instanceof IResource && !((IResource) value).exists()) {
+      return gray;
     }
     return null;
   }
 
   @Override
   public Image getImage(Object element) {
-    if (element instanceof TreeNode) {
-      Object value = ((TreeNode) element).getValue();
-      if (value instanceof IResource) {
-        return workbenchLabels.getImage(value);
-      }
-      return dateLabels.getImage(value);
+    Object value = TreeNodes.getObject(element);
+    if (value instanceof IResource) {
+      return workbenchLabels.getImage(value);
     }
-    return null;
+    return dateLabels.getImage(value);
   }
 
   @Override
   public String getText(Object element) {
-    if (!(element instanceof TreeNode)) {
-      return null;
-    }
-
-    Object value = ((TreeNode) element).getValue();
+    Object value = TreeNodes.getObject(element);
     if (value instanceof IResource) {
       if (value instanceof IFolder) {
         return ((IFolder) value).getProjectRelativePath().toString();

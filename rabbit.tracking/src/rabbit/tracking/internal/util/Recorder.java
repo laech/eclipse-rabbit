@@ -129,7 +129,7 @@ public final class Recorder<T> extends Observable {
    * @param userData The optional user object for this record session.
    * @see #isRecording()
    */
-  public void start(@Nullable T userData) {
+  public synchronized void start(@Nullable T userData) {
     if (isRecording()) {
       if (!Objects.equal(data, userData)) {
         stop();
@@ -148,7 +148,7 @@ public final class Recorder<T> extends Observable {
    * 
    * @see #isRecording()
    */
-  public void start() {
+  public synchronized void start() {
     start(null);
   }
 
@@ -156,7 +156,7 @@ public final class Recorder<T> extends Observable {
    * Stops recording. Calling this method when the recorder is not running has
    * no effects.
    */
-  public void stop() {
+  public synchronized void stop() {
     if (!isRecording()) {
       return;
     }

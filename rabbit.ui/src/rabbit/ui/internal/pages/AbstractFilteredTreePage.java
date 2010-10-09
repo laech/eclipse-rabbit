@@ -63,7 +63,7 @@ public abstract class AbstractFilteredTreePage implements IPage {
   /**
    * Constructor.
    */
-  public AbstractFilteredTreePage() {
+  protected AbstractFilteredTreePage() {
   }
   
   @SuppressWarnings("deprecation")

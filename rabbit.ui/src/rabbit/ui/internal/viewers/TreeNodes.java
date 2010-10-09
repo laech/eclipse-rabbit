@@ -216,4 +216,15 @@ public class TreeNodes {
 
     return value;
   }
+
+  /**
+   * @return If the given object is a {@link TreeNode}, returns it's value,
+   * otherwise returns the object itself. Returns null if object is null.
+   */
+  public static Object getObject(@Nullable Object obj) {
+    if (obj instanceof TreeNode) {
+      return ((TreeNode) obj).getValue();
+    }
+    return obj;
+  }
 }

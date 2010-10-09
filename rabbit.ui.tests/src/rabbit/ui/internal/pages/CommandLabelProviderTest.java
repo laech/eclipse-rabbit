@@ -15,15 +15,18 @@
  */
 package rabbit.ui.internal.pages;
 
-import rabbit.ui.internal.pages.CommandLabelProvider;
-
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
 
 import org.eclipse.core.commands.Command;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.commands.ICommandImageService;
 import org.eclipse.ui.commands.ICommandService;
 import org.junit.Test;
+
+import java.util.Collection;
 
 /**
  * @see CommandLabelProvider
@@ -33,14 +36,17 @@ public class CommandLabelProviderTest {
   private final CommandLabelProvider labels;
   private final Command definedCommand;
   private final Command undefinedCommand;
+  
+  private final ICommandService commandService = (ICommandService) PlatformUI
+      .getWorkbench().getService(ICommandService.class);
+  
+  private final ICommandImageService imageService = (ICommandImageService)
+      PlatformUI.getWorkbench().getService(ICommandImageService.class);
 
   public CommandLabelProviderTest() {
     labels = new CommandLabelProvider();
-
-    ICommandService service = (ICommandService) PlatformUI.getWorkbench()
-        .getService(ICommandService.class);
-    definedCommand = service.getDefinedCommands()[0];
-    undefinedCommand = service.getCommand(System.currentTimeMillis() + "");
+    definedCommand = commandService.getDefinedCommands()[0];
+    undefinedCommand = commandService.getCommand(System.currentTimeMillis() + "");
   }
 
   @Test
@@ -50,13 +56,20 @@ public class CommandLabelProviderTest {
   }
 
   @Test
-  public void testGetImage() throws Exception {
-    /*
-     * Image will never be null, if there is no image associated with a command,
-     * a generic image should be returned.
-     */
-
-    assertNotNull(labels.getImage(definedCommand));
-    assertNotNull(labels.getImage(undefinedCommand));
+  public void testGetImage_notNull() throws Exception {
+    @SuppressWarnings("unchecked")
+    Collection<String> ids = commandService.getDefinedCommandIds();
+    for (String id : ids) {
+      if (imageService.getImageDescriptor(id) != null) {
+        Command cmdWithImage = commandService.getCommand(id);
+        assertThat(labels.getImage(cmdWithImage), notNullValue());
+        break;
+      }
+    }
+  }
+  
+  @Test
+  public void testGetImage_null() {
+    assertNull(labels.getImage(undefinedCommand));
   }
 }

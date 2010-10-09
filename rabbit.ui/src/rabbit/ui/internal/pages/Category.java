@@ -61,6 +61,9 @@ public enum Category implements ICategory {
       
   /** Perspective category */
   PERSPECTIVE("Perspectives", SharedImages.PERSPECTIVE),
+  
+  /** TODO Workspace category */
+  WORKSPACE("Workspaces", SharedImages.ELEMENT),
   ;
   
   private String text;

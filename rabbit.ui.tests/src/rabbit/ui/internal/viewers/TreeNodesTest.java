@@ -5,9 +5,12 @@ import rabbit.ui.internal.viewers.TreeNodes;
 
 import com.google.common.base.Predicates;
 
+import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -175,6 +178,24 @@ public class TreeNodesTest {
   }
 
   @Test
+  public void testGetObject_notTreeNode() {
+    Object value = Boolean.TRUE;
+    assertThat(TreeNodes.getObject(value), sameInstance(value));
+  }
+
+  @Test
+  public void testGetObject_null() {
+    assertThat(TreeNodes.getObject(null), nullValue());
+  }
+
+  @Test
+  public void testGetObject_TreeNode() {
+    Object value = new Object();
+    TreeNode node = new TreeNode(value);
+    assertThat(TreeNodes.getObject(node), sameInstance(value));
+  }
+  
+  @Test
   public void testIntValueOfSubtree() {
     TreeNode root = new TreeNode(new Object());
     int value = 0;
@@ -191,12 +212,12 @@ public class TreeNodesTest {
 
     assertEquals(value, TreeNodes.intValueOfSubtree(root));
   }
-
+  
   @Test(expected = NullPointerException.class)
   public void testIntValueofSubtree_nullTree() throws Exception {
     TreeNodes.intValueOfSubtree(null);
   }
-
+  
   @Test
   public void testIntValueOfSubtree_nullTreeValue() throws Exception {
     TreeNode node = new TreeNode(null);

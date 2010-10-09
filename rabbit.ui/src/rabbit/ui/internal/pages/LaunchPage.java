@@ -217,7 +217,9 @@ public class LaunchPage extends InternalPage<LaunchDataDescriptor>
   @Override
   protected void initializeViewer(TreeViewer viewer) {
     contents = new LaunchPageContentProvider(viewer);
-    labels = new LaunchPageLabelProvider(contents);
+    labels = new LaunchPageLabelProvider(
+        contents.getLaunchCountValueProvider(), 
+        contents.getLaunchDurationValueProvider());
     viewer.setContentProvider(contents);
     viewer.setLabelProvider(labels);
   }

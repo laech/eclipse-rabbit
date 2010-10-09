@@ -17,15 +17,11 @@ package rabbit.ui.internal.pages;
 
 import static rabbit.ui.internal.util.DurationFormat.format;
 
-import rabbit.data.access.model.SessionDataDescriptor;
-import rabbit.ui.internal.pages.DateLabelProvider;
-import rabbit.ui.internal.pages.SessionPageLabelProvider;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
-import org.joda.time.Duration;
+import org.eclipse.jface.viewers.TreeNode;
 import org.joda.time.LocalDate;
 import org.junit.AfterClass;
 import org.junit.Test;
@@ -33,6 +29,7 @@ import org.junit.Test;
 /**
  * Test for {@link SessionPageLabelProvider}
  */
+@Deprecated
 public class SessionPageLabelProviderTest {
 
   private static final SessionPageLabelProvider provider;
@@ -50,51 +47,57 @@ public class SessionPageLabelProviderTest {
   }
   
   @Test
-  public void testGetText() {
-    LocalDate today = new LocalDate();
-    SessionDataDescriptor des = new SessionDataDescriptor(today, new Duration(10));
-    assertEquals(dateLabels.getText(des), provider.getText(today));
-
-    LocalDate yesterday = today.minusDays(1);
-    des = new SessionDataDescriptor(yesterday, new Duration(1));
-    assertEquals(dateLabels.getText(des), provider.getText(yesterday));
-
-    LocalDate someday = yesterday.minusDays(1);
-    des = new SessionDataDescriptor(someday, new Duration(100));
-    assertEquals(dateLabels.getText(des), provider.getText(someday));
+  public void testGetColumnImage_0() {
+    TreeNode node = new TreeNode(new LocalDate());
+    assertNotNull(provider.getColumnImage(node, 0));
+    assertNull(provider.getColumnImage(node, 1));
   }
   
   @Test
-  public void testGetImage() {
-    SessionDataDescriptor d = new SessionDataDescriptor(new LocalDate(), new Duration(101));
-    assertNotNull(provider.getImage(d));
-  }
-
-  @Test
   public void testGetColumnText_0() {
     LocalDate today = new LocalDate();
-    SessionDataDescriptor des = new SessionDataDescriptor(today, new Duration(101));
-    assertEquals(dateLabels.getText(des), provider.getColumnText(today, 0));
+    TreeNode node = new TreeNode(today);
+    assertNotNull(dateLabels.getText(today));
+    assertEquals(dateLabels.getText(today), provider.getColumnText(node, 0));
 
     LocalDate yesterday = today.minusDays(1);
-    des = new SessionDataDescriptor(yesterday, new Duration(1));
-    assertEquals(dateLabels.getText(des), provider.getColumnText(yesterday, 0));
+    node = new TreeNode(yesterday);
+    assertNotNull(dateLabels.getText(yesterday));
+    assertEquals(dateLabels.getText(yesterday), provider.getColumnText(node, 0));
 
     LocalDate someday = yesterday.minusDays(1);
-    des = new SessionDataDescriptor(someday, new Duration(0));
-    assertEquals(dateLabels.getText(des), provider.getColumnText(someday, 0));
+    node = new TreeNode(someday);
+    assertNotNull(dateLabels.getText(someday));
+    assertEquals(dateLabels.getText(someday), provider.getColumnText(node, 0));
   }
 
   @Test
   public void testGetColumnText_1() {
-    SessionDataDescriptor d = new SessionDataDescriptor(new LocalDate(), new Duration(101));
-    assertEquals(format(d.getDuration().getMillis()), provider.getColumnText(d, 1));
+    long duration = 100;
+    TreeNode node = new TreeNode(duration);
+    assertEquals(format(duration), provider.getColumnText(node, 1));
   }
 
   @Test
-  public void testGetColumnImage() {
-    SessionDataDescriptor d = new SessionDataDescriptor(new LocalDate(), new Duration(101));
-    assertNotNull(provider.getColumnImage(d, 0));
-    assertNull(provider.getColumnImage(d, 1));
+  public void testGetImage() {
+    assertNotNull(provider.getImage(new TreeNode(new LocalDate())));
+  }
+
+  @Test
+  public void testGetText() {
+    LocalDate today = new LocalDate();
+    TreeNode node = new TreeNode(today);
+    assertNotNull(dateLabels.getText(today));
+    assertEquals(dateLabels.getText(today), provider.getText(node));
+
+    LocalDate yesterday = today.minusDays(1);
+    node = new TreeNode(yesterday);
+    assertNotNull(dateLabels.getText(yesterday));
+    assertEquals(dateLabels.getText(yesterday), provider.getText(node));
+
+    LocalDate someday = yesterday.minusDays(1);
+    node = new TreeNode(someday);
+    assertNotNull(dateLabels.getText(someday));
+    assertEquals(dateLabels.getText(someday), provider.getText(node));
   }
 }

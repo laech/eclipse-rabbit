@@ -17,7 +17,10 @@ package rabbit.ui.internal.pages;
 
 import static rabbit.ui.internal.util.DurationFormat.format;
 
-import rabbit.data.access.model.SessionDataDescriptor;
+import rabbit.ui.internal.viewers.CellPainter.IValueProvider;
+import rabbit.ui.internal.viewers.TreeNodes;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
@@ -26,16 +29,19 @@ import org.eclipse.swt.graphics.Image;
 /**
  * A label provider for a {@link SessionPage}
  */
-public class SessionPageLabelProvider extends LabelProvider implements
-    ITableLabelProvider {
+public class SessionPageLabelProvider extends LabelProvider
+    implements ITableLabelProvider {
 
   private final DateLabelProvider dateLabels;
+  private final IValueProvider valueProvider;
 
   /**
    * Constructor.
+   * @param valueProvider The value provider.
    */
-  public SessionPageLabelProvider() {
-    dateLabels = new DateLabelProvider();
+  public SessionPageLabelProvider(IValueProvider valueProvider) {
+    this.valueProvider = checkNotNull(valueProvider);
+    this.dateLabels = new DateLabelProvider();
   }
 
   @Override
@@ -46,10 +52,8 @@ public class SessionPageLabelProvider extends LabelProvider implements
   
   @Override
   public Image getImage(Object element) {
-    if (element instanceof SessionDataDescriptor)
-      return dateLabels.getImage(((SessionDataDescriptor) element).getDate());
-    else
-      return null;
+    element = TreeNodes.getObject(element);
+    return dateLabels.getImage(element);
   }
 
   @Override
@@ -59,24 +63,20 @@ public class SessionPageLabelProvider extends LabelProvider implements
   
   @Override
   public String getText(Object element) {
-    if (element instanceof SessionDataDescriptor)
-      return dateLabels.getText(((SessionDataDescriptor) element).getDate());
-    else
-      return null;
+    element = TreeNodes.getObject(element);
+    return dateLabels.getText(element);
   }
 
   @Override
   public String getColumnText(Object element, int columnIndex) {
+    Object value = TreeNodes.getObject(element);
     switch (columnIndex) {
     case 0:
-      return getText(element);
+      return getText(value);
 
     case 1:
-      if (element instanceof SessionDataDescriptor)
-        return format(((SessionDataDescriptor) element).getDuration().getMillis());
-      else
-        return null;
-
+      return format(valueProvider.getValue(element));
+        
     default:
       return null;
     }

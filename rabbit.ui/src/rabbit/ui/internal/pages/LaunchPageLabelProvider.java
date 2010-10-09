@@ -22,6 +22,7 @@ import rabbit.ui.internal.util.Pair;
 import rabbit.ui.internal.util.UndefinedLaunchConfigurationType;
 import rabbit.ui.internal.util.UndefinedLaunchMode;
 import rabbit.ui.internal.viewers.CellPainter.IValueProvider;
+import rabbit.ui.internal.viewers.TreeNodes;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -33,34 +34,42 @@ import org.eclipse.debug.ui.IDebugUIConstants;
 import org.eclipse.jface.viewers.IColorProvider;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.viewers.TreeNode;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.PlatformUI;
 
+import javax.annotation.Nullable;
+
 /**
  * Label provider a {@link LaunchPage}.
  */
-public class LaunchPageLabelProvider extends LabelProvider implements
-    ITableLabelProvider, IColorProvider {
+class LaunchPageLabelProvider extends LabelProvider 
+    implements ITableLabelProvider, IColorProvider {
 
   private final ResourcePageLabelProvider resourceLabels;
-  private final LaunchPageContentProvider contents;
+  private final IValueProvider launchCounts;
+  private final IValueProvider launchDurations;
   private final Image launchImage;
   private final Color gray;
-
+  
   /**
    * Constructs a new label provider.
    * 
-   * @param contentProvider The content provider of the page.
+   * @param launchCountValueProvider The value provider for providing launch
+   *          counts.
+   * @param launchDurationValueProvider The value provider for providing launch
+   *          durations.
    */
-  public LaunchPageLabelProvider(LaunchPageContentProvider contentProvider) {
-    checkNotNull(contentProvider);
-    contents = contentProvider;
+  LaunchPageLabelProvider(IValueProvider launchCountValueProvider,
+                          IValueProvider launchDurationValueProvider) {
+
+    launchCounts = checkNotNull(launchCountValueProvider);
+    launchDurations = checkNotNull(launchDurationValueProvider);
     resourceLabels = new ResourcePageLabelProvider();
     launchImage = SharedImages.ELEMENT.createImage();
-    gray = PlatformUI.getWorkbench().getDisplay().getSystemColor(SWT.COLOR_DARK_GRAY);
+    gray = PlatformUI.getWorkbench().getDisplay()
+        .getSystemColor(SWT.COLOR_DARK_GRAY);
   }
 
   @Override
@@ -71,94 +80,90 @@ public class LaunchPageLabelProvider extends LabelProvider implements
   }
 
   @Override
-  public Color getBackground(Object element) {
+  public Color getBackground(@Nullable Object element) {
     return null;
   }
 
   @Override
-  public Image getImage(Object element) {
-    if (!(element instanceof TreeNode))
-      return null;
+  public Image getImage(@Nullable Object element) {
+    element = TreeNodes.getObject(element);
+    if (element instanceof ILaunchMode) {
+      return getLaunchModeImage(((ILaunchMode) element).getIdentifier());
 
-    Object value = ((TreeNode) element).getValue();
-    if (value instanceof ILaunchMode) {
-      return getLaunchModeImage(((ILaunchMode) value).getIdentifier());
-
-    } else if (value instanceof ILaunchConfigurationType) {
-      String id = ((ILaunchConfigurationType) value).getIdentifier();
+    } else if (element instanceof ILaunchConfigurationType) {
+      String id = ((ILaunchConfigurationType) element).getIdentifier();
       return DebugUITools.getImage(id);
 
-    } else if (value instanceof Pair<?, ?>) { // <LaunchName, LaunchTypeId>
-      return DebugUITools.getImage(((Pair<?, ?>) value).getSecond().toString());
+    } else if (element instanceof Pair<?, ?>) { // <LaunchName, LaunchTypeId>
+      return DebugUITools.getImage(((Pair<?, ?>) element).getSecond()
+          .toString());
     }
     return resourceLabels.getImage(element);
   }
 
   @Override
-  public Image getColumnImage(Object element, int columnIndex) {
+  public Image getColumnImage(@Nullable Object element, int columnIndex) {
     return (columnIndex == 0) ? getImage(element) : null;
   }
 
   @Override
-  public String getText(Object element) {
-    if (!(element instanceof TreeNode))
-      return null;
-
-    Object value = ((TreeNode) element).getValue();
-    if (value instanceof ILaunchMode)
+  public String getText(@Nullable Object element) {
+    Object value = TreeNodes.getObject(element);
+    if (value instanceof ILaunchMode) {
       return ((ILaunchMode) value).getLabel().replace("&", "");
-
-    else if (value instanceof ILaunchConfigurationType)
+      
+    } else if (value instanceof ILaunchConfigurationType) {
       return ((ILaunchConfigurationType) value).getName();
-
-    else if (value instanceof Pair<?, ?>) // <LaunchName, LaunchTypeId>
+      
+    } else if (value instanceof Pair<?, ?>) { // <LaunchName, LaunchTypeId>
       return ((Pair<?, ?>) value).getFirst().toString();
-    else
+      
+    } else {
       return resourceLabels.getText(element);
+    }
   }
 
   @Override
-  public String getColumnText(Object element, int columnIndex) {
-    if (columnIndex == 0)
+  public String getColumnText(@Nullable Object element, int columnIndex) {
+    if (columnIndex == 0) {
       return getText(element);
+    }
 
     switch (columnIndex) {
     case 1:
-      IValueProvider countProvider = contents.getLaunchCountValueProvider();
-      if (countProvider.shouldPaint(element))
-        return countProvider.getValue(element) + "";
-
+      if (launchCounts.shouldPaint(element)) {
+        return launchCounts.getValue(element) + "";
+      }
     case 3:
-      IValueProvider provider = contents.getLaunchDurationValueProvider();
-      if (provider.shouldPaint(element))
-        return format(provider.getValue(element));
-
+      if (launchDurations.shouldPaint(element)) {
+        return format(launchDurations.getValue(element));
+      }
     default:
       return null;
     }
   }
 
   @Override
-  public Color getForeground(Object element) {
-    if (!(element instanceof TreeNode))
-      return null;
-    
-    TreeNode node = (TreeNode) element;
-    if (node.getValue() instanceof UndefinedLaunchMode || 
-        node.getValue() instanceof UndefinedLaunchConfigurationType)
+  public Color getForeground(@Nullable Object element) {
+    element = TreeNodes.getObject(element);
+    if (element instanceof UndefinedLaunchMode
+        || element instanceof UndefinedLaunchConfigurationType) {
       return gray;
-    else 
+      
+    } else {
       return resourceLabels.getForeground(element);
+    }
   }
 
   private Image getLaunchModeImage(String modeId) {
-    if (modeId.equals(ILaunchManager.DEBUG_MODE))
+    if (modeId.equals(ILaunchManager.DEBUG_MODE)) {
       return DebugUITools.getImage(IDebugUIConstants.IMG_OBJS_LAUNCH_DEBUG);
-
-    else if (modeId.equals(ILaunchManager.RUN_MODE))
+      
+    } else if (modeId.equals(ILaunchManager.RUN_MODE)) {
       return DebugUITools.getImage(IDebugUIConstants.IMG_OBJS_LAUNCH_RUN);
-    
-    else
+      
+    } else {
       return DebugUITools.getImage(IDebugUIConstants.IMG_OBJS_ENVIRONMENT);
+    }
   }
 }

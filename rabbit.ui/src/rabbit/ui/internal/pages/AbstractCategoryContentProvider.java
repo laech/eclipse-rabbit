@@ -24,8 +24,8 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 
+import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.TreeNode;
-import org.eclipse.jface.viewers.TreeNodeContentProvider;
 import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
@@ -36,6 +36,8 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
+import javax.annotation.Nullable;
+
 /**
  * Abstract content provider supports categorization of data.
  * 
@@ -44,7 +46,7 @@ import java.util.Set;
  * {@link Predicate}.
  */
 abstract class AbstractCategoryContentProvider 
-    extends TreeNodeContentProvider implements ICategoryProvider {
+    implements ICategoryProvider, ITreeContentProvider {
 
   /**
    * An unmodifiable set of all the categories supported by this content
@@ -99,6 +101,10 @@ abstract class AbstractCategoryContentProvider
     paintCategory = getDefaultPaintCategory();
   }
 
+  @Override
+  public void dispose() {
+  }
+
   /**
    * Gets the map contain categories and predicates to categorize the elements.
    * 
@@ -109,10 +115,20 @@ abstract class AbstractCategoryContentProvider
   }
 
   @Override
-  public Object[] getElements(Object inputElement) {
-    return (getRoot().getChildren() != null) 
-        ? getRoot().getChildren()
-        : new Object[0];
+  public Object[] getChildren(@Nullable Object parentElement) {
+    if (parentElement instanceof TreeNode) {
+      return ((TreeNode) parentElement).getChildren();
+    }
+    return null;
+  }
+
+  /**
+   * The implementation of this method in this class returns 
+   * getRoot().getChildren();
+   */
+  @Override
+  public Object[] getElements(@Nullable Object inputElement) {
+    return getRoot().getChildren();
   }
 
   /**
@@ -122,6 +138,11 @@ abstract class AbstractCategoryContentProvider
    */
   public ICategory getPaintCategory() {
     return paintCategory;
+  }
+
+  @Override
+  public Object getParent(Object element) {
+    return null;
   }
 
   /**
@@ -156,7 +177,6 @@ abstract class AbstractCategoryContentProvider
 
   @Override
   public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-    super.inputChanged(viewer, oldInput, newInput);
     getRoot().setChildren(null);
     if (newInput != null) {
       doInputChanged(viewer, oldInput, newInput);
@@ -225,20 +245,6 @@ abstract class AbstractCategoryContentProvider
   }
 
   /**
-   * Method to check whether the given category is a paint category, the default
-   * implementation returns true if {@link #getAllSupportedCategories()}
-   * contains the given category, subclass may override.
-   * 
-   * @param category The category.
-   * @return True if the category is supported, false otherwise.
-   * @see #getPaintCategory()
-   * @see #setPaintCategory(ICategory)
-   */
-  protected boolean isPaintCategory(ICategory category) {
-    return allCategories.contains(category);
-  }
-
-  /**
    * Notifies the subclasses that the input has been changed. Subclasses should
    * override this method.
    * 
@@ -255,25 +261,39 @@ abstract class AbstractCategoryContentProvider
    * @return All the categories supported by this content provider.
    */
   protected abstract ICategory[] getAllSupportedCategories();
-
+  
   /**
    * Gets the default paint category.
    * 
    * @return The default paint category.
    */
   protected abstract ICategory getDefaultPaintCategory();
-
+  
   /**
    * Gets the default selected categories of this content provider.
    * 
    * @return An ordered array of default category selection.
    */
   protected abstract ICategory[] getDefaultSelectedCategories();
-
+  
   /**
    * Gets the mapping of categories and classes defined by subclasses.
    * 
    * @return The mapping of categories and classes.
    */
   protected abstract Map<ICategory, Predicate<Object>> initializeCategorizers();
+  
+  /**
+   * Method to check whether the given category is a paint category, the default
+   * implementation returns true if {@link #getAllSupportedCategories()}
+   * contains the given category, subclass may override.
+   * 
+   * @param category The category.
+   * @return True if the category is supported, false otherwise.
+   * @see #getPaintCategory()
+   * @see #setPaintCategory(ICategory)
+   */
+  protected boolean isPaintCategory(ICategory category) {
+    return allCategories.contains(category);
+  }
 }
