@@ -36,7 +36,7 @@ public class CellPainter extends StyledCellLabelProvider {
   /**
    * A value provider that provides values for elements.
    */
-  public interface IValueProvider {
+  public static interface IValueProvider {
 
     /**
      * Gets the maximum value of all the elements.

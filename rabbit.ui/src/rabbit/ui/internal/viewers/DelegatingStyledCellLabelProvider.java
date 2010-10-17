@@ -30,6 +30,13 @@ import org.eclipse.swt.widgets.Event;
  */
 public class DelegatingStyledCellLabelProvider extends StyledCellLabelProvider {
   
+  /*
+   * Using a cell label provider instead of a normal label provider can take
+   * care of some selection issues. For example, on Window Vista/7, when a tree
+   * item is selected when using a normal label provider, the spacing between
+   * left and right is uneven (doesn't look good).
+   */
+  
   private final ILabelProvider labelProvider;
   private final boolean shouldDispose;
 

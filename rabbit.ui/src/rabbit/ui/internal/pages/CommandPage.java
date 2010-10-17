@@ -27,6 +27,7 @@ import rabbit.ui.internal.actions.GroupByAction;
 import rabbit.ui.internal.actions.ShowHideFilterControlAction;
 import rabbit.ui.internal.util.ICategory;
 import rabbit.ui.internal.viewers.CellPainter;
+import rabbit.ui.internal.viewers.DelegatingStyledCellLabelProvider;
 import rabbit.ui.internal.viewers.TreeViewerLabelSorter;
 import rabbit.ui.internal.viewers.TreeViewerSorter;
 
@@ -41,6 +42,7 @@ import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.viewers.TreeNode;
 import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.jface.viewers.TreeViewerColumn;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.TreeColumn;
@@ -71,12 +73,13 @@ public class CommandPage extends InternalPage<CommandDataDescriptor>
   
   @Override
   public void createColumns(TreeViewer viewer) {
+		TreeViewerColumn viewerColumn = new TreeViewerColumn(viewer, SWT.LEFT);
+    viewerColumn.getColumn().setText("Name");
+    viewerColumn.getColumn().setWidth(150);
+    viewerColumn.getColumn().addSelectionListener(createInitialComparator(viewer));
+    viewerColumn.setLabelProvider(new DelegatingStyledCellLabelProvider(labels, false));
+
     TreeColumn column = new TreeColumn(viewer.getTree(), SWT.LEFT);
-    column.setText("Name");
-    column.setWidth(150);
-    column.addSelectionListener(createInitialComparator(viewer));
-    
-    column = new TreeColumn(viewer.getTree(), SWT.LEFT);
     column.addSelectionListener(new TreeViewerLabelSorter(viewer));
     column.setText("Description");
     column.setWidth(200);
