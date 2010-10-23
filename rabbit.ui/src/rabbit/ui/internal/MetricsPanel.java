@@ -87,9 +87,10 @@ public class MetricsPanel {
       public void selectionChanged(SelectionChangedEvent event) {
         ISelection selection = event.getSelection();
         if (selection instanceof IStructuredSelection) {
-          PageDescriptor page = (PageDescriptor) ((IStructuredSelection) selection)
-              .getFirstElement();
-          view.display(page.getPage());
+          Object element = ((IStructuredSelection) selection).getFirstElement();
+          if (element != null && element instanceof PageDescriptor) {
+            view.display(((PageDescriptor) element).getPage());
+          }
         }
       }
     });

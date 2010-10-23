@@ -15,14 +15,13 @@
  */
 package rabbit.ui.internal.viewers;
 
-import rabbit.ui.internal.util.PageDescriptor;
-
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.StyledCellLabelProvider;
 import org.eclipse.jface.viewers.ViewerCell;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.widgets.Event;
+
+import rabbit.ui.internal.util.PageDescriptor;
 
 /**
  * Label provider for {@link PageDescriptor}.
@@ -87,11 +86,5 @@ public class PageDescriptorLabelProvider extends StyledCellLabelProvider
   @Override
   public boolean useNativeToolTip(Object object) {
     return true;
-  }
-
-  @Override
-  protected void measure(Event event, Object element) {
-    super.measure(event, element);
-    event.height = (event.height < 20) ? 20 : event.height;
   }
 }

@@ -162,6 +162,9 @@ public class RabbitView extends ViewPart {
   /** True if this OS is Windows, false otherwise. */
   private final boolean isWindowsOS = Platform.getOS().equals(Platform.OS_WIN32);
 
+  /** True if this OS is linux, false otherwise. */
+  private final boolean isLinux = Platform.getOS().equals(Platform.OS_LINUX);
+  
   /** File to save/restore the view state, may be null. */
   private IMemento memento;
   
@@ -229,7 +232,7 @@ public class RabbitView extends ViewPart {
     // Header:
     Composite header = toolkit.createComposite(right);
     GridLayout headerLayout = new GridLayout(2, false);
-    if (!isWindowsOS) {
+    if (isLinux) { // Make GTK widgets have less spaces:
       headerLayout.marginHeight = 0;
       headerLayout.marginWidth = 0;
       headerLayout.horizontalSpacing = 0;
@@ -239,7 +242,7 @@ public class RabbitView extends ViewPart {
     GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER)
         .grab(true, false).applyTo(header);
     {
-      int toolbarStyle = (isWindowsOS) ? SWT.FLAT : SWT.NONE;
+      int toolbarStyle = (!isLinux) ? SWT.FLAT : SWT.NONE;
       
       ToolBar bar = new ToolBar(header, toolbarStyle);
       bar.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
