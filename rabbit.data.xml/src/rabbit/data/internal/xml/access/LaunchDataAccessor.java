@@ -67,7 +67,7 @@ public class LaunchDataAccessor
 
       Set<IPath> paths = Sets.newHashSetWithExpectedSize(type.getFilePath().size());
       for (String str : type.getFilePath()) {
-        paths.add(new Path(str));
+        paths.add(new Path(str)); // TODO check not null and segment count
       }
       return new LaunchDataDescriptor(cal, des, type.getCount(),
           new Duration(type.getTotalDuration()), paths);
