@@ -77,7 +77,14 @@ public abstract class AbstractNodeAccessor<E, T, S extends EventGroupType>
    * @param type The XML type.
    * @return A data node, or null if one cannot be created.
    */
-  protected abstract E createDataNode(LocalDate cal, T type);
+  protected E createDataNode(LocalDate cal, T type) {
+    return null;
+  }
+  
+  // TODO
+  protected E createDataNode(LocalDate cal, WorkspaceStorage ws, T type) throws Exception {
+    return null;
+  }
 
   @Override protected Collection<E> filter(Multimap<WorkspaceStorage, S> data) {
 
@@ -111,7 +118,12 @@ public abstract class AbstractNodeAccessor<E, T, S extends EventGroupType>
       }
       LocalDate date = toLocalDate(entry.getValue().getDate());
       for (T element : filtered) {
-        E node = createDataNode(date, element);
+        E node = null;
+        try {
+          node = createDataNode(date, entry.getKey(), element);
+        } catch (Exception e) {
+          node = null;
+        }
         if (node != null) {
           result.add(node);
         }
