@@ -16,7 +16,6 @@
 package rabbit.data.access.model;
 
 
-import org.eclipse.ui.IPerspectiveDescriptor;
 import org.joda.time.Duration;
 import org.joda.time.LocalDate;
 
@@ -41,7 +40,7 @@ public interface IPerspectiveData extends IData {
   static final IKey<Duration> DURATION = Key.create();
   
   /**
-   * Key for the perspective.
+   * Key for the perspective ID.
    */
-  static final IKey<IPerspectiveDescriptor> PERSPECTIVE = Key.create();
+  static final IKey<String> PERSPECTIVE_ID = Key.create();
 }

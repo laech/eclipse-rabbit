@@ -22,7 +22,6 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
 import org.eclipse.core.runtime.Path;
-import org.eclipse.ui.IPerspectiveDescriptor;
 import org.eclipse.ui.PlatformUI;
 import org.joda.time.Duration;
 import org.joda.time.LocalDate;
@@ -37,71 +36,70 @@ public class PerspectiveDataTest {
   private LocalDate date;
   private WorkspaceStorage workspace;
   private Duration duration;
-  private IPerspectiveDescriptor persp;
+  private String pId;
   
   @Before
   public void before() {
     date = new LocalDate().minusDays(1);
     workspace = new WorkspaceStorage(new Path(""), new Path(""));
     duration = new Duration(10);
-    persp = 
-        PlatformUI.getWorkbench().getPerspectiveRegistry().getPerspectives()[0];
+    pId = PlatformUI.getWorkbench().getPerspectiveRegistry().getPerspectives()[0].getId();
   }
 
   @Test
   public void shouldReturnTheDate() {
     assertThat(
-        create(date, workspace, duration, persp).get(IPerspectiveData.DATE),
+        create(date, workspace, duration, pId).get(IPerspectiveData.DATE),
         is(date));
   }
   
   @Test
   public void shouldReturnTheDuration() {
     assertThat(
-        create(date, workspace, duration, persp).get(IPerspectiveData.DURATION),
+        create(date, workspace, duration, pId).get(IPerspectiveData.DURATION),
         is(duration));
   }
   
   @Test
-  public void shouldReturnThePart() {
+  public void shouldReturnThePerspectiveId() {
     assertThat(
-        create(date, workspace, duration, persp).get(IPerspectiveData.PERSPECTIVE),
-        is(persp));
+        create(date, workspace, duration, pId).get(IPerspectiveData.PERSPECTIVE_ID),
+        is(pId));
   }
   
   @Test
   public void shouldReturnTheWorkspace() {
     assertThat(
-        create(date, workspace, duration, persp).get(IPerspectiveData.WORKSPACE),
+        create(date, workspace, duration, pId).get(IPerspectiveData.WORKSPACE),
         is(workspace));
   }
   
   @Test(expected = NullPointerException.class)
   public void shouldThrowNullPointerExceptionIfConstructedWithoutADate() {
-    create(null, workspace, duration, persp);
+    create(null, workspace, duration, pId);
   }
   
   @Test(expected = NullPointerException.class)
   public void shouldThrowNullPointerExceptionIfConstructedWithoutADuration() {
-    create(date, workspace, null, persp);
+    create(date, workspace, null, pId);
   }
   
   @Test(expected = NullPointerException.class)
-  public void shouldThrowNullPointerExceptionIfConstructedWithoutAPart() {
+  public void shouldThrowNullPointerExceptionIfConstructedWithoutAPerspectiveId() {
     create(date, workspace, duration, null);
   }
   
   @Test(expected = NullPointerException.class)
   public void shouldThrowNullPointerExceptionIfConstructedWithoutAWorkspace() {
-    create(date, null, duration, persp);
+    create(date, null, duration, pId);
   }
   
   /**
    * @see PerspectiveData#PerspectiveData(
-   *      LocalDate, WorkspaceStorage, Duration, IPerspectiveDescriptor)
+   *      LocalDate, WorkspaceStorage, Duration, String)
    */
   private PerspectiveData create(
-      LocalDate d, WorkspaceStorage ws, Duration dur, IPerspectiveDescriptor p) {
-    return new PerspectiveData(d, ws, dur, p);
+      LocalDate d, WorkspaceStorage ws, Duration dur, String perspectiveId) {
+    return new PerspectiveData(d, ws, dur, perspectiveId);
   }
 }

@@ -21,7 +21,6 @@ import rabbit.data.access.model.WorkspaceStorage;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import org.eclipse.ui.IPerspectiveDescriptor;
 import org.joda.time.Duration;
 import org.joda.time.LocalDate;
 
@@ -42,20 +41,20 @@ public class PerspectiveData implements IPerspectiveData {
    * @param date The date of the session.
    * @param workspace The workspace of the session.
    * @param duration The duration.
-   * @param perspective The perspective.
+   * @param perspectiveId The perspective ID.
    * @throws NullPointerException If any of the arguments are null.
    */
   public PerspectiveData(
       LocalDate date, 
       WorkspaceStorage workspace, 
       Duration duration, 
-      IPerspectiveDescriptor perspective) {
+      String perspectiveId) {
     
     data = new KeyMapBuilder()
         .put(DATE,        checkNotNull(date, "date"))
         .put(WORKSPACE,   checkNotNull(workspace, "workspace"))
         .put(DURATION,    checkNotNull(duration, "duration"))
-        .put(PERSPECTIVE, checkNotNull(perspective, "perspective"))
+        .put(PERSPECTIVE_ID, checkNotNull(perspectiveId, "perspectiveId"))
         .build();
   }
 

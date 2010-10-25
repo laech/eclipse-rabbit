@@ -22,7 +22,6 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
 import org.eclipse.core.runtime.Path;
-import org.eclipse.ui.IWorkbenchPartDescriptor;
 import org.eclipse.ui.PlatformUI;
 import org.joda.time.Duration;
 import org.joda.time.LocalDate;
@@ -37,70 +36,70 @@ public class PartDataTest {
   private LocalDate date;
   private WorkspaceStorage workspace;
   private Duration duration;
-  private IWorkbenchPartDescriptor part;
+  private String partId;
   
   @Before
   public void before() {
     date = new LocalDate().minusDays(1);
     workspace = new WorkspaceStorage(new Path(""), new Path(""));
     duration = new Duration(10);
-    part = PlatformUI.getWorkbench().getViewRegistry().getViews()[0];
+    partId = PlatformUI.getWorkbench().getViewRegistry().getViews()[0].getId();
   }
 
   @Test
   public void shouldReturnTheDate() {
     assertThat(
-        create(date, workspace, duration, part).get(IPartData.DATE),
+        create(date, workspace, duration, partId).get(IPartData.DATE),
         is(date));
   }
   
   @Test
   public void shouldReturnTheDuration() {
     assertThat(
-        create(date, workspace, duration, part).get(IPartData.DURATION),
+        create(date, workspace, duration, partId).get(IPartData.DURATION),
         is(duration));
   }
   
   @Test
-  public void shouldReturnThePart() {
+  public void shouldReturnThePartId() {
     assertThat(
-        create(date, workspace, duration, part).get(IPartData.PART),
-        is(part));
+        create(date, workspace, duration, partId).get(IPartData.PART_ID),
+        is(partId));
   }
   
   @Test
   public void shouldReturnTheWorkspace() {
     assertThat(
-        create(date, workspace, duration, part).get(IPartData.WORKSPACE),
+        create(date, workspace, duration, partId).get(IPartData.WORKSPACE),
         is(workspace));
   }
   
   @Test(expected = NullPointerException.class)
   public void shouldThrowNullPointerExceptionIfConstructedWithoutADate() {
-    create(null, workspace, duration, part);
+    create(null, workspace, duration, partId);
   }
   
   @Test(expected = NullPointerException.class)
   public void shouldThrowNullPointerExceptionIfConstructedWithoutADuration() {
-    create(date, workspace, null, part);
+    create(date, workspace, null, partId);
   }
   
   @Test(expected = NullPointerException.class)
-  public void shouldThrowNullPointerExceptionIfConstructedWithoutAPart() {
+  public void shouldThrowNullPointerExceptionIfConstructedWithoutAPartId() {
     create(date, workspace, duration, null);
   }
   
   @Test(expected = NullPointerException.class)
   public void shouldThrowNullPointerExceptionIfConstructedWithoutAWorkspace() {
-    create(date, null, duration, part);
+    create(date, null, duration, partId);
   }
   
   /**
    * @see PartData#PartData(
-   *      LocalDate, WorkspaceStorage, Duration, IWorkbenchPartDescriptor)
+   *      LocalDate, WorkspaceStorage, Duration, String)
    */
   private PartData create(
-      LocalDate d, WorkspaceStorage ws, Duration dur, IWorkbenchPartDescriptor p) {
-    return new PartData(d, ws, dur, p);
+      LocalDate date, WorkspaceStorage ws, Duration dur, String partId) {
+    return new PartData(date, ws, dur, partId);
   }
 }

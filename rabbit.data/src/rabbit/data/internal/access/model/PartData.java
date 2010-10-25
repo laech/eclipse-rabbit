@@ -21,7 +21,6 @@ import rabbit.data.access.model.WorkspaceStorage;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import org.eclipse.ui.IWorkbenchPartDescriptor;
 import org.joda.time.Duration;
 import org.joda.time.LocalDate;
 
@@ -42,20 +41,20 @@ public class PartData implements IPartData {
    * @param date The date of the session.
    * @param workspace The workspace of the session.
    * @param duration The duration.
-   * @param part The workbench tool.
+   * @param partId The workbench tool ID.
    * @throws NullPointerException If any of the arguments are null.
    */
   public PartData(
       LocalDate date, 
       WorkspaceStorage workspace, 
       Duration duration, 
-      IWorkbenchPartDescriptor part) {
+      String partId) {
     
     data = new KeyMapBuilder()
         .put(DATE,      checkNotNull(date, "date"))
         .put(WORKSPACE, checkNotNull(workspace, "workspace"))
         .put(DURATION,  checkNotNull(duration, "duration"))
-        .put(PART,      checkNotNull(part, "part"))
+        .put(PART_ID,   checkNotNull(partId, "partId"))
         .build();
   }
 
