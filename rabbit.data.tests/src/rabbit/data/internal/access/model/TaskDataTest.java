@@ -17,6 +17,7 @@ package rabbit.data.internal.access.model;
 
 import rabbit.data.access.model.ITaskData;
 import rabbit.data.access.model.WorkspaceStorage;
+import rabbit.data.common.TaskId;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
@@ -25,28 +26,27 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.mylyn.internal.tasks.core.LocalTask;
-import org.eclipse.mylyn.tasks.core.ITask;
 import org.joda.time.Duration;
 import org.joda.time.LocalDate;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.Date;
+
 /**
  * @see TaskData
  */
-@SuppressWarnings("restriction")
 public class TaskDataTest {
 
-  private ITask task;
   private IFile file;
+  private TaskId taskId;
   private LocalDate date;
   private Duration duration;
   private WorkspaceStorage workspace;
 
   @Before
   public void prepare() {
-    task = new LocalTask("id", "summary");
+    taskId = new TaskId("id", new Date());
     file = workspaceRoot().getFile(new Path("/project/file.txt"));
     date = new LocalDate();
     duration = new Duration(10);
@@ -56,69 +56,69 @@ public class TaskDataTest {
   @Test
   public void shouldReturnTheDate() {
     assertThat(
-        create(date, workspace, duration, file, task).get(ITaskData.DATE),
+        create(date, workspace, duration, file, taskId).get(ITaskData.DATE),
         is(date));
   }
 
   @Test
   public void shouldReturnTheDuration() {
     assertThat(
-        create(date, workspace, duration, file, task).get(ITaskData.DURATION),
+        create(date, workspace, duration, file, taskId).get(ITaskData.DURATION),
         is(duration));
   }
 
   @Test
   public void shouldReturnTheFile() {
     assertThat(
-        create(date, workspace, duration, file, task).get(ITaskData.FILE),
+        create(date, workspace, duration, file, taskId).get(ITaskData.FILE),
         is(file));
   }
 
   @Test
   public void shouldReturnTheWorkspace() {
     assertThat(
-        create(date, workspace, duration, file, task).get(ITaskData.WORKSPACE),
+        create(date, workspace, duration, file, taskId).get(ITaskData.WORKSPACE),
         is(workspace));
   }
   
   @Test
-  public void shouldReturnTheTask() {
+  public void shouldReturnTheTaskId() {
     assertThat(
-        create(date, workspace, duration, file, task).get(ITaskData.TASK),
-        is(task));
+        create(date, workspace, duration, file, taskId).get(ITaskData.TASK_ID),
+        is(taskId));
   }
 
   @Test(expected = NullPointerException.class)
   public void shouldThrowNullPointerExceptionIfConstructedWithoutADate() {
-    create(null, workspace, duration, file, task);
+    create(null, workspace, duration, file, taskId);
   }
 
   @Test(expected = NullPointerException.class)
   public void shouldThrowNullPointerExceptionIfConstructedWithoutADuration() {
-    create(date, workspace, null, file, task);
+    create(date, workspace, null, file, taskId);
   }
 
   @Test(expected = NullPointerException.class)
   public void shouldThrowNullPointerExceptionIfConstructedWithoutAFile() {
-    create(date, workspace, duration, null, task);
+    create(date, workspace, duration, null, taskId);
   }
 
   @Test(expected = NullPointerException.class)
   public void shouldThrowNullPointerExceptionIfConstructedWithoutAWorkspace() {
-    create(date, null, duration, file, task);
+    create(date, null, duration, file, taskId);
   }
   
   @Test(expected = NullPointerException.class)
-  public void shouldThrowNullPointerExceptionIfConstructedWithoutATask() {
+  public void shouldThrowNullPointerExceptionIfConstructedWithoutATaskId() {
     create(date, workspace, duration, file, null);
   }
 
   /**
-   * @see TaskData#TaskData(LocalDate, WorkspaceStorage, Duration, IFile, ITask)
+   * @see TaskData#TaskData(LocalDate, WorkspaceStorage, Duration, IFile, TaskId)
    */
   private TaskData create(LocalDate date, WorkspaceStorage workspace,
-      Duration duration, IFile file, ITask task) {
-    return new TaskData(date, workspace, duration, file, task);
+      Duration duration, IFile file, TaskId taskId) {
+    return new TaskData(date, workspace, duration, file, taskId);
   }
   
   /**

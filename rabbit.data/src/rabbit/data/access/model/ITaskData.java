@@ -15,9 +15,9 @@
  */
 package rabbit.data.access.model;
 
+import rabbit.data.common.TaskId;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.mylyn.tasks.core.ITask;
 import org.joda.time.Duration;
 import org.joda.time.LocalDate;
 
@@ -30,24 +30,24 @@ public interface ITaskData extends IData {
    * Key for the date.
    */
   static final IKey<LocalDate> DATE = Key.create();
-  
+
   /**
    * Key for the workspace.
    */
   static final IKey<WorkspaceStorage> WORKSPACE = Key.create();
-  
+
   /**
    * Key for the duration.
    */
   static final IKey<Duration> DURATION = Key.create();
-  
+
   /**
    * Key for the file.
    */
   static final IKey<IFile> FILE = Key.create();
-  
+
   /**
-   * Key for the task.
+   * Key for the task ID.
    */
-  static final IKey<ITask> TASK = Key.create();
+  static final IKey<TaskId> TASK_ID = Key.create();
 }

@@ -18,11 +18,11 @@ package rabbit.data.internal.access.model;
 import rabbit.data.access.model.IKey;
 import rabbit.data.access.model.ITaskData;
 import rabbit.data.access.model.WorkspaceStorage;
+import rabbit.data.common.TaskId;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.mylyn.tasks.core.ITask;
 import org.joda.time.Duration;
 import org.joda.time.LocalDate;
 
@@ -44,7 +44,7 @@ public class TaskData implements ITaskData {
    * @param workspace The workspace of the session.
    * @param duration The duration of the session.
    * @param file The workspace file.
-   * @param task The task.
+   * @param taskId The task ID.
    * @throws NullPointerException If any of the arguments are null;
    */
   public TaskData(
@@ -52,14 +52,14 @@ public class TaskData implements ITaskData {
       WorkspaceStorage workspace,
       Duration duration, 
       IFile file,
-      ITask task) {
+      TaskId taskId) {
     
     data = new KeyMapBuilder()
         .put(DATE,      checkNotNull(date, "date"))
         .put(WORKSPACE, checkNotNull(workspace, "workspace"))
         .put(DURATION,  checkNotNull(duration, "duration"))
         .put(FILE,      checkNotNull(file, "file"))
-        .put(TASK,      checkNotNull(task, "task"))
+        .put(TASK_ID,   checkNotNull(taskId, "taskId"))
         .build();
   }
 
