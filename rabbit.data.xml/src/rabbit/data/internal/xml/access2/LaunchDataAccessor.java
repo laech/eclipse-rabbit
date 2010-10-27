@@ -21,8 +21,7 @@ import rabbit.data.access.model.WorkspaceStorage;
 import rabbit.data.internal.access.model.LaunchData;
 import rabbit.data.internal.xml.IDataStore;
 import rabbit.data.internal.xml.StoreNames;
-import rabbit.data.internal.xml.access.AbstractNodeAccessor;
-import rabbit.data.internal.xml.merge.IMerger;
+import rabbit.data.internal.xml.access.AbstractAccessor2;
 import rabbit.data.internal.xml.schema.events.EventListType;
 import rabbit.data.internal.xml.schema.events.LaunchEventListType;
 import rabbit.data.internal.xml.schema.events.LaunchEventType;
@@ -45,25 +44,22 @@ import java.util.Set;
  * Accesses launch event data.
  */
 public class LaunchDataAccessor extends
-    AbstractNodeAccessor<ILaunchData, LaunchEventType, LaunchEventListType> {
- 
+    AbstractAccessor2<ILaunchData, LaunchEventType, LaunchEventListType> {
+
   /**
    * Constructor.
    * 
    * @param store The data store to get the data from.
-   * @param merger The merger for merging XML data nodes.
-   * @throws NullPointerException If any arguments are null.
+   * @throws NullPointerException If argument is null.
    */
   @Inject
-  LaunchDataAccessor(
-      @Named(StoreNames.LAUNCH_STORE) IDataStore store, 
-      IMerger<LaunchEventType> merger) {
-    super(store, merger);
+  LaunchDataAccessor(@Named(StoreNames.LAUNCH_STORE) IDataStore store) {
+    super(store);
   }
-  
+
   @Override
-  protected ILaunchData createDataNode(
-      LocalDate date, WorkspaceStorage ws, LaunchEventType type) throws Exception {
+  protected ILaunchData createDataNode(LocalDate date, WorkspaceStorage ws,
+      LaunchEventType type) throws Exception {
     Duration duration = new Duration(type.getTotalDuration());
     LaunchConfigurationDescriptor config = new LaunchConfigurationDescriptor(
         type.getName(), type.getLaunchModeId(), type.getLaunchTypeId());
@@ -79,12 +75,12 @@ public class LaunchDataAccessor extends
   }
 
   @Override
-  protected Collection<LaunchEventType> getElements(LaunchEventListType list) {
-    return list.getLaunchEvent();
+  protected Collection<LaunchEventListType> getCategories(EventListType doc) {
+    return doc.getLaunchEvents();
   }
 
   @Override
-  protected Collection<LaunchEventListType> getCategories(EventListType doc) {
-    return doc.getLaunchEvents();
+  protected Collection<LaunchEventType> getElements(LaunchEventListType list) {
+    return list.getLaunchEvent();
   }
 }

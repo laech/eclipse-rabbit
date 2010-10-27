@@ -15,6 +15,7 @@
  */
 package rabbit.data.internal.xml.access;
 
+import static rabbit.data.internal.xml.DatatypeUtil.toLocalDate;
 import static rabbit.data.internal.xml.DatatypeUtil.toXmlDate;
 
 import rabbit.data.access.IAccessor;
@@ -27,10 +28,10 @@ import rabbit.data.internal.xml.schema.events.EventListType;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.LinkedListMultimap;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Path;
 import org.joda.time.LocalDate;
 
 import java.io.File;
@@ -49,7 +50,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
  * @param <E> The XML type.
  * @param <S> The XML category type.
  */
-public abstract class AbstractAccessor<T, E, S extends EventGroupType>
+public abstract class AbstractAccessor2<T, E, S extends EventGroupType>
     implements IAccessor<T> {
 
   private final IDataStore store;
@@ -60,24 +61,26 @@ public abstract class AbstractAccessor<T, E, S extends EventGroupType>
    * @param store The data store to get the data from.
    * @throws NullPointerException If any arguments are null.
    */
-  protected AbstractAccessor(IDataStore store) {
+  protected AbstractAccessor2(IDataStore store) {
     this.store = checkNotNull(store);
   }
 
   @Override
   public final Collection<T> getData(LocalDate start, LocalDate end) {
-    return filter(getXmlData(checkNotNull(start, "start date is null"), 
+    return filter(getXmlData(checkNotNull(start, "start date is null"),
                              checkNotNull(end, "end date is null")));
   }
 
   /**
-   * Filters the given data.
+   * Creates a data node.
    * 
-   * @param data The raw data between the two dates of
-   *          {@link #getData(Calendar, Calendar)}.
-   * @return The filtered data.
+   * @param cal The date of the XML type.
+   * @param type The XML type.
+   * @return A data node, or null if one cannot be created.
+   * @throws Exception If a data node cannot be created.
    */
-  protected abstract Collection<T> filter(Multimap<WorkspaceStorage, S> data);
+  protected abstract T createDataNode(LocalDate cal, WorkspaceStorage ws, E type)
+      throws Exception;
 
   /**
    * Gets the collection of categories from the given parameter.
@@ -97,7 +100,41 @@ public abstract class AbstractAccessor<T, E, S extends EventGroupType>
   }
 
   /**
-   * Gets the data from the XML files. TODO
+   * Gets a collection of types from the given category.
+   * 
+   * @param category The category.
+   * @return A collection of objects.
+   */
+  protected abstract Collection<E> getElements(S category);
+
+  /**
+   * Filters the given data.
+   * 
+   * @param data The raw data between the two dates of
+   *          {@link #getData(Calendar, Calendar)}.
+   * @return The filtered data.
+   */
+  private Collection<T> filter(Multimap<WorkspaceStorage, S> data) {
+    List<T> result = Lists.newLinkedList();
+    for (Map.Entry<WorkspaceStorage, S> entry : data.entries()) {
+      LocalDate date = toLocalDate(entry.getValue().getDate());
+      for (E element : getElements(entry.getValue())) {
+        T node = null;
+        try {
+          node = createDataNode(date, entry.getKey(), element);
+        } catch (Exception e) {
+          node = null;
+        }
+        if (node != null) {
+          result.add(node);
+        }
+      }
+    }
+    return result;
+  }
+
+  /**
+   * Gets the data from the XML files.
    * 
    * @param start The start date of the data to get.
    * @param end The end date of the data to get.
@@ -111,19 +148,15 @@ public abstract class AbstractAccessor<T, E, S extends EventGroupType>
     XmlPlugin plugin = XmlPlugin.getDefault();
 
     IPath[] storagePaths = plugin.getStoragePaths();
-    Multimap<WorkspaceStorage, S> data = LinkedListMultimap
-        .create(storagePaths.length);
-    Multimap<WorkspaceStorage, File> files = LinkedListMultimap
-        .create(storagePaths.length);
+    Multimap<WorkspaceStorage, S> data = 
+        LinkedListMultimap.create(storagePaths.length);
+    Multimap<WorkspaceStorage, File> files = 
+        LinkedListMultimap.create(storagePaths.length);
 
-    for (IPath path : storagePaths) {
-      List<File> fileList = getDataStore().getDataFiles(start, end, path);
-      IPath workspacePath = null;
-      String workspacePathString = plugin.getProperty(path.toOSString());
-      if (workspacePathString != null) {
-        workspacePath = new Path(workspacePathString);
-      }
-      files.putAll(new WorkspaceStorage(path, workspacePath), fileList);
+    for (IPath storagePath : storagePaths) {
+      List<File> fileList = getDataStore().getDataFiles(start, end, storagePath);
+      IPath workspacePath = plugin.getWorkspacePath(storagePath);
+      files.putAll(new WorkspaceStorage(storagePath, workspacePath), fileList);
     }
 
     for (Map.Entry<WorkspaceStorage, File> entry : files.entries()) {

@@ -20,8 +20,7 @@ import rabbit.data.access.model.WorkspaceStorage;
 import rabbit.data.internal.access.model.FileData;
 import rabbit.data.internal.xml.IDataStore;
 import rabbit.data.internal.xml.StoreNames;
-import rabbit.data.internal.xml.access.AbstractNodeAccessor;
-import rabbit.data.internal.xml.merge.IMerger;
+import rabbit.data.internal.xml.access.AbstractAccessor2;
 import rabbit.data.internal.xml.schema.events.EventListType;
 import rabbit.data.internal.xml.schema.events.FileEventListType;
 import rabbit.data.internal.xml.schema.events.FileEventType;
@@ -41,25 +40,22 @@ import java.util.Collection;
  * Accesses file event data.
  */
 public class FileDataAccessor extends
-    AbstractNodeAccessor<IFileData, FileEventType, FileEventListType> {
+    AbstractAccessor2<IFileData, FileEventType, FileEventListType> {
 
   /**
    * Constructor.
    * 
    * @param store The data store to get the data from.
-   * @param merger The merger for merging XML data nodes.
-   * @throws NullPointerException If any arguments are null.
+   * @throws NullPointerException If argument is null.
    */
   @Inject
-  FileDataAccessor(
-      @Named(StoreNames.FILE_STORE) IDataStore store,
-      IMerger<FileEventType> merger) {
-    super(store, merger);
+  FileDataAccessor(@Named(StoreNames.FILE_STORE) IDataStore store) {
+    super(store);
   }
 
   @Override
-  protected IFileData createDataNode(
-      LocalDate date, WorkspaceStorage ws, FileEventType type) throws Exception {
+  protected IFileData createDataNode(LocalDate date, WorkspaceStorage ws,
+      FileEventType type) throws Exception {
     return new FileData(date, ws, new Duration(type.getDuration()),
         workspaceRoot().getFile(new Path(type.getFilePath())));
   }
@@ -73,7 +69,7 @@ public class FileDataAccessor extends
   protected Collection<FileEventListType> getCategories(EventListType doc) {
     return doc.getFileEvents();
   }
-  
+
   /**
    * @return The root of the current workspace.
    */

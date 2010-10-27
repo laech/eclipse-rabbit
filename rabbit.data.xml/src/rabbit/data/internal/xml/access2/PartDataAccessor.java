@@ -20,8 +20,7 @@ import rabbit.data.access.model.WorkspaceStorage;
 import rabbit.data.internal.access.model.PartData;
 import rabbit.data.internal.xml.IDataStore;
 import rabbit.data.internal.xml.StoreNames;
-import rabbit.data.internal.xml.access.AbstractNodeAccessor;
-import rabbit.data.internal.xml.merge.IMerger;
+import rabbit.data.internal.xml.access.AbstractAccessor2;
 import rabbit.data.internal.xml.schema.events.EventListType;
 import rabbit.data.internal.xml.schema.events.PartEventListType;
 import rabbit.data.internal.xml.schema.events.PartEventType;
@@ -37,21 +36,18 @@ import java.util.Collection;
 /**
  * Accesses workbench part event data.
  */
-public class PartDataAccessor
-    extends AbstractNodeAccessor<IPartData, PartEventType, PartEventListType> {
+public class PartDataAccessor extends
+    AbstractAccessor2<IPartData, PartEventType, PartEventListType> {
 
   /**
    * Constructor.
    * 
    * @param store The data store to get the data from.
-   * @param merger The merger for merging XML data nodes.
-   * @throws NullPointerException If any arguments are null.
+   * @throws NullPointerException If argument is null.
    */
   @Inject
-  PartDataAccessor(
-      @Named(StoreNames.PART_STORE) IDataStore store, 
-      IMerger<PartEventType> merger) {
-    super(store, merger);
+  PartDataAccessor(@Named(StoreNames.PART_STORE) IDataStore store) {
+    super(store);
   }
 
   @Override
@@ -60,8 +56,8 @@ public class PartDataAccessor
   }
 
   @Override
-  protected IPartData createDataNode(
-      LocalDate date, WorkspaceStorage ws, PartEventType t) throws Exception {
+  protected IPartData createDataNode(LocalDate date, WorkspaceStorage ws,
+      PartEventType t) throws Exception {
     return new PartData(date, ws, new Duration(t.getDuration()), t.getPartId());
   }
 

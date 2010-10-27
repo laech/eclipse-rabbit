@@ -20,8 +20,7 @@ import rabbit.data.access.model.WorkspaceStorage;
 import rabbit.data.internal.access.model.CommandData;
 import rabbit.data.internal.xml.IDataStore;
 import rabbit.data.internal.xml.StoreNames;
-import rabbit.data.internal.xml.access.AbstractNodeAccessor;
-import rabbit.data.internal.xml.merge.IMerger;
+import rabbit.data.internal.xml.access.AbstractAccessor2;
 import rabbit.data.internal.xml.schema.events.CommandEventListType;
 import rabbit.data.internal.xml.schema.events.CommandEventType;
 import rabbit.data.internal.xml.schema.events.EventListType;
@@ -40,20 +39,17 @@ import java.util.Collection;
  * Accesses command event data.
  */
 public class CommandDataAccessor extends
-    AbstractNodeAccessor<ICommandData, CommandEventType, CommandEventListType> {
+    AbstractAccessor2<ICommandData, CommandEventType, CommandEventListType> {
 
   /**
    * Constructor.
    * 
    * @param store The data store to get the data from.
-   * @param merger The merger for merging XML data nodes.
    * @throws NullPointerException If any arguments are null.
    */
   @Inject
-  CommandDataAccessor(
-      @Named(StoreNames.COMMAND_STORE) IDataStore store,
-      IMerger<CommandEventType> merger) {
-    super(store, merger);
+  CommandDataAccessor(@Named(StoreNames.COMMAND_STORE) IDataStore store) {
+    super(store);
   }
 
   @Override

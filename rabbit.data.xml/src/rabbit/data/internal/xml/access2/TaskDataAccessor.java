@@ -21,8 +21,7 @@ import rabbit.data.common.TaskId;
 import rabbit.data.internal.access.model.TaskData;
 import rabbit.data.internal.xml.IDataStore;
 import rabbit.data.internal.xml.StoreNames;
-import rabbit.data.internal.xml.access.AbstractNodeAccessor;
-import rabbit.data.internal.xml.merge.IMerger;
+import rabbit.data.internal.xml.access.AbstractAccessor2;
 import rabbit.data.internal.xml.schema.events.EventListType;
 import rabbit.data.internal.xml.schema.events.TaskFileEventListType;
 import rabbit.data.internal.xml.schema.events.TaskFileEventType;
@@ -37,28 +36,24 @@ import org.eclipse.core.runtime.Path;
 import org.joda.time.Duration;
 import org.joda.time.LocalDate;
 
+import java.util.Calendar;
 import java.util.Collection;
 
 /**
  * Gets task data.
  */
-public class TaskDataAccessor 
-    extends AbstractNodeAccessor<ITaskData, 
-                                 TaskFileEventType, 
-                                 TaskFileEventListType> {
+public class TaskDataAccessor extends
+    AbstractAccessor2<ITaskData, TaskFileEventType, TaskFileEventListType> {
 
   /**
    * Constructor.
    * 
    * @param store The data store to get the data from.
-   * @param merger The merger for merging XML data nodes.
-   * @throws NullPointerException If any arguments are null.
+   * @throws NullPointerException If argument is null.
    */
   @Inject
-  TaskDataAccessor(
-      @Named(StoreNames.TASK_STORE) IDataStore store,
-      IMerger<TaskFileEventType> merger) {
-    super(store, merger);
+  TaskDataAccessor(@Named(StoreNames.TASK_STORE) IDataStore store) {
+    super(store);
   }
 
   @Override
@@ -67,11 +62,14 @@ public class TaskDataAccessor
     Duration duration = new Duration(t.getDuration());
     IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
     IFile file = root.getFile(new Path(t.getFilePath()));
-    TaskId taskId = new TaskId(t.getTaskId().getHandleId(), 
-        t.getTaskId().getCreationDate().toGregorianCalendar().getTime());
+
+    String handleId = t.getTaskId().getHandleId();
+    Calendar createDate = t.getTaskId().getCreationDate().toGregorianCalendar();
+    TaskId taskId = new TaskId(handleId, createDate.getTime());
+
     return new TaskData(date, ws, duration, file, taskId);
   }
-  
+
   @Override
   protected Collection<TaskFileEventListType> getCategories(EventListType doc) {
     return doc.getTaskFileEvents();

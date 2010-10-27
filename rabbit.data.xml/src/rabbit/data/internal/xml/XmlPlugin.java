@@ -208,6 +208,14 @@ public class XmlPlugin extends AbstractUIPlugin {
   public String getProperty(String key) {
     return properties.getProperty(key);
   }
+  
+  public IPath getWorkspacePath(IPath storagePath) {
+    String workspacePathString = getProperty(storagePath.lastSegment());
+    if (workspacePathString != null) {
+      return new Path(workspacePathString);
+    }
+    return null;
+  }
 
   /**
    * Gets the properties file for saving the storage root property.

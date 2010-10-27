@@ -20,8 +20,7 @@ import rabbit.data.access.model.WorkspaceStorage;
 import rabbit.data.internal.access.model.JavaData;
 import rabbit.data.internal.xml.IDataStore;
 import rabbit.data.internal.xml.StoreNames;
-import rabbit.data.internal.xml.access.AbstractNodeAccessor;
-import rabbit.data.internal.xml.merge.IMerger;
+import rabbit.data.internal.xml.access.AbstractAccessor2;
 import rabbit.data.internal.xml.schema.events.EventListType;
 import rabbit.data.internal.xml.schema.events.JavaEventListType;
 import rabbit.data.internal.xml.schema.events.JavaEventType;
@@ -39,26 +38,23 @@ import java.util.Collection;
 /**
  * Gets java element event data from the database.
  */
-public class JavaDataAccessor
-    extends AbstractNodeAccessor<IJavaData, JavaEventType, JavaEventListType> {
+public class JavaDataAccessor extends
+    AbstractAccessor2<IJavaData, JavaEventType, JavaEventListType> {
 
   /**
    * Constructor.
    * 
    * @param store The data store to get the data from.
-   * @param merger The merger for merging XML data nodes.
-   * @throws NullPointerException If any arguments are null.
+   * @throws NullPointerException If argument is null.
    */
   @Inject
-  JavaDataAccessor(
-      @Named(StoreNames.JAVA_STORE) IDataStore store,
-      IMerger<JavaEventType> merger) {
-    super(store, merger);
+  JavaDataAccessor(@Named(StoreNames.JAVA_STORE) IDataStore store) {
+    super(store);
   }
-  
+
   @Override
-  protected IJavaData createDataNode(
-      LocalDate date, WorkspaceStorage ws, JavaEventType type) throws Exception {
+  protected IJavaData createDataNode(LocalDate date, WorkspaceStorage ws,
+      JavaEventType type) throws Exception {
     Duration duration = new Duration(type.getDuration());
     IJavaElement element = JavaCore.create(type.getHandleIdentifier());
     return new JavaData(date, ws, duration, element);

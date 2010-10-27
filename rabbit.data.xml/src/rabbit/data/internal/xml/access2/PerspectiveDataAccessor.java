@@ -20,8 +20,7 @@ import rabbit.data.access.model.WorkspaceStorage;
 import rabbit.data.internal.access.model.PerspectiveData;
 import rabbit.data.internal.xml.IDataStore;
 import rabbit.data.internal.xml.StoreNames;
-import rabbit.data.internal.xml.access.AbstractNodeAccessor;
-import rabbit.data.internal.xml.merge.IMerger;
+import rabbit.data.internal.xml.access.AbstractAccessor2;
 import rabbit.data.internal.xml.schema.events.EventListType;
 import rabbit.data.internal.xml.schema.events.PerspectiveEventListType;
 import rabbit.data.internal.xml.schema.events.PerspectiveEventType;
@@ -37,41 +36,36 @@ import java.util.Collection;
 /**
  * Accesses perspective event data.
  */
-public class PerspectiveDataAccessor 
-    extends AbstractNodeAccessor<IPerspectiveData, 
-                                 PerspectiveEventType, 
-                                 PerspectiveEventListType> {
-
+public class PerspectiveDataAccessor
+    extends
+    AbstractAccessor2<IPerspectiveData, PerspectiveEventType, PerspectiveEventListType> {
 
   /**
    * Constructor.
    * 
    * @param store The data store to get the data from.
-   * @param merger The merger for merging XML data nodes.
-   * @throws NullPointerException If any arguments are null.
+   * @throws NullPointerException If argument is null.
    */
   @Inject
-  PerspectiveDataAccessor(
-      @Named(StoreNames.PERSPECTIVE_STORE) IDataStore store,
-      IMerger<PerspectiveEventType> merger) {
-    super(store, merger);
+  PerspectiveDataAccessor(@Named(StoreNames.PERSPECTIVE_STORE) IDataStore store) {
+    super(store);
   }
-  
+
   @Override
-  protected IPerspectiveData createDataNode(LocalDate date, WorkspaceStorage ws,
-      PerspectiveEventType t) throws Exception {
+  protected IPerspectiveData createDataNode(LocalDate date,
+      WorkspaceStorage ws, PerspectiveEventType t) throws Exception {
     Duration duration = new Duration(t.getDuration());
     return new PerspectiveData(date, ws, duration, t.getPerspectiveId());
   }
 
   @Override
-  protected Collection<PerspectiveEventType> getElements( 
-      PerspectiveEventListType list) {
-    return list.getPerspectiveEvent();
+  protected Collection<PerspectiveEventListType> getCategories(EventListType t) {
+    return t.getPerspectiveEvents();
   }
 
   @Override
-  protected Collection<PerspectiveEventListType> getCategories(EventListType t) {
-    return t.getPerspectiveEvents();
+  protected Collection<PerspectiveEventType> getElements(
+      PerspectiveEventListType list) {
+    return list.getPerspectiveEvent();
   }
 }

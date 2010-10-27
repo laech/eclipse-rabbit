@@ -17,6 +17,8 @@ package rabbit.data.access.model;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.base.Objects;
+
 import org.eclipse.core.runtime.IPath;
 
 import javax.annotation.Nullable;
@@ -40,6 +42,23 @@ public final class WorkspaceStorage {
     this.storagePath = checkNotNull(storagePath);
     this.workspacePath = workspacePath;
   }
+  
+  @Override
+  public boolean equals(Object obj) {
+    if (obj instanceof WorkspaceStorage) {
+      WorkspaceStorage ws = (WorkspaceStorage) obj;
+      return Objects.equal(getStoragePath(), ws.getStoragePath())
+          && Objects.equal(getWorkspacePath(), ws.getWorkspacePath());
+    }
+    return false;
+  }
+  
+  /**
+   * @return The path to where the data is stored.
+   */
+  public IPath getStoragePath() {
+    return storagePath;
+  }
 
   /**
    * @return The path to the workspace, may be null if unknown.
@@ -48,10 +67,8 @@ public final class WorkspaceStorage {
     return workspacePath;
   }
 
-  /**
-   * @return The path to where the data is stored.
-   */
-  public IPath getStoragePath() {
-    return storagePath;
+  @Override
+  public int hashCode() {
+    return Objects.hashCode(getStoragePath(), getWorkspacePath());
   }
 }

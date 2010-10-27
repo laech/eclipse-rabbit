@@ -5,8 +5,7 @@ import rabbit.data.access.model.WorkspaceStorage;
 import rabbit.data.internal.access.model.SessionData;
 import rabbit.data.internal.xml.IDataStore;
 import rabbit.data.internal.xml.StoreNames;
-import rabbit.data.internal.xml.access.AbstractNodeAccessor;
-import rabbit.data.internal.xml.merge.IMerger;
+import rabbit.data.internal.xml.access.AbstractAccessor2;
 import rabbit.data.internal.xml.schema.events.EventListType;
 import rabbit.data.internal.xml.schema.events.SessionEventListType;
 import rabbit.data.internal.xml.schema.events.SessionEventType;
@@ -23,34 +22,32 @@ import java.util.Collection;
  * Accesses session data events.
  */
 public class SessionDataAccessor extends
-    AbstractNodeAccessor<ISessionData, SessionEventType, SessionEventListType> {
+    AbstractAccessor2<ISessionData, SessionEventType, SessionEventListType> {
 
   /**
    * Constructor.
    * 
    * @param store The data store to get the data from.
-   * @param merger The merger for merging XML data nodes.
-   * @throws NullPointerException If any arguments are null.
+   * @throws NullPointerException If argument is null.
    */
   @Inject
-  SessionDataAccessor(@Named(StoreNames.SESSION_STORE) IDataStore store,
-      IMerger<SessionEventType> merger) {
-    super(store, merger);
-  }
-  
-  @Override
-  protected ISessionData createDataNode(
-      LocalDate cal, WorkspaceStorage ws, SessionEventType type) throws Exception {
-    return new SessionData(cal, ws, new Duration(type.getDuration()));
+  SessionDataAccessor(@Named(StoreNames.SESSION_STORE) IDataStore store) {
+    super(store);
   }
 
   @Override
-  protected Collection<SessionEventType> getElements(SessionEventListType list) {
-    return list.getSessionEvent();
+  protected ISessionData createDataNode(LocalDate cal, WorkspaceStorage ws,
+      SessionEventType type) throws Exception {
+    return new SessionData(cal, ws, new Duration(type.getDuration()));
   }
 
   @Override
   protected Collection<SessionEventListType> getCategories(EventListType list) {
     return list.getSessionEvents();
+  }
+
+  @Override
+  protected Collection<SessionEventType> getElements(SessionEventListType list) {
+    return list.getSessionEvent();
   }
 }

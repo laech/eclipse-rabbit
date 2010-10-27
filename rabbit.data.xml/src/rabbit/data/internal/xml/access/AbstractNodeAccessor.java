@@ -21,7 +21,6 @@ import rabbit.data.access.IAccessor;
 import rabbit.data.access.model.WorkspaceStorage;
 import rabbit.data.internal.xml.IDataStore;
 import rabbit.data.internal.xml.merge.IMerger;
-import rabbit.data.internal.xml.merge.Mergers;
 import rabbit.data.internal.xml.schema.events.EventGroupType;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -49,7 +48,7 @@ import java.util.Map;
 public abstract class AbstractNodeAccessor<E, T, S extends EventGroupType>
     extends AbstractAccessor<E, T, S> {
 
-  protected final IMerger<T> merger;
+  private final IMerger<T> merger;
 
   /**
    * Constructor.
@@ -86,41 +85,20 @@ public abstract class AbstractNodeAccessor<E, T, S extends EventGroupType>
     return null;
   }
 
-  @Override protected Collection<E> filter(Multimap<WorkspaceStorage, S> data) {
-
-    // List<E> result = Lists.newLinkedList();
-    // for (Map.Entry<WorkspaceStorage, S> entry : data.entrySet()) {
-    // S category = entry.getValue();
-    // // Multimap<XMLGregorianCalendar, T> map = LinkedListMultimap.create();
-    // Collection<T> elements = getElements(category);
-    // // if (getMerger() != null) {
-    // // }
-    //
-    // if (getMerger() != null) {
-    // Mergers.merge(getMerger(), elements, Lists.newArrayList(elements));
-    // }
-    // LocalDate date = toLocalDate(category.getDate());
-    // for (T type : elements) {
-    // E element = createDataNode(date, type);
-    // if (element != null) {
-    // result.add(element);
-    // }
-    // }
-    // }
-    // return result;
-    //
-    
+  @Override
+  protected Collection<E> filter(Multimap<WorkspaceStorage, S> data) {
     List<E> result = Lists.newLinkedList();
     for (Map.Entry<WorkspaceStorage, S> entry : data.entries()) {
-      List<T> filtered = Lists.newLinkedList();
-      for (T element : getElements(entry.getValue())) {
-        Mergers.merge(getMerger(), filtered, element);
-      }
+//      List<T> filtered = Lists.newLinkedList();
+//      for (T element : getElements(entry.getValue())) {
+//        Mergers.merge(getMerger(), filtered, element);//TODO remove
+//      }
       LocalDate date = toLocalDate(entry.getValue().getDate());
-      for (T element : filtered) {
+      for (T element : getElements(entry.getValue())) {
         E node = null;
         try {
-          node = createDataNode(date, entry.getKey(), element);
+          node = createDataNode(date, element);
+//          node = createDataNode(date, entry.getKey(), element);
         } catch (Exception e) {
           node = null;
         }
@@ -130,31 +108,6 @@ public abstract class AbstractNodeAccessor<E, T, S extends EventGroupType>
       }
     }
     return result;
-
-//    Multimap<XMLGregorianCalendar, T> map = LinkedListMultimap.create();
-//    for (Map.Entry<WorkspaceStorage, S> entry : data.entries()) {
-//      // for (S category : data) {List
-//
-//      S list = entry.getValue();
-//      if (getMerger() != null) {
-//        Mergers.merge(getMerger(), map.get(list.getDate()), getElements(list));
-//      } else {
-//        map.get(list.getDate()).addAll(getElements(list));
-//      }
-//    }
-//
-//    ImmutableSet.Builder<E> result = ImmutableSet.builder();
-//    for (Entry<XMLGregorianCalendar, Collection<T>> entry : map.asMap()
-//        .entrySet()) {
-//
-//      LocalDate date = toLocalDate(entry.getKey());
-//      for (T type : entry.getValue()) {
-//        E element = createDataNode(date, type);
-//        if (element != null)
-//          result.add(element);
-//      }
-//    }
-//    return result.build();
   }
 
   /**

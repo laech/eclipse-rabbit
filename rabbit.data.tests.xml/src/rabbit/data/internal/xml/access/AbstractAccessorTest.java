@@ -22,15 +22,21 @@ import rabbit.data.internal.xml.schema.events.EventGroupType;
 import rabbit.data.internal.xml.schema.events.EventListType;
 import rabbit.data.internal.xml.schema.events.ObjectFactory;
 
-import static org.junit.Assert.assertNotNull;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.junit.Assert.assertThat;
+import static org.junit.matchers.JUnitMatchers.hasItem;
 
 import org.eclipse.core.runtime.IPath;
 import org.joda.time.LocalDate;
 import org.joda.time.MutableDateTime;
 import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.BeforeClass;
+import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
+
+import static java.lang.System.nanoTime;
 
 import java.io.File;
 import java.util.Collection;
@@ -43,44 +49,37 @@ import javax.xml.datatype.XMLGregorianCalendar;
  */
 public abstract class AbstractAccessorTest<T, E, S extends EventGroupType> {
 
-  private AbstractAccessor<T, E, S> accessor = create();
-
-  protected ObjectFactory objectFactory = new ObjectFactory();
-
-  private static final IPath originalRoot = XmlPlugin.getDefault()
+  private static final IPath ORIGINAL_ROOT = XmlPlugin.getDefault()
       .getStoragePathRoot();
 
   @AfterClass
-  public static void afterClass() {
-    XmlPlugin.getDefault().setStoragePathRoot(originalRoot.toFile());
+  public static void restoreSettings() {
+    XmlPlugin.getDefault().setStoragePathRoot(ORIGINAL_ROOT.toFile());
   }
 
-  @BeforeClass
-  public static void beforeClass() {
-    // Set the directory root to a new folder so that we don't mess
-    // with existing data:
-    File dir = originalRoot.append(System.currentTimeMillis() + "").toFile();
-    if (!dir.exists() && !dir.mkdirs()) {
-      Assert.fail();
-    }
-    XmlPlugin.getDefault().setStoragePathRoot(dir);
-  }
+  @Rule
+  public TemporaryFolder folder = new TemporaryFolder();
+  
+  protected ObjectFactory objectFactory = new ObjectFactory();
 
-  @Test
-  public void testGetCategories() throws Exception {
-    EventListType eventList = objectFactory.createEventListType();
-    S list = createCategory();
-    accessor.getCategories(eventList).add(list);
-    Assert.assertEquals(1, accessor.getCategories(eventList).size());
-  }
+  private AbstractAccessor<T, E, S> accessor = create();
 
-  @Test(expected = NullPointerException.class)
-  public void testGetData_endDateNull() {
-    accessor.getData(new LocalDate(), null);
+  @Before
+  public void changeSettings() {
+    XmlPlugin.getDefault().setStoragePathRoot(folder.newFolder(nanoTime() + ""));
   }
 
   @Test
-  public void testGetData() throws Exception {
+  public void getCategoriesShouldReturnTheCorrectCategories() {
+    EventListType eventList = new EventListType();
+    S category = createCategory();
+    accessor.getCategories(eventList).add(category);
+    assertThat(accessor.getCategories(eventList), hasItem(category));
+    assertThat(accessor.getCategories(eventList).size(), is(1));
+  }
+
+  @Test
+  public void getDataShouldReturnTheCorrectData() throws Exception {
     String id = "qfnnvkfde877thfg";
 
     // 1:
@@ -123,13 +122,18 @@ public abstract class AbstractAccessorTest<T, E, S extends EventGroupType> {
   }
 
   @Test(expected = NullPointerException.class)
-  public void testGetData_startDateNull() {
+  public void getDataShouldThrowNullPointerExceptionIfEndDateIsNull() {
+    accessor.getData(new LocalDate(), null);
+  }
+
+  @Test(expected = NullPointerException.class)
+  public void getDataShouldThrowNullPointerExceptionIfStartDateIsNull() {
     accessor.getData(null, new LocalDate());
   }
 
   @Test
-  public void testGetDataStore() throws Exception {
-    assertNotNull(accessor.getDataStore());
+  public void getDataStoreShouldNotReturnNull() throws Exception {
+    assertThat(accessor.getDataStore(), is(notNullValue()));
   }
 
   /**
