@@ -63,7 +63,7 @@ public class JavaDataTest {
   @Test
   public void shouldReturnTheElement() {
     assertThat(
-        create(date, workspace, duration, element).get(IJavaData.ELEMENT),
+        create(date, workspace, duration, element).get(IJavaData.JAVA_ELEMENT),
         is(element));
   }
   

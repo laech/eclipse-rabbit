@@ -54,7 +54,7 @@ public class JavaData implements IJavaData {
         .put(DATE,      checkNotNull(date,      "date"))
         .put(WORKSPACE, checkNotNull(workspace, "workspace"))
         .put(DURATION,  checkNotNull(duration,  "duration"))
-        .put(ELEMENT,   checkNotNull(element,   "handleId"))
+        .put(JAVA_ELEMENT,   checkNotNull(element,   "handleId"))
         .build();
   }
 

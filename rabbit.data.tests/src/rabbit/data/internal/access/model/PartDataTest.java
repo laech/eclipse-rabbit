@@ -22,6 +22,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
 import org.eclipse.core.runtime.Path;
+import org.eclipse.ui.IWorkbenchPartDescriptor;
 import org.eclipse.ui.PlatformUI;
 import org.joda.time.Duration;
 import org.joda.time.LocalDate;
@@ -61,10 +62,28 @@ public class PartDataTest {
   }
   
   @Test
+  public void shouldReturnTheEditor() {
+    IWorkbenchPartDescriptor editor = PlatformUI.getWorkbench()
+        .getEditorRegistry().getDefaultEditor("a.txt");
+    assertThat(
+        create(date, workspace, duration, editor.getId()).part(), 
+        is(editor));
+  }
+  
+  @Test
   public void shouldReturnThePartId() {
     assertThat(
         create(date, workspace, duration, partId).get(IPartData.PART_ID),
         is(partId));
+  }
+  
+  @Test
+  public void shouldReturnTheView() {
+    IWorkbenchPartDescriptor view = PlatformUI.getWorkbench()
+        .getViewRegistry().getViews()[0];
+    assertThat(
+        create(date, workspace, duration, view.getId()).part(), 
+        is(view));
   }
   
   @Test

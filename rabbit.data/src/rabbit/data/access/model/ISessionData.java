@@ -27,15 +27,15 @@ public interface ISessionData extends IData {
   /**
    * Key for the date.
    */
-  static final IKey<LocalDate> DATE = Key.create();
+  static final IKey<LocalDate> DATE = Keys.DATE;
   
   /**
    * Key for the workspace.
    */
-  static final IKey<WorkspaceStorage> WORKSPACE = Key.create();
+  static final IKey<WorkspaceStorage> WORKSPACE = Keys.WORKSPACE;
   
   /**
    * Key for the duration.
    */
-  static final IKey<Duration> DURATION = Key.create();
+  static final IKey<Duration> DURATION = Keys.DURATION;
 }

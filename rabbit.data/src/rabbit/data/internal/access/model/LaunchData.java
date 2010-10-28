@@ -63,7 +63,7 @@ public class LaunchData implements ILaunchData {
     checkArgument(count >= 1, "count < 1");
     
     data = new KeyMapBuilder()
-        .put(LAUNCH_COUNT,  count)
+        .put(COUNT,  count)
         .put(DATE,          checkNotNull(date, "date"))
         .put(WORKSPACE,     checkNotNull(workspace, "workspace"))
         .put(LAUNCH_CONFIG, checkNotNull(config, "config"))

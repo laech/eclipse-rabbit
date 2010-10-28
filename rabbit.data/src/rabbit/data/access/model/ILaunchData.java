@@ -30,30 +30,30 @@ public interface ILaunchData extends IData {
   /**
    * Key for the date.
    */
-  static final IKey<LocalDate> DATE = Key.create();
+  static final IKey<LocalDate> DATE = Keys.DATE;
   
   /**
    * Key for the workspace.
    */
-  static final IKey<WorkspaceStorage> WORKSPACE = Key.create();
+  static final IKey<WorkspaceStorage> WORKSPACE = Keys.WORKSPACE;
   
   /**
    * Key for the duration.
    */
-  static final IKey<Duration> DURATION = Key.create();
+  static final IKey<Duration> DURATION = Keys.DURATION;
   
   /**
    * Key for the launch count.
    */
-  static final IKey<Integer> LAUNCH_COUNT = Key.create();
+  static final IKey<Integer> COUNT = Keys.COUNT;
   
   /**
    * Key for the files involved.
    */
-  static final IKey<Set<IFile>> FILES = Key.create();
+  static final IKey<Set<IFile>> FILES = Keys.FILES;
   
   /**
    * Key for the launch configuration.
    */
-  static final IKey<LaunchConfigurationDescriptor> LAUNCH_CONFIG = Key.create();
+  static final IKey<LaunchConfigurationDescriptor> LAUNCH_CONFIG = Keys.LAUNCH_CONFIG;
 }

@@ -80,7 +80,7 @@ public class LaunchDataAccessorTest extends
       WorkspaceStorage expectedWs, ILaunchData actual) {
     assertThat(actual.get(ILaunchData.DATE), is(expectedDate));
     assertThat(actual.get(ILaunchData.WORKSPACE), is(expectedWs));
-    assertThat(actual.get(ILaunchData.LAUNCH_COUNT), is(expected.getCount()));
+    assertThat(actual.get(ILaunchData.COUNT), is(expected.getCount()));
     assertThat(actual.get(ILaunchData.DURATION).getMillis(),
         is(expected.getTotalDuration()));
 

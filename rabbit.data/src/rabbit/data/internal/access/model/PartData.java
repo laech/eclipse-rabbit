@@ -21,6 +21,10 @@ import rabbit.data.access.model.WorkspaceStorage;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import org.eclipse.ui.IEditorRegistry;
+import org.eclipse.ui.IWorkbenchPartDescriptor;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.views.IViewRegistry;
 import org.joda.time.Duration;
 import org.joda.time.LocalDate;
 
@@ -64,4 +68,26 @@ public class PartData implements IPartData {
     return (T) data.get(key);
   }
 
+  @Override
+  public IWorkbenchPartDescriptor part() {
+    IWorkbenchPartDescriptor part = viewRegistry().find(get(PART_ID));
+    if (part == null) {
+      return editorRegistry().findEditor(get(PART_ID));
+    }
+    return part;
+  }
+
+  /**
+   * @return The workbench editor registry.
+   */
+  private IEditorRegistry editorRegistry() {
+    return PlatformUI.getWorkbench().getEditorRegistry();
+  }
+  
+  /**
+   * @return The workbench view registry.
+   */
+  private IViewRegistry viewRegistry() {
+    return PlatformUI.getWorkbench().getViewRegistry();
+  }
 }

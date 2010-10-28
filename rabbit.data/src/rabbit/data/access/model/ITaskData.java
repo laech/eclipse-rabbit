@@ -29,25 +29,25 @@ public interface ITaskData extends IData {
   /**
    * Key for the date.
    */
-  static final IKey<LocalDate> DATE = Key.create();
+  static final IKey<LocalDate> DATE = Keys.DATE;
 
   /**
    * Key for the workspace.
    */
-  static final IKey<WorkspaceStorage> WORKSPACE = Key.create();
+  static final IKey<WorkspaceStorage> WORKSPACE = Keys.WORKSPACE;
 
   /**
    * Key for the duration.
    */
-  static final IKey<Duration> DURATION = Key.create();
+  static final IKey<Duration> DURATION = Keys.DURATION;
 
   /**
    * Key for the file.
    */
-  static final IKey<IFile> FILE = Key.create();
+  static final IKey<IFile> FILE = Keys.FILE;
 
   /**
    * Key for the task ID.
    */
-  static final IKey<TaskId> TASK_ID = Key.create();
+  static final IKey<TaskId> TASK_ID = Keys.TASK_ID;
 }

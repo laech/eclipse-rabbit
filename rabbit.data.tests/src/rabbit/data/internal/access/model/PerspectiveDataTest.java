@@ -22,6 +22,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
 import org.eclipse.core.runtime.Path;
+import org.eclipse.ui.IPerspectiveDescriptor;
 import org.eclipse.ui.PlatformUI;
 import org.joda.time.Duration;
 import org.joda.time.LocalDate;
@@ -58,6 +59,15 @@ public class PerspectiveDataTest {
     assertThat(
         create(date, workspace, duration, pId).get(IPerspectiveData.DURATION),
         is(duration));
+  }
+  
+  @Test
+  public void shouldReturnThePerspective() {
+    IPerspectiveDescriptor pp = PlatformUI.getWorkbench()
+        .getPerspectiveRegistry().getPerspectives()[0];
+    assertThat(
+        create(date, workspace, duration, pp.getId()).perspective(), 
+        is(pp));
   }
   
   @Test

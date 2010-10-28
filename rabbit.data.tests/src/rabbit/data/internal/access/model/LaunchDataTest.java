@@ -129,7 +129,7 @@ public class LaunchDataTest {
   @Test
   public void shouldReturnTheCount() {
     LaunchData launch = create(date, workspace, config, count, duration, files);
-    assertThat(launch.get(ILaunchData.LAUNCH_COUNT), is(count));
+    assertThat(launch.get(ILaunchData.COUNT), is(count));
   }
   
   @Test

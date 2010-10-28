@@ -27,20 +27,20 @@ public interface ICommandData extends IData {
   /**
    * Key for the date.
    */
-  static final IKey<LocalDate> DATE = Key.create();
+  static final IKey<LocalDate> DATE = Keys.DATE;
   
   /**
    * Key for the workspace.
    */
-  static final IKey<WorkspaceStorage> WORKSPACE = Key.create();
+  static final IKey<WorkspaceStorage> WORKSPACE = Keys.WORKSPACE;
   
   /**
-   * Key for the command ID.
+   * Key for the command.
    */
-  static final IKey<Command> COMMAND = Key.create();
+  static final IKey<Command> COMMAND = Keys.COMMAND;
   
   /**
    * Key for the execution count.
    */
-  static final IKey<Integer> COUNT = Key.create();
+  static final IKey<Integer> COUNT = Keys.COUNT;
 }

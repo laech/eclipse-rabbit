@@ -16,6 +16,7 @@
 package rabbit.data.access.model;
 
 
+import org.eclipse.ui.IWorkbenchPartDescriptor;
 import org.joda.time.Duration;
 import org.joda.time.LocalDate;
 
@@ -27,20 +28,27 @@ public interface IPartData extends IData {
   /**
    * Key for the date.
    */
-  static final IKey<LocalDate>  DATE = Key.create();
+  static final IKey<LocalDate> DATE = Keys.DATE;
   
   /**
    * Key for the workspace.
    */
-  static final IKey<WorkspaceStorage> WORKSPACE = Key.create();
+  static final IKey<WorkspaceStorage> WORKSPACE = Keys.WORKSPACE;
   
   /**
    * Key for the duration.
    */
-  static final IKey<Duration> DURATION = Key.create();
+  static final IKey<Duration> DURATION = Keys.DURATION;
   
   /**
    * Key for the workbench tool ID.
    */
-  static final IKey<String> PART_ID = Key.create();
+  static final IKey<String> PART_ID = Keys.PART_ID;
+  
+  /**
+   * Gets the workbench part that has the ID.
+   * @return The workbench part, or null if no part has that ID.
+   * @see #PART_ID
+   */
+  IWorkbenchPartDescriptor part();
 }

@@ -17,7 +17,7 @@ package rabbit.data.internal.xml.access2;
 
 import static rabbit.data.access.model.IJavaData.DATE;
 import static rabbit.data.access.model.IJavaData.DURATION;
-import static rabbit.data.access.model.IJavaData.ELEMENT;
+import static rabbit.data.access.model.IJavaData.JAVA_ELEMENT;
 import static rabbit.data.access.model.IJavaData.WORKSPACE;
 import static rabbit.data.internal.xml.DatatypeUtil.toXmlDate;
 
@@ -49,7 +49,7 @@ public class JavaDataAccessorTest extends
     assertThat(actual.get(DATE), is(expectedDate));
     assertThat(actual.get(WORKSPACE), is(expectedWs));
     assertThat(actual.get(DURATION).getMillis(), is(expected.getDuration()));
-    assertThat(actual.get(ELEMENT),
+    assertThat(actual.get(JAVA_ELEMENT),
         is(JavaCore.create(expected.getHandleIdentifier())));
   }
 

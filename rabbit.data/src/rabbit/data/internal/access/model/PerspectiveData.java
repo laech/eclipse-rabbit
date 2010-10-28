@@ -21,6 +21,8 @@ import rabbit.data.access.model.WorkspaceStorage;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import org.eclipse.ui.IPerspectiveDescriptor;
+import org.eclipse.ui.PlatformUI;
 import org.joda.time.Duration;
 import org.joda.time.LocalDate;
 
@@ -62,6 +64,12 @@ public class PerspectiveData implements IPerspectiveData {
   @Override
   public <T> T get(IKey<T> key) {
     return (T) data.get(key);
+  }
+
+  @Override
+  public IPerspectiveDescriptor perspective() {
+    return PlatformUI.getWorkbench().getPerspectiveRegistry()
+        .findPerspectiveWithId(get(PERSPECTIVE_ID));
   }
 
 }
