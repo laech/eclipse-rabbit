@@ -19,12 +19,13 @@ import static com.google.common.base.Predicates.instanceOf;
 
 import com.google.common.base.Objects;
 import com.google.common.base.Predicate;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 
 import org.eclipse.jface.viewers.TreePath;
@@ -32,6 +33,8 @@ import org.eclipse.jface.viewers.Viewer;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -40,18 +43,73 @@ import java.util.Set;
  */
 public class FilterableContentProviderTest {
 
+  /*
+   * This class tests the functionalities of FilterableContentProvider, not its
+   * subclasses, which is OK as the method in FilterableContentProvider are
+   * final, cannot be overridden.
+   */
+  
+  /**
+   * A content provider to help testing.
+   */
+  private static class MyContentProvider extends FilterableContentProvider {
+    
+    final Map<TreePath, Object[]> data;
+    final Object input;
+    final List<Object> inputElements;
+    
+    @SuppressWarnings("unchecked")
+    MyContentProvider(Collection<Predicate<?>> elementFilters,
+                      Map<TreePath, Object[]> childrenByParent, 
+                      Object input,
+                      Object[] inputElements) {
+      this.data = ImmutableMap.copyOf(childrenByParent);
+      this.input = input;
+      this.inputElements = ImmutableList.of(inputElements);
+      for (Predicate<?> filter : elementFilters) {
+        addFilter((Predicate<Object>) filter);
+      }
+    }
+
+    @Override
+    public void dispose() {
+    }
+
+    @Override
+    public TreePath[] getParents(Object element) {
+      return new TreePath[0];
+    }
+
+    @Override
+    public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
+    }
+
+    @Override
+    protected Object[] doGetChildren(TreePath parentPath) {
+      Object[] children = data.get(parentPath);
+      return (children == null) ? EMPTY_ARRAY : children;
+    }
+
+    @Override
+    protected Object[] doGetElements(Object theInput) {
+      return Objects.equal(input, theInput) 
+          ? inputElements.toArray()
+          : EMPTY_ARRAY;
+    }
+  }
+
   /**
    * Helper class for building a {@link FilterableContentProvider} for testing.
    */
-  private static class Tester {
+  private static class Builder {
 
     final Map<TreePath, Object[]> data = Maps.newHashMap();
     final Set<Predicate<?>> filters = Sets.newHashSet();
     Object input = new Object();
-    Object[] inputElements = new Object[0];
+    private Object[] inputElements = new Object[0];
 
     /** Constructor. */
-    Tester() {
+    Builder() {
     }
 
     /**
@@ -61,33 +119,7 @@ public class FilterableContentProviderTest {
      * @return A {@link FilterableContentProvider}.
      */
     FilterableContentProvider build() {
-      return new FilterableContentProvider(filters.toArray(new Predicate[0])) {
-
-        @Override
-        public void dispose() {
-        }
-
-        @Override
-        public TreePath[] getParents(Object element) {
-          return new TreePath[0];
-        }
-
-        @Override
-        public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-        }
-
-        @Override
-        protected Object[] doGetChildren(TreePath parentPath) {
-          Object[] children = data.get(parentPath);
-          return (children == null) ? new Object[0] : children;
-        }
-
-        @Override
-        protected Object[] doGetElements(Object theInput) {
-          return (Objects.equal(input, theInput)) ? inputElements
-              : new Object[0];
-        }
-      };
+      return new MyContentProvider(filters, data, input, inputElements);
     }
 
     /**
@@ -98,7 +130,7 @@ public class FilterableContentProviderTest {
      *          The filter to add.
      * @return {@code this}
      */
-    Tester filter(Predicate<?> filter) {
+    Builder filter(Predicate<?> filter) {
       filters.add(filter);
       return this;
     }
@@ -114,7 +146,7 @@ public class FilterableContentProviderTest {
      *          The elements of the input.
      * @return {@code this}
      */
-    Tester input(Object input, Object[] elements) {
+    Builder input(Object input, Object[] elements) {
       this.input = input;
       this.inputElements = elements;
       return this;
@@ -125,219 +157,229 @@ public class FilterableContentProviderTest {
      * {@code getChildren(parent} is called on the content provider built by
      * this object, {@code children} will be returned.
      * 
-     * @param parent
+     * @param parentsetup
      *          The parent path.
      * @param children
      *          The children of the parent path.
      * @return {@code this}
      */
-    Tester map(TreePath parent, Object[] children) {
+    Builder map(TreePath parent, Object[] children) {
       data.put(parent, children);
       return this;
     }
   }
 
-  protected FilterableContentProvider provider;
+  private FilterableContentProvider provider;
 
   @Before
-  public void before() {
-    provider = new Tester().build();
+  public void createContentProvider() {
+    provider = new Builder().build();
   }
 
   @Test
-  public void testGetChildren_argIsNull() {
-    // No exceptions
+  public void theOrderOfTheChildrenShouldBeRetainedWhenFiltering() {
+    Object[] initialChildren = {3, "2", 1};
+    Object[] expectedChildren = {3, 1};
+
+    TreePath parent = newPath();
+    FilterableContentProvider p = new Builder().map(parent, initialChildren)
+        .filter(instanceOf(String.class)).build();
+
+    assertThat(p.getChildren(parent), equalTo(expectedChildren));
+  }
+
+  @Test
+  public void theOrderOfTheChildrenShouldBeRetainedWhenNoFilterIsUsed() {
+    Object[] expectedChildren = {9, 29, "adf", 0};
+    TreePath parent = newPath();
+    FilterableContentProvider p = new Builder().map(parent, expectedChildren)
+        .build();
+    assertThat(p.getChildren(parent), equalTo(expectedChildren));
+  }
+
+  @Test
+  public void duplicateChildrenShouldBeRetainedWhenFiltering() {
+    Object[] initialChildren = {0, 0, "a"};
+    Object[] expectedChildren = {0, 0};
+
+    TreePath parent = newPath();
+    FilterableContentProvider p = new Builder().map(parent, initialChildren)
+        .filter(instanceOf(String.class)).build();
+
+    assertThat(p.getChildren(parent), equalTo(expectedChildren));
+  }
+
+  @Test
+  public void duplicateChildrenShouldBeRetainedWhenNoFilterIsUsed() {
+    Object[] children = {0, 0, 0};
+    TreePath parent = newPath();
+    FilterableContentProvider p = new Builder().map(parent, children).build();
+    assertThat(p.getChildren(parent), equalTo(children));
+  }
+
+  @Test
+  public void allChildrenShouldBeReturnedIfNoFilterIsUsed() {
+    Object[] expectedChildren1 = {158, 290};
+    Object[] expectedChildren2 = {"1", "2"};
+
+    TreePath parent1 = newPath(10);
+    TreePath parent2 = newPath("");
+    FilterableContentProvider f = new Builder().map(parent1, expectedChildren1)
+        .map(parent2, expectedChildren2).build();
+
+    assertThat(f.getChildren(parent1), equalTo(expectedChildren1));
+    assertThat(f.getChildren(parent2), equalTo(expectedChildren2));
+  }
+
+  @Test
+  public void anEmptyArrayShouldBeReturnedIfAllChildrenAreFilteredOut() {
+    Object[] initialChildren = {1, "2", 3l};
+    Object[] expectedChildren = {};
+
+    TreePath parent = newPath();
+    FilterableContentProvider p = new Builder().map(parent, initialChildren)
+        .filter(instanceOf(Object.class)).build();
+
+    assertThat(p.getChildren(parent), equalTo(expectedChildren));
+  }
+
+  @Test
+  public void anEmptyArrayShouldBeReturnedIfParentHasNoChildren() {
+    assertThat(provider.getChildren(newPath()), equalTo(emptyArray()));
+  }
+
+  @Test
+  public void anEmptyArrayShouldBeReturnedIfParentIsNull() {
     assertThat(provider.getChildren(null), equalTo(emptyArray()));
   }
 
   @Test
-  public void testGetChildren_retainsDuplicateChildrenFiltered() {
-    // Test that duplicate children is not removed by filtering:
-    TreePath parent = parent();
-    Object[] children = {0, 0, "a"}; // Children with duplicate elements
-    FilterableContentProvider p = new Tester().map(parent, children)
-        .filter(instanceOf(String.class)).build();
-    assertThat(p.getChildren(parent), equalTo(elements(0, 0)));
-  }
-
-  @Test
-  public void testGetChildren_retainsDuplicateChildrenUnfiltered() {
-    // Test that duplicate children is not removed:
-    TreePath parent = parent();
-    Object[] children = {0, 0, 0}; // Children with duplicate elements
-    FilterableContentProvider p = new Tester().map(parent, children).build();
-    assertThat(p.getChildren(parent), equalTo(children));
-  }
-
-  @Test
-  public void testGetChildren_retainsOriginalOrderFiltered() {
-    // Test that the order of the children element is not modified by
-    // filtering
-    TreePath parent = parent();
-    Object[] children = {3, "2", 1}; // "2" will be removed by filtering
-    FilterableContentProvider p = new Tester().map(parent, children)
-        .filter(instanceOf(String.class)).build();
-    assertThat(p.getChildren(parent), equalTo(elements(3, 1)));
-  }
-
-  @Test
-  public void testGetChildren_retainsOriginalOrderUnfiltered() {
-    // Test that the order of the children element is not modified
-    TreePath parent = parent();
-    Object[] children = {9, 29, "adf", 0};
-    FilterableContentProvider p = new Tester().map(parent, children).build();
-    assertThat(p.getChildren(parent), equalTo(children));
-  }
-
-  @Test
-  public void testGetChildren_returnsEmptyFilteredChildren() {
-    TreePath parent = parent();
-    Object[] children = {1, "2", 3l};
-    FilterableContentProvider p = new Tester().map(parent, children)
-        .filter(instanceOf(Object.class)).build();
-    assertThat(p.getChildren(parent), equalTo(emptyArray()));
-  }
-
-  @Test
-  public void testGetChildren_returnsFilteredChildren() {
-    TreePath parent = parent();
+  public void filteredChildrenShouldBeReturnWhenFilterIsUsed() {
     Object integer = 1;
     Object string = "2";
-    Object[] children = {integer, string};
-    FilterableContentProvider p = new Tester().map(parent, children)
+    Object[] initialChildren = {integer, string};
+    Object[] expectedChildren = {integer};
+
+    TreePath parent = newPath();
+    FilterableContentProvider p = new Builder().map(parent, initialChildren)
         .filter(instanceOf(String.class)).build();
-    assertThat(p.getChildren(parent), equalTo(elements(integer)));
+
+    assertThat(p.getChildren(parent), equalTo(expectedChildren));
   }
 
   @Test
-  public void testGetChildren_returnsUnfilteredChildren() {
-    TreePath p1 = parent(10);
-    TreePath p2 = parent("");
-    Object[] c1 = {158, 290};
-    Object[] c2 = {"1", "2"};
-    FilterableContentProvider f = new Tester().map(p1, c1).map(p2, c2).build();
-    assertThat(f.getChildren(p1), equalTo(c1));
-    assertThat(f.getChildren(p2), equalTo(c2));
+  public void theOrderOfTheRootElementsShouldBeRetainedWhenFiltering() {
+    Object[] initialChildren = {1, "2", 3};
+    Object[] expectedChildren = {1, 3};
+
+    Object input = "";
+    FilterableContentProvider p = new Builder().input(input, initialChildren)
+        .filter(instanceOf(String.class)).build();
+
+    assertThat(p.getElements(input), equalTo(expectedChildren));
   }
 
   @Test
-  public void testGetChildren_returnsUnfilteredEmptyArray() {
-    assertThat(provider.getChildren(parent()), equalTo(emptyArray()));
+  public void theOrderOfTheRootElementsShouldBeRetainedWhenNoFilterIsUsed() {
+    Object input = "";
+    Object[] elements = elements(1, "2", 3);
+    FilterableContentProvider p = new Builder().input(input, elements).build();
+    assertThat(p.getElements(input), equalTo(elements));
   }
 
   @Test
-  public void testGetElements_argIsNll() {
-    assertThat(provider.getElements(null), equalTo(emptyArray()));
-  }
+  public void duplicateRootElementsShouldBeRetainedWhenFiltering() {
+    Object[] initialElements = {0, "abc", 0, "def"};
+    Object[] expectedElements = {0, 0};
 
-  @Test
-  public void testGetElements_retainsDuplicateElementsFiltered() {
     Object input = new Object();
-    Object[] elements = elements(0, "abc", 0, "def");
-    FilterableContentProvider p = new Tester().input(input, elements)
+    FilterableContentProvider p = new Builder().input(input, initialElements)
         .filter(instanceOf(String.class)).build();
-    assertThat(p.getElements(input), equalTo(elements(0, 0)));
+
+    assertThat(p.getElements(input), equalTo(expectedElements));
   }
 
   @Test
-  public void testGetElements_retainsDuplicateElementsUnfiltered() {
+  public void duplicateRootElementsShouldBeRetainedWhenNoFilterIsUsed() {
     Object input = new Object();
     Object[] elements = elements(0, 1, 1, 0);
-    FilterableContentProvider p = new Tester().input(input, elements).build();
+    FilterableContentProvider p = new Builder().input(input, elements).build();
     assertThat(p.getElements(input), equalTo(elements));
   }
 
   @Test
-  public void testGetElements_retainsOriginalOrderFiltered() {
-    Object input = "";
-    Object[] elements = elements(1, "2", 3);
-    FilterableContentProvider p = new Tester().input(input, elements)
-        .filter(instanceOf(String.class)).build();
-    assertThat(p.getElements(input), equalTo(elements(1, 3)));
-  }
-
-  @Test
-  public void testGetElements_retainsOriginalOrderUnfilterd() {
-    Object input = "";
-    Object[] elements = elements(1, "2", 3);
-    FilterableContentProvider p = new Tester().input(input, elements).build();
+  public void allRootElementsShouldBeReturnedIfThereIsNoFilter() {
+    Object input = 0;
+    Object[] elements = {1, 2, 3};
+    FilterableContentProvider p = new Builder().input(input, elements).build();
     assertThat(p.getElements(input), equalTo(elements));
   }
 
   @Test
-  public void testGetElements_returnsFilteredElements() {
-    Object input = "";
-    Object[] elements = elements("1", 2, 3);
-    FilterableContentProvider p = new Tester().input(input, elements)
-        .filter(instanceOf(String.class)).build();
-    assertThat(p.getElements(input), equalTo(elements(2, 3)));
-  }
+  public void anEmptyArrayShouldBeReturnedIfAllRootElementsAreFilteredOut() {
+    Object[] initialElements = {1, 2, 3};
+    Object[] expectedElements = {};
 
-  @Test
-  public void testGetElements_returnsFilteredEmptyArray() {
     Object input = "";
-    Object[] children = {1, 2, 3};
-    FilterableContentProvider p = new Tester().input(input, children)
+    FilterableContentProvider p = new Builder().input(input, initialElements)
         .filter(instanceOf(Integer.class)).build();
-    assertThat(p.getElements(input), equalTo(emptyArray()));
+
+    assertThat(p.getElements(input), equalTo(expectedElements));
   }
 
   @Test
-  public void testGetElements_returnsUnfileredEmptyArray() {
+  public void anEmptyArrayShouldBeReturnedIfInputHasNoRootElements() {
     assertThat(provider.getElements(0), equalTo(emptyArray()));
   }
 
   @Test
-  public void testGetElements_returnsUnfiltedElements() {
-    Object input = 0;
-    Object[] elements = {1, 2, 3};
-    FilterableContentProvider p = new Tester().input(input, elements).build();
-    assertThat(p.getElements(input), equalTo(elements));
+  public void anEmptyArrayShouldBeReturnedIfInputIsNull() {
+    assertThat(provider.getElements(null), equalTo(emptyArray()));
   }
 
   @Test
-  public void testGetFilters_empty() {
-    assertThat(provider.getFilters(), notNullValue());
-    assertThat(provider.getFilters().isEmpty(), is(true));
+  public void filteredRootElementsShouldBeReturnedWhenFilterIsUsed() {
+    Object[] initialElements = {"1", 2, 3};
+    Object[] expectedElements = {2, 3};
+
+    Object input = "";
+    FilterableContentProvider p = new Builder().input(input, initialElements)
+        .filter(instanceOf(String.class)).build();
+
+    assertThat(p.getElements(input), equalTo(expectedElements));
   }
 
   @Test
-  public void testGetFilters_notEmpty() {
-    FilterableContentProvider p = new Tester().filter(instanceOf(String.class))
-        .filter(instanceOf(Integer.class)).build();
-    assertThat(p.getFilters(), notNullValue());
-    assertThat(p.getFilters().size(), is(2));
-    assertThat(p.getFilters().contains(instanceOf(Integer.class)), is(true));
-    assertThat(p.getFilters().contains(instanceOf(String.class)), is(true));
+  public void hasChildrenShouldReturnFalseIfAllChildrenAreFilteredOut() {
+    TreePath parent = newPath();
+    FilterableContentProvider p = new Builder().map(parent, elements(1, "2"))
+        .filter(instanceOf(Object.class)).build();
+
+    assertThat(p.hasChildren(newPath()), is(false));
   }
 
   @Test
-  public void testHasChildren_argIsNull() {
+  public void hasChildrenShouldReturnFalseIfParentHasNoChildren() {
+    assertThat(provider.hasChildren(newPath()), is(false));
+  }
+
+  @Test
+  public void hasChildrenShouldReturnFalseIfParentIsNull() {
     assertThat(provider.hasChildren(null), is(false));
   }
 
   @Test
-  public void testHasChildren_returnsFalseFiltered() {
-    assertThat(provider.hasChildren(parent()), is(false));
-  }
-
-  @Test
-  public void testHasChildren_returnsFalseUnfiltered() {
-    assertThat(provider.hasChildren(parent()), is(false));
-  }
-
-  @Test
-  public void testHasChildren_returnsTrueFiltered() {
-    TreePath parent = parent();
-    FilterableContentProvider p = new Tester().map(parent, elements(0, "1"))
+  public void hasChildrenShouldReturnTrueIfNotAllChildrenAreFilteredOut() {
+    TreePath parent = newPath();
+    FilterableContentProvider p = new Builder().map(parent, elements(0, "1"))
         .filter(instanceOf(String.class)).build();
     assertThat(p.hasChildren(parent), is(true));
   }
 
   @Test
-  public void testHasChildren_returnsTrueUnfiltered() {
-    TreePath parent = parent();
-    FilterableContentProvider p = new Tester().map(parent, elements(0)).build();
+  public void hasChildrenShouldReturnTrueIfParentHasChildrenAndThereIsNoFilter() {
+    TreePath parent = newPath();
+    FilterableContentProvider p = new Builder().map(parent, elements(0)).build();
     assertThat(p.hasChildren(parent), is(true));
   }
 
@@ -358,7 +400,7 @@ public class FilterableContentProviderTest {
   /**
    * @return A {@link TreePath} containing the given segments.
    */
-  private TreePath parent(Object... segments) {
+  private TreePath newPath(Object... segments) {
     return new TreePath(segments);
   }
 }

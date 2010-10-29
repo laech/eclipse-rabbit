@@ -20,10 +20,11 @@ import static com.google.common.base.Predicates.or;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
-import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
 
 import org.eclipse.jface.viewers.ITreePathContentProvider;
 import org.eclipse.jface.viewers.TreePath;
+import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 
 import java.util.Arrays;
@@ -47,20 +48,43 @@ import javax.annotation.Nullable;
 public abstract class FilterableContentProvider implements
     ITreePathContentProvider {
 
-  private static final Object[] EMPTY_ARRAY = new Object[0];
+  /**
+   * An empty array is to be returned when parent has no children, or input has
+   * no elements.
+   */
+  protected static final Object[] EMPTY_ARRAY = new Object[0];
 
-  /** Immutable set of filters. */
-  private final Set<Predicate<Object>> filters;
+  /**
+   * A collection of filters. This collection is not synchronized nor it is
+   * immutable.
+   */
+  private final Set<Predicate<? super Object>> filters = Sets.newHashSet();
 
   /**
    * Constructor.
-   * 
-   * @param elementFilters
-   *          The filters to filter unwanted elements.
    */
-  @SuppressWarnings("unchecked")
-  public FilterableContentProvider(Predicate<?>... elementFilters) {
-    filters = ImmutableSet.of((Predicate<Object>[]) elementFilters);
+  protected FilterableContentProvider() {
+  }
+
+  /**
+   * Adds the given filter to filter elements. If an identical filter is already
+   * registered, the given filter will be ignored.
+   * 
+   * @param filter
+   *          The new filter.
+   */
+  public void addFilter(Predicate<? super Object> filter) {
+    filters.add(filter);
+  }
+
+  /**
+   * Removes the given filter.
+   * 
+   * @param filter
+   *          The filter to remove.
+   */
+  public void removeFilter(Predicate<?> filter) {
+    filters.remove(filter);
   }
 
   @Override
@@ -71,13 +95,6 @@ public abstract class FilterableContentProvider implements
   @Override
   public final Object[] getElements(Object inputElement) {
     return filter(doGetElements(inputElement));
-  }
-
-  /**
-   * @return The filters to filter unwanted elements.
-   */
-  public Set<Predicate<Object>> getFilters() {
-    return filters;
   }
 
   @Override
@@ -118,6 +135,6 @@ public abstract class FilterableContentProvider implements
       return EMPTY_ARRAY;
     }
     List<Object> children = Arrays.asList(elements);
-    return Collections2.filter(children, not(or(getFilters()))).toArray();
+    return Collections2.filter(children, not(or(filters))).toArray();
   }
 }
