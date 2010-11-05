@@ -21,13 +21,13 @@ import org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(Suite.class)
 @SuiteClasses({
-  DelegatingStyledCellLabelProviderTest.class,
-  PageDescriptorContentProviderTest.class,
-  PageDescriptorLabelProviderTest.class,
-  TreeNodesTest.class,
-  TreeViewerLabelSorterTest.class,
-  DeepPatternFilterTest.class,
-})
+    DeepPatternFilterTest.class,
+    DelegatingStyledCellLabelProviderTest.class,
+    PageDescriptorContentProviderTest.class,
+    PageDescriptorLabelProviderTest.class,
+    TreeNodesTest.class,
+    TreePathContentProviderTest.class,
+    TreeViewerLabelSorterTest.class,})
 public class AllTests {
 
 }
