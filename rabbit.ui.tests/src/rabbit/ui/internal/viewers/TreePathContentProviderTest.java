@@ -13,7 +13,6 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package rabbit.ui.internal.viewers;
 
 import rabbit.ui.internal.viewers.ITreePathBuilder;
@@ -36,7 +35,6 @@ import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.Viewer;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mockito;
 
 import static java.util.Arrays.asList;
 
@@ -59,7 +57,7 @@ public class TreePathContentProviderTest {
   public void setup() {
     Collection<TreePath> noData = Collections.emptyList();
     ITreePathBuilder builder = mock(ITreePathBuilder.class);
-    when(builder.build(Mockito.any())).thenReturn(noData);
+    when(builder.build(any())).thenReturn(noData);
     content = create(builder);
   }
 

@@ -32,7 +32,8 @@ public interface ITreePathBuilder {
    * 
    * @param input the input element to build from.
    * @return a collection of tree paths, the collection may be empty but never
-   *         null.
+   *         null. If unable to build from the given input, an empty collection
+   *         will be returned.
    */
   Collection<TreePath> build(@Nullable Object input);
 }

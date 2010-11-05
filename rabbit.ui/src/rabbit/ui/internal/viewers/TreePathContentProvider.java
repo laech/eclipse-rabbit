@@ -22,7 +22,6 @@ import static com.google.common.collect.Sets.newLinkedHashSet;
 
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Sets;
 
 import org.eclipse.jface.viewers.ITreePathContentProvider;
 import org.eclipse.jface.viewers.TreePath;
@@ -80,14 +79,7 @@ public final class TreePathContentProvider implements ITreePathContentProvider {
 
   @Override
   public Object[] getChildren(@Nullable TreePath branch) {
-    Set<Object> children = newLinkedHashSet();
-    for (TreePath leaf : leaves) {
-      if (leaf.getSegmentCount() > branch.getSegmentCount()
-          && leaf.startsWith(branch, null)) {
-        children.add(leaf.getSegment(branch.getSegmentCount()));
-      }
-    }
-    return children.toArray();
+    return childrenOf(branch).toArray();
   }
 
   /**
@@ -99,7 +91,7 @@ public final class TreePathContentProvider implements ITreePathContentProvider {
    */
   @Override
   public Object[] getElements(@Nullable Object inputElement) {
-    Set<Object> elements = Sets.newLinkedHashSet();
+    Set<Object> elements = newLinkedHashSet();
     for (TreePath leaf : leaves) {
       if (leaf.getFirstSegment() != null) {
         elements.add(leaf.getFirstSegment());
@@ -110,7 +102,7 @@ public final class TreePathContentProvider implements ITreePathContentProvider {
 
   @Override
   public TreePath[] getParents(@Nullable Object element) {
-    Set<TreePath> parents = Sets.newLinkedHashSet();
+    Set<TreePath> parents = newLinkedHashSet();
     for (TreePath leaf : leaves) {
       int index = indexOf(leaf, element);
       if (index < 0) {
@@ -120,10 +112,10 @@ public final class TreePathContentProvider implements ITreePathContentProvider {
     }
     return parents.toArray(new TreePath[parents.size()]);
   }
-
+  
   @Override
-  public boolean hasChildren(@Nullable TreePath path) {
-    return getChildren(path).length > 0;
+  public boolean hasChildren(@Nullable TreePath branch) {
+    return !childrenOf(branch).isEmpty();
   }
 
   /**
@@ -139,17 +131,19 @@ public final class TreePathContentProvider implements ITreePathContentProvider {
   }
 
   /**
-   * Returns the index of the given segment in the given path.
-   * 
-   * @param path the tree path to search the segment.
-   * @param segment the segment to find the index for.
-   * @return the index, or a negative number if not found.
+   * Gets the children of the given parent.
+   * @param branch the parent.
+   * @return a collection of children, or an empty collection if no children.
    */
-  private int indexOf(TreePath path, Object segment) {
-    for (int i = 0; i < path.getSegmentCount(); ++i) {
-      if (Objects.equal(path.getSegment(i), segment)) { return i; }
+  private Set<Object> childrenOf(@Nullable TreePath branch) {
+    Set<Object> children = newLinkedHashSet();
+    for (TreePath leaf : leaves) {
+      if (leaf.getSegmentCount() > branch.getSegmentCount()
+          && leaf.startsWith(branch, null)) {
+        children.add(leaf.getSegment(branch.getSegmentCount()));
+      }
     }
-    return -1;
+    return children;
   }
 
   /**
@@ -167,6 +161,20 @@ public final class TreePathContentProvider implements ITreePathContentProvider {
       segments.add(path.getSegment(i));
     }
     return new TreePath(segments.toArray());
+  }
+
+  /**
+   * Returns the index of the given segment in the given path.
+   * 
+   * @param path the tree path to search the segment.
+   * @param segment the segment to find the index for.
+   * @return the index, or a negative number if not found.
+   */
+  private int indexOf(TreePath path, Object segment) {
+    for (int i = 0; i < path.getSegmentCount(); ++i) {
+      if (Objects.equal(path.getSegment(i), segment)) { return i; }
+    }
+    return -1;
   }
 
 }
