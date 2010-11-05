@@ -71,15 +71,13 @@ public class TreePathContentProviderTest {
     // When asking for the possible parents of the child:
     TreePath[] parents = content.getParents(child);
 
-    // Then an empty array is return as the parents:
+    // Then an empty array is returned as the parents:
     assertThat(parents, is(EMPTY_ARRAY));
   }
 
   @Test
   public void aChildHasPossibleParentsShouldGetTheParents() {
-    // Given we have two leaves that have the same last segments and the content
-    // provider is built with a tree path builder that will always return the 2
-    // leaves regardless of the actual input::
+    // Given we have two leaves that have the same last segments:
     Object child = "Child";
     TreePath leaf1 = new TreePath(new Object[]{0, child});
     TreePath leaf2 = new TreePath(new Object[]{2, child});
@@ -88,12 +86,11 @@ public class TreePathContentProviderTest {
     given(builder.build("input")).willReturn(asList(leaf1, leaf2));
     content = create(builder);
 
-    // When getting the parents of the children:
+    // When getting the parents of the child:
     content.inputChanged(null, null, "input");
     Set<TreePath> actual = newHashSet(content.getParents(child));
 
-    // Then getting the parents of the child object should return the parent
-    // path of the two leaves:
+    // Then the parent path of the two leaves should be returned:e
     Set<TreePath> expected = newHashSet(
         leaf1.getParentPath(),
         leaf2.getParentPath());
@@ -138,9 +135,7 @@ public class TreePathContentProviderTest {
 
   @Test
   public void aParentHasChildrenShouldGetTheDistinctChildren() {
-    // Given a tree path has 3 children, 2 of which are equal, and the content
-    // provider is built with a tree path builder that will always return the
-    // children regardless of the actual input:
+    // Given a tree path has 3 children, 2 of which are equal:
     TreePath branch = new TreePath(new Object[]{0, 1});
     TreePath leaf1 = branch.createChildPath(2);
     TreePath leaf2 = branch.createChildPath(3);
@@ -303,9 +298,7 @@ public class TreePathContentProviderTest {
 
   @Test
   public void theRootElementsShouldBeTheDistinctRootSegmentsOfAllLeaves() {
-    // Given we have three leaves, the 0th segments of two of them are equal,
-    // and the content provider is built with a tree path builder that will
-    // always return the 3 leaves regardless of the actual input:
+    // Given we have 3 leaves, the 0th segments of 2 of them are equal::
     TreePath leaf1 = new TreePath(new Object[]{0, 1});
     TreePath leaf2 = new TreePath(new Object[]{2, 3});
     TreePath leaf3 = new TreePath(new Object[]{9, 8});
