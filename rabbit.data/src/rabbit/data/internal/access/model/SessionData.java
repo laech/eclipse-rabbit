@@ -26,6 +26,8 @@ import org.joda.time.LocalDate;
 
 import java.util.Map;
 
+import javax.annotation.Nullable;
+
 /**
  * Contains session data information.
  */
@@ -55,7 +57,7 @@ public class SessionData implements ISessionData {
 
   @SuppressWarnings("unchecked")
   @Override
-  public <T> T get(IKey<T> key) {
+  public <T> T get(@Nullable IKey<T> key) {
     return (T) data.get(key);
   }
 }

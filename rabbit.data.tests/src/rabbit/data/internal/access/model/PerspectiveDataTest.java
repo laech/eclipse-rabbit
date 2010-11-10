@@ -19,6 +19,7 @@ import rabbit.data.access.model.IPerspectiveData;
 import rabbit.data.access.model.WorkspaceStorage;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
 
 import org.eclipse.core.runtime.Path;
@@ -44,7 +45,14 @@ public class PerspectiveDataTest {
     date = new LocalDate().minusDays(1);
     workspace = new WorkspaceStorage(new Path(""), new Path(""));
     duration = new Duration(10);
-    pId = PlatformUI.getWorkbench().getPerspectiveRegistry().getPerspectives()[0].getId();
+    pId = "ijk";
+  }
+
+  @Test
+  public void shouldReturnNullIfKeyIsNull() {
+    assertThat(
+        create(date, workspace, duration, pId).get(null),
+        is(nullValue()));
   }
 
   @Test
@@ -66,7 +74,7 @@ public class PerspectiveDataTest {
     IPerspectiveDescriptor pp = PlatformUI.getWorkbench()
         .getPerspectiveRegistry().getPerspectives()[0];
     assertThat(
-        create(date, workspace, duration, pp.getId()).perspective(), 
+        create(date, workspace, duration, pp.getId()).getPerspective(), 
         is(pp));
   }
   

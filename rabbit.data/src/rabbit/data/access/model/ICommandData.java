@@ -15,30 +15,34 @@
  */
 package rabbit.data.access.model;
 
-
 import org.eclipse.core.commands.Command;
 import org.joda.time.LocalDate;
 
 /**
  * Contains command execution information.
+ * <p>
+ * Values represented by the keys defined in this interface are not null.
+ * </p>
+ * 
+ * @noimplement
  */
 public interface ICommandData extends IData {
-  
+
   /**
    * Key for the date.
    */
   static final IKey<LocalDate> DATE = Keys.DATE;
-  
+
   /**
    * Key for the workspace.
    */
   static final IKey<WorkspaceStorage> WORKSPACE = Keys.WORKSPACE;
-  
+
   /**
    * Key for the command.
    */
   static final IKey<Command> COMMAND = Keys.COMMAND;
-  
+
   /**
    * Key for the execution count.
    */

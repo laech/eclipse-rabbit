@@ -20,11 +20,11 @@ import rabbit.data.access.model.WorkspaceStorage;
 import rabbit.data.common.TaskId;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.mock;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Path;
 import org.joda.time.Duration;
 import org.joda.time.LocalDate;
@@ -47,10 +47,17 @@ public class TaskDataTest {
   @Before
   public void prepare() {
     taskId = new TaskId("id", new Date());
-    file = workspaceRoot().getFile(new Path("/project/file.txt"));
+    file = mock(IFile.class);
     date = new LocalDate();
     duration = new Duration(10);
     workspace = new WorkspaceStorage(new Path(""), new Path(""));
+  }
+
+  @Test
+  public void shouldReturnNullIfKeyIsNull() {
+    assertThat(
+        create(date, workspace, duration, file, taskId).get(null),
+        is(nullValue()));
   }
 
   @Test
@@ -119,12 +126,5 @@ public class TaskDataTest {
   private TaskData create(LocalDate date, WorkspaceStorage workspace,
       Duration duration, IFile file, TaskId taskId) {
     return new TaskData(date, workspace, duration, file, taskId);
-  }
-  
-  /**
-   * @return The workspace root.
-   */
-  private IWorkspaceRoot workspaceRoot() {
-    return ResourcesPlugin.getWorkspace().getRoot();
   }
 }

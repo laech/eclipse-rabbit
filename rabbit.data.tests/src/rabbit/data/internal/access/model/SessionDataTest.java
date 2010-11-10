@@ -19,6 +19,7 @@ import rabbit.data.access.model.ISessionData;
 import rabbit.data.access.model.WorkspaceStorage;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
 
 import org.eclipse.core.runtime.Path;
@@ -45,6 +46,16 @@ public class SessionDataTest {
     WorkspaceStorage ws = new WorkspaceStorage(new Path(""), new Path(""));
     Duration dur = new Duration(10);
     assertThat(create(date, ws, dur).get(ISessionData.DURATION), is(dur));
+  }
+
+  @Test
+  public void shouldReturnNullIfKeyIsNull() {
+    LocalDate date = new LocalDate();
+    WorkspaceStorage ws = new WorkspaceStorage(new Path(""), new Path(""));
+    Duration dur = new Duration(10);
+    assertThat(
+        create(date, ws, dur).get(null),
+        is(nullValue()));
   }
 
   @Test

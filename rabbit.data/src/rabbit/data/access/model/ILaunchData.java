@@ -15,7 +15,6 @@
  */
 package rabbit.data.access.model;
 
-
 import org.eclipse.core.resources.IFile;
 import org.joda.time.Duration;
 import org.joda.time.LocalDate;
@@ -24,6 +23,11 @@ import java.util.Set;
 
 /**
  * Contains launch information.
+ * <p>
+ * Values represented by the keys defined in this interface are not null.
+ * </p>
+ * 
+ * @noimplement
  */
 public interface ILaunchData extends IData {
 
@@ -31,27 +35,27 @@ public interface ILaunchData extends IData {
    * Key for the date.
    */
   static final IKey<LocalDate> DATE = Keys.DATE;
-  
+
   /**
    * Key for the workspace.
    */
   static final IKey<WorkspaceStorage> WORKSPACE = Keys.WORKSPACE;
-  
+
   /**
    * Key for the duration.
    */
   static final IKey<Duration> DURATION = Keys.DURATION;
-  
+
   /**
    * Key for the launch count.
    */
   static final IKey<Integer> COUNT = Keys.COUNT;
-  
+
   /**
    * Key for the files involved.
    */
   static final IKey<Set<IFile>> FILES = Keys.FILES;
-  
+
   /**
    * Key for the launch configuration.
    */

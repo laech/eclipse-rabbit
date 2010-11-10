@@ -19,6 +19,7 @@ import rabbit.data.access.model.IPartData;
 import rabbit.data.access.model.WorkspaceStorage;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
 
 import org.eclipse.core.runtime.Path;
@@ -44,7 +45,14 @@ public class PartDataTest {
     date = new LocalDate().minusDays(1);
     workspace = new WorkspaceStorage(new Path(""), new Path(""));
     duration = new Duration(10);
-    partId = PlatformUI.getWorkbench().getViewRegistry().getViews()[0].getId();
+    partId = "abc";
+  }
+
+  @Test
+  public void shouldReturnNullIfKeyIsNull() {
+    assertThat(
+        create(date, workspace, duration, partId).get(null),
+        is(nullValue()));
   }
 
   @Test
@@ -66,7 +74,7 @@ public class PartDataTest {
     IWorkbenchPartDescriptor editor = PlatformUI.getWorkbench()
         .getEditorRegistry().getDefaultEditor("a.txt");
     assertThat(
-        create(date, workspace, duration, editor.getId()).part(), 
+        create(date, workspace, duration, editor.getId()).getPart(), 
         is(editor));
   }
   
@@ -82,7 +90,7 @@ public class PartDataTest {
     IWorkbenchPartDescriptor view = PlatformUI.getWorkbench()
         .getViewRegistry().getViews()[0];
     assertThat(
-        create(date, workspace, duration, view.getId()).part(), 
+        create(date, workspace, duration, view.getId()).getPart(), 
         is(view));
   }
   

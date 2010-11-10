@@ -22,6 +22,11 @@ import org.joda.time.LocalDate;
 
 /**
  * Contains information regarding time spent on a Java element.
+ * <p>
+ * Values represented by the keys defined in this interface are not null.
+ * </p>
+ * 
+ * @noimplement
  */
 public interface IJavaData extends IData {
 

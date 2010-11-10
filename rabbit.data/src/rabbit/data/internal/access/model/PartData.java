@@ -30,6 +30,8 @@ import org.joda.time.LocalDate;
 
 import java.util.Map;
 
+import javax.annotation.Nullable;
+
 /**
  * Contains information about the time spent on a workbench tool.
  */
@@ -64,12 +66,12 @@ public class PartData implements IPartData {
 
   @SuppressWarnings("unchecked")
   @Override
-  public <T> T get(IKey<T> key) {
+  public <T> T get(@Nullable IKey<T> key) {
     return (T) data.get(key);
   }
 
   @Override
-  public IWorkbenchPartDescriptor part() {
+  public IWorkbenchPartDescriptor getPart() {
     IWorkbenchPartDescriptor part = viewRegistry().find(get(PART_ID));
     if (part == null) {
       return editorRegistry().findEditor(get(PART_ID));

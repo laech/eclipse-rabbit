@@ -19,11 +19,11 @@ import rabbit.data.access.model.IFileData;
 import rabbit.data.access.model.WorkspaceStorage;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.mock;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Path;
 import org.joda.time.Duration;
 import org.joda.time.LocalDate;
@@ -42,10 +42,17 @@ public class FileDataTest {
 
   @Before
   public void prepare() {
-    file = workspaceRoot().getFile(new Path("/project/file.txt"));
+    file = mock(IFile.class);
     date = new LocalDate();
     duration = new Duration(10);
     workspace = new WorkspaceStorage(new Path(""), new Path(""));
+  }
+
+  @Test
+  public void shouldReturnNullIfKeyIsNull() {
+    assertThat(
+        create(date, workspace, duration, file).get(null),
+        is(nullValue()));
   }
 
   @Test
@@ -99,15 +106,10 @@ public class FileDataTest {
   /**
    * @see FileData#FileData(LocalDate, WorkspaceStorage, Duration, IFile)
    */
-  private FileData create(LocalDate date, WorkspaceStorage workspace,
-      Duration duration, IFile file) {
+  private FileData create(LocalDate date,
+                          WorkspaceStorage workspace,
+                          Duration duration,
+                          IFile file) {
     return new FileData(date, workspace, duration, file);
-  }
-  
-  /**
-   * @return The workspace root.
-   */
-  private IWorkspaceRoot workspaceRoot() {
-    return ResourcesPlugin.getWorkspace().getRoot();
   }
 }

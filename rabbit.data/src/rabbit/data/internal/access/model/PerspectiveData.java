@@ -28,6 +28,8 @@ import org.joda.time.LocalDate;
 
 import java.util.Map;
 
+import javax.annotation.Nullable;
+
 /**
  * Contains information about time spent on a perspective.
  */
@@ -62,12 +64,12 @@ public class PerspectiveData implements IPerspectiveData {
 
   @SuppressWarnings("unchecked")
   @Override
-  public <T> T get(IKey<T> key) {
+  public <T> T get(@Nullable IKey<T> key) {
     return (T) data.get(key);
   }
 
   @Override
-  public IPerspectiveDescriptor perspective() {
+  public IPerspectiveDescriptor getPerspective() {
     return PlatformUI.getWorkbench().getPerspectiveRegistry()
         .findPerspectiveWithId(get(PERSPECTIVE_ID));
   }

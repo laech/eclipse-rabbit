@@ -15,6 +15,8 @@
  */
 package rabbit.data.access.model;
 
+import javax.annotation.Nullable;
+
 /**
  * Contains a map of keys and values.
  */
@@ -25,5 +27,5 @@ public interface IData {
    * @param key The key.
    * @return The value, or null if no value is represented by the key.
    */
-  <T> T get(IKey<T> key);
+  <T> T get(@Nullable IKey<T> key);
 }

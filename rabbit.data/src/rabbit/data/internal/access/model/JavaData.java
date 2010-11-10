@@ -27,6 +27,8 @@ import org.joda.time.LocalDate;
 
 import java.util.Map;
 
+import javax.annotation.Nullable;
+
 /**
  * Contains information regarding time spent on a Java element.
  */
@@ -60,7 +62,7 @@ public class JavaData implements IJavaData {
 
   @SuppressWarnings("unchecked")
   @Override
-  public <T> T get(IKey<T> key) {
+  public <T> T get(@Nullable IKey<T> key) {
     return (T) data.get(key);
   }
 }

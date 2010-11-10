@@ -27,22 +27,22 @@ import javax.annotation.Nullable;
  * Contains information about where data is stored for a workspace.
  */
 public final class WorkspaceStorage {
-  
+
   private final IPath storagePath;
   private final IPath workspacePath;
-  
+
   /**
    * Constructor.
    * @param storagePath The path to where the data is stored.
-   * @param workspacePath The path to the workspace where the data came from, 
-   *        or null if unknown.
+   * @param workspacePath The path to the workspace where the data came from, or
+   *        null if unknown.
    * @throws NullPointerException If {@code storagePath} is null.
    */
   public WorkspaceStorage(IPath storagePath, @Nullable IPath workspacePath) {
     this.storagePath = checkNotNull(storagePath);
     this.workspacePath = workspacePath;
   }
-  
+
   @Override
   public boolean equals(Object obj) {
     if (obj instanceof WorkspaceStorage) {
@@ -52,7 +52,7 @@ public final class WorkspaceStorage {
     }
     return false;
   }
-  
+
   /**
    * @return The path to where the data is stored.
    */
@@ -70,5 +70,11 @@ public final class WorkspaceStorage {
   @Override
   public int hashCode() {
     return Objects.hashCode(getStoragePath(), getWorkspacePath());
+  }
+
+  @Override
+  public String toString() {
+    return "workspacePath=" + getWorkspacePath() + ":storagePath="
+        + getStoragePath();
   }
 }

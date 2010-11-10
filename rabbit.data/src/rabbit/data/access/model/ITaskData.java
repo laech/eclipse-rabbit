@@ -23,6 +23,11 @@ import org.joda.time.LocalDate;
 
 /**
  * Contains information about time spent on a file during a task.
+ * <p>
+ * Values represented by the keys defined in this interface are not null.
+ * </p>
+ * 
+ * @noimplement
  */
 public interface ITaskData extends IData {
 

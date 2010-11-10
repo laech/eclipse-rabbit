@@ -13,33 +13,26 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package rabbit.data.access.model;
+package rabbit.data.internal.access.model;
 
-import org.joda.time.Duration;
-import org.joda.time.LocalDate;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import org.junit.runners.Suite.SuiteClasses;
 
 /**
- * Contains session data information.
- * <p>
- * Values represented by the keys defined in this interface are not null.
- * </p>
- * 
- * @noimplement
+ * Test suite for this package.
  */
-public interface ISessionData extends IData {
+@RunWith(Suite.class)
+@SuiteClasses({
+    CommandDataTest.class,
+    FileDataTest.class,
+    JavaDataTest.class,
+    KeyMapBuilderTest.class,
+    LaunchDataTest.class,
+    PartDataTest.class,
+    PerspectiveDataTest.class,
+    SessionDataTest.class,
+    TaskDataTest.class})
+public class AllTests {
 
-  /**
-   * Key for the date.
-   */
-  static final IKey<LocalDate> DATE = Keys.DATE;
-
-  /**
-   * Key for the workspace.
-   */
-  static final IKey<WorkspaceStorage> WORKSPACE = Keys.WORKSPACE;
-
-  /**
-   * Key for the duration.
-   */
-  static final IKey<Duration> DURATION = Keys.DURATION;
 }

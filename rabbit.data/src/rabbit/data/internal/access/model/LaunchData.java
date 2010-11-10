@@ -32,6 +32,8 @@ import org.joda.time.LocalDate;
 import java.util.Map;
 import java.util.Set;
 
+import javax.annotation.Nullable;
+
 /**
  * Contains launch information.
  */
@@ -75,7 +77,7 @@ public class LaunchData implements ILaunchData {
 
   @SuppressWarnings("unchecked")
   @Override
-  public <T> T get(IKey<T> key) {
+  public <T> T get(@Nullable IKey<T> key) {
     return (T) data.get(key);
   }
 }

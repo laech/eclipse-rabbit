@@ -23,11 +23,11 @@ import com.google.common.collect.Sets;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.mock;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Path;
 import org.joda.time.Duration;
 import org.joda.time.LocalDate;
@@ -62,10 +62,14 @@ public class LaunchDataTest {
     workspace = new WorkspaceStorage(new Path(""), new Path(""));
     config = new LaunchConfigurationDescriptor("a", "b", "c");
     duration = new Duration(10);
-    
-    IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
-    files = Sets.newHashSet(root.getFile(new Path("/project/a.txt")),
-                            root.getFile(new Path("/project/b.jpg")));
+    files = Sets.newHashSet(mock(IFile.class), mock(IFile.class));
+  }
+
+  @Test
+  public void shouldReturnNullIfKeyIsNull() {
+    assertThat(
+        create(date, workspace, config, count, duration, files).get(null),
+        is(nullValue()));
   }
 
   @Test(expected = NullPointerException.class)
@@ -146,9 +150,8 @@ public class LaunchDataTest {
   
   @Test(expected = UnsupportedOperationException.class)
   public void shouldReturnTheFilesInAnImmutableSet() {
-    IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot(); 
     LaunchData launch = create(date, workspace, config, count, duration, files);
-    launch.get(ILaunchData.FILES).add(root.getFile(new Path("/p/z.txt")));
+    launch.get(ILaunchData.FILES).add(mock(IFile.class));
   }
 
   /**

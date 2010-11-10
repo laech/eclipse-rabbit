@@ -15,40 +15,45 @@
  */
 package rabbit.data.access.model;
 
-
 import org.eclipse.ui.IPerspectiveDescriptor;
 import org.joda.time.Duration;
 import org.joda.time.LocalDate;
 
 /**
  * Contains information about the time spent on a perspective.
+ * <p>
+ * Values represented by the keys defined in this interface are not null.
+ * </p>
+ * 
+ * @noimplement
  */
 public interface IPerspectiveData extends IData {
 
   /**
    * Key for the date.
    */
-  static final IKey<LocalDate>  DATE = Keys.DATE;
-  
+  static final IKey<LocalDate> DATE = Keys.DATE;
+
   /**
    * Key for the workspace.
    */
   static final IKey<WorkspaceStorage> WORKSPACE = Keys.WORKSPACE;
-  
+
   /**
    * Key for the duration.
    */
   static final IKey<Duration> DURATION = Keys.DURATION;
-  
+
   /**
    * Key for the perspective ID.
    */
   static final IKey<String> PERSPECTIVE_ID = Keys.PERSPECTIVE_ID;
-  
+
   /**
    * Gets the perspective that has the ID.
+   * 
    * @return The perspective, or null if no perspective has the ID.
    * @see #PERSPECTIVE_ID
    */
-  IPerspectiveDescriptor perspective();
+  IPerspectiveDescriptor getPerspective();
 }

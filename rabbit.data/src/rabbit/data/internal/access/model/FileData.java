@@ -27,6 +27,8 @@ import org.joda.time.LocalDate;
 
 import java.util.Map;
 
+import javax.annotation.Nullable;
+
 /**
  * Contains information about time spent on a file.
  */
@@ -58,7 +60,7 @@ public class FileData implements IFileData {
 
   @SuppressWarnings("unchecked")
   @Override
-  public <T> T get(IKey<T> key) {
+  public <T> T get(@Nullable IKey<T> key) {
     return (T) data.get(key);
   }
 }
