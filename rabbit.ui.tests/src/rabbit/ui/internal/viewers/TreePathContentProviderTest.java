@@ -15,9 +15,6 @@
  */
 package rabbit.ui.internal.viewers;
 
-import rabbit.ui.internal.viewers.ITreePathBuilder;
-import rabbit.ui.internal.viewers.TreePathContentProvider;
-
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSet;
 
@@ -39,7 +36,6 @@ import org.junit.Test;
 import static java.util.Arrays.asList;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -55,7 +51,7 @@ public class TreePathContentProviderTest {
 
   @Before
   public void setup() {
-    Collection<TreePath> noData = Collections.emptyList();
+    List<TreePath> noData = Collections.emptyList();
     ITreePathBuilder builder = mock(ITreePathBuilder.class);
     when(builder.build(any())).thenReturn(noData);
     content = create(builder);

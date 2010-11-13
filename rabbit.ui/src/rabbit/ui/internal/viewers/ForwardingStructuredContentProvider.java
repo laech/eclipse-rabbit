@@ -15,25 +15,21 @@
  */
 package rabbit.ui.internal.viewers;
 
-import org.eclipse.jface.viewers.TreePath;
-
-import java.util.List;
-
-import javax.annotation.Nullable;
+import org.eclipse.jface.viewers.IStructuredContentProvider;
 
 /**
- * Builder to build tree paths from a given input element.
+ * Forwards all method calls to an {@link IStructuredContentProvider}.
  */
-public interface ITreePathBuilder {
+public abstract class ForwardingStructuredContentProvider
+    extends ForwardingContentProvider implements IStructuredContentProvider {
 
-  /**
-   * Builds a collection of tree paths representing the leaves elements of the
-   * tree built from the given input.
-   * 
-   * @param input the input element to build from.
-   * @return a collection of tree paths, the collection may be empty but never
-   *         null. If unable to build from the given input, an empty collection
-   *         will be returned.
-   */
-  List<TreePath> build(@Nullable Object input);
+  protected ForwardingStructuredContentProvider() {}
+
+  @Override
+  public Object[] getElements(Object inputElement) {
+    return delegate().getElements(inputElement);
+  }
+
+  @Override
+  protected abstract IStructuredContentProvider delegate();
 }

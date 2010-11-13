@@ -15,25 +15,16 @@
  */
 package rabbit.ui.internal.viewers;
 
-import org.eclipse.jface.viewers.TreePath;
-
-import java.util.List;
-
-import javax.annotation.Nullable;
+import rabbit.ui.internal.viewers.FilterableSupport;
+import rabbit.ui.internal.viewers.IFilterable;
 
 /**
- * Builder to build tree paths from a given input element.
+ * Tests for {@link FilterableSupport}
  */
-public interface ITreePathBuilder {
+public class FilterableSupportTest extends FilterableTest {
 
-  /**
-   * Builds a collection of tree paths representing the leaves elements of the
-   * tree built from the given input.
-   * 
-   * @param input the input element to build from.
-   * @return a collection of tree paths, the collection may be empty but never
-   *         null. If unable to build from the given input, an empty collection
-   *         will be returned.
-   */
-  List<TreePath> build(@Nullable Object input);
+  @Override
+  protected IFilterable create() {
+    return new FilterableSupport();
+  }
 }

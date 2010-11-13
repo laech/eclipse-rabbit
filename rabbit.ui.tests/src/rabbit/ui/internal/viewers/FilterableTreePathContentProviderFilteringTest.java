@@ -15,25 +15,23 @@
  */
 package rabbit.ui.internal.viewers;
 
-import org.eclipse.jface.viewers.TreePath;
+import rabbit.ui.internal.viewers.FilterableTreePathContentProvider;
+import rabbit.ui.internal.viewers.IFilterable;
 
-import java.util.List;
+import static org.mockito.Mockito.mock;
 
-import javax.annotation.Nullable;
+import org.eclipse.jface.viewers.ITreePathContentProvider;
 
 /**
- * Builder to build tree paths from a given input element.
+ * Tests the filtering feature of a {@link FilterableTreePathContentProvider}.
+ * @see FilterableTreePathContentProviderTest
  */
-public interface ITreePathBuilder {
+public class FilterableTreePathContentProviderFilteringTest
+    extends FilterableTest {
 
-  /**
-   * Builds a collection of tree paths representing the leaves elements of the
-   * tree built from the given input.
-   * 
-   * @param input the input element to build from.
-   * @return a collection of tree paths, the collection may be empty but never
-   *         null. If unable to build from the given input, an empty collection
-   *         will be returned.
-   */
-  List<TreePath> build(@Nullable Object input);
+  @Override
+  protected IFilterable create() {
+    return new FilterableTreePathContentProvider(
+        mock(ITreePathContentProvider.class));
+  }
 }
