@@ -15,12 +15,11 @@
  */
 package rabbit.ui.internal.viewers;
 
-import static com.google.common.base.Preconditions.checkArgument;
+import rabbit.ui.IProvider;
+
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.Lists.newArrayListWithCapacity;
 import static com.google.common.collect.Sets.newLinkedHashSet;
 
-import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
 
 import org.eclipse.jface.viewers.ITreePathContentProvider;
@@ -29,6 +28,8 @@ import org.eclipse.jface.viewers.Viewer;
 
 import static java.util.Collections.emptyList;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -52,7 +53,10 @@ import javax.annotation.Nullable;
  * from segment 0 up to but exclude the child segment.</li>
  * </ul>
  */
-public final class TreePathContentProvider implements ITreePathContentProvider {
+public final class TreePathContentProvider
+    implements ITreePathContentProvider, IProvider<TreePath> {
+  
+  private static final TreePath[] EMPTY = {};
 
   private final ITreePathBuilder builder;
 
@@ -75,6 +79,15 @@ public final class TreePathContentProvider implements ITreePathContentProvider {
   @Override
   public void dispose() {
     leaves = emptyList();
+  }
+
+  /**
+   * Gets the current tree leaves in use by this content provider.
+   * @return the leaves.
+   */
+  @Override
+  public Collection<TreePath> get() {
+    return leaves;
   }
 
   @Override
@@ -102,17 +115,21 @@ public final class TreePathContentProvider implements ITreePathContentProvider {
 
   @Override
   public TreePath[] getParents(@Nullable Object element) {
+    if (element == null) {
+      return EMPTY;
+    }
+    
     Set<TreePath> parents = newLinkedHashSet();
     for (TreePath leaf : leaves) {
-      int index = indexOf(leaf, element);
+      int index = TreePaths.indexOf(leaf, element);
       if (index < 0) {
         continue;
       }
-      parents.add(headPath(leaf, index));
+      parents.add(TreePaths.headPath(leaf, index));
     }
     return parents.toArray(new TreePath[parents.size()]);
   }
-  
+
   @Override
   public boolean hasChildren(@Nullable TreePath branch) {
     return !childrenOf(branch).isEmpty();
@@ -123,9 +140,10 @@ public final class TreePathContentProvider implements ITreePathContentProvider {
    * updated.
    */
   @Override
-  public void inputChanged(Viewer viewer,
-                           @Nullable Object oldInput,
-                           @Nullable Object newInput) {
+  public void inputChanged(
+      Viewer viewer,
+      @Nullable Object oldInput,
+      @Nullable Object newInput) {
 
     leaves = ImmutableList.copyOf(builder.build(newInput));
   }
@@ -136,6 +154,9 @@ public final class TreePathContentProvider implements ITreePathContentProvider {
    * @return a collection of children, or an empty collection if no children.
    */
   private Set<Object> childrenOf(@Nullable TreePath branch) {
+    if (branch == null) {
+      return Collections.emptySet();
+    }
     Set<Object> children = newLinkedHashSet();
     for (TreePath leaf : leaves) {
       if (leaf.getSegmentCount() > branch.getSegmentCount()
@@ -145,36 +166,4 @@ public final class TreePathContentProvider implements ITreePathContentProvider {
     }
     return children;
   }
-
-  /**
-   * Gets the head path of a tree path.
-   * 
-   * @param path the path.
-   * @param endIndex the ending index on the given path, exclusive.
-   * @return the head path.
-   * @throws IllegalArgumentException if {@code endIndex < 0}.
-   */
-  private TreePath headPath(TreePath path, int endIndex) {
-    checkArgument(endIndex >= 0);
-    List<Object> segments = newArrayListWithCapacity(endIndex);
-    for (int i = 0; i < endIndex; ++i) {
-      segments.add(path.getSegment(i));
-    }
-    return new TreePath(segments.toArray());
-  }
-
-  /**
-   * Returns the index of the given segment in the given path.
-   * 
-   * @param path the tree path to search the segment.
-   * @param segment the segment to find the index for.
-   * @return the index, or a negative number if not found.
-   */
-  private int indexOf(TreePath path, Object segment) {
-    for (int i = 0; i < path.getSegmentCount(); ++i) {
-      if (Objects.equal(path.getSegment(i), segment)) { return i; }
-    }
-    return -1;
-  }
-
 }
