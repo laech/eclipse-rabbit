@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: rabbit.ui.tests
-Bundle-SymbolicName: rabbit.ui.tests
+Bundle-Name: rabbit.ui.test
+Bundle-SymbolicName: rabbit.ui.test
 Bundle-Version: 1.2.0.qualifier
 Fragment-Host: rabbit.ui
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6

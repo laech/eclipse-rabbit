@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: rabbit.data.tests.handler
-Bundle-SymbolicName: rabbit.data.tests.handler
+Bundle-Name: rabbit.data.handler.test
+Bundle-SymbolicName: rabbit.data.handler.test
 Bundle-Version: 1.1.0.qualifier
 Fragment-Host: rabbit.data.handler
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6

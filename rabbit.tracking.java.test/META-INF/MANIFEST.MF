@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: rabbit.tracking.tests.java
-Bundle-SymbolicName: rabbit.tracking.tests.java
+Bundle-Name: rabbit.tracking.java.test
+Bundle-SymbolicName: rabbit.tracking.java.test
 Bundle-Version: 1.1.0.qualifier
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,

@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: rabbit.ui.tests.mylyn
-Bundle-SymbolicName: rabbit.ui.tests.mylyn
+Bundle-Name: rabbit.ui.mylyn.test
+Bundle-SymbolicName: rabbit.ui.mylyn.test
 Bundle-Version: 1.0.0.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Require-Bundle: rabbit.data,
