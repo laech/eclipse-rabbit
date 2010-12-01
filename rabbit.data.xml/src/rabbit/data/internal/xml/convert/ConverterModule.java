@@ -36,33 +36,35 @@ import com.google.inject.AbstractModule;
 import com.google.inject.TypeLiteral;
 
 /**
- * TODO
+ * Binds {@link IConverter} to its implementations.
  */
 public class ConverterModule extends AbstractModule {
+
+  public ConverterModule() {}
 
   @Override
   protected void configure() {
     bind(new TypeLiteral<IConverter<CommandEvent, CommandEventType>>() {})
         .to(CommandEventConverter.class);
-    
+
     bind(new TypeLiteral<IConverter<FileEvent, FileEventType>>() {})
         .to(FileEventConverter.class);
-    
+
     bind(new TypeLiteral<IConverter<JavaEvent, JavaEventType>>() {})
         .to(JavaEventConverter.class);
-    
+
     bind(new TypeLiteral<IConverter<LaunchEvent, LaunchEventType>>() {})
         .to(LaunchEventConverter.class);
-    
+
     bind(new TypeLiteral<IConverter<PartEvent, PartEventType>>() {})
         .to(PartEventConverter.class);
-    
+
     bind(new TypeLiteral<IConverter<PerspectiveEvent, PerspectiveEventType>>() {})
         .to(PerspectiveEventConverter.class);
-    
+
     bind(new TypeLiteral<IConverter<SessionEvent, SessionEventType>>() {})
         .to(SessionEventConverter.class);
-    
+
     bind(new TypeLiteral<IConverter<TaskFileEvent, TaskFileEventType>>() {})
         .to(TaskFileEventConverter.class);
   }

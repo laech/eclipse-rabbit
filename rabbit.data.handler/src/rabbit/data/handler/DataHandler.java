@@ -25,8 +25,6 @@ import rabbit.data.access.model.PerspectiveDataDescriptor;
 import rabbit.data.access.model.SessionDataDescriptor;
 import rabbit.data.access.model.TaskFileDataDescriptor;
 import rabbit.data.internal.xml.access.AccessorModule;
-import rabbit.data.internal.xml.convert.ConverterModule;
-import rabbit.data.internal.xml.merge.MergerModule;
 import rabbit.data.internal.xml.store.StorerModule;
 import rabbit.data.store.IStorer;
 import rabbit.data.store.model.CommandEvent;
@@ -52,11 +50,7 @@ public class DataHandler {
   private static final Injector injector;
 
   static {
-    injector = Guice.createInjector(
-        new AccessorModule(),
-        new StorerModule(), 
-        new ConverterModule(), 
-        new MergerModule());
+    injector = Guice.createInjector(new AccessorModule(), new StorerModule());
   }
 
   /**
@@ -119,6 +113,5 @@ public class DataHandler {
     }
   }
 
-  private DataHandler() {
-  }
+  private DataHandler() {}
 }

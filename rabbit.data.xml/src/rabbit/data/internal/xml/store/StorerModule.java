@@ -15,9 +15,9 @@
  */
 package rabbit.data.internal.xml.store;
 
-import rabbit.data.internal.xml.DataStore;
-import rabbit.data.internal.xml.IDataStore;
-import rabbit.data.internal.xml.StoreNames;
+import rabbit.data.internal.xml.StoreNamesModule;
+import rabbit.data.internal.xml.convert.ConverterModule;
+import rabbit.data.internal.xml.merge.MergerModule;
 import rabbit.data.store.IStorer;
 import rabbit.data.store.model.CommandEvent;
 import rabbit.data.store.model.FileEvent;
@@ -29,79 +29,32 @@ import rabbit.data.store.model.SessionEvent;
 import rabbit.data.store.model.TaskFileEvent;
 
 import com.google.inject.AbstractModule;
-import com.google.inject.Singleton;
 import com.google.inject.TypeLiteral;
-import com.google.inject.name.Names;
 
 /**
- * TODO
+ * Binds {@link IStorer} to its implementations.
  */
 public class StorerModule extends AbstractModule {
 
   /**
    * Constructor.
    */
-  public StorerModule() {
-
-  }
+  public StorerModule() {}
 
   @Override
   protected void configure() {
-    bind(IDataStore.class)
-        .annotatedWith(Names.named(StoreNames.COMMAND_STORE))
-        .toInstance(DataStore.COMMAND_STORE);
-    bind(new TypeLiteral<IStorer<CommandEvent>>() {})
-        .to(CommandEventStorer.class)
-        .in(Singleton.class);
-    
-    bind(IDataStore.class)
-        .annotatedWith(Names.named(StoreNames.FILE_STORE))
-        .toInstance(DataStore.FILE_STORE);
-    bind(new TypeLiteral<IStorer<FileEvent>>() {})
-        .to(FileEventStorer.class)
-        .in(Singleton.class);
-    
-    bind(IDataStore.class)
-        .annotatedWith(Names.named(StoreNames.JAVA_STORE))
-        .toInstance(DataStore.JAVA_STORE);
-    bind(new TypeLiteral<IStorer<JavaEvent>>(){})
-        .to(JavaEventStorer.class)
-        .in(Singleton.class);
+    install(new StoreNamesModule());
+    install(new ConverterModule());
+    install(new MergerModule());
 
-    bind(IDataStore.class)
-        .annotatedWith(Names.named(StoreNames.LAUNCH_STORE))
-        .toInstance(DataStore.LAUNCH_STORE);
-    bind(new TypeLiteral<IStorer<LaunchEvent>>(){})
-        .to(LaunchEventStorer.class)
-        .in(Singleton.class);
-
-    bind(IDataStore.class)
-        .annotatedWith(Names.named(StoreNames.PART_STORE))
-        .toInstance(DataStore.PART_STORE);
-    bind(new TypeLiteral<IStorer<PartEvent>>(){})
-        .to(PartEventStorer.class)
-        .in(Singleton.class);
-
-    bind(IDataStore.class)
-        .annotatedWith(Names.named(StoreNames.PERSPECTIVE_STORE))
-        .toInstance(DataStore.PERSPECTIVE_STORE);
-    bind(new TypeLiteral<IStorer<PerspectiveEvent>>() {})
-        .to(PerspectiveEventStorer.class)
-        .in(Singleton.class);
-
-    bind(IDataStore.class)
-        .annotatedWith(Names.named(StoreNames.SESSION_STORE))
-        .toInstance(DataStore.SESSION_STORE);
-    bind(new TypeLiteral<IStorer<SessionEvent>>() {})
-        .to(SessionEventStorer.class)
-        .in(Singleton.class);
-
-    bind(IDataStore.class)
-        .annotatedWith(Names.named(StoreNames.TASK_STORE))
-        .toInstance(DataStore.TASK_STORE);
-    bind(new TypeLiteral<IStorer<TaskFileEvent>>() {})
-        .to(TaskFileEventStorer.class)
-        .in(Singleton.class);
+    bind(new TypeLiteral<IStorer<CommandEvent>>() {})     .to(CommandEventStorer.class);
+    bind(new TypeLiteral<IStorer<FileEvent>>() {})        .to(FileEventStorer.class);
+    bind(new TypeLiteral<IStorer<JavaEvent>>() {})        .to(JavaEventStorer.class);
+    bind(new TypeLiteral<IStorer<LaunchEvent>>() {})      .to(LaunchEventStorer.class);
+    bind(new TypeLiteral<IStorer<PartEvent>>() {})        .to(PartEventStorer.class);
+    bind(new TypeLiteral<IStorer<PerspectiveEvent>>() {}) .to(PerspectiveEventStorer.class);
+    bind(new TypeLiteral<IStorer<SessionEvent>>() {})     .to(SessionEventStorer.class);
+    bind(new TypeLiteral<IStorer<TaskFileEvent>>() {})    .to(TaskFileEventStorer.class);
   }
 
 }

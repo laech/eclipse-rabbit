@@ -28,38 +28,22 @@ import com.google.inject.AbstractModule;
 import com.google.inject.TypeLiteral;
 
 /**
- * TODO
+ * Binds {@link IMerger} to its implementations.
  */
 public class MergerModule extends AbstractModule {
-  
-  public MergerModule() {
-  }
+
+  public MergerModule() {}
 
   @Override
   protected void configure() {
-    bind(new TypeLiteral<IMerger<CommandEventType>>() {})
-        .to(CommandEventTypeMerger.class);
-    
-    bind(new TypeLiteral<IMerger<FileEventType>>() {})
-        .to(FileEventTypeMerger.class);
-    
-    bind(new TypeLiteral<IMerger<JavaEventType>>() {})
-        .to(JavaEventTypeMerger.class);
-    
-    bind(new TypeLiteral<IMerger<LaunchEventType>>() {})
-        .to(LaunchEventTypeMerger.class);
-    
-    bind(new TypeLiteral<IMerger<PartEventType>>() {})
-        .to(PartEventTypeMerger.class);
-    
-    bind(new TypeLiteral<IMerger<PerspectiveEventType>>() {})
-        .to(PerspectiveEventTypeMerger.class);
-    
-    bind(new TypeLiteral<IMerger<SessionEventType>>() {})
-        .to(SessionEventTypeMerger.class);
-    
-    bind(new TypeLiteral<IMerger<TaskFileEventType>>() {})
-        .to(TaskFileEventTypeMerger.class);
+    bind(new TypeLiteral<IMerger<CommandEventType>>     () {}).to(CommandEventTypeMerger.class);
+    bind(new TypeLiteral<IMerger<FileEventType>>        () {}).to(FileEventTypeMerger.class);
+    bind(new TypeLiteral<IMerger<JavaEventType>>        () {}).to(JavaEventTypeMerger.class);
+    bind(new TypeLiteral<IMerger<LaunchEventType>>      () {}).to(LaunchEventTypeMerger.class);
+    bind(new TypeLiteral<IMerger<PartEventType>>        () {}).to(PartEventTypeMerger.class);
+    bind(new TypeLiteral<IMerger<PerspectiveEventType>> () {}).to(PerspectiveEventTypeMerger.class);
+    bind(new TypeLiteral<IMerger<SessionEventType>>     () {}).to(SessionEventTypeMerger.class);
+    bind(new TypeLiteral<IMerger<TaskFileEventType>>    () {}).to(TaskFileEventTypeMerger.class);
   }
 
 }

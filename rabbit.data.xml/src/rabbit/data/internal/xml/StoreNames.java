@@ -15,11 +15,12 @@
  */
 package rabbit.data.internal.xml;
 
-/**
- * TODO
+/*
+ * Store names for Guice.
  */
 public class StoreNames {
-  
+
+  //@formatter:off
   public static final String COMMAND_STORE     = "CommandStore";
   public static final String FILE_STORE        = "FileStore";
   public static final String JAVA_STORE        = "JavaStore";
@@ -28,4 +29,5 @@ public class StoreNames {
   public static final String PERSPECTIVE_STORE = "PerspectiveStore";
   public static final String SESSION_STORE     = "SessionStore";
   public static final String TASK_STORE        = "TaskStore";
+  //@formatter:on
 }
