@@ -25,6 +25,7 @@ import rabbit.data.internal.xml.schema.events.PerspectiveEventType;
 import rabbit.data.store.model.PerspectiveEvent;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
 import java.util.List;
@@ -34,6 +35,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
 /**
  * Stores {@link PerspectiveEvent}.
  */
+@Singleton
 public final class PerspectiveEventStorer extends 
     AbstractStorer<PerspectiveEvent, PerspectiveEventType, PerspectiveEventListType> {
 

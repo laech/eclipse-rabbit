@@ -25,6 +25,7 @@ import rabbit.data.internal.xml.schema.events.EventListType;
 import rabbit.data.store.model.CommandEvent;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
 import java.util.List;
@@ -34,6 +35,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
 /**
  * Stores {@link CommandEvent}
  */
+@Singleton
 public final class CommandEventStorer extends
     AbstractStorer<CommandEvent, CommandEventType, CommandEventListType> {
 

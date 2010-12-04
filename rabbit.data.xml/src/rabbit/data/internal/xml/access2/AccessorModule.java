@@ -24,7 +24,6 @@ import rabbit.data.access.model.IPartData;
 import rabbit.data.access.model.IPerspectiveData;
 import rabbit.data.access.model.ISessionData;
 import rabbit.data.access.model.ITaskData;
-import rabbit.data.internal.xml.StoreNamesModule;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.TypeLiteral;
@@ -36,8 +35,6 @@ public class AccessorModule extends AbstractModule {
 
   @Override
   protected void configure() {
-    // TODO
-    install(new StoreNamesModule());
     bind(new TypeLiteral<IAccessor<ICommandData>>() {})     .to(CommandDataAccessor.class);
     bind(new TypeLiteral<IAccessor<IFileData>>() {})        .to(FileDataAccessor.class);
     bind(new TypeLiteral<IAccessor<IJavaData>>() {})        .to(JavaDataAccessor.class);

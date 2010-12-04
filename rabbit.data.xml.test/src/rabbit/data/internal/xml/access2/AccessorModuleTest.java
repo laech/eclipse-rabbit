@@ -24,6 +24,7 @@ import rabbit.data.access.model.IPartData;
 import rabbit.data.access.model.IPerspectiveData;
 import rabbit.data.access.model.ISessionData;
 import rabbit.data.access.model.ITaskData;
+import rabbit.data.internal.xml.StoreNamesModule;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -71,7 +72,7 @@ public class AccessorModuleTest {
   public AccessorModuleTest(TypeLiteral<?> interfaceType, Class<?> implClass) {
     this.interfaceType = interfaceType;
     this.implClass = implClass;
-    this.injector = Guice.createInjector(new AccessorModule());
+    this.injector = Guice.createInjector(new AccessorModule(), new StoreNamesModule());
   }
 
   @Test

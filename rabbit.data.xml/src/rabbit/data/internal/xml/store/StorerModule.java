@@ -15,9 +15,6 @@
  */
 package rabbit.data.internal.xml.store;
 
-import rabbit.data.internal.xml.StoreNamesModule;
-import rabbit.data.internal.xml.convert.ConverterModule;
-import rabbit.data.internal.xml.merge.MergerModule;
 import rabbit.data.store.IStorer;
 import rabbit.data.store.model.CommandEvent;
 import rabbit.data.store.model.FileEvent;
@@ -43,18 +40,14 @@ public class StorerModule extends AbstractModule {
 
   @Override
   protected void configure() {
-    install(new StoreNamesModule());
-    install(new ConverterModule());
-    install(new MergerModule());
-
-    bind(new TypeLiteral<IStorer<CommandEvent>>() {})     .to(CommandEventStorer.class);
-    bind(new TypeLiteral<IStorer<FileEvent>>() {})        .to(FileEventStorer.class);
-    bind(new TypeLiteral<IStorer<JavaEvent>>() {})        .to(JavaEventStorer.class);
-    bind(new TypeLiteral<IStorer<LaunchEvent>>() {})      .to(LaunchEventStorer.class);
-    bind(new TypeLiteral<IStorer<PartEvent>>() {})        .to(PartEventStorer.class);
-    bind(new TypeLiteral<IStorer<PerspectiveEvent>>() {}) .to(PerspectiveEventStorer.class);
-    bind(new TypeLiteral<IStorer<SessionEvent>>() {})     .to(SessionEventStorer.class);
-    bind(new TypeLiteral<IStorer<TaskFileEvent>>() {})    .to(TaskFileEventStorer.class);
+    bind(new TypeLiteral<IStorer<CommandEvent>>     () {}).to(CommandEventStorer.class);
+    bind(new TypeLiteral<IStorer<FileEvent>>        () {}).to(FileEventStorer.class);
+    bind(new TypeLiteral<IStorer<JavaEvent>>        () {}).to(JavaEventStorer.class);
+    bind(new TypeLiteral<IStorer<LaunchEvent>>      () {}).to(LaunchEventStorer.class);
+    bind(new TypeLiteral<IStorer<PartEvent>>        () {}).to(PartEventStorer.class);
+    bind(new TypeLiteral<IStorer<PerspectiveEvent>> () {}).to(PerspectiveEventStorer.class);
+    bind(new TypeLiteral<IStorer<SessionEvent>>     () {}).to(SessionEventStorer.class);
+    bind(new TypeLiteral<IStorer<TaskFileEvent>>    () {}).to(TaskFileEventStorer.class);
   }
 
 }

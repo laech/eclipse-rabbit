@@ -25,6 +25,7 @@ import rabbit.data.internal.xml.schema.events.LaunchEventType;
 import rabbit.data.store.model.LaunchEvent;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
 import java.util.List;
@@ -34,6 +35,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
 /**
  * Stores {@link LaunchEvent}
  */
+@Singleton
 public final class LaunchEventStorer extends
     AbstractStorer<LaunchEvent, LaunchEventType, LaunchEventListType> {
 

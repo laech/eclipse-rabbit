@@ -25,6 +25,7 @@ import rabbit.data.internal.xml.schema.events.TaskFileEventType;
 import rabbit.data.store.model.TaskFileEvent;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 
 import java.util.List;
@@ -34,6 +35,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
 /**
  * Stores {@link TaskFileEvent}.
  */
+@Singleton
 public final class TaskFileEventStorer extends
     AbstractStorer<TaskFileEvent, TaskFileEventType, TaskFileEventListType> {
 

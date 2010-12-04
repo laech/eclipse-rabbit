@@ -24,8 +24,6 @@ import rabbit.data.access.model.PartDataDescriptor;
 import rabbit.data.access.model.PerspectiveDataDescriptor;
 import rabbit.data.access.model.SessionDataDescriptor;
 import rabbit.data.access.model.TaskFileDataDescriptor;
-import rabbit.data.internal.xml.access.AccessorModule;
-import rabbit.data.internal.xml.store.StorerModule;
 import rabbit.data.store.IStorer;
 import rabbit.data.store.model.CommandEvent;
 import rabbit.data.store.model.FileEvent;
@@ -35,6 +33,7 @@ import rabbit.data.store.model.PartEvent;
 import rabbit.data.store.model.PerspectiveEvent;
 import rabbit.data.store.model.SessionEvent;
 import rabbit.data.store.model.TaskFileEvent;
+import rabbit.data.xml.XmlModule;
 
 import com.google.inject.ConfigurationException;
 import com.google.inject.Guice;
@@ -50,7 +49,7 @@ public class DataHandler {
   private static final Injector injector;
 
   static {
-    injector = Guice.createInjector(new AccessorModule(), new StorerModule());
+    injector = Guice.createInjector(new XmlModule());
   }
 
   /**

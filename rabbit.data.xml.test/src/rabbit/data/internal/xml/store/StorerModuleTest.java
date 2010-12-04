@@ -15,6 +15,9 @@
  */
 package rabbit.data.internal.xml.store;
 
+import rabbit.data.internal.xml.StoreNamesModule;
+import rabbit.data.internal.xml.convert.ConverterModule;
+import rabbit.data.internal.xml.merge.MergerModule;
 import rabbit.data.store.IStorer;
 import rabbit.data.store.model.CommandEvent;
 import rabbit.data.store.model.FileEvent;
@@ -71,7 +74,8 @@ public class StorerModuleTest {
   public StorerModuleTest(TypeLiteral<?> storerInterface, Class<?> storerImplementation) {
     this.storerInterface = storerInterface;
     this.storerImplementation = storerImplementation;
-    this.injector = Guice.createInjector(new StorerModule());
+    this.injector = Guice.createInjector(
+        new StorerModule(), new StoreNamesModule(), new ConverterModule(), new MergerModule());
   }
 
   @Test

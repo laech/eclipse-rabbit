@@ -12,10 +12,12 @@ Require-Bundle: org.eclipse.core.runtime,
  rabbit.common;bundle-version="1.1.0",
  org.eclipse.jdt.core;resolution:=optional
 Export-Package: rabbit.data.internal.xml;x-friends:="rabbit.data.xml.ui",
- rabbit.data.internal.xml.access;x-friends:="rabbit.data.handler",
- rabbit.data.internal.xml.convert;x-friends:="rabbit.data.handler",
- rabbit.data.internal.xml.merge;x-friends:="rabbit.data.handler",
+ rabbit.data.internal.xml.access;x-internal:=true,
+ rabbit.data.internal.xml.access2;x-internal:=true,
+ rabbit.data.internal.xml.convert;x-internal:=true,
+ rabbit.data.internal.xml.merge;x-internal:=true,
  rabbit.data.internal.xml.schema.events;x-internal:=true,
- rabbit.data.internal.xml.store;x-friends:="rabbit.data.handler"
+ rabbit.data.internal.xml.store;x-internal:=true,
+ rabbit.data.xml
 Bundle-Activator: rabbit.data.internal.xml.XmlPlugin
 Bundle-ActivationPolicy: lazy
