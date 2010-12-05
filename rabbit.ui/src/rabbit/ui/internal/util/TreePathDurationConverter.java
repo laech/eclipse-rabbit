@@ -15,24 +15,21 @@
  */
 package rabbit.ui.internal.util;
 
-import javax.annotation.Nullable;
+import org.eclipse.jface.viewers.TreePath;
+import org.joda.time.Duration;
 
 /**
- * Categorizes elements into categories.
+ * Converts a {@link TreePath} by checking its last segment, if the segment is a {@link Duration}
+ * then the duration in milliseconds is returned, otherwise 0 is returned.
  */
-public interface ICategorizer {
+public final class TreePathDurationConverter implements IConverter<TreePath> {
 
-  /**
-   * Gets the category the given element belongs to.
-   * @param element the element to categorize.
-   * @return the category the given element belongs to.
-   */
-  ICategory getCategory(@Nullable Object element);
-
-  /**
-   * Checks whether this categorizer has the given category.
-   * @param category the category to check.
-   * @return true if this categorizer has the given category, false otherwise.
-   */
-  boolean hasCategory(ICategory category);
+  @Override
+  public long convert(TreePath element) {
+    Object obj = element.getLastSegment();
+    if (obj instanceof Duration) {
+      return ((Duration) obj).getMillis();
+    }
+    return 0;
+  }
 }
