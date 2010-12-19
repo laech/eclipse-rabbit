@@ -18,8 +18,8 @@ package rabbit.ui.internal.pages;
 import rabbit.ui.IPage;
 import rabbit.ui.internal.RabbitUI;
 import rabbit.ui.internal.viewers.CellPainter;
-import rabbit.ui.internal.viewers.TreeViewerSorter;
 import rabbit.ui.internal.viewers.CellPainter.IValueProvider;
+import rabbit.ui.internal.viewers.TreeViewerSorter;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
@@ -28,7 +28,6 @@ import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
-import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.ITreeSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreePath;
@@ -102,21 +101,18 @@ public abstract class AbstractFilteredTreePage implements IPage {
     viewer.addDoubleClickListener(new IDoubleClickListener() {
       @Override
       public void doubleClick(DoubleClickEvent e) {
-        if (e.getSelection() instanceof ITreeSelection) {
-          ITreeSelection selection = (ITreeSelection) e.getSelection();
-          
-          try {
-            TreePath path = selection.getPaths()[0];
-            ITreeContentProvider contents = (ITreeContentProvider) viewer.getContentProvider();
-            if (contents.hasChildren(selection.getFirstElement()))
-              viewer.setExpandedState(path, !viewer.getExpandedState(path));
-            
-          } catch (NullPointerException ex) {
-            ex.printStackTrace();
-          } catch (ArrayIndexOutOfBoundsException ex) {
-            ex.printStackTrace();
-          }
+        if (!(e.getSelection() instanceof ITreeSelection)) {
+          return;
         }
+        
+        ITreeSelection selection = (ITreeSelection) e.getSelection();
+        TreePath[] paths = selection.getPaths();
+        if (paths == null || paths.length < 1) {
+          return;
+        }
+        
+        TreePath path = paths[0];
+        viewer.setExpandedState(path, !viewer.getExpandedState(path));
       }
     });
 
