@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry exported="true" kind="lib" path="lib/joda-time-1.6.2.jar" sourcepath="/home/o-o/Downloads/joda-time-1.6.2/joda-time-1.6.2-sources.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/guice-2.0-no_aop.jar" sourcepath="C:/Users/o-o/Downloads/guice-2.0-src.zip"/>
+	<classpathentry exported="true" kind="lib" path="lib/guava-r07.jar" sourcepath="/Volumes/Things/Downloads/guava-r07/guava-src-r07.zip"/>
+	<classpathentry exported="true" kind="lib" path="lib/commons-io-1.4.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/guice-2.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/joda-time-1.6.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jsr305.jar"/>
+	<classpathentry kind="lib" path="lib/aopalliance.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
-	<classpathentry exported="true" kind="lib" path="lib/google-collect-1.0.jar" sourcepath="C:/Users/o-o/Documents/Downloads/google-collect-1.0/src-1.0.zip"/>
-	<classpathentry exported="true" kind="lib" path="lib/jsr305.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/commons-io-1.4.jar" sourcepath="C:/Downloads/commons-io-1.4/commons-io-1.4-sources.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
