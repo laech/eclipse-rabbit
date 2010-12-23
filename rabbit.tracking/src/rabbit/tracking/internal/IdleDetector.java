@@ -42,21 +42,21 @@ public final class IdleDetector extends Observable implements Listener {
 
   private ScheduledThreadPoolExecutor timer;
   private ScheduledFuture<?> currentTask;
-  private Display display;
+  private final Display display;
   private boolean isRunning;
   private boolean isActive;
   private long lastEventNanoTime;
-  private long idleIntervalMillis;
-  private long runDelayMillis;
+  private final long idleIntervalMillis;
+  private final long runDelayMillis;
 
-  private Runnable taskCode = new Runnable() {
+  private final Runnable taskCode = new Runnable() {
     @Override
     public void run() {
       if (!isActive) {
         return;
       }
-      long durationMillis 
-          = TimeUnit.NANOSECONDS.toMillis(nowNanoTime() - lastEventNanoTime);
+      long durationMillis = TimeUnit.NANOSECONDS.toMillis(nowNanoTime()
+          - lastEventNanoTime);
       if (durationMillis > idleIntervalMillis) {
         isActive = false;
         setChanged();
@@ -65,7 +65,7 @@ public final class IdleDetector extends Observable implements Listener {
     }
   };
 
-  private Runnable addFilters = new Runnable() {
+  private final Runnable addFilters = new Runnable() {
     @Override
     public void run() {
       display.addFilter(SWT.KeyDown, IdleDetector.this);
@@ -73,7 +73,7 @@ public final class IdleDetector extends Observable implements Listener {
     }
   };
 
-  private Runnable removeFilters = new Runnable() {
+  private final Runnable removeFilters = new Runnable() {
     @Override
     public void run() {
       display.removeFilter(SWT.KeyDown, IdleDetector.this);
@@ -84,12 +84,17 @@ public final class IdleDetector extends Observable implements Listener {
   /**
    * Constructor. When constructed, this object is not yet running.
    * 
-   * @param disp The display to listen to.
-   * @param idleTime After no activities within this period (in milliseconds),
-   *          the user is considered idle.
-   * @param delay The time (in milliseconds) of how often checks should run.
-   * @throws NullPointerException If display is null.
-   * @throws IllegalArgumentException If the interval or the delay is negative.
+   * @param disp
+   *          The display to listen to.
+   * @param idleTime
+   *          After no activities within this period (in milliseconds), the user
+   *          is considered idle.
+   * @param delay
+   *          The time (in milliseconds) of how often checks should run.
+   * @throws NullPointerException
+   *           If display is null.
+   * @throws IllegalArgumentException
+   *           If the interval or the delay is negative.
    * @see #setRunning(boolean)
    */
   public IdleDetector(Display disp, long idleTime, long delay) {
@@ -138,7 +143,7 @@ public final class IdleDetector extends Observable implements Listener {
    * 
    * @return True if running, false otherwise.
    */
-  public boolean isRunning() {
+  public synchronized boolean isRunning() {
     return isRunning;
   }
 
@@ -150,7 +155,7 @@ public final class IdleDetector extends Observable implements Listener {
    *         return true.
    * @see #isRunning()
    */
-  public boolean isUserActive() {
+  public synchronized boolean isUserActive() {
     if (!isRunning) {
       return true;
     }
@@ -162,9 +167,10 @@ public final class IdleDetector extends Observable implements Listener {
    * the same state will have no effects. If the display is disposed, call this
    * method has no effects.
    * 
-   * @param run True to run, false to stop.
+   * @param run
+   *          True to run, false to stop.
    */
-  public void setRunning(boolean run) {
+  public synchronized void setRunning(boolean run) {
     if (isRunning == run || display.isDisposed()) {
       return;
     }
@@ -175,8 +181,8 @@ public final class IdleDetector extends Observable implements Listener {
       lastEventNanoTime = nowNanoTime();
       display.syncExec(addFilters);
       timer = new ScheduledThreadPoolExecutor(1);
-      currentTask = timer.scheduleWithFixedDelay(taskCode, runDelayMillis, runDelayMillis,
-          TimeUnit.MILLISECONDS);
+      currentTask = timer.scheduleWithFixedDelay(taskCode, runDelayMillis,
+          runDelayMillis, TimeUnit.MILLISECONDS);
     } else {
       display.syncExec(removeFilters);
       currentTask.cancel(false);

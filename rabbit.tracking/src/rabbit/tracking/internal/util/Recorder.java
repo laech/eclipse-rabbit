@@ -30,9 +30,10 @@ import javax.annotation.Nullable;
  * value of {@link #getLastRecord()} changes, the argument object passed to the
  * observers will be the new value of {@link #getLastRecord()}.
  * <p>
- * This class is not thread safe.
+ * This class is thread safe.
  * 
- * @param <T> The user data type, the user data is an optional data object
+ * @param <T>
+ *          The user data type, the user data is an optional data object
  *          associate with each recording.
  */
 public final class Recorder<T> extends Observable {
@@ -49,11 +50,14 @@ public final class Recorder<T> extends Observable {
     /**
      * Constructs a new record.
      * 
-     * @param startMillis The start time in milliseconds.
-     * @param endMillis The end time in milliseconds.
-     * @param data The optional user data.
-     * @throws IllegalArgumentException If {@link #endTimeMillis} <
-     *           {@link #startTimeMillis}.
+     * @param startMillis
+     *          The start time in milliseconds.
+     * @param endMillis
+     *          The end time in milliseconds.
+     * @param data
+     *          The optional user data.
+     * @throws IllegalArgumentException
+     *           If {@link #endTimeMillis} < {@link #startTimeMillis}.
      */
     public Record(long startMillis, long endMillis, @Nullable T data) {
       checkArgument(endMillis >= startMillis);
@@ -115,7 +119,7 @@ public final class Recorder<T> extends Observable {
    * 
    * @return The user data, or null if none.
    */
-  public T getUserData() {
+  public synchronized T getUserData() {
     return data;
   }
 
@@ -126,7 +130,8 @@ public final class Recorder<T> extends Observable {
    * referenced, {@link #stop()} will be called then a new session will be
    * started.
    * 
-   * @param userData The optional user object for this record session.
+   * @param userData
+   *          The optional user object for this record session.
    * @see #isRecording()
    */
   public synchronized void start(@Nullable T userData) {
@@ -156,13 +161,15 @@ public final class Recorder<T> extends Observable {
    * Stops recording. Calling this method when the recorder is not running has
    * no effects.
    */
-  public synchronized void stop() {
-    if (!isRecording()) {
-      return;
+  public void stop() {
+    synchronized (this) {
+      if (!isRecording()) {
+        return;
+      }
+      record = new Record<T>(start, System.currentTimeMillis(), data);
+      running = false;
+      data = null;
     }
-    record = new Record<T>(start, System.currentTimeMillis(), data);
-    running = false;
-    data = null;
     setChanged();
     notifyObservers(record);
   }
@@ -173,7 +180,7 @@ public final class Recorder<T> extends Observable {
    * @return True if this recorder is currently recording a session, false
    *         otherwise.
    */
-  public boolean isRecording() {
+  public synchronized boolean isRecording() {
     return running;
   }
 
@@ -183,7 +190,7 @@ public final class Recorder<T> extends Observable {
    * 
    * @return The last recorded session.
    */
-  public Record<T> getLastRecord() {
+  public synchronized Record<T> getLastRecord() {
     return record;
   }
 
