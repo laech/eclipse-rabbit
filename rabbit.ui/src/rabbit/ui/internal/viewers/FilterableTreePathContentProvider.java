@@ -39,15 +39,22 @@ public class FilterableTreePathContentProvider
 
   private final IFilterable filterable;
   private final ITreePathContentProvider provider;
-
+  
   /**
-   * Constructor.
    * @param provider the real provider to provide elements and children.
-   * @throws NullPointerException if argument is null.
+   * @param filters the filters to be added to filter out unwanted elements.
+   * @see #addFilter(Predicate)
+   * @throws NullPointerException if {@code provider} is null, or {@code filters}
+   *         contains null elements. 
    */
-  public FilterableTreePathContentProvider(ITreePathContentProvider provider) {
+  public FilterableTreePathContentProvider(
+      ITreePathContentProvider provider, Predicate<? super Object>... filters) {
+    
     this.provider = checkNotNull(provider);
     this.filterable = new FilterableSupport();
+    for (Predicate<Object> filter : filters) {
+      addFilter(checkNotNull(filter));
+    }
   }
 
   @Override

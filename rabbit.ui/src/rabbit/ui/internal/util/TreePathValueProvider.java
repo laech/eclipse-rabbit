@@ -27,6 +27,7 @@ import com.google.common.collect.Sets;
 import org.eclipse.jface.viewers.TreePath;
 
 import java.util.Collection;
+import java.util.Observable;
 import java.util.Set;
 
 import javax.annotation.Nullable;
@@ -52,7 +53,7 @@ import javax.annotation.Nullable;
  * true on the given path.
  * </p>
  */
-public final class TreePathValueProvider implements IValueProvider {
+public final class TreePathValueProvider extends Observable implements IValueProvider {
 
   private final ICategorizer categorizer;
   private final IProvider<TreePath> pathProvider;
@@ -67,15 +68,34 @@ public final class TreePathValueProvider implements IValueProvider {
    * @param treePathProvider for getting the tree leaf paths.
    * @param converter for getting value of a tree path supplied by
    *        {@code treePathProvider}.
+   * @throws NullPointerException if any argument is null.
    */
   public TreePathValueProvider(
       ICategorizer categorizer,
       IProvider<TreePath> treePathProvider,
       IConverter<TreePath> converter) {
+    this(categorizer, treePathProvider, converter, null);
+  }
+  
+  /**
+   * @param categorizer for categorizing tree paths.
+   * @param treePathProvider for getting the tree leaf paths.
+   * @param converter for getting value of a tree path supplied by
+   *        {@code treePathProvider}.
+   * @param visualCategory the default visual category.
+   * @throws NullPointerException if any of 
+   *         {@code categorizer, treePathProvider, converter} is null.
+   */
+  public TreePathValueProvider(
+      ICategorizer categorizer,
+      IProvider<TreePath> treePathProvider,
+      IConverter<TreePath> converter,
+      @Nullable ICategory visualCategory) {
 
     this.categorizer = checkNotNull(categorizer, "categorizer");
     this.pathProvider = checkNotNull(treePathProvider, "treePathProvider");
     this.converter = checkNotNull(converter, "converter");
+    this.visual = visualCategory;
   }
 
   /**
@@ -168,13 +188,20 @@ public final class TreePathValueProvider implements IValueProvider {
 
   /**
    * Sets the visual category. If the category is not supported by the
-   * categorizer then it will be ignored and this method will return false.
+   * categorizer then it will be ignored and this method will return false. 
+   * If {@link #getVisualCategory()} returns a different category after this 
+   * change then observers of this instance will get notified.
    * @param category the new category.
    * @return true if the category is accepted, false otherwise.
    */
   public boolean setVisualCategory(ICategory category) {
     if (getCategorizer().hasCategory(category)) {
-      this.visual = category;
+      ICategory old = visual;
+      visual = category;
+      if (!Objects.equal(old, visual)) {
+        setChanged();
+        notifyObservers();
+      }
       return true;
     }
     return false;

@@ -18,6 +18,7 @@ package rabbit.ui.internal.viewers;
 import rabbit.ui.internal.viewers.FilterableTreePathContentProvider;
 import rabbit.ui.internal.viewers.ForwardingTreePathContentProvider;
 
+import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -40,8 +41,14 @@ public class FilterableTreePathContentProviderTest {
   private static final Object[] EMPTY_ARRAY = {};
 
   @Test(expected = NullPointerException.class)
-  public void constructorShouldThrowAnExceptionIfArgumentIsNull() {
+  public void constructorShouldThrowAnExceptionIfProviderIsNull() {
     create(null);
+  }
+  
+  @SuppressWarnings("unchecked")
+  @Test(expected = NullPointerException.class)
+  public void constructorShouldThrowAnExceptionIfFiltersContainNull() {
+    create(mock(ITreePathContentProvider.class), mock(Predicate.class), null);
   }
 
   @Test
@@ -244,11 +251,12 @@ public class FilterableTreePathContentProviderTest {
   }
 
   /**
-   * @return a forwarding content provider built with the given internal
-   *         provider for testing.
+   * @see FilterableTreePathContentProvider#FilterableTreePathContentProvider(ITreePathContentProvider,
+   *      Predicate...)
    */
-  protected FilterableTreePathContentProvider create(ITreePathContentProvider p) {
-    return new FilterableTreePathContentProvider(p);
+  protected FilterableTreePathContentProvider create(
+      ITreePathContentProvider p, Predicate<? super Object>... filters) {
+    return new FilterableTreePathContentProvider(p, filters);
   }
 
   private final ForwardingTreePathContentProvider create() {
@@ -259,15 +267,13 @@ public class FilterableTreePathContentProviderTest {
     return create(p);
   }
 
-  private FilterableTreePathContentProvider create(Object input,
-      Object[] elements) {
+  private FilterableTreePathContentProvider create(Object input, Object[] elements) {
     ITreePathContentProvider mock = mock(ITreePathContentProvider.class);
     given(mock.getElements(input)).willReturn(elements);
     return create(mock);
   }
 
-  private FilterableTreePathContentProvider create(TreePath parent,
-      Object[] children) {
+  private FilterableTreePathContentProvider create(TreePath parent, Object[] children) {
     ITreePathContentProvider mock = mock(ITreePathContentProvider.class);
     given(mock.getChildren(parent)).willReturn(children);
     return create(mock);

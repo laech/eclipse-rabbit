@@ -16,7 +16,7 @@
 package rabbit.ui.internal.actions;
 
 import rabbit.ui.internal.SharedImages;
-import rabbit.ui.internal.util.ICategoryProvider;
+import rabbit.ui.internal.util.ICategoryProvider2;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -32,35 +32,16 @@ import org.eclipse.swt.widgets.MenuItem;
  * to show the group by dialog. The text of this action is the text of the
  * default action prefixed with "Group by ".
  */
-public class GroupByAction extends DropDownAction {
+public class GroupByAction2 extends DropDownAction {
 
-  private ICategoryProvider categoryProvider;
-
-//  /**
-//   * Constructor.
-//   * 
-//   * @param categoryProvider The category provider that contains the grouping
-//   *          categories.
-//   * @param defaultAction The default action.
-//   * @param menuItems The actions to show on the menu.
-//   * @throws NullPointerException If category provider is null, or default
-//   *           action is null.
-//   */
-//  public GroupByAction(ICategoryProvider categoryProvider,
-//      IAction defaultAction, IAction... menuItems) {
-//    super("Group by " + defaultAction.getText(), SharedImages.HIERARCHY,
-//        defaultAction, menuItems);
-//
-//    checkNotNull(categoryProvider);
-//    this.categoryProvider = categoryProvider;
-//  }
+  private ICategoryProvider2 categoryProvider;
   
   /**
    * Constructor. This constructor uses the first action in the arguments as the default, that is,
    * the default text/image/action will be taken from the first action.
    * @param actions the list of actions, length must be greater than 1.
    */
-  public GroupByAction(ICategoryProvider categoryProvider, IAction... actions) {
+  public GroupByAction2(ICategoryProvider2 categoryProvider, IAction... actions) {
     super(actions);
     this.categoryProvider = checkNotNull(categoryProvider);
     setText("Group by " + getText());
@@ -72,7 +53,7 @@ public class GroupByAction extends DropDownAction {
    * 
    * @return The provider.
    */
-  public ICategoryProvider getCategoryProvider() {
+  public ICategoryProvider2 getCategoryProvider() {
     return categoryProvider;
   }
 
@@ -84,7 +65,7 @@ public class GroupByAction extends DropDownAction {
       if (getMenuItemActions().length > 0)
         new MenuItem(menu, SWT.SEPARATOR);
 
-      IAction showAction = new ShowGroupByDialogAction(categoryProvider);
+      IAction showAction = new ShowGroupByDialogAction2(categoryProvider);
       new ActionContributionItem(showAction).fill(menu, -1);
     }
     return menu;

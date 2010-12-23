@@ -41,6 +41,8 @@ import static java.util.Arrays.asList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Observable;
+import java.util.Observer;
 import java.util.Set;
 
 /**
@@ -337,6 +339,22 @@ public class TreePathContentProviderTest {
     content = create(null);
   }
 
+  @Test
+  public void shouldNotifyObserversOnInputChange() {
+    final int[] updateCount = {0};
+    Observer observer = new Observer() {
+      @Override
+      public void update(Observable arg0, Object arg1) {
+        updateCount[0]++;
+      }
+    };
+    TreePathContentProvider provider = create(mock(ITreePathBuilder.class));
+    provider.addObserver(observer);
+    
+    provider.inputChanged(null, null, null);
+    assertThat(updateCount[0], is(1));
+  }
+  
   /**
    * Creates a content provider for testing.
    */

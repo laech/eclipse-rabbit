@@ -50,6 +50,12 @@ public class TreePathsTest {
     thrown.expect(IllegalArgumentException.class);
     TreePaths.headPath(path, path.getSegmentCount() + 1);
   }
+  
+  @Test
+  public void headPathShouldReturnAnEqualPathIfIndexIsEqualToThePathLength() {
+    TreePath path = newPath();
+    assertThat(TreePaths.headPath(path, path.getSegmentCount()), equalTo(path));
+  }
 
   @Test
   public void headPathShouldThrowAnExceptionIfIndexIsNegative() {

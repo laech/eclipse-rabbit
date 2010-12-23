@@ -31,6 +31,7 @@ import static java.util.Collections.emptyList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Observable;
 import java.util.Set;
 
 import javax.annotation.Nullable;
@@ -54,7 +55,7 @@ import javax.annotation.Nullable;
  * </ul>
  */
 public final class TreePathContentProvider
-    implements ITreePathContentProvider, IProvider<TreePath> {
+    extends Observable implements ITreePathContentProvider, IProvider<TreePath> {
   
   private static final TreePath[] EMPTY = {};
 
@@ -132,7 +133,16 @@ public final class TreePathContentProvider
 
   @Override
   public boolean hasChildren(@Nullable TreePath branch) {
-    return !childrenOf(branch).isEmpty();
+    if (branch == null) {
+      return false;
+    }
+    for (TreePath leaf : leaves) {
+      if (leaf.getSegmentCount() > branch.getSegmentCount()
+          && leaf.startsWith(branch, null)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   /**
@@ -146,6 +156,9 @@ public final class TreePathContentProvider
       @Nullable Object newInput) {
 
     leaves = ImmutableList.copyOf(builder.build(newInput));
+    
+    setChanged();
+    notifyObservers();
   }
 
   /**

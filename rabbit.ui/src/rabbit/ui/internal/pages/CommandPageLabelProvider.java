@@ -15,6 +15,7 @@
  */
 package rabbit.ui.internal.pages;
 
+import rabbit.data.access.model.WorkspaceStorage;
 import rabbit.ui.internal.viewers.CellPainter.IValueProvider;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -36,10 +37,11 @@ import org.eclipse.ui.PlatformUI;
 public class CommandPageLabelProvider extends LabelProvider implements
     ITableLabelProvider, IColorProvider {
 
-  private final Color gray;
+  private final Color gray; 
+  private final IValueProvider values;
   private final DateLabelProvider dateLabels;
   private final CommandLabelProvider commandLabels;
-  private final IValueProvider values;
+  private final WorkspaceStorageLabelProvider workspaceLabels;
 
   /**
    * Constructor.
@@ -51,6 +53,7 @@ public class CommandPageLabelProvider extends LabelProvider implements
     values = checkNotNull(valueProvider);
     dateLabels = new DateLabelProvider();
     commandLabels = new CommandLabelProvider();
+    workspaceLabels = new WorkspaceStorageLabelProvider();
     gray = PlatformUI.getWorkbench().getDisplay().getSystemColor(
         SWT.COLOR_DARK_GRAY);
   }
@@ -60,6 +63,7 @@ public class CommandPageLabelProvider extends LabelProvider implements
     super.dispose();
     dateLabels.dispose();
     commandLabels.dispose();
+    workspaceLabels.dispose();
   }
 
   @Override
@@ -109,6 +113,8 @@ public class CommandPageLabelProvider extends LabelProvider implements
       element = ((TreeNode) element).getValue();
     if ((element instanceof Command) && !((Command) element).isDefined())
       return gray;
+    if (element instanceof WorkspaceStorage)
+      return workspaceLabels.getForeground(element);
     else
       return null;
   }
@@ -119,6 +125,8 @@ public class CommandPageLabelProvider extends LabelProvider implements
       element = ((TreeNode) element).getValue();
     if (element instanceof Command)
       return commandLabels.getImage(element);
+    if (element instanceof WorkspaceStorage)
+      return workspaceLabels.getImage(element);
     else
       return dateLabels.getImage(element);
   }
@@ -129,6 +137,8 @@ public class CommandPageLabelProvider extends LabelProvider implements
       element = ((TreeNode) element).getValue();
     if (element instanceof Command)
       return commandLabels.getText(element);
+    if (element instanceof WorkspaceStorage)
+      return workspaceLabels.getText(element);
     else
       return dateLabels.getText(element);
   }

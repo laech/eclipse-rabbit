@@ -31,8 +31,8 @@ import org.eclipse.swt.widgets.Menu;
 public class DropDownAction extends Action implements IMenuCreator {
 
   protected Menu menu;
-  private IAction defaultAction;
-  private IAction[] menuItems;
+  private final IAction defaultAction;
+  private final IAction[] menuItems;
 
   /**
    * Constructor.
@@ -52,6 +52,15 @@ public class DropDownAction extends Action implements IMenuCreator {
     setImageDescriptor(image);
     this.defaultAction = defaultAction;
     this.menuItems = menuItems;
+  }
+
+  /**
+   * Constructor. This constructor uses the first action in the arguments as the default, that is,
+   * the default text/image/action will be taken from the first action.
+   * @param menuItems the list of actions, length must be greater than 1.
+   */
+  public DropDownAction(IAction... menuItems) {
+    this(menuItems[0].getText(), menuItems[0].getImageDescriptor(), menuItems[0], menuItems);
   }
 
   @Override

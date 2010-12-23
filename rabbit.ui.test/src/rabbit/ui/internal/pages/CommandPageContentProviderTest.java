@@ -15,10 +15,7 @@
  */
 package rabbit.ui.internal.pages;
 
-import rabbit.data.access.model.CommandDataDescriptor;
-import rabbit.ui.internal.pages.Category;
-import rabbit.ui.internal.pages.CommandPageContentProvider;
-import rabbit.ui.internal.pages.PerspectivePageContentProvider;
+import rabbit.data.access.model.ICommandData;
 import rabbit.ui.internal.pages.CommandPageContentProvider.IProvider;
 import rabbit.ui.internal.util.ICategory;
 
@@ -30,6 +27,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 
 import org.eclipse.core.commands.Command;
 import org.eclipse.jface.viewers.TreeNode;
@@ -70,24 +69,28 @@ public class CommandPageContentProviderTest {
   }
   
   @Test
-  public void testCategories() {
+  public void shouldSetupTheCategoriesProperly() {
     Set<ICategory> selected = Sets.newHashSet(provider.getSelectedCategories());
     Set<ICategory> unselected = Sets.newHashSet(provider.getUnselectedCategories());
     assertEquals(0, Sets.intersection(selected, unselected).size());
 
     Set<ICategory> all = Sets.union(selected, unselected);
-    Set<Category> set = Sets.newHashSet(Category.DATE, Category.COMMAND);
+    Set<Category> set = Sets.newHashSet(Category.DATE, Category.COMMAND, Category.WORKSPACE);
     assertEquals(set.size(), all.size());
     assertEquals(0, Sets.difference(all, set).size());
   }
 
   @Test
-  public void testGetChildren() throws Exception {
+  public void getChildrenShouldReturnTheCorrectChildren() throws Exception {
     // Two data descriptor of different dates, same id, different value:
-    CommandDataDescriptor d1 = new CommandDataDescriptor(
-        new LocalDate(), 1, "id");
-    CommandDataDescriptor d2 = new CommandDataDescriptor(
-        d1.getDate().minusDays(1), 2, d1.getCommandId());
+    ICommandData d1 = mock(ICommandData.class);
+    ICommandData d2 = mock(ICommandData.class);
+    given(d1.get(ICommandData.COMMAND)).willReturn(command);
+    given(d2.get(ICommandData.COMMAND)).willReturn(command);
+    given(d1.get(ICommandData.DATE)).willReturn(new LocalDate());
+    given(d2.get(ICommandData.DATE)).willReturn(new LocalDate().minusDays(10));
+    given(d1.get(ICommandData.COUNT)).willReturn(Integer.valueOf(1));
+    given(d2.get(ICommandData.COUNT)).willReturn(Integer.valueOf(2));
 
     provider.getViewer().setInput(newInput(d1, d2));
 
@@ -102,19 +105,22 @@ public class CommandPageContentProviderTest {
     assertEquals(2, dateNodes.length);
     assertTrue(dateNodes[0].getValue() instanceof LocalDate);
     assertTrue(dateNodes[1].getValue() instanceof LocalDate);
-    Set<Object> set = Sets.newHashSet(dateNodes[0].getValue(),
-        dateNodes[1].getValue());
-    assertTrue(set.contains(d1.getDate()));
-    assertTrue(set.contains(d2.getDate()));
+    Set<Object> set = Sets.newHashSet(dateNodes[0].getValue(), dateNodes[1].getValue());
+    assertTrue(set.contains(d1.get(ICommandData.DATE)));
+    assertTrue(set.contains(d2.get(ICommandData.DATE)));
   }
 
   @Test
   public void testGetElement() throws Exception {
     // Two data descriptor of different dates, same id, different value:
-    CommandDataDescriptor d1 = new CommandDataDescriptor(new LocalDate(), 1,
-        command.getId());
-    CommandDataDescriptor d2 = new CommandDataDescriptor(
-        d1.getDate().minusDays(1), 2, d1.getCommandId());
+    ICommandData d1 = mock(ICommandData.class);
+    ICommandData d2 = mock(ICommandData.class);
+    given(d1.get(ICommandData.COMMAND)).willReturn(command);
+    given(d2.get(ICommandData.COMMAND)).willReturn(command);
+    given(d1.get(ICommandData.DATE)).willReturn(new LocalDate());
+    given(d2.get(ICommandData.DATE)).willReturn(new LocalDate().minusDays(10));
+    given(d1.get(ICommandData.COUNT)).willReturn(Integer.valueOf(1));
+    given(d2.get(ICommandData.COUNT)).willReturn(Integer.valueOf(2));
 
     provider.getViewer().setInput(newInput(d1, d2));
 
@@ -128,8 +134,8 @@ public class CommandPageContentProviderTest {
     Set<LocalDate> dates = Sets.newTreeSet();
     dates.add((LocalDate) nodes[0].getValue());
     dates.add((LocalDate) nodes[1].getValue());
-    assertTrue(dates.contains(d1.getDate()));
-    assertTrue(dates.contains(d2.getDate()));
+    assertTrue(dates.contains(d1.get(ICommandData.DATE)));
+    assertTrue(dates.contains(d2.get(ICommandData.DATE)));
 
     provider.setSelectedCategories(Category.COMMAND);
     assertEquals(1, provider.getElements(null).length);
@@ -139,26 +145,30 @@ public class CommandPageContentProviderTest {
   @Test
   public void testGetMaxValue() {
     // Two data descriptor of different dates, same id, different value:
-    CommandDataDescriptor d1 = new CommandDataDescriptor(new LocalDate(), 100,
-        "id");
-    CommandDataDescriptor d2 = new CommandDataDescriptor(
-        d1.getDate().minusDays(1), 2, d1.getCommandId());
+    ICommandData d1 = mock(ICommandData.class);
+    ICommandData d2 = mock(ICommandData.class);
+    given(d1.get(ICommandData.COMMAND)).willReturn(command);
+    given(d2.get(ICommandData.COMMAND)).willReturn(command);
+    given(d1.get(ICommandData.DATE)).willReturn(new LocalDate());
+    given(d2.get(ICommandData.DATE)).willReturn(new LocalDate().minusDays(10));
+    given(d1.get(ICommandData.COUNT)).willReturn(Integer.valueOf(10));
+    given(d2.get(ICommandData.COUNT)).willReturn(Integer.valueOf(2));
 
     // Date
     provider.getViewer().setInput(newInput(d1, d2));
     provider.setSelectedCategories(Category.DATE);
     provider.setPaintCategory(Category.DATE);
-    assertEquals(d1.getCount(), provider.getMaxValue());
+    assertEquals(d1.get(ICommandData.COUNT).longValue(), provider.getMaxValue());
 
     // Command
     // Set to Category.COMMAND so that the two data descriptors representing the
     // same command will be merged as a single tree node:
     provider.setSelectedCategories(Category.COMMAND);
     provider.setPaintCategory(Category.COMMAND);
-    assertEquals(d1.getCount() + d2.getCount(), provider.getMaxValue());
+    assertEquals(d1.get(ICommandData.COUNT) + d2.get(ICommandData.COUNT), provider.getMaxValue());
     // Separate the data descriptors by dates:
     provider.setSelectedCategories(Category.DATE, Category.COMMAND);
-    assertEquals(d1.getCount(), provider.getMaxValue());
+    assertEquals(d1.get(ICommandData.COUNT).longValue(), provider.getMaxValue());
   }
 
   @Test
@@ -177,7 +187,7 @@ public class CommandPageContentProviderTest {
 
   @Test
   public void testGetUnselectedCategories() {
-    Set<Category> all = Sets.newHashSet(Category.DATE, Category.COMMAND);
+    Set<Category> all = Sets.newHashSet(Category.DATE, Category.COMMAND, Category.WORKSPACE);
     ICategory[] categories = all.toArray(new ICategory[all.size()]);
     provider.setSelectedCategories(categories);
     assertEquals(0, provider.getUnselectedCategories().length);
@@ -193,29 +203,35 @@ public class CommandPageContentProviderTest {
   @Test
   public void testGetValue() throws Exception {
     // Two data descriptor of different dates, same id, different value:
-    CommandDataDescriptor d1 = new CommandDataDescriptor(new LocalDate(), 1,
-        "id");
-    CommandDataDescriptor d2 = new CommandDataDescriptor(
-        d1.getDate().minusDays(1), 2, d1.getCommandId());
+    ICommandData d1 = mock(ICommandData.class);
+    ICommandData d2 = mock(ICommandData.class);
+    given(d1.get(ICommandData.COMMAND)).willReturn(command);
+    given(d2.get(ICommandData.COMMAND)).willReturn(command);
+    given(d1.get(ICommandData.DATE)).willReturn(new LocalDate());
+    given(d2.get(ICommandData.DATE)).willReturn(new LocalDate().minusDays(10));
+    given(d1.get(ICommandData.COUNT)).willReturn(Integer.valueOf(1));
+    given(d2.get(ICommandData.COUNT)).willReturn(Integer.valueOf(2));
 
     provider.getViewer().setInput(newInput(d1, d2));
 
     TreeNode root = provider.getRoot();
     provider.setSelectedCategories(Category.COMMAND);
     TreeNode fileNode = root.getChildren()[0];
-    assertEquals(d1.getCount() + d2.getCount(), provider.getValue(fileNode));
+    assertEquals(d1.get(ICommandData.COUNT) + d2.get(ICommandData.COUNT), provider.getValue(fileNode));
 
     provider.setSelectedCategories(Category.DATE);
     TreeNode[] dateNodes = root.getChildren();
     assertEquals(2, dateNodes.length);
-    assertEquals(d1.getCount(), provider.getValue(dateNodes[0]));
-    assertEquals(d2.getCount(), provider.getValue(dateNodes[1]));
+    assertEquals(d1.get(ICommandData.COUNT).longValue(), provider.getValue(dateNodes[0]));
+    assertEquals(d2.get(ICommandData.COUNT).longValue(), provider.getValue(dateNodes[1]));
   }
 
   @Test
   public void testHasChildren() throws Exception {
-    CommandDataDescriptor des = new CommandDataDescriptor(new LocalDate(), 1,
-        "id");
+    ICommandData des = mock(ICommandData.class);
+    given(des.get(ICommandData.COMMAND)).willReturn(command);
+    given(des.get(ICommandData.DATE)).willReturn(new LocalDate());
+    given(des.get(ICommandData.COUNT)).willReturn(Integer.valueOf(1));
     provider.getViewer().setInput(newInput(des));
 
     TreeNode root = provider.getRoot();
@@ -229,8 +245,10 @@ public class CommandPageContentProviderTest {
 
   @Test
   public void testInputChanged_clearsOldData() throws Exception {
-    CommandDataDescriptor des = new CommandDataDescriptor(new LocalDate(), 1,
-        "id");
+    ICommandData des = mock(ICommandData.class);
+    given(des.get(ICommandData.COMMAND)).willReturn(command);
+    given(des.get(ICommandData.DATE)).willReturn(new LocalDate());
+    given(des.get(ICommandData.COUNT)).willReturn(Integer.valueOf(1));
     provider.getViewer().setInput(newInput(des));
     TreeNode root = provider.getRoot();
     assertFalse(root.getChildren() == null || root.getChildren().length == 0);
@@ -263,20 +281,24 @@ public class CommandPageContentProviderTest {
   @Test
   public void testSetPaintCategory() {
     // Two data descriptor of different dates, same id, different value:
-    CommandDataDescriptor d1 = new CommandDataDescriptor(new LocalDate(), 1000,
-        "id");
-    CommandDataDescriptor d2 = new CommandDataDescriptor(
-        d1.getDate().minusDays(1), 2, d1.getCommandId());
+    ICommandData d1 = mock(ICommandData.class);
+    ICommandData d2 = mock(ICommandData.class);
+    given(d1.get(ICommandData.COMMAND)).willReturn(command);
+    given(d2.get(ICommandData.COMMAND)).willReturn(command);
+    given(d1.get(ICommandData.DATE)).willReturn(new LocalDate());
+    given(d2.get(ICommandData.DATE)).willReturn(new LocalDate().minusDays(10));
+    given(d1.get(ICommandData.COUNT)).willReturn(Integer.valueOf(10));
+    given(d2.get(ICommandData.COUNT)).willReturn(Integer.valueOf(2));
 
     provider.getViewer().setInput(newInput(d1, d2));
 
     provider.setSelectedCategories(Category.DATE);
     provider.setPaintCategory(Category.DATE);
-    assertEquals(d1.getCount(), provider.getMaxValue());
+    assertEquals(d1.get(ICommandData.COUNT).longValue(), provider.getMaxValue());
 
     provider.setSelectedCategories(Category.COMMAND);
     provider.setPaintCategory(Category.COMMAND);
-    assertEquals(d1.getCount() + d2.getCount(), provider.getMaxValue());
+    assertEquals(d1.get(ICommandData.COUNT) + d2.get(ICommandData.COUNT), provider.getMaxValue());
   }
 
   @Test
@@ -352,9 +374,9 @@ public class CommandPageContentProviderTest {
     assertTrue(provider.shouldPaint(commandNode));
   }
 
-  static IProvider newInput(final CommandDataDescriptor... data) {
+  static IProvider newInput(final ICommandData... data) {
     return new IProvider() {
-      public Collection<CommandDataDescriptor> get() {
+      public Collection<ICommandData> get() {
         return Arrays.asList(data);
       };
     };

@@ -26,27 +26,36 @@ import org.eclipse.ui.dialogs.FilteredTree;
 /**
  * Action to show or hide the filter control of a {@link FilteredTree}
  */
-public class ShowHideFilterControlAction extends Action {
+public final class ShowHideFilterControlAction extends Action {
 
   private final FilteredTree fTree;
 
   /**
    * Creates an action for the given tree.
-   * 
-   * @param tree The target of this action.
+   * @param tree the target of this action.
    */
   public ShowHideFilterControlAction(FilteredTree tree) {
+    this(tree, false);
+  }
+
+  /**
+   * Constructor.
+   * @param tree the target of this action.
+   * @param hide true to hide the filter now.
+   */
+  public ShowHideFilterControlAction(FilteredTree tree, boolean hide) {
     super("Search", IAction.AS_CHECK_BOX);
     setImageDescriptor(SharedImages.SEARCH);
     setChecked(tree.getFilterControl().getParent().isVisible());
     fTree = tree;
+    if (hide) {
+      run();
+    }
   }
 
   @Override
   public void run() {
-    GridData data = (GridData) fTree.getFilterControl().getParent()
-        .getLayoutData();
-
+    GridData data = (GridData) fTree.getFilterControl().getParent().getLayoutData();
     if (data.heightHint == 0) {
       data.heightHint = SWT.DEFAULT;
       fTree.getFilterControl().getParent().setVisible(true);

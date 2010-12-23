@@ -80,6 +80,8 @@ abstract class AbstractCategoryContentProvider
    */
   AbstractCategoryContentProvider(TreeViewer treeViewer) {
     viewer = checkNotNull(treeViewer);
+    
+    // TODO get rid of this:
     viewer.addFilter(new ViewerFilter() {
       @Override
       public boolean select(Viewer viewer, Object parent, Object element) {

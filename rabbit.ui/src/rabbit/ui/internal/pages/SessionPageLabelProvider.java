@@ -29,6 +29,7 @@ import org.eclipse.swt.graphics.Image;
 /**
  * A label provider for a {@link SessionPage}
  */
+@Deprecated
 public class SessionPageLabelProvider extends LabelProvider
     implements ITableLabelProvider {
 

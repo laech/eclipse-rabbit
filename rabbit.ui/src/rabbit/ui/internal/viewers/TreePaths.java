@@ -59,7 +59,7 @@ public class TreePaths {
   public static TreePath headPath(TreePath path, int endIndex) {
     checkArgument(endIndex >= 0, "endIndex is negative");
     checkArgument(
-        endIndex < path.getSegmentCount(),
+        endIndex <= path.getSegmentCount(),
         "endIndex is greater than length of path");
 
     List<Object> segments = newArrayListWithCapacity(endIndex);

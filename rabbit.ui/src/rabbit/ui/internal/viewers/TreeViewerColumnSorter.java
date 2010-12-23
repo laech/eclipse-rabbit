@@ -17,9 +17,10 @@ package rabbit.ui.internal.viewers;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import org.eclipse.jface.viewers.TreePath;
+import org.eclipse.jface.viewers.TreePathViewerSorter;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerComparator;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -40,32 +41,33 @@ import org.eclipse.swt.widgets.Widget;
  * multiple columns of the same viewer.
  * </p>
  * <p>
- * Subclasses need to override {@link #doCompare(Viewer, Object, Object)} to
+ * Subclasses need to override {@link #doCompare(Viewer, TreePath, Object, Object)} to
  * do the actual comparing of the elements. 
  * </p>
  */
-public abstract class TreeViewerSorter extends ViewerComparator implements SelectionListener {
-
+public abstract class TreeViewerColumnSorter 
+    extends TreePathViewerSorter implements SelectionListener {
+  
   /**
    * One of {@link SWT#NONE}, {@link SWT#UP}, {@link SWT#DOWN}.
    */
   private int sortDirection;
-  private TreeViewer viewer;
   private TreeColumn selectedColumn;
+  private final TreeViewer viewer;
 
   /**
    * Constructor.
    * @param parent The parent viewer.
    * @throws NullPointerException If argument is null.
    */
-  public TreeViewerSorter(TreeViewer parent) {
+  public TreeViewerColumnSorter(TreeViewer parent) {
     viewer = checkNotNull(parent);
     sortDirection = SWT.NONE;
     selectedColumn = null;
   }
 
   @Override
-  public int compare(Viewer v, Object e1, Object e2) {
+  public int compare(Viewer v, TreePath parentPath, Object e1, Object e2) {
     int cat1 = category(e1);
     int cat2 = category(e2);
 
@@ -73,7 +75,7 @@ public abstract class TreeViewerSorter extends ViewerComparator implements Selec
     if (cat1 != cat2) {
       value = cat1 - cat2;
     } else {
-      value = doCompare(v, e1, e2);
+      value = doCompare(v, parentPath, e1, e2);
     }
 
     if (sortDirection == SWT.DOWN) {
@@ -84,7 +86,6 @@ public abstract class TreeViewerSorter extends ViewerComparator implements Selec
 
   /**
    * Gets the currently selected column.
-   * 
    * @return The selected column.
    */
   public TreeColumn getSelectedColumn() {
@@ -93,6 +94,7 @@ public abstract class TreeViewerSorter extends ViewerComparator implements Selec
 
   @Override
   public void widgetDefaultSelected(SelectionEvent e) {
+    // Do nothing.
   }
 
   @Override
@@ -104,28 +106,20 @@ public abstract class TreeViewerSorter extends ViewerComparator implements Selec
     Object[] expandedElements = viewer.getExpandedElements();
 
     selectedColumn = (TreeColumn) e.widget;
-    Tree table = selectedColumn.getParent();
-    TreeColumn previousColumn = table.getSortColumn();
-    sortDirection = table.getSortDirection();
+    Tree tree = selectedColumn.getParent();
+    TreeColumn previousColumn = tree.getSortColumn();
+    sortDirection = tree.getSortDirection();
 
     if (previousColumn == selectedColumn) {
       sortDirection = (sortDirection == SWT.UP) ? SWT.DOWN : SWT.UP;
     } else {
-      table.setSortColumn(selectedColumn);
+      tree.setSortColumn(selectedColumn);
       sortDirection = SWT.UP;
       viewer.setComparator(this);
     }
-    table.setSortDirection(sortDirection);
+    tree.setSortDirection(sortDirection);
     viewer.refresh();
     viewer.setExpandedElements(expandedElements);
-  }
-
-  /**
-   * Gets the viewer registered.
-   * @return The viewer.
-   */
-  public TreeViewer getViewer() {
-    return viewer;
   }
 
   /**
@@ -134,6 +128,7 @@ public abstract class TreeViewerSorter extends ViewerComparator implements Selec
    * class.
    * 
    * @param v The viewer.
+   * @param parentPath the parent path of the elements, or null if the elements are root elements.
    * @param e1 The first element.
    * @param e2 The second element.
    * @return A negative value if the first element is consider less than the
@@ -141,5 +136,5 @@ public abstract class TreeViewerSorter extends ViewerComparator implements Selec
    *         the second element, a positive value if the first element is
    *         consider greater than the second element,
    */
-  protected abstract int doCompare(Viewer v, Object e1, Object e2);
+  protected abstract int doCompare(Viewer v, TreePath parentPath, Object e1, Object e2);
 }

@@ -15,7 +15,8 @@
  */
 package rabbit.ui.internal.pages;
 
-import rabbit.data.access.model.CommandDataDescriptor;
+import rabbit.data.access.model.ICommandData;
+import rabbit.data.access.model.WorkspaceStorage;
 import rabbit.ui.internal.util.ICategory;
 import rabbit.ui.internal.util.ICategoryProvider;
 import rabbit.ui.internal.viewers.TreeNodes;
@@ -41,16 +42,17 @@ import java.util.Collections;
  * <ul>
  * <li>{@link Category#DATE}</li>
  * <li>{@link Category#COMMAND}</li>
+ * <li>{@link Category#WORKSPACE}</li>
  * </ul>
  * </p>
  */
 class CommandPageContentProvider extends AbstractValueContentProvider {
   
   /**
-   * A provider that provides collection of {@link CommandDataDescriptor} 
+   * A provider that provides collection of {@link ICommandData} 
    * objects. 
    */
-  static interface IProvider extends rabbit.ui.IProvider<CommandDataDescriptor> {
+  static interface IProvider extends rabbit.ui.IProvider<ICommandData> {
   }
 
   /**
@@ -66,32 +68,33 @@ class CommandPageContentProvider extends AbstractValueContentProvider {
     super.doInputChanged(viewer, oldInput, newInput);
     getRoot().setChildren(null);
     
-    Collection<CommandDataDescriptor> data = Collections.emptyList();
+    Collection<ICommandData> data = Collections.emptyList();
     if (newInput instanceof IProvider) {
       data = ((IProvider) newInput).get();
     }
 
-    for (CommandDataDescriptor des : data) {
+    for (ICommandData des : data) {
       TreeNode node = getRoot();
       for (ICategory category : getSelectedCategories()) {
         
         if (Category.DATE == category) {
-          node = TreeNodes.findOrAppend(node, des.getDate());
-          
+          node = TreeNodes.findOrAppend(node, des.get(ICommandData.DATE));
         } else if (Category.COMMAND == category) {
-          Command command = des.findCommand();
+          Command command = des.get(ICommandData.COMMAND);
           node = TreeNodes.findOrAppend(node, command);
+        } else if (Category.WORKSPACE == category) {
+          node = TreeNodes.findOrAppend(node, des.get(ICommandData.WORKSPACE));
         }
       }
       
       // Cast count to long for this content provider to work:
-      TreeNodes.appendToParent(node, (long) des.getCount(), true);
+      TreeNodes.appendToParent(node, des.get(ICommandData.COUNT).longValue(), true);
     }
   }
   
   @Override
   protected ICategory[] getAllSupportedCategories() {
-    return new ICategory[] { Category.DATE, Category.COMMAND };
+    return new ICategory[] { Category.DATE, Category.COMMAND, Category.WORKSPACE };
   }
 
   @Override
@@ -109,7 +112,7 @@ class CommandPageContentProvider extends AbstractValueContentProvider {
     return ImmutableMap.<ICategory, Predicate<Object>> builder()
         .put(Category.DATE,    Predicates.instanceOf(LocalDate.class))
         .put(Category.COMMAND, Predicates.instanceOf(Command.class))
+        .put(Category.WORKSPACE, Predicates.instanceOf(WorkspaceStorage.class))
         .build();
   }
-
 }

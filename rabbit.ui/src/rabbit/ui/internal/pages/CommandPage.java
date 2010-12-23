@@ -15,15 +15,21 @@
  */
 package rabbit.ui.internal.pages;
 
+import static rabbit.ui.internal.pages.Category.COMMAND;
+import static rabbit.ui.internal.pages.Category.DATE;
+import static rabbit.ui.internal.pages.Category.WORKSPACE;
+
 import rabbit.data.access.IAccessor;
-import rabbit.data.access.model.CommandDataDescriptor;
+import rabbit.data.access.model.ICommandData;
 import rabbit.data.handler.DataHandler;
 import rabbit.ui.internal.RabbitUI;
-import rabbit.ui.internal.SharedImages;
+import rabbit.ui.internal.actions.CategoryAction;
 import rabbit.ui.internal.actions.CollapseAllAction;
+import rabbit.ui.internal.actions.ColorByAction;
 import rabbit.ui.internal.actions.DropDownAction;
 import rabbit.ui.internal.actions.ExpandAllAction;
 import rabbit.ui.internal.actions.GroupByAction;
+import rabbit.ui.internal.actions.PaintCategoryAction;
 import rabbit.ui.internal.actions.ShowHideFilterControlAction;
 import rabbit.ui.internal.util.ICategory;
 import rabbit.ui.internal.viewers.CellPainter;
@@ -34,7 +40,6 @@ import rabbit.ui.internal.viewers.TreeViewerSorter;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 
-import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IContributionItem;
@@ -54,9 +59,9 @@ import java.util.List;
 /**
  * A page for displaying command usage.
  */
-public class CommandPage extends InternalPage<CommandDataDescriptor>
+public class CommandPage extends InternalPage<ICommandData>
     implements CommandPageContentProvider.IProvider {
-  
+
   // Preference constants:
   private static final String PREF_SELECTED_CATEGORIES = "CommandPage.SelectedCatgories";
   private static final String PREF_PAINT_CATEGORY = "CommandPage.PaintCategory";
@@ -70,10 +75,10 @@ public class CommandPage extends InternalPage<CommandDataDescriptor>
   public CommandPage() {
     super();
   }
-  
+
   @Override
   public void createColumns(TreeViewer viewer) {
-		TreeViewerColumn viewerColumn = new TreeViewerColumn(viewer, SWT.LEFT);
+    TreeViewerColumn viewerColumn = new TreeViewerColumn(viewer, SWT.LEFT);
     viewerColumn.getColumn().setText("Name");
     viewerColumn.getColumn().setWidth(150);
     viewerColumn.getColumn().addSelectionListener(createInitialComparator(viewer));
@@ -92,50 +97,31 @@ public class CommandPage extends InternalPage<CommandDataDescriptor>
 
   @Override
   public IContributionItem[] createToolBarItems(IToolBarManager toolBar) {
-    ShowHideFilterControlAction filterAction = 
-        new ShowHideFilterControlAction(getFilteredTree());
-    filterAction.run();
+    IAction filterAction = new ShowHideFilterControlAction(getFilteredTree(), true);
+   
+    IAction treeAction = new DropDownAction(
+        new CollapseAllAction(getViewer()),
+        new ExpandAllAction(getViewer()));
+
+    IAction groupByAction = new GroupByAction(contents,
+        new CategoryAction(contents, COMMAND),
+        new CategoryAction(contents, DATE, COMMAND),
+        new CategoryAction(contents, WORKSPACE, COMMAND));
     
-    final ICategory cmd = Category.COMMAND;
-    final ICategory date = Category.DATE;
+    IAction colorByAction = new ColorByAction(
+        new PaintCategoryAction(contents, COMMAND),
+        new PaintCategoryAction(contents, DATE),
+        new PaintCategoryAction(contents, WORKSPACE));
     
-    IAction groupByCmd = new Action(cmd.getText(), cmd.getImageDescriptor()) {
-      @Override public void run() {
-        contents.setSelectedCategories(cmd);
-      }
-    };
-    IAction groupByDate = new Action(date.getText(), date.getImageDescriptor()) {
-      @Override public void run() {
-        contents.setSelectedCategories(date, cmd);
-      }
-    };
-    IAction colorByCmd = new Action(cmd.getText(), cmd.getImageDescriptor()) {
-      @Override public void run() {
-        contents.setPaintCategory(cmd);
-      }
-    };
-    IAction colorByDate = new Action(date.getText(), date.getImageDescriptor()) {
-      @Override public void run() {
-        contents.setPaintCategory(date);
-      }
-    };
-    
-    IAction collapse = new CollapseAllAction(getViewer());
     IContributionItem[] items = new IContributionItem[] {
         new ActionContributionItem(filterAction),
-        new ActionContributionItem(new DropDownAction(
-            collapse.getText(), collapse.getImageDescriptor(), 
-            collapse, 
-            collapse,
-            new ExpandAllAction(getViewer()))),
-        new ActionContributionItem(new GroupByAction(contents, groupByCmd,
-            groupByCmd, groupByDate)),
-        new ActionContributionItem(new DropDownAction(
-            "Highlight " + colorByCmd.getText(), SharedImages.BRUSH, 
-            colorByCmd, colorByCmd, colorByDate))};
+        new ActionContributionItem(treeAction),
+        new ActionContributionItem(groupByAction),
+        new ActionContributionItem(colorByAction)};
 
-    for (IContributionItem item : items)
+    for (IContributionItem item : items) {
       toolBar.add(item);
+    }
 
     return items;
   }
@@ -144,23 +130,23 @@ public class CommandPage extends InternalPage<CommandDataDescriptor>
   protected CellPainter createCellPainter() {
     return new CellPainter(contents);
   }
-  
+
   @Override
   protected PatternFilter createFilter() {
-    return new PatternFilter();
+    return new PatternFilter(); // TODO check this.
   }
 
   @Override
   protected TreeViewerSorter createInitialComparator(TreeViewer viewer) {
     return new TreeViewerLabelSorter(viewer) {
-
+      // TODO check this.
       @Override
       protected int doCompare(Viewer v, Object e1, Object e2) {
         if (e1 instanceof TreeNode)
           e1 = ((TreeNode) e1).getValue();
         if (e2 instanceof TreeNode)
           e2 = ((TreeNode) e2).getValue();
-        
+
         if (e1 instanceof LocalDate && e2 instanceof LocalDate)
           return ((LocalDate) e1).compareTo((LocalDate) e2);
         else
@@ -170,10 +156,10 @@ public class CommandPage extends InternalPage<CommandDataDescriptor>
   }
 
   @Override
-  protected IAccessor<CommandDataDescriptor> getAccessor() {
-    return DataHandler.getAccessor(CommandDataDescriptor.class);
+  protected IAccessor<ICommandData> getAccessor() {
+    return DataHandler.getAccessor(ICommandData.class);
   }
-  
+
   @Override
   protected void initializeViewer(TreeViewer viewer) {
     contents = new CommandPageContentProvider(viewer);
@@ -181,7 +167,7 @@ public class CommandPage extends InternalPage<CommandDataDescriptor>
     viewer.setLabelProvider(labels);
     viewer.setContentProvider(contents);
   }
-  
+
   @Override
   protected void restoreState() {
     super.restoreState();
