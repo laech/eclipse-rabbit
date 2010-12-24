@@ -18,7 +18,7 @@ package rabbit.ui.internal.treebuilders;
 import rabbit.data.access.model.IKey;
 import rabbit.data.access.model.ISessionData;
 import rabbit.ui.IProvider;
-import rabbit.ui.internal.categories.SessionCategory;
+import rabbit.ui.internal.pages.Category;
 import rabbit.ui.internal.util.ICategory;
 import rabbit.ui.internal.util.ICategoryProvider2;
 
@@ -55,8 +55,8 @@ public final class SessionDataTreeBuilder
   public SessionDataTreeBuilder(ICategoryProvider2 categoryProvider) {
     super(categoryProvider, ImmutableMap
         .<ICategory, IKey<?>> builder()
-        .put(SessionCategory.DATE, ISessionData.DATE)
-        .put(SessionCategory.WORKSPACE, ISessionData.WORKSPACE)
+        .put(Category.DATE, ISessionData.DATE)
+        .put(Category.WORKSPACE, ISessionData.WORKSPACE)
         .build());
   }
 

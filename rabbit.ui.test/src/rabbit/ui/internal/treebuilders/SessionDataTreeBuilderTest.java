@@ -18,7 +18,7 @@ package rabbit.ui.internal.treebuilders;
 import rabbit.data.access.model.ISessionData;
 import rabbit.data.access.model.WorkspaceStorage;
 import rabbit.ui.IProvider;
-import rabbit.ui.internal.categories.SessionCategory;
+import rabbit.ui.internal.pages.Category;
 import rabbit.ui.internal.treebuilders.SessionDataTreeBuilder.ISessionDataProvider;
 import rabbit.ui.internal.util.ICategory;
 import rabbit.ui.internal.util.ICategoryProvider2;
@@ -49,9 +49,9 @@ public class SessionDataTreeBuilderTest
   protected List<TreePath> buildPaths(ISessionData data, ICategory... categories) {
     List<Object> segments = newArrayList();
     for (ICategory c : categories) {
-      if (c == SessionCategory.DATE) {
+      if (c == Category.DATE) {
         segments.add(data.get(ISessionData.DATE));
-      } else if (c == SessionCategory.WORKSPACE) {
+      } else if (c == Category.WORKSPACE) {
         segments.add(data.get(ISessionData.WORKSPACE));
       }
     }
@@ -61,7 +61,7 @@ public class SessionDataTreeBuilderTest
 
   @Override
   protected ICategory[] categories() {
-    return new ICategory[]{SessionCategory.DATE, SessionCategory.WORKSPACE};
+    return new ICategory[]{Category.DATE, Category.WORKSPACE};
   }
 
   @Override

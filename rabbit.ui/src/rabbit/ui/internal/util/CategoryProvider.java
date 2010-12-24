@@ -53,8 +53,8 @@ public final class CategoryProvider extends Observable
    *         contain all of the default selected categories.
    */
   public CategoryProvider(ICategory[] supported, ICategory... defaultSelected) {
-    this.allSupported = ImmutableSet.of(supported);
-    this.selected = ImmutableList.of(defaultSelected);
+    this.allSupported = ImmutableSet.copyOf(supported);
+    this.selected = ImmutableList.copyOf(defaultSelected);
 
     checkArgument(allSupported.containsAll(selected));
   }

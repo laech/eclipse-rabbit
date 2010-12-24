@@ -81,7 +81,7 @@ public final class CommonToolBarBuilder {
   
   /**
    * Builds a collection of actions from the configuration.
-   * @return a collection of actions.
+   * @return a collection of actions, the returned collection is modifiable.
    */
   public List<IContributionItem> build() {
     List<IContributionItem> items = Lists.newArrayList();

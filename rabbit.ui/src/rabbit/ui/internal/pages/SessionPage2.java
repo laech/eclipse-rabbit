@@ -15,8 +15,8 @@
  */
 package rabbit.ui.internal.pages;
 
-import static rabbit.ui.internal.categories.SessionCategory.DATE;
-import static rabbit.ui.internal.categories.SessionCategory.WORKSPACE;
+import static rabbit.ui.internal.pages.Category.DATE;
+import static rabbit.ui.internal.pages.Category.WORKSPACE;
 import static rabbit.ui.internal.viewers.Viewers.newTreeViewerColumn;
 import static rabbit.ui.internal.viewers.Viewers.refresh;
 import static rabbit.ui.internal.viewers.Viewers.resetInput;
@@ -27,15 +27,6 @@ import rabbit.data.access.model.WorkspaceStorage;
 import rabbit.data.handler.DataHandler;
 import rabbit.ui.IPage;
 import rabbit.ui.Preference;
-import rabbit.ui.internal.actions.CategoryAction2;
-import rabbit.ui.internal.actions.CollapseAllAction;
-import rabbit.ui.internal.actions.ColorByAction;
-import rabbit.ui.internal.actions.DropDownAction;
-import rabbit.ui.internal.actions.ExpandAllAction;
-import rabbit.ui.internal.actions.GroupByAction2;
-import rabbit.ui.internal.actions.PaintCategoryAction2;
-import rabbit.ui.internal.actions.ShowHideFilterControlAction;
-import rabbit.ui.internal.categories.SessionCategory;
 import rabbit.ui.internal.treebuilders.SessionDataTreeBuilder;
 import rabbit.ui.internal.treebuilders.SessionDataTreeBuilder.ISessionDataProvider;
 import rabbit.ui.internal.util.Categorizer;
@@ -60,8 +51,6 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableMap;
 
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.jface.action.ActionContributionItem;
-import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
@@ -72,6 +61,8 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.TreeColumn;
+import org.eclipse.ui.IMemento;
 import org.eclipse.ui.dialogs.FilteredTree;
 import org.joda.time.Duration;
 import org.joda.time.LocalDate;
@@ -87,8 +78,6 @@ import java.util.Observer;
  */
 public final class SessionPage2 implements IPage, Observer {
 
-  // TODO save states
-
   private FilteredTree filteredTree;
   private CategoryProvider categoryProvider;
   private TreePathValueProvider valueProvider;
@@ -98,8 +87,8 @@ public final class SessionPage2 implements IPage, Observer {
 
   @Override
   public void createContents(Composite parent) {
-
-    categoryProvider = new CategoryProvider(SessionCategory.values(), DATE);
+    Category[] supported = {WORKSPACE, DATE};
+    categoryProvider = new CategoryProvider(supported, DATE);
     categoryProvider.addObserver(this);
     contentProvider = new TreePathContentProvider(new SessionDataTreeBuilder(categoryProvider));
     contentProvider.addObserver(this);
@@ -140,6 +129,22 @@ public final class SessionPage2 implements IPage, Observer {
         return new Color(display, 208, 145, 60);
       }
     });
+  }
+  
+  public void onSaveState(IMemento memento) {
+    String id = getClass().getSimpleName();
+    TreeColumn[] columns = filteredTree.getViewer().getTree().getColumns();
+    StateHelper.of(memento, id)
+        .saveColumnWidths(columns)
+        .saveCategories(categoryProvider.getSelected().toArray(new Category[0]));
+  }
+  
+  public void onRestoreState(IMemento memento) {
+    String id = getClass().getSimpleName();
+    TreeColumn[] columns = filteredTree.getViewer().getTree().getColumns();
+    StateHelper.of(memento, id)
+        .restoreColumnWidths(columns)
+        .restoreCategories(categoryProvider);
   }
   
   @Override
@@ -192,7 +197,7 @@ public final class SessionPage2 implements IPage, Observer {
   }
 
   private TreePathValueProvider createValueProvider() {
-    Map<Predicate<Object>, SessionCategory> categories = ImmutableMap.of(
+    Map<Predicate<Object>, Category> categories = ImmutableMap.of(
         instanceOf(LocalDate.class), DATE,
         instanceOf(WorkspaceStorage.class), WORKSPACE);
     ICategorizer categorizer = new Categorizer(categories);
