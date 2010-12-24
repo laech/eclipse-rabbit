@@ -96,5 +96,24 @@
             name="Rabbit">
       </page>
    </extension>
+   <extension
+         point="org.eclipse.ui.decorators">
+      <decorator
+            adaptable="false"
+            class="rabbit.ui.internal.decorators.DateDecorator"
+            id="rabbit.ui.decorators.DateDecorator"
+            label="Date Decorator"
+            lightweight="true"
+            state="true">
+         <enablement>
+            <objectClass
+                  name="org.joda.time.LocalDate">
+            </objectClass>
+         </enablement>
+         <description>
+            Rabbit&apos;s decorator for decorating dates (to determine if a date is today, or yesterday).
+         </description>
+      </decorator>
+   </extension>
 
 </plugin>
