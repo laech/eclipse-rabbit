@@ -15,12 +15,13 @@
  */
 package rabbit.ui.internal.viewers;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import rabbit.ui.internal.viewers.CellPainter.IValueProvider;
 
-import com.google.common.base.Preconditions;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.viewers.ColumnViewer;
+import org.eclipse.jface.viewers.StyledCellLabelProvider;
 import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.ViewerColumn;
 import org.eclipse.swt.SWT;
@@ -33,10 +34,10 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 
 /**
- * A label provider for a tree viewer column that paints horizontal bars in the cells.
+ * A label provider for a tree viewer column that paints horizontal bars in the
+ * cells.
  */
-// TODO get rid of "extends CellPainter"
-public class TreeViewerCellPainter extends CellPainter {
+public class TreeViewerCellPainter extends StyledCellLabelProvider {
 
   // /**
   // * A value provider that provides values for elements.
@@ -63,7 +64,7 @@ public class TreeViewerCellPainter extends CellPainter {
   // */
   // boolean shouldPaint(TreePath path);
   //
-  // } TODO
+  // } TODO doco
 
   private Color background;
   private Color foreground;
@@ -79,7 +80,6 @@ public class TreeViewerCellPainter extends CellPainter {
    * @throws NullPointerException if argument is null.
    */
   public TreeViewerCellPainter(IValueProvider valueProvider) {
-    super(valueProvider);
     this.valueProvider = checkNotNull(valueProvider, "valueProvider");
     isLinux = Platform.getOS().equals(Platform.OS_LINUX);
     point = new Point(0, 0);
@@ -115,8 +115,8 @@ public class TreeViewerCellPainter extends CellPainter {
       return;
     }
 
-    point.x = event.x;
-    point.y = event.y;
+    point.x = event.x + (event.width / 2);
+    point.y = event.y + (event.height / 2);
     TreePath path = getViewer().getCell(point).getViewerRow().getTreePath();
 
     int columnWidth = event.gc.getClipping().width;
@@ -135,8 +135,8 @@ public class TreeViewerCellPainter extends CellPainter {
     int oldAlpha = gc.getAlpha();
 
     /*
-     * On Linux, enabling GC's antialias or changing the alpha will sometimes cause the color bar to
-     * be half drawn.
+     * On Linux, enabling GC's antialias or changing the alpha will sometimes
+     * cause the color bar to be half drawn.
      */
     if (!isLinux) {
       int alpha = (int) (width / (float) columnWidth * 255);
@@ -162,10 +162,11 @@ public class TreeViewerCellPainter extends CellPainter {
   }
 
   /**
-   * Creates the desired color for painting the cells. Callers of this method must dispose the
-   * returned color themselves.
+   * Creates the desired color for painting the cells. Callers of this method
+   * must dispose the returned color themselves.
    * 
-   * @param display the display to create the color for.
+   * @param display
+   *          the display to create the color for.
    * @return a new color.
    */
   protected Color createColor(Display display) {
