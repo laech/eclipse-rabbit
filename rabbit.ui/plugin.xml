@@ -83,7 +83,7 @@
             parent="rabbit.ui.pages.projectRelated">
       </page>
       <page
-            class="rabbit.ui.internal.pages.SessionPage2"
+            class="rabbit.ui.internal.pages.TmpPage2"
             id="rabbit.ui.page1"
             name="rabbit.ui.page1">
       </page>
@@ -100,18 +100,23 @@
          point="org.eclipse.ui.decorators">
       <decorator
             adaptable="false"
-            class="rabbit.ui.internal.decorators.DateDecorator"
-            id="rabbit.ui.decorators.DateDecorator"
-            label="Date Decorator"
+            class="rabbit.ui.internal.decorators.RabbitDecorator"
+            id="rabbit.ui.decorators.RabbitDecorator"
+            label="Rabbit Decorator"
             lightweight="true"
             state="true">
          <enablement>
-            <objectClass
-                  name="org.joda.time.LocalDate">
-            </objectClass>
+            <or>
+               <objectClass
+                     name="org.joda.time.LocalDate">
+               </objectClass>
+               <objectClass
+                     name="rabbit.data.access.model.WorkspaceStorage">
+               </objectClass>
+            </or>
          </enablement>
          <description>
-            Rabbit&apos;s decorator for decorating dates (to determine if a date is today, or yesterday).
+            Rabbit&apos;s decorator for decorating elements in the Rabbit View, to provide more useful information.
          </description>
       </decorator>
    </extension>

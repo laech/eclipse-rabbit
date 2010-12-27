@@ -15,8 +15,8 @@
  */
 package rabbit.ui.internal.treebuilders;
 
+import rabbit.data.access.model.ICommandData;
 import rabbit.data.access.model.IKey;
-import rabbit.data.access.model.ISessionData;
 import rabbit.ui.IProvider;
 import rabbit.ui.internal.pages.Category;
 import rabbit.ui.internal.util.ICategory;
@@ -26,7 +26,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
 import org.eclipse.jface.viewers.TreePath;
-import org.joda.time.Duration;
 
 import static java.util.Collections.emptyList;
 
@@ -34,43 +33,42 @@ import java.util.Collection;
 import java.util.List;
 
 /**
- * A {@link SessionDataTreeBuilder} takes input as {@link ISessionDataProvider}
+ * A {@link CommandDataTreeBuilder} takes input as {@link ICommandDataProvider}
  * and builds tree leaves based on the order of the categories provided by the
  * {@link ICategoryProvider2}, the last segment of every path will be the
- * {@link Duration} data node of each {@link ISessionData} provided by the
- * provider.
+ * {@link Integer} data node ({@link ICommandData#COUNT}) of each
+ * {@link ICommandData} provided by the provider.
  */
-public final class SessionDataTreeBuilder
-    extends AbstractDataTreeBuilder<ISessionData> {
+public final class CommandDataTreeBuilder
+    extends AbstractDataTreeBuilder<ICommandData> {
 
   /**
-   * Provides {@link ISessionData}.
+   * Provides {@link ICommandData}.
    */
-  public static interface ISessionDataProvider extends IProvider<ISessionData> {}
+  public static interface ICommandDataProvider extends IProvider<ICommandData> {}
 
   /**
    * @param categoryProvider the provider for providing categories.
    * @throws NullPointerException if argument is null.
    */
-  public SessionDataTreeBuilder(ICategoryProvider2 categoryProvider) {
-    super(categoryProvider, ImmutableMap
-        .<ICategory, IKey<?>> builder()
-        .put(Category.DATE, ISessionData.DATE)
-        .put(Category.WORKSPACE, ISessionData.WORKSPACE)
-        .build());
+  public CommandDataTreeBuilder(ICategoryProvider2 categoryProvider) {
+    super(categoryProvider, ImmutableMap.<ICategory, IKey<?>> of(
+        Category.COMMAND, ICommandData.COMMAND,
+        Category.DATE, ICommandData.DATE,
+        Category.WORKSPACE, ICommandData.WORKSPACE));
   }
 
   @Override
-  protected Collection<ISessionData> getData(Object input) {
-    if (input instanceof ISessionDataProvider) {
-      return ((ISessionDataProvider) input).get();
+  protected Collection<ICommandData> getData(Object input) {
+    if (input instanceof ICommandDataProvider) {
+      return ((ICommandDataProvider) input).get();
     }
     return emptyList();
   }
 
   @Override
-  protected List<TreePath> transform(ISessionData data, TreePath path)
+  protected List<TreePath> transform(ICommandData data, TreePath path)
       throws Exception {
-    return ImmutableList.of(path.createChildPath(data.get(ISessionData.DURATION)));
+    return ImmutableList.of(path.createChildPath(data.get(ICommandData.COUNT)));
   }
 }

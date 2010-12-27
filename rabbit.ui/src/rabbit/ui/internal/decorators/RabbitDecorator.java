@@ -15,35 +15,44 @@
  */
 package rabbit.ui.internal.decorators;
 
+import rabbit.data.access.model.WorkspaceStorage;
+
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.jface.viewers.BaseLabelProvider;
 import org.eclipse.jface.viewers.IDecoration;
 import org.eclipse.jface.viewers.ILightweightLabelDecorator;
 import org.joda.time.LocalDate;
 
-public class DateDecorator extends BaseLabelProvider implements ILightweightLabelDecorator {
+public class RabbitDecorator
+    extends BaseLabelProvider implements ILightweightLabelDecorator {
   
+  private static final String SEPARATOR = System.getProperty("file.separator");
+
   private LocalDate today;
   private long endOfToday;
-  
-  public DateDecorator() {
-    checkFields();
+
+  public RabbitDecorator() {
+    checkDateFields();
   }
-  
-  private void checkFields() {
+
+  @Override
+  public void decorate(Object element, IDecoration decoration) {
+    if (element instanceof LocalDate) {
+      decorateDate((LocalDate) element, decoration);
+    } else if (element instanceof WorkspaceStorage) {
+      decorateWorkspace((WorkspaceStorage) element, decoration);
+    }
+  }
+
+  private void checkDateFields() {
     if (System.currentTimeMillis() > endOfToday) {
       today = new LocalDate();
       endOfToday = today.toInterval().getEndMillis();
     }
   }
 
-  @Override
-  public void decorate(Object element, IDecoration decoration) {
-    if (!(element instanceof LocalDate)) {
-      return;
-    }
-
-    checkFields();
-    LocalDate date = (LocalDate) element;
+  private void decorateDate(LocalDate date, IDecoration decoration) {
+    checkDateFields();
     if (date.getYear() == today.getYear()) {
       switch (today.getDayOfYear() - date.getDayOfYear()) {
       case 0:
@@ -55,6 +64,16 @@ public class DateDecorator extends BaseLabelProvider implements ILightweightLabe
       default:
         break;
       }
+    }
+  }
+
+  private void decorateWorkspace(WorkspaceStorage ws, IDecoration decoration) {
+    IPath path = ws.getWorkspacePath();
+    if (path != null) {
+      decoration.addSuffix(" [" + path.toOSString() + "]");
+    } else {
+      String guess = ws.getStoragePath().lastSegment().replace(".", SEPARATOR);
+      decoration.addSuffix(" [may be " + guess + "?]");
     }
   }
 }

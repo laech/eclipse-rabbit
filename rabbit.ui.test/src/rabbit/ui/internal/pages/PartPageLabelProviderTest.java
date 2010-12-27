@@ -19,6 +19,7 @@ import static rabbit.ui.internal.util.DurationFormat.format;
 
 import rabbit.data.access.model.PartDataDescriptor;
 import rabbit.ui.internal.util.UndefinedWorkbenchPartDescriptor;
+import rabbit.ui.internal.viewers.DateLabelProvider;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;

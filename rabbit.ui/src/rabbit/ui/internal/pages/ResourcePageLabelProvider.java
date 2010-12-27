@@ -15,6 +15,7 @@
  */
 package rabbit.ui.internal.pages;
 
+import rabbit.ui.internal.viewers.DateLabelProvider;
 import rabbit.ui.internal.viewers.TreeNodes;
 
 import org.eclipse.core.resources.IFolder;

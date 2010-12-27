@@ -15,6 +15,8 @@
  */
 package rabbit.ui.internal.decorators;
 
+import rabbit.data.access.model.WorkspaceStorage;
+
 import static com.google.common.collect.Lists.newArrayList;
 
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -24,6 +26,8 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.viewers.IDecoration;
 import org.joda.time.LocalDate;
 import org.junit.Before;
@@ -34,21 +38,70 @@ import org.mockito.stubbing.Answer;
 import java.util.List;
 
 /**
- * @see DateDecorator
+ * @see RabbitDecorator
  */
-public class DateDecoratorTest {
-  
-  DateDecorator decorator;
-  
+public class RabbitDecoratorTest {
+
+  RabbitDecorator decorator;
+
   @Before
   public void create() {
-    decorator = new DateDecorator();
+    decorator = new RabbitDecorator();
+  }
+  
+  @Test
+  public void shouldAddSuffixToAKnownWorkspace() {
+    final List<String> args = newArrayList();
+    IDecoration decoration = mock(IDecoration.class);
+    doAnswer(new Answer<Void>() {
+      @Override
+      public Void answer(InvocationOnMock invocation) throws Throwable {
+        for (Object arg : invocation.getArguments()) {
+          args.add(arg.toString());
+        }
+        return null;
+      }
+    }).when(decoration).addSuffix(anyString());
+    
+    IPath workspace = Path.fromOSString("/opt/abc");
+    IPath storage = Path.fromOSString(".home.abc");
+    WorkspaceStorage ws = new WorkspaceStorage(storage, workspace);
+    
+    String expected = " [" + workspace.toOSString() + "]";
+    decorator.decorate(ws, decoration);
+    assertThat(args.size(), equalTo(1));
+    assertThat(args.get(0), equalTo(expected));
+  }
+  
+  @Test
+  public void shouldAddSuffixToAnUnknownWorkspace() {
+    final List<String> args = newArrayList();
+    IDecoration decoration = mock(IDecoration.class);
+    doAnswer(new Answer<Void>() {
+      @Override
+      public Void answer(InvocationOnMock invocation) throws Throwable {
+        for (Object arg : invocation.getArguments()) {
+          args.add(arg.toString());
+        }
+        return null;
+      }
+    }).when(decoration).addSuffix(anyString());
+    
+    IPath workspace = null;
+    IPath storage = Path.fromOSString(".home.abc");
+    WorkspaceStorage ws = new WorkspaceStorage(storage, workspace);
+    
+    String fileSeparator = System.getProperty("file.separator");
+    String expected = " [may be " + storage.lastSegment().replace(".", fileSeparator) + "?]";
+    decorator.decorate(ws, decoration);
+    assertThat(args.size(), equalTo(1));
+    assertThat(args.get(0), equalTo(expected));
   }
 
   @Test
   public void shouldAddSuffixToToday() {
     LocalDate today = new LocalDate();
-    
+
     final List<String> args = newArrayList();
     IDecoration decoration = mock(IDecoration.class);
     doAnswer(new Answer<Void>() {
@@ -60,16 +113,16 @@ public class DateDecoratorTest {
         return null;
       }
     }).when(decoration).addSuffix(anyString());
-    
+
     decorator.decorate(today, decoration);
     assertThat(args.size(), is(1));
     assertThat(args.get(0), equalTo(" [Today]"));
   }
-  
+
   @Test
   public void shouldAddSuffixToYesterday() {
     LocalDate yesterday = new LocalDate().minusDays(1);
-    
+
     final List<String> args = newArrayList();
     IDecoration decoration = mock(IDecoration.class);
     doAnswer(new Answer<Void>() {
@@ -81,7 +134,7 @@ public class DateDecoratorTest {
         return null;
       }
     }).when(decoration).addSuffix(anyString());
-    
+
     decorator.decorate(yesterday, decoration);
     assertThat(args.size(), is(1));
     assertThat(args.get(0), equalTo(" [Yesterday]"));

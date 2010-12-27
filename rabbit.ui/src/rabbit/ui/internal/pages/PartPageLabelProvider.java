@@ -18,6 +18,7 @@ package rabbit.ui.internal.pages;
 import static rabbit.ui.internal.util.DurationFormat.format;
 
 import rabbit.ui.internal.util.UndefinedWorkbenchPartDescriptor;
+import rabbit.ui.internal.viewers.DateLabelProvider;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 

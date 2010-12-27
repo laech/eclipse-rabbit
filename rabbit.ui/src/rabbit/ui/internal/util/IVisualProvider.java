@@ -13,21 +13,16 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package rabbit.ui.internal.pages;
+package rabbit.ui.internal.util;
 
-import static rabbit.ui.internal.pages.Category.DATE;
-import static rabbit.ui.internal.pages.Category.WORKSPACE;
+/**
+ * Represents a provider that holds a {@link ICategory} that represents a
+ * visual.
+ */
+public interface IVisualProvider {
 
-public final class SessionPageTest extends AbsPageTest {
-
-  @Override
-  protected AbsPage create() {
-    return new SessionPage();
-  }
-
-  @Override
-  protected Category[] getSupportedCategories() {
-    return new Category[]{DATE, WORKSPACE};
-  }
-
+  /**
+   * @return the visual category.
+   */
+  ICategory getVisualCategory();
 }

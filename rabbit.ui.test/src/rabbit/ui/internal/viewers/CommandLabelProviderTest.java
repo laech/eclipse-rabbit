@@ -13,14 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package rabbit.ui.internal.pages;
+package rabbit.ui.internal.viewers;
 
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 
 import org.eclipse.core.commands.Command;
+import org.eclipse.swt.SWT;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.commands.ICommandImageService;
 import org.eclipse.ui.commands.ICommandService;
@@ -31,45 +33,62 @@ import java.util.Collection;
 /**
  * @see CommandLabelProvider
  */
-public class CommandLabelProviderTest {
+public class CommandLabelProviderTest extends NullLabelProviderTest {
 
-  private final CommandLabelProvider labels;
-  private final Command definedCommand;
-  private final Command undefinedCommand;
-  
+  private Command definedCmd;
+  private Command undefinedCmd;
+
   private final ICommandService commandService = (ICommandService) PlatformUI
       .getWorkbench().getService(ICommandService.class);
-  
+
   private final ICommandImageService imageService = (ICommandImageService)
       PlatformUI.getWorkbench().getService(ICommandImageService.class);
 
-  public CommandLabelProviderTest() {
-    labels = new CommandLabelProvider();
-    definedCommand = commandService.getDefinedCommands()[0];
-    undefinedCommand = commandService.getCommand(System.currentTimeMillis() + "");
+  @Test
+  public void getForegroundShouldReturnGrayForAnUndefinedCommand() {
+    assertThat(provider.getForeground(undefinedCmd), equalTo(PlatformUI
+        .getWorkbench().getDisplay().getSystemColor(SWT.COLOR_DARK_GRAY)));
   }
 
   @Test
-  public void testGetText() throws Exception {
-    assertEquals(definedCommand.getName(), labels.getText(definedCommand));
-    assertEquals(undefinedCommand.getId(), labels.getText(undefinedCommand));
-  }
-
-  @Test
-  public void testGetImage_notNull() throws Exception {
+  public void getImageShouldReturnAnImageForACommandThatHasImage()
+      throws Exception {
     @SuppressWarnings("unchecked")
     Collection<String> ids = commandService.getDefinedCommandIds();
     for (String id : ids) {
       if (imageService.getImageDescriptor(id) != null) {
         Command cmdWithImage = commandService.getCommand(id);
-        assertThat(labels.getImage(cmdWithImage), notNullValue());
+        assertThat(provider.getImage(cmdWithImage), notNullValue());
         break;
       }
     }
   }
-  
+
   @Test
-  public void testGetImage_null() {
-    assertNull(labels.getImage(undefinedCommand));
+  public void getImageShouldReturnNullForACommandThatHasNoImage() {
+    assertThat(provider.getImage(undefinedCmd), nullValue());
+  }
+
+  @Test
+  public void getTextShouldReturnTheIdOfAnUndefinedCommand() throws Exception {
+    assertThat(provider.getText(undefinedCmd), equalTo(undefinedCmd.getId()));
+  }
+
+  @Test
+  public void getTextShouldReturnTheNameOfADefinedCommand() throws Exception {
+    assertEquals(definedCmd.getName(), provider.getText(definedCmd));
+  }
+
+  @Override
+  public void setUp() {
+    super.setUp();
+    provider = new CommandLabelProvider();
+    definedCmd = commandService.getDefinedCommands()[0];
+    undefinedCmd = commandService.getCommand(System.currentTimeMillis() + "");
+  }
+
+  @Override
+  protected NullLabelProvider create() {
+    return new CommandLabelProvider();
   }
 }

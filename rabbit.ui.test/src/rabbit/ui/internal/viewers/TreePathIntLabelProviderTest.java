@@ -15,7 +15,6 @@
  */
 package rabbit.ui.internal.viewers;
 
-import rabbit.ui.internal.util.DurationFormat;
 import rabbit.ui.internal.viewers.CellPainter.IValueProvider;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -40,9 +39,9 @@ import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
 
 /**
- * Tests for {@link TreePathDurationLabelProvider}.
+ * Tests for {@link TreePathIntLabelProvider}.
  */
-public class TreePathDurationLabelProviderTest {
+public class TreePathIntLabelProviderTest {
 
   private static Display display;
   private TreeViewer viewer;
@@ -68,27 +67,27 @@ public class TreePathDurationLabelProviderTest {
 
   @Test(expected = NullPointerException.class)
   public void shouldThrowAnExceptionIfConstructedWithoutAValueProvider() {
-    new TreePathDurationLabelProvider(null);
+    new TreePathIntLabelProvider(null);
   }
 
   @Test
   public void getValueProviderShouldReturnTheValueProvider() {
     IValueProvider valueProvider = mock(IValueProvider.class);
-    TreePathDurationLabelProvider labelProvider = new TreePathDurationLabelProvider(valueProvider);
+    TreePathIntLabelProvider labelProvider = new TreePathIntLabelProvider(valueProvider);
     assertThat(labelProvider.getValueProvider(), is(valueProvider));
   }
 
   @Test
-  public void updateShouldSetTheCellTextToTheFormattedDurationOfThePathIfThePathIsToBePainted() {
-    Long durationMillis = 123456789L;
+  public void updateShouldSetTheCellTextToTheValueOfThePathIfThePathIsToBePainted() {
+    Integer value = Integer.valueOf(18);
     Object obj = new Object();
 
     IValueProvider valueProvider = mock(IValueProvider.class);
     TreePath equalPath = new TreePath(new Object[]{obj});
-    given(valueProvider.getValue(equalPath)).willReturn(durationMillis);
+    given(valueProvider.getValue(equalPath)).willReturn(value.longValue());
     given(valueProvider.shouldPaint(obj)).willReturn(TRUE);
 
-    TreePathDurationLabelProvider labelProvider = new TreePathDurationLabelProvider(valueProvider);
+    TreePathIntLabelProvider labelProvider = new TreePathIntLabelProvider(valueProvider);
     column.setLabelProvider(labelProvider);
 
     ITreeContentProvider contentProvider = mock(ITreeContentProvider.class);
@@ -96,7 +95,7 @@ public class TreePathDurationLabelProviderTest {
     viewer.setContentProvider(contentProvider);
     viewer.setInput("");
 
-    String expectedText = DurationFormat.format(durationMillis);
+    String expectedText = String.valueOf(value);
     assertThat(viewer.getTree().getItem(0).getText(), is(expectedText));
   }
 
@@ -108,7 +107,7 @@ public class TreePathDurationLabelProviderTest {
     TreePath equalPath = new TreePath(new Object[]{obj});
     given(valueProvider.shouldPaint(equalPath)).willReturn(FALSE);
 
-    TreePathDurationLabelProvider labelProvider = new TreePathDurationLabelProvider(valueProvider);
+    TreePathIntLabelProvider labelProvider = new TreePathIntLabelProvider(valueProvider);
     column.setLabelProvider(labelProvider);
 
     ITreeContentProvider contentProvider = mock(ITreeContentProvider.class);

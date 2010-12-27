@@ -53,7 +53,8 @@ import javax.annotation.Nullable;
  * true on the given path.
  * </p>
  */
-public final class TreePathValueProvider extends Observable implements IValueProvider {
+public final class TreePathValueProvider extends Observable
+    implements IValueProvider, IVisualProvider {
 
   private final ICategorizer categorizer;
   private final IProvider<TreePath> pathProvider;
@@ -140,9 +141,7 @@ public final class TreePathValueProvider extends Observable implements IValuePro
     return getValue((TreePath) element, getProvider().get());
   }
 
-  /**
-   * @return the visual category currently set.
-   */
+  @Override
   public ICategory getVisualCategory() {
     return visual;
   }

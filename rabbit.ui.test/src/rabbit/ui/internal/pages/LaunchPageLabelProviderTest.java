@@ -20,6 +20,7 @@ import static rabbit.ui.internal.util.DurationFormat.format;
 import rabbit.ui.internal.util.Pair;
 import rabbit.ui.internal.util.UndefinedLaunchConfigurationType;
 import rabbit.ui.internal.util.UndefinedLaunchMode;
+import rabbit.ui.internal.viewers.DateLabelProvider;
 import rabbit.ui.internal.viewers.CellPainter.IValueProvider;
 
 import static com.google.common.base.Preconditions.checkNotNull;

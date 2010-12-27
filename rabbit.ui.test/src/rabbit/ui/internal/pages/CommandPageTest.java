@@ -15,51 +15,23 @@
  */
 package rabbit.ui.internal.pages;
 
-import rabbit.ui.internal.pages.AbstractFilteredTreePage;
-import rabbit.ui.internal.pages.Category;
-import rabbit.ui.internal.pages.CommandPage;
-import rabbit.ui.internal.pages.CommandPageContentProvider;
-import rabbit.ui.internal.util.ICategory;
-
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-
-import org.junit.Test;
+import static rabbit.ui.internal.pages.Category.COMMAND;
+import static rabbit.ui.internal.pages.Category.DATE;
+import static rabbit.ui.internal.pages.Category.WORKSPACE;
 
 /**
  * Test for {@link CommandPage}
  */
-public class CommandPageTest extends AbstractFilteredTreePageTest {
+public class CommandPageTest extends AbsPageTest {
 
-  @Test
-  public void testSaveState_selectedCategories() throws Exception {
-    CommandPageContentProvider contents = (CommandPageContentProvider) page.getViewer().getContentProvider();
-
-    ICategory[] categories = new ICategory[]{Category.DATE, Category.COMMAND};
-    contents.setSelectedCategories(categories);
-    saveState(page);
-
-    contents.setSelectedCategories(new ICategory[]{Category.DATE});
-    restoreState(page);
-    assertArrayEquals(categories, contents.getSelectedCategories());
-  }
-
-  @Test
-  public void testSaveState_paintCategory() throws Exception {
-    CommandPageContentProvider contents = (CommandPageContentProvider) page.getViewer().getContentProvider();
-
-    Category paintCategory = Category.COMMAND;
-    contents.setPaintCategory(paintCategory);
-    saveState(page);
-
-    contents.setPaintCategory(Category.DATE);
-    restoreState(page);
-    assertEquals(paintCategory, contents.getPaintCategory());
+  @Override
+  protected AbsPage create() {
+    return new CommandPage();
   }
 
   @Override
-  protected AbstractFilteredTreePage createPage() {
-    return new CommandPage();
+  protected Category[] getSupportedCategories() {
+    return new Category[]{COMMAND, DATE, WORKSPACE};
   }
 
 }

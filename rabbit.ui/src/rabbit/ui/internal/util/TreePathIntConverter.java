@@ -13,21 +13,23 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package rabbit.ui.internal.pages;
+package rabbit.ui.internal.util;
 
-import static rabbit.ui.internal.pages.Category.DATE;
-import static rabbit.ui.internal.pages.Category.WORKSPACE;
+import org.eclipse.jface.viewers.TreePath;
+import org.joda.time.Duration;
 
-public final class SessionPageTest extends AbsPageTest {
+/**
+ * Converts a {@link TreePath} by checking its last segment, if the segment is a {@link Duration}
+ * then the duration in milliseconds is returned, otherwise 0 is returned.
+ */
+public final class TreePathIntConverter implements IConverter<TreePath> {
 
   @Override
-  protected AbsPage create() {
-    return new SessionPage();
+  public long convert(TreePath element) {
+    Object obj = element.getLastSegment();
+    if (obj instanceof Integer) {
+      return ((Integer) obj).longValue();
+    }
+    return 0;
   }
-
-  @Override
-  protected Category[] getSupportedCategories() {
-    return new Category[]{DATE, WORKSPACE};
-  }
-
 }

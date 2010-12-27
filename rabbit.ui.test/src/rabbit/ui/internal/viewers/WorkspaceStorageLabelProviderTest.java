@@ -13,9 +13,10 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package rabbit.ui.internal.pages;
+package rabbit.ui.internal.viewers;
 
 import rabbit.data.access.model.WorkspaceStorage;
+import rabbit.ui.internal.viewers.WorkspaceStorageLabelProvider;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
@@ -23,63 +24,51 @@ import static org.junit.Assert.assertThat;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
-
-import static java.lang.String.format;
 
 /**
  * @see WorkspaceStorageLabelProvider
  */
-public class WorkspaceStorageLabelProviderTest {
+public class WorkspaceStorageLabelProviderTest extends NullLabelProviderTest {
 
-  private WorkspaceStorageLabelProvider labelProvider;
-
-  @Before
-  public void create() {
-    labelProvider = new WorkspaceStorageLabelProvider();
-  }
-
-  @After
-  public void dispose() {
-    labelProvider.dispose();
-  }
-  
   @Test
   public void getForegroundShouldReturnAColorIfWorkspacePathIsNull() {
     IPath storage = Path.fromPortableString("/");
     WorkspaceStorage ws = new WorkspaceStorage(storage, null);
-    assertThat(labelProvider.getForeground(ws), notNullValue());
+    assertThat(provider.getForeground(ws), notNullValue());
   }
 
-  @Test
-  public void getTextShouldReturnTheWorkspacePathIfThereIsOne() {
-    IPath workspace = new Path(System.getProperty("user.home"));
-    IPath storage = Path.fromPortableString("/storage");
-    WorkspaceStorage ws = new WorkspaceStorage(storage, workspace);
-    
-    String expected = format("%s (%s)", workspace.lastSegment(), workspace.toOSString());
-    assertThat(labelProvider.getText(ws), equalTo(expected));
-  }
-
-  @Test
-  public void getTextShouldReturnAHelpfulMessageIfThereIsNoWorkspacePath() {
-    // Currently if the workspace is at: /home/user/workspace,
-    // then the folder storing data for that workspace is named: .home.user.workspace,
-    // which is done by replacing all the separators with a dot.
-    IPath storage = Path.fromPortableString("/Rabbit/.Hello.World");
-    WorkspaceStorage ws = new WorkspaceStorage(storage, null);
-    
-    String expected = format("Unknown (may be %s?)", storage.lastSegment().replace(".", "/"));
-    assertThat(labelProvider.getText(ws), equalTo(expected));
-  }
-  
   @Test
   public void getImageShouldReturnANonnullImage() {
     IPath workspace = new Path(System.getProperty("user.home"));
     IPath storage = Path.fromPortableString("/storage");
     WorkspaceStorage ws = new WorkspaceStorage(storage, workspace);
-    assertThat(labelProvider.getImage(ws), notNullValue());
+    assertThat(provider.getImage(ws), notNullValue());
+  }
+
+  @Test
+  public void getTextShouldReturnTheUnknownStringIfThereIsNoWorkspacePath() {
+    // Currently if the workspace is at: /home/user/workspace,
+    // then the folder storing data for that workspace is named:
+    // .home.user.workspace,
+    // which is done by replacing all the separators with a dot.
+    IPath storage = Path.fromPortableString("/Rabbit/.Hello.World");
+    WorkspaceStorage ws = new WorkspaceStorage(storage, null);
+    assertThat(provider.getText(ws), equalTo("Unknown"));
+  }
+
+  @Test
+  public void getTextShouldReturnTheWorkspaceFolderNameIfThereIsOne() {
+    IPath workspace = new Path(System.getProperty("user.home"));
+    IPath storage = Path.fromPortableString("/storage");
+    WorkspaceStorage ws = new WorkspaceStorage(storage, workspace);
+
+    String expected = ws.getWorkspacePath().lastSegment();
+    assertThat(provider.getText(ws), equalTo(expected));
+  }
+
+  @Override
+  protected WorkspaceStorageLabelProvider create() {
+    return new WorkspaceStorageLabelProvider();
   }
 }

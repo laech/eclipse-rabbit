@@ -74,8 +74,6 @@ public class TreeViewerCellPainter extends StyledCellLabelProvider {
   private final Point point;
 
   /**
-   * Constructor.
-   * 
    * @param valueProvider The provider for getting the values of each cell from.
    * @throws NullPointerException if argument is null.
    */
@@ -125,8 +123,8 @@ public class TreeViewerCellPainter extends StyledCellLabelProvider {
       return;
     }
     int x = event.x;
-    int y = event.y + 1;
-    int height = event.height - 2;
+    int y = event.y;
+    int height = event.height - 1;
 
     GC gc = event.gc;
     Color oldBackground = gc.getBackground();
@@ -143,7 +141,7 @@ public class TreeViewerCellPainter extends StyledCellLabelProvider {
       if (alpha < 100) {
         alpha = 100;
       }
-//      gc.setAlpha(alpha);
+      gc.setAlpha(alpha);
       gc.setAntialias(SWT.ON);
     }
     gc.setBackground(background);

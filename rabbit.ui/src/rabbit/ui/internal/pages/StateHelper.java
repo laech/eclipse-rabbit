@@ -75,25 +75,38 @@ class StateHelper {
    */
   StateHelper restoreCategories(ICategoryProvider2 provider) {
     checkNotNull(provider);
-
+    
+    List<Category> list = retrieveSavedCategories();
+    if (list != null) {
+      provider.setSelected(list.toArray(new Category[list.size()]));
+    }
+    return this;
+  }
+  
+  /**
+   * Retrieve previously saved categories. Note that if no categories has been
+   * saved, null is returned, not an empty collection, because an empty
+   * collection of categories may have been saved.
+   * @return a list of categories, or null if none has been saved.
+   */
+  List<Category> retrieveSavedCategories() {
     IMemento m = getMemento();
 
     String string = m.getString(CATEGORIES);
     if (string == null) {
-      return this;
+      return null;
     }
 
+    List<Category> result = newArrayList();
     List<String> list = newArrayList(Splitter.on(SEPARATOR).split(string));
-    List<Category> categories = newArrayListWithCapacity(list.size());
     for (String str : list) {
       try {
-        categories.add(Enum.valueOf(Category.class, str));
+        result.add(Enum.valueOf(Category.class, str));
       } catch (IllegalArgumentException e) {
         // Ignore invalid ones
       }
     }
-    provider.setSelected(categories.toArray(new Category[categories.size()]));
-    return this;
+    return result;
   }
 
   /**
@@ -187,6 +200,26 @@ class StateHelper {
     m.putString(VISUAL_CATEGORY, category.toString());
     return this;
   }
+  
+  /**
+   * Retrieve the previously saved visual category.
+   * @return the category, or null.
+   */
+  Category retrieveSavedVisualCategory() {
+    IMemento m = getMemento();
+
+    String str = m.getString(VISUAL_CATEGORY);
+    if (str == null) {
+      return null;
+    }
+
+    try {
+      return Enum.valueOf(Category.class, str);
+    } catch (IllegalArgumentException e) {
+      // Ignore invalid
+    }
+    return null;
+  }
 
   /**
    * Restores the previously saved visual category. If no saved category found,
@@ -199,18 +232,9 @@ class StateHelper {
   StateHelper restoreVisualCategory(TreePathValueProvider provider) {
     checkNotNull(provider);
 
-    IMemento m = getMemento();
-
-    String str = m.getString(VISUAL_CATEGORY);
-    if (str == null) {
-      return this;
-    }
-
-    try {
-      Category c = Enum.valueOf(Category.class, str);
+    Category c = retrieveSavedVisualCategory();
+    if (c != null) {
       provider.setVisualCategory(c);
-    } catch (IllegalArgumentException e) {
-      // Ignore invalid
     }
     return this;
   }

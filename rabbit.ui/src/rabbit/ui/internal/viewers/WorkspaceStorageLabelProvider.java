@@ -13,13 +13,11 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package rabbit.ui.internal.pages;
+package rabbit.ui.internal.viewers;
 
 import rabbit.data.access.model.WorkspaceStorage;
 import rabbit.ui.internal.SharedImages;
 
-import org.eclipse.jface.viewers.IColorProvider;
-import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
@@ -28,17 +26,17 @@ import org.eclipse.ui.PlatformUI;
 /**
  * Provides labels for {@link WorkspaceStorage}.
  */
-public final class WorkspaceStorageLabelProvider extends LabelProvider implements IColorProvider {
-  
+public final class WorkspaceStorageLabelProvider extends NullLabelProvider {
+
   private static final Color GRAY = PlatformUI.getWorkbench().getDisplay()
       .getSystemColor(SWT.COLOR_DARK_GRAY);
-  
+
   private final Image workspaceImage;
 
   public WorkspaceStorageLabelProvider() {
     workspaceImage = SharedImages.WORKSPACE.createImage();
   }
-  
+
   @Override
   public void dispose() {
     super.dispose();
@@ -46,16 +44,13 @@ public final class WorkspaceStorageLabelProvider extends LabelProvider implement
   }
 
   @Override
-  public String getText(Object element) {
+  public Color getForeground(Object element) {
     if (element instanceof WorkspaceStorage) {
-      WorkspaceStorage ws = (WorkspaceStorage) element;
-      if (ws.getWorkspacePath() != null) {
-        return ws.getWorkspacePath().lastSegment() + " (" + ws.getWorkspacePath().toOSString() + ")";
-      } else {
-        return "Unknown (may be " + ws.getStoragePath().lastSegment().replace(".", "/") + "?)";
+      if (((WorkspaceStorage) element).getWorkspacePath() == null) {
+        return GRAY;
       }
     }
-    return super.getText(element);
+    return super.getForeground(element);
   }
 
   @Override
@@ -67,17 +62,15 @@ public final class WorkspaceStorageLabelProvider extends LabelProvider implement
   }
 
   @Override
-  public Color getForeground(Object element) {
+  public String getText(Object element) {
     if (element instanceof WorkspaceStorage) {
-      if (((WorkspaceStorage) element).getWorkspacePath() == null) {
-        return GRAY;
+      WorkspaceStorage ws = (WorkspaceStorage) element;
+      if (ws.getWorkspacePath() != null) {
+        return ws.getWorkspacePath().lastSegment();
+      } else {
+        return "Unknown";
       }
     }
-    return null;
-  }
-
-  @Override
-  public Color getBackground(Object element) {
-    return null;
+    return super.getText(element);
   }
 }

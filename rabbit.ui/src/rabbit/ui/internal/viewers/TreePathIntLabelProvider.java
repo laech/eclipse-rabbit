@@ -15,25 +15,23 @@
  */
 package rabbit.ui.internal.viewers;
 
-import rabbit.ui.internal.util.DurationFormat;
 import rabbit.ui.internal.viewers.CellPainter.IValueProvider;
 
-import com.google.common.base.Preconditions;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.eclipse.jface.viewers.CellLabelProvider;
 import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.ViewerCell;
 
 /**
- * A {@link CellLabelProvider} that treats the value of a {@link TreePath} as a
- * duration in milliseconds, then formats that duration into human readable
- * string and use that as the label of the cell representing the path. The value
- * of the path is supplied by a {@link IValueProvider}, if
- * {@link IValueProvider#shouldPaint(Object)} returns <code>false</code> on a
- * object of a cell, then the text of the cell representing the path will be
- * blank.
+ * A {@link CellLabelProvider} that treats the value of a {@link TreePath} as an
+ * integer, then simple converts the integer to string and use that as the label
+ * of the cell representing the path. The value of the path is supplied by a
+ * {@link IValueProvider}, if {@link IValueProvider#shouldPaint(Object)} returns
+ * <code>false</code> on a object in a cell, then the text of the cell
+ * representing the path will be blank.
  */
-public final class TreePathDurationLabelProvider extends CellLabelProvider {
+public final class TreePathIntLabelProvider extends CellLabelProvider {
 
   private final IValueProvider valueProvider;
 
@@ -42,9 +40,8 @@ public final class TreePathDurationLabelProvider extends CellLabelProvider {
    * @param valueProvider The value provider to provide value for the tree
    *        paths.
    */
-  public TreePathDurationLabelProvider(IValueProvider valueProvider) {
-    this.valueProvider = Preconditions.checkNotNull(valueProvider,
-        "valueProvider");
+  public TreePathIntLabelProvider(IValueProvider valueProvider) {
+    this.valueProvider = checkNotNull(valueProvider, "valueProvider");
   }
 
   /**
@@ -59,7 +56,7 @@ public final class TreePathDurationLabelProvider extends CellLabelProvider {
     TreePath path = cell.getViewerRow().getTreePath();
     String text = null;
     if (getValueProvider().shouldPaint(cell.getElement())) {
-      text = DurationFormat.format(getValueProvider().getValue(path));
+      text = String.valueOf(getValueProvider().getValue(path));
     }
     cell.setText(text);
   }

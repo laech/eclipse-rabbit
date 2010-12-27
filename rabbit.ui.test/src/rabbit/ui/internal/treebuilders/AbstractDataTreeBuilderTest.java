@@ -229,7 +229,7 @@ public abstract class AbstractDataTreeBuilderTest<T> {
   protected abstract List<TreePath> buildPaths(T data, ICategory... categories);
 
   /**
-   * @return some categories, must be more than one.
+   * @return some categories supported by the builder, must be more than one.
    */
   protected abstract ICategory[] categories();
 

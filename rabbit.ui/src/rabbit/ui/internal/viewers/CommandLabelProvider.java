@@ -13,14 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package rabbit.ui.internal.pages;
+package rabbit.ui.internal.viewers;
 
 import com.google.common.collect.Maps;
 
 import org.eclipse.core.commands.Command;
 import org.eclipse.core.commands.common.NotDefinedException;
 import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.commands.ICommandImageService;
@@ -32,7 +33,7 @@ import javax.annotation.Nullable;
 /**
  * Label provider for {@link Command}.
  */
-public class CommandLabelProvider extends LabelProvider {
+public final class CommandLabelProvider extends NullLabelProvider {
 
   private final ICommandImageService service;
 
@@ -43,25 +44,36 @@ public class CommandLabelProvider extends LabelProvider {
    */
   private final Map<String, Image> images;
 
+  private final Color gray;
+
   /**
    * Constructor.
    */
   public CommandLabelProvider() {
     images = Maps.newLinkedHashMap();
-    service = (ICommandImageService) PlatformUI.getWorkbench().getService(
-        ICommandImageService.class);
+    service = (ICommandImageService) PlatformUI.getWorkbench()
+        .getService(ICommandImageService.class);
+    gray = PlatformUI.getWorkbench().getDisplay()
+        .getSystemColor(SWT.COLOR_DARK_GRAY);
+  }
+  
+  @Override
+  public void dispose() {
+    super.dispose();
+    for (Image img : images.values()) {
+      if (img != null && !img.isDisposed())
+        img.dispose();
+    }
   }
 
   @Override
-  public String getText(@Nullable Object element) {
+  public Color getForeground(Object element) {
     if (element instanceof Command) {
-      try {
-        return ((Command) element).getName();
-      } catch (NotDefinedException e) {
-        return ((Command) element).getId();
+      if (!((Command) element).isDefined()) {
+        return gray;
       }
     }
-    return null;
+    return super.getForeground(element);
   }
 
   @Override
@@ -83,11 +95,14 @@ public class CommandLabelProvider extends LabelProvider {
   }
 
   @Override
-  public void dispose() {
-    super.dispose();
-    for (Image img : images.values()) {
-      if (img != null && !img.isDisposed())
-        img.dispose();
+  public String getText(@Nullable Object element) {
+    if (element instanceof Command) {
+      try {
+        return ((Command) element).getName();
+      } catch (NotDefinedException e) {
+        return ((Command) element).getId();
+      }
     }
+    return null;
   }
 }
