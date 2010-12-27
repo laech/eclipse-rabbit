@@ -68,6 +68,9 @@ public class SharedImages {
   /** View area image. */
   public static final ImageDescriptor VIEW = getObj16("view-highlight.gif");
   
+  /** Workspace image. */
+  public static final ImageDescriptor WORKSPACE = getObj16("workspace.gif");
+  
   /**
    * Gets an image descriptor from the directory "icons/full/obj16/".
    * @param name The name of the file.

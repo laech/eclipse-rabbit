@@ -16,6 +16,7 @@
 package rabbit.ui.internal.pages;
 
 import rabbit.data.access.model.WorkspaceStorage;
+import rabbit.ui.internal.SharedImages;
 
 import org.eclipse.jface.viewers.IColorProvider;
 import org.eclipse.jface.viewers.LabelProvider;
@@ -31,8 +32,17 @@ public final class WorkspaceStorageLabelProvider extends LabelProvider implement
   
   private static final Color GRAY = PlatformUI.getWorkbench().getDisplay()
       .getSystemColor(SWT.COLOR_DARK_GRAY);
+  
+  private final Image workspaceImage;
 
   public WorkspaceStorageLabelProvider() {
+    workspaceImage = SharedImages.WORKSPACE.createImage();
+  }
+  
+  @Override
+  public void dispose() {
+    super.dispose();
+    workspaceImage.dispose();
   }
 
   @Override
@@ -50,6 +60,9 @@ public final class WorkspaceStorageLabelProvider extends LabelProvider implement
 
   @Override
   public Image getImage(Object element) {
+    if (element instanceof WorkspaceStorage) {
+      return workspaceImage;
+    }
     return super.getImage(element);
   }
 
