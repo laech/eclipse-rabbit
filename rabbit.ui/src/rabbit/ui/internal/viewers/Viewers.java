@@ -22,6 +22,7 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 
+import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ITreeSelection;
@@ -64,6 +65,8 @@ public final class Viewers {
   }
 
   public static FilteredTree newFilteredTree(Composite parent, PatternFilter filter) {
+    GridLayoutFactory.fillDefaults().margins(0, 0).applyTo(parent);
+    
     int style = SWT.VIRTUAL | SWT.V_SCROLL | SWT.H_SCROLL;
 
     @SuppressWarnings("deprecation")
