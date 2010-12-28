@@ -15,298 +15,271 @@
  */
 package rabbit.ui.internal.pages;
 
+import static rabbit.ui.internal.pages.Category.DATE;
+import static rabbit.ui.internal.pages.Category.LAUNCH;
+import static rabbit.ui.internal.pages.Category.LAUNCH_MODE;
+import static rabbit.ui.internal.pages.Category.LAUNCH_TYPE;
+import static rabbit.ui.internal.pages.Category.WORKSPACE;
+import static rabbit.ui.internal.viewers.Viewers.newTreeViewerColumn;
+
 import rabbit.data.access.IAccessor;
-import rabbit.data.access.model.LaunchDataDescriptor;
+import rabbit.data.access.model.ILaunchData;
+import rabbit.data.access.model.WorkspaceStorage;
 import rabbit.data.handler.DataHandler;
-import rabbit.ui.internal.RabbitUI;
-import rabbit.ui.internal.SharedImages;
-import rabbit.ui.internal.actions.CollapseAllAction;
-import rabbit.ui.internal.actions.DropDownAction;
-import rabbit.ui.internal.actions.ExpandAllAction;
-import rabbit.ui.internal.actions.GroupByAction;
-import rabbit.ui.internal.actions.ShowHideFilterControlAction;
-import rabbit.ui.internal.util.ICategory;
-import rabbit.ui.internal.viewers.CellPainter;
-import rabbit.ui.internal.viewers.DeepPatternFilter;
-import rabbit.ui.internal.viewers.DelegatingStyledCellLabelProvider;
-import rabbit.ui.internal.viewers.TreeViewerLabelSorter;
-import rabbit.ui.internal.viewers.TreeViewerSorter;
+import rabbit.ui.Preference;
+import rabbit.ui.internal.treebuilders.LaunchDataTreeBuilder;
+import rabbit.ui.internal.treebuilders.LaunchDataTreeBuilder.ILaunchDataProvider;
+import rabbit.ui.internal.util.Categorizer;
+import rabbit.ui.internal.util.CategoryProvider;
+import rabbit.ui.internal.util.ICategorizer;
+import rabbit.ui.internal.util.IConverter;
+import rabbit.ui.internal.util.LaunchName;
+import rabbit.ui.internal.util.TreePathDurationConverter;
+import rabbit.ui.internal.util.TreePathIntConverter;
+import rabbit.ui.internal.util.TreePathValueProvider;
+import rabbit.ui.internal.viewers.CompositeCellLabelProvider;
+import rabbit.ui.internal.viewers.DateLabelProvider;
+import rabbit.ui.internal.viewers.FilterableTreePathContentProvider;
+import rabbit.ui.internal.viewers.LaunchLabelProvider;
+import rabbit.ui.internal.viewers.ResourceLabelProvider;
+import rabbit.ui.internal.viewers.TreePathContentProvider;
+import rabbit.ui.internal.viewers.TreePathDurationLabelProvider;
+import rabbit.ui.internal.viewers.TreePathIntLabelProvider;
+import rabbit.ui.internal.viewers.TreePathPatternFilter;
+import rabbit.ui.internal.viewers.TreeViewerCellPainter;
+import rabbit.ui.internal.viewers.TreeViewerColumnSorter;
+import rabbit.ui.internal.viewers.TreeViewerColumnValueSorter;
+import rabbit.ui.internal.viewers.Viewers;
+import rabbit.ui.internal.viewers.WorkspaceStorageLabelProvider;
 
-import com.google.common.base.Joiner;
-import com.google.common.collect.Lists;
+import static com.google.common.base.Predicates.instanceOf;
 
-import org.eclipse.jface.action.Action;
-import org.eclipse.jface.action.ActionContributionItem;
-import org.eclipse.jface.action.IAction;
+import com.google.common.base.Predicate;
+import com.google.common.collect.ImmutableMap;
+
+import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.debug.core.ILaunchConfigurationType;
+import org.eclipse.debug.core.ILaunchMode;
 import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.IToolBarManager;
-import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.viewers.TreeNode;
+import org.eclipse.jface.viewers.DecoratingStyledCellLabelProvider;
+import org.eclipse.jface.viewers.ILabelDecorator;
+import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.TreeViewerColumn;
-import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.TreeColumn;
-import org.eclipse.ui.dialogs.PatternFilter;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.dialogs.FilteredTree;
+import org.joda.time.Duration;
 import org.joda.time.LocalDate;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 /**
- * Displays launch events.
+ * A page for displaying command usage.
  */
-public class LaunchPage extends InternalPage<LaunchDataDescriptor>
-    implements LaunchPageContentProvider.IProvider {
-  
-  // Preference constants:
-  private static final String PREF_SELECTED_CATEGORIES = "LaunchPage.SelectedCatgories";
-  private static final String PREF_PAINT_CATEGORY = "LaunchPage.PaintCategory";
+public class LaunchPage extends AbsPage {
 
-  private LaunchPageContentProvider contents;
-  private LaunchPageLabelProvider labels;
-  
-  /**
-   * Constructs a new page.
-   */
-  public LaunchPage() {
-    super();
-  }
-  
+  private FilteredTree filteredTree;
+  private CategoryProvider categoryProvider;
+  private TreePathValueProvider durationProvider;
+  private TreePathValueProvider countProvider;
+  private TreePathContentProvider contentProvider;
+
+  public LaunchPage() {}
+
   @Override
-  public IContributionItem[] createToolBarItems(IToolBarManager toolBar) {
+  public void createContents(Composite parent) {
+    Category[] supported = {WORKSPACE, DATE, LAUNCH, LAUNCH_MODE, LAUNCH_TYPE};
+    categoryProvider = new CategoryProvider(supported, LAUNCH);
+    categoryProvider.addObserver(this);
 
-    Category[] categories = new Category[] {
-    // Categories for color by drop down action:
-        Category.LAUNCH, // 
-        Category.LAUNCH_MODE, // 
-        Category.LAUNCH_TYPE, // 
-        Category.DATE };
+    contentProvider = new TreePathContentProvider(
+        new LaunchDataTreeBuilder(categoryProvider));
+    contentProvider.addObserver(this);
 
-    // Color by actions:
-    IAction[] colorActions = new IAction[categories.length];
-    for (int i = 0; i < colorActions.length; i++) {
-      final Category cat = categories[i];
-      colorActions[i] = new Action(cat.getText(), cat.getImageDescriptor()) {
-        @Override
-        public void run() {
-          contents.setPaintCategory(cat);
-        }
-      };
-    }
+    durationProvider = createDurationValueProvider();
+    durationProvider.addObserver(this);
 
-    IAction filterAction = new ShowHideFilterControlAction(getFilteredTree());
-    filterAction.run();
+    countProvider = createCountValueProvider();
+    countProvider.addObserver(this);
 
-    IAction collapse = new CollapseAllAction(getViewer());
-    IAction groupByLaunches = newGroupByLaunchesAction();
-    IContributionItem[] items = new IContributionItem[] {
-        new ActionContributionItem(filterAction), //
-        new ActionContributionItem(new DropDownAction(
-            collapse.getText(), collapse.getImageDescriptor(), 
-            collapse, 
-            collapse,
-            new ExpandAllAction(getViewer()))),
-        new ActionContributionItem(new GroupByAction(contents, groupByLaunches,
-            groupByLaunches, //
-            newGroupByLaunchModesAction(), //
-            newGroupByLaunchConfigTypesAction(), //
-            newGroupByDatesAction())), //
-        new ActionContributionItem(new DropDownAction( //
-            "Highlight " + colorActions[0].getText(), SharedImages.BRUSH, // 
-            colorActions[0], //
-            colorActions)) };
+    // The main label provider for the first column:
+    CompositeCellLabelProvider mainLabels = new CompositeCellLabelProvider(
+        new LaunchLabelProvider(),
+        new ResourceLabelProvider(),
+        new DateLabelProvider(),
+        new WorkspaceStorageLabelProvider());
 
-    for (IContributionItem item : items)
-      toolBar.add(item);
+    // The viewer:
+    filteredTree = Viewers.newFilteredTree(parent,
+        new TreePathPatternFilter(mainLabels));
+    TreeViewer viewer = filteredTree.getViewer();
+    FilterableTreePathContentProvider filteredContentProvider =
+        new FilterableTreePathContentProvider(contentProvider);
+    filteredContentProvider.addFilter(instanceOf(Integer.class));
+    filteredContentProvider.addFilter(instanceOf(Duration.class));
+    viewer.setContentProvider(filteredContentProvider);
 
-    return items;
-  }
+    // Column sorters:
+    TreeViewerColumnSorter labelSorter =
+        new InternalTreeViewerColumnLabelSorter(viewer, mainLabels);
+    TreeViewerColumnSorter countSorter =
+        new TreeViewerColumnValueSorter(viewer, countProvider);
+    TreeViewerColumnSorter durationSorter =
+        new TreeViewerColumnValueSorter(viewer, durationProvider);
 
-  /**
-   * Creates a cell painter for launch durations.
-   */
-  @Override
-  protected CellPainter createCellPainter() {
-    return new CellPainter(contents.getLaunchDurationValueProvider()) {
-      @Override
-      protected Color createColor(Display display) {
-        return new Color(display, 49, 132, 155);
-      }
-    };
-  }
+    // The columns:
 
-  /**
-   * Creates a cell painter for launch counts.
-   * 
-   * @return A cell painter.
-   */
-  protected CellPainter createCellPainter2() {
-    return new CellPainter(contents.getLaunchCountValueProvider()) {
+    TreeViewerColumn mainColumn =
+        newTreeViewerColumn(viewer, SWT.LEFT, "Name", 200);
+    mainColumn.getColumn().addSelectionListener(labelSorter);
+    ILabelDecorator decorator =
+        PlatformUI.getWorkbench().getDecoratorManager().getLabelDecorator();
+    mainColumn.setLabelProvider(new DecoratingStyledCellLabelProvider(
+        mainLabels, decorator, null));
+
+    TreeViewerColumn countColumn =
+        newTreeViewerColumn(viewer, SWT.RIGHT, "Count", 100);
+    countColumn.getColumn().addSelectionListener(countSorter);
+    countColumn.setLabelProvider(
+        new TreePathIntLabelProvider(countProvider));
+
+    TreeViewerColumn countGraphColumn =
+        newTreeViewerColumn(viewer, SWT.LEFT, "", 100);
+    countGraphColumn.getColumn().addSelectionListener(countSorter);
+    countGraphColumn.setLabelProvider(new TreeViewerCellPainter(countProvider) {
       @Override
       protected Color createColor(Display display) {
         return new Color(display, 118, 146, 60);
       }
-    };
-  }
+    });
 
-  @Override
-  protected void createColumns(TreeViewer viewer) {
-    TreeViewerSorter countSorter = new TreeViewerSorter(viewer) {
+    TreeViewerColumn durationColumn =
+        newTreeViewerColumn(viewer, SWT.RIGHT, "Total Duration", 150);
+    durationColumn.getColumn().addSelectionListener(durationSorter);
+    durationColumn.setLabelProvider(
+        new TreePathDurationLabelProvider(durationProvider));
+
+    TreeViewerColumn durationGraphColumn =
+        newTreeViewerColumn(viewer, SWT.LEFT, "", 100);
+    durationGraphColumn.getColumn().addSelectionListener(durationSorter);
+    durationGraphColumn.setLabelProvider(new TreeViewerCellPainter(
+        durationProvider) {
       @Override
-      protected int doCompare(Viewer v, Object e1, Object e2) {
-        long count1 = contents.getLaunchCountValueProvider().getValue(e1);
-        long count2 = contents.getLaunchCountValueProvider().getValue(e2);
-        if (count1 == count2) {
-          return 0;
-        } else {
-          return (count1 > count2) ? 1 : -1;
-        }
+      protected Color createColor(Display display) {
+        return new Color(display, 49, 132, 155);
       }
-    };
-    
-    TreeViewerColumn viewerColumn = new TreeViewerColumn(viewer, SWT.LEFT);
-    viewerColumn.getColumn().setText("Name");
-    viewerColumn.getColumn().setWidth(180);
-    viewerColumn.getColumn().addSelectionListener(createInitialComparator(viewer));
-    viewerColumn.setLabelProvider(new DelegatingStyledCellLabelProvider(labels, false));
-
-    TreeColumn column = new TreeColumn(viewer.getTree(), SWT.RIGHT);
-    column.setText("Count");
-    column.setWidth(80);
-    column.addSelectionListener(countSorter);
-
-    column = new TreeColumn(viewer.getTree(), SWT.LEFT);
-    column.setWidth(100);
-    column.addSelectionListener(countSorter);
-    new TreeViewerColumn(viewer, column).setLabelProvider(createCellPainter2());
-
-    column = new TreeColumn(viewer.getTree(), SWT.RIGHT);
-    column.setWidth(120);
-    column.setText("Total Duration");
-    column.addSelectionListener(getValueSorter());
-  }
-  
-  @Override
-  protected PatternFilter createFilter() {
-    return new DeepPatternFilter();
-  }
-  
-  @Override
-  protected TreeViewerLabelSorter createInitialComparator(TreeViewer viewer) {
-    return new TreeViewerLabelSorter(viewer) {
-      @Override
-      protected int doCompare(Viewer v, Object e1, Object e2) {
-        if (!(e1 instanceof TreeNode) || !(e2 instanceof TreeNode))
-          return super.doCompare(v, e1, e2);
-
-        Object element1 = ((TreeNode) e1).getValue();
-        Object element2 = ((TreeNode) e2).getValue();
-        if (element1 instanceof LocalDate && element2 instanceof LocalDate)
-          return ((LocalDate) element1).compareTo(((LocalDate) element2));
-        else
-          return super.doCompare(v, e1, e2);
-      }
-    };
-  }
-  
-  @Override
-  protected IAccessor<LaunchDataDescriptor> getAccessor() {
-    return DataHandler.getAccessor(LaunchDataDescriptor.class);
+    });
   }
 
   @Override
-  protected void initializeViewer(TreeViewer viewer) {
-    contents = new LaunchPageContentProvider(viewer);
-    labels = new LaunchPageLabelProvider(
-        contents.getLaunchCountValueProvider(), 
-        contents.getLaunchDurationValueProvider());
-    viewer.setContentProvider(contents);
-    viewer.setLabelProvider(labels);
-  }
+  public IContributionItem[] createToolBarItems(IToolBarManager toolBar) {
+    List<IContributionItem> items = new CommonToolBarBuilder()
+        .enableFilterControlAction(filteredTree, true)
+        .enableTreeAction(filteredTree.getViewer())
+        .enableGroupByAction(categoryProvider)
+        .enableColorByAction(durationProvider, countProvider)
 
-  @Override
-  protected void restoreState() {
-    super.restoreState();
-    IPreferenceStore store = RabbitUI.getDefault().getPreferenceStore();
+        .addGroupByAction(LAUNCH)
+        .addGroupByAction(LAUNCH_MODE, LAUNCH)
+        .addGroupByAction(LAUNCH_TYPE, LAUNCH)
+        .addGroupByAction(DATE, LAUNCH)
+        .addGroupByAction(WORKSPACE, LAUNCH)
 
-    // Restores the selected categories of the content provider:
-    String[] categoryStr = store.getString(PREF_SELECTED_CATEGORIES).split(",");
-    List<Category> cats = Lists.newArrayList();
-    for (String str : categoryStr) {
-      try {
-        cats.add(Enum.valueOf(Category.class, str));
-      } catch (IllegalArgumentException e) {
-        // Ignore invalid elements.
-      }
+        .addColorByAction(LAUNCH)
+        .addColorByAction(LAUNCH_MODE)
+        .addColorByAction(LAUNCH_TYPE)
+        .addColorByAction(DATE)
+        .addColorByAction(WORKSPACE)
+        .build();
+
+    for (IContributionItem item : items) {
+      toolBar.add(item);
     }
-    contents.setSelectedCategories(cats.toArray(new ICategory[cats.size()]));
-
-    // Restores the paint category of the content provider:
-    String paintStr = store.getString(PREF_PAINT_CATEGORY);
-    try {
-      Category cat = Enum.valueOf(Category.class, paintStr);
-      contents.setPaintCategory(cat);
-    } catch (IllegalArgumentException e) {
-      // Just let the content provider use its default paint category.
-    }
+    return items.toArray(new IContributionItem[items.size()]);
   }
 
   @Override
-  protected void saveState() {
-    super.saveState();
-    IPreferenceStore store = RabbitUI.getDefault().getPreferenceStore();
-
-    // Saves the selected categories of the content provider:
-    ICategory[] categories = contents.getSelectedCategories();
-    store.setValue(PREF_SELECTED_CATEGORIES, Joiner.on(",").join(categories));
-
-    // Saves the paint category of the content provider:
-    store.setValue(PREF_PAINT_CATEGORY, contents.getPaintCategory().toString());
-  }
-
-  /** Action to group data by launch dates. */
-  private IAction newGroupByDatesAction() {
-    final ICategory cat = Category.DATE;
-    return new Action(cat.getText(), cat.getImageDescriptor()) {
+  public Job updateJob(Preference pref) {
+    TreeViewer viewer = filteredTree.getViewer();
+    return new UpdateJob<ILaunchData>(viewer, pref, getAccessor()) {
       @Override
-      public void run() {
-        contents.setSelectedCategories(cat, Category.LAUNCH);
+      protected Object getInput(final Collection<ILaunchData> data) {
+        return new ILaunchDataProvider() {
+          @Override
+          public Collection<ILaunchData> get() {
+            return data;
+          }
+        };
       }
     };
   }
 
-  /** Action to group data by launch configuration types. */
-  private IAction newGroupByLaunchConfigTypesAction() {
-    final ICategory cat = Category.LAUNCH_TYPE;
-    return new Action(cat.getText(), cat.getImageDescriptor()) {
-      @Override
-      public void run() {
-        contents.setSelectedCategories(cat, Category.LAUNCH);
-      }
-    };
+  @Override
+  protected FilteredTree getFilteredTree() {
+    return filteredTree;
   }
 
-  /** Action to group data by launches. */
-  private IAction newGroupByLaunchesAction() {
-    final ICategory cat = Category.LAUNCH;
-    return new Action(cat.getText(), cat.getImageDescriptor()) {
-      @Override
-      public void run() {
-        contents.setSelectedCategories(cat);
-      }
-    };
+  @Override
+  protected Category[] getSelectedCategories() {
+    return categoryProvider.getSelected().toArray(new Category[0]);
   }
 
-  /** Action to group data by launch modes. */
-  private IAction newGroupByLaunchModesAction() {
-    final ICategory cat = Category.LAUNCH_MODE;
-    return new Action(cat.getText(), cat.getImageDescriptor()) {
-      @Override
-      public void run() {
-        contents.setSelectedCategories(cat, Category.LAUNCH);
-      }
-    };
+  @Override
+  protected Category getVisualCategory() {
+    return (Category) durationProvider.getVisualCategory();
+  }
+
+  @Override
+  protected void setSelectedCategories(List<Category> categories) {
+    Category[] selected = categories.toArray(new Category[0]);
+    categoryProvider.setSelected(selected);
+  }
+
+  @Override
+  protected void setVisualCategory(Category category) {
+    durationProvider.setVisualCategory(category);
+    countProvider.setVisualCategory(category);
+  }
+
+  @Override
+  protected void updateMaxValue() {
+    durationProvider.setMaxValue(durationProvider.getVisualCategory());
+    countProvider.setMaxValue(countProvider.getVisualCategory());
+  }
+
+  private TreePathValueProvider createDurationValueProvider() {
+    ICategorizer categorizer = createCategorizer();
+    IConverter<TreePath> converter = new TreePathDurationConverter();
+    return new TreePathValueProvider(
+        categorizer, contentProvider, converter, LAUNCH);
+  }
+
+  private TreePathValueProvider createCountValueProvider() {
+    ICategorizer categorizer = createCategorizer();
+    IConverter<TreePath> converter = new TreePathIntConverter();
+    return new TreePathValueProvider(
+        categorizer, contentProvider, converter, LAUNCH);
+  }
+
+  private ICategorizer createCategorizer() {
+    Map<Predicate<Object>, Category> categories = ImmutableMap.of(
+        instanceOf(LaunchName.class), LAUNCH,
+        instanceOf(ILaunchMode.class), LAUNCH_MODE,
+        instanceOf(ILaunchConfigurationType.class), LAUNCH_TYPE,
+        instanceOf(LocalDate.class), DATE,
+        instanceOf(WorkspaceStorage.class), WORKSPACE);
+    ICategorizer categorizer = new Categorizer(categories);
+    return categorizer;
+  }
+
+  private IAccessor<ILaunchData> getAccessor() {
+    return DataHandler.getAccessor(ILaunchData.class);
   }
 }

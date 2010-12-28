@@ -74,7 +74,8 @@ public final class WorkspaceStorage {
 
   @Override
   public String toString() {
-    return "workspacePath=" + getWorkspacePath() + ":storagePath="
-        + getStoragePath();
+    return Objects.toStringHelper(this)
+        .addValue(getWorkspacePath())
+        .addValue(getStoragePath()).toString();
   }
 }

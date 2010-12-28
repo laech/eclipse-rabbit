@@ -24,8 +24,9 @@ import rabbit.ui.internal.util.ICategory;
 import rabbit.ui.internal.util.ICategoryProvider2;
 import rabbit.ui.internal.viewers.ITreePathBuilder;
 
-import static com.google.common.collect.Lists.newArrayList;
-
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.junit.Assert.assertThat;
+import static org.junit.matchers.JUnitMatchers.hasItems;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
@@ -33,6 +34,7 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.viewers.TreePath;
 import org.joda.time.Duration;
 import org.joda.time.LocalDate;
+import org.junit.Before;
 
 import static java.util.Arrays.asList;
 
@@ -42,51 +44,93 @@ import java.util.List;
 /**
  * Tests for a {@link SessionDataTreeBuilder}.
  */
-public class SessionDataTreeBuilderTest
+public final class SessionDataTreeBuilderTest
     extends AbstractDataTreeBuilderTest<ISessionData> {
 
-  @Override
-  protected List<TreePath> buildPaths(ISessionData data, ICategory... categories) {
-    List<Object> segments = newArrayList();
-    for (ICategory c : categories) {
-      if (c == Category.DATE) {
-        segments.add(data.get(ISessionData.DATE));
-      } else if (c == Category.WORKSPACE) {
-        segments.add(data.get(ISessionData.WORKSPACE));
-      }
-    }
-    segments.add(data.get(ISessionData.DURATION));
-    return asList(new TreePath(segments.toArray()));
+  LocalDate date;
+  Duration duration;
+  WorkspaceStorage ws;
+
+  ISessionData data;
+
+  @Before
+  public void setup() {
+    date = new LocalDate().minusDays(1);
+    duration = new Duration(System.currentTimeMillis());
+    ws = new WorkspaceStorage(new Path(".a"), new Path("/a"));
+
+    data = mock(ISessionData.class);
+    given(data.get(ISessionData.DATE)).willReturn(date);
+    given(data.get(ISessionData.DURATION)).willReturn(duration);
+    given(data.get(ISessionData.WORKSPACE)).willReturn(ws);
   }
 
   @Override
-  protected ICategory[] categories() {
-    return new ICategory[]{Category.DATE, Category.WORKSPACE};
+  public void shouldCorrectlyBuildASinglePath() {
+    ICategory[] categories = {Category.DATE, Category.WORKSPACE};
+    List<TreePath> expected = asList(newPath(date, ws, duration));
+
+    ICategoryProvider2 provider = mock(ICategoryProvider2.class);
+    given(provider.getSelected()).willReturn(asList(categories));
+    ITreePathBuilder builder = create(provider);
+
+    ISessionDataProvider input = mock(ISessionDataProvider.class);
+    given(input.get()).willReturn(asList(data));
+    List<TreePath> actual = builder.build(input);
+
+    assertThat(toString(actual, expected), actual, equalTo(expected));
+  }
+
+  @Override
+  public void shouldCorrectlyBuildMultiplePaths() {
+    WorkspaceStorage ws2 = new WorkspaceStorage(new Path(".b"), null);
+    LocalDate date2 = date.minusDays(2);
+    Duration duration2 = duration.withMillis(10000);
+
+    ICategory[] categories = {Category.WORKSPACE, Category.DATE};
+    List<TreePath> expected = asList(
+        newPath(ws, date, duration),
+        newPath(ws2, date2, duration2));
+
+    ISessionData data2 = mock(ISessionData.class);
+    given(data2.get(ISessionData.DATE)).willReturn(date2);
+    given(data2.get(ISessionData.DURATION)).willReturn(duration2);
+    given(data2.get(ISessionData.WORKSPACE)).willReturn(ws2);
+
+    ICategoryProvider2 provider = mock(ICategoryProvider2.class);
+    given(provider.getSelected()).willReturn(asList(categories));
+    ITreePathBuilder builder = create(provider);
+
+    ISessionDataProvider input = mock(ISessionDataProvider.class);
+    given(input.get()).willReturn(asList(data, data2));
+    List<TreePath> actual = builder.build(input);
+
+    assertThat(actual.size(), equalTo(expected.size()));
+    assertThat(toString(actual, expected),
+        actual, hasItems(expected.toArray(new TreePath[0])));
+  }
+
+  @Override
+  public void shouldRetainIdenticalPaths() {
+    ICategory[] categories = {Category.DATE, Category.WORKSPACE};
+    List<TreePath> expected = asList(
+        newPath(date, ws, duration),
+        newPath(date, ws, duration));
+
+    ICategoryProvider2 provider = mock(ICategoryProvider2.class);
+    given(provider.getSelected()).willReturn(asList(categories));
+    ITreePathBuilder builder = create(provider);
+
+    ISessionDataProvider input = mock(ISessionDataProvider.class);
+    given(input.get()).willReturn(asList(data, data));
+    List<TreePath> actual = builder.build(input);
+
+    assertThat(toString(actual, expected), actual, equalTo(expected));
   }
 
   @Override
   protected ITreePathBuilder create(ICategoryProvider2 p) {
     return new SessionDataTreeBuilder(p);
-  }
-
-  @Override
-  protected ISessionData dataNode1() {
-    ISessionData d = mock(ISessionData.class);
-    given(d.get(ISessionData.DATE)).willReturn(new LocalDate().minusDays(1));
-    given(d.get(ISessionData.DURATION)).willReturn(new Duration(10));
-    given(d.get(ISessionData.WORKSPACE)).willReturn(
-        new WorkspaceStorage(new Path("/"), null));
-    return d;
-  }
-
-  @Override
-  protected ISessionData dataNode2() {
-    ISessionData d = mock(ISessionData.class);
-    given(d.get(ISessionData.DATE)).willReturn(new LocalDate());
-    given(d.get(ISessionData.DURATION)).willReturn(new Duration(9));
-    given(d.get(ISessionData.WORKSPACE)).willReturn(
-        new WorkspaceStorage(new Path("/a"), new Path("/b")));
-    return d;
   }
 
   @Override

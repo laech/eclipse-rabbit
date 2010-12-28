@@ -27,6 +27,7 @@ import rabbit.ui.internal.util.ICategory;
 import rabbit.ui.internal.util.ICategoryProvider2;
 import rabbit.ui.internal.util.TreePathValueProvider;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.collect.Lists;
@@ -52,7 +53,7 @@ public final class CommonToolBarBuilder {
   private List<IAction> groupByActions;
   private List<IAction> colorByActions;
   private ICategoryProvider2 categoryProvider;
-  private TreePathValueProvider valueProvider;
+  private TreePathValueProvider[] valueProviders;
 
   public CommonToolBarBuilder() {
     groupByActions = Lists.newLinkedList();
@@ -60,12 +61,12 @@ public final class CommonToolBarBuilder {
   }
 
   /**
-   * @throws IllegalStateException if {@link #enableColorByAction(TreePathValueProvider)} has not
+   * @throws IllegalStateException if {@link #enableColorByAction(TreePathValueProvider...)} has not
    *         been called.
    */
   public CommonToolBarBuilder addColorByAction(ICategory visualCategory) {
-    checkState(valueProvider != null);
-    colorByActions.add(new PaintCategoryAction2(valueProvider, visualCategory));
+    checkState(valueProviders != null);
+    colorByActions.add(new PaintCategoryAction2(visualCategory, valueProviders));
     return this;
   }
 
@@ -95,7 +96,7 @@ public final class CommonToolBarBuilder {
       items.add(new ActionContributionItem(
           new GroupByAction2(categoryProvider, groupByActions.toArray(new IAction[0]))));
     }
-    if (valueProvider != null) {
+    if (valueProviders != null) {
       items.add(new ActionContributionItem(
           new ColorByAction(colorByActions.toArray(new IAction[0]))));
     }
@@ -104,13 +105,16 @@ public final class CommonToolBarBuilder {
   
   /**
    * Enables the color-by action group.
-   * @param valueProvider the provider to accept the action events. 
+   * @param valueProviders the provider to accept the action events. 
    * @return this
    * @see TreePathValueProvider#getVisualCategory()
    * @see TreePathValueProvider#setVisualCategory(ICategory)
    */
-  public CommonToolBarBuilder enableColorByAction(TreePathValueProvider valueProvider) {
-    this.valueProvider = valueProvider;
+  public CommonToolBarBuilder enableColorByAction(TreePathValueProvider... valueProviders) {
+    for (TreePathValueProvider p : valueProviders) {
+      checkNotNull(p);
+    }
+    this.valueProviders = valueProviders.clone();
     return this;
   }
   

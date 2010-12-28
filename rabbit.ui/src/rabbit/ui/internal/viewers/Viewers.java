@@ -92,7 +92,7 @@ public final class Viewers {
     TreeViewerColumn column = new TreeViewerColumn(viewer, style);
     column.getColumn().setResizable(true);
     column.getColumn().setMoveable(true);
-    column.getColumn().setWidth(100);
+    column.getColumn().setWidth(100); // TODO fix this.
     column.getColumn().setText(text);
     return column;
   }

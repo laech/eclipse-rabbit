@@ -27,10 +27,7 @@ import static com.google.common.collect.Lists.newArrayListWithCapacity;
 
 import com.google.common.base.Joiner;
 
-import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
@@ -39,7 +36,6 @@ import org.eclipse.jface.viewers.TreePath;
 import org.junit.Before;
 import org.junit.Test;
 
-import static java.util.Arrays.asList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.emptySet;
 
@@ -55,26 +51,14 @@ import javax.annotation.Nullable;
  * These tree builders all take an {@link ICategoryProvider2} as constructor
  * argument, and all accept input as some kind of {@link IProvider}.
  * 
- * @param <T> the element type to be returned by {@link IProvider#get()}.
  * @see AbstractDataTreeBuilder
  */
 public abstract class AbstractDataTreeBuilderTest<T> {
 
   private ITreePathBuilder builder;
-  private T data;
-  private IProvider<T> input;
 
   @Before
-  @SuppressWarnings("unchecked")
   public void before() {
-
-    assertThat(dataNode1(), is(not(dataNode2())));
-    assertThat(input(null).get(), is(nullValue()));
-    assertThat(categories(), is(not(reverse(categories()))));
-
-    data = dataNode1();
-    input = input(asList(data));
-
     Collection<ICategory> noCategories = emptySet();
     ICategoryProvider2 p = mock(ICategoryProvider2.class);
     given(p.getAllSupported()).willReturn(noCategories);
@@ -109,70 +93,10 @@ public abstract class AbstractDataTreeBuilderTest<T> {
   }
 
   @Test
-  public void shouldBuildPathsUsingTheLatestOrderOfTheCategories() {
-    ICategory[] categories1 = categories();
-    ICategoryProvider2 p = mock(ICategoryProvider2.class);
-    given(p.getSelected()).willReturn(asList(categories1));
-
-    // Build something using the previous categories:
-    builder = create(p);
-    builder.build(input);
-
-    // Reorder the categories and build something else:
-    ICategory[] categories2 = reverse(categories1);
-    given(p.getSelected()).willReturn(asList(categories2));
-    List<TreePath> pathsBuilt = builder.build(input);
-
-    // Then the tree paths are built using the latest order of the categories:
-    List<TreePath> expected = buildPaths(data, categories2);
-    assertThat(toString(pathsBuilt, expected), pathsBuilt, is(expected));
-  }
+  public abstract void shouldCorrectlyBuildASinglePath();
 
   @Test
-  public void shouldCorrectlyBuildASinglePath() {
-    // Given the categories are ordered in a certain order:
-    ICategory[] categories = categories();
-    ICategoryProvider2 p = mock(ICategoryProvider2.class);
-    given(p.getSelected()).willReturn(asList(categories));
-    builder = create(p);
-
-    // When a tree path is built:
-    List<TreePath> paths = builder.build(input);
-
-    // Then the segments in the tree path should follow that order:
-    List<TreePath> expected = buildPaths(data, categories);
-    assertThat(toString(paths, expected), paths, is(equalTo(expected)));
-  }
-
-  @Test
-  public void shouldCorrectlyBuildMultiplePaths() {
-    // Given there is more than one data to be built to tree paths:
-    ICategory[] categories = categories();
-    ICategoryProvider2 p = mock(ICategoryProvider2.class);
-    given(p.getSelected()).willReturn(asList(categories));
-
-    List<T> mockData = newArrayList();
-    List<TreePath> expected = newArrayList();
-    for (int i = 0; i < 2; ++i) {
-
-      // Setup the mock:
-      T d = (i % 2 == 0) ? dataNode1() : dataNode2();
-      mockData.add(d);
-
-      // Builds the expected path using the order of the categories defined by
-      // the category provider:
-      expected.addAll(buildPaths(d, categories));
-    }
-
-    IProvider<T> input = input(mockData);
-    builder = create(p);
-
-    // When the tree paths are built:
-    List<TreePath> pathsBuilt = builder.build(input);
-
-    // Then each data node should have its corresponding tree path:
-    assertThat(toString(pathsBuilt, expected), pathsBuilt, is(expected));
-  }
+  public abstract void shouldCorrectlyBuildMultiplePaths();
 
   @Test
   public void shouldIgnoreTheInputIfTheInputReturnsANullCollection() {
@@ -183,55 +107,21 @@ public abstract class AbstractDataTreeBuilderTest<T> {
     List<TreePath> pathsBuilt = builder.build(dataProvider);
 
     // Then an empty collection is returned without failing:
-    assertThat(pathsBuilt, is(emptyList()));
+    assertThat(pathsBuilt, is(Collections.<TreePath> emptyList()));
   }
 
   @Test
-  public void shouldRetainIdenticalPaths() {
-    // Given there are some data nodes that contains the same information
-    ICategory[] categories = categories();
-    ICategoryProvider2 p = mock(ICategoryProvider2.class);
-    given(p.getSelected()).willReturn(asList(categories)); // Set up the
-                                                           // category order
+  public abstract void shouldRetainIdenticalPaths();
 
-    List<T> mockData = newArrayList();
-    List<TreePath> expected = newArrayList();
-    T data = dataNode1();
-    List<TreePath> paths = buildPaths(data, categories);
-    // Create multiple equal elements:
-    for (int i = 0; i < 2; ++i) {
-      mockData.add(data);
-      expected.addAll(paths);
-    }
-
-    IProvider<T> input = input(mockData);
-    builder = create(p);
-
-    // When the tree paths are built, all identical paths should be retained:
-    List<TreePath> pathsBuilt = builder.build(input);
-
-    // Then each data node should have its corresponding tree path:
-    assertThat(toString(pathsBuilt, expected), pathsBuilt, is(expected));
-  }
   @Test
   public void shouldReturnAnEmptyCollectionIfInputIsNotRecognized() {
-    assertThat(builder.build("NotRecognized"), is(emptyList()));
+    assertThat(builder.build(this), is(Collections.<TreePath> emptyList()));
   }
 
   @Test
   public void shouldReturnAnEmptyCollectionIsInputIsNull() {
-    assertThat(builder.build(null), is(emptyList()));
+    assertThat(builder.build(null), is(Collections.<TreePath> emptyList()));
   }
-
-  /**
-   * Builds tree paths according to the given data and categories.
-   */
-  protected abstract List<TreePath> buildPaths(T data, ICategory... categories);
-
-  /**
-   * @return some categories supported by the builder, must be more than one.
-   */
-  protected abstract ICategory[] categories();
 
   /**
    * Creates a builder to be tested.
@@ -241,20 +131,14 @@ public abstract class AbstractDataTreeBuilderTest<T> {
   protected abstract ITreePathBuilder create(ICategoryProvider2 p);
 
   /**
-   * Creates a data node that is different to {@link #dataNode2()}.
-   */
-  protected abstract T dataNode1();
-
-  /**
-   * Creates a data node that is different to {@link #dataNode1()}.
-   */
-  protected abstract T dataNode2();
-
-  /**
    * Creates a provider as an input to the builder.
    * @param inputData the data to be returned by the provider.
    */
   protected abstract IProvider<T> input(@Nullable Collection<T> inputData);
+
+  protected TreePath newPath(Object... segments) {
+    return new TreePath(segments);
+  }
 
   /**
    * @return an error message to use with assert methods.
@@ -282,23 +166,5 @@ public abstract class AbstractDataTreeBuilderTest<T> {
     }
     return path.getClass().getSimpleName() + "["
         + Joiner.on(", ").join(segments) + "]";
-  }
-
-  /**
-   * @return an empty list of tree paths.
-   */
-  private List<TreePath> emptyList() {
-    return Collections.emptyList();
-  }
-
-  /**
-   * Creates a new array that is the inverse of the given array.
-   */
-  private ICategory[] reverse(ICategory[] elements) {
-    List<ICategory> list = newArrayListWithCapacity(elements.length);
-    for (ICategory elem : elements) {
-      list.add(0, elem);
-    }
-    return list.toArray(new ICategory[0]);
   }
 }

@@ -15,34 +15,38 @@
  */
 package rabbit.ui.internal.pages;
 
-import static rabbit.ui.internal.pages.Category.COMMAND;
 import static rabbit.ui.internal.pages.Category.DATE;
+import static rabbit.ui.internal.pages.Category.LAUNCH;
+import static rabbit.ui.internal.pages.Category.LAUNCH_MODE;
+import static rabbit.ui.internal.pages.Category.LAUNCH_TYPE;
 import static rabbit.ui.internal.pages.Category.WORKSPACE;
 import static rabbit.ui.internal.viewers.Viewers.newTreeViewerColumn;
 
 import rabbit.data.access.IAccessor;
-import rabbit.data.access.model.ICommandData;
+import rabbit.data.access.model.ILaunchData;
 import rabbit.data.access.model.WorkspaceStorage;
 import rabbit.data.handler.DataHandler;
 import rabbit.ui.Preference;
-import rabbit.ui.internal.treebuilders.CommandDataTreeBuilder;
-import rabbit.ui.internal.treebuilders.CommandDataTreeBuilder.ICommandDataProvider;
+import rabbit.ui.internal.treebuilders.LaunchDataTreeBuilder;
+import rabbit.ui.internal.treebuilders.LaunchDataTreeBuilder.ILaunchDataProvider;
 import rabbit.ui.internal.util.Categorizer;
 import rabbit.ui.internal.util.CategoryProvider;
 import rabbit.ui.internal.util.ICategorizer;
 import rabbit.ui.internal.util.IConverter;
+import rabbit.ui.internal.util.LaunchName;
+import rabbit.ui.internal.util.TreePathDurationConverter;
 import rabbit.ui.internal.util.TreePathIntConverter;
 import rabbit.ui.internal.util.TreePathValueProvider;
-import rabbit.ui.internal.viewers.CommandDescriptionProvider;
-import rabbit.ui.internal.viewers.CommandLabelProvider;
 import rabbit.ui.internal.viewers.CompositeCellLabelProvider;
 import rabbit.ui.internal.viewers.DateLabelProvider;
 import rabbit.ui.internal.viewers.FilterableTreePathContentProvider;
+import rabbit.ui.internal.viewers.LaunchLabelProvider;
+import rabbit.ui.internal.viewers.ResourceLabelProvider;
 import rabbit.ui.internal.viewers.TreePathContentProvider;
+import rabbit.ui.internal.viewers.TreePathDurationLabelProvider;
 import rabbit.ui.internal.viewers.TreePathIntLabelProvider;
 import rabbit.ui.internal.viewers.TreePathPatternFilter;
 import rabbit.ui.internal.viewers.TreeViewerCellPainter;
-import rabbit.ui.internal.viewers.TreeViewerColumnLabelSorter;
 import rabbit.ui.internal.viewers.TreeViewerColumnSorter;
 import rabbit.ui.internal.viewers.TreeViewerColumnValueSorter;
 import rabbit.ui.internal.viewers.Viewers;
@@ -53,20 +57,23 @@ import static com.google.common.base.Predicates.instanceOf;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableMap;
 
-import org.eclipse.core.commands.Command;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.debug.core.ILaunchConfigurationType;
+import org.eclipse.debug.core.ILaunchMode;
 import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.IToolBarManager;
-import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.DecoratingStyledCellLabelProvider;
 import org.eclipse.jface.viewers.ILabelDecorator;
 import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.TreeViewerColumn;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.FilteredTree;
+import org.joda.time.Duration;
 import org.joda.time.LocalDate;
 
 import java.util.Collection;
@@ -80,25 +87,32 @@ public class TmpPage2 extends AbsPage {
 
   private FilteredTree filteredTree;
   private CategoryProvider categoryProvider;
-  private TreePathValueProvider valueProvider;
+  private TreePathValueProvider durationProvider;
+  private TreePathValueProvider countProvider;
   private TreePathContentProvider contentProvider;
 
   public TmpPage2() {}
 
   @Override
   public void createContents(Composite parent) {
-    Category[] supported = {WORKSPACE, DATE, COMMAND};
-    categoryProvider = new CategoryProvider(supported, COMMAND);
+    Category[] supported = {WORKSPACE, DATE, LAUNCH, LAUNCH_MODE, LAUNCH_TYPE};
+    categoryProvider = new CategoryProvider(supported, LAUNCH);
     categoryProvider.addObserver(this);
+
     contentProvider = new TreePathContentProvider(
-        new CommandDataTreeBuilder(categoryProvider));
+        new LaunchDataTreeBuilder(categoryProvider));
     contentProvider.addObserver(this);
-    valueProvider = createValueProvider();
-    valueProvider.addObserver(this);
+
+    durationProvider = createDurationValueProvider();
+    durationProvider.addObserver(this);
+
+    countProvider = createCountValueProvider();
+    countProvider.addObserver(this);
 
     // The main label provider for the first column:
     CompositeCellLabelProvider mainLabels = new CompositeCellLabelProvider(
-        new CommandLabelProvider(),
+        new LaunchLabelProvider(),
+        new ResourceLabelProvider(),
         new DateLabelProvider(),
         new WorkspaceStorageLabelProvider());
 
@@ -109,13 +123,16 @@ public class TmpPage2 extends AbsPage {
     FilterableTreePathContentProvider filteredContentProvider =
         new FilterableTreePathContentProvider(contentProvider);
     filteredContentProvider.addFilter(instanceOf(Integer.class));
+    filteredContentProvider.addFilter(instanceOf(Duration.class));
     viewer.setContentProvider(filteredContentProvider);
 
     // Column sorters:
     TreeViewerColumnSorter labelSorter =
         new InternalTreeViewerColumnLabelSorter(viewer, mainLabels);
     TreeViewerColumnSorter countSorter =
-        new TreeViewerColumnValueSorter(viewer, valueProvider);
+        new TreeViewerColumnValueSorter(viewer, countProvider);
+    TreeViewerColumnSorter durationSorter =
+        new TreeViewerColumnValueSorter(viewer, durationProvider);
 
     // The columns:
 
@@ -127,23 +144,38 @@ public class TmpPage2 extends AbsPage {
     mainColumn.setLabelProvider(new DecoratingStyledCellLabelProvider(
         mainLabels, decorator, null));
 
-    TreeViewerColumn descriptionColumn =
-        newTreeViewerColumn(viewer, SWT.LEFT, "Description", 200);
-    ColumnLabelProvider descriptionLabels = new CommandDescriptionProvider();
-    descriptionColumn.setLabelProvider(descriptionLabels);
-    descriptionColumn.getColumn().addSelectionListener(
-        new TreeViewerColumnLabelSorter(viewer, descriptionLabels));
+    TreeViewerColumn countColumn =
+        newTreeViewerColumn(viewer, SWT.RIGHT, "Count", 100);
+    countColumn.getColumn().addSelectionListener(countSorter);
+    countColumn.setLabelProvider(
+        new TreePathIntLabelProvider(countProvider));
+
+    TreeViewerColumn countGraphColumn =
+        newTreeViewerColumn(viewer, SWT.LEFT, "", 100);
+    countGraphColumn.getColumn().addSelectionListener(countSorter);
+    countGraphColumn.setLabelProvider(new TreeViewerCellPainter(countProvider) {
+      @Override
+      protected Color createColor(Display display) {
+        return new Color(display, 118, 146, 60);
+      }
+    });
 
     TreeViewerColumn durationColumn =
-        newTreeViewerColumn(viewer, SWT.RIGHT, "Usage Count", 150);
-    durationColumn.getColumn().addSelectionListener(countSorter);
+        newTreeViewerColumn(viewer, SWT.RIGHT, "Total Duration", 150);
+    durationColumn.getColumn().addSelectionListener(durationSorter);
     durationColumn.setLabelProvider(
-        new TreePathIntLabelProvider(valueProvider));
+        new TreePathDurationLabelProvider(durationProvider));
 
-    TreeViewerColumn graphColumn =
+    TreeViewerColumn durationGraphColumn =
         newTreeViewerColumn(viewer, SWT.LEFT, "", 100);
-    graphColumn.getColumn().addSelectionListener(countSorter);
-    graphColumn.setLabelProvider(new TreeViewerCellPainter(valueProvider));
+    durationGraphColumn.getColumn().addSelectionListener(durationSorter);
+    durationGraphColumn.setLabelProvider(new TreeViewerCellPainter(
+        durationProvider) {
+      @Override
+      protected Color createColor(Display display) {
+        return new Color(display, 49, 132, 155);
+      }
+    });
   }
 
   @Override
@@ -152,11 +184,17 @@ public class TmpPage2 extends AbsPage {
         .enableFilterControlAction(filteredTree, true)
         .enableTreeAction(filteredTree.getViewer())
         .enableGroupByAction(categoryProvider)
-        .enableColorByAction(valueProvider)
-        .addGroupByAction(COMMAND)
-        .addGroupByAction(DATE, COMMAND)
-        .addGroupByAction(WORKSPACE, COMMAND)
-        .addColorByAction(COMMAND)
+        .enableColorByAction(durationProvider, countProvider)
+
+        .addGroupByAction(LAUNCH)
+        .addGroupByAction(LAUNCH_MODE, LAUNCH)
+        .addGroupByAction(LAUNCH_TYPE, LAUNCH)
+        .addGroupByAction(DATE, LAUNCH)
+        .addGroupByAction(WORKSPACE, LAUNCH)
+
+        .addColorByAction(LAUNCH)
+        .addColorByAction(LAUNCH_MODE)
+        .addColorByAction(LAUNCH_TYPE)
         .addColorByAction(DATE)
         .addColorByAction(WORKSPACE)
         .build();
@@ -170,12 +208,12 @@ public class TmpPage2 extends AbsPage {
   @Override
   public Job updateJob(Preference pref) {
     TreeViewer viewer = filteredTree.getViewer();
-    return new UpdateJob<ICommandData>(viewer, pref, getAccessor()) {
+    return new UpdateJob<ILaunchData>(viewer, pref, getAccessor()) {
       @Override
-      protected Object getInput(final Collection<ICommandData> data) {
-        return new ICommandDataProvider() {
+      protected Object getInput(final Collection<ILaunchData> data) {
+        return new ILaunchDataProvider() {
           @Override
-          public Collection<ICommandData> get() {
+          public Collection<ILaunchData> get() {
             return data;
           }
         };
@@ -195,36 +233,53 @@ public class TmpPage2 extends AbsPage {
 
   @Override
   protected Category getVisualCategory() {
-    return (Category) valueProvider.getVisualCategory();
+    return (Category) durationProvider.getVisualCategory();
   }
 
   @Override
   protected void setSelectedCategories(List<Category> categories) {
-    categoryProvider.setSelected(categories.toArray(new Category[0]));
+    Category[] selected = categories.toArray(new Category[0]);
+    categoryProvider.setSelected(selected);
   }
 
   @Override
   protected void setVisualCategory(Category category) {
-    valueProvider.setVisualCategory(category);
+    durationProvider.setVisualCategory(category);
+    countProvider.setVisualCategory(category);
   }
 
   @Override
   protected void updateMaxValue() {
-    valueProvider.setMaxValue(valueProvider.getVisualCategory());
+    durationProvider.setMaxValue(durationProvider.getVisualCategory());
+    countProvider.setMaxValue(countProvider.getVisualCategory());
   }
 
-  private TreePathValueProvider createValueProvider() {
+  private TreePathValueProvider createDurationValueProvider() {
+    ICategorizer categorizer = createCategorizer();
+    IConverter<TreePath> converter = new TreePathDurationConverter();
+    return new TreePathValueProvider(
+        categorizer, contentProvider, converter, LAUNCH);
+  }
+
+  private TreePathValueProvider createCountValueProvider() {
+    ICategorizer categorizer = createCategorizer();
+    IConverter<TreePath> converter = new TreePathIntConverter();
+    return new TreePathValueProvider(
+        categorizer, contentProvider, converter, LAUNCH);
+  }
+
+  private ICategorizer createCategorizer() {
     Map<Predicate<Object>, Category> categories = ImmutableMap.of(
-        instanceOf(Command.class), COMMAND,
+        instanceOf(LaunchName.class), LAUNCH,
+        instanceOf(ILaunchMode.class), LAUNCH_MODE,
+        instanceOf(ILaunchConfigurationType.class), LAUNCH_TYPE,
         instanceOf(LocalDate.class), DATE,
         instanceOf(WorkspaceStorage.class), WORKSPACE);
     ICategorizer categorizer = new Categorizer(categories);
-    IConverter<TreePath> converter = new TreePathIntConverter();
-    return new TreePathValueProvider(
-        categorizer, contentProvider, converter, COMMAND);
+    return categorizer;
   }
 
-  private IAccessor<ICommandData> getAccessor() {
-    return DataHandler.getAccessor(ICommandData.class);
+  private IAccessor<ILaunchData> getAccessor() {
+    return DataHandler.getAccessor(ILaunchData.class);
   }
 }

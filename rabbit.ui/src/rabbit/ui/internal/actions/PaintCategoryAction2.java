@@ -20,28 +20,36 @@ import rabbit.ui.internal.util.TreePathValueProvider;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.collect.ImmutableList;
+
 import org.eclipse.jface.action.Action;
 
+import java.util.List;
+
 /**
- * An action to call {@link TreePathValueProvider#setVisualCategory(ICategory)} when it's
- * invoked.
+ * An action to call {@link TreePathValueProvider#setVisualCategory(ICategory)}
+ * when it's invoked.
  */
 public final class PaintCategoryAction2 extends Action {
 
-  private final TreePathValueProvider provider;
   private final ICategory visualCategory;
+  private final List<TreePathValueProvider> providers;
 
   /**
    * Constructor. When this action is invoked,
-   * {@link TreePathValueProvider#setVisualCategory(ICategory)} will be called with the given
-   * category. The text/image will be taken from the category.
-   * @param provider the provider to set the category.
+   * {@link TreePathValueProvider#setVisualCategory(ICategory)} will be called
+   * with the given category. The text/image will be taken from the category.
+   * @param providers the providers to set the category.
    * @param visualCategory the category to be set.
    * @throws NullPointerException if any argument is null.
    */
-  public PaintCategoryAction2(TreePathValueProvider provider, ICategory visualCategory) {
-    this.provider = checkNotNull(provider);
+  public PaintCategoryAction2(
+      ICategory visualCategory, TreePathValueProvider... providers) {
     this.visualCategory = checkNotNull(visualCategory);
+    for (TreePathValueProvider p : providers) {
+      checkNotNull(p);
+    }
+    this.providers = ImmutableList.copyOf(providers);
     setText(visualCategory.getText());
     setImageDescriptor(visualCategory.getImageDescriptor());
   }
@@ -49,6 +57,8 @@ public final class PaintCategoryAction2 extends Action {
   @Override
   public void run() {
     super.run();
-    provider.setVisualCategory(visualCategory);
+    for (TreePathValueProvider provider : providers) {
+      provider.setVisualCategory(visualCategory);
+    }
   }
 }

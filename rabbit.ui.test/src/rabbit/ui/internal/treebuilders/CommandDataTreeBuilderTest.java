@@ -24,8 +24,9 @@ import rabbit.ui.internal.util.ICategory;
 import rabbit.ui.internal.util.ICategoryProvider2;
 import rabbit.ui.internal.viewers.ITreePathBuilder;
 
-import static com.google.common.collect.Lists.newArrayList;
-
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.junit.Assert.assertThat;
+import static org.junit.matchers.JUnitMatchers.hasItems;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
@@ -33,6 +34,7 @@ import org.eclipse.core.commands.Command;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.viewers.TreePath;
 import org.joda.time.LocalDate;
+import org.junit.Before;
 
 import static java.util.Arrays.asList;
 
@@ -46,52 +48,96 @@ import java.util.List;
 public class CommandDataTreeBuilderTest
     extends AbstractDataTreeBuilderTest<ICommandData> {
 
-  @Override
-  protected List<TreePath> buildPaths(ICommandData d, ICategory... categories) {
-    List<Object> segments = newArrayList();
-    for (ICategory c : categories) {
-      if (c == Category.COMMAND) {
-        segments.add(d.get(ICommandData.COMMAND));
-      } else if (c == Category.DATE) {
-        segments.add(d.get(ICommandData.DATE));
-      } else if (c == Category.WORKSPACE) {
-        segments.add(d.get(ICommandData.WORKSPACE));
-      }
-    }
-    segments.add(d.get(ICommandData.COUNT));
-    return asList(new TreePath(segments.toArray()));
+  int count;
+  Command command;
+  LocalDate date;
+  WorkspaceStorage ws;
+
+  ICommandData data;
+
+  @Before
+  public void setup() {
+    command = newCommand("hello");
+    count = 19;
+    date = new LocalDate().minusDays(1);
+    ws = new WorkspaceStorage(new Path(".a"), new Path("/a"));
+
+    data = mock(ICommandData.class);
+    given(data.get(ICommandData.DATE)).willReturn(date);
+    given(data.get(ICommandData.COUNT)).willReturn(count);
+    given(data.get(ICommandData.COMMAND)).willReturn(command);
+    given(data.get(ICommandData.WORKSPACE)).willReturn(ws);
   }
 
   @Override
-  protected ICategory[] categories() {
-    return new ICategory[]{Category.DATE, Category.WORKSPACE};
+  public void shouldCorrectlyBuildASinglePath() {
+    ICategory[] categories = {
+        Category.DATE, Category.WORKSPACE, Category.COMMAND};
+    List<TreePath> expected = asList(newPath(date, ws, command, count));
+
+    ICategoryProvider2 provider = mock(ICategoryProvider2.class);
+    given(provider.getSelected()).willReturn(asList(categories));
+    ITreePathBuilder builder = create(provider);
+
+    ICommandDataProvider input = mock(ICommandDataProvider.class);
+    given(input.get()).willReturn(asList(data));
+    List<TreePath> actual = builder.build(input);
+
+    assertThat(toString(actual, expected), actual, equalTo(expected));
+  }
+
+  @Override
+  public void shouldCorrectlyBuildMultiplePaths() {
+    WorkspaceStorage ws2 = new WorkspaceStorage(new Path(".b"), null);
+    LocalDate date2 = date.minusDays(2);
+    Command command2 = newCommand("abc");
+    int count2 = count + 10;
+
+    ICategory[] categories = {Category.WORKSPACE, Category.COMMAND};
+    List<TreePath> expected = asList(
+        newPath(ws, command, count),
+        newPath(ws2, command2, count2));
+
+    ICommandData data2 = mock(ICommandData.class);
+    given(data2.get(ICommandData.DATE)).willReturn(date2);
+    given(data2.get(ICommandData.COUNT)).willReturn(count2);
+    given(data2.get(ICommandData.COMMAND)).willReturn(command2);
+    given(data2.get(ICommandData.WORKSPACE)).willReturn(ws2);
+
+    ICategoryProvider2 provider = mock(ICategoryProvider2.class);
+    given(provider.getSelected()).willReturn(asList(categories));
+    ITreePathBuilder builder = create(provider);
+
+    ICommandDataProvider input = mock(ICommandDataProvider.class);
+    given(input.get()).willReturn(asList(data, data2));
+    List<TreePath> actual = builder.build(input);
+
+    assertThat(actual.size(), equalTo(expected.size()));
+    assertThat(toString(actual, expected),
+        actual, hasItems(expected.toArray(new TreePath[0])));
+  }
+
+  @Override
+  public void shouldRetainIdenticalPaths() {
+    ICategory[] categories = {Category.DATE, Category.WORKSPACE};
+    List<TreePath> expected = asList(
+        newPath(date, ws, count),
+        newPath(date, ws, count));
+
+    ICategoryProvider2 provider = mock(ICategoryProvider2.class);
+    given(provider.getSelected()).willReturn(asList(categories));
+    ITreePathBuilder builder = create(provider);
+
+    ICommandDataProvider input = mock(ICommandDataProvider.class);
+    given(input.get()).willReturn(asList(data, data));
+    List<TreePath> actual = builder.build(input);
+
+    assertThat(toString(actual, expected), actual, equalTo(expected));
   }
 
   @Override
   protected ITreePathBuilder create(ICategoryProvider2 p) {
     return new CommandDataTreeBuilder(p);
-  }
-
-  @Override
-  protected ICommandData dataNode1() {
-    ICommandData data = mock(ICommandData.class);
-    given(data.get(ICommandData.COMMAND)).willReturn(newCommand("1"));
-    given(data.get(ICommandData.COUNT)).willReturn(10);
-    given(data.get(ICommandData.DATE)).willReturn(new LocalDate());
-    given(data.get(ICommandData.WORKSPACE)).willReturn(
-        new WorkspaceStorage(new Path("/"), null));
-    return data;
-  }
-
-  @Override
-  protected ICommandData dataNode2() {
-    ICommandData data = mock(ICommandData.class);
-    given(data.get(ICommandData.COMMAND)).willReturn(newCommand("2"));
-    given(data.get(ICommandData.COUNT)).willReturn(11);
-    given(data.get(ICommandData.DATE)).willReturn(new LocalDate().minusDays(1));
-    given(data.get(ICommandData.WORKSPACE)).willReturn(
-        new WorkspaceStorage(new Path("/1"), new Path("/2")));
-    return data;
   }
 
   @Override
@@ -107,7 +153,8 @@ public class CommandDataTreeBuilderTest
 
   private Command newCommand(String id) {
     try {
-      Constructor<Command> c = Command.class.getDeclaredConstructor(String.class);
+      Constructor<Command> c = Command.class
+          .getDeclaredConstructor(String.class);
       c.setAccessible(true);
       return c.newInstance(id);
     } catch (Exception e) {
