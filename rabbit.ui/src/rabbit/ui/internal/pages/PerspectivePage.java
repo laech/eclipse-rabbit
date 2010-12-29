@@ -15,208 +15,226 @@
  */
 package rabbit.ui.internal.pages;
 
+import static rabbit.ui.internal.pages.Category.DATE;
+import static rabbit.ui.internal.pages.Category.PERSPECTIVE;
+import static rabbit.ui.internal.pages.Category.WORKSPACE;
+import static rabbit.ui.internal.viewers.Viewers.newTreeViewerColumn;
+
 import rabbit.data.access.IAccessor;
-import rabbit.data.access.model.PerspectiveDataDescriptor;
+import rabbit.data.access.model.IPerspectiveData;
+import rabbit.data.access.model.WorkspaceStorage;
 import rabbit.data.handler.DataHandler;
-import rabbit.ui.internal.RabbitUI;
-import rabbit.ui.internal.SharedImages;
-import rabbit.ui.internal.actions.CollapseAllAction;
-import rabbit.ui.internal.actions.DropDownAction;
-import rabbit.ui.internal.actions.ExpandAllAction;
-import rabbit.ui.internal.actions.GroupByAction;
-import rabbit.ui.internal.actions.ShowHideFilterControlAction;
-import rabbit.ui.internal.util.ICategory;
-import rabbit.ui.internal.viewers.CellPainter;
-import rabbit.ui.internal.viewers.DelegatingStyledCellLabelProvider;
-import rabbit.ui.internal.viewers.TreeViewerLabelSorter;
-import rabbit.ui.internal.viewers.TreeViewerSorter;
+import rabbit.ui.Preference;
+import rabbit.ui.internal.treebuilders.PerspectiveDataTreeBuilder;
+import rabbit.ui.internal.treebuilders.PerspectiveDataTreeBuilder.IPerspectiveDataProvider;
+import rabbit.ui.internal.util.Categorizer;
+import rabbit.ui.internal.util.CategoryProvider;
+import rabbit.ui.internal.util.ICategorizer;
+import rabbit.ui.internal.util.IConverter;
+import rabbit.ui.internal.util.TreePathDurationConverter;
+import rabbit.ui.internal.util.TreePathValueProvider;
+import rabbit.ui.internal.viewers.CompositeCellLabelProvider;
+import rabbit.ui.internal.viewers.DateLabelProvider;
+import rabbit.ui.internal.viewers.FilterableTreePathContentProvider;
+import rabbit.ui.internal.viewers.PerspectiveLabelProvider;
+import rabbit.ui.internal.viewers.TreePathContentProvider;
+import rabbit.ui.internal.viewers.TreePathDurationLabelProvider;
+import rabbit.ui.internal.viewers.TreePathPatternFilter;
+import rabbit.ui.internal.viewers.TreeViewerCellPainter;
+import rabbit.ui.internal.viewers.TreeViewerColumnSorter;
+import rabbit.ui.internal.viewers.TreeViewerColumnValueSorter;
+import rabbit.ui.internal.viewers.Viewers;
+import rabbit.ui.internal.viewers.WorkspaceStorageLabelProvider;
 
-import com.google.common.base.Joiner;
-import com.google.common.collect.Lists;
+import static com.google.common.base.Predicates.instanceOf;
 
-import org.eclipse.jface.action.Action;
-import org.eclipse.jface.action.ActionContributionItem;
-import org.eclipse.jface.action.IAction;
+import com.google.common.base.Predicate;
+import com.google.common.collect.ImmutableMap;
+
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.IToolBarManager;
-import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.viewers.TreeNode;
+import org.eclipse.jface.viewers.DecoratingStyledCellLabelProvider;
+import org.eclipse.jface.viewers.ILabelDecorator;
+import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.TreeViewerColumn;
-import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.TreeColumn;
-import org.eclipse.ui.dialogs.PatternFilter;
+import org.eclipse.ui.IPerspectiveDescriptor;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.dialogs.FilteredTree;
+import org.joda.time.Duration;
 import org.joda.time.LocalDate;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 /**
- * A page displays perspective usage.
+ * A page for displaying perspective usage.
  */
-public class PerspectivePage extends InternalPage<PerspectiveDataDescriptor>
-    implements PerspectivePageContentProvider.IProvider {
-  
-  // Preference constants:
-  private static final String PREF_SELECTED_CATEGORIES = "PerspectivePage.SelectedCatgories";
-  private static final String PREF_PAINT_CATEGORY = "PerspectivePage.PaintCategory";
+public class PerspectivePage extends AbsPage {
 
-  private PerspectivePageContentProvider contents;
-  private PerspectivePageLabelProvider labels;
-  
-  /**
-   * Constructs a new page.
-   */
-  public PerspectivePage() {
-    super();
-  }
+  private FilteredTree filteredTree;
+  private CategoryProvider categoryProvider;
+  private TreePathValueProvider durationProvider;
+  private TreePathContentProvider contentProvider;
+
+  public PerspectivePage() {}
 
   @Override
-  public void createColumns(TreeViewer viewer) {
-    TreeViewerColumn viewerColumn = new TreeViewerColumn(viewer, SWT.LEFT);
-    viewerColumn.getColumn().setText("Name");
-    viewerColumn.getColumn().setWidth(200);
-    viewerColumn.getColumn().addSelectionListener(createInitialComparator(viewer));
-    viewerColumn.setLabelProvider(new DelegatingStyledCellLabelProvider(labels, false));
+  public void createContents(Composite parent) {
+    Category[] supported = {WORKSPACE, DATE, PERSPECTIVE};
+    categoryProvider = new CategoryProvider(supported, PERSPECTIVE);
+    categoryProvider.addObserver(this);
 
-    TreeColumn column = new TreeColumn(viewer.getTree(), SWT.RIGHT);
-    column.setText("Usage");
-    column.setWidth(200);
-    column.addSelectionListener(getValueSorter());
-  }
-  
-  @Override
-  public IContributionItem[] createToolBarItems(IToolBarManager toolBar) {
-    final ICategory date = Category.DATE;
-    final ICategory pers = Category.PERSPECTIVE;
-    
-    IAction colorByDate = new Action(date.getText(), date.getImageDescriptor()) {
-      @Override public void run() {
-        contents.setPaintCategory(date);
-      }
-    };
-    IAction colorByPers = new Action(pers.getText(), pers.getImageDescriptor()) {
-      @Override public void run() {
-        contents.setPaintCategory(pers);
-      }
-    };
-    IAction groupByDate = new Action(date.getText(), date.getImageDescriptor()) {
-      @Override public void run() {
-        contents.setSelectedCategories(date, pers);
-      }
-    };
-    IAction groupByPers = new Action(pers.getText(), pers.getImageDescriptor()) {
-      @Override public void run() {
-        contents.setSelectedCategories(pers);
-      }
-    };
-    
-    ShowHideFilterControlAction filter = new ShowHideFilterControlAction(getFilteredTree());
-    filter.run();
-    
-    IAction collapse = new CollapseAllAction(getViewer());
-    IContributionItem[] items = new IContributionItem[] {
-        new ActionContributionItem(filter),
-        new ActionContributionItem(new DropDownAction(
-            collapse.getText(), collapse.getImageDescriptor(), 
-            collapse, 
-            collapse,
-            new ExpandAllAction(getViewer()))),
-        new ActionContributionItem(new GroupByAction(contents, groupByPers, 
-            groupByPers, groupByDate)), 
-        new ActionContributionItem(new DropDownAction(
-            "Highlight " + colorByPers.getText(), SharedImages.BRUSH, 
-            colorByPers, colorByPers, colorByDate))};
+    contentProvider = new TreePathContentProvider(
+        new PerspectiveDataTreeBuilder(categoryProvider));
+    contentProvider.addObserver(this);
 
-    for (IContributionItem item : items)
-      toolBar.add(item);
+    durationProvider = createDurationValueProvider();
+    durationProvider.addObserver(this);
 
-    return items;
-  }
+    // The main label provider for the first column:
+    CompositeCellLabelProvider mainLabels = new CompositeCellLabelProvider(
+        new PerspectiveLabelProvider(),
+        new DateLabelProvider(),
+        new WorkspaceStorageLabelProvider());
 
-  @Override
-  protected CellPainter createCellPainter() {
-    return new CellPainter(contents) {
+    // The viewer:
+    filteredTree = Viewers.newFilteredTree(parent,
+        new TreePathPatternFilter(mainLabels));
+    TreeViewer viewer = filteredTree.getViewer();
+    FilterableTreePathContentProvider filteredContentProvider =
+        new FilterableTreePathContentProvider(contentProvider);
+    filteredContentProvider.addFilter(instanceOf(Duration.class));
+    viewer.setContentProvider(filteredContentProvider);
+
+    // Column sorters:
+    TreeViewerColumnSorter labelSorter =
+        new InternalTreeViewerColumnLabelSorter(viewer, mainLabels);
+    TreeViewerColumnSorter durationSorter =
+        new TreeViewerColumnValueSorter(viewer, durationProvider);
+
+    // The columns:
+
+    TreeViewerColumn mainColumn =
+        newTreeViewerColumn(viewer, SWT.LEFT, "Name", 200);
+    mainColumn.getColumn().addSelectionListener(labelSorter);
+    ILabelDecorator decorator =
+        PlatformUI.getWorkbench().getDecoratorManager().getLabelDecorator();
+    mainColumn.setLabelProvider(new DecoratingStyledCellLabelProvider(
+        mainLabels, decorator, null));
+
+    TreeViewerColumn durationColumn =
+        newTreeViewerColumn(viewer, SWT.RIGHT, "Usage", 150);
+    durationColumn.getColumn().addSelectionListener(durationSorter);
+    durationColumn.setLabelProvider(
+        new TreePathDurationLabelProvider(durationProvider));
+
+    TreeViewerColumn durationGraphColumn =
+        newTreeViewerColumn(viewer, SWT.LEFT, "", 100);
+    durationGraphColumn.getColumn().addSelectionListener(durationSorter);
+    durationGraphColumn.setLabelProvider(new TreeViewerCellPainter(
+        durationProvider) {
       @Override
       protected Color createColor(Display display) {
         return new Color(display, 218, 176, 0);
       }
-    };
+    });
   }
 
   @Override
-  protected PatternFilter createFilter() {
-    return new PatternFilter();
+  public IContributionItem[] createToolBarItems(IToolBarManager toolBar) {
+    List<IContributionItem> items = new CommonToolBarBuilder()
+        .enableFilterControlAction(filteredTree, true)
+        .enableTreeAction(filteredTree.getViewer())
+        .enableGroupByAction(categoryProvider)
+        .enableColorByAction(durationProvider)
+
+        .addGroupByAction(PERSPECTIVE)
+        .addGroupByAction(DATE, PERSPECTIVE)
+        .addGroupByAction(WORKSPACE, PERSPECTIVE)
+
+        .addColorByAction(PERSPECTIVE)
+        .addColorByAction(DATE)
+        .addColorByAction(WORKSPACE)
+        .build();
+
+    for (IContributionItem item : items) {
+      toolBar.add(item);
+    }
+    return items.toArray(new IContributionItem[items.size()]);
   }
 
   @Override
-  protected TreeViewerSorter createInitialComparator(TreeViewer viewer) {
-    return new TreeViewerLabelSorter(viewer) {
+  public Job updateJob(Preference pref) {
+    TreeViewer viewer = filteredTree.getViewer();
+    return new UpdateJob<IPerspectiveData>(viewer, pref, getAccessor()) {
       @Override
-      protected int doCompare(Viewer v, Object x, Object y) {
-        if (x instanceof TreeNode) x = ((TreeNode) x).getValue();
-        if (y instanceof TreeNode) y = ((TreeNode) y).getValue();
-        
-        if (x instanceof LocalDate && y instanceof LocalDate)
-          return ((LocalDate) x).compareTo((LocalDate) y);
-        else
-          return super.doCompare(v, x, y);
+      protected Object getInput(final Collection<IPerspectiveData> data) {
+        return new IPerspectiveDataProvider() {
+          @Override
+          public Collection<IPerspectiveData> get() {
+            return data;
+          }
+        };
       }
     };
   }
 
   @Override
-  protected IAccessor<PerspectiveDataDescriptor> getAccessor() {
-    return DataHandler.getAccessor(PerspectiveDataDescriptor.class);
+  protected FilteredTree getFilteredTree() {
+    return filteredTree;
   }
 
   @Override
-  protected void initializeViewer(TreeViewer viewer) {
-    contents = new PerspectivePageContentProvider(viewer);
-    labels = new PerspectivePageLabelProvider(contents);
-    viewer.setContentProvider(contents);
-    viewer.setLabelProvider(labels);
-  }  
-  
-  @Override
-  protected void restoreState() {
-    super.restoreState();
-    IPreferenceStore store = RabbitUI.getDefault().getPreferenceStore();
-
-    // Restores the selected categories of the content provider:
-    String[] categoryStr = store.getString(PREF_SELECTED_CATEGORIES).split(",");
-    List<Category> cats = Lists.newArrayList();
-    for (String str : categoryStr) {
-      try {
-        cats.add(Enum.valueOf(Category.class, str));
-      } catch (IllegalArgumentException e) {
-        // Ignore invalid elements.
-      }
-    }
-    contents.setSelectedCategories(cats.toArray(new ICategory[cats.size()]));
-
-    // Restores the paint category of the content provider:
-    String paintStr = store.getString(PREF_PAINT_CATEGORY);
-    try {
-      Category cat = Enum.valueOf(Category.class, paintStr);
-      contents.setPaintCategory(cat);
-    } catch (IllegalArgumentException e) {
-      // Just let the content provider use its default paint category.
-    }
+  protected Category[] getSelectedCategories() {
+    return categoryProvider.getSelected().toArray(new Category[0]);
   }
 
   @Override
-  protected void saveState() {
-    super.saveState();
-    IPreferenceStore store = RabbitUI.getDefault().getPreferenceStore();
-
-    // Saves the selected categories of the content provider:
-    ICategory[] categories = contents.getSelectedCategories();
-    store.setValue(PREF_SELECTED_CATEGORIES, Joiner.on(",").join(categories));
-
-    // Saves the paint category of the content provider:
-    store.setValue(PREF_PAINT_CATEGORY, contents.getPaintCategory().toString());
+  protected Category getVisualCategory() {
+    return (Category) durationProvider.getVisualCategory();
   }
+
+  @Override
+  protected void setSelectedCategories(List<Category> categories) {
+    Category[] selected = categories.toArray(new Category[0]);
+    categoryProvider.setSelected(selected);
+  }
+
+  @Override
+  protected void setVisualCategory(Category category) {
+    durationProvider.setVisualCategory(category);
+  }
+
+  @Override
+  protected void updateMaxValue() {
+    durationProvider.setMaxValue(durationProvider.getVisualCategory());
+  }
+
+  private ICategorizer createCategorizer() {
+    Map<Predicate<Object>, Category> categories = ImmutableMap.of(
+        instanceOf(IPerspectiveDescriptor.class), PERSPECTIVE,
+        instanceOf(LocalDate.class), DATE,
+        instanceOf(WorkspaceStorage.class), WORKSPACE);
+    ICategorizer categorizer = new Categorizer(categories);
+    return categorizer;
+  }
+
+  private TreePathValueProvider createDurationValueProvider() {
+    ICategorizer categorizer = createCategorizer();
+    IConverter<TreePath> converter = new TreePathDurationConverter();
+    return new TreePathValueProvider(
+        categorizer, contentProvider, converter, PERSPECTIVE);
+  }
+
+  private IAccessor<IPerspectiveData> getAccessor() {
+    return DataHandler.getAccessor(IPerspectiveData.class);
+  }
+
 }

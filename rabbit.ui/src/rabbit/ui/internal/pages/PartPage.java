@@ -62,6 +62,8 @@ import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.viewers.DecoratingStyledCellLabelProvider;
+import org.eclipse.jface.viewers.ILabelDecorator;
 import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.TreeViewerColumn;
@@ -71,6 +73,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorDescriptor;
 import org.eclipse.ui.IWorkbenchPartDescriptor;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.FilteredTree;
 import org.eclipse.ui.views.IViewDescriptor;
 import org.joda.time.Duration;
@@ -164,7 +167,10 @@ public class PartPage extends AbsPage {
     TreeViewerColumn mainColumn =
         newTreeViewerColumn(viewer, SWT.LEFT, "Name", 200);
     mainColumn.getColumn().addSelectionListener(labelSorter);
-    mainColumn.setLabelProvider(mainLabels);
+    ILabelDecorator decorator =
+      PlatformUI.getWorkbench().getDecoratorManager().getLabelDecorator();
+    mainColumn.setLabelProvider(new DecoratingStyledCellLabelProvider(
+        mainLabels, decorator, null));
 
     TreeViewerColumn durationColumn =
         newTreeViewerColumn(viewer, SWT.RIGHT, "Usage", 150);

@@ -15,23 +15,21 @@
  */
 package rabbit.ui.internal.treebuilders;
 
-import rabbit.data.access.model.IPartData;
+import rabbit.data.access.model.IPerspectiveData;
 import rabbit.ui.IProvider;
 import rabbit.ui.internal.pages.Category;
 import rabbit.ui.internal.util.ICategory;
 import rabbit.ui.internal.util.ICategoryProvider2;
-import rabbit.ui.internal.util.UndefinedWorkbenchPartDescriptor;
+import rabbit.ui.internal.util.UndefinedPerspectiveDescriptor;
 import rabbit.ui.internal.viewers.ITreePathBuilder;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newArrayList;
 
 import org.eclipse.jface.viewers.TreePath;
-import org.eclipse.ui.IEditorRegistry;
-import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.IWorkbenchPartDescriptor;
+import org.eclipse.ui.IPerspectiveDescriptor;
+import org.eclipse.ui.IPerspectiveRegistry;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.views.IViewRegistry;
 import org.joda.time.Duration;
 
 import static java.util.Collections.emptyList;
@@ -40,42 +38,43 @@ import java.util.Collection;
 import java.util.List;
 
 /**
- * A {@link PartDataTreeBuilder} takes input as {@link IPartDataProvider} and
- * builds tree leaves based on the order of the categories provided by the
- * {@link ICategoryProvider2}, the last segment of every path will be the
- * {@link Duration} data node of each {@link IPartData} provided by the
- * provider.
+ * A {@link PerspectiveDataTreeBuilder} takes input as
+ * {@link IPerspectiveDataProvider} and builds tree leaves based on the order of
+ * the categories provided by the {@link ICategoryProvider2}, the last segment
+ * of every path will be the {@link Duration} data node of each
+ * {@link IPerspectiveData} provided by the provider.
  */
-public class PartDataTreeBuilder implements ITreePathBuilder {
+public class PerspectiveDataTreeBuilder implements ITreePathBuilder {
 
   /**
-   * Provides {@link IPartData}.
+   * Provides {@link IPerspectiveData}.
    */
-  public static interface IPartDataProvider extends IProvider<IPartData> {}
+  public static interface IPerspectiveDataProvider
+      extends IProvider<IPerspectiveData> {}
 
   private final ICategoryProvider2 provider;
 
-  public PartDataTreeBuilder(ICategoryProvider2 provider) {
+  public PerspectiveDataTreeBuilder(ICategoryProvider2 provider) {
     this.provider = checkNotNull(provider);
   }
 
   @Override
   public List<TreePath> build(Object input) {
-    if (!(input instanceof IPartDataProvider)) {
+    if (!(input instanceof IPerspectiveDataProvider)) {
       return emptyList();
     }
 
-    Collection<IPartData> dataCol = ((IPartDataProvider) input).get();
+    Collection<IPerspectiveData> dataCol =
+          ((IPerspectiveDataProvider) input).get();
     if (dataCol == null) {
       return emptyList();
     }
 
-    IWorkbench workbench = PlatformUI.getWorkbench();
-    IViewRegistry viewRegistry = workbench.getViewRegistry();
-    IEditorRegistry editorRegistry = workbench.getEditorRegistry();
+    IPerspectiveRegistry registry =
+        PlatformUI.getWorkbench().getPerspectiveRegistry();
 
     List<TreePath> result = newArrayList();
-    for (IPartData data : dataCol) {
+    for (IPerspectiveData data : dataCol) {
 
       List<Object> segments = newArrayList();
       for (ICategory c : provider.getSelected()) {
@@ -85,27 +84,24 @@ public class PartDataTreeBuilder implements ITreePathBuilder {
 
         switch ((Category) c) {
         case WORKSPACE:
-          segments.add(data.get(IPartData.WORKSPACE));
+          segments.add(data.get(IPerspectiveData.WORKSPACE));
           break;
         case DATE:
-          segments.add(data.get(IPartData.DATE));
+          segments.add(data.get(IPerspectiveData.DATE));
           break;
-        case WORKBENCH_TOOL:
-          String id = data.get(IPartData.PART_ID);
-          IWorkbenchPartDescriptor part = viewRegistry.find(id);
-          if (part == null) {
-            part = editorRegistry.findEditor(id);
+        case PERSPECTIVE:
+          String id = data.get(IPerspectiveData.PERSPECTIVE_ID);
+          IPerspectiveDescriptor p = registry.findPerspectiveWithId(id);
+          if (p == null) {
+            p = new UndefinedPerspectiveDescriptor(id);
           }
-          if (part == null) {
-            part = new UndefinedWorkbenchPartDescriptor(id);
-          }
-          segments.add(part);
+          segments.add(p);
           break;
         default:
           break;
         }
       }
-      segments.add(data.get(IPartData.DURATION));
+      segments.add(data.get(IPerspectiveData.DURATION));
       result.add(new TreePath(segments.toArray()));
     }
 

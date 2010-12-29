@@ -15,53 +15,22 @@
  */
 package rabbit.ui.internal.pages;
 
-import rabbit.ui.internal.pages.AbstractFilteredTreePage;
-import rabbit.ui.internal.pages.Category;
-import rabbit.ui.internal.pages.PerspectivePage;
-import rabbit.ui.internal.pages.PerspectivePageContentProvider;
-import rabbit.ui.internal.util.ICategory;
-
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-
-import org.junit.Test;
-
 /**
  * Test for {@link PerspectivePage}
  */
-public class PerspectivePageTest extends AbstractFilteredTreePageTest {
+public class PerspectivePageTest extends AbsPageTest {
 
-  @Test
-  public void testSaveState_selectedCategories() throws Exception {
-    PerspectivePageContentProvider contents = (PerspectivePageContentProvider) page
-        .getViewer().getContentProvider();
-    
-    ICategory[] categories = new ICategory[] { Category.DATE, Category.PERSPECTIVE };
-    contents.setSelectedCategories(categories);
-    saveState(page);
-    
-    contents.setSelectedCategories(Category.PERSPECTIVE);
-    restoreState(page);
-    assertArrayEquals(categories, contents.getSelectedCategories());
-  }
-  
-  @Test
-  public void testSaveState_paintCategory() throws Exception {
-    PerspectivePageContentProvider contents = (PerspectivePageContentProvider) page
-        .getViewer().getContentProvider();
-    
-    Category paintCategory = Category.DATE;
-    contents.setPaintCategory(paintCategory);
-    saveState(page);
-    
-    contents.setPaintCategory(Category.PERSPECTIVE);
-    restoreState(page);
-    assertEquals(paintCategory, contents.getPaintCategory());
+  @Override
+  protected AbsPage create() {
+    return new PerspectivePage();
   }
 
   @Override
-  protected AbstractFilteredTreePage createPage() {
-    return new PerspectivePage();
+  protected Category[] getSupportedCategories() {
+    return new Category[]{
+        Category.PERSPECTIVE,
+        Category.DATE,
+        Category.WORKSPACE,};
   }
 
 }
