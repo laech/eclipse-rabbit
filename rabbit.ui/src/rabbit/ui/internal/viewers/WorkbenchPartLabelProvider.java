@@ -13,13 +13,16 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package rabbit.ui.internal.pages;
+package rabbit.ui.internal.viewers;
+
+import rabbit.ui.internal.util.UndefinedWorkbenchPartDescriptor;
 
 import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.viewers.BaseLabelProvider;
-import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.IWorkbenchPartDescriptor;
+import org.eclipse.ui.PlatformUI;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -29,28 +32,34 @@ import javax.annotation.Nullable;
 /**
  * Label provider for {@link IWorkbenchPartDescriptor}
  */
-public class WorkbenchPartLabelProvider extends BaseLabelProvider implements
-    ILabelProvider {
+public final class WorkbenchPartLabelProvider extends NullLabelProvider {
 
   /** Keys are workbench part id, values may be null. */
-  private Map<String, Image> images;
+  private final Map<String, Image> images;
+  private final Color gray;
 
-  /**
-   * Constructs a new page.
-   * 
-   * @param page The parent.
-   */
   public WorkbenchPartLabelProvider() {
     images = new HashMap<String, Image>();
+    gray = PlatformUI.getWorkbench().getDisplay().getSystemColor(
+        SWT.COLOR_DARK_GRAY);
   }
 
   @Override
   public void dispose() {
     super.dispose();
     for (Image img : images.values()) {
-      if (img != null)
+      if (img != null) {
         img.dispose();
+      }
     }
+  }
+
+  @Override
+  public Color getForeground(@Nullable Object element) {
+    if (element instanceof UndefinedWorkbenchPartDescriptor) {
+      return gray;
+    }
+    return super.getForeground(element);
   }
 
   @Override
@@ -59,22 +68,20 @@ public class WorkbenchPartLabelProvider extends BaseLabelProvider implements
       IWorkbenchPartDescriptor part = (IWorkbenchPartDescriptor) element;
       if (images.containsKey(part.getId())) {
         return images.get(part.getId());
-      } else {
-        ImageDescriptor des = part.getImageDescriptor();
-        Image img = (des != null) ? des.createImage() : null;
-        images.put(part.getId(), img);
-        return img;
       }
-    } else {
-      return null;
+      ImageDescriptor des = part.getImageDescriptor();
+      Image img = (des != null) ? des.createImage() : null;
+      images.put(part.getId(), img);
+      return img;
     }
+    return super.getImage(element);
   }
 
   @Override
   public String getText(@Nullable Object element) {
-    if (element instanceof IWorkbenchPartDescriptor)
+    if (element instanceof IWorkbenchPartDescriptor) {
       return ((IWorkbenchPartDescriptor) element).getLabel();
-    else
-      return null;
+    }
+    return super.getText(element);
   }
 }

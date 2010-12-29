@@ -15,52 +15,22 @@
  */
 package rabbit.ui.internal.pages;
 
-import rabbit.ui.internal.pages.AbstractFilteredTreePage;
-import rabbit.ui.internal.pages.Category;
-import rabbit.ui.internal.pages.PartPage;
-import rabbit.ui.internal.pages.PartPageContentProvider;
-import rabbit.ui.internal.util.ICategory;
-
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-
-import org.junit.Test;
-
 /**
  * Test for {@link PartPage}
  */
-public class PartPageTest extends AbstractFilteredTreePageTest {
-  
-  @Test
-  public void testSaveState_selectedCategories() throws Exception {
-    PartPageContentProvider contents = (PartPageContentProvider) page
-        .getViewer().getContentProvider();
-    
-    ICategory[] categories = new ICategory[] { Category.DATE, Category.WORKBENCH_TOOL };
-    contents.setSelectedCategories(categories);
-    saveState(page);
-    
-    contents.setSelectedCategories(Category.WORKBENCH_TOOL);
-    restoreState(page);
-    assertArrayEquals(categories, contents.getSelectedCategories());
-  }
-  
-  @Test
-  public void testSaveState_paintCategory() throws Exception {
-    PartPageContentProvider contents = (PartPageContentProvider) page
-        .getViewer().getContentProvider();
-    
-    Category paintCategory = Category.DATE;
-    contents.setPaintCategory(paintCategory);
-    saveState(page);
-    
-    contents.setPaintCategory(Category.WORKBENCH_TOOL);
-    restoreState(page);
-    assertEquals(paintCategory, contents.getPaintCategory());
+public class PartPageTest extends AbsPageTest {
+
+  @Override
+  protected AbsPage create() {
+    return new PartPage();
   }
 
   @Override
-  protected AbstractFilteredTreePage createPage() {
-    return new PartPage();
+  protected Category[] getSupportedCategories() {
+    return new Category[]{
+        Category.WORKBENCH_TOOL,
+        Category.DATE,
+        Category.WORKSPACE};
   }
+
 }

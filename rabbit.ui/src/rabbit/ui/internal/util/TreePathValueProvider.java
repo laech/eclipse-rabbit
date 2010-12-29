@@ -20,8 +20,10 @@ import rabbit.ui.internal.viewers.CellPainter.IValueProvider;
 import rabbit.ui.internal.viewers.TreePaths;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Predicates.alwaysTrue;
 
 import com.google.common.base.Objects;
+import com.google.common.base.Predicate;
 import com.google.common.collect.Sets;
 
 import org.eclipse.jface.viewers.TreePath;
@@ -77,14 +79,14 @@ public final class TreePathValueProvider extends Observable
       IConverter<TreePath> converter) {
     this(categorizer, treePathProvider, converter, null);
   }
-  
+
   /**
    * @param categorizer for categorizing tree paths.
    * @param treePathProvider for getting the tree leaf paths.
    * @param converter for getting value of a tree path supplied by
    *        {@code treePathProvider}.
    * @param visualCategory the default visual category.
-   * @throws NullPointerException if any of 
+   * @throws NullPointerException if any of
    *         {@code categorizer, treePathProvider, converter} is null.
    */
   public TreePathValueProvider(
@@ -154,13 +156,28 @@ public final class TreePathValueProvider extends Observable
    * @param category the category.
    */
   public void setMaxValue(ICategory category) {
+    setMaxValue(category, alwaysTrue());
+  }
+
+  /**
+   * Sets the max value using a category a predicate. If the category of a tree
+   * node is equal to the given category, and the
+   * {@link Predicate#apply(Object)} returns true on the element, and the value
+   * of that path (from the root to that element) is the highest of all, that
+   * the max value will be set to that value.
+   * @param category the category.
+   * @param predicate the predicate to select wanted elements.
+   */
+  public void setMaxValue(ICategory category,
+      Predicate<? super Object> predicate) {
     Set<TreePath> paths = Sets.newHashSet();
     Collection<TreePath> leaves = getProvider().get();
     for (TreePath leaf : leaves) {
       for (int i = 0; i < leaf.getSegmentCount(); ++i) {
 
-        ICategory another = getCategorizer().getCategory(leaf.getSegment(i));
-        if (Objects.equal(category, another)) {
+        Object segment = leaf.getSegment(i);
+        ICategory another = getCategorizer().getCategory(segment);
+        if (Objects.equal(category, another) && predicate.apply(segment)) {
           paths.add(TreePaths.headPath(leaf, i + 1));
           break;
         }
@@ -187,9 +204,9 @@ public final class TreePathValueProvider extends Observable
 
   /**
    * Sets the visual category. If the category is not supported by the
-   * categorizer then it will be ignored and this method will return false. 
-   * If {@link #getVisualCategory()} returns a different category after this 
-   * change then observers of this instance will get notified.
+   * categorizer then it will be ignored and this method will return false. If
+   * {@link #getVisualCategory()} returns a different category after this change
+   * then observers of this instance will get notified.
    * @param category the new category.
    * @return true if the category is accepted, false otherwise.
    */

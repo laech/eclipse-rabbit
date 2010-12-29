@@ -16,54 +16,52 @@
 package rabbit.ui.internal.pages;
 
 import static rabbit.ui.internal.pages.Category.DATE;
-import static rabbit.ui.internal.pages.Category.LAUNCH;
-import static rabbit.ui.internal.pages.Category.LAUNCH_MODE;
-import static rabbit.ui.internal.pages.Category.LAUNCH_TYPE;
+import static rabbit.ui.internal.pages.Category.WORKBENCH_TOOL;
 import static rabbit.ui.internal.pages.Category.WORKSPACE;
 import static rabbit.ui.internal.viewers.Viewers.newTreeViewerColumn;
 
 import rabbit.data.access.IAccessor;
-import rabbit.data.access.model.ILaunchData;
+import rabbit.data.access.model.IPartData;
 import rabbit.data.access.model.WorkspaceStorage;
 import rabbit.data.handler.DataHandler;
 import rabbit.ui.Preference;
-import rabbit.ui.internal.treebuilders.LaunchDataTreeBuilder;
-import rabbit.ui.internal.treebuilders.LaunchDataTreeBuilder.ILaunchDataProvider;
+import rabbit.ui.internal.SharedImages;
+import rabbit.ui.internal.treebuilders.PartDataTreeBuilder;
+import rabbit.ui.internal.treebuilders.PartDataTreeBuilder.IPartDataProvider;
 import rabbit.ui.internal.util.Categorizer;
 import rabbit.ui.internal.util.CategoryProvider;
 import rabbit.ui.internal.util.ICategorizer;
 import rabbit.ui.internal.util.IConverter;
-import rabbit.ui.internal.util.LaunchName;
 import rabbit.ui.internal.util.TreePathDurationConverter;
-import rabbit.ui.internal.util.TreePathIntConverter;
 import rabbit.ui.internal.util.TreePathValueProvider;
 import rabbit.ui.internal.viewers.CompositeCellLabelProvider;
 import rabbit.ui.internal.viewers.DateLabelProvider;
 import rabbit.ui.internal.viewers.FilterableTreePathContentProvider;
-import rabbit.ui.internal.viewers.LaunchLabelProvider;
-import rabbit.ui.internal.viewers.ResourceLabelProvider;
 import rabbit.ui.internal.viewers.TreePathContentProvider;
 import rabbit.ui.internal.viewers.TreePathDurationLabelProvider;
-import rabbit.ui.internal.viewers.TreePathIntLabelProvider;
 import rabbit.ui.internal.viewers.TreePathPatternFilter;
 import rabbit.ui.internal.viewers.TreeViewerCellPainter;
 import rabbit.ui.internal.viewers.TreeViewerColumnSorter;
 import rabbit.ui.internal.viewers.TreeViewerColumnValueSorter;
 import rabbit.ui.internal.viewers.Viewers;
+import rabbit.ui.internal.viewers.WorkbenchPartLabelProvider;
 import rabbit.ui.internal.viewers.WorkspaceStorageLabelProvider;
 
+import static com.google.common.base.Predicates.and;
 import static com.google.common.base.Predicates.instanceOf;
+import static com.google.common.base.Predicates.not;
 
 import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableMap;
 
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.debug.core.ILaunchConfigurationType;
-import org.eclipse.debug.core.ILaunchMode;
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.ActionContributionItem;
+import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.IToolBarManager;
-import org.eclipse.jface.viewers.DecoratingStyledCellLabelProvider;
-import org.eclipse.jface.viewers.ILabelDecorator;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.TreeViewerColumn;
@@ -71,8 +69,10 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.IEditorDescriptor;
+import org.eclipse.ui.IWorkbenchPartDescriptor;
 import org.eclipse.ui.dialogs.FilteredTree;
+import org.eclipse.ui.views.IViewDescriptor;
 import org.joda.time.Duration;
 import org.joda.time.LocalDate;
 
@@ -81,38 +81,66 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * A page for displaying command usage.
+ * A page for displaying workbench part usage.
  */
 public class TmpPage2 extends AbsPage {
+
+  private class HideElementsAction extends Action {
+    final Predicate<Object> elementsToHide;
+
+    HideElementsAction(
+        String text, ImageDescriptor image, Predicate<Object> elementsToHide) {
+      super(text, IAction.AS_CHECK_BOX);
+      setImageDescriptor(image);
+      this.elementsToHide = elementsToHide;
+    }
+
+    @Override
+    public void run() {
+      super.run();
+      if (!isChecked()) {
+        filteredContentProvider.removeFilter(elementsToHide);
+      } else {
+        filteredContentProvider.addFilter(elementsToHide);
+      }
+      refreshViewer();
+    }
+  }
 
   private FilteredTree filteredTree;
   private CategoryProvider categoryProvider;
   private TreePathValueProvider durationProvider;
-  private TreePathValueProvider countProvider;
-  private TreePathContentProvider contentProvider;
 
-  public TmpPage2() {}
+  private TreePathContentProvider realContentProvider;
+  /**
+   * Wraps {@link #realContentProvider} to filter elements.
+   */
+  private FilterableTreePathContentProvider filteredContentProvider;
+
+  private final HideElementsAction hideViewsAction;
+  private final HideElementsAction hideEditorsAction;
+
+  public TmpPage2() {
+    hideEditorsAction = createHideEditorsAction();
+    hideViewsAction = createHideViewsAction();
+  }
 
   @Override
   public void createContents(Composite parent) {
-    Category[] supported = {WORKSPACE, DATE, LAUNCH, LAUNCH_MODE, LAUNCH_TYPE};
-    categoryProvider = new CategoryProvider(supported, LAUNCH);
+    Category[] supported = {WORKSPACE, DATE, WORKBENCH_TOOL};
+    categoryProvider = new CategoryProvider(supported, WORKBENCH_TOOL);
     categoryProvider.addObserver(this);
 
-    contentProvider = new TreePathContentProvider(
-        new LaunchDataTreeBuilder(categoryProvider));
-    contentProvider.addObserver(this);
+    realContentProvider = new TreePathContentProvider(
+        new PartDataTreeBuilder(categoryProvider));
+    realContentProvider.addObserver(this);
 
     durationProvider = createDurationValueProvider();
     durationProvider.addObserver(this);
 
-    countProvider = createCountValueProvider();
-    countProvider.addObserver(this);
-
     // The main label provider for the first column:
     CompositeCellLabelProvider mainLabels = new CompositeCellLabelProvider(
-        new LaunchLabelProvider(),
-        new ResourceLabelProvider(),
+        new WorkbenchPartLabelProvider(),
         new DateLabelProvider(),
         new WorkspaceStorageLabelProvider());
 
@@ -120,17 +148,14 @@ public class TmpPage2 extends AbsPage {
     filteredTree = Viewers.newFilteredTree(parent,
         new TreePathPatternFilter(mainLabels));
     TreeViewer viewer = filteredTree.getViewer();
-    FilterableTreePathContentProvider filteredContentProvider =
-        new FilterableTreePathContentProvider(contentProvider);
-    filteredContentProvider.addFilter(instanceOf(Integer.class));
+    filteredContentProvider =
+        new FilterableTreePathContentProvider(realContentProvider);
     filteredContentProvider.addFilter(instanceOf(Duration.class));
     viewer.setContentProvider(filteredContentProvider);
 
     // Column sorters:
     TreeViewerColumnSorter labelSorter =
         new InternalTreeViewerColumnLabelSorter(viewer, mainLabels);
-    TreeViewerColumnSorter countSorter =
-        new TreeViewerColumnValueSorter(viewer, countProvider);
     TreeViewerColumnSorter durationSorter =
         new TreeViewerColumnValueSorter(viewer, durationProvider);
 
@@ -139,29 +164,10 @@ public class TmpPage2 extends AbsPage {
     TreeViewerColumn mainColumn =
         newTreeViewerColumn(viewer, SWT.LEFT, "Name", 200);
     mainColumn.getColumn().addSelectionListener(labelSorter);
-    ILabelDecorator decorator =
-        PlatformUI.getWorkbench().getDecoratorManager().getLabelDecorator();
-    mainColumn.setLabelProvider(new DecoratingStyledCellLabelProvider(
-        mainLabels, decorator, null));
-
-    TreeViewerColumn countColumn =
-        newTreeViewerColumn(viewer, SWT.RIGHT, "Count", 100);
-    countColumn.getColumn().addSelectionListener(countSorter);
-    countColumn.setLabelProvider(
-        new TreePathIntLabelProvider(countProvider));
-
-    TreeViewerColumn countGraphColumn =
-        newTreeViewerColumn(viewer, SWT.LEFT, "", 100);
-    countGraphColumn.getColumn().addSelectionListener(countSorter);
-    countGraphColumn.setLabelProvider(new TreeViewerCellPainter(countProvider) {
-      @Override
-      protected Color createColor(Display display) {
-        return new Color(display, 118, 146, 60);
-      }
-    });
+    mainColumn.setLabelProvider(mainLabels);
 
     TreeViewerColumn durationColumn =
-        newTreeViewerColumn(viewer, SWT.RIGHT, "Total Duration", 150);
+        newTreeViewerColumn(viewer, SWT.RIGHT, "Usage", 150);
     durationColumn.getColumn().addSelectionListener(durationSorter);
     durationColumn.setLabelProvider(
         new TreePathDurationLabelProvider(durationProvider));
@@ -184,20 +190,19 @@ public class TmpPage2 extends AbsPage {
         .enableFilterControlAction(filteredTree, true)
         .enableTreeAction(filteredTree.getViewer())
         .enableGroupByAction(categoryProvider)
-        .enableColorByAction(durationProvider, countProvider)
+        .enableColorByAction(durationProvider)
 
-        .addGroupByAction(LAUNCH)
-        .addGroupByAction(LAUNCH_MODE, LAUNCH)
-        .addGroupByAction(LAUNCH_TYPE, LAUNCH)
-        .addGroupByAction(DATE, LAUNCH)
-        .addGroupByAction(WORKSPACE, LAUNCH)
+        .addGroupByAction(WORKBENCH_TOOL)
+        .addGroupByAction(DATE, WORKBENCH_TOOL)
+        .addGroupByAction(WORKSPACE, WORKBENCH_TOOL)
 
-        .addColorByAction(LAUNCH)
-        .addColorByAction(LAUNCH_MODE)
-        .addColorByAction(LAUNCH_TYPE)
+        .addColorByAction(WORKBENCH_TOOL)
         .addColorByAction(DATE)
         .addColorByAction(WORKSPACE)
         .build();
+
+    items.add(new ActionContributionItem(createHideViewsAction()));
+    items.add(new ActionContributionItem(createHideEditorsAction()));
 
     for (IContributionItem item : items) {
       toolBar.add(item);
@@ -208,12 +213,12 @@ public class TmpPage2 extends AbsPage {
   @Override
   public Job updateJob(Preference pref) {
     TreeViewer viewer = filteredTree.getViewer();
-    return new UpdateJob<ILaunchData>(viewer, pref, getAccessor()) {
+    return new UpdateJob<IPartData>(viewer, pref, getAccessor()) {
       @Override
-      protected Object getInput(final Collection<ILaunchData> data) {
-        return new ILaunchDataProvider() {
+      protected Object getInput(final Collection<IPartData> data) {
+        return new IPartDataProvider() {
           @Override
-          public Collection<ILaunchData> get() {
+          public Collection<IPartData> get() {
             return data;
           }
         };
@@ -245,41 +250,59 @@ public class TmpPage2 extends AbsPage {
   @Override
   protected void setVisualCategory(Category category) {
     durationProvider.setVisualCategory(category);
-    countProvider.setVisualCategory(category);
   }
 
   @Override
   protected void updateMaxValue() {
     durationProvider.setMaxValue(durationProvider.getVisualCategory());
-    countProvider.setMaxValue(countProvider.getVisualCategory());
-  }
-
-  private TreePathValueProvider createDurationValueProvider() {
-    ICategorizer categorizer = createCategorizer();
-    IConverter<TreePath> converter = new TreePathDurationConverter();
-    return new TreePathValueProvider(
-        categorizer, contentProvider, converter, LAUNCH);
-  }
-
-  private TreePathValueProvider createCountValueProvider() {
-    ICategorizer categorizer = createCategorizer();
-    IConverter<TreePath> converter = new TreePathIntConverter();
-    return new TreePathValueProvider(
-        categorizer, contentProvider, converter, LAUNCH);
   }
 
   private ICategorizer createCategorizer() {
     Map<Predicate<Object>, Category> categories = ImmutableMap.of(
-        instanceOf(LaunchName.class), LAUNCH,
-        instanceOf(ILaunchMode.class), LAUNCH_MODE,
-        instanceOf(ILaunchConfigurationType.class), LAUNCH_TYPE,
+        instanceOf(IWorkbenchPartDescriptor.class), WORKBENCH_TOOL,
         instanceOf(LocalDate.class), DATE,
         instanceOf(WorkspaceStorage.class), WORKSPACE);
     ICategorizer categorizer = new Categorizer(categories);
     return categorizer;
   }
 
-  private IAccessor<ILaunchData> getAccessor() {
-    return DataHandler.getAccessor(ILaunchData.class);
+  private TreePathValueProvider createDurationValueProvider() {
+    ICategorizer categorizer = createCategorizer();
+    IConverter<TreePath> converter = new TreePathDurationConverter();
+    return new TreePathValueProvider(
+        categorizer, realContentProvider, converter, WORKBENCH_TOOL);
+  }
+
+  private HideElementsAction createHideEditorsAction() {
+    final Predicate<Object> hideEditorsFilter = instanceOf(IEditorDescriptor.class);
+    HideElementsAction hideEditorsAction = new HideElementsAction(
+        "Hide Editors", SharedImages.EDITOR, hideEditorsFilter);
+    return hideEditorsAction;
+  }
+
+  private HideElementsAction createHideViewsAction() {
+    final Predicate<Object> hideViewsFilter = instanceOf(IViewDescriptor.class);
+    HideElementsAction hideViewsAction = new HideElementsAction("Hide Views",
+        SharedImages.VIEW, hideViewsFilter);
+    return hideViewsAction;
+  }
+
+  private IAccessor<IPartData> getAccessor() {
+    return DataHandler.getAccessor(IPartData.class);
+  }
+
+  private void refreshViewer() {
+    Predicate<Object> predicate = Predicates.alwaysTrue();
+    if (hideEditorsAction.isChecked()) {
+      predicate = and(predicate, not(hideEditorsAction.elementsToHide));
+    }
+    if (hideViewsAction.isChecked()) {
+      predicate = and(predicate, not(hideViewsAction.elementsToHide));
+    }
+    durationProvider.setMaxValue(
+        durationProvider.getVisualCategory(), predicate);
+    filteredTree.getViewer().getTree().setRedraw(false);
+    filteredTree.getViewer().refresh(false);
+    filteredTree.getViewer().getTree().setRedraw(true);
   }
 }

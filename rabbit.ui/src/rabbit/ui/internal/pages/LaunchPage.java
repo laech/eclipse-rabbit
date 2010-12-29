@@ -81,7 +81,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * A page for displaying command usage.
+ * A page for displaying launch events.
  */
 public class LaunchPage extends AbsPage {
 

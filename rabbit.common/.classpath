@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry exported="true" kind="lib" path="lib/guava-r07.jar" sourcepath="/Volumes/Things/Downloads/guava-r07/guava-src-r07.zip"/>
+	<classpathentry exported="true" kind="lib" path="lib/guava-r07.jar" sourcepath="/Users/o-o/Downloads/guava-r07/guava-src-r07.zip"/>
 	<classpathentry exported="true" kind="lib" path="lib/commons-io-1.4.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/guice-2.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/joda-time-1.6.2.jar"/>

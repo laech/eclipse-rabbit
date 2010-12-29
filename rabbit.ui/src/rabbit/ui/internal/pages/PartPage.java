@@ -15,231 +15,294 @@
  */
 package rabbit.ui.internal.pages;
 
+import static rabbit.ui.internal.pages.Category.DATE;
+import static rabbit.ui.internal.pages.Category.WORKBENCH_TOOL;
+import static rabbit.ui.internal.pages.Category.WORKSPACE;
+import static rabbit.ui.internal.viewers.Viewers.newTreeViewerColumn;
+
 import rabbit.data.access.IAccessor;
-import rabbit.data.access.model.PartDataDescriptor;
+import rabbit.data.access.model.IPartData;
+import rabbit.data.access.model.WorkspaceStorage;
 import rabbit.data.handler.DataHandler;
-import rabbit.ui.internal.RabbitUI;
+import rabbit.ui.Preference;
 import rabbit.ui.internal.SharedImages;
-import rabbit.ui.internal.actions.CollapseAllAction;
-import rabbit.ui.internal.actions.DropDownAction;
-import rabbit.ui.internal.actions.ExpandAllAction;
-import rabbit.ui.internal.actions.GroupByAction;
-import rabbit.ui.internal.actions.ShowHideFilterControlAction;
-import rabbit.ui.internal.util.ICategory;
-import rabbit.ui.internal.viewers.CellPainter;
-import rabbit.ui.internal.viewers.DelegatingStyledCellLabelProvider;
-import rabbit.ui.internal.viewers.TreeViewerLabelSorter;
-import rabbit.ui.internal.viewers.TreeViewerSorter;
+import rabbit.ui.internal.treebuilders.PartDataTreeBuilder;
+import rabbit.ui.internal.treebuilders.PartDataTreeBuilder.IPartDataProvider;
+import rabbit.ui.internal.util.Categorizer;
+import rabbit.ui.internal.util.CategoryProvider;
+import rabbit.ui.internal.util.ICategorizer;
+import rabbit.ui.internal.util.IConverter;
+import rabbit.ui.internal.util.TreePathDurationConverter;
+import rabbit.ui.internal.util.TreePathValueProvider;
+import rabbit.ui.internal.viewers.CompositeCellLabelProvider;
+import rabbit.ui.internal.viewers.DateLabelProvider;
+import rabbit.ui.internal.viewers.FilterableTreePathContentProvider;
+import rabbit.ui.internal.viewers.TreePathContentProvider;
+import rabbit.ui.internal.viewers.TreePathDurationLabelProvider;
+import rabbit.ui.internal.viewers.TreePathPatternFilter;
+import rabbit.ui.internal.viewers.TreeViewerCellPainter;
+import rabbit.ui.internal.viewers.TreeViewerColumnSorter;
+import rabbit.ui.internal.viewers.TreeViewerColumnValueSorter;
+import rabbit.ui.internal.viewers.Viewers;
+import rabbit.ui.internal.viewers.WorkbenchPartLabelProvider;
+import rabbit.ui.internal.viewers.WorkspaceStorageLabelProvider;
 
-import com.google.common.base.Joiner;
-import com.google.common.collect.Lists;
+import static com.google.common.base.Predicates.and;
+import static com.google.common.base.Predicates.instanceOf;
+import static com.google.common.base.Predicates.not;
 
+import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
+import com.google.common.collect.ImmutableMap;
+
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.IToolBarManager;
-import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.viewers.TreeNode;
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.TreeViewerColumn;
-import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.TreeColumn;
-import org.eclipse.ui.dialogs.PatternFilter;
+import org.eclipse.ui.IEditorDescriptor;
+import org.eclipse.ui.IWorkbenchPartDescriptor;
+import org.eclipse.ui.dialogs.FilteredTree;
+import org.eclipse.ui.views.IViewDescriptor;
+import org.joda.time.Duration;
 import org.joda.time.LocalDate;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 /**
- * A page displays workbench part usage.
+ * A page for displaying workbench part usage.
  */
-public class PartPage extends InternalPage<PartDataDescriptor>
-    implements PartPageContentProvider.IProvider {
+public class PartPage extends AbsPage {
 
-  // Preference constants:
-  private static final String PREF_SELECTED_CATEGORIES = "PartPage.SelectedCatgories";
-  private static final String PREF_PAINT_CATEGORY = "PartPage.PaintCategory";
+  private class HideElementsAction extends Action {
+    final Predicate<Object> elementsToHide;
 
-  private PartPageContentProvider contents;
-  private PartPageLabelProvider labels;
-  
+    HideElementsAction(
+        String text, ImageDescriptor image, Predicate<Object> elementsToHide) {
+      super(text, IAction.AS_CHECK_BOX);
+      setImageDescriptor(image);
+      this.elementsToHide = elementsToHide;
+    }
+
+    @Override
+    public void run() {
+      super.run();
+      if (!isChecked()) {
+        filteredContentProvider.removeFilter(elementsToHide);
+      } else {
+        filteredContentProvider.addFilter(elementsToHide);
+      }
+      refreshViewer();
+    }
+  }
+
+  private FilteredTree filteredTree;
+  private CategoryProvider categoryProvider;
+  private TreePathValueProvider durationProvider;
+
+  private TreePathContentProvider realContentProvider;
   /**
-   * Constructs a new page.
+   * Wraps {@link #realContentProvider} to filter elements.
    */
+  private FilterableTreePathContentProvider filteredContentProvider;
+
+  private final HideElementsAction hideViewsAction;
+  private final HideElementsAction hideEditorsAction;
+
   public PartPage() {
-    super();
+    hideEditorsAction = createHideEditorsAction();
+    hideViewsAction = createHideViewsAction();
   }
 
   @Override
-  public void createColumns(TreeViewer viewer) {
-    TreeViewerColumn viewerColumn = new TreeViewerColumn(viewer, SWT.LEFT);
-    viewerColumn.getColumn().setText("Name");
-    viewerColumn.getColumn().setWidth(200);
-    viewerColumn.getColumn().addSelectionListener(createInitialComparator(viewer));
-    viewerColumn.setLabelProvider(new DelegatingStyledCellLabelProvider(labels, false));
+  public void createContents(Composite parent) {
+    Category[] supported = {WORKSPACE, DATE, WORKBENCH_TOOL};
+    categoryProvider = new CategoryProvider(supported, WORKBENCH_TOOL);
+    categoryProvider.addObserver(this);
 
-    TreeColumn column = new TreeColumn(viewer.getTree(), SWT.RIGHT);
-    column.addSelectionListener(getValueSorter());
-    column.setText("Usage");
-    column.setWidth(200);
-  }
+    realContentProvider = new TreePathContentProvider(
+        new PartDataTreeBuilder(categoryProvider));
+    realContentProvider.addObserver(this);
 
-  @Override
-  public IContributionItem[] createToolBarItems(IToolBarManager toolBar) {
-    final ICategory date = Category.DATE;
-    final ICategory part = Category.WORKBENCH_TOOL;
-    
-    IAction colorByDate = new Action(date.getText(), date.getImageDescriptor()) {
-      @Override public void run() {
-        contents.setPaintCategory(date);
-      }
-    };
-    IAction colorByPart = new Action(part.getText(), part.getImageDescriptor()) {
-      @Override public void run() {
-        contents.setPaintCategory(part);
-      }
-    };
-    IAction groupByDate = new Action(date.getText(), date.getImageDescriptor()) {
-      @Override public void run() {
-        contents.setSelectedCategories(date, part);
-      }
-    };
-    IAction groupByPart = new Action(part.getText(), part.getImageDescriptor()) {
-      @Override public void run() {
-        contents.setSelectedCategories(part);
-      }
-    };
-    IAction hideEditors = new Action("Hide Editors", IAction.AS_CHECK_BOX) {
-      @Override public void run() {
-        contents.setHideEditors(isChecked());
-      }
-    };
-    hideEditors.setChecked(contents.isHidingEditors());
-    hideEditors.setImageDescriptor(SharedImages.EDITOR);
-    
-    IAction hideViews = new Action("Hide Views", IAction.AS_CHECK_BOX) {
-      @Override public void run() {
-        contents.setHideViews(isChecked());
-      }
-    };
-    hideViews.setChecked(contents.isHidingViews());
-    hideViews.setImageDescriptor(SharedImages.VIEW);
-    
-    ShowHideFilterControlAction filter = new ShowHideFilterControlAction(getFilteredTree());
-    filter.run();
-    
-    IAction collapse = new CollapseAllAction(getViewer());
-    IContributionItem[] items = new IContributionItem[] {
-        new ActionContributionItem(filter),
-        new ActionContributionItem(new DropDownAction(
-            collapse.getText(), collapse.getImageDescriptor(), 
-            collapse, 
-            collapse,
-            new ExpandAllAction(getViewer()))),
-        new ActionContributionItem(new GroupByAction(contents, 
-            groupByPart, 
-            groupByPart, 
-            groupByDate)), 
-        new ActionContributionItem(new DropDownAction(
-            "Highlight " + colorByPart.getText(), SharedImages.BRUSH, 
-            colorByPart, 
-            colorByPart, 
-            colorByDate)),
-        new ActionContributionItem(hideViews),
-        new ActionContributionItem(hideEditors)
-        };
+    durationProvider = createDurationValueProvider();
+    durationProvider.addObserver(this);
 
-    for (IContributionItem item : items)
-      toolBar.add(item);
+    // The main label provider for the first column:
+    CompositeCellLabelProvider mainLabels = new CompositeCellLabelProvider(
+        new WorkbenchPartLabelProvider(),
+        new DateLabelProvider(),
+        new WorkspaceStorageLabelProvider());
 
-    return items;
-  }
+    // The viewer:
+    filteredTree = Viewers.newFilteredTree(parent,
+        new TreePathPatternFilter(mainLabels));
+    TreeViewer viewer = filteredTree.getViewer();
+    filteredContentProvider =
+        new FilterableTreePathContentProvider(realContentProvider);
+    filteredContentProvider.addFilter(instanceOf(Duration.class));
+    viewer.setContentProvider(filteredContentProvider);
 
-  @Override
-  protected CellPainter createCellPainter() {
-    return new CellPainter(contents) {
+    // Column sorters:
+    TreeViewerColumnSorter labelSorter =
+        new InternalTreeViewerColumnLabelSorter(viewer, mainLabels);
+    TreeViewerColumnSorter durationSorter =
+        new TreeViewerColumnValueSorter(viewer, durationProvider);
+
+    // The columns:
+
+    TreeViewerColumn mainColumn =
+        newTreeViewerColumn(viewer, SWT.LEFT, "Name", 200);
+    mainColumn.getColumn().addSelectionListener(labelSorter);
+    mainColumn.setLabelProvider(mainLabels);
+
+    TreeViewerColumn durationColumn =
+        newTreeViewerColumn(viewer, SWT.RIGHT, "Usage", 150);
+    durationColumn.getColumn().addSelectionListener(durationSorter);
+    durationColumn.setLabelProvider(
+        new TreePathDurationLabelProvider(durationProvider));
+
+    TreeViewerColumn durationGraphColumn =
+        newTreeViewerColumn(viewer, SWT.LEFT, "", 100);
+    durationGraphColumn.getColumn().addSelectionListener(durationSorter);
+    durationGraphColumn.setLabelProvider(new TreeViewerCellPainter(
+        durationProvider) {
       @Override
       protected Color createColor(Display display) {
         return new Color(display, 49, 132, 155);
       }
-    };
-  }
-  
-  @Override
-  protected PatternFilter createFilter() {
-    return new PatternFilter();
+    });
   }
 
   @Override
-  protected TreeViewerSorter createInitialComparator(TreeViewer viewer) {
-    return new TreeViewerLabelSorter(viewer) {
+  public IContributionItem[] createToolBarItems(IToolBarManager toolBar) {
+    List<IContributionItem> items = new CommonToolBarBuilder()
+        .enableFilterControlAction(filteredTree, true)
+        .enableTreeAction(filteredTree.getViewer())
+        .enableGroupByAction(categoryProvider)
+        .enableColorByAction(durationProvider)
 
+        .addGroupByAction(WORKBENCH_TOOL)
+        .addGroupByAction(DATE, WORKBENCH_TOOL)
+        .addGroupByAction(WORKSPACE, WORKBENCH_TOOL)
+
+        .addColorByAction(WORKBENCH_TOOL)
+        .addColorByAction(DATE)
+        .addColorByAction(WORKSPACE)
+        .build();
+
+    items.add(new ActionContributionItem(createHideViewsAction()));
+    items.add(new ActionContributionItem(createHideEditorsAction()));
+
+    for (IContributionItem item : items) {
+      toolBar.add(item);
+    }
+    return items.toArray(new IContributionItem[items.size()]);
+  }
+
+  @Override
+  public Job updateJob(Preference pref) {
+    TreeViewer viewer = filteredTree.getViewer();
+    return new UpdateJob<IPartData>(viewer, pref, getAccessor()) {
       @Override
-      protected int doCompare(Viewer v, Object x, Object y) {
-        if (x instanceof TreeNode) x = ((TreeNode) x).getValue();
-        if (y instanceof TreeNode) y = ((TreeNode) y).getValue();
-        
-        if (x instanceof LocalDate && y instanceof LocalDate)
-          return ((LocalDate) x).compareTo((LocalDate) y);
-        else
-          return super.doCompare(v, x, y);
+      protected Object getInput(final Collection<IPartData> data) {
+        return new IPartDataProvider() {
+          @Override
+          public Collection<IPartData> get() {
+            return data;
+          }
+        };
       }
     };
   }
 
   @Override
-  protected IAccessor<PartDataDescriptor> getAccessor() {
-    return DataHandler.getAccessor(PartDataDescriptor.class);
+  protected FilteredTree getFilteredTree() {
+    return filteredTree;
   }
 
   @Override
-  protected void initializeViewer(TreeViewer viewer) {
-    contents = new PartPageContentProvider(viewer);
-    labels = new PartPageLabelProvider(contents);
-    viewer.setContentProvider(contents);
-    viewer.setLabelProvider(labels);
+  protected Category[] getSelectedCategories() {
+    return categoryProvider.getSelected().toArray(new Category[0]);
   }
 
   @Override
-  protected void restoreState() {
-    super.restoreState();
-    IPreferenceStore store = RabbitUI.getDefault().getPreferenceStore();
+  protected Category getVisualCategory() {
+    return (Category) durationProvider.getVisualCategory();
+  }
 
-    // Restores the selected categories of the content provider:
-    String[] categoryStr = store.getString(PREF_SELECTED_CATEGORIES).split(",");
-    List<Category> cats = Lists.newArrayList();
-    for (String str : categoryStr) {
-      try {
-        cats.add(Enum.valueOf(Category.class, str));
-      } catch (IllegalArgumentException e) {
-        // Ignore invalid elements.
-      }
+  @Override
+  protected void setSelectedCategories(List<Category> categories) {
+    Category[] selected = categories.toArray(new Category[0]);
+    categoryProvider.setSelected(selected);
+  }
+
+  @Override
+  protected void setVisualCategory(Category category) {
+    durationProvider.setVisualCategory(category);
+  }
+
+  @Override
+  protected void updateMaxValue() {
+    durationProvider.setMaxValue(durationProvider.getVisualCategory());
+  }
+
+  private ICategorizer createCategorizer() {
+    Map<Predicate<Object>, Category> categories = ImmutableMap.of(
+        instanceOf(IWorkbenchPartDescriptor.class), WORKBENCH_TOOL,
+        instanceOf(LocalDate.class), DATE,
+        instanceOf(WorkspaceStorage.class), WORKSPACE);
+    ICategorizer categorizer = new Categorizer(categories);
+    return categorizer;
+  }
+
+  private TreePathValueProvider createDurationValueProvider() {
+    ICategorizer categorizer = createCategorizer();
+    IConverter<TreePath> converter = new TreePathDurationConverter();
+    return new TreePathValueProvider(
+        categorizer, realContentProvider, converter, WORKBENCH_TOOL);
+  }
+
+  private HideElementsAction createHideEditorsAction() {
+    final Predicate<Object> hideEditorsFilter = instanceOf(IEditorDescriptor.class);
+    HideElementsAction hideEditorsAction = new HideElementsAction(
+        "Hide Editors", SharedImages.EDITOR, hideEditorsFilter);
+    return hideEditorsAction;
+  }
+
+  private HideElementsAction createHideViewsAction() {
+    final Predicate<Object> hideViewsFilter = instanceOf(IViewDescriptor.class);
+    HideElementsAction hideViewsAction = new HideElementsAction("Hide Views",
+        SharedImages.VIEW, hideViewsFilter);
+    return hideViewsAction;
+  }
+
+  private IAccessor<IPartData> getAccessor() {
+    return DataHandler.getAccessor(IPartData.class);
+  }
+
+  private void refreshViewer() {
+    Predicate<Object> predicate = Predicates.alwaysTrue();
+    if (hideEditorsAction.isChecked()) {
+      predicate = and(predicate, not(hideEditorsAction.elementsToHide));
     }
-    contents.setSelectedCategories(cats.toArray(new ICategory[cats.size()]));
-
-    // Restores the paint category of the content provider:
-    String paintStr = store.getString(PREF_PAINT_CATEGORY);
-    try {
-      Category cat = Enum.valueOf(Category.class, paintStr);
-      contents.setPaintCategory(cat);
-    } catch (IllegalArgumentException e) {
-      // Just let the content provider use its default paint category.
+    if (hideViewsAction.isChecked()) {
+      predicate = and(predicate, not(hideViewsAction.elementsToHide));
     }
-  }
-
-  @Override
-  protected void saveState() {
-    super.saveState();
-    IPreferenceStore store = RabbitUI.getDefault().getPreferenceStore();
-
-    // Saves the selected categories of the content provider:
-    ICategory[] categories = contents.getSelectedCategories();
-    store.setValue(PREF_SELECTED_CATEGORIES, Joiner.on(",").join(categories));
-
-    // Saves the paint category of the content provider:
-    store.setValue(PREF_PAINT_CATEGORY, contents.getPaintCategory().toString());
+    durationProvider.setMaxValue(
+        durationProvider.getVisualCategory(), predicate);
+    filteredTree.getViewer().getTree().setRedraw(false);
+    filteredTree.getViewer().refresh(false);
+    filteredTree.getViewer().getTree().setRedraw(true);
   }
 }
