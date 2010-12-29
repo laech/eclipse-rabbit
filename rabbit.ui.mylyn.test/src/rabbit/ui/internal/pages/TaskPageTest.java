@@ -13,30 +13,28 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package rabbit.ui.internal.pages.mylyn;
-
-import rabbit.ui.internal.pages.mylyn.MylynCategory;
-
-import static org.junit.Assert.assertNotNull;
-
-import org.junit.Test;
-
-import java.lang.reflect.Field;
+package rabbit.ui.internal.pages;
 
 /**
- * @see MylynCategory
+ * @see TaskPage
  */
-public class MylynCategoryTest {
+@SuppressWarnings("restriction")
+public class TaskPageTest extends AbsPageTest {
 
-  @Test
-  public void testFields() throws Exception {
-    Field[] fields = MylynCategory.class.getDeclaredFields();
-    for (Field field : fields) {
-      if (field.isAccessible()) {
-        MylynCategory category = (MylynCategory) field.get(null);
-        assertNotNull(category.getText());
-        assertNotNull(category.getImageDescriptor());
-      }
-    }
+  @Override
+  protected AbsPage create() {
+    return new TaskPage();
   }
+
+  @Override
+  protected Category[] getSupportedCategories() {
+    return new Category[]{
+        Category.WORKSPACE,
+        Category.DATE,
+        Category.TASK,
+        Category.PROJECT,
+        Category.FOLDER,
+        Category.FILE,};
+  }
+
 }

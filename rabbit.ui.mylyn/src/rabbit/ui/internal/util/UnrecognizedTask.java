@@ -28,7 +28,7 @@ import java.util.Map;
  * Represents a task that has been missing or deleted.
  */
 public final class UnrecognizedTask implements ITask {
-  
+
   private final DateFormat format = DateFormat.getDateTimeInstance();
 
   /**
@@ -62,7 +62,7 @@ public final class UnrecognizedTask implements ITask {
   }
 
   @Override
-  public Object getAdapter(Class adapter) {
+  public Object getAdapter(@SuppressWarnings("rawtypes") Class adapter) {
     return null;
   }
 
@@ -126,7 +126,7 @@ public final class UnrecognizedTask implements ITask {
     String summary = "Unrecognized Task. ID: " + taskId.getHandleIdentifier();
     if (getCreationDate().getTime() > 0)
       summary += ". Created on: " + format.format(getCreationDate());
-    
+
     return summary;
   }
 
@@ -171,48 +171,37 @@ public final class UnrecognizedTask implements ITask {
   }
 
   @Override
-  public void setAttribute(String key, String value) {
-  }
+  public void setAttribute(String key, String value) {}
 
   @Override
-  public void setCompletionDate(Date completionDate) {
-  }
+  public void setCompletionDate(Date completionDate) {}
 
   @Override
-  public void setCreationDate(Date date) {
-  }
+  public void setCreationDate(Date date) {}
 
   @Override
-  public void setDueDate(Date date) {
-  }
+  public void setDueDate(Date date) {}
 
   @Override
-  public void setModificationDate(Date modificationDate) {
-  }
+  public void setModificationDate(Date modificationDate) {}
 
   @Override
-  public void setOwner(String owner) {
-  }
+  public void setOwner(String owner) {}
 
   @Override
-  public void setPriority(String priority) {
-  }
+  public void setPriority(String priority) {}
 
   @Override
-  public void setSummary(String summary) {
-  }
+  public void setSummary(String summary) {}
 
   @Override
-  public void setTaskKey(String taskKey) {
-  }
+  public void setTaskKey(String taskKey) {}
 
   @Override
-  public void setTaskKind(String kind) {
-  }
+  public void setTaskKind(String kind) {}
 
   @Override
-  public void setUrl(String taskUrl) {
-  }
+  public void setUrl(String taskUrl) {}
 
   @Override
   public String toString() {

@@ -27,9 +27,9 @@ import org.joda.time.LocalDate;
  * This sorter sorts elements base on their labels, except when it encounters two {@link LocalDate}
  * elements, then the two elements will be sorted by {@link LocalDate#compareTo(Object)}.
  */
-/* package */class InternalTreeViewerColumnLabelSorter extends TreeViewerColumnLabelSorter {
+public class InternalTreeViewerColumnLabelSorter extends TreeViewerColumnLabelSorter {
 
-  /* package */InternalTreeViewerColumnLabelSorter(TreeViewer parent, ILabelProvider labelProvider) {
+  public InternalTreeViewerColumnLabelSorter(TreeViewer parent, ILabelProvider labelProvider) {
     super(parent, labelProvider);
   }
 

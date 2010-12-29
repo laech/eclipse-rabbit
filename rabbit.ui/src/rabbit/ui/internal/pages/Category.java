@@ -27,13 +27,13 @@ import org.eclipse.ui.ide.IDE;
  * Internal enum of categories, shared by pages.
  */
 public enum Category implements ICategory {
-  
+
   /** Date category. */
   DATE("Dates", SharedImages.CALENDAR),
-  
+
   /** Command category. */
   COMMAND("Commands", SharedImages.ELEMENT),
-  
+
   /** Launch category. */
   LAUNCH("Launches", SharedImages.LAUNCH),
 
@@ -42,7 +42,7 @@ public enum Category implements ICategory {
 
   /** Launch type category */
   LAUNCH_TYPE("Launch Types", SharedImages.LAUNCH_TYPE),
-  
+
   /** Project category */
   PROJECT("Projects", PlatformUI.getWorkbench().getSharedImages()
       .getImageDescriptor(IDE.SharedImages.IMG_OBJ_PROJECT)),
@@ -54,21 +54,25 @@ public enum Category implements ICategory {
   /** File category */
   FILE("Files", PlatformUI.getWorkbench().getSharedImages()
       .getImageDescriptor(ISharedImages.IMG_OBJ_FILE)),
-  
+
   /** Workbench tool category */
   WORKBENCH_TOOL("Workbench Tools", PlatformUI.getWorkbench().getSharedImages()
       .getImageDescriptor(ISharedImages.IMG_DEF_VIEW)),
-      
+
   /** Perspective category */
   PERSPECTIVE("Perspectives", SharedImages.PERSPECTIVE),
-  
+
   /** Workspace category */
   WORKSPACE("Workspaces", SharedImages.WORKSPACE),
+
+  /** Task category */
+  TASK("Tasks", SharedImages.TASK),
+
   ;
-  
+
   private String text;
   private ImageDescriptor image;
-  
+
   private Category(String text, ImageDescriptor image) {
     this.text = text;
     this.image = image;

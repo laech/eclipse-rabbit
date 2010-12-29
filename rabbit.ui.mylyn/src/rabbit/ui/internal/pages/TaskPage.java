@@ -19,16 +19,22 @@ import static rabbit.ui.internal.pages.Category.DATE;
 import static rabbit.ui.internal.pages.Category.FILE;
 import static rabbit.ui.internal.pages.Category.FOLDER;
 import static rabbit.ui.internal.pages.Category.PROJECT;
+import static rabbit.ui.internal.pages.Category.TASK;
 import static rabbit.ui.internal.pages.Category.WORKSPACE;
 import static rabbit.ui.internal.viewers.Viewers.newTreeViewerColumn;
 
 import rabbit.data.access.IAccessor;
-import rabbit.data.access.model.IFileData;
+import rabbit.data.access.model.ITaskData;
 import rabbit.data.access.model.WorkspaceStorage;
 import rabbit.data.handler.DataHandler;
 import rabbit.ui.Preference;
-import rabbit.ui.internal.treebuilders.FileDataTreeBuilder;
-import rabbit.ui.internal.treebuilders.FileDataTreeBuilder.IFileDataProvider;
+import rabbit.ui.internal.pages.AbsPage;
+import rabbit.ui.internal.pages.Category;
+import rabbit.ui.internal.pages.CommonToolBarBuilder;
+import rabbit.ui.internal.pages.InternalTreeViewerColumnLabelSorter;
+import rabbit.ui.internal.pages.UpdateJob;
+import rabbit.ui.internal.treebuilders.TaskDataTreeBuilder;
+import rabbit.ui.internal.treebuilders.TaskDataTreeBuilder.ITaskDataProvider;
 import rabbit.ui.internal.util.Categorizer;
 import rabbit.ui.internal.util.CategoryProvider;
 import rabbit.ui.internal.util.ICategorizer;
@@ -39,6 +45,7 @@ import rabbit.ui.internal.viewers.CompositeCellLabelProvider;
 import rabbit.ui.internal.viewers.DateLabelProvider;
 import rabbit.ui.internal.viewers.FilterableTreePathContentProvider;
 import rabbit.ui.internal.viewers.ResourceLabelProvider;
+import rabbit.ui.internal.viewers.TaskLabelProvider;
 import rabbit.ui.internal.viewers.TreePathContentProvider;
 import rabbit.ui.internal.viewers.TreePathDurationLabelProvider;
 import rabbit.ui.internal.viewers.TreePathPatternFilter;
@@ -64,6 +71,7 @@ import org.eclipse.jface.viewers.ILabelDecorator;
 import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.TreeViewerColumn;
+import org.eclipse.mylyn.tasks.core.ITask;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Composite;
@@ -78,25 +86,26 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * A page for displaying time spent on files.
+ * A page for displaying time spent on files while working with tasks.
  */
-public class TmpPage2 extends AbsPage {
+public class TaskPage extends AbsPage {
 
   private FilteredTree filteredTree;
   private CategoryProvider categoryProvider;
   private TreePathValueProvider durationProvider;
   private TreePathContentProvider contentProvider;
 
-  public TmpPage2() {}
+  public TaskPage() {}
 
   @Override
   public void createContents(Composite parent) {
-    Category[] supported = {WORKSPACE, DATE, PROJECT, FOLDER, FILE};
-    categoryProvider = new CategoryProvider(supported, PROJECT, FOLDER, FILE);
+    Category[] supported = {WORKSPACE, DATE, TASK, PROJECT, FOLDER, FILE};
+    categoryProvider = new CategoryProvider(supported,
+        TASK, PROJECT, FOLDER, FILE);
     categoryProvider.addObserver(this);
 
     contentProvider = new TreePathContentProvider(
-        new FileDataTreeBuilder(categoryProvider));
+        new TaskDataTreeBuilder(categoryProvider));
     contentProvider.addObserver(this);
 
     durationProvider = createDurationValueProvider();
@@ -104,6 +113,7 @@ public class TmpPage2 extends AbsPage {
 
     // The main label provider for the first column:
     CompositeCellLabelProvider mainLabels = new CompositeCellLabelProvider(
+        new TaskLabelProvider(),
         new ResourceLabelProvider(),
         new DateLabelProvider(),
         new WorkspaceStorageLabelProvider());
@@ -159,17 +169,14 @@ public class TmpPage2 extends AbsPage {
         .enableGroupByAction(categoryProvider)
         .enableColorByAction(durationProvider)
 
-        .addGroupByAction(
-            FILE.getText(), FILE.getImageDescriptor(), PROJECT, FOLDER, FILE)
-        .addGroupByAction(
-            FOLDER.getText(), FOLDER.getImageDescriptor(), PROJECT, FOLDER)
-        .addGroupByAction(PROJECT)
-        .addGroupByAction(DATE, PROJECT, FOLDER, FILE)
-        .addGroupByAction(WORKSPACE, PROJECT, FOLDER, FILE)
+        .addGroupByAction(TASK, PROJECT, FOLDER, FILE)
+        .addGroupByAction(DATE, TASK, PROJECT, FOLDER, FILE)
+        .addGroupByAction(WORKSPACE, TASK, PROJECT, FOLDER, FILE)
 
         .addColorByAction(FILE)
         .addColorByAction(FOLDER)
         .addColorByAction(PROJECT)
+        .addColorByAction(TASK)
         .addColorByAction(DATE)
         .addColorByAction(WORKSPACE)
         .build();
@@ -183,12 +190,12 @@ public class TmpPage2 extends AbsPage {
   @Override
   public Job updateJob(Preference pref) {
     TreeViewer viewer = filteredTree.getViewer();
-    return new UpdateJob<IFileData>(viewer, pref, getAccessor()) {
+    return new UpdateJob<ITaskData>(viewer, pref, getAccessor()) {
       @Override
-      protected Object getInput(final Collection<IFileData> data) {
-        return new IFileDataProvider() {
+      protected Object getInput(final Collection<ITaskData> data) {
+        return new ITaskDataProvider() {
           @Override
-          public Collection<IFileData> get() {
+          public Collection<ITaskData> get() {
             return data;
           }
         };
@@ -228,12 +235,15 @@ public class TmpPage2 extends AbsPage {
   }
 
   private ICategorizer createCategorizer() {
-    Map<Predicate<Object>, Category> categories = ImmutableMap.of(
-        instanceOf(IFile.class), FILE,
-        instanceOf(IFolder.class), FOLDER,
-        instanceOf(IProject.class), PROJECT,
-        instanceOf(LocalDate.class), DATE,
-        instanceOf(WorkspaceStorage.class), WORKSPACE);
+    Map<Predicate<Object>, Category> categories = ImmutableMap
+        .<Predicate<Object>, Category> builder()
+        .put(instanceOf(IFile.class), FILE)
+        .put(instanceOf(IFolder.class), FOLDER)
+        .put(instanceOf(IProject.class), PROJECT)
+        .put(instanceOf(ITask.class), TASK)
+        .put(instanceOf(LocalDate.class), DATE)
+        .put(instanceOf(WorkspaceStorage.class), WORKSPACE)
+        .build();
     ICategorizer categorizer = new Categorizer(categories);
     return categorizer;
   }
@@ -242,11 +252,11 @@ public class TmpPage2 extends AbsPage {
     ICategorizer categorizer = createCategorizer();
     IConverter<TreePath> converter = new TreePathDurationConverter();
     return new TreePathValueProvider(
-        categorizer, contentProvider, converter, FILE);
+        categorizer, contentProvider, converter, TASK);
   }
 
-  private IAccessor<IFileData> getAccessor() {
-    return DataHandler.getAccessor(IFileData.class);
+  private IAccessor<ITaskData> getAccessor() {
+    return DataHandler.getAccessor(ITaskData.class);
   }
 
 }

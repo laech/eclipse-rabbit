@@ -34,7 +34,7 @@ import java.util.Collection;
 /**
  * An internal update job for updating a page.
  */
-abstract class UpdateJob<T> extends Job {
+public abstract class UpdateJob<T> extends Job {
 
   private final TreeViewer viewer;
   private final Preference pref;
@@ -48,7 +48,7 @@ abstract class UpdateJob<T> extends Job {
    * @param accessor The data accessor for getting the data from.
    * @throws NullPointerException If any of the arguments are null.
    */
-  UpdateJob(TreeViewer viewer, Preference pref, IAccessor<T> accessor) {
+  public UpdateJob(TreeViewer viewer, Preference pref, IAccessor<T> accessor) {
     super("Updating Rabbit View...");
     this.viewer = checkNotNull(viewer);
     this.pref = checkNotNull(pref);

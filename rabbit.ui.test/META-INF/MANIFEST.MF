@@ -19,6 +19,11 @@ Require-Bundle: org.eclipse.core.resources,
  rabbit.common,
  rabbit.common.testing
 Export-Package: rabbit.ui.internal,
+ rabbit.ui.internal.actions,
+ rabbit.ui.internal.decorators,
+ rabbit.ui.internal.dialogs,
  rabbit.ui.internal.pages,
  rabbit.ui.internal.pref,
- rabbit.ui.internal.util
+ rabbit.ui.internal.treebuilders,
+ rabbit.ui.internal.util,
+ rabbit.ui.internal.viewers

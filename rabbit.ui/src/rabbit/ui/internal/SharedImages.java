@@ -71,6 +71,9 @@ public class SharedImages {
   /** Workspace image. */
   public static final ImageDescriptor WORKSPACE = getObj16("workspace.gif");
   
+  /** Task image. */
+  public static final ImageDescriptor TASK = getObj16("task.gif");
+  
   /**
    * Gets an image descriptor from the directory "icons/full/obj16/".
    * @param name The name of the file.

@@ -103,7 +103,7 @@ public abstract class TreeViewerColumnSorter
     if (!(item instanceof TreeColumn)) {
       return;
     }
-    Object[] expandedElements = viewer.getExpandedElements();
+    TreePath[] expandedTreePaths = viewer.getExpandedTreePaths();
 
     selectedColumn = (TreeColumn) e.widget;
     Tree tree = selectedColumn.getParent();
@@ -119,7 +119,8 @@ public abstract class TreeViewerColumnSorter
       viewer.setComparator(this);
     }
     tree.setSortDirection(sortDirection);
-    viewer.setExpandedElements(expandedElements);
+    
+    viewer.setExpandedTreePaths(expandedTreePaths);
   }
 
   /**

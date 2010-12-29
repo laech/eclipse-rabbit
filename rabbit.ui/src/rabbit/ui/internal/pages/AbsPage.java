@@ -37,7 +37,7 @@ import java.util.Observer;
 /**
  * Internal abstract page to reduce code duplication.
  */
-abstract class AbsPage implements IPage, Observer {
+public abstract class AbsPage implements IPage, Observer {
 
   public void onRestoreState(IMemento memento) {
     String id = getClass().getSimpleName();

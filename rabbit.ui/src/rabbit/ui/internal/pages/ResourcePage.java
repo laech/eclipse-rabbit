@@ -242,7 +242,7 @@ public class ResourcePage extends AbsPage {
     ICategorizer categorizer = createCategorizer();
     IConverter<TreePath> converter = new TreePathDurationConverter();
     return new TreePathValueProvider(
-        categorizer, contentProvider, converter, FILE);
+        categorizer, contentProvider, converter, PROJECT);
   }
 
   private IAccessor<IFileData> getAccessor() {
