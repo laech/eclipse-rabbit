@@ -176,7 +176,7 @@ public class PartPage extends AbsPage {
         newTreeViewerColumn(viewer, SWT.RIGHT, "Usage", 150);
     durationColumn.getColumn().addSelectionListener(durationSorter);
     durationColumn.setLabelProvider(
-        new TreePathDurationLabelProvider(durationProvider));
+        new TreePathDurationLabelProvider(durationProvider, mainLabels));
 
     TreeViewerColumn durationGraphColumn =
         newTreeViewerColumn(viewer, SWT.LEFT, "", 100);

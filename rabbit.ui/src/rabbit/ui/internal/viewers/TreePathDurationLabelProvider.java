@@ -18,11 +18,14 @@ package rabbit.ui.internal.viewers;
 import rabbit.ui.internal.util.DurationFormat;
 import rabbit.ui.internal.viewers.CellPainter.IValueProvider;
 
-import com.google.common.base.Preconditions;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.eclipse.jface.viewers.CellLabelProvider;
+import org.eclipse.jface.viewers.IColorProvider;
 import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.ViewerCell;
+
+import javax.annotation.Nullable;
 
 /**
  * A {@link CellLabelProvider} that treats the value of a {@link TreePath} as a
@@ -36,15 +39,26 @@ import org.eclipse.jface.viewers.ViewerCell;
 public final class TreePathDurationLabelProvider extends CellLabelProvider {
 
   private final IValueProvider valueProvider;
+  private final IColorProvider colorProvider;
 
   /**
-   * Constructor.
-   * @param valueProvider The value provider to provide value for the tree
+   * @param valueProvider the value provider to provide value for the tree
    *        paths.
    */
   public TreePathDurationLabelProvider(IValueProvider valueProvider) {
-    this.valueProvider = Preconditions.checkNotNull(valueProvider,
-        "valueProvider");
+    this(valueProvider, null);
+  }
+
+  /**
+   * @param valueProvider the value provider to provide value for the tree
+   *        paths.
+   * @param colorProvider the optional {@link IColorProvider} to color the
+   *        labels.
+   */
+  public TreePathDurationLabelProvider(
+      IValueProvider valueProvider, @Nullable IColorProvider colorProvider) {
+    this.valueProvider = checkNotNull(valueProvider, "valueProvider");
+    this.colorProvider = colorProvider;
   }
 
   /**
@@ -62,5 +76,10 @@ public final class TreePathDurationLabelProvider extends CellLabelProvider {
       text = DurationFormat.format(getValueProvider().getValue(path));
     }
     cell.setText(text);
+
+    if (colorProvider != null) { // TOOD test
+      cell.setBackground(colorProvider.getBackground(cell.getElement()));
+      cell.setForeground(colorProvider.getForeground(cell.getElement()));
+    }
   }
 }

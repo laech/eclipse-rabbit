@@ -138,7 +138,7 @@ public class CommandPage extends AbsPage {
         newTreeViewerColumn(viewer, SWT.RIGHT, "Usage Count", 150);
     durationColumn.getColumn().addSelectionListener(countSorter);
     durationColumn.setLabelProvider(
-        new TreePathIntLabelProvider(valueProvider));
+        new TreePathIntLabelProvider(valueProvider, mainLabels));
 
     TreeViewerColumn graphColumn =
         newTreeViewerColumn(viewer, SWT.LEFT, "", 100);

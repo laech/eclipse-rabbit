@@ -16,17 +16,19 @@
 package rabbit.ui.internal.pages;
 
 import static rabbit.ui.internal.pages.Category.DATE;
-import static rabbit.ui.internal.pages.Category.PERSPECTIVE;
+import static rabbit.ui.internal.pages.Category.FILE;
+import static rabbit.ui.internal.pages.Category.FOLDER;
+import static rabbit.ui.internal.pages.Category.PROJECT;
 import static rabbit.ui.internal.pages.Category.WORKSPACE;
 import static rabbit.ui.internal.viewers.Viewers.newTreeViewerColumn;
 
 import rabbit.data.access.IAccessor;
-import rabbit.data.access.model.IPerspectiveData;
+import rabbit.data.access.model.IFileData;
 import rabbit.data.access.model.WorkspaceStorage;
 import rabbit.data.handler.DataHandler;
 import rabbit.ui.Preference;
-import rabbit.ui.internal.treebuilders.PerspectiveDataTreeBuilder;
-import rabbit.ui.internal.treebuilders.PerspectiveDataTreeBuilder.IPerspectiveDataProvider;
+import rabbit.ui.internal.treebuilders.FileDataTreeBuilder;
+import rabbit.ui.internal.treebuilders.FileDataTreeBuilder.IFileDataProvider;
 import rabbit.ui.internal.util.Categorizer;
 import rabbit.ui.internal.util.CategoryProvider;
 import rabbit.ui.internal.util.ICategorizer;
@@ -36,7 +38,7 @@ import rabbit.ui.internal.util.TreePathValueProvider;
 import rabbit.ui.internal.viewers.CompositeCellLabelProvider;
 import rabbit.ui.internal.viewers.DateLabelProvider;
 import rabbit.ui.internal.viewers.FilterableTreePathContentProvider;
-import rabbit.ui.internal.viewers.PerspectiveLabelProvider;
+import rabbit.ui.internal.viewers.ResourceLabelProvider;
 import rabbit.ui.internal.viewers.TreePathContentProvider;
 import rabbit.ui.internal.viewers.TreePathDurationLabelProvider;
 import rabbit.ui.internal.viewers.TreePathPatternFilter;
@@ -51,6 +53,9 @@ import static com.google.common.base.Predicates.instanceOf;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableMap;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.IToolBarManager;
@@ -63,7 +68,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.ui.IPerspectiveDescriptor;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.FilteredTree;
 import org.joda.time.Duration;
@@ -74,7 +78,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * A page for displaying perspective usage.
+ * A page for displaying time spent on files.
  */
 public class TmpPage2 extends AbsPage {
 
@@ -87,12 +91,12 @@ public class TmpPage2 extends AbsPage {
 
   @Override
   public void createContents(Composite parent) {
-    Category[] supported = {WORKSPACE, DATE, PERSPECTIVE};
-    categoryProvider = new CategoryProvider(supported, PERSPECTIVE);
+    Category[] supported = {WORKSPACE, DATE, PROJECT, FOLDER, FILE};
+    categoryProvider = new CategoryProvider(supported, PROJECT, FOLDER, FILE);
     categoryProvider.addObserver(this);
 
     contentProvider = new TreePathContentProvider(
-        new PerspectiveDataTreeBuilder(categoryProvider));
+        new FileDataTreeBuilder(categoryProvider));
     contentProvider.addObserver(this);
 
     durationProvider = createDurationValueProvider();
@@ -100,7 +104,7 @@ public class TmpPage2 extends AbsPage {
 
     // The main label provider for the first column:
     CompositeCellLabelProvider mainLabels = new CompositeCellLabelProvider(
-        new PerspectiveLabelProvider(),
+        new ResourceLabelProvider(),
         new DateLabelProvider(),
         new WorkspaceStorageLabelProvider());
 
@@ -130,10 +134,10 @@ public class TmpPage2 extends AbsPage {
         mainLabels, decorator, null));
 
     TreeViewerColumn durationColumn =
-        newTreeViewerColumn(viewer, SWT.RIGHT, "Usage", 150);
+        newTreeViewerColumn(viewer, SWT.RIGHT, "Time Spent", 150);
     durationColumn.getColumn().addSelectionListener(durationSorter);
-    durationColumn.setLabelProvider(
-        new TreePathDurationLabelProvider(durationProvider));
+    durationColumn.setLabelProvider(new TreePathDurationLabelProvider(
+        durationProvider, mainLabels));
 
     TreeViewerColumn durationGraphColumn =
         newTreeViewerColumn(viewer, SWT.LEFT, "", 100);
@@ -142,7 +146,7 @@ public class TmpPage2 extends AbsPage {
         durationProvider) {
       @Override
       protected Color createColor(Display display) {
-        return new Color(display, 218, 176, 0);
+        return new Color(display, 136, 177, 231);
       }
     });
   }
@@ -155,11 +159,17 @@ public class TmpPage2 extends AbsPage {
         .enableGroupByAction(categoryProvider)
         .enableColorByAction(durationProvider)
 
-        .addGroupByAction(PERSPECTIVE)
-        .addGroupByAction(DATE, PERSPECTIVE)
-        .addGroupByAction(WORKSPACE, PERSPECTIVE)
+        .addGroupByAction(
+            FILE.getText(), FILE.getImageDescriptor(), PROJECT, FOLDER, FILE)
+        .addGroupByAction(
+            FOLDER.getText(), FOLDER.getImageDescriptor(), PROJECT, FOLDER)
+        .addGroupByAction(PROJECT)
+        .addGroupByAction(DATE, PROJECT, FOLDER, FILE)
+        .addGroupByAction(WORKSPACE, PROJECT, FOLDER, FILE)
 
-        .addColorByAction(PERSPECTIVE)
+        .addColorByAction(FILE)
+        .addColorByAction(FOLDER)
+        .addColorByAction(PROJECT)
         .addColorByAction(DATE)
         .addColorByAction(WORKSPACE)
         .build();
@@ -173,12 +183,12 @@ public class TmpPage2 extends AbsPage {
   @Override
   public Job updateJob(Preference pref) {
     TreeViewer viewer = filteredTree.getViewer();
-    return new UpdateJob<IPerspectiveData>(viewer, pref, getAccessor()) {
+    return new UpdateJob<IFileData>(viewer, pref, getAccessor()) {
       @Override
-      protected Object getInput(final Collection<IPerspectiveData> data) {
-        return new IPerspectiveDataProvider() {
+      protected Object getInput(final Collection<IFileData> data) {
+        return new IFileDataProvider() {
           @Override
-          public Collection<IPerspectiveData> get() {
+          public Collection<IFileData> get() {
             return data;
           }
         };
@@ -219,7 +229,9 @@ public class TmpPage2 extends AbsPage {
 
   private ICategorizer createCategorizer() {
     Map<Predicate<Object>, Category> categories = ImmutableMap.of(
-        instanceOf(IPerspectiveDescriptor.class), PERSPECTIVE,
+        instanceOf(IFile.class), FILE,
+        instanceOf(IFolder.class), FOLDER,
+        instanceOf(IProject.class), PROJECT,
         instanceOf(LocalDate.class), DATE,
         instanceOf(WorkspaceStorage.class), WORKSPACE);
     ICategorizer categorizer = new Categorizer(categories);
@@ -230,11 +242,11 @@ public class TmpPage2 extends AbsPage {
     ICategorizer categorizer = createCategorizer();
     IConverter<TreePath> converter = new TreePathDurationConverter();
     return new TreePathValueProvider(
-        categorizer, contentProvider, converter, PERSPECTIVE);
+        categorizer, contentProvider, converter, FILE);
   }
 
-  private IAccessor<IPerspectiveData> getAccessor() {
-    return DataHandler.getAccessor(IPerspectiveData.class);
+  private IAccessor<IFileData> getAccessor() {
+    return DataHandler.getAccessor(IFileData.class);
   }
 
 }

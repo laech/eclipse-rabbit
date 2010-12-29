@@ -87,7 +87,7 @@ public class TreePathDurationLabelProviderTest {
     TreePath equalPath = new TreePath(new Object[]{obj});
     given(valueProvider.getValue(equalPath)).willReturn(durationMillis);
     given(valueProvider.shouldPaint(obj)).willReturn(TRUE);
-
+    
     TreePathDurationLabelProvider labelProvider = new TreePathDurationLabelProvider(valueProvider);
     column.setLabelProvider(labelProvider);
 

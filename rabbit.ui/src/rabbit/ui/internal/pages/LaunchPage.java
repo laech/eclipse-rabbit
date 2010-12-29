@@ -148,7 +148,7 @@ public class LaunchPage extends AbsPage {
         newTreeViewerColumn(viewer, SWT.RIGHT, "Count", 100);
     countColumn.getColumn().addSelectionListener(countSorter);
     countColumn.setLabelProvider(
-        new TreePathIntLabelProvider(countProvider));
+        new TreePathIntLabelProvider(countProvider, mainLabels));
 
     TreeViewerColumn countGraphColumn =
         newTreeViewerColumn(viewer, SWT.LEFT, "", 100);
@@ -164,7 +164,7 @@ public class LaunchPage extends AbsPage {
         newTreeViewerColumn(viewer, SWT.RIGHT, "Total Duration", 150);
     durationColumn.getColumn().addSelectionListener(durationSorter);
     durationColumn.setLabelProvider(
-        new TreePathDurationLabelProvider(durationProvider));
+        new TreePathDurationLabelProvider(durationProvider, mainLabels));
 
     TreeViewerColumn durationGraphColumn =
         newTreeViewerColumn(viewer, SWT.LEFT, "", 100);

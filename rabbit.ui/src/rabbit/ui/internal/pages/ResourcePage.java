@@ -15,329 +15,238 @@
  */
 package rabbit.ui.internal.pages;
 
-import rabbit.data.access.IAccessor;
-import rabbit.data.access.model.FileDataDescriptor;
-import rabbit.data.handler.DataHandler;
-import rabbit.ui.internal.RabbitUI;
-import rabbit.ui.internal.SharedImages;
-import rabbit.ui.internal.actions.CollapseAllAction;
-import rabbit.ui.internal.actions.DropDownAction;
-import rabbit.ui.internal.actions.ExpandAllAction;
-import rabbit.ui.internal.actions.GroupByAction;
-import rabbit.ui.internal.actions.ShowHideFilterControlAction;
-import rabbit.ui.internal.util.ICategory;
-import rabbit.ui.internal.viewers.CellPainter;
-import rabbit.ui.internal.viewers.DeepPatternFilter;
-import rabbit.ui.internal.viewers.DelegatingStyledCellLabelProvider;
-import rabbit.ui.internal.viewers.TreeViewerLabelSorter;
-import rabbit.ui.internal.viewers.TreeViewerSorter;
+import static rabbit.ui.internal.pages.Category.DATE;
+import static rabbit.ui.internal.pages.Category.FILE;
+import static rabbit.ui.internal.pages.Category.FOLDER;
+import static rabbit.ui.internal.pages.Category.PROJECT;
+import static rabbit.ui.internal.pages.Category.WORKSPACE;
+import static rabbit.ui.internal.viewers.Viewers.newTreeViewerColumn;
 
-import com.google.common.base.Joiner;
-import com.google.common.collect.Lists;
+import rabbit.data.access.IAccessor;
+import rabbit.data.access.model.IFileData;
+import rabbit.data.access.model.WorkspaceStorage;
+import rabbit.data.handler.DataHandler;
+import rabbit.ui.Preference;
+import rabbit.ui.internal.treebuilders.FileDataTreeBuilder;
+import rabbit.ui.internal.treebuilders.FileDataTreeBuilder.IFileDataProvider;
+import rabbit.ui.internal.util.Categorizer;
+import rabbit.ui.internal.util.CategoryProvider;
+import rabbit.ui.internal.util.ICategorizer;
+import rabbit.ui.internal.util.IConverter;
+import rabbit.ui.internal.util.TreePathDurationConverter;
+import rabbit.ui.internal.util.TreePathValueProvider;
+import rabbit.ui.internal.viewers.CompositeCellLabelProvider;
+import rabbit.ui.internal.viewers.DateLabelProvider;
+import rabbit.ui.internal.viewers.FilterableTreePathContentProvider;
+import rabbit.ui.internal.viewers.ResourceLabelProvider;
+import rabbit.ui.internal.viewers.TreePathContentProvider;
+import rabbit.ui.internal.viewers.TreePathDurationLabelProvider;
+import rabbit.ui.internal.viewers.TreePathPatternFilter;
+import rabbit.ui.internal.viewers.TreeViewerCellPainter;
+import rabbit.ui.internal.viewers.TreeViewerColumnSorter;
+import rabbit.ui.internal.viewers.TreeViewerColumnValueSorter;
+import rabbit.ui.internal.viewers.Viewers;
+import rabbit.ui.internal.viewers.WorkspaceStorageLabelProvider;
+
+import static com.google.common.base.Predicates.instanceOf;
+
+import com.google.common.base.Predicate;
+import com.google.common.collect.ImmutableMap;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.jface.action.Action;
-import org.eclipse.jface.action.ActionContributionItem;
-import org.eclipse.jface.action.IAction;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.IToolBarManager;
-import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.viewers.TreeNode;
+import org.eclipse.jface.viewers.DecoratingStyledCellLabelProvider;
+import org.eclipse.jface.viewers.ILabelDecorator;
+import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.TreeViewerColumn;
-import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.TreeColumn;
-import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.dialogs.PatternFilter;
-import org.eclipse.ui.ide.IDE;
+import org.eclipse.ui.dialogs.FilteredTree;
+import org.joda.time.Duration;
 import org.joda.time.LocalDate;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 /**
- * A page for displaying time spent working on different files.
+ * A page for displaying time spent on files.
  */
-public class ResourcePage extends InternalPage<FileDataDescriptor>
-    implements ResourcePageContentProvider.IProvider {
+public class ResourcePage extends AbsPage {
 
-  // Preference constants:
-  private static final String PREF_SELECTED_CATEGORIES = "ResourcePage.SelectedCatgories";
-  private static final String PREF_PAINT_CATEGORY = "ResourcePage.PaintCategory";
+  private FilteredTree filteredTree;
+  private CategoryProvider categoryProvider;
+  private TreePathValueProvider durationProvider;
+  private TreePathContentProvider contentProvider;
 
-  private ResourcePageContentProvider contents;
-  private ResourcePageTableLabelProvider labels;
-  
-  public ResourcePage() {
-    super();
-  }
+  public ResourcePage() {}
 
   @Override
-  public IContributionItem[] createToolBarItems(IToolBarManager toolBar) {
-    IAction collapse = new CollapseAllAction(getViewer());
-    IAction groupByFilesAction = newGroupByAllResourcesAction();
-    IAction colorByProjectsAction = newColorByProjectsAction();
-    IAction filterTreeAction = new ShowHideFilterControlAction(getFilteredTree());
-    filterTreeAction.run(); // Hides the filter control
+  public void createContents(Composite parent) {
+    Category[] supported = {WORKSPACE, DATE, PROJECT, FOLDER, FILE};
+    categoryProvider = new CategoryProvider(supported, PROJECT, FOLDER, FILE);
+    categoryProvider.addObserver(this);
 
-    IContributionItem[] items = new IContributionItem[] {
-        new ActionContributionItem(filterTreeAction),
-        new ActionContributionItem(new DropDownAction(
-            collapse.getText(), collapse.getImageDescriptor(), 
-            collapse, 
-            collapse, 
-            new ExpandAllAction(getViewer()))),
-        new ActionContributionItem(new GroupByAction(contents,
-            groupByFilesAction, // Default action 
-            groupByFilesAction, // First menu item
-            newGroupByFoldersAction(), 
-            newGroupByProjectsAction(), 
-            newGroupByDatesAndFilesAction())),
-        new ActionContributionItem(new DropDownAction(
-            "Highlight " + colorByProjectsAction.getText(), SharedImages.BRUSH, 
-            colorByProjectsAction, // Default action
-            newColorByFilesAction(),
-            newColorByFoldersAction(),
-            colorByProjectsAction, 
-            newColorByDatesAction())) };
+    contentProvider = new TreePathContentProvider(
+        new FileDataTreeBuilder(categoryProvider));
+    contentProvider.addObserver(this);
 
-    for (IContributionItem item : items)
-      toolBar.add(item);
+    durationProvider = createDurationValueProvider();
+    durationProvider.addObserver(this);
 
-    return items;
-  }
-  
-  @Override
-  protected CellPainter createCellPainter() {
-    return new CellPainter(contents) {
+    // The main label provider for the first column:
+    CompositeCellLabelProvider mainLabels = new CompositeCellLabelProvider(
+        new ResourceLabelProvider(),
+        new DateLabelProvider(),
+        new WorkspaceStorageLabelProvider());
+
+    // The viewer:
+    filteredTree = Viewers.newFilteredTree(parent,
+        new TreePathPatternFilter(mainLabels));
+    TreeViewer viewer = filteredTree.getViewer();
+    FilterableTreePathContentProvider filteredContentProvider =
+        new FilterableTreePathContentProvider(contentProvider);
+    filteredContentProvider.addFilter(instanceOf(Duration.class));
+    viewer.setContentProvider(filteredContentProvider);
+
+    // Column sorters:
+    TreeViewerColumnSorter labelSorter =
+        new InternalTreeViewerColumnLabelSorter(viewer, mainLabels);
+    TreeViewerColumnSorter durationSorter =
+        new TreeViewerColumnValueSorter(viewer, durationProvider);
+
+    // The columns:
+
+    TreeViewerColumn mainColumn =
+        newTreeViewerColumn(viewer, SWT.LEFT, "Name", 200);
+    mainColumn.getColumn().addSelectionListener(labelSorter);
+    ILabelDecorator decorator =
+        PlatformUI.getWorkbench().getDecoratorManager().getLabelDecorator();
+    mainColumn.setLabelProvider(new DecoratingStyledCellLabelProvider(
+        mainLabels, decorator, null));
+
+    TreeViewerColumn durationColumn =
+        newTreeViewerColumn(viewer, SWT.RIGHT, "Time Spent", 150);
+    durationColumn.getColumn().addSelectionListener(durationSorter);
+    durationColumn.setLabelProvider(new TreePathDurationLabelProvider(
+        durationProvider, mainLabels));
+
+    TreeViewerColumn durationGraphColumn =
+        newTreeViewerColumn(viewer, SWT.LEFT, "", 100);
+    durationGraphColumn.getColumn().addSelectionListener(durationSorter);
+    durationGraphColumn.setLabelProvider(new TreeViewerCellPainter(
+        durationProvider) {
       @Override
       protected Color createColor(Display display) {
         return new Color(display, 136, 177, 231);
       }
-    };
+    });
   }
 
   @Override
-  protected void createColumns(TreeViewer viewer) {
-    TreeViewerColumn viewerColumn = new TreeViewerColumn(viewer, SWT.LEFT);
-    viewerColumn.getColumn().setText("Name");
-    viewerColumn.getColumn().setWidth(200);
-    viewerColumn.getColumn().addSelectionListener(createInitialComparator(viewer));
-    viewerColumn.setLabelProvider(new DelegatingStyledCellLabelProvider(labels, false));
-    
-    TreeColumn column = new TreeColumn(viewer.getTree(), SWT.RIGHT);
-    column.setText("Time Spent");
-    column.setWidth(150);
-    column.addSelectionListener(getValueSorter());
-  }
+  public IContributionItem[] createToolBarItems(IToolBarManager toolBar) {
+    List<IContributionItem> items = new CommonToolBarBuilder()
+        .enableFilterControlAction(filteredTree, true)
+        .enableTreeAction(filteredTree.getViewer())
+        .enableGroupByAction(categoryProvider)
+        .enableColorByAction(durationProvider)
 
-  @Override
-  protected PatternFilter createFilter() {
-    return new DeepPatternFilter();
-  }
+        .addGroupByAction(
+            FILE.getText(), FILE.getImageDescriptor(), PROJECT, FOLDER, FILE)
+        .addGroupByAction(
+            FOLDER.getText(), FOLDER.getImageDescriptor(), PROJECT, FOLDER)
+        .addGroupByAction(PROJECT)
+        .addGroupByAction(DATE, PROJECT, FOLDER, FILE)
+        .addGroupByAction(WORKSPACE, PROJECT, FOLDER, FILE)
 
-  @Override
-  protected TreeViewerSorter createInitialComparator(TreeViewer viewer) {
-    return new TreeViewerLabelSorter(viewer) {
-      
-      @Override
-      public int category(Object element) {
-        if (element instanceof TreeNode) {
-          TreeNode node = (TreeNode) element;
-          if (node.getValue() instanceof IFile)
-            return 1;
-          if (node.getValue() instanceof IFolder)
-            return 2;
-          if (node.getValue() instanceof IProject)
-            return 3;
-          if (node.getValue() instanceof LocalDate)
-            return 4;
-        }
-        return super.category(element);
-      }
-      
-      @Override
-      protected int doCompare(Viewer v, Object e1, Object e2) {
-        if (!(e1 instanceof TreeNode) || !(e2 instanceof TreeNode))
-          return super.doCompare(v, e1, e2);
+        .addColorByAction(FILE)
+        .addColorByAction(FOLDER)
+        .addColorByAction(PROJECT)
+        .addColorByAction(DATE)
+        .addColorByAction(WORKSPACE)
+        .build();
 
-        Object element1 = ((TreeNode) e1).getValue();
-        Object element2 = ((TreeNode) e2).getValue();
-        if (element1 instanceof LocalDate && element2 instanceof LocalDate)
-          return ((LocalDate) element1).compareTo(((LocalDate) element2));
-        else
-          return super.doCompare(v, e1, e2);
-      }
-    };
-  }
-
-  @Override
-  protected IAccessor<FileDataDescriptor> getAccessor() {
-    return DataHandler.getAccessor(FileDataDescriptor.class);
-  }
-
-  @Override
-  protected void initializeViewer(TreeViewer viewer) {
-    contents = new ResourcePageContentProvider(viewer);
-    labels = new ResourcePageTableLabelProvider(contents);
-    viewer.setContentProvider(contents);
-    viewer.setLabelProvider(labels);
-  }
-
-  @Override
-  protected void restoreState() {
-    super.restoreState();
-    IPreferenceStore store = RabbitUI.getDefault().getPreferenceStore();
-
-    // Restores the selected categories of the content provider:
-    String[] categoryStr = store.getString(PREF_SELECTED_CATEGORIES).split(",");
-    List<Category> cats = Lists.newArrayList();
-    for (String str : categoryStr) {
-      try {
-        cats.add(Enum.valueOf(Category.class, str));
-      } catch (IllegalArgumentException e) {
-        // Ignore invalid elements.
-      }
+    for (IContributionItem item : items) {
+      toolBar.add(item);
     }
-    contents.setSelectedCategories(cats.toArray(new ICategory[cats.size()]));
-
-    // Restores the paint category of the content provider:
-    String paintStr = store.getString(PREF_PAINT_CATEGORY);
-    try {
-      Category cat = Enum.valueOf(Category.class, paintStr);
-      contents.setPaintCategory(cat);
-    } catch (IllegalArgumentException e) {
-      // Just let the content provider use its default paint category.
-    }
+    return items.toArray(new IContributionItem[items.size()]);
   }
 
   @Override
-  protected void saveState() {
-    super.saveState();
-    IPreferenceStore store = RabbitUI.getDefault().getPreferenceStore();
-
-    // Saves the selected categories of the content provider:
-    ICategory[] categories = contents.getSelectedCategories();
-    store.setValue(PREF_SELECTED_CATEGORIES, Joiner.on(",").join(categories));
-
-    // Saves the paint category of the content provider:
-    store.setValue(PREF_PAINT_CATEGORY, contents.getPaintCategory().toString());
-  }
-
-  /**
-   * Action to color the dates.
-   */
-  private IAction newColorByDatesAction() {
-    IAction action = new Action("Dates", SharedImages.CALENDAR) {
+  public Job updateJob(Preference pref) {
+    TreeViewer viewer = filteredTree.getViewer();
+    return new UpdateJob<IFileData>(viewer, pref, getAccessor()) {
       @Override
-      public void run() {
-        contents.setPaintCategory(Category.DATE);
+      protected Object getInput(final Collection<IFileData> data) {
+        return new IFileDataProvider() {
+          @Override
+          public Collection<IFileData> get() {
+            return data;
+          }
+        };
       }
     };
-    return action;
   }
 
-  /**
-   * Action to color the files.
-   */
-  private IAction newColorByFilesAction() {
-    IAction action = new Action("Files", PlatformUI.getWorkbench()
-        .getSharedImages().getImageDescriptor(ISharedImages.IMG_OBJ_FILE)) {
-      @Override
-      public void run() {
-        contents.setPaintCategory(Category.FILE);
-      }
-    };
-    return action;
+  @Override
+  protected FilteredTree getFilteredTree() {
+    return filteredTree;
   }
 
-  /**
-   * Action to color the folders.
-   */
-  private IAction newColorByFoldersAction() {
-    IAction action = new Action("Folders", PlatformUI.getWorkbench()
-        .getSharedImages().getImageDescriptor(ISharedImages.IMG_OBJ_FOLDER)) {
-      @Override
-      public void run() {
-        contents.setPaintCategory(Category.FOLDER);
-      }
-    };
-    return action;
+  @Override
+  protected Category[] getSelectedCategories() {
+    return categoryProvider.getSelected().toArray(new Category[0]);
   }
 
-  /**
-   * Action to color the projects.
-   */
-  private IAction newColorByProjectsAction() {
-    IAction action = new Action("Projects", PlatformUI.getWorkbench()
-        .getSharedImages().getImageDescriptor(IDE.SharedImages.IMG_OBJ_PROJECT)) {
-      @Override
-      public void run() {
-        contents.setPaintCategory(Category.PROJECT);
-      }
-    };
-    return action;
+  @Override
+  protected Category getVisualCategory() {
+    return (Category) durationProvider.getVisualCategory();
   }
 
-  /**
-   * Action to group the data by files.
-   */
-  private IAction newGroupByAllResourcesAction() {
-    IAction action = new Action("Files", PlatformUI.getWorkbench()
-        .getSharedImages().getImageDescriptor(ISharedImages.IMG_OBJ_FILE)) {
-      @Override
-      public void run() {
-        contents.setSelectedCategories();
-      }
-    };
-    return action;
+  @Override
+  protected void setSelectedCategories(List<Category> categories) {
+    Category[] selected = categories.toArray(new Category[0]);
+    categoryProvider.setSelected(selected);
   }
 
-  /**
-   * Action to group the data by dates and files.
-   */
-  private IAction newGroupByDatesAndFilesAction() {
-    IAction action = new Action("Dates", SharedImages.CALENDAR) {
-      @Override
-      public void run() {
-        contents.setSelectedCategories(Category.DATE, Category.PROJECT, 
-            Category.FOLDER, Category.FILE);
-      }
-    };
-    return action;
+  @Override
+  protected void setVisualCategory(Category category) {
+    durationProvider.setVisualCategory(category);
   }
 
-  /**
-   * Action to group the data by folders.
-   */
-  private IAction newGroupByFoldersAction() {
-    IAction action = new Action("Folders", PlatformUI
-        .getWorkbench().getSharedImages().getImageDescriptor(
-            ISharedImages.IMG_OBJ_FOLDER)) {
-      @Override
-      public void run() {
-        contents.setSelectedCategories(Category.PROJECT, Category.FOLDER);
-      }
-    };
-    return action;
+  @Override
+  protected void updateMaxValue() {
+    durationProvider.setMaxValue(durationProvider.getVisualCategory());
   }
-  
-  /**
-   * Action to group the data by projects.
-   */
-  private IAction newGroupByProjectsAction() {
-    IAction action = new Action("Projects", PlatformUI.getWorkbench()
-        .getSharedImages().getImageDescriptor(IDE.SharedImages.IMG_OBJ_PROJECT)) {
-      @Override
-      public void run() {
-        contents.setSelectedCategories(Category.PROJECT);
-      }
-    };
-    return action;
+
+  private ICategorizer createCategorizer() {
+    Map<Predicate<Object>, Category> categories = ImmutableMap.of(
+        instanceOf(IFile.class), FILE,
+        instanceOf(IFolder.class), FOLDER,
+        instanceOf(IProject.class), PROJECT,
+        instanceOf(LocalDate.class), DATE,
+        instanceOf(WorkspaceStorage.class), WORKSPACE);
+    ICategorizer categorizer = new Categorizer(categories);
+    return categorizer;
   }
+
+  private TreePathValueProvider createDurationValueProvider() {
+    ICategorizer categorizer = createCategorizer();
+    IConverter<TreePath> converter = new TreePathDurationConverter();
+    return new TreePathValueProvider(
+        categorizer, contentProvider, converter, FILE);
+  }
+
+  private IAccessor<IFileData> getAccessor() {
+    return DataHandler.getAccessor(IFileData.class);
+  }
+
 }

@@ -35,6 +35,7 @@ import com.google.common.collect.Lists;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IContributionItem;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.ui.dialogs.FilteredTree;
 
@@ -79,6 +80,20 @@ public final class CommonToolBarBuilder {
     groupByActions.add(new CategoryAction2(categoryProvider, categories));
     return this;
   }
+  
+  /**
+   * @throws IllegalStateException if {@link #enableGroupByAction(ICategoryProvider2)} has not been
+   *         called.
+   */
+  public CommonToolBarBuilder addGroupByAction(
+      String text, ImageDescriptor image, ICategory...categories) {
+    IAction action = new CategoryAction2(categoryProvider, categories);
+    action.setText(text);
+    action.setImageDescriptor(image);
+    groupByActions.add(action);
+    return this;
+  }
+  
   
   /**
    * Builds a collection of actions from the configuration.

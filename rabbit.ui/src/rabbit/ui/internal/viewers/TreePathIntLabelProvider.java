@@ -20,8 +20,11 @@ import rabbit.ui.internal.viewers.CellPainter.IValueProvider;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.eclipse.jface.viewers.CellLabelProvider;
+import org.eclipse.jface.viewers.IColorProvider;
 import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.ViewerCell;
+
+import javax.annotation.Nullable;
 
 /**
  * A {@link CellLabelProvider} that treats the value of a {@link TreePath} as an
@@ -34,14 +37,25 @@ import org.eclipse.jface.viewers.ViewerCell;
 public final class TreePathIntLabelProvider extends CellLabelProvider {
 
   private final IValueProvider valueProvider;
+  private final IColorProvider colorProvider;
 
   /**
-   * Constructor.
-   * @param valueProvider The value provider to provide value for the tree
+   * @param valueProvider the value provider to provide value for the tree
    *        paths.
    */
   public TreePathIntLabelProvider(IValueProvider valueProvider) {
+    this(valueProvider, null);
+  }
+
+  /**
+   * @param valueProvider The value provider to provide value for the tree
+   *        paths.
+   * @param colorProvider the optional color provider for coloring the cells.
+   */
+  public TreePathIntLabelProvider(IValueProvider valueProvider,
+      @Nullable IColorProvider colorProvider) {
     this.valueProvider = checkNotNull(valueProvider, "valueProvider");
+    this.colorProvider = colorProvider;
   }
 
   /**
@@ -59,5 +73,10 @@ public final class TreePathIntLabelProvider extends CellLabelProvider {
       text = String.valueOf(getValueProvider().getValue(path));
     }
     cell.setText(text);
+
+    if (colorProvider != null) { // TODO test
+      cell.setBackground(colorProvider.getBackground(cell.getElement()));
+      cell.setForeground(colorProvider.getForeground(cell.getElement()));
+    }
   }
 }
