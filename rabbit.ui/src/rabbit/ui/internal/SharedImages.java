@@ -31,7 +31,7 @@ public class SharedImages {
 
   /** Expand all image. */
   public static final ImageDescriptor EXPAND_ALL = getObj16("expandall.gif");
-  
+
   /** Collapse all image. */
   public static final ImageDescriptor COLLAPSE_ALL = getObj16("collapseall.gif");
 
@@ -49,31 +49,38 @@ public class SharedImages {
 
   /** Search image. */
   public static final ImageDescriptor SEARCH = getObj16("search.gif");
-  
+
   /** Launch type image. */
   public static final ImageDescriptor LAUNCH_TYPE = getObj16("launch-type.gif");
-  
+
   /** Launch mode image. */
   public static final ImageDescriptor LAUNCH_MODE = getObj16("launch-mode.gif");
-  
+
   /** Launch image. */
   public static final ImageDescriptor LAUNCH = getObj16("run.gif");
-  
+
   /** Default perspective image. */
   public static final ImageDescriptor PERSPECTIVE = getObj16("defaultpersp.gif");
-  
+
   /** Editor area image. */
   public static final ImageDescriptor EDITOR = getObj16("editor-highlight.gif");
-  
+
   /** View area image. */
   public static final ImageDescriptor VIEW = getObj16("view-highlight.gif");
-  
+
   /** Workspace image. */
   public static final ImageDescriptor WORKSPACE = getObj16("workspace.gif");
-  
+
   /** Task image. */
   public static final ImageDescriptor TASK = getObj16("task.gif");
-  
+
+  public static final ImageDescriptor JAVA_MEMBER = getObj16("java_member.gif");
+  public static final ImageDescriptor JAVA_METHOD = getObj16("method.gif");
+  public static final ImageDescriptor JAVA_TYPE = getObj16("class.gif");
+  public static final ImageDescriptor JAVA_TYPE_ROOT = getObj16("java_file.gif");
+  public static final ImageDescriptor JAVA_PACKAGE = getObj16("package.gif");
+  public static final ImageDescriptor JAVA_PACKAGE_ROOT = getObj16("src_folder.gif");
+
   /**
    * Gets an image descriptor from the directory "icons/full/obj16/".
    * @param name The name of the file.

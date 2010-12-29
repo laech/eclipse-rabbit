@@ -1,52 +1,37 @@
 package rabbit.ui.internal.pages.java;
 
-import rabbit.ui.internal.pages.AbstractFilteredTreePage;
-import rabbit.ui.internal.pages.AbstractFilteredTreePageTest;
-import rabbit.ui.internal.pages.java.JavaCategory;
-import rabbit.ui.internal.pages.java.JavaPage;
-import rabbit.ui.internal.pages.java.JavaPageContentProvider;
-import rabbit.ui.internal.util.ICategory;
+import static rabbit.ui.internal.pages.Category.DATE;
+import static rabbit.ui.internal.pages.Category.JAVA_MEMBER;
+import static rabbit.ui.internal.pages.Category.JAVA_PACKAGE;
+import static rabbit.ui.internal.pages.Category.JAVA_PACKAGE_ROOT;
+import static rabbit.ui.internal.pages.Category.JAVA_TYPE_ROOT;
+import static rabbit.ui.internal.pages.Category.PROJECT;
+import static rabbit.ui.internal.pages.Category.WORKSPACE;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-
-import org.junit.Test;
+import rabbit.ui.internal.pages.AbsPage;
+import rabbit.ui.internal.pages.AbsPageTest;
+import rabbit.ui.internal.pages.Category;
 
 /**
  * @see JavaPage
  */
-public class JavaPageTest extends AbstractFilteredTreePageTest {
+public final class JavaPageTest extends AbsPageTest {
 
-  @Test
-  public void testSaveState_selectedCategories() throws Exception {
-    JavaPageContentProvider contents = (JavaPageContentProvider) page
-        .getViewer().getContentProvider();
-    
-    ICategory[] categories = new ICategory[] { JavaCategory.DATE, JavaCategory.PACKAGE };
-    contents.setSelectedCategories(categories);
-    saveState(page);
-    
-    contents.setSelectedCategories(new ICategory[] { JavaCategory.METHOD });
-    restoreState(page);
-    assertArrayEquals(categories, contents.getSelectedCategories());
-  }
-  
-  @Test
-  public void testSaveState_paintCategory() throws Exception {
-    JavaPageContentProvider contents = (JavaPageContentProvider) page
-        .getViewer().getContentProvider();
-    
-    JavaCategory paintCategory = JavaCategory.PACKAGE_ROOT;
-    contents.setPaintCategory(paintCategory);
-    saveState(page);
-    
-    contents.setPaintCategory(JavaCategory.DATE);
-    restoreState(page);
-    assertEquals(paintCategory, contents.getPaintCategory());
+  @Override
+  protected AbsPage create() {
+    return new JavaPage();
   }
 
   @Override
-  protected AbstractFilteredTreePage createPage() {
-    return new JavaPage();
+  protected Category[] getSupportedCategories() {
+    return new Category[]{
+        WORKSPACE,
+        DATE,
+        PROJECT,
+        JAVA_PACKAGE_ROOT,
+        JAVA_PACKAGE,
+        JAVA_TYPE_ROOT,
+        JAVA_MEMBER};
   }
+
 }

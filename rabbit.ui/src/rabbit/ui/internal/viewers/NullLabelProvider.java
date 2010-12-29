@@ -15,11 +15,12 @@
  */
 package rabbit.ui.internal.viewers;
 
+import org.eclipse.jface.viewers.BaseLabelProvider;
+import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider;
 import org.eclipse.jface.viewers.IColorProvider;
 import org.eclipse.jface.viewers.IFontProvider;
 import org.eclipse.jface.viewers.ILabelProvider;
-
-import org.eclipse.jface.viewers.BaseLabelProvider;
+import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Image;
@@ -31,8 +32,8 @@ import javax.annotation.Nullable;
  * this provider, calling {@link #getText(Object)} or {@link #getImage(Object)}
  * on that element will always return null.
  */
-public class NullLabelProvider extends BaseLabelProvider
-    implements ILabelProvider, IFontProvider, IColorProvider {
+public class NullLabelProvider extends BaseLabelProvider implements
+    ILabelProvider, IFontProvider, IColorProvider, IStyledLabelProvider {
 
   protected NullLabelProvider() {}
 
@@ -58,6 +59,11 @@ public class NullLabelProvider extends BaseLabelProvider
 
   @Override
   public Font getFont(@Nullable Object element) {
+    return null;
+  }
+
+  @Override
+  public StyledString getStyledText(@Nullable Object element) {
     return null;
   }
 }

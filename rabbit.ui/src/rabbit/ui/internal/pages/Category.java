@@ -68,6 +68,24 @@ public enum Category implements ICategory {
   /** Task category */
   TASK("Tasks", SharedImages.TASK),
 
+  /** Java package root (source folder) category */
+  JAVA_PACKAGE_ROOT("Source Folders", SharedImages.JAVA_PACKAGE_ROOT),
+
+  /** Java package category */
+  JAVA_PACKAGE("Packages", SharedImages.JAVA_PACKAGE),
+
+  /** Java type root (Java file) category */
+  JAVA_TYPE_ROOT("Files", SharedImages.JAVA_TYPE_ROOT),
+
+  /** Java type category */
+  JAVA_TYPE("Types", SharedImages.JAVA_TYPE),
+
+  /** Java method category */
+  JAVA_METHOD("Methods", SharedImages.JAVA_METHOD),
+
+  /** Java member category, includes {@link #JAVA_TYPE} and {@link #JAVA_METHOD} */
+  JAVA_MEMBER("Java Members", SharedImages.JAVA_MEMBER),
+
   ;
 
   private String text;

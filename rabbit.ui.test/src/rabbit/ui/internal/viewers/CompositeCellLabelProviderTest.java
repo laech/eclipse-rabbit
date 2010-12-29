@@ -24,6 +24,7 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 
 import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.DelegatingStyledCellLabelProvider.IStyledLabelProvider;
 import org.eclipse.jface.viewers.IBaseLabelProvider;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.StyledString;
@@ -74,7 +75,7 @@ public class CompositeCellLabelProviderTest {
   @Test
   public void getForegroundShouldReturnTheForegroundFromTheInternalLabelProvider() {
     Color color = display.getSystemColor(SWT.COLOR_BLACK);
-    
+
     ColumnLabelProvider p1 = mock(ColumnLabelProvider.class);
     ColumnLabelProvider p2 = mock(ColumnLabelProvider.class);
     given(p1.getForeground(any())).willReturn(null);
@@ -87,7 +88,7 @@ public class CompositeCellLabelProviderTest {
   @Test
   public void getBackgroundShouldReturnTheBackgroundFromTheInternalLabelProvider() {
     Color color = display.getSystemColor(SWT.COLOR_BLACK);
-    
+
     ColumnLabelProvider p1 = mock(ColumnLabelProvider.class);
     ColumnLabelProvider p2 = mock(ColumnLabelProvider.class);
     given(p1.getBackground(any())).willReturn(null);
@@ -121,7 +122,7 @@ public class CompositeCellLabelProviderTest {
   public void getImageShouldReturnTheImageFromTheInternalLabelProvider()
       throws Exception {
     Image image = new Image(display, 1, 1);
-    
+
     ILabelProvider p1 = mock(ILabelProvider.class);
     ILabelProvider p2 = mock(ILabelProvider.class);
     given(p1.getImage(any())).willReturn(null);
@@ -145,7 +146,7 @@ public class CompositeCellLabelProviderTest {
   }
 
   @Test
-  public void getStyledTextShouldReturnTheTextOfTheElement() {
+  public void getStyledTextShouldReturnThePlainTextOfTheElementIfThereIsNoStyledTextLabelProvider() {
     String text = "Hello";
     Object element = new Object();
     ILabelProvider p = mock(ILabelProvider.class);
@@ -157,10 +158,22 @@ public class CompositeCellLabelProviderTest {
   }
 
   @Test
+  public void getStyledTextShouldReturnTheStyledTextFromTheInternalStyledTextLabelProvider() {
+    StyledString expectedText = new StyledString("Hello");
+
+    Object element = new Object();
+    IStyledLabelProvider p = mock(IStyledLabelProvider.class);
+    given(p.getStyledText(element)).willReturn(expectedText);
+
+    CompositeCellLabelProvider provider = create(p);
+    assertThat(provider.getStyledText(element), equalTo(expectedText));
+  }
+
+  @Test
   public void getTextShouldReturnTheTextFromTheInternalLabelProvider()
       throws Exception {
     String text = "Hello";
-    
+
     ILabelProvider p1 = mock(ILabelProvider.class);
     ILabelProvider p2 = mock(ILabelProvider.class);
     given(p1.getText(any())).willReturn(null);

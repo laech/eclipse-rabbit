@@ -35,6 +35,11 @@ public class NullLabelProviderTest {
   }
 
   @Test
+  public void getStyledStringShouldReturnNullIfElementIsNotRecognized() {
+    assertThat(provider.getStyledText(getUnrecognizedElement()), nullValue());
+  }
+
+  @Test
   public void getFontShouldReturnNullIfElementIsNotRecognized() {
     assertThat(provider.getFont(getUnrecognizedElement()), nullValue());
   }

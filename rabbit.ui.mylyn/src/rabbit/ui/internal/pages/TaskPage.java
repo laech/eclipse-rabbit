@@ -156,7 +156,7 @@ public class TaskPage extends AbsPage {
         durationProvider) {
       @Override
       protected Color createColor(Display display) {
-        return new Color(display, 136, 177, 231);
+        return new Color(display, 75, 172, 98);
       }
     });
   }

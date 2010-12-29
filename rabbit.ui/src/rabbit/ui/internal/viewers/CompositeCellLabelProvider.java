@@ -112,6 +112,14 @@ public class CompositeCellLabelProvider
 
   @Override
   public StyledString getStyledText(Object element) {
+    for (IBaseLabelProvider p : providers) {
+      if (p instanceof IStyledLabelProvider) {
+        StyledString str = ((IStyledLabelProvider) p).getStyledText(element);
+        if (str != null) {
+          return str;
+        }
+      }
+    }
     String text = getText(element);
     if (text == null) {
       text = element.toString();
