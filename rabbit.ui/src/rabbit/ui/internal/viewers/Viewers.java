@@ -15,13 +15,6 @@
  */
 package rabbit.ui.internal.viewers;
 
-import static com.google.common.collect.Lists.newArrayList;
-import static com.google.common.collect.Lists.newArrayListWithCapacity;
-
-import com.google.common.base.Joiner;
-import com.google.common.base.Splitter;
-import com.google.common.collect.Lists;
-
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
@@ -30,7 +23,6 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.TreeViewerColumn;
-import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
@@ -38,38 +30,27 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.TreeColumn;
-import org.eclipse.ui.IMemento;
 import org.eclipse.ui.dialogs.FilteredTree;
 import org.eclipse.ui.dialogs.PatternFilter;
 
-import java.util.List;
-
 /**
- * TODO
+ * Utility methods for working with viewers.
  */
 public final class Viewers {
 
-  public static void refresh(TreeViewer viewer) {
-    viewer.getTree().setRedraw(false);
-    viewer.refresh();
-    viewer.getTree().setRedraw(true);
-  }
-
-  public static void resetInput(TreeViewer viewer) {
-    TreePath[] paths = viewer.getExpandedTreePaths();
-    viewer.getTree().setRedraw(false);
-    viewer.setInput(viewer.getInput());
-    viewer.setExpandedTreePaths(paths);
-    viewer.getTree().setRedraw(true);
-  }
-
-  public static FilteredTree newFilteredTree(Composite parent, PatternFilter filter) {
+  /**
+   * Creates a new, configured {@link FilteredTree}.
+   * @param parent the parent composite.
+   * @param filter the filter for the tree.
+   * @return a {@link FilteredTree}.
+   */
+  public static FilteredTree newFilteredTree(
+      Composite parent, PatternFilter filter) {
     GridLayoutFactory.fillDefaults().margins(0, 0).applyTo(parent);
-    
-    int style = SWT.VIRTUAL | SWT.V_SCROLL | SWT.H_SCROLL;
 
+    int style = SWT.VIRTUAL | SWT.V_SCROLL | SWT.H_SCROLL;
     @SuppressWarnings("deprecation")
+    // Need this for Eclipse 3.4:
     FilteredTree tree = new FilteredTree(parent, style, filter);
     tree.setBackground(parent.getBackground());
     tree.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -90,14 +71,43 @@ public final class Viewers {
     return tree;
   }
 
-  public static TreeViewerColumn newTreeViewerColumn(TreeViewer viewer, int style, String text,
-      int width) {
+  /**
+   * Creates a new {@link TreeViewerColumn}.
+   * @param viewer the parent viewer.
+   * @param style the style of the column.
+   * @param text the text of the column.
+   * @param width the width of the column
+   * @return a column.
+   */
+  public static TreeViewerColumn newTreeViewerColumn(
+      TreeViewer viewer, int style, String text, int width) {
     TreeViewerColumn column = new TreeViewerColumn(viewer, style);
     column.getColumn().setResizable(true);
     column.getColumn().setMoveable(true);
-    column.getColumn().setWidth(100); // TODO fix this.
+    column.getColumn().setWidth(width);
     column.getColumn().setText(text);
     return column;
+  }
+
+  /**
+   * Refreshes the given viewer.
+   */
+  public static void refresh(TreeViewer viewer) {
+    viewer.getTree().setRedraw(false);
+    viewer.refresh();
+    viewer.getTree().setRedraw(true);
+  }
+
+  /**
+   * Gets the current input of the viewer and calls
+   * {@link TreeViewer#setInput(Object)} on it.
+   */
+  public static void resetInput(TreeViewer viewer) {
+    TreePath[] paths = viewer.getExpandedTreePaths();
+    viewer.getTree().setRedraw(false);
+    viewer.setInput(viewer.getInput());
+    viewer.setExpandedTreePaths(paths);
+    viewer.getTree().setRedraw(true);
   }
 
   /**
@@ -116,7 +126,8 @@ public final class Viewers {
   }
 
   /**
-   * Configures the given viewer to expand/collapse an tree branch when double clicked on the item.
+   * Configures the given viewer to expand/collapse an tree branch when double
+   * clicked on the item.
    */
   private static void expandOnDoubleClick(final TreeViewer viewer) {
     viewer.addDoubleClickListener(new IDoubleClickListener() {

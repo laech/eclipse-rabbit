@@ -15,13 +15,14 @@
  */
 package rabbit.ui.internal.viewers;
 
-import rabbit.ui.internal.viewers.TreeViewerSorter;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.CoreMatchers.sameInstance;
+import static org.junit.Assert.assertThat;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-
+import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Event;
@@ -34,21 +35,21 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
- * @see TreeViewerSorter
+ * @see TreeViewerColumnSorter
  */
-public abstract class TreeViewerSorterTest {
-  
+public class TreeViewerColumnSorterTest {
+
   /**
    * Shell for creating additional viewers for testing, must not reassign this
    * variable.
    */
   protected static Shell shell;
-  
+
   @BeforeClass
   public static void beforeClass() {
     shell = new Shell(PlatformUI.getWorkbench().getDisplay());
   }
-  
+
   @AfterClass
   public static void afterClass() {
     shell.dispose();
@@ -56,53 +57,53 @@ public abstract class TreeViewerSorterTest {
 
   @Test(expected = NullPointerException.class)
   public void testConstructor_null() throws Exception {
-    createViewerSorter(null);
+    create(null);
   }
-  
+
   @Test
-  public void testGetViewer() throws Exception {
+  public void getViewerShouldReturnTheSameViewer() throws Exception {
     TreeViewer viewer = new TreeViewer(shell);
-    assertSame(viewer, createViewerSorter(viewer).getViewer());
+    assertThat(create(viewer).getViewer(), sameInstance(viewer));
   }
-  
+
   @Test
-  public void testGetSelectedColumn() throws Exception {
-    TreeViewerSorter sorter = createViewerSorter(new TreeViewer(shell));
-    assertNull(sorter.getSelectedColumn());
-    
+  public void getSelectedColumnShouldReturnTheRightColumn() {
+    TreeViewerColumnSorter sorter = create(new TreeViewer(shell));
+    assertThat(sorter.getSelectedColumn(), nullValue());
+
     TreeColumn column = new TreeColumn(sorter.getViewer().getTree(), SWT.NONE);
     Event event = new Event();
     event.widget = column;
     SelectionEvent selectionEvent = new SelectionEvent(event);
-   
+
     sorter.widgetSelected(selectionEvent);
-    assertSame(column, sorter.getSelectedColumn());
+    assertThat(sorter.getSelectedColumn(), sameInstance(column));
   }
-  
+
   /**
    * Test that when a column is clicked, the sort indicator is updated on the
    * column.
    */
   @Test
-  public void testSelectColumn_sortIndication() throws Exception {
-    TreeViewerSorter sorter = createViewerSorter(new TreeViewer(shell));
-    assertNull(sorter.getSelectedColumn());
-    
+  public void shouldUpdateTheSortIndicationOnTheColumnHeader() {
+    TreeViewerColumnSorter sorter = create(new TreeViewer(shell));
+    assertThat(sorter.getSelectedColumn(), nullValue());
+
     TreeColumn column = new TreeColumn(sorter.getViewer().getTree(), SWT.NONE);
     Event event = new Event();
     event.widget = column;
     SelectionEvent selectionEvent = new SelectionEvent(event);
-    
+
     sorter.widgetSelected(selectionEvent);
     Tree tree = sorter.getViewer().getTree();
-    assertEquals(column, tree.getSortColumn());
-    assertEquals(SWT.UP, tree.getSortDirection());
-    
+    assertThat(tree.getSortColumn(), is(column));
+    assertThat(tree.getSortDirection(), is(SWT.UP));
+
     sorter.widgetSelected(selectionEvent);
-    assertEquals(column, tree.getSortColumn());
-    assertEquals(SWT.DOWN, tree.getSortDirection());
+    assertThat(tree.getSortColumn(), is(column));
+    assertThat(tree.getSortDirection(), is(SWT.DOWN));
   }
-  
+
   /**
    * Creates a viewer sorter for testing. Subclass should create a sorter using
    * the argument directly <strong>without</strong> checking for null.
@@ -110,5 +111,12 @@ public abstract class TreeViewerSorterTest {
    * @param viewer The viewer.
    * @return A viewer sorter for testing.
    */
-  protected abstract TreeViewerSorter createViewerSorter(TreeViewer viewer);
+  protected TreeViewerColumnSorter create(TreeViewer viewer) {
+    return new TreeViewerColumnSorter(viewer) {
+      @Override
+      protected int doCompare(Viewer v, TreePath path, Object e1, Object e2) {
+        return 0;
+      }
+    };
+  }
 }

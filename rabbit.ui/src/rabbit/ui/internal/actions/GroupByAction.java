@@ -36,28 +36,10 @@ public class GroupByAction extends DropDownAction {
 
   private ICategoryProvider categoryProvider;
 
-//  /**
-//   * Constructor.
-//   * 
-//   * @param categoryProvider The category provider that contains the grouping
-//   *          categories.
-//   * @param defaultAction The default action.
-//   * @param menuItems The actions to show on the menu.
-//   * @throws NullPointerException If category provider is null, or default
-//   *           action is null.
-//   */
-//  public GroupByAction(ICategoryProvider categoryProvider,
-//      IAction defaultAction, IAction... menuItems) {
-//    super("Group by " + defaultAction.getText(), SharedImages.HIERARCHY,
-//        defaultAction, menuItems);
-//
-//    checkNotNull(categoryProvider);
-//    this.categoryProvider = categoryProvider;
-//  }
-  
   /**
-   * Constructor. This constructor uses the first action in the arguments as the default, that is,
-   * the default text/image/action will be taken from the first action.
+   * Constructor. This constructor uses the first action in the arguments as the
+   * default, that is, the default text/image/action will be taken from the
+   * first action.
    * @param actions the list of actions, length must be greater than 1.
    */
   public GroupByAction(ICategoryProvider categoryProvider, IAction... actions) {

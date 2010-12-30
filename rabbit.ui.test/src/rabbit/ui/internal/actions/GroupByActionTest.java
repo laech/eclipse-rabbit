@@ -15,13 +15,13 @@
  */
 package rabbit.ui.internal.actions;
 
-import rabbit.ui.internal.actions.GroupByAction;
-import rabbit.ui.internal.util.ICategory;
 import rabbit.ui.internal.util.ICategoryProvider;
 
-import static org.junit.Assert.*;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.junit.Assert.assertThat;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 
-import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.junit.Test;
 
@@ -30,40 +30,23 @@ import org.junit.Test;
  */
 public class GroupByActionTest {
 
-  /** Action for testing. */
-  private IAction action = new Action("Abc") {
-  };
-
-  /** Provider for testing. */
-  private ICategoryProvider categoryProvider = new ICategoryProvider() {
-    @Override
-    public void setSelectedCategories(ICategory... categories) {
-    }
-
-    @Override
-    public ICategory[] getUnselectedCategories() {
-      return new ICategory[0];
-    }
-
-    @Override
-    public ICategory[] getSelectedCategories() {
-      return new ICategory[0];
-    }
-  };
-
   @Test(expected = NullPointerException.class)
-  public void testConstructor_categoryProvider_null() {
-    new GroupByAction(null, action);
+  public void shouldThrowAnExceptionIfTryToConstructWithANullCategoryProvider() {
+    new GroupByAction(null, mock(IAction.class));
   }
 
   @Test(expected = NullPointerException.class)
-  public void testConstructor_defaultAction_null() {
-    new GroupByAction(categoryProvider, null);
+  public void shouldThrowAnExceptionIfTryToConstructWithNullActions() {
+    new GroupByAction(mock(ICategoryProvider.class), new IAction[]{null});
   }
 
   @Test
-  public void testGetText() {
-    assertEquals("Group by " + action.getText(), new GroupByAction(
-        categoryProvider, action).getText());
+  public void getTextShouldReturnTheCorrectText() {
+    IAction action = mock(IAction.class);
+    given(action.getText()).willReturn("Hello");
+
+    assertThat(
+        new GroupByAction(mock(ICategoryProvider.class), action).getText(),
+        equalTo("Group by " + action.getText()));
   }
 }

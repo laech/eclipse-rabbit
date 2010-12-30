@@ -20,7 +20,7 @@ import rabbit.data.access.model.ISessionData;
 import rabbit.ui.IProvider;
 import rabbit.ui.internal.pages.Category;
 import rabbit.ui.internal.util.ICategory;
-import rabbit.ui.internal.util.ICategoryProvider2;
+import rabbit.ui.internal.util.ICategoryProvider;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -36,7 +36,7 @@ import java.util.List;
 /**
  * A {@link SessionDataTreeBuilder} takes input as {@link ISessionDataProvider}
  * and builds tree leaves based on the order of the categories provided by the
- * {@link ICategoryProvider2}, the last segment of every path will be the
+ * {@link ICategoryProvider}, the last segment of every path will be the
  * {@link Duration} data node of each {@link ISessionData} provided by the
  * provider.
  */
@@ -52,7 +52,7 @@ public final class SessionDataTreeBuilder
    * @param categoryProvider the provider for providing categories.
    * @throws NullPointerException if argument is null.
    */
-  public SessionDataTreeBuilder(ICategoryProvider2 categoryProvider) {
+  public SessionDataTreeBuilder(ICategoryProvider categoryProvider) {
     super(categoryProvider, ImmutableMap
         .<ICategory, IKey<?>> builder()
         .put(Category.DATE, ISessionData.DATE)

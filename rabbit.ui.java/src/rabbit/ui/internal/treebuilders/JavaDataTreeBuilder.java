@@ -20,7 +20,7 @@ import rabbit.ui.IProvider;
 import rabbit.ui.internal.pages.Category;
 import rabbit.ui.internal.util.ICategorizer;
 import rabbit.ui.internal.util.ICategory;
-import rabbit.ui.internal.util.ICategoryProvider2;
+import rabbit.ui.internal.util.ICategoryProvider;
 import rabbit.ui.internal.util.JavaStructureCategorizer;
 import rabbit.ui.internal.viewers.ITreePathBuilder;
 
@@ -45,10 +45,10 @@ public final class JavaDataTreeBuilder implements ITreePathBuilder {
    */
   public static interface IJavaDataProvider extends IProvider<IJavaData> {}
 
-  private final ICategoryProvider2 provider;
+  private final ICategoryProvider provider;
   private final ICategorizer categorizer;
 
-  public JavaDataTreeBuilder(ICategoryProvider2 provider) {
+  public JavaDataTreeBuilder(ICategoryProvider provider) {
     this.provider = checkNotNull(provider);
     this.categorizer = new JavaStructureCategorizer();
   }

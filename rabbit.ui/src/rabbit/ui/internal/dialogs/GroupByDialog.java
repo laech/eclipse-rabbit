@@ -47,6 +47,7 @@ import org.eclipse.ui.forms.widgets.Form;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Section;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -166,11 +167,9 @@ public class GroupByDialog extends FormDialog {
    * 
    * @param categories The elements.
    */
-  public void setUnSelectedCategories(ICategory[] categories) {
+  public void setUnSelectedCategories(Collection<ICategory> categories) {
     availableCategories.clear();
-    for (ICategory cat : categories) {
-      availableCategories.add(cat);
-    }
+    availableCategories.addAll(categories);
   }
 
   /**
@@ -179,11 +178,9 @@ public class GroupByDialog extends FormDialog {
    * 
    * @param categories The elements.
    */
-  public void setSelectedCategories(ICategory[] categories) {
+  public void setSelectedCategories(List<ICategory> categories) {
     selectedCategories.clear();
-    for (ICategory cat : categories) {
-      selectedCategories.add(cat);
-    }
+    selectedCategories.addAll(categories);
   }
 
   @Override

@@ -21,7 +21,7 @@ import rabbit.ui.IProvider;
 import rabbit.ui.internal.pages.Category;
 import rabbit.ui.internal.treebuilders.FileDataTreeBuilder.IFileDataProvider;
 import rabbit.ui.internal.util.ICategory;
-import rabbit.ui.internal.util.ICategoryProvider2;
+import rabbit.ui.internal.util.ICategoryProvider;
 import rabbit.ui.internal.viewers.ITreePathBuilder;
 
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -86,7 +86,7 @@ public final class FileDataTreeBuilderTest extends
         fileHasParentFolder,
         duration));
 
-    ICategoryProvider2 provider = mock(ICategoryProvider2.class);
+    ICategoryProvider provider = mock(ICategoryProvider.class);
     given(provider.getSelected()).willReturn(asList(categories));
     ITreePathBuilder builder = create(provider);
 
@@ -126,7 +126,7 @@ public final class FileDataTreeBuilderTest extends
     given(data2.get(IFileData.FILE)).willReturn(fileHasNoParentFolder);
     given(data2.get(IFileData.WORKSPACE)).willReturn(ws2);
 
-    ICategoryProvider2 provider = mock(ICategoryProvider2.class);
+    ICategoryProvider provider = mock(ICategoryProvider.class);
     given(provider.getSelected()).willReturn(asList(categories));
     ITreePathBuilder builder = create(provider);
 
@@ -146,7 +146,7 @@ public final class FileDataTreeBuilderTest extends
         newPath(date, ws, duration),
         newPath(date, ws, duration));
 
-    ICategoryProvider2 provider = mock(ICategoryProvider2.class);
+    ICategoryProvider provider = mock(ICategoryProvider.class);
     given(provider.getSelected()).willReturn(asList(categories));
     ITreePathBuilder builder = create(provider);
 
@@ -158,7 +158,7 @@ public final class FileDataTreeBuilderTest extends
   }
 
   @Override
-  protected ITreePathBuilder create(ICategoryProvider2 p) {
+  protected ITreePathBuilder create(ICategoryProvider p) {
     return new FileDataTreeBuilder(p);
   }
 

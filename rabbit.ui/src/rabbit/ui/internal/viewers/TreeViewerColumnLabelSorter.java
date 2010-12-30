@@ -25,8 +25,8 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 
 /**
- * TODO check.
- * Instances of this sorter compares elements based on their labels (ignore cases).
+ * Instances of this sorter compares elements based on their labels (ignore
+ * cases).
  */
 public class TreeViewerColumnLabelSorter extends TreeViewerColumnSorter {
 
@@ -34,10 +34,12 @@ public class TreeViewerColumnLabelSorter extends TreeViewerColumnSorter {
 
   /**
    * @param parent the parent viewer.
-   * @param labelProvider the label provider for getting the labels of the elements.
+   * @param labelProvider the label provider for getting the labels of the
+   *        elements.
    * @throws NullPointerException if any argument is null.
    */
-  public TreeViewerColumnLabelSorter(TreeViewer parent, ILabelProvider labelProvider) {
+  public TreeViewerColumnLabelSorter(TreeViewer parent,
+      ILabelProvider labelProvider) {
     super(parent);
     this.labelProvider = checkNotNull(labelProvider);
   }

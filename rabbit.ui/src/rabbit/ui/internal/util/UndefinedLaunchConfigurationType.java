@@ -33,8 +33,9 @@ import java.util.Set;
 /**
  * Represents an undefined launch configuration type.
  */
-@SuppressWarnings("unchecked")
-public class UndefinedLaunchConfigurationType implements ILaunchConfigurationType {
+@SuppressWarnings("rawtypes")
+public class UndefinedLaunchConfigurationType
+    implements ILaunchConfigurationType {
 
   private final String identifier;
 
@@ -47,17 +48,20 @@ public class UndefinedLaunchConfigurationType implements ILaunchConfigurationTyp
     checkNotNull(id);
     identifier = id;
   }
-  
+
   @Override
   public boolean equals(Object obj) {
-    if (obj == null) return false;
-    if (obj == this) return true;
-    if (obj.getClass() != getClass()) return false;
-    
+    if (obj == null)
+      return false;
+    if (obj == this)
+      return true;
+    if (obj.getClass() != getClass())
+      return false;
+
     UndefinedLaunchConfigurationType t = (UndefinedLaunchConfigurationType) obj;
     return getIdentifier().equals(t.getIdentifier());
   }
-  
+
   @Override
   public int hashCode() {
     return getIdentifier().hashCode();

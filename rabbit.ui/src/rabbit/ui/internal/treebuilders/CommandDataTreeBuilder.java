@@ -20,7 +20,7 @@ import rabbit.data.access.model.IKey;
 import rabbit.ui.IProvider;
 import rabbit.ui.internal.pages.Category;
 import rabbit.ui.internal.util.ICategory;
-import rabbit.ui.internal.util.ICategoryProvider2;
+import rabbit.ui.internal.util.ICategoryProvider;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -35,7 +35,7 @@ import java.util.List;
 /**
  * A {@link CommandDataTreeBuilder} takes input as {@link ICommandDataProvider}
  * and builds tree leaves based on the order of the categories provided by the
- * {@link ICategoryProvider2}, the last segment of every path will be the
+ * {@link ICategoryProvider}, the last segment of every path will be the
  * {@link Integer} data node ({@link ICommandData#COUNT}) of each
  * {@link ICommandData} provided by the provider.
  */
@@ -51,7 +51,7 @@ public final class CommandDataTreeBuilder
    * @param categoryProvider the provider for providing categories.
    * @throws NullPointerException if argument is null.
    */
-  public CommandDataTreeBuilder(ICategoryProvider2 categoryProvider) {
+  public CommandDataTreeBuilder(ICategoryProvider categoryProvider) {
     super(categoryProvider, ImmutableMap.<ICategory, IKey<?>> of(
         Category.COMMAND, ICommandData.COMMAND,
         Category.DATE, ICommandData.DATE,

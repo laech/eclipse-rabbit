@@ -15,40 +15,50 @@
  */
 package rabbit.ui.internal.actions;
 
-import rabbit.ui.internal.pages.AbstractValueContentProvider;
 import rabbit.ui.internal.util.ICategory;
+import rabbit.ui.internal.util.IVisualProvider;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.collect.ImmutableList;
+
 import org.eclipse.jface.action.Action;
 
+import java.util.List;
+
 /**
- * An action to call {@link AbstractValueContentProvider#setPaintCategory(ICategory)} when it's
- * invoked.
+ * An action to call {@link IVisualProvider#setVisualCategory(ICategory)} when
+ * it's invoked.
  */
 public final class PaintCategoryAction extends Action {
 
-  private final AbstractValueContentProvider provider;
-  private final ICategory paintCategory;
+  private final ICategory visualCategory;
+  private final List<IVisualProvider> providers;
 
   /**
    * Constructor. When this action is invoked,
-   * {@link AbstractValueContentProvider#setPaintCategory(ICategory)} will be called with the given
-   * category. The text/image will be taken from the category.
-   * @param provider the provider to set the category.
-   * @param paintCategory the category to be set.
+   * {@link IVisualProvider#setVisualCategory(ICategory)} will be called with
+   * the given category. The text/image will be taken from the category.
+   * @param providers the providers to set the category.
+   * @param visualCategory the category to be set.
    * @throws NullPointerException if any argument is null.
    */
-  public PaintCategoryAction(AbstractValueContentProvider provider, ICategory paintCategory) {
-    this.provider = checkNotNull(provider);
-    this.paintCategory = checkNotNull(paintCategory);
-    setText(paintCategory.getText());
-    setImageDescriptor(paintCategory.getImageDescriptor());
+  public PaintCategoryAction(
+      ICategory visualCategory, IVisualProvider... providers) {
+    this.visualCategory = checkNotNull(visualCategory);
+    for (IVisualProvider p : providers) {
+      checkNotNull(p);
+    }
+    this.providers = ImmutableList.copyOf(providers);
+    setText(visualCategory.getText());
+    setImageDescriptor(visualCategory.getImageDescriptor());
   }
 
   @Override
   public void run() {
     super.run();
-    provider.setPaintCategory(paintCategory);
+    for (IVisualProvider provider : providers) {
+      provider.setVisualCategory(visualCategory);
+    }
   }
 }

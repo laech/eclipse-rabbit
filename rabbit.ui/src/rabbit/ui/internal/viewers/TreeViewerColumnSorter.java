@@ -29,25 +29,22 @@ import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.swt.widgets.Widget;
 
 /**
- * FIXME: sorting for tree path
- * <p>
  * A comparator for sorting the a {@link TreeViewer} when the user is clicked on
  * a column.
- * </p>
  * <p>
  * To register a column for sorting, simply call the column's
- * {@link TreeColumn#addSelectionListener(SelectionListener)} method and
- * pass in an instance of this class. An instance of this class can be shared by
- * multiple columns of the same viewer.
+ * {@link TreeColumn#addSelectionListener(SelectionListener)} method and pass in
+ * an instance of this class.
  * </p>
  * <p>
- * Subclasses need to override {@link #doCompare(Viewer, TreePath, Object, Object)} to
- * do the actual comparing of the elements. 
+ * Subclasses need to override
+ * {@link #doCompare(Viewer, TreePath, Object, Object)} to do the actual
+ * comparing of the elements.
  * </p>
  */
-public abstract class TreeViewerColumnSorter 
+public abstract class TreeViewerColumnSorter
     extends TreePathViewerSorter implements SelectionListener {
-  
+
   /**
    * One of {@link SWT#NONE}, {@link SWT#UP}, {@link SWT#DOWN}.
    */
@@ -92,6 +89,13 @@ public abstract class TreeViewerColumnSorter
     return selectedColumn;
   }
 
+  /**
+   * @return the viewer
+   */
+  public TreeViewer getViewer() {
+    return viewer;
+  }
+
   @Override
   public void widgetDefaultSelected(SelectionEvent e) {
     // Do nothing.
@@ -119,7 +123,7 @@ public abstract class TreeViewerColumnSorter
       viewer.setComparator(this);
     }
     tree.setSortDirection(sortDirection);
-    
+
     viewer.setExpandedTreePaths(expandedTreePaths);
   }
 
@@ -129,7 +133,8 @@ public abstract class TreeViewerColumnSorter
    * class.
    * 
    * @param v The viewer.
-   * @param parentPath the parent path of the elements, or null if the elements are root elements.
+   * @param parentPath the parent path of the elements, or null if the elements
+   *        are root elements.
    * @param e1 The first element.
    * @param e2 The second element.
    * @return A negative value if the first element is consider less than the
@@ -137,5 +142,6 @@ public abstract class TreeViewerColumnSorter
    *         the second element, a positive value if the first element is
    *         consider greater than the second element,
    */
-  protected abstract int doCompare(Viewer v, TreePath parentPath, Object e1, Object e2);
+  protected abstract int doCompare(Viewer v, TreePath parentPath, Object e1,
+      Object e2);
 }

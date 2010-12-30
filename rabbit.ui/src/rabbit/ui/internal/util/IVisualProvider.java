@@ -25,4 +25,10 @@ public interface IVisualProvider {
    * @return the visual category.
    */
   ICategory getVisualCategory();
+
+  /**
+   * @param category the new visual category.
+   * @return true if the category is supported and accepted, false otherwise.
+   */
+  boolean setVisualCategory(ICategory category);
 }

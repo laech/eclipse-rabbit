@@ -41,11 +41,11 @@ import java.util.Map;
 
 /**
  * An instance of this class is intended to be used with a
- * {@link ICategoryProvider2} for specifying which elements belong to which
+ * {@link ICategoryProvider} for specifying which elements belong to which
  * structural categories in order for the elements to be structured in a certain
  * way.
  * 
- * @see ICategoryProvider2
+ * @see ICategoryProvider
  * @see CategoryProvider
  * @see CategoryProvider#CategoryProvider(ICategory[], ICategory...)
  */

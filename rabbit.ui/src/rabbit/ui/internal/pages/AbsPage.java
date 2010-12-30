@@ -20,10 +20,10 @@ import static rabbit.ui.internal.viewers.Viewers.resetInput;
 
 import rabbit.ui.IPage;
 import rabbit.ui.internal.util.ICategory;
-import rabbit.ui.internal.util.ICategoryProvider2;
+import rabbit.ui.internal.util.ICategoryProvider;
 import rabbit.ui.internal.util.IVisualProvider;
 import rabbit.ui.internal.util.TreePathValueProvider;
-import rabbit.ui.internal.viewers.CellPainter.IValueProvider;
+import rabbit.ui.internal.viewers.IValueProvider;
 
 import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.swt.widgets.TreeColumn;
@@ -73,7 +73,7 @@ public abstract class AbsPage implements IPage, Observer {
       updateMaxValue();
       refresh(getFilteredTree().getViewer());
 
-    } else if (o instanceof ICategoryProvider2) {
+    } else if (o instanceof ICategoryProvider) {
       resetInput(getFilteredTree().getViewer());
 
     } else if (o instanceof IContentProvider) {
@@ -100,13 +100,13 @@ public abstract class AbsPage implements IPage, Observer {
   
   /**
    * @param categories the categories to set.
-   * @see ICategoryProvider2#setSelected(ICategory...)
+   * @see ICategoryProvider#setSelected(ICategory...)
    */
   protected abstract void setSelectedCategories(List<Category> categories);
   
   /**
    * @return the current selected categories.
-   * @see ICategoryProvider2#getSelected()
+   * @see ICategoryProvider#getSelected()
    */
   protected abstract Category[] getSelectedCategories();
   

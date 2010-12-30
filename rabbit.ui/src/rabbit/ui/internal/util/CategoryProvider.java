@@ -30,10 +30,10 @@ import java.util.Observable;
 import java.util.Set;
 
 /**
- * Provides default implementation for {@link ICategoryProvider2}.
+ * Provides default implementation for {@link ICategoryProvider}.
  */
 public final class CategoryProvider extends Observable
-    implements ICategoryProvider2 {
+    implements ICategoryProvider {
 
   /**
    * Immutable collection of all supported categories.

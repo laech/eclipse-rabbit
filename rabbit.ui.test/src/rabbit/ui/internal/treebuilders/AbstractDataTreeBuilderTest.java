@@ -19,7 +19,7 @@ import rabbit.data.access.model.IData;
 import rabbit.data.access.model.IKey;
 import rabbit.ui.IProvider;
 import rabbit.ui.internal.util.ICategory;
-import rabbit.ui.internal.util.ICategoryProvider2;
+import rabbit.ui.internal.util.ICategoryProvider;
 import rabbit.ui.internal.viewers.ITreePathBuilder;
 
 import static com.google.common.collect.Lists.newArrayList;
@@ -48,7 +48,7 @@ import javax.annotation.Nullable;
 
 /**
  * An abstract test case defined common tests for the internal tree builders.
- * These tree builders all take an {@link ICategoryProvider2} as constructor
+ * These tree builders all take an {@link ICategoryProvider} as constructor
  * argument, and all accept input as some kind of {@link IProvider}.
  * 
  * @see AbstractDataTreeBuilder
@@ -60,7 +60,7 @@ public abstract class AbstractDataTreeBuilderTest<T> {
   @Before
   public void before() {
     Collection<ICategory> noCategories = emptySet();
-    ICategoryProvider2 p = mock(ICategoryProvider2.class);
+    ICategoryProvider p = mock(ICategoryProvider.class);
     given(p.getAllSupported()).willReturn(noCategories);
     builder = create(p);
   }
@@ -80,7 +80,7 @@ public abstract class AbstractDataTreeBuilderTest<T> {
   @Test(expected = NullPointerException.class)
   public void constructorShouldThrowAnExceptionIfTheKeyMapIsNull() {
     // Testing the abstract class only:
-    ICategoryProvider2 p = mock(ICategoryProvider2.class);
+    ICategoryProvider p = mock(ICategoryProvider.class);
     given(p.getAllSupported()).willReturn(Collections.<ICategory> emptySet());
     given(p.getSelected()).willReturn(Collections.<ICategory> emptyList());
     given(p.getUnselected()).willReturn(Collections.<ICategory> emptySet());
@@ -125,10 +125,10 @@ public abstract class AbstractDataTreeBuilderTest<T> {
 
   /**
    * Creates a builder to be tested.
-   * @param p the {@link ICategoryProvider2} for the constructor.
+   * @param p the {@link ICategoryProvider} for the constructor.
    * @return a builder.
    */
-  protected abstract ITreePathBuilder create(ICategoryProvider2 p);
+  protected abstract ITreePathBuilder create(ICategoryProvider p);
 
   /**
    * Creates a provider as an input to the builder.

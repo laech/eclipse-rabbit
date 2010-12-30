@@ -16,7 +16,6 @@
 package rabbit.ui.internal.actions;
 
 import rabbit.ui.internal.SharedImages;
-import rabbit.ui.internal.util.ICategoryProvider;
 
 import org.eclipse.jface.action.IAction;
 

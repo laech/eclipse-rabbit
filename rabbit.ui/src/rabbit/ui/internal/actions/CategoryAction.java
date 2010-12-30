@@ -33,15 +33,16 @@ public final class CategoryAction extends Action {
 
   /**
    * Constructs a new action. When this action is invoked,
-   * {@link ICategoryProvider#setSelectedCategories(ICategory...)} will be called with the given
-   * categories. The text/image of this action will be taken from the first category.
+   * {@link ICategoryProvider#setSelected(ICategory...)} will be called with the
+   * given categories. The text/image of this action will be taken from the
+   * first category.
    * @param categoryProvider the provider to set the categories.
    * @param categories the categories to set.
    * @throws NullPointerException if any argument is null.
    */
   public CategoryAction(
       ICategoryProvider categoryProvider, ICategory... categories) {
-    
+
     checkNotNull(categoryProvider);
     checkNotNull(categories);
     checkArgument(categories.length > 0);
@@ -57,6 +58,6 @@ public final class CategoryAction extends Action {
   @Override
   public void run() {
     super.run();
-    provider.setSelectedCategories(categories);
+    provider.setSelected(categories);
   }
 }

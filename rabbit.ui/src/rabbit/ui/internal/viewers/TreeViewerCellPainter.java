@@ -15,8 +15,6 @@
  */
 package rabbit.ui.internal.viewers;
 
-import rabbit.ui.internal.viewers.CellPainter.IValueProvider;
-
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.eclipse.core.runtime.Platform;
@@ -39,33 +37,6 @@ import org.eclipse.swt.widgets.Event;
  */
 public class TreeViewerCellPainter extends StyledCellLabelProvider {
 
-  // /**
-  // * A value provider that provides values for elements.
-  // */
-  // public static interface IValueProvider {
-  //
-  // /**
-  // * Gets the maximum value of all the tree paths.
-  // * @return The maximum value.
-  // */
-  // long getMaxValue();
-  //
-  // /**
-  // * Gets the value of the given tree path.
-  // * @param path the tree path.
-  // * @return the value.
-  // */
-  // long getValue(TreePath path);
-  //
-  // /**
-  // * Checks whether a cell containing the given path should be painted.
-  // * @param path the path in the cell.
-  // * @return <code>true</code> to paint, <code>false</code> otherwise.
-  // */
-  // boolean shouldPaint(TreePath path);
-  //
-  // } TODO doco
-
   private Color background;
   private Color foreground;
   private IValueProvider valueProvider;
@@ -74,7 +45,7 @@ public class TreeViewerCellPainter extends StyledCellLabelProvider {
   private final Point point;
 
   /**
-   * @param valueProvider The provider for getting the values of each cell from.
+   * @param valueProvider the provider for getting the values of each tree path.
    * @throws NullPointerException if argument is null.
    */
   public TreeViewerCellPainter(IValueProvider valueProvider) {
@@ -163,8 +134,7 @@ public class TreeViewerCellPainter extends StyledCellLabelProvider {
    * Creates the desired color for painting the cells. Callers of this method
    * must dispose the returned color themselves.
    * 
-   * @param display
-   *          the display to create the color for.
+   * @param display the display to create the color for.
    * @return a new color.
    */
   protected Color createColor(Display display) {
@@ -181,7 +151,8 @@ public class TreeViewerCellPainter extends StyledCellLabelProvider {
     }
 
     long value = valueProvider.getValue(path);
-    int width = (int) (value * columnWidth / (double) valueProvider.getMaxValue());
+    int width = (int) (value * columnWidth / (double) valueProvider
+        .getMaxValue());
     width = ((value != 0) && (width == 0)) ? 2 : width;
 
     if (value != 0 && width < 2) {

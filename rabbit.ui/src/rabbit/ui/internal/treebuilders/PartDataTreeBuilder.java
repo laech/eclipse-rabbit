@@ -19,7 +19,7 @@ import rabbit.data.access.model.IPartData;
 import rabbit.ui.IProvider;
 import rabbit.ui.internal.pages.Category;
 import rabbit.ui.internal.util.ICategory;
-import rabbit.ui.internal.util.ICategoryProvider2;
+import rabbit.ui.internal.util.ICategoryProvider;
 import rabbit.ui.internal.util.UndefinedWorkbenchPartDescriptor;
 import rabbit.ui.internal.viewers.ITreePathBuilder;
 
@@ -42,7 +42,7 @@ import java.util.List;
 /**
  * A {@link PartDataTreeBuilder} takes input as {@link IPartDataProvider} and
  * builds tree leaves based on the order of the categories provided by the
- * {@link ICategoryProvider2}, the last segment of every path will be the
+ * {@link ICategoryProvider}, the last segment of every path will be the
  * {@link Duration} data node of each {@link IPartData} provided by the
  * provider.
  */
@@ -53,9 +53,9 @@ public class PartDataTreeBuilder implements ITreePathBuilder {
    */
   public static interface IPartDataProvider extends IProvider<IPartData> {}
 
-  private final ICategoryProvider2 provider;
+  private final ICategoryProvider provider;
 
-  public PartDataTreeBuilder(ICategoryProvider2 provider) {
+  public PartDataTreeBuilder(ICategoryProvider provider) {
     this.provider = checkNotNull(provider);
   }
 

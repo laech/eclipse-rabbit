@@ -16,7 +16,8 @@
 package rabbit.ui.internal.pages;
 
 import rabbit.ui.internal.util.ICategory;
-import rabbit.ui.internal.util.ICategoryProvider2;
+import rabbit.ui.internal.util.ICategoryProvider;
+import rabbit.ui.internal.util.IVisualProvider;
 import rabbit.ui.internal.util.TreePathValueProvider;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -73,16 +74,16 @@ class StateHelper {
    * @throws NullPointerException if argument is null.
    * @see #saveCategories(Category...)
    */
-  StateHelper restoreCategories(ICategoryProvider2 provider) {
+  StateHelper restoreCategories(ICategoryProvider provider) {
     checkNotNull(provider);
-    
+
     List<Category> list = retrieveSavedCategories();
     if (list != null) {
       provider.setSelected(list.toArray(new Category[list.size()]));
     }
     return this;
   }
-  
+
   /**
    * Retrieve previously saved categories. Note that if no categories has been
    * saved, null is returned, not an empty collection, because an empty
@@ -149,7 +150,7 @@ class StateHelper {
    * @param categories the categories to be saved.
    * @return this
    * @throws NullPointerException if argument contains null.
-   * @see #restoreCategories(ICategoryProvider2)
+   * @see #restoreCategories(ICategoryProvider)
    */
   StateHelper saveCategories(Category... categories) {
     for (Category c : categories) {
@@ -200,7 +201,7 @@ class StateHelper {
     m.putString(VISUAL_CATEGORY, category.toString());
     return this;
   }
-  
+
   /**
    * Retrieve the previously saved visual category.
    * @return the category, or null.
@@ -227,9 +228,9 @@ class StateHelper {
    * @param provider the provider to set the category.
    * @return this
    * @throws NullPointerException if argument is null.
-   * @see TreePathValueProvider#setVisualCategory(ICategory)
+   * @see IVisualProvider#setVisualCategory(ICategory)
    */
-  StateHelper restoreVisualCategory(TreePathValueProvider provider) {
+  StateHelper restoreVisualCategory(IVisualProvider provider) {
     checkNotNull(provider);
 
     Category c = retrieveSavedVisualCategory();

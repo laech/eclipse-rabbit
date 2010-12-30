@@ -26,7 +26,6 @@ import org.eclipse.jface.action.IAction;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Shell;
 
-// TODO test
 /**
  * Action to open a {@link GroupByDialog}
  */
@@ -41,7 +40,7 @@ public class ShowGroupByDialogAction extends Action {
    * @throws NullPointerException If the provider is null.
    */
   public ShowGroupByDialogAction(ICategoryProvider provider) {
-    this("Advanced...", IAction.AS_PUSH_BUTTON, provider);
+    this(provider, "Advanced...", IAction.AS_PUSH_BUTTON);
   }
 
   /**
@@ -52,9 +51,8 @@ public class ShowGroupByDialogAction extends Action {
    * @param provider The category provider.
    * @throws NullPointerException If the provider is null.
    */
-  public ShowGroupByDialogAction(String text, int style,
-      ICategoryProvider provider) {
-
+  public ShowGroupByDialogAction(ICategoryProvider provider, String text,
+      int style) {
     super(text, style);
     checkNotNull(provider);
 
@@ -69,11 +67,11 @@ public class ShowGroupByDialogAction extends Action {
     dialog.create();
     dialog.getShell().setSize(400, 400);
 
-    dialog.setSelectedCategories(provider.getSelectedCategories());
-    dialog.setUnSelectedCategories(provider.getUnselectedCategories());
+    dialog.setSelectedCategories(provider.getSelected());
+    dialog.setUnSelectedCategories(provider.getUnselected());
 
     if (dialog.open() == GroupByDialog.OK) {
-      provider.setSelectedCategories(dialog.getSelectedCategories());
+      provider.setSelected(dialog.getSelectedCategories());
     }
   }
 }

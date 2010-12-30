@@ -21,7 +21,7 @@ import rabbit.ui.IProvider;
 import rabbit.ui.internal.pages.Category;
 import rabbit.ui.internal.treebuilders.PartDataTreeBuilder.IPartDataProvider;
 import rabbit.ui.internal.util.ICategory;
-import rabbit.ui.internal.util.ICategoryProvider2;
+import rabbit.ui.internal.util.ICategoryProvider;
 import rabbit.ui.internal.util.UndefinedWorkbenchPartDescriptor;
 import rabbit.ui.internal.viewers.ITreePathBuilder;
 
@@ -77,7 +77,7 @@ public final class PartDataTreeBuilderTest extends
         Category.DATE, Category.WORKSPACE, Category.WORKBENCH_TOOL};
     List<TreePath> expected = asList(newPath(date, ws, view, duration));
 
-    ICategoryProvider2 provider = mock(ICategoryProvider2.class);
+    ICategoryProvider provider = mock(ICategoryProvider.class);
     given(provider.getSelected()).willReturn(asList(categories));
     ITreePathBuilder builder = create(provider);
 
@@ -102,7 +102,7 @@ public final class PartDataTreeBuilderTest extends
     given(data.get(IPartData.PART_ID)).willReturn(undefined.getId());
     given(data.get(IPartData.WORKSPACE)).willReturn(ws);
 
-    ICategoryProvider2 provider = mock(ICategoryProvider2.class);
+    ICategoryProvider provider = mock(ICategoryProvider.class);
     given(provider.getSelected()).willReturn(asList(categories));
     ITreePathBuilder builder = create(provider);
 
@@ -132,7 +132,7 @@ public final class PartDataTreeBuilderTest extends
     given(data2.get(IPartData.PART_ID)).willReturn(editor.getId());
     given(data2.get(IPartData.WORKSPACE)).willReturn(ws2);
 
-    ICategoryProvider2 provider = mock(ICategoryProvider2.class);
+    ICategoryProvider provider = mock(ICategoryProvider.class);
     given(provider.getSelected()).willReturn(asList(categories));
     ITreePathBuilder builder = create(provider);
 
@@ -152,7 +152,7 @@ public final class PartDataTreeBuilderTest extends
         newPath(date, ws, duration),
         newPath(date, ws, duration));
 
-    ICategoryProvider2 provider = mock(ICategoryProvider2.class);
+    ICategoryProvider provider = mock(ICategoryProvider.class);
     given(provider.getSelected()).willReturn(asList(categories));
     ITreePathBuilder builder = create(provider);
 
@@ -164,7 +164,7 @@ public final class PartDataTreeBuilderTest extends
   }
 
   @Override
-  protected ITreePathBuilder create(ICategoryProvider2 p) {
+  protected ITreePathBuilder create(ICategoryProvider p) {
     return new PartDataTreeBuilder(p);
   }
 

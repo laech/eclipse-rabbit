@@ -15,16 +15,16 @@
  */
 package rabbit.ui.internal.pages;
 
-import rabbit.ui.internal.actions.CategoryAction2;
+import rabbit.ui.internal.actions.CategoryAction;
 import rabbit.ui.internal.actions.CollapseAllAction;
 import rabbit.ui.internal.actions.ColorByAction;
 import rabbit.ui.internal.actions.DropDownAction;
 import rabbit.ui.internal.actions.ExpandAllAction;
-import rabbit.ui.internal.actions.GroupByAction2;
-import rabbit.ui.internal.actions.PaintCategoryAction2;
+import rabbit.ui.internal.actions.GroupByAction;
+import rabbit.ui.internal.actions.PaintCategoryAction;
 import rabbit.ui.internal.actions.ShowHideFilterControlAction;
 import rabbit.ui.internal.util.ICategory;
-import rabbit.ui.internal.util.ICategoryProvider2;
+import rabbit.ui.internal.util.ICategoryProvider;
 import rabbit.ui.internal.util.TreePathValueProvider;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -53,7 +53,7 @@ public final class CommonToolBarBuilder {
   private IAction treeAction;
   private List<IAction> groupByActions;
   private List<IAction> colorByActions;
-  private ICategoryProvider2 categoryProvider;
+  private ICategoryProvider categoryProvider;
   private TreePathValueProvider[] valueProviders;
 
   public CommonToolBarBuilder() {
@@ -67,27 +67,27 @@ public final class CommonToolBarBuilder {
    */
   public CommonToolBarBuilder addColorByAction(ICategory visualCategory) {
     checkState(valueProviders != null);
-    colorByActions.add(new PaintCategoryAction2(visualCategory, valueProviders));
+    colorByActions.add(new PaintCategoryAction(visualCategory, valueProviders));
     return this;
   }
 
   /**
-   * @throws IllegalStateException if {@link #enableGroupByAction(ICategoryProvider2)} has not been
+   * @throws IllegalStateException if {@link #enableGroupByAction(ICategoryProvider)} has not been
    *         called.
    */
   public CommonToolBarBuilder addGroupByAction(ICategory... categories) {
     checkState(categoryProvider != null);
-    groupByActions.add(new CategoryAction2(categoryProvider, categories));
+    groupByActions.add(new CategoryAction(categoryProvider, categories));
     return this;
   }
   
   /**
-   * @throws IllegalStateException if {@link #enableGroupByAction(ICategoryProvider2)} has not been
+   * @throws IllegalStateException if {@link #enableGroupByAction(ICategoryProvider)} has not been
    *         called.
    */
   public CommonToolBarBuilder addGroupByAction(
       String text, ImageDescriptor image, ICategory...categories) {
-    IAction action = new CategoryAction2(categoryProvider, categories);
+    IAction action = new CategoryAction(categoryProvider, categories);
     action.setText(text);
     action.setImageDescriptor(image);
     groupByActions.add(action);
@@ -109,7 +109,7 @@ public final class CommonToolBarBuilder {
     }
     if (categoryProvider != null) {
       items.add(new ActionContributionItem(
-          new GroupByAction2(categoryProvider, groupByActions.toArray(new IAction[0]))));
+          new GroupByAction(categoryProvider, groupByActions.toArray(new IAction[0]))));
     }
     if (valueProviders != null) {
       items.add(new ActionContributionItem(
@@ -148,10 +148,10 @@ public final class CommonToolBarBuilder {
    * Enables the group-by action group.
    * @param categoryProvider the object to receive the action events.
    * @return this
-   * @see ICategoryProvider2#setSelected(ICategory...)
-   * @see ICategoryProvider2#getSelected()
+   * @see ICategoryProvider#setSelected(ICategory...)
+   * @see ICategoryProvider#getSelected()
    */
-  public CommonToolBarBuilder enableGroupByAction(ICategoryProvider2 categoryProvider) {
+  public CommonToolBarBuilder enableGroupByAction(ICategoryProvider categoryProvider) {
     this.categoryProvider = categoryProvider;
     return this;
   }

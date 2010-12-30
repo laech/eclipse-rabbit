@@ -17,8 +17,6 @@ package rabbit.ui.internal.viewers;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Preconditions;
-
 import org.eclipse.jface.viewers.ContentViewer;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ITreePathContentProvider;
@@ -27,12 +25,16 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.ui.dialogs.PatternFilter;
 
 /**
- * TODO FIXME
+ * TODO A {@link PatternFilter} that uses {@link TreePath}s. To use this class,
+ * the viewer's content provider must be an instance of
+ * {@link ITreePathContentProvider}, and
+ * {@link ITreePathContentProvider#getParents(Object)} must return an array that
+ * contains the actual parent of a given element.
  */
-public class TreePathPatternFilter extends PatternFilter {
-  
+public final class TreePathPatternFilter extends PatternFilter {
+
   private final ILabelProvider labelProvider;
-  
+
   public TreePathPatternFilter(ILabelProvider labelProvider) {
     this.labelProvider = checkNotNull(labelProvider);
   }
@@ -55,7 +57,7 @@ public class TreePathPatternFilter extends PatternFilter {
     }
     return false;
   }
-  
+
   @Override
   protected boolean isLeafMatch(Viewer viewer, Object element) {
     String text = labelProvider.getText(element);
@@ -70,8 +72,9 @@ public class TreePathPatternFilter extends PatternFilter {
       return true;
     }
 
-    ITreePathContentProvider provider = (ITreePathContentProvider) // TODO note this
-        ((ContentViewer) viewer).getContentProvider();
+    ITreePathContentProvider provider = (ITreePathContentProvider) // TODO note
+                                                                   // this
+    ((ContentViewer) viewer).getContentProvider();
     for (Object child : provider.getChildren(path)) {
       if (isMatch(viewer, path.createChildPath(child))) {
         return true;

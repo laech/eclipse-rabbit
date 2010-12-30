@@ -15,8 +15,6 @@
  */
 package rabbit.ui.internal.viewers;
 
-import rabbit.ui.internal.viewers.CellPainter.IValueProvider;
-
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.primitives.Longs;

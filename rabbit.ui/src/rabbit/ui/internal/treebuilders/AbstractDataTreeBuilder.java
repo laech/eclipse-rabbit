@@ -18,7 +18,7 @@ package rabbit.ui.internal.treebuilders;
 import rabbit.data.access.model.IData;
 import rabbit.data.access.model.IKey;
 import rabbit.ui.internal.util.ICategory;
-import rabbit.ui.internal.util.ICategoryProvider2;
+import rabbit.ui.internal.util.ICategoryProvider;
 import rabbit.ui.internal.viewers.ITreePathBuilder;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -39,13 +39,13 @@ import java.util.Map;
 /**
  * Internal abstract class for implementing a tree builder. This type of builder
  * will usually take an {@code IProvider} as input and builds a collection of
- * tree paths based on the categories provided by an {@link ICategoryProvider2}.
+ * tree paths based on the categories provided by an {@link ICategoryProvider}.
  * @param <T> the type of data.
  */
 public abstract class AbstractDataTreeBuilder<T extends IData>
     implements ITreePathBuilder {
 
-  private final ICategoryProvider2 categoryProvider;
+  private final ICategoryProvider categoryProvider;
   private final Map<ICategory, IKey<? extends Object>> keys;
 
   /**
@@ -55,7 +55,7 @@ public abstract class AbstractDataTreeBuilder<T extends IData>
    *        used to get the data.
    */
   protected AbstractDataTreeBuilder(
-      ICategoryProvider2 categoryProvider,
+      ICategoryProvider categoryProvider,
       Map<? extends ICategory, ? extends IKey<? extends Object>> keys) {
 
     this.categoryProvider = checkNotNull(categoryProvider, "category provider");

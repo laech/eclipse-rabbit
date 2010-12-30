@@ -20,7 +20,7 @@ import rabbit.ui.internal.util.ICategoryProvider;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.sameInstance;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -46,7 +46,7 @@ public class CategoryActionTest {
 
     ICategory[] categories = {mock(ICategory.class), mock(ICategory.class)};
     ICategoryProvider provider = mock(ICategoryProvider.class);
-    doThrow(new MyException()).when(provider).setSelectedCategories(categories);
+    doThrow(new MyException()).when(provider).setSelected(categories);
 
     IAction action = create(provider, categories);
     thrown.expect(MyException.class);

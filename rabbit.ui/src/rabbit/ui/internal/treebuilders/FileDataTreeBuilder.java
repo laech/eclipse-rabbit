@@ -19,7 +19,7 @@ import rabbit.data.access.model.IFileData;
 import rabbit.ui.IProvider;
 import rabbit.ui.internal.pages.Category;
 import rabbit.ui.internal.util.ICategory;
-import rabbit.ui.internal.util.ICategoryProvider2;
+import rabbit.ui.internal.util.ICategoryProvider;
 import rabbit.ui.internal.viewers.ITreePathBuilder;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -38,7 +38,7 @@ import java.util.List;
 /**
  * A {@link FileDataTreeBuilder} takes input as {@link IFileDataProvider} and
  * builds tree leaves based on the order of the categories provided by the
- * {@link ICategoryProvider2}, the last segment of every path will be the
+ * {@link ICategoryProvider}, the last segment of every path will be the
  * {@link Duration} data node of each {@link IFileData} provided by the
  * provider.
  */
@@ -49,9 +49,9 @@ public final class FileDataTreeBuilder implements ITreePathBuilder {
    */
   public static interface IFileDataProvider extends IProvider<IFileData> {}
 
-  private final ICategoryProvider2 provider;
+  private final ICategoryProvider provider;
 
-  public FileDataTreeBuilder(ICategoryProvider2 provider) {
+  public FileDataTreeBuilder(ICategoryProvider provider) {
     this.provider = checkNotNull(provider);
   }
 

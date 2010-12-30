@@ -16,7 +16,7 @@
 package rabbit.ui.internal.util;
 
 import rabbit.ui.IProvider;
-import rabbit.ui.internal.viewers.CellPainter.IValueProvider;
+import rabbit.ui.internal.viewers.IValueProvider;
 import rabbit.ui.internal.viewers.TreePaths;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -210,6 +210,7 @@ public final class TreePathValueProvider extends Observable
    * @param category the new category.
    * @return true if the category is accepted, false otherwise.
    */
+  @Override
   public boolean setVisualCategory(ICategory category) {
     if (getCategorizer().hasCategory(category)) {
       ICategory old = visual;

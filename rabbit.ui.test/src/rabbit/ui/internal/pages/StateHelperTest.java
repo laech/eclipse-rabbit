@@ -22,7 +22,7 @@ import rabbit.ui.IProvider;
 import rabbit.ui.internal.util.CategoryProvider;
 import rabbit.ui.internal.util.ICategorizer;
 import rabbit.ui.internal.util.ICategory;
-import rabbit.ui.internal.util.ICategoryProvider2;
+import rabbit.ui.internal.util.ICategoryProvider;
 import rabbit.ui.internal.util.IConverter;
 import rabbit.ui.internal.util.TreePathValueProvider;
 
@@ -76,7 +76,7 @@ public class StateHelperTest {
   @Test
   public void restoreCategoriesShouldDoNothingIfNoCategoriesHaveBeenSaved() {
     ICategory[] categories = {DATE, FILE};
-    ICategoryProvider2 provider = new CategoryProvider(categories, categories);
+    ICategoryProvider provider = new CategoryProvider(categories, categories);
     helper.restoreCategories(provider);
     assertThat(provider.getSelected(), equalTo(asList(categories)));
   }
@@ -187,7 +187,7 @@ public class StateHelperTest {
     // For saving the selected categories:
     final List<Category> expectedCategories = asList(DATE, FILE);
     final List<Category> actualCategories = Lists.newArrayList();
-    ICategoryProvider2 categoryProvider = mock(ICategoryProvider2.class);
+    ICategoryProvider categoryProvider = mock(ICategoryProvider.class);
     doAnswer(new Answer<Void>() {
       @Override
       public Void answer(InvocationOnMock invocation) throws Throwable {
@@ -227,7 +227,7 @@ public class StateHelperTest {
     final List<Category> expected = asList(DATE, FILE);
     final List<Category> actual = Lists.newArrayList();
 
-    ICategoryProvider2 provider = mock(ICategoryProvider2.class);
+    ICategoryProvider provider = mock(ICategoryProvider.class);
     doAnswer(new Answer<Void>() {
       @Override
       public Void answer(InvocationOnMock invocation) throws Throwable {

@@ -16,7 +16,6 @@
 package rabbit.ui.internal.viewers;
 
 import rabbit.ui.internal.util.DurationFormat;
-import rabbit.ui.internal.viewers.CellPainter.IValueProvider;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 

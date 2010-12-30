@@ -20,7 +20,7 @@ import rabbit.data.access.model.LaunchConfigurationDescriptor;
 import rabbit.ui.IProvider;
 import rabbit.ui.internal.pages.Category;
 import rabbit.ui.internal.util.ICategory;
-import rabbit.ui.internal.util.ICategoryProvider2;
+import rabbit.ui.internal.util.ICategoryProvider;
 import rabbit.ui.internal.util.LaunchName;
 import rabbit.ui.internal.util.UndefinedLaunchConfigurationType;
 import rabbit.ui.internal.util.UndefinedLaunchMode;
@@ -47,7 +47,7 @@ import java.util.List;
 /**
  * A {@link LaunchDataTreeBuilder} takes input as {@link ILaunchDataProvider}
  * and builds tree leaves based on the order of the categories provided by the
- * {@link ICategoryProvider2}, the last segment of every path will be either an
+ * {@link ICategoryProvider}, the last segment of every path will be either an
  * {@link Integer} data node ({@link ILaunchData#COUNT}) or an {@link Duration}
  * data node ({@link ILaunchData#DURATION}). Each {@link ILaunchData} provided
  * by the provider will be transformed into two paths (one ends with
@@ -55,14 +55,14 @@ import java.util.List;
  */
 public final class LaunchDataTreeBuilder implements ITreePathBuilder {
 
-  private final ICategoryProvider2 provider;
+  private final ICategoryProvider provider;
 
   /**
    * Provides {@link ILaunchData}.
    */
   public static interface ILaunchDataProvider extends IProvider<ILaunchData> {}
 
-  public LaunchDataTreeBuilder(ICategoryProvider2 provider) {
+  public LaunchDataTreeBuilder(ICategoryProvider provider) {
     this.provider = checkNotNull(provider);
   }
 

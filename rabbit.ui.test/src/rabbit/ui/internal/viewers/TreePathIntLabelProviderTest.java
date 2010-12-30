@@ -15,8 +15,6 @@
  */
 package rabbit.ui.internal.viewers;
 
-import rabbit.ui.internal.viewers.CellPainter.IValueProvider;
-
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.BDDMockito.given;

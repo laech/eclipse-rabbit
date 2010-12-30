@@ -22,7 +22,7 @@ import rabbit.ui.IProvider;
 import rabbit.ui.internal.pages.Category;
 import rabbit.ui.internal.treebuilders.LaunchDataTreeBuilder.ILaunchDataProvider;
 import rabbit.ui.internal.util.ICategory;
-import rabbit.ui.internal.util.ICategoryProvider2;
+import rabbit.ui.internal.util.ICategoryProvider;
 import rabbit.ui.internal.util.LaunchName;
 
 import com.google.common.collect.HashMultiset;
@@ -128,7 +128,7 @@ public final class LaunchDataTreeBuilderTest
     // Mocks:
     ILaunchDataProvider input = mock(ILaunchDataProvider.class);
     given(input.get()).willReturn(Arrays.asList(dataNode));
-    ICategoryProvider2 provider = mock(ICategoryProvider2.class);
+    ICategoryProvider provider = mock(ICategoryProvider.class);
     given(provider.getSelected()).willReturn(asList(categories));
     LaunchDataTreeBuilder builder = create(provider);
 
@@ -174,7 +174,7 @@ public final class LaunchDataTreeBuilderTest
     // Mocks:
     ILaunchDataProvider input = mock(ILaunchDataProvider.class);
     given(input.get()).willReturn(Arrays.asList(dataNode, dataNode2));
-    ICategoryProvider2 provider = mock(ICategoryProvider2.class);
+    ICategoryProvider provider = mock(ICategoryProvider.class);
     given(provider.getSelected()).willReturn(asList(categories));
     LaunchDataTreeBuilder builder = create(provider);
 
@@ -207,7 +207,7 @@ public final class LaunchDataTreeBuilderTest
     // Return same data node twice:
     given(input.get()).willReturn(asList(dataNode, dataNode));
 
-    ICategoryProvider2 provider = mock(ICategoryProvider2.class);
+    ICategoryProvider provider = mock(ICategoryProvider.class);
     given(provider.getSelected()).willReturn(asList(categories));
     LaunchDataTreeBuilder builder = create(provider);
 
@@ -221,7 +221,7 @@ public final class LaunchDataTreeBuilderTest
   }
 
   @Override
-  protected LaunchDataTreeBuilder create(ICategoryProvider2 p) {
+  protected LaunchDataTreeBuilder create(ICategoryProvider p) {
     return new LaunchDataTreeBuilder(p);
   }
 

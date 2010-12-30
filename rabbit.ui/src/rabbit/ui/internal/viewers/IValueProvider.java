@@ -13,16 +13,31 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package rabbit.ui.internal.pages;
-
-import org.eclipse.jface.viewers.TreeViewer;
+package rabbit.ui.internal.viewers;
 
 /**
- * @see AbstractValueContentProvider
+ * A value provider that provides values for elements.
  */
-public abstract class AbstractValueContentProviderTest 
-    extends AbstractCategoryContentProviderTest {
+public interface IValueProvider {
 
-  @Override
-  protected abstract AbstractValueContentProvider create(TreeViewer viewer);
+  /**
+   * Gets the maximum value of all the elements.
+   * @return The maximum value.
+   */
+  long getMaxValue();
+
+  /**
+   * Gets the value of the given element.
+   * @param element The element.
+   * @return The value.
+   */
+  long getValue(Object element);
+
+  /**
+   * Checks whether a cell should be painted.
+   * @param element The element in the cell.
+   * @return True to paint, false otherwise.
+   */
+  boolean shouldPaint(Object element);
+
 }

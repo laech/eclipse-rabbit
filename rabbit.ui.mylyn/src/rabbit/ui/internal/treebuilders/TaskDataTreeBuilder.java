@@ -20,7 +20,7 @@ import rabbit.data.common.TaskId;
 import rabbit.ui.IProvider;
 import rabbit.ui.internal.pages.Category;
 import rabbit.ui.internal.util.ICategory;
-import rabbit.ui.internal.util.ICategoryProvider2;
+import rabbit.ui.internal.util.ICategoryProvider;
 import rabbit.ui.internal.util.UnrecognizedTask;
 import rabbit.ui.internal.viewers.ITreePathBuilder;
 
@@ -45,7 +45,7 @@ import java.util.List;
 /**
  * A {@link TaskDataTreeBuilder} takes input as {@link ITaskDataProvider} and
  * builds tree leaves based on the order of the categories provided by the
- * {@link ICategoryProvider2}, the last segment of every path will be the
+ * {@link ICategoryProvider}, the last segment of every path will be the
  * {@link Duration} data node of each {@link ITaskData} provided by the
  * provider.
  */
@@ -56,9 +56,9 @@ public final class TaskDataTreeBuilder implements ITreePathBuilder {
    */
   public static interface ITaskDataProvider extends IProvider<ITaskData> {}
 
-  private final ICategoryProvider2 provider;
+  private final ICategoryProvider provider;
 
-  public TaskDataTreeBuilder(ICategoryProvider2 provider) {
+  public TaskDataTreeBuilder(ICategoryProvider provider) {
     this.provider = checkNotNull(provider);
   }
 

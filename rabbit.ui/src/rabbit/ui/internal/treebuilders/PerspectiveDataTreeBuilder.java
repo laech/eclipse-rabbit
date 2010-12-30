@@ -19,7 +19,7 @@ import rabbit.data.access.model.IPerspectiveData;
 import rabbit.ui.IProvider;
 import rabbit.ui.internal.pages.Category;
 import rabbit.ui.internal.util.ICategory;
-import rabbit.ui.internal.util.ICategoryProvider2;
+import rabbit.ui.internal.util.ICategoryProvider;
 import rabbit.ui.internal.util.UndefinedPerspectiveDescriptor;
 import rabbit.ui.internal.viewers.ITreePathBuilder;
 
@@ -40,7 +40,7 @@ import java.util.List;
 /**
  * A {@link PerspectiveDataTreeBuilder} takes input as
  * {@link IPerspectiveDataProvider} and builds tree leaves based on the order of
- * the categories provided by the {@link ICategoryProvider2}, the last segment
+ * the categories provided by the {@link ICategoryProvider}, the last segment
  * of every path will be the {@link Duration} data node of each
  * {@link IPerspectiveData} provided by the provider.
  */
@@ -52,9 +52,9 @@ public class PerspectiveDataTreeBuilder implements ITreePathBuilder {
   public static interface IPerspectiveDataProvider
       extends IProvider<IPerspectiveData> {}
 
-  private final ICategoryProvider2 provider;
+  private final ICategoryProvider provider;
 
-  public PerspectiveDataTreeBuilder(ICategoryProvider2 provider) {
+  public PerspectiveDataTreeBuilder(ICategoryProvider provider) {
     this.provider = checkNotNull(provider);
   }
 

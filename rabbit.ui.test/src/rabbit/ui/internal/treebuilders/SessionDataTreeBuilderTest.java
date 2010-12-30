@@ -21,7 +21,7 @@ import rabbit.ui.IProvider;
 import rabbit.ui.internal.pages.Category;
 import rabbit.ui.internal.treebuilders.SessionDataTreeBuilder.ISessionDataProvider;
 import rabbit.ui.internal.util.ICategory;
-import rabbit.ui.internal.util.ICategoryProvider2;
+import rabbit.ui.internal.util.ICategoryProvider;
 import rabbit.ui.internal.viewers.ITreePathBuilder;
 
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -70,7 +70,7 @@ public final class SessionDataTreeBuilderTest
     ICategory[] categories = {Category.DATE, Category.WORKSPACE};
     List<TreePath> expected = asList(newPath(date, ws, duration));
 
-    ICategoryProvider2 provider = mock(ICategoryProvider2.class);
+    ICategoryProvider provider = mock(ICategoryProvider.class);
     given(provider.getSelected()).willReturn(asList(categories));
     ITreePathBuilder builder = create(provider);
 
@@ -97,7 +97,7 @@ public final class SessionDataTreeBuilderTest
     given(data2.get(ISessionData.DURATION)).willReturn(duration2);
     given(data2.get(ISessionData.WORKSPACE)).willReturn(ws2);
 
-    ICategoryProvider2 provider = mock(ICategoryProvider2.class);
+    ICategoryProvider provider = mock(ICategoryProvider.class);
     given(provider.getSelected()).willReturn(asList(categories));
     ITreePathBuilder builder = create(provider);
 
@@ -117,7 +117,7 @@ public final class SessionDataTreeBuilderTest
         newPath(date, ws, duration),
         newPath(date, ws, duration));
 
-    ICategoryProvider2 provider = mock(ICategoryProvider2.class);
+    ICategoryProvider provider = mock(ICategoryProvider.class);
     given(provider.getSelected()).willReturn(asList(categories));
     ITreePathBuilder builder = create(provider);
 
@@ -129,7 +129,7 @@ public final class SessionDataTreeBuilderTest
   }
 
   @Override
-  protected ITreePathBuilder create(ICategoryProvider2 p) {
+  protected ITreePathBuilder create(ICategoryProvider p) {
     return new SessionDataTreeBuilder(p);
   }
 

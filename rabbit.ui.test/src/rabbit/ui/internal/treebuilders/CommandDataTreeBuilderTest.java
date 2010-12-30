@@ -21,7 +21,7 @@ import rabbit.ui.IProvider;
 import rabbit.ui.internal.pages.Category;
 import rabbit.ui.internal.treebuilders.CommandDataTreeBuilder.ICommandDataProvider;
 import rabbit.ui.internal.util.ICategory;
-import rabbit.ui.internal.util.ICategoryProvider2;
+import rabbit.ui.internal.util.ICategoryProvider;
 import rabbit.ui.internal.viewers.ITreePathBuilder;
 
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -75,7 +75,7 @@ public class CommandDataTreeBuilderTest
         Category.DATE, Category.WORKSPACE, Category.COMMAND};
     List<TreePath> expected = asList(newPath(date, ws, command, count));
 
-    ICategoryProvider2 provider = mock(ICategoryProvider2.class);
+    ICategoryProvider provider = mock(ICategoryProvider.class);
     given(provider.getSelected()).willReturn(asList(categories));
     ITreePathBuilder builder = create(provider);
 
@@ -104,7 +104,7 @@ public class CommandDataTreeBuilderTest
     given(data2.get(ICommandData.COMMAND)).willReturn(command2);
     given(data2.get(ICommandData.WORKSPACE)).willReturn(ws2);
 
-    ICategoryProvider2 provider = mock(ICategoryProvider2.class);
+    ICategoryProvider provider = mock(ICategoryProvider.class);
     given(provider.getSelected()).willReturn(asList(categories));
     ITreePathBuilder builder = create(provider);
 
@@ -124,7 +124,7 @@ public class CommandDataTreeBuilderTest
         newPath(date, ws, count),
         newPath(date, ws, count));
 
-    ICategoryProvider2 provider = mock(ICategoryProvider2.class);
+    ICategoryProvider provider = mock(ICategoryProvider.class);
     given(provider.getSelected()).willReturn(asList(categories));
     ITreePathBuilder builder = create(provider);
 
@@ -136,7 +136,7 @@ public class CommandDataTreeBuilderTest
   }
 
   @Override
-  protected ITreePathBuilder create(ICategoryProvider2 p) {
+  protected ITreePathBuilder create(ICategoryProvider p) {
     return new CommandDataTreeBuilder(p);
   }
 

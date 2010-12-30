@@ -15,8 +15,8 @@
  */
 package rabbit.ui.internal.actions;
 
-import rabbit.ui.internal.pages.AbstractValueContentProvider;
 import rabbit.ui.internal.util.ICategory;
+import rabbit.ui.internal.util.IVisualProvider;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
@@ -43,10 +43,10 @@ public class PaintCategoryActionTest {
     @SuppressWarnings("serial")
     class MyException extends RuntimeException {}
     ICategory category = mock(ICategory.class);
-    AbstractValueContentProvider provider = mock(AbstractValueContentProvider.class);
-    doThrow(new MyException()).when(provider).setPaintCategory(category);
+    IVisualProvider provider = mock(IVisualProvider.class);
+    doThrow(new MyException()).when(provider).setVisualCategory(category);
 
-    IAction action = create(provider, category);
+    IAction action = create(category, provider);
     thrown.expect(MyException.class);
     action.run();
   }
@@ -57,8 +57,9 @@ public class PaintCategoryActionTest {
     ImageDescriptor image = mock(ImageDescriptor.class);
     given(category.getImageDescriptor()).willReturn(image);
 
-    IAction action = create(mock(AbstractValueContentProvider.class), category);
-    assertThat(action.getImageDescriptor(), equalTo(category.getImageDescriptor()));
+    IAction action = create(category);
+    assertThat(action.getImageDescriptor(),
+        equalTo(category.getImageDescriptor()));
   }
 
   @Test
@@ -66,27 +67,27 @@ public class PaintCategoryActionTest {
     ICategory category = mock(ICategory.class);
     given(category.getText()).willReturn("Hello");
 
-    IAction action = create(mock(AbstractValueContentProvider.class), category);
+    IAction action = create(category);
     assertThat(action.getText(), equalTo(category.getText()));
   }
 
   @Test
   public void shouldThrowAnExceptionIfTryToConstructWithoutACategory() {
     thrown.expect(NullPointerException.class);
-    create(mock(AbstractValueContentProvider.class), null);
+    create(null, mock(IVisualProvider.class));
   }
 
   @Test
-  public void shouldThrowAnExceptionIfTryToConstructWithoutAProvider() {
+  public void shouldThrowAnExceptionIfTryToConstructWithANullProvider() {
     thrown.expect(NullPointerException.class);
-    create(null, mock(ICategory.class));
+    create(mock(ICategory.class), new IVisualProvider[]{null});
   }
 
   /**
-   * @see PaintCategoryAction#PaintCategoryAction(AbstractValueContentProvider, ICategory)
+   * @see PaintCategoryAction#PaintCategoryAction(ICategory, IVisualProvider...)
    */
-  protected PaintCategoryAction create(
-      AbstractValueContentProvider provider, ICategory paintCategory) {
-    return new PaintCategoryAction(provider, paintCategory);
+  protected PaintCategoryAction create(ICategory paintCategory,
+      IVisualProvider... providers) {
+    return new PaintCategoryAction(paintCategory, providers);
   }
 }

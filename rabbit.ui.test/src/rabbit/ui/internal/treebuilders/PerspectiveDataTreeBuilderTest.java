@@ -21,7 +21,7 @@ import rabbit.ui.IProvider;
 import rabbit.ui.internal.pages.Category;
 import rabbit.ui.internal.treebuilders.PerspectiveDataTreeBuilder.IPerspectiveDataProvider;
 import rabbit.ui.internal.util.ICategory;
-import rabbit.ui.internal.util.ICategoryProvider2;
+import rabbit.ui.internal.util.ICategoryProvider;
 import rabbit.ui.internal.util.UndefinedPerspectiveDescriptor;
 import rabbit.ui.internal.viewers.ITreePathBuilder;
 
@@ -86,7 +86,7 @@ public final class PerspectiveDataTreeBuilderTest extends
     given(data.get(IPerspectiveData.PERSPECTIVE_ID)).willReturn(
         undefined.getId());
 
-    ICategoryProvider2 provider = mock(ICategoryProvider2.class);
+    ICategoryProvider provider = mock(ICategoryProvider.class);
     given(provider.getSelected()).willReturn(asList(categories));
     ITreePathBuilder builder = create(provider);
 
@@ -103,7 +103,7 @@ public final class PerspectiveDataTreeBuilderTest extends
         Category.DATE, Category.WORKSPACE, Category.PERSPECTIVE};
     List<TreePath> expected = asList(newPath(date, ws, perspective, duration));
 
-    ICategoryProvider2 provider = mock(ICategoryProvider2.class);
+    ICategoryProvider provider = mock(ICategoryProvider.class);
     given(provider.getSelected()).willReturn(asList(categories));
     ITreePathBuilder builder = create(provider);
 
@@ -133,7 +133,7 @@ public final class PerspectiveDataTreeBuilderTest extends
     given(data2.get(IPerspectiveData.WORKSPACE)).willReturn(ws2);
     given(data2.get(IPerspectiveData.PERSPECTIVE_ID)).willReturn(p2.getId());
 
-    ICategoryProvider2 provider = mock(ICategoryProvider2.class);
+    ICategoryProvider provider = mock(ICategoryProvider.class);
     given(provider.getSelected()).willReturn(asList(categories));
     ITreePathBuilder builder = create(provider);
 
@@ -153,7 +153,7 @@ public final class PerspectiveDataTreeBuilderTest extends
         newPath(date, ws, duration),
         newPath(date, ws, duration));
 
-    ICategoryProvider2 provider = mock(ICategoryProvider2.class);
+    ICategoryProvider provider = mock(ICategoryProvider.class);
     given(provider.getSelected()).willReturn(asList(categories));
     ITreePathBuilder builder = create(provider);
 
@@ -165,7 +165,7 @@ public final class PerspectiveDataTreeBuilderTest extends
   }
 
   @Override
-  protected ITreePathBuilder create(ICategoryProvider2 p) {
+  protected ITreePathBuilder create(ICategoryProvider p) {
     return new PerspectiveDataTreeBuilder(p);
   }
 
