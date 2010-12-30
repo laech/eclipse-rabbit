@@ -19,7 +19,6 @@ import rabbit.ui.IPage;
 import rabbit.ui.Preference;
 import rabbit.ui.internal.SharedImages;
 import rabbit.ui.internal.util.PageDescriptor;
-import rabbit.ui.internal.viewers.PageDescriptorLabelProvider;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -29,6 +28,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.ui.IMemento;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -46,6 +46,8 @@ public class PageDescriptorLabelProviderTest {
       return new IContributionItem[0];
     }
     @Override public Job updateJob(Preference preference) { return null; }
+    @Override public void onRestoreState(IMemento memento) {}
+    @Override public void onSaveState(IMemento memento) {}
   };
   
   @AfterClass

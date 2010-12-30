@@ -26,15 +26,15 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.ui.IMemento;
 
 /**
  * Represents a category containing Java specific pages.
- *
+ * 
  */
 public class JavaCategoryPage implements IPage {
 
-  public JavaCategoryPage() {
-  }
+  public JavaCategoryPage() {}
 
   @Override
   public void createContents(Composite parent) {
@@ -43,7 +43,7 @@ public class JavaCategoryPage implements IPage {
     label.setBackground(parent.getBackground());
     label.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
     label.setText("This category contains pages that display specific " +
-    		"information about Java related activities.");
+        "information about Java related activities.");
   }
 
   @Override
@@ -55,5 +55,11 @@ public class JavaCategoryPage implements IPage {
   public Job updateJob(Preference preference) {
     return null;
   }
+
+  @Override
+  public void onRestoreState(IMemento memento) {}
+
+  @Override
+  public void onSaveState(IMemento memento) {}
 
 }

@@ -39,6 +39,7 @@ import java.util.Observer;
  */
 public abstract class AbsPage implements IPage, Observer {
 
+  @Override
   public void onRestoreState(IMemento memento) {
     String id = getClass().getSimpleName();
     TreeColumn[] columns = getFilteredTree().getViewer().getTree().getColumns();
@@ -57,6 +58,7 @@ public abstract class AbsPage implements IPage, Observer {
     }
   }
 
+  @Override
   public void onSaveState(IMemento memento) {
     String id = getClass().getSimpleName();
     TreeColumn[] columns = getFilteredTree().getViewer().getTree().getColumns();
@@ -81,11 +83,25 @@ public abstract class AbsPage implements IPage, Observer {
     }
   }
   
+  protected abstract FilteredTree getFilteredTree();
+  
+  /**
+   * @return the current selected categories.
+   * @see ICategoryProvider#getSelected()
+   */
+  protected abstract Category[] getSelectedCategories();
+  
   /**
    * @return the current visual category.
    * @see IVisualProvider#getVisualCategory()
    */
   protected abstract Category getVisualCategory();
+  
+  /**
+   * @param categories the categories to set.
+   * @see ICategoryProvider#setSelected(ICategory...)
+   */
+  protected abstract void setSelectedCategories(List<Category> categories);
   
   /**
    * @param category the category to set.
@@ -97,18 +113,4 @@ public abstract class AbsPage implements IPage, Observer {
    * Updates {@link IValueProvider#getMaxValue()}.
    */
   protected abstract void updateMaxValue();
-  
-  /**
-   * @param categories the categories to set.
-   * @see ICategoryProvider#setSelected(ICategory...)
-   */
-  protected abstract void setSelectedCategories(List<Category> categories);
-  
-  /**
-   * @return the current selected categories.
-   * @see ICategoryProvider#getSelected()
-   */
-  protected abstract Category[] getSelectedCategories();
-  
-  protected abstract FilteredTree getFilteredTree();
 }

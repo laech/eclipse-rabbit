@@ -19,6 +19,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.IContributionItem;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.ui.IMemento;
 
 /**
  * Represents a page for displaying graphical information.
@@ -27,27 +28,35 @@ public interface IPage {
 
   /**
    * Creates the content of this page.
-   * 
    * @param parent The parent composite.
    */
   void createContents(Composite parent);
 
   /**
    * Creates the tool bar items of this page.
-   * 
    * @return All tool bat items that have been created for this page, including
    *         the separators.
    */
   IContributionItem[] createToolBarItems(IToolBarManager toolBar);
 
   /**
+   * Restores the state of this page.
+   * @param memento the memento containing the state.
+   */
+  void onRestoreState(IMemento memento);
+
+  /**
+   * Saves the state of this page.
+   * @param memento the memento for saving the state.
+   */
+  void onSaveState(IMemento memento);
+
+  /**
    * Creates a job which will be ran to update the page. This page will only
    * return the job, not run it.
-   * 
    * @param preference The new preferences.
    * @return A job to update the page, or null if this page does not need to be
    *         updated.
    */
   Job updateJob(Preference preference);
-
 }

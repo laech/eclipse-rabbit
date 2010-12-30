@@ -15,8 +15,8 @@
  */
 package rabbit.ui.internal.pages;
 
-import rabbit.ui.Preference;
 import rabbit.ui.IPage;
+import rabbit.ui.Preference;
 
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.IContributionItem;
@@ -26,11 +26,11 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.ui.IMemento;
 
 public class ProjectCategory implements IPage {
 
-  public ProjectCategory() {
-  }
+  public ProjectCategory() {}
 
   @Override
   public void createContents(Composite parent) {
@@ -38,7 +38,8 @@ public class ProjectCategory implements IPage {
     Label label = new Label(parent, SWT.NONE);
     label.setBackground(parent.getBackground());
     label.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
-    label.setText("This category contains pages that display information relating to projects.");
+    label.setText("This category contains pages that display information" +
+        " relating to projects.");
   }
 
   @Override
@@ -50,5 +51,11 @@ public class ProjectCategory implements IPage {
   public Job updateJob(Preference preference) {
     return null;
   }
+
+  @Override
+  public void onRestoreState(IMemento memento) {}
+
+  @Override
+  public void onSaveState(IMemento memento) {}
 
 }

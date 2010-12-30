@@ -72,7 +72,7 @@ public final class TreePathIntLabelProvider extends CellLabelProvider {
     }
     cell.setText(text);
 
-    if (colorProvider != null) { // TODO test
+    if (colorProvider != null) {
       cell.setBackground(colorProvider.getBackground(cell.getElement()));
       cell.setForeground(colorProvider.getForeground(cell.getElement()));
     }

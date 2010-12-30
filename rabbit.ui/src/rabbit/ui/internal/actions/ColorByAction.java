@@ -19,9 +19,6 @@ import rabbit.ui.internal.SharedImages;
 
 import org.eclipse.jface.action.IAction;
 
-/**
- * TODO
- */
 public class ColorByAction extends DropDownAction {
 
   /**

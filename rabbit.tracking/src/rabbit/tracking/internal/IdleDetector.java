@@ -130,12 +130,17 @@ public final class IdleDetector extends Observable implements Listener {
 
   @Override
   public void handleEvent(Event event) {
-    lastEventNanoTime = nowNanoTime();
-    if (!isActive) {
+    
+    synchronized (this) {
+      lastEventNanoTime = nowNanoTime();
+      if (isActive) {
+        return;
+      }
       isActive = true;
-      setChanged();
-      notifyObservers();
     }
+    
+    setChanged();
+    notifyObservers();
   }
 
   /**

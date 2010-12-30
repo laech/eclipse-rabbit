@@ -29,9 +29,16 @@ import java.util.Set;
 
 import javax.annotation.Nullable;
 
-// TODO test
+/**
+ * Utility class for working with the workbench.
+ * 
+ */
 public final class WorkbenchUtil {
 
+  /**
+   * Gets the current active workbench window.
+   * @return the active workbench window, or null.
+   */
   public static IWorkbenchWindow getActiveWindow() {
     if (Display.getCurrent() != null) {
       return PlatformUI.getWorkbench().getActiveWorkbenchWindow();
@@ -47,6 +54,9 @@ public final class WorkbenchUtil {
     return win[0];
   }
 
+  /**
+   * Checks whether the given window's shell is active.
+   */
   public static boolean isActiveShell(IWorkbenchWindow win) {
     final Shell shell = win.getShell();
     final boolean[] result = new boolean[1];
@@ -60,13 +70,16 @@ public final class WorkbenchUtil {
     return result[0];
   }
 
+  /**
+   * Gets the current window's active part.
+   * @return the active part, or null.
+   */
   public static IWorkbenchPart getActivePart() {
     return getActiveWindow().getPartService().getActivePart();
   }
 
   /**
    * Gets all the {@link IPartService} from the currently opened windows.
-   * 
    * @return A Set of IPartService.
    */
   public static Set<IPartService> getPartServices() {
@@ -80,7 +93,6 @@ public final class WorkbenchUtil {
 
   /**
    * Gets the perspective of the given window.
-   * 
    * @param win The window.
    * @return The perspective, or null.
    */

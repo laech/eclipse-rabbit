@@ -162,16 +162,18 @@ public final class Recorder<T> extends Observable {
    * no effects.
    */
   public void stop() {
+    Record<T> r = null;
     synchronized (this) {
       if (!isRecording()) {
         return;
       }
       record = new Record<T>(start, System.currentTimeMillis(), data);
+      r = record;
       running = false;
       data = null;
     }
     setChanged();
-    notifyObservers(record);
+    notifyObservers(r);
   }
 
   /**

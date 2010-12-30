@@ -25,6 +25,7 @@ import rabbit.ui.internal.actions.PaintCategoryAction;
 import rabbit.ui.internal.actions.ShowHideFilterControlAction;
 import rabbit.ui.internal.util.ICategory;
 import rabbit.ui.internal.util.ICategoryProvider;
+import rabbit.ui.internal.util.IVisualProvider;
 import rabbit.ui.internal.util.TreePathValueProvider;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -42,19 +43,20 @@ import org.eclipse.ui.dialogs.FilteredTree;
 import java.util.List;
 
 /**
- * TODO review and test me
- * Builder to build common tool bar actions for pages. The order of the actions are predefined by
- * this builder, that means the order of the items will be consistent, regardless of the order of
- * the methods called.
+ * Builder to build common tool bar actions for pages. The order of the tool bar
+ * items are predefined by this builder, that means the order of the items will
+ * be consistent.
  */
 public final class CommonToolBarBuilder {
 
   private IAction filterAction;
   private IAction treeAction;
-  private List<IAction> groupByActions;
-  private List<IAction> colorByActions;
+
+  private final List<IAction> groupByActions;
+  private final List<IAction> colorByActions;
+
   private ICategoryProvider categoryProvider;
-  private TreePathValueProvider[] valueProviders;
+  private IVisualProvider[] visualProviders;
 
   public CommonToolBarBuilder() {
     groupByActions = Lists.newLinkedList();
@@ -62,17 +64,19 @@ public final class CommonToolBarBuilder {
   }
 
   /**
-   * @throws IllegalStateException if {@link #enableColorByAction(TreePathValueProvider...)} has not
-   *         been called.
+   * @throws IllegalStateException if
+   *         {@link #enableColorByAction(TreePathValueProvider...)} has not been
+   *         called.
    */
   public CommonToolBarBuilder addColorByAction(ICategory visualCategory) {
-    checkState(valueProviders != null);
-    colorByActions.add(new PaintCategoryAction(visualCategory, valueProviders));
+    checkState(visualProviders != null);
+    colorByActions.add(new PaintCategoryAction(visualCategory, visualProviders));
     return this;
   }
 
   /**
-   * @throws IllegalStateException if {@link #enableGroupByAction(ICategoryProvider)} has not been
+   * @throws IllegalStateException if
+   *         {@link #enableGroupByAction(ICategoryProvider)} has not been
    *         called.
    */
   public CommonToolBarBuilder addGroupByAction(ICategory... categories) {
@@ -80,21 +84,21 @@ public final class CommonToolBarBuilder {
     groupByActions.add(new CategoryAction(categoryProvider, categories));
     return this;
   }
-  
+
   /**
-   * @throws IllegalStateException if {@link #enableGroupByAction(ICategoryProvider)} has not been
+   * @throws IllegalStateException if
+   *         {@link #enableGroupByAction(ICategoryProvider)} has not been
    *         called.
    */
   public CommonToolBarBuilder addGroupByAction(
-      String text, ImageDescriptor image, ICategory...categories) {
+      String text, ImageDescriptor image, ICategory... categories) {
     IAction action = new CategoryAction(categoryProvider, categories);
     action.setText(text);
     action.setImageDescriptor(image);
     groupByActions.add(action);
     return this;
   }
-  
-  
+
   /**
    * Builds a collection of actions from the configuration.
    * @return a collection of actions, the returned collection is modifiable.
@@ -109,41 +113,44 @@ public final class CommonToolBarBuilder {
     }
     if (categoryProvider != null) {
       items.add(new ActionContributionItem(
-          new GroupByAction(categoryProvider, groupByActions.toArray(new IAction[0]))));
+          new GroupByAction(categoryProvider, groupByActions
+              .toArray(new IAction[0]))));
     }
-    if (valueProviders != null) {
+    if (visualProviders != null) {
       items.add(new ActionContributionItem(
           new ColorByAction(colorByActions.toArray(new IAction[0]))));
     }
     return items;
   }
-  
+
   /**
    * Enables the color-by action group.
-   * @param valueProviders the provider to accept the action events. 
+   * @param valueProviders the provider to accept the action events.
    * @return this
-   * @see TreePathValueProvider#getVisualCategory()
-   * @see TreePathValueProvider#setVisualCategory(ICategory)
+   * @see IVisualProvider#getVisualCategory()
+   * @see IVisualProvider#setVisualCategory(ICategory)
    */
-  public CommonToolBarBuilder enableColorByAction(TreePathValueProvider... valueProviders) {
-    for (TreePathValueProvider p : valueProviders) {
+  public CommonToolBarBuilder enableColorByAction(
+      IVisualProvider... valueProviders) {
+    for (IVisualProvider p : valueProviders) {
       checkNotNull(p);
     }
-    this.valueProviders = valueProviders.clone();
+    this.visualProviders = valueProviders.clone();
     return this;
   }
-  
+
   /**
    * Enables the show/hide filter control action.
    * @param tree the tree hosting the filter control.
    * @param hideControl true to hide the control by default.
    * @return this
    */
-  public CommonToolBarBuilder enableFilterControlAction(FilteredTree tree, boolean hideControl) {
+  public CommonToolBarBuilder enableFilterControlAction(FilteredTree tree,
+      boolean hideControl) {
     filterAction = new ShowHideFilterControlAction(tree, hideControl);
     return this;
   }
-  
+
   /**
    * Enables the group-by action group.
    * @param categoryProvider the object to receive the action events.
@@ -151,11 +158,12 @@ public final class CommonToolBarBuilder {
    * @see ICategoryProvider#setSelected(ICategory...)
    * @see ICategoryProvider#getSelected()
    */
-  public CommonToolBarBuilder enableGroupByAction(ICategoryProvider categoryProvider) {
+  public CommonToolBarBuilder enableGroupByAction(
+      ICategoryProvider categoryProvider) {
     this.categoryProvider = categoryProvider;
     return this;
   }
-  
+
   /**
    * Enables the collapse/expand actions for the given viewer.
    * @param viewer the viewer to receive the action events.
@@ -164,7 +172,8 @@ public final class CommonToolBarBuilder {
    * @see TreeViewer#collapseAll()
    */
   public CommonToolBarBuilder enableTreeAction(TreeViewer viewer) {
-    treeAction = new DropDownAction(new CollapseAllAction(viewer), new ExpandAllAction(viewer));
+    treeAction = new DropDownAction(new CollapseAllAction(viewer),
+        new ExpandAllAction(viewer));
     return this;
   }
 }

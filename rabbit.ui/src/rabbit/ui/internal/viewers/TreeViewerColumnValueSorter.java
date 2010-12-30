@@ -24,8 +24,8 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 
 /**
- * TODO check This sorter uses a {@link IValueProvider} to get the values of each tree path and
- * sorts the paths base on the values received.
+ * This sorter uses a {@link IValueProvider} to get the values of each tree path
+ * and sorts the paths base on the values received.
  */
 public class TreeViewerColumnValueSorter extends TreeViewerColumnSorter {
 
@@ -33,10 +33,12 @@ public class TreeViewerColumnValueSorter extends TreeViewerColumnSorter {
 
   /**
    * @param viewer the parent viewer.
-   * @param valueProvider the value provider for getting values of the tree paths.
+   * @param valueProvider the value provider for getting values of the tree
+   *        paths.
    * @throws NullPointerException if any argument is null.
    */
-  public TreeViewerColumnValueSorter(TreeViewer viewer, IValueProvider valueProvider) {
+  public TreeViewerColumnValueSorter(TreeViewer viewer,
+      IValueProvider valueProvider) {
     super(viewer);
     this.valueProvider = checkNotNull(valueProvider);
   }

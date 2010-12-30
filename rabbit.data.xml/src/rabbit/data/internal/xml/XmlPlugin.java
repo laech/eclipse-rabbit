@@ -15,11 +15,15 @@
  */
 package rabbit.data.internal.xml;
 
+import static com.google.common.collect.Sets.newHashSet;
+
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
@@ -32,9 +36,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 
 /**
  * Activator class for this plug-in.
@@ -64,8 +67,7 @@ public class XmlPlugin extends AbstractUIPlugin {
   /** The settings. */
   private Properties properties = new Properties();
 
-  public XmlPlugin() {
-  }
+  public XmlPlugin() {}
 
   /**
    * Gets the full path to the storage location of this workspace. The returned
@@ -78,7 +80,13 @@ public class XmlPlugin extends AbstractUIPlugin {
         .toOSString();
     workspace = workspace.replace(File.separatorChar, '.');
     workspace = workspace.replace(":", "");
-    return getStoragePathRoot().append(workspace);
+    IPath path = getStoragePathRoot().append(workspace);
+    File file = path.toFile();
+    if (!file.exists() && !file.mkdirs()) {
+      getLog().log(new Status(IStatus.ERROR, PLUGIN_ID,
+          "Unable to create folder (" + file + ") for saving Rabbit's data!"));
+    }
+    return path;
   }
 
   /**
@@ -106,12 +114,13 @@ public class XmlPlugin extends AbstractUIPlugin {
       return new IPath[0];
     }
 
-    List<IPath> paths = new ArrayList<IPath>(files.length);
+    Set<IPath> paths = newHashSet();
     for (File file : files) {
       if (file.isDirectory()) {
         paths.add(Path.fromOSString(file.getAbsolutePath()));
       }
     }
+    paths.add(getStoragePath());
 
     return paths.toArray(new IPath[paths.size()]);
   }
@@ -131,14 +140,14 @@ public class XmlPlugin extends AbstractUIPlugin {
    *         </ul>
    */
   public boolean setStoragePathRoot(File dir) {
-    if (dir == null 
-        || !dir.isDirectory() 
-        || !dir.exists() 
+    if (dir == null
+        || !dir.isDirectory()
+        || !dir.exists()
         || !dir.canRead()
         || !dir.canWrite()) {
       return false;
     }
-    
+
     properties.setProperty(PROP_STORAGE_ROOT, dir.getAbsolutePath());
     return true;
   }
@@ -154,10 +163,7 @@ public class XmlPlugin extends AbstractUIPlugin {
       properties.load(reader);
 
       // If exceptions occur, just restore to the defaults:
-    } catch (FileNotFoundException e) {
-    } catch (IOException e) {
-    } catch (IllegalArgumentException e) {
-    } finally {
+    } catch (FileNotFoundException e) {} catch (IOException e) {} catch (IllegalArgumentException e) {} finally {
       IOUtils.closeQuietly(reader);
       checkProperties(properties);
     }
@@ -192,25 +198,28 @@ public class XmlPlugin extends AbstractUIPlugin {
     if (prop.getProperty(PROP_STORAGE_ROOT) == null) {
       prop.setProperty(PROP_STORAGE_ROOT, DEFAULT_STORAGE_ROOT);
     }
-    
-    // Maps the name of the storage folder for this workspace with the actual 
+
+    // Maps the name of the storage folder for this workspace with the actual
     // OS path:
-    prop.setProperty(getStoragePath().lastSegment().toString(), 
+    prop.setProperty(getStoragePropertyString(getStoragePath()),
         ResourcesPlugin.getWorkspace().getRoot().getLocation().toOSString());
   }
-  
-//  // TODO:
-//  public String getProperty(String key, String defaultValue) {
-//    return properties.getProperty(key, defaultValue);
-//  }
-  
-  // TODO:
-  public String getProperty(String key) {
+
+  /**
+   * Gets the property string for the storage path.
+   * @param storagePath the storage path.
+   * @return a property string for getting/setting the property.
+   */
+  public String getStoragePropertyString(IPath storagePath) {
+    return "_ws_" + storagePath.lastSegment();
+  }
+
+  private String getProperty(String key) {
     return properties.getProperty(key);
   }
-  
+
   public IPath getWorkspacePath(IPath storagePath) {
-    String workspacePathString = getProperty(storagePath.lastSegment());
+    String workspacePathString = getProperty(getStoragePropertyString(storagePath));
     if (workspacePathString != null) {
       return new Path(workspacePathString);
     }

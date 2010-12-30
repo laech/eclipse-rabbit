@@ -299,6 +299,11 @@ public class RabbitView extends ViewPart {
         cmp.setLayout(new FillLayout());
         page.createContents(cmp);
         pages.put(page, cmp);
+        
+        // Restores the state:
+        if (memento != null) {
+          page.onRestoreState(memento);
+        }
       }
 
       // Updates the extension tool bar items:
@@ -332,15 +337,20 @@ public class RabbitView extends ViewPart {
   }
 
   @Override
-  public void init(IViewSite site, IMemento memento) throws PartInitException {
-    super.init(site, memento);
-    this.memento = memento;
+  public void init(IViewSite site, IMemento m) throws PartInitException {
+    super.init(site, m);
+    if (m != null) {
+      this.memento = m.getChild(PREF_RABBIT_VIEW);
+    }
   }
 
   @Override
   public void saveState(IMemento memento) {
     memento = memento.createChild(PREF_RABBIT_VIEW);
     memento.putInteger(PREF_METRICS_WIDTH, sashFormData.left.offset);
+    for (IPage page : pages.keySet()) {
+      page.onSaveState(memento);
+    }
   }
 
   @Override

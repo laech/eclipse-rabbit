@@ -15,19 +15,28 @@
  */
 package rabbit.data.internal.xml;
 
+import static com.google.common.collect.Sets.newHashSet;
+
+import com.google.common.base.Function;
+import com.google.common.collect.Collections2;
+import com.google.common.collect.Sets;
+
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.matchers.JUnitMatchers.hasItem;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.junit.Test;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.io.IOException;
-import java.util.HashSet;
+import java.util.Collection;
 import java.util.Set;
 
 /**
@@ -38,71 +47,72 @@ public class XmlPluginTest {
   private static XmlPlugin plugin = XmlPlugin.getDefault();
 
   @Test
-  public void testGetStoragePath() {
+  public void getStoragePropertyStringShouldReturnTheCorrectString() {
+    String expected = "_ws_ccc";
+    IPath path = new Path("/a/b/ccc");
+    assertThat(plugin.getStoragePropertyString(path), equalTo(expected));
+  }
+
+  @Test
+  public void getStoragePathShouldReturnTheCurrentStoragePath() {
     assertNotNull(plugin.getStoragePath());
     assertTrue(plugin.getStoragePath().toFile().exists());
     assertTrue(plugin.getStoragePath().toFile().isDirectory());
   }
 
   @Test
-  public void testGetStoragePathRoot() {
-    assertNotNull(plugin.getStoragePathRoot());
+  public void getStoragePathRootShouldReturnTheParentOfTheStoragePath() {
+    assertThat(plugin.getStoragePathRoot(),
+        equalTo(plugin.getStoragePath().removeLastSegments(1)));
   }
 
   @Test
-  public void testPluginId() {
+  public void thePluginIdShouldEqualToTheBundleSymbolicName() {
     assertEquals(XmlPlugin.PLUGIN_ID, plugin.getBundle().getSymbolicName());
   }
 
   @Test
-  public void testSetStoragePathRoot() throws IOException {
+  public void setStoragePathRootTests() throws IOException {
     IPath oldPath = plugin.getStoragePathRoot();
-    IPath path = oldPath.append(System.currentTimeMillis() + "");
+    try {
+      IPath path = oldPath.append(System.currentTimeMillis() + "");
 
-    File file = path.toFile();
+      File file = path.toFile();
 
-    // File not exist, should return false:
-    assertFalse(file.exists());
-    assertFalse(plugin.setStoragePathRoot(file));
+      // File not exist, should return false:
+      assertFalse(file.exists());
+      assertFalse(plugin.setStoragePathRoot(file));
 
-    // File exists, readable, writable, should return true:
-    assertTrue(file.mkdirs());
-    assertTrue(file.setReadable(true));
-    assertTrue(file.setWritable(true));
-    assertTrue(plugin.setStoragePathRoot(file));
-
-    plugin.setStoragePathRoot(oldPath.toFile());
+      // File exists, readable, writable, should return true:
+      assertTrue(file.mkdirs());
+      assertTrue(file.setReadable(true));
+      assertTrue(file.setWritable(true));
+      assertTrue(plugin.setStoragePathRoot(file));
+    } finally {
+      plugin.setStoragePathRoot(oldPath.toFile());
+    }
   }
 
   @Test
   public void testStoragePaths() {
-    Set<IPath> paths = new HashSet<IPath>();
-    for (IPath path : plugin.getStoragePaths()) {
-      paths.add(path);
-    }
-    boolean hasDefaultPath = false;
-    for (IPath path : paths) {
-      if (path.toString().equals(plugin.getStoragePath().toString())) {
-        hasDefaultPath = true;
-        break;
-      }
-    }
-    if (!hasDefaultPath) {
-      fail();
-    }
+    Collection<IPath> paths = newHashSet(plugin.getStoragePaths());
+    assertThat(paths, hasItem(plugin.getStoragePath()));
 
-    IPath root = plugin.getStoragePathRoot();
-    File rootFile = new File(root.toOSString());
-    File[] files = rootFile.listFiles();
-    paths = new HashSet<IPath>(files.length);
-    for (File file : files) {
-      if (file.isDirectory()) {
-        paths.add(Path.fromOSString(file.getAbsolutePath()));
+    File root = plugin.getStoragePathRoot().toFile();
+    Set<File> files = Sets.newHashSet(root.listFiles(new FileFilter() {
+      @Override
+      public boolean accept(File file) {
+        return file.isDirectory();
       }
-    }
-    assertEquals(paths.size(), plugin.getStoragePaths().length);
-    for (IPath path : plugin.getStoragePaths()) {
-      assertTrue(paths.contains(path));
-    }
+    }));
+    files.add(plugin.getStoragePath().toFile());
+    paths = Collections2.transform(files, new Function<File, IPath>() {
+      @Override
+      public IPath apply(File input) {
+        return Path.fromOSString(input.getAbsolutePath());
+      }
+    });
+
+    assertThat(newHashSet(plugin.getStoragePaths()), equalTo(newHashSet(paths)));
   }
 }

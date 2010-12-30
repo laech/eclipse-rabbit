@@ -26,14 +26,14 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.ui.IMemento;
 
 /**
  * An empty category page used to contain other pages.
  */
 public class EclipseUsageCategory implements IPage {
 
-  public EclipseUsageCategory() {
-  }
+  public EclipseUsageCategory() {}
 
   @Override
   public void createContents(Composite parent) {
@@ -41,18 +41,24 @@ public class EclipseUsageCategory implements IPage {
     Label label = new Label(parent, SWT.NONE);
     label.setBackground(parent.getBackground());
     label.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
-    label
-        .setText("This category contains pages that display usage information about Eclipse.");
+    label.setText("This category contains pages that display usage information"
+        + " about Eclipse.");
   }
 
   @Override
   public IContributionItem[] createToolBarItems(IToolBarManager toolBar) {
     return new IContributionItem[0];
   }
-  
+
   @Override
   public Job updateJob(Preference preference) {
     return null;
   }
+
+  @Override
+  public void onRestoreState(IMemento memento) {}
+
+  @Override
+  public void onSaveState(IMemento memento) {}
 
 }

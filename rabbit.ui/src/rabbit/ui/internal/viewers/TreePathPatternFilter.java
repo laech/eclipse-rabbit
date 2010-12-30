@@ -25,8 +25,8 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.ui.dialogs.PatternFilter;
 
 /**
- * TODO A {@link PatternFilter} that uses {@link TreePath}s. To use this class,
- * the viewer's content provider must be an instance of
+ * A {@link PatternFilter} that uses {@link TreePath}s. To use this class, the
+ * viewer's content provider must be an instance of
  * {@link ITreePathContentProvider}, and
  * {@link ITreePathContentProvider#getParents(Object)} must return an array that
  * contains the actual parent of a given element.
@@ -44,6 +44,10 @@ public final class TreePathPatternFilter extends PatternFilter {
     ITreePathContentProvider provider = (ITreePathContentProvider)
         ((ContentViewer) viewer).getContentProvider();
     TreePath[] parents = provider.getParents(element);
+    if (parents == null) {
+      return false;
+    }
+
     for (TreePath parent : parents) {
       Object[] children = provider.getChildren(parent);
       for (Object child : children) {
@@ -72,10 +76,14 @@ public final class TreePathPatternFilter extends PatternFilter {
       return true;
     }
 
-    ITreePathContentProvider provider = (ITreePathContentProvider) // TODO note
-                                                                   // this
-    ((ContentViewer) viewer).getContentProvider();
-    for (Object child : provider.getChildren(path)) {
+    ITreePathContentProvider provider = (ITreePathContentProvider)
+        ((ContentViewer) viewer).getContentProvider();
+    Object[] children = provider.getChildren(path);
+    if (children == null) {
+      return false;
+    }
+
+    for (Object child : children) {
       if (isMatch(viewer, path.createChildPath(child))) {
         return true;
       }
