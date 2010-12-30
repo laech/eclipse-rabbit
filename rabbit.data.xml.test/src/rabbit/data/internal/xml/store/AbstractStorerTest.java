@@ -81,23 +81,23 @@ public abstract class AbstractStorerTest<E extends DiscreteEvent, T, S extends E
   public void testCommit() throws Exception {
     E event = createEvent(new DateTime());
     storer.insert(event);
-    
+
     File file = getDataStore(storer).getDataFile(event.getTime().toLocalDate());
     if (file.exists() && !file.delete())
       fail("File must be deleted before test can continue");
-    
+
     storer.commit();
-    
+
     List<S> data = getCategories(storer, getDataStore(storer).read(file));
     assertEquals(1, data.size());
     assertEquals(toXmlDate(event.getTime()), data.get(0).getDate());
-    
+
     List<T> elements = storer.getElements(data.get(0));
     assertEquals(1, elements.size());
     T element = elements.get(0);
     assertTrue(equal(getConverter(storer).convert(event), element));
   }
-  
+
   @Test
   public void testCommit_emptyDataAfterward() throws Exception {
     E event = createEvent(new DateTime());
@@ -261,8 +261,8 @@ public abstract class AbstractStorerTest<E extends DiscreteEvent, T, S extends E
 
   /**
    * Creates an event for testing. The return event must be different to
-   * {@link #createEvent()} (Non mergeable). Subsequence calls to this method
-   * should return equal objects.
+   * {@link #createEvent(DateTime)} (Non mergeable). Subsequence calls to this
+   * method should return equal objects.
    */
   protected abstract E createEventDiff(DateTime dateTime) throws Exception;
 
@@ -277,8 +277,8 @@ public abstract class AbstractStorerTest<E extends DiscreteEvent, T, S extends E
   protected abstract boolean equal(T t1, T t2);
 
   /**
-   * Calls the protected method {@code
-   * AbstractStorer.getXmlTypeCategories(EventListType)}.
+   * Calls the protected method
+   * {@code AbstractStorer.getXmlTypeCategories(EventListType)}.
    */
   @SuppressWarnings("unchecked")
   protected List<S> getCategories(AbstractStorer<E, T, S> storer,

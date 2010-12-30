@@ -31,15 +31,13 @@ public interface IStorer<T> {
 
   /**
    * Insert a collection of objects to be stored.
-   * 
-   * @param col The collection of objects.
+   * @param collection The collection of objects.
    */
   void insert(Collection<? extends T> collection);
 
   /**
    * Inserts an object to be stored.
-   * 
-   * @param e The object.
+   * @param element The object.
    */
   void insert(T element);
 

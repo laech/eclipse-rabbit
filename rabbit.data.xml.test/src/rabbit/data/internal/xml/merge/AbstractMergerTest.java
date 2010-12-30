@@ -95,8 +95,8 @@ public abstract class AbstractMergerTest<T> {
 
   /**
    * Creates a target type for testing, all fields must be filled, and is
-   * different to {@link #createTargetType()}, i.e. calling {@link
-   * AbstractMerger#isMergeable(createTargetType(), createTargetType2())} will
+   * different to {@link #createTargetType()}, i.e. calling {@code
+   * AbstractMerger.isMergeable(createTargetType(), createTargetType2())} will
    * always return false. Subsequence calls to this method must return objects 
    * with exact same values.
    */

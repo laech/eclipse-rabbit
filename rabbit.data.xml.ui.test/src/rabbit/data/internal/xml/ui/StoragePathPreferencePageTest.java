@@ -31,9 +31,6 @@ import org.junit.runner.RunWith;
 
 import java.io.File;
 
-/**
- * Test for {@link RabbitPreferencePage}
- */
 @RunWith(SWTBotJunit4ClassRunner.class)
 public class StoragePathPreferencePageTest {
 
@@ -65,8 +62,7 @@ public class StoragePathPreferencePageTest {
     try {
       // A message box may be popped up asking to move the old files.
       bot.button("No").click();
-    } catch (WidgetNotFoundException e) {
-    }
+    } catch (WidgetNotFoundException e) {}
     assertEquals(storagePath, XmlPlugin.getDefault().getStoragePathRoot()
         .toOSString());
 
@@ -77,8 +73,7 @@ public class StoragePathPreferencePageTest {
     try {
       // A message box may be popped up asking to move the old files.
       bot.button("No").click();
-    } catch (WidgetNotFoundException e) {
-    }
+    } catch (WidgetNotFoundException e) {}
     assertEquals(storagePath, XmlPlugin.getDefault().getStoragePathRoot()
         .toOSString());
 
@@ -108,8 +103,7 @@ public class StoragePathPreferencePageTest {
     try {
       // A message box may be popped up asking to move the old files.
       bot.button("No").click();
-    } catch (WidgetNotFoundException e) {
-    }
+    } catch (WidgetNotFoundException e) {}
     assertEquals(storagePath, XmlPlugin.getDefault().getStoragePathRoot()
         .toOSString());
 
@@ -122,8 +116,7 @@ public class StoragePathPreferencePageTest {
     try {
       // A message box may be popped up asking to move the old files.
       bot.button("No").click();
-    } catch (WidgetNotFoundException e) {
-    }
+    } catch (WidgetNotFoundException e) {}
     assertEquals(storagePath, XmlPlugin.getDefault().getStoragePathRoot()
         .toOSString());
   }

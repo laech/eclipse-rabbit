@@ -15,14 +15,10 @@
  */
 package rabbit.data.store.model;
 
-import rabbit.data.store.model.ContinuousEvent;
-import rabbit.data.store.model.JavaEvent;
-
 import static org.junit.Assert.assertEquals;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaCore;
-import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.junit.Test;
 
@@ -48,7 +44,7 @@ public class JavaEventTest extends ContinuousEventTest {
   }
   
   /**
-   * @see JavaEvent#JavaEvent(DateTime, long, IJavaElement)
+   * @see JavaEvent#JavaEvent(Interval, IJavaElement)
    */
   protected JavaEvent createEvent(Interval interval, IJavaElement element) {
     return new JavaEvent(interval, element);

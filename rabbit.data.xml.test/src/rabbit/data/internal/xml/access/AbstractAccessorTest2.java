@@ -19,6 +19,7 @@ import static rabbit.data.internal.xml.DatatypeUtil.toXmlDate;
 
 import rabbit.data.access.model.WorkspaceStorage;
 import rabbit.data.internal.xml.XmlPlugin;
+import rabbit.data.internal.xml.access.AbstractAccessor;
 import rabbit.data.internal.xml.schema.events.EventGroupType;
 import rabbit.data.internal.xml.schema.events.EventListType;
 
@@ -44,7 +45,7 @@ import java.util.Collection;
 import java.util.List;
 
 /**
- * @see AbstractAccessor2
+ * @see AbstractAccessor
  */
 public abstract class AbstractAccessorTest2<T, E, S extends EventGroupType> {
 
@@ -78,7 +79,7 @@ public abstract class AbstractAccessorTest2<T, E, S extends EventGroupType> {
     return String.valueOf(System.nanoTime());
   }
 
-  protected AbstractAccessor2<T, E, S> accessor;
+  protected AbstractAccessor<T, E, S> accessor;
 
   @Before
   public void before() throws Exception {
@@ -227,7 +228,7 @@ public abstract class AbstractAccessorTest2<T, E, S extends EventGroupType> {
   /**
    * Creates a subject for testing.
    */
-  protected abstract AbstractAccessor2<T, E, S> create();
+  protected abstract AbstractAccessor<T, E, S> create();
 
   /**
    * @return A new category type.

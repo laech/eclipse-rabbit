@@ -15,73 +15,66 @@
  */
 package rabbit.data.internal.xml.access;
 
-import rabbit.data.access.model.PerspectiveDataDescriptor;
+import rabbit.data.access.model.IPerspectiveData;
+import rabbit.data.access.model.WorkspaceStorage;
 import rabbit.data.internal.xml.DataStore;
-import rabbit.data.internal.xml.merge.PerspectiveEventTypeMerger;
+import rabbit.data.internal.xml.access.PerspectiveDataAccessor;
+import rabbit.data.internal.xml.schema.events.EventListType;
 import rabbit.data.internal.xml.schema.events.PerspectiveEventListType;
 import rabbit.data.internal.xml.schema.events.PerspectiveEventType;
 
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
 
 import org.joda.time.LocalDate;
 
 import java.util.List;
 
+/**
+ * @see PerspectiveDataAccessor
+ */
 public class PerspectiveDataAccessorTest
     extends
-    AbstractNodeAccessorTest<PerspectiveDataDescriptor, PerspectiveEventType, PerspectiveEventListType> {
+    AbstractAccessorTest2<IPerspectiveData, PerspectiveEventType, PerspectiveEventListType> {
+
+  @Override
+  protected void assertValues(PerspectiveEventType expected,
+      LocalDate expectedDate, WorkspaceStorage expectedWs,
+      IPerspectiveData actual) {
+    assertThat(actual.get(IPerspectiveData.DATE), is(expectedDate));
+    assertThat(actual.get(IPerspectiveData.WORKSPACE), is(expectedWs));
+    assertThat(actual.get(IPerspectiveData.PERSPECTIVE_ID),
+        is(expected.getPerspectiveId()));
+    assertThat(actual.get(IPerspectiveData.DURATION).getMillis(),
+        is(expected.getDuration()));
+  }
 
   @Override
   protected PerspectiveDataAccessor create() {
-    return new PerspectiveDataAccessor(
-        DataStore.PERSPECTIVE_STORE, new PerspectiveEventTypeMerger());
+    return new PerspectiveDataAccessor(DataStore.PERSPECTIVE_STORE);
   }
 
   @Override
   protected PerspectiveEventListType createCategory() {
-    return objectFactory.createPerspectiveEventListType();
+    return new PerspectiveEventListType();
   }
 
   @Override
   protected PerspectiveEventType createElement() {
-    PerspectiveEventType type = objectFactory.createPerspectiveEventType();
+    PerspectiveEventType type = new PerspectiveEventType();
     type.setDuration(11);
     type.setPerspectiveId("abc");
     return type;
   }
 
   @Override
+  protected List<PerspectiveEventListType> getCategories(EventListType events) {
+    return events.getPerspectiveEvents();
+  }
+
+  @Override
   protected List<PerspectiveEventType> getElements(PerspectiveEventListType list) {
     return list.getPerspectiveEvent();
-  }
-
-  @Override
-  protected void setId(PerspectiveEventType type, String id) {
-    type.setPerspectiveId(id);
-  }
-
-  @Override
-  protected void setValue(PerspectiveEventType type, long usage) {
-    type.setDuration(usage);
-  }
-
-  @Override
-  public void testCreateDataNode() throws Exception {
-    LocalDate date = new LocalDate();
-    PerspectiveEventType e = createElement();
-    PerspectiveDataDescriptor des = accessor.createDataNode(date, e);
-
-    assertEquals(date, des.getDate());
-    assertEquals(e.getDuration(), des.getDuration().getMillis());
-    assertEquals(e.getPerspectiveId(), des.getPerspectiveId());
-  }
-
-  @Override
-  protected boolean areEqual(PerspectiveDataDescriptor expected,
-      PerspectiveDataDescriptor actual) {
-    return expected.getDate().equals(actual.getDate())
-        && expected.getDuration().equals(actual.getDuration())
-        && expected.getPerspectiveId().equals(actual.getPerspectiveId());
   }
 
 }

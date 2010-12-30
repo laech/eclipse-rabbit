@@ -20,8 +20,6 @@ package rabbit.data.internal.xml.merge;
  * usually consist of two "parts", one identify part and one value part, if the
  * identity parts are equal for two objects, then they are considered as
  * mergeable.
- * 
- * @param T The type of objects to merge.
  */
 public interface IMerger<T> {
 

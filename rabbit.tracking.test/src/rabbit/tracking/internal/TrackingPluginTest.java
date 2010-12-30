@@ -36,7 +36,7 @@ import java.util.Collection;
 import java.util.Set;
 
 /**
- * Test for {@link RabbitCorePlugin}
+ * Test for {@link TrackingPlugin}
  */
 public class TrackingPluginTest {
 

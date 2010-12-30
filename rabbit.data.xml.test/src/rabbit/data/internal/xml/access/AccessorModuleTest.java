@@ -13,7 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package rabbit.data.internal.xml.access2;
+package rabbit.data.internal.xml.access;
 
 import rabbit.data.access.IAccessor;
 import rabbit.data.access.model.ICommandData;
@@ -25,6 +25,15 @@ import rabbit.data.access.model.IPerspectiveData;
 import rabbit.data.access.model.ISessionData;
 import rabbit.data.access.model.ITaskData;
 import rabbit.data.internal.xml.StoreNamesModule;
+import rabbit.data.internal.xml.access.AccessorModule;
+import rabbit.data.internal.xml.access.CommandDataAccessor;
+import rabbit.data.internal.xml.access.FileDataAccessor;
+import rabbit.data.internal.xml.access.JavaDataAccessor;
+import rabbit.data.internal.xml.access.LaunchDataAccessor;
+import rabbit.data.internal.xml.access.PartDataAccessor;
+import rabbit.data.internal.xml.access.PerspectiveDataAccessor;
+import rabbit.data.internal.xml.access.SessionDataAccessor;
+import rabbit.data.internal.xml.access.TaskDataAccessor;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;

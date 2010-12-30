@@ -15,10 +15,11 @@
  */
 package rabbit.data.internal.xml.access;
 
-import rabbit.data.access.model.CommandDataDescriptor;
+import rabbit.data.access.model.ICommandData;
+import rabbit.data.access.model.WorkspaceStorage;
+import rabbit.data.internal.access.model.CommandData;
 import rabbit.data.internal.xml.IDataStore;
 import rabbit.data.internal.xml.StoreNames;
-import rabbit.data.internal.xml.merge.IMerger;
 import rabbit.data.internal.xml.schema.events.CommandEventListType;
 import rabbit.data.internal.xml.schema.events.CommandEventType;
 import rabbit.data.internal.xml.schema.events.EventListType;
@@ -26,6 +27,9 @@ import rabbit.data.internal.xml.schema.events.EventListType;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
+import org.eclipse.core.commands.Command;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.commands.ICommandService;
 import org.joda.time.LocalDate;
 
 import java.util.Collection;
@@ -33,37 +37,25 @@ import java.util.Collection;
 /**
  * Accesses command event data.
  */
-public class CommandDataAccessor
-    extends
-    AbstractNodeAccessor<CommandDataDescriptor, CommandEventType, CommandEventListType> {
+public class CommandDataAccessor extends
+    AbstractAccessor<ICommandData, CommandEventType, CommandEventListType> {
 
   /**
    * Constructor.
    * 
    * @param store The data store to get the data from.
-   * @param merger The merger for merging XML data nodes.
    * @throws NullPointerException If any arguments are null.
    */
   @Inject
-  CommandDataAccessor(
-      @Named(StoreNames.COMMAND_STORE) IDataStore store,
-      IMerger<CommandEventType> merger) {
-    super(store, merger);
+  CommandDataAccessor(@Named(StoreNames.COMMAND_STORE) IDataStore store) {
+    super(store);
   }
 
   @Override
-  protected CommandDataDescriptor createDataNode(LocalDate cal,
-      CommandEventType type) {
-
-    try {
-      return new CommandDataDescriptor(cal, type.getCount(),
-          type.getCommandId());
-
-    } catch (NullPointerException e) {
-      return null;
-    } catch (IllegalArgumentException e) {
-      return null;
-    }
+  protected ICommandData createDataNode(
+      LocalDate date, WorkspaceStorage ws, CommandEventType type) throws Exception {
+    Command cmd = commandService().getCommand(type.getCommandId());
+    return new CommandData(date, ws, cmd, type.getCount());
   }
 
   @Override
@@ -76,4 +68,11 @@ public class CommandDataAccessor
     return list.getCommandEvent();
   }
 
+  /**
+   * @return The workbench command service.
+   */
+  private ICommandService commandService() {
+    return (ICommandService) 
+        PlatformUI.getWorkbench().getService(ICommandService.class);
+  }
 }

@@ -15,75 +15,67 @@
  */
 package rabbit.data.internal.xml.access;
 
-import rabbit.data.access.model.CommandDataDescriptor;
+import static rabbit.data.access.model.ICommandData.COMMAND;
+import static rabbit.data.access.model.ICommandData.COUNT;
+import static rabbit.data.access.model.ICommandData.DATE;
+import static rabbit.data.access.model.ICommandData.WORKSPACE;
+
+import rabbit.data.access.model.ICommandData;
+import rabbit.data.access.model.WorkspaceStorage;
 import rabbit.data.internal.xml.DataStore;
-import rabbit.data.internal.xml.merge.CommandEventTypeMerger;
+import rabbit.data.internal.xml.access.CommandDataAccessor;
 import rabbit.data.internal.xml.schema.events.CommandEventListType;
 import rabbit.data.internal.xml.schema.events.CommandEventType;
+import rabbit.data.internal.xml.schema.events.EventListType;
 
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
 
 import org.joda.time.LocalDate;
 
 import java.util.List;
 
 /**
- * Test for {@link CommandDataAccessor}
+ * @see CommandDataAccessor
  */
-public class CommandDataAccessorTest
-    extends
-    AbstractNodeAccessorTest<CommandDataDescriptor, CommandEventType, CommandEventListType> {
+public class CommandDataAccessorTest extends
+    AbstractAccessorTest2<ICommandData, CommandEventType, CommandEventListType> {
+
+  @Override
+  protected void assertValues(CommandEventType expected,
+      LocalDate expectedDate, WorkspaceStorage expectedWs, ICommandData actual) {
+
+    assertThat(actual.get(COMMAND).getId(), is(expected.getCommandId()));
+    assertThat(actual.get(COUNT), is(expected.getCount()));
+    assertThat(actual.get(DATE), is(expectedDate));
+    assertThat(actual.get(WORKSPACE), is(expectedWs));
+  }
 
   @Override
   protected CommandDataAccessor create() {
-    return new CommandDataAccessor(
-        DataStore.COMMAND_STORE, new CommandEventTypeMerger());
+    return new CommandDataAccessor(DataStore.COMMAND_STORE);
   }
 
   @Override
   protected CommandEventListType createCategory() {
-    return objectFactory.createCommandEventListType();
+    return new CommandEventListType();
   }
 
   @Override
   protected CommandEventType createElement() {
-    CommandEventType type = objectFactory.createCommandEventType();
+    CommandEventType type = new CommandEventType();
     type.setCommandId("abc");
     type.setCount(10);
     return type;
   }
 
   @Override
+  protected List<CommandEventListType> getCategories(EventListType events) {
+    return events.getCommandEvents();
+  }
+
+  @Override
   protected List<CommandEventType> getElements(CommandEventListType list) {
     return list.getCommandEvent();
   }
-
-  @Override
-  protected void setId(CommandEventType type, String id) {
-    type.setCommandId(id);
-  }
-
-  @Override
-  protected void setValue(CommandEventType type, long usage) {
-    type.setCount((int) usage);
-  }
-
-  @Override
-  public void testCreateDataNode() throws Exception {
-    LocalDate date = new LocalDate();
-    CommandEventType type = createElement();
-    CommandDataDescriptor des = accessor.createDataNode(date, type);
-
-    assertEquals(date, des.getDate());
-    assertEquals(type.getCommandId(), des.getCommandId());
-    assertEquals(type.getCount(), des.getCount());
-  }
-
-  @Override
-  protected boolean areEqual(CommandDataDescriptor expected, CommandDataDescriptor actual) {
-    return expected.getCommandId().equals(actual.getCommandId())
-        && expected.getDate().equals(actual.getDate())
-        && expected.getCount() == actual.getCount();
-  }
-
 }

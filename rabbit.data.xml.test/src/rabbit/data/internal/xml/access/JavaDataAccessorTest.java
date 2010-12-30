@@ -15,16 +15,24 @@
  */
 package rabbit.data.internal.xml.access;
 
+import static rabbit.data.access.model.IJavaData.DATE;
+import static rabbit.data.access.model.IJavaData.DURATION;
+import static rabbit.data.access.model.IJavaData.JAVA_ELEMENT;
+import static rabbit.data.access.model.IJavaData.WORKSPACE;
 import static rabbit.data.internal.xml.DatatypeUtil.toXmlDate;
 
-import rabbit.data.access.model.JavaDataDescriptor;
+import rabbit.data.access.model.IJavaData;
+import rabbit.data.access.model.WorkspaceStorage;
 import rabbit.data.internal.xml.DataStore;
-import rabbit.data.internal.xml.merge.JavaEventTypeMerger;
+import rabbit.data.internal.xml.access.JavaDataAccessor;
+import rabbit.data.internal.xml.schema.events.EventListType;
 import rabbit.data.internal.xml.schema.events.JavaEventListType;
 import rabbit.data.internal.xml.schema.events.JavaEventType;
 
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
 
+import org.eclipse.jdt.core.JavaCore;
 import org.joda.time.LocalDate;
 
 import java.util.List;
@@ -32,29 +40,22 @@ import java.util.List;
 /**
  * @see JavaDataAccessor
  */
-public class JavaDataAccessorTest extends 
-    AbstractNodeAccessorTest<JavaDataDescriptor, JavaEventType, JavaEventListType> {
+public class JavaDataAccessorTest extends
+    AbstractAccessorTest2<IJavaData, JavaEventType, JavaEventListType> {
 
   @Override
-  protected JavaDataAccessor create() {
-    return new JavaDataAccessor(
-        DataStore.JAVA_STORE, new JavaEventTypeMerger());
+  protected void assertValues(JavaEventType expected, LocalDate expectedDate,
+      WorkspaceStorage expectedWs, IJavaData actual) {
+    assertThat(actual.get(DATE), is(expectedDate));
+    assertThat(actual.get(WORKSPACE), is(expectedWs));
+    assertThat(actual.get(DURATION).getMillis(), is(expected.getDuration()));
+    assertThat(actual.get(JAVA_ELEMENT),
+        is(JavaCore.create(expected.getHandleIdentifier())));
   }
 
   @Override
-  public void testCreateDataNode() throws Exception {
-    LocalDate date = new LocalDate(1999, 1, 1);
-    String id = "abc";
-    long value = 1983;
-    
-    JavaEventType type = new JavaEventType();
-    type.setDuration(value);
-    type.setHandleIdentifier(id);
-    
-    JavaDataDescriptor des = accessor.createDataNode(date, type);
-    assertEquals(date, des.getDate());
-    assertEquals(value, des.getDuration().getMillis());
-    assertEquals(id, des.getHandleIdentifier());
+  protected JavaDataAccessor create() {
+    return new JavaDataAccessor(DataStore.JAVA_STORE);
   }
 
   @Override
@@ -68,31 +69,17 @@ public class JavaDataAccessorTest extends
   protected JavaEventType createElement() {
     JavaEventType type = new JavaEventType();
     type.setDuration(10);
-    type.setHandleIdentifier("abc");
+    type.setHandleIdentifier("=project/src<pkg{Program.java"); // Valid ID
     return type;
+  }
+
+  @Override
+  protected List<JavaEventListType> getCategories(EventListType events) {
+    return events.getJavaEvents();
   }
 
   @Override
   protected List<JavaEventType> getElements(JavaEventListType list) {
     return list.getJavaEvent();
   }
-
-  @Override
-  protected void setId(JavaEventType type, String id) {
-    type.setHandleIdentifier(id);
-  }
-
-  @Override
-  protected void setValue(JavaEventType type, long usage) {
-    type.setDuration(usage);
-  }
-
-  @Override
-  protected boolean areEqual(JavaDataDescriptor expected,
-      JavaDataDescriptor actual) {
-    return expected.getDate().equals(actual.getDate())
-        && expected.getDuration().equals(actual.getDuration())
-        && expected.getHandleIdentifier().equals(actual.getHandleIdentifier());
-  }
-
 }

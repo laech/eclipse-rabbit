@@ -55,7 +55,7 @@ public class PerspectiveEventTypeMergerTest extends
   /**
    * Tests when {@link PerspectiveEventType#getPerspectiveId()} returns null on
    * the first parameter, and returns not null on the second parameter,
-   * {@link PerspectiveEventTypeeMerger#isMergeable(PerspectiveEventType, PerspectiveEventType)}
+   * {@link PerspectiveEventTypeMerger#isMergeable(PerspectiveEventType, PerspectiveEventType)}
    * should return false instead of failing.
    */
   @Test

@@ -385,12 +385,12 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
 
   /**
    * This test is for the same purpose as
-   * {@link #testFilterDeletedElements_typeMembers()}, but with a little
+   * {@link #testFilter_deletedElement_typeMembers()}, but with a little
    * difference, that is, if the whole Java file is deleted, all the data about
    * the Java elements in the file will be stored under the Java file, even
    * though it's deleted.
    * 
-   * @see #testFilterDeletedElements_typeMembers()
+   * @see #testFilter_deletedElement_typeMembers()
    */
   @Test
   public void testFilter_deletedElement_mainType() throws Exception {
@@ -470,7 +470,7 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
    * "File.java", even though the file has been deleted.
    * </p>
    * 
-   * @see #testFilterDeletedElements_mainType()
+   * @see #testFilter_deletedElement_mainType()
    */
   @Test
   public void testFilter_deletedElement_typeMembers() throws Exception {
@@ -1103,7 +1103,7 @@ public class JavaTrackerTest extends AbstractTrackerTest<JavaEvent> {
 
   /**
    * Closes all the editor in the workbench page, contents of editors are not
-   * saved. Then opens the Java editor on {@link #FILE}.
+   * saved. Then opens the Java editor on {@link #unit}.
    * 
    * @return The editor.
    */

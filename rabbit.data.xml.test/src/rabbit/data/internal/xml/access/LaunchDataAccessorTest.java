@@ -15,47 +15,53 @@
  */
 package rabbit.data.internal.xml.access;
 
-import rabbit.data.access.model.LaunchDataDescriptor;
+import rabbit.data.access.model.ILaunchData;
+import rabbit.data.access.model.LaunchConfigurationDescriptor;
+import rabbit.data.access.model.WorkspaceStorage;
 import rabbit.data.internal.xml.DataStore;
 import rabbit.data.internal.xml.DatatypeUtil;
-import rabbit.data.internal.xml.merge.LaunchEventTypeMerger;
+import rabbit.data.internal.xml.access.LaunchDataAccessor;
+import rabbit.data.internal.xml.schema.events.EventListType;
 import rabbit.data.internal.xml.schema.events.LaunchEventListType;
 import rabbit.data.internal.xml.schema.events.LaunchEventType;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import com.google.common.base.Function;
+import com.google.common.collect.Collections2;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
+import static org.junit.matchers.JUnitMatchers.hasItems;
+
+import org.eclipse.core.resources.IFile;
 import org.eclipse.debug.core.ILaunchManager;
 import org.joda.time.LocalDate;
 
+import java.util.Collection;
 import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @see LaunchDataAccessor
  */
-public class LaunchDataAccessorTest
-    extends
-    AbstractNodeAccessorTest<LaunchDataDescriptor, LaunchEventType, LaunchEventListType> {
-
+public class LaunchDataAccessorTest extends
+    AbstractAccessorTest2<ILaunchData, LaunchEventType, LaunchEventListType> {
 
   @Override
   protected LaunchDataAccessor create() {
-    return new LaunchDataAccessor(
-        DataStore.LAUNCH_STORE, new LaunchEventTypeMerger());
+    return new LaunchDataAccessor(DataStore.LAUNCH_STORE);
   }
 
   @Override
   protected LaunchEventListType createCategory() {
-    LaunchEventListType type = objectFactory.createLaunchEventListType();
-    type.setDate(DatatypeUtil
-        .toXmlDateTime(new GregorianCalendar()));
+    LaunchEventListType type = new LaunchEventListType();
+    type.setDate(DatatypeUtil.toXmlDateTime(new GregorianCalendar()));
     return type;
   }
 
   @Override
   protected LaunchEventType createElement() {
-    LaunchEventType type = objectFactory.createLaunchEventType();
+    LaunchEventType type = new LaunchEventType();
     type.setTotalDuration(10);
     type.setLaunchModeId(ILaunchManager.RUN_MODE);
     type.setName("name");
@@ -70,40 +76,34 @@ public class LaunchDataAccessorTest
   }
 
   @Override
-  protected void setId(LaunchEventType type, String id) {
-    type.setLaunchModeId(id);
-    type.setLaunchTypeId(id);
-    type.setName(id);
+  protected void assertValues(LaunchEventType expected, LocalDate expectedDate,
+      WorkspaceStorage expectedWs, ILaunchData actual) {
+    assertThat(actual.get(ILaunchData.DATE), is(expectedDate));
+    assertThat(actual.get(ILaunchData.WORKSPACE), is(expectedWs));
+    assertThat(actual.get(ILaunchData.COUNT), is(expected.getCount()));
+    assertThat(actual.get(ILaunchData.DURATION).getMillis(),
+        is(expected.getTotalDuration()));
+
+    LaunchConfigurationDescriptor config = actual.get(ILaunchData.LAUNCH_CONFIG);
+    assertThat(config.getLaunchModeId(), is(expected.getLaunchModeId()));
+    assertThat(config.getLaunchTypeId(), is(expected.getLaunchTypeId()));
+    assertThat(config.getLaunchName(), is(expected.getName()));
+
+    Set<IFile> files = actual.get(ILaunchData.FILES);
+    Collection<String> paths = Collections2.transform(files,
+        new Function<IFile, String>() {
+          @Override
+          public String apply(IFile file) {
+            return file.getFullPath().toPortableString();
+          }
+        });
+    assertThat(paths.size(), is(expected.getFilePath().size()));
+    assertThat(paths, hasItems(expected.getFilePath().toArray(new String[0])));
   }
 
   @Override
-  protected void setValue(LaunchEventType type, long usage) {
-    type.setTotalDuration(usage);
+  protected List<LaunchEventListType> getCategories(EventListType events) {
+    return events.getLaunchEvents();
   }
 
-  @Override
-  public void testCreateDataNode() throws Exception {
-    LocalDate date = new LocalDate();
-    LaunchEventType e = createElement();
-    LaunchDataDescriptor des = accessor.createDataNode(date, e);
-    
-    assertEquals(date, des.getDate());
-    assertEquals(e.getCount(), des.getLaunchCount());
-    assertEquals(e.getTotalDuration(), des.getDuration().getMillis());
-    assertEquals(e.getLaunchModeId(), des.getLaunchDescriptor().getLaunchModeId());
-    assertEquals(e.getLaunchTypeId(), des.getLaunchDescriptor().getLaunchTypeId());
-    assertEquals(e.getName(), des.getLaunchDescriptor().getLaunchName());
-    assertEquals(e.getFilePath().size(), des.getFilePaths().size());
-    assertTrue(e.getFilePath().containsAll(des.getFilePaths()));
-  }
-
-  @Override
-  protected boolean areEqual(LaunchDataDescriptor expected,
-      LaunchDataDescriptor actual) {
-    return expected.getDate().equals(actual.getDate())
-        && expected.getDuration().equals(actual.getDuration())
-        && expected.getFilePaths().equals(actual.getFilePaths())
-        && expected.getLaunchDescriptor().equals(actual.getLaunchDescriptor())
-        && expected.getLaunchCount() == actual.getLaunchCount();
-  }
 }

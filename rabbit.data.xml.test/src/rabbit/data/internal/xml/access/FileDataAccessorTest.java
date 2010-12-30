@@ -15,76 +15,69 @@
  */
 package rabbit.data.internal.xml.access;
 
-import rabbit.data.access.model.FileDataDescriptor;
+import static rabbit.data.access.model.IFileData.DATE;
+import static rabbit.data.access.model.IFileData.DURATION;
+import static rabbit.data.access.model.IFileData.FILE;
+import static rabbit.data.access.model.IFileData.WORKSPACE;
+
+import rabbit.data.access.model.IFileData;
+import rabbit.data.access.model.WorkspaceStorage;
 import rabbit.data.internal.xml.DataStore;
-import rabbit.data.internal.xml.merge.FileEventTypeMerger;
+import rabbit.data.internal.xml.access.FileDataAccessor;
+import rabbit.data.internal.xml.schema.events.EventListType;
 import rabbit.data.internal.xml.schema.events.FileEventListType;
 import rabbit.data.internal.xml.schema.events.FileEventType;
 
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
 
+import org.eclipse.core.runtime.Path;
 import org.joda.time.LocalDate;
 
 import java.util.List;
 
 /**
- * Test for {@link FileDataAccessor}
+ * @see FileDataAccessor
  */
-public class FileDataAccessorTest
-    extends
-    AbstractNodeAccessorTest<FileDataDescriptor, FileEventType, FileEventListType> {
+public class FileDataAccessorTest extends
+    AbstractAccessorTest2<IFileData, FileEventType, FileEventListType> {
+
+  @Override
+  protected void assertValues(FileEventType expected, LocalDate expectedDate,
+      WorkspaceStorage expectedWs, IFileData actual) {
+
+    assertThat(actual.get(DATE), is(expectedDate));
+    assertThat(actual.get(DURATION).getMillis(), is(expected.getDuration()));
+    assertThat(actual.get(WORKSPACE), is(expectedWs));
+    assertThat(actual.get(FILE).getFullPath(),
+        is(Path.fromPortableString(expected.getFilePath())));
+  }
 
   @Override
   protected FileDataAccessor create() {
-    return new FileDataAccessor(
-        DataStore.FILE_STORE, new FileEventTypeMerger());
+    return new FileDataAccessor(DataStore.FILE_STORE);
   }
 
   @Override
   protected FileEventListType createCategory() {
-    return objectFactory.createFileEventListType();
+    return new FileEventListType();
   }
 
   @Override
   protected FileEventType createElement() {
-    FileEventType type = objectFactory.createFileEventType();
+    FileEventType type = new FileEventType();
     type.setDuration(1000);
-    type.setFilePath("/ab");
+    type.setFilePath("/project/file.txt");
     return type;
+  }
+
+  @Override
+  protected List<FileEventListType> getCategories(EventListType events) {
+    return events.getFileEvents();
   }
 
   @Override
   protected List<FileEventType> getElements(FileEventListType list) {
     return list.getFileEvent();
   }
-
-  @Override
-  protected void setId(FileEventType type, String id) {
-    type.setFilePath(id);
-  }
-
-  @Override
-  protected void setValue(FileEventType type, long usage) {
-    type.setDuration(usage);
-  }
-
-  @Override
-  public void testCreateDataNode() throws Exception {
-    LocalDate date = new LocalDate();
-    FileEventType type = createElement();
-    FileDataDescriptor des = accessor.createDataNode(date, type);
-
-    assertEquals(date, des.getDate());
-    assertEquals(type.getDuration(), des.getDuration().getMillis());
-    assertEquals(type.getFilePath(), des.getFilePath().toString());
-  }
-
-  @Override
-  protected boolean areEqual(FileDataDescriptor expected,
-      FileDataDescriptor actual) {
-    return expected.getDate().equals(actual.getDate())
-        && expected.getDuration().equals(actual.getDuration())
-        && expected.getFilePath().equals(actual.getFilePath());
-  }
-
 }

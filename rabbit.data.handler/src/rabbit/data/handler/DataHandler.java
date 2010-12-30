@@ -16,14 +16,14 @@
 package rabbit.data.handler;
 
 import rabbit.data.access.IAccessor;
-import rabbit.data.access.model.CommandDataDescriptor;
-import rabbit.data.access.model.FileDataDescriptor;
-import rabbit.data.access.model.JavaDataDescriptor;
-import rabbit.data.access.model.LaunchDataDescriptor;
-import rabbit.data.access.model.PartDataDescriptor;
-import rabbit.data.access.model.PerspectiveDataDescriptor;
-import rabbit.data.access.model.SessionDataDescriptor;
-import rabbit.data.access.model.TaskFileDataDescriptor;
+import rabbit.data.access.model.ICommandData;
+import rabbit.data.access.model.IFileData;
+import rabbit.data.access.model.IJavaData;
+import rabbit.data.access.model.ILaunchData;
+import rabbit.data.access.model.IPartData;
+import rabbit.data.access.model.IPerspectiveData;
+import rabbit.data.access.model.ISessionData;
+import rabbit.data.access.model.ITaskData;
 import rabbit.data.store.IStorer;
 import rabbit.data.store.model.CommandEvent;
 import rabbit.data.store.model.FileEvent;
@@ -87,14 +87,14 @@ public class DataHandler {
    * <p>
    * The following object types are supported:
    * <ul>
-   * <li>{@link CommandDataDescriptor}</li>
-   * <li>{@link FileDataDescriptor}</li>
-   * <li>{@link PartDataDescriptor}</li>
-   * <li>{@link PerspectiveDataDescriptor}</li>
-   * <li>{@link LaunchDataDescriptor}</li>
-   * <li>{@link TaskFileDataDescriptor}</li>
-   * <li>{@link SessionDataDescriptor}</li>
-   * <li>{@link JavaDataDescriptor}</li>
+   * <li>{@link ICommandData}</li>
+   * <li>{@link IFileData}</li>
+   * <li>{@link IPartData}</li>
+   * <li>{@link IPerspectiveData}</li>
+   * <li>{@link ILaunchData}</li>
+   * <li>{@link ITaskData}</li>
+   * <li>{@link ISessionData}</li>
+   * <li>{@link IJavaData}</li>
    * </ul>
    * </p>
    * 

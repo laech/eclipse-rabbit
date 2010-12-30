@@ -62,7 +62,7 @@ public class Mergers {
    * 
    * @param merger The merger to use.
    * @param collection The collection to merge the element to.
-   * @param elementsToMerge The element to be merged into the collection.
+   * @param item The element to be merged into the collection.
    * @return The collection.
    * @throws NullPointerException If any of the arguments are null.
    */

@@ -1,9 +1,10 @@
 package rabbit.data.internal.xml.access;
 
-import rabbit.data.access.model.SessionDataDescriptor;
+import rabbit.data.access.model.ISessionData;
+import rabbit.data.access.model.WorkspaceStorage;
+import rabbit.data.internal.access.model.SessionData;
 import rabbit.data.internal.xml.IDataStore;
 import rabbit.data.internal.xml.StoreNames;
-import rabbit.data.internal.xml.merge.IMerger;
 import rabbit.data.internal.xml.schema.events.EventListType;
 import rabbit.data.internal.xml.schema.events.SessionEventListType;
 import rabbit.data.internal.xml.schema.events.SessionEventType;
@@ -20,43 +21,32 @@ import java.util.Collection;
  * Accesses session data events.
  */
 public class SessionDataAccessor extends
-    AbstractNodeAccessor<SessionDataDescriptor, 
-                             SessionEventType, 
-                             SessionEventListType> {
-
+    AbstractAccessor<ISessionData, SessionEventType, SessionEventListType> {
 
   /**
    * Constructor.
    * 
    * @param store The data store to get the data from.
-   * @param merger The merger for merging XML data nodes.
-   * @throws NullPointerException If any arguments are null.
+   * @throws NullPointerException If argument is null.
    */
   @Inject
-  SessionDataAccessor(
-      @Named(StoreNames.SESSION_STORE) IDataStore store,
-      IMerger<SessionEventType> merger) {
-    super(store, merger);
+  SessionDataAccessor(@Named(StoreNames.SESSION_STORE) IDataStore store) {
+    super(store);
   }
 
   @Override
-  protected SessionDataDescriptor createDataNode(LocalDate cal,
-      SessionEventType type) {
-    if (cal != null && type.getDuration() >= 0) {
-      return new SessionDataDescriptor(cal, new Duration(type.getDuration()));
-    } else {
-      return null;
-    }
+  protected ISessionData createDataNode(LocalDate cal, WorkspaceStorage ws,
+      SessionEventType type) throws Exception {
+    return new SessionData(cal, ws, new Duration(type.getDuration()));
   }
 
   @Override
-  protected Collection<SessionEventType> getElements(
-      SessionEventListType category) {
-    return category.getSessionEvent();
+  protected Collection<SessionEventListType> getCategories(EventListType list) {
+    return list.getSessionEvents();
   }
 
   @Override
-  protected Collection<SessionEventListType> getCategories(EventListType doc) {
-    return doc.getSessionEvents();
+  protected Collection<SessionEventType> getElements(SessionEventListType list) {
+    return list.getSessionEvent();
   }
 }

@@ -15,42 +15,58 @@
  */
 package rabbit.data.internal.xml.access;
 
-import rabbit.data.access.model.PartDataDescriptor;
+import rabbit.data.access.model.IPartData;
+import rabbit.data.access.model.WorkspaceStorage;
 import rabbit.data.internal.xml.DataStore;
-import rabbit.data.internal.xml.merge.PartEventTypeMerger;
+import rabbit.data.internal.xml.access.PartDataAccessor;
+import rabbit.data.internal.xml.schema.events.EventListType;
 import rabbit.data.internal.xml.schema.events.PartEventListType;
 import rabbit.data.internal.xml.schema.events.PartEventType;
 
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
 
 import org.joda.time.LocalDate;
 
 import java.util.List;
 
 /**
- * Test for {@link PartDataAccessor}
+ * @see PartDataAccessor
  */
-public class PartDataAccessorTest
-    extends
-    AbstractNodeAccessorTest<PartDataDescriptor, PartEventType, PartEventListType> {
+public class PartDataAccessorTest extends
+    AbstractAccessorTest2<IPartData, PartEventType, PartEventListType> {
+
+  @Override
+  protected void assertValues(PartEventType expected, LocalDate expectedDate,
+      WorkspaceStorage expectedWs, IPartData actual) {
+    assertThat(actual.get(IPartData.DATE), is(expectedDate));
+    assertThat(actual.get(IPartData.WORKSPACE), is(expectedWs));
+    assertThat(actual.get(IPartData.PART_ID), is(expected.getPartId()));
+    assertThat(actual.get(IPartData.DURATION).getMillis(),
+        is(expected.getDuration()));
+  }
 
   @Override
   protected PartDataAccessor create() {
-    return new PartDataAccessor(
-        DataStore.PART_STORE, new PartEventTypeMerger());
+    return new PartDataAccessor(DataStore.PART_STORE);
   }
 
   @Override
   protected PartEventListType createCategory() {
-    return objectFactory.createPartEventListType();
+    return new PartEventListType();
   }
 
   @Override
   protected PartEventType createElement() {
-    PartEventType type = objectFactory.createPartEventType();
+    PartEventType type = new PartEventType();
     type.setDuration(11);
     type.setPartId("am.an.id");
     return type;
+  }
+
+  @Override
+  protected List<PartEventListType> getCategories(EventListType events) {
+    return events.getPartEvents();
   }
 
   @Override
@@ -58,32 +74,4 @@ public class PartDataAccessorTest
     return list.getPartEvent();
   }
 
-  @Override
-  protected void setId(PartEventType type, String id) {
-    type.setPartId(id);
-  }
-
-  @Override
-  protected void setValue(PartEventType type, long usage) {
-    type.setDuration(usage);
-  }
-
-  @Override
-  public void testCreateDataNode() throws Exception {
-    LocalDate date = new LocalDate();
-    PartEventType type = createElement();
-    PartDataDescriptor des = accessor.createDataNode(date, type);
-    
-    assertEquals(date, des.getDate());
-    assertEquals(type.getPartId(), des.getPartId());
-    assertEquals(type.getDuration(), des.getDuration().getMillis());
-  }
-
-  @Override
-  protected boolean areEqual(PartDataDescriptor expected,
-      PartDataDescriptor actual) {
-    return expected.getDate().equals(actual.getDate())
-        && expected.getDuration().equals(actual.getDuration())
-        && expected.getPartId().equals(actual.getPartId());
-  }
 }

@@ -16,52 +16,33 @@
 package rabbit.data.internal.xml.access;
 
 import rabbit.data.access.IAccessor;
-import rabbit.data.access.model.CommandDataDescriptor;
-import rabbit.data.access.model.FileDataDescriptor;
-import rabbit.data.access.model.JavaDataDescriptor;
-import rabbit.data.access.model.LaunchDataDescriptor;
-import rabbit.data.access.model.PartDataDescriptor;
-import rabbit.data.access.model.PerspectiveDataDescriptor;
-import rabbit.data.access.model.SessionDataDescriptor;
-import rabbit.data.access.model.TaskFileDataDescriptor;
+import rabbit.data.access.model.ICommandData;
+import rabbit.data.access.model.IFileData;
+import rabbit.data.access.model.IJavaData;
+import rabbit.data.access.model.ILaunchData;
+import rabbit.data.access.model.IPartData;
+import rabbit.data.access.model.IPerspectiveData;
+import rabbit.data.access.model.ISessionData;
+import rabbit.data.access.model.ITaskData;
 
 import com.google.inject.AbstractModule;
-import com.google.inject.Singleton;
 import com.google.inject.TypeLiteral;
 
 /**
- * TODO
+ * Module for accessors.
  */
 public class AccessorModule extends AbstractModule {
 
-  public AccessorModule() {
-  }
-
   @Override
   protected void configure() {
-    bind(new TypeLiteral<IAccessor<CommandDataDescriptor>>() {}).to(
-        CommandDataAccessor.class).in(Singleton.class);
-
-    bind(new TypeLiteral<IAccessor<FileDataDescriptor>>() {}).to(
-        FileDataAccessor.class).in(Singleton.class);
-
-    bind(new TypeLiteral<IAccessor<JavaDataDescriptor>>() {}).to(
-        JavaDataAccessor.class).in(Singleton.class);
-
-    bind(new TypeLiteral<IAccessor<LaunchDataDescriptor>>() {}).to(
-        LaunchDataAccessor.class).in(Singleton.class);
-
-    bind(new TypeLiteral<IAccessor<PartDataDescriptor>>() {}).to(
-        PartDataAccessor.class).in(Singleton.class);
-
-    bind(new TypeLiteral<IAccessor<PerspectiveDataDescriptor>>() {}).to(
-        PerspectiveDataAccessor.class).in(Singleton.class);
-
-    bind(new TypeLiteral<IAccessor<SessionDataDescriptor>>() {}).to(
-        SessionDataAccessor.class).in(Singleton.class);
-
-    bind(new TypeLiteral<IAccessor<TaskFileDataDescriptor>>() {}).to(
-        TaskFileDataAccessor.class).in(Singleton.class);
-
+    bind(new TypeLiteral<IAccessor<ICommandData>>() {})     .to(CommandDataAccessor.class);
+    bind(new TypeLiteral<IAccessor<IFileData>>() {})        .to(FileDataAccessor.class);
+    bind(new TypeLiteral<IAccessor<IJavaData>>() {})        .to(JavaDataAccessor.class);
+    bind(new TypeLiteral<IAccessor<ILaunchData>>() {})      .to(LaunchDataAccessor.class);
+    bind(new TypeLiteral<IAccessor<IPartData>>() {})        .to(PartDataAccessor.class);
+    bind(new TypeLiteral<IAccessor<IPerspectiveData>>() {}) .to(PerspectiveDataAccessor.class);
+    bind(new TypeLiteral<IAccessor<ISessionData>>() {})     .to(SessionDataAccessor.class);
+    bind(new TypeLiteral<IAccessor<ITaskData>>() {})        .to(TaskDataAccessor.class);
   }
+
 }

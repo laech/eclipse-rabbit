@@ -13,14 +13,12 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-package rabbit.data.internal.xml.access2;
+package rabbit.data.internal.xml.access;
 
 import rabbit.data.access.model.ITaskData;
 import rabbit.data.access.model.WorkspaceStorage;
 import rabbit.data.internal.xml.DataStore;
 import rabbit.data.internal.xml.DatatypeUtil;
-import rabbit.data.internal.xml.access.AbstractAccessorTest2;
-import rabbit.data.internal.xml.access.TaskFileDataAccessor;
 import rabbit.data.internal.xml.schema.events.EventListType;
 import rabbit.data.internal.xml.schema.events.TaskFileEventListType;
 import rabbit.data.internal.xml.schema.events.TaskFileEventType;
@@ -35,7 +33,7 @@ import org.joda.time.LocalDate;
 import java.util.List;
 
 /**
- * @see TaskFileDataAccessor
+ * @see TaskDataAccessor
  */
 public class TaskDataAccessorTest extends
     AbstractAccessorTest2<ITaskData, TaskFileEventType, TaskFileEventListType> {

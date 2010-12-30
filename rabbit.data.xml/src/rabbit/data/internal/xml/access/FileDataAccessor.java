@@ -15,10 +15,11 @@
  */
 package rabbit.data.internal.xml.access;
 
-import rabbit.data.access.model.FileDataDescriptor;
+import rabbit.data.access.model.IFileData;
+import rabbit.data.access.model.WorkspaceStorage;
+import rabbit.data.internal.access.model.FileData;
 import rabbit.data.internal.xml.IDataStore;
 import rabbit.data.internal.xml.StoreNames;
-import rabbit.data.internal.xml.merge.IMerger;
 import rabbit.data.internal.xml.schema.events.EventListType;
 import rabbit.data.internal.xml.schema.events.FileEventListType;
 import rabbit.data.internal.xml.schema.events.FileEventType;
@@ -26,6 +27,8 @@ import rabbit.data.internal.xml.schema.events.FileEventType;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
+import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Path;
 import org.joda.time.Duration;
 import org.joda.time.LocalDate;
@@ -35,36 +38,25 @@ import java.util.Collection;
 /**
  * Accesses file event data.
  */
-public class FileDataAccessor
-    extends
-    AbstractNodeAccessor<FileDataDescriptor, FileEventType, FileEventListType> {
+public class FileDataAccessor extends
+    AbstractAccessor<IFileData, FileEventType, FileEventListType> {
 
   /**
    * Constructor.
    * 
    * @param store The data store to get the data from.
-   * @param merger The merger for merging XML data nodes.
-   * @throws NullPointerException If any arguments are null.
+   * @throws NullPointerException If argument is null.
    */
   @Inject
-  FileDataAccessor(
-      @Named(StoreNames.FILE_STORE) IDataStore store,
-      IMerger<FileEventType> merger) {
-    super(store, merger);
+  FileDataAccessor(@Named(StoreNames.FILE_STORE) IDataStore store) {
+    super(store);
   }
 
   @Override
-  protected FileDataDescriptor createDataNode(LocalDate cal, FileEventType type) {
-    try {
-      return new FileDataDescriptor(cal, new Duration(type.getDuration()),
-          new Path(type.getFilePath()));
-    } catch (NullPointerException e) {
-      return null;
-    } catch (IllegalArgumentException e) {
-      return null;
-    } catch (Throwable t) {
-      return null; // This one is for the construction of the path.
-    }
+  protected IFileData createDataNode(LocalDate date, WorkspaceStorage ws,
+      FileEventType type) throws Exception {
+    return new FileData(date, ws, new Duration(type.getDuration()),
+        workspaceRoot().getFile(new Path(type.getFilePath())));
   }
 
   @Override
@@ -75,5 +67,12 @@ public class FileDataAccessor
   @Override
   protected Collection<FileEventListType> getCategories(EventListType doc) {
     return doc.getFileEvents();
+  }
+
+  /**
+   * @return The root of the current workspace.
+   */
+  private IWorkspaceRoot workspaceRoot() {
+    return ResourcesPlugin.getWorkspace().getRoot();
   }
 }

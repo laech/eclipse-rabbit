@@ -32,7 +32,7 @@ public class PerspectiveLabelProvider extends NullLabelProvider {
   private final Color gray;
 
   public PerspectiveLabelProvider() {
-    provider = new org.eclipse.ui.model.PerspectiveLabelProvider();
+    provider = new org.eclipse.ui.model.PerspectiveLabelProvider(false);
     gray = PlatformUI.getWorkbench().getDisplay()
         .getSystemColor(SWT.COLOR_DARK_GRAY);
   }

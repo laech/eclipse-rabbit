@@ -54,7 +54,7 @@ public class PartEventTypeMergerTest extends AbstractMergerTest<PartEventType> {
   /**
    * Tests when {@link PartEventType#getPartId()} returns null on the first
    * parameter, and returns not null on the second parameter,
-   * {@link PartEventTypeeMerger#isMergeable(PartEventType, PartEventType)}
+   * {@link PartEventTypeMerger#isMergeable(PartEventType, PartEventType)}
    * should return false instead of failing.
    */
   @Test
