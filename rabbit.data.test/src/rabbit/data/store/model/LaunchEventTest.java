@@ -15,18 +15,16 @@
  */
 package rabbit.data.store.model;
 
-import rabbit.data.store.model.LaunchEvent;
-
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertSame;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.not;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.mock;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
-import org.eclipse.debug.core.ILaunchManager;
-import org.eclipse.debug.core.Launch;
-import org.eclipse.debug.internal.core.LaunchConfiguration;
+import org.eclipse.debug.core.ILaunchConfigurationType;
 import org.joda.time.Interval;
 import org.junit.Test;
 
@@ -37,81 +35,112 @@ import java.util.Set;
 /**
  * @see LaunchEvent
  */
-@SuppressWarnings("restriction")
 public class LaunchEventTest extends ContinuousEventTest {
 
-  private static class LaunchConfigurationForTest extends LaunchConfiguration {
-    protected LaunchConfigurationForTest(String name) {
-      super(name, null);
-    }
-  }
-
   @Test
-  public void testConstructor_copiesFileIds() {
+  public void constructorShouldCoptyTheFilePaths() {
     Set<IPath> filePaths = new HashSet<IPath>();
     filePaths.add(new Path("/a"));
     filePaths.add(new Path("/b"));
     filePaths.add(new Path("/c"));
-    LaunchEvent event = new LaunchEvent(new Interval(0, 1), new Launch(
-        new LaunchConfigurationForTest("a"), ILaunchManager.DEBUG_MODE, null),
-        new LaunchConfigurationForTest("asdf"), filePaths);
-
-    assertFalse(filePaths == event.getFilePaths());
+    LaunchEvent event = new LaunchEvent(
+        new Interval(0, 1),
+        mock(ILaunch.class),
+        mock(ILaunchConfiguration.class),
+        mock(ILaunchConfigurationType.class),
+        filePaths);
 
     filePaths.add(new Path("/Should not effect the collection in the event."));
-    assertFalse(filePaths.size() == event.getFilePaths().size());
-
-    filePaths.clear();
-    assertFalse(event.getFilePaths().isEmpty());
+    assertThat(event.getFilePaths(), not(equalTo(filePaths)));
   }
 
   @Test(expected = NullPointerException.class)
-  public void testConstructor_fileIdsNull() {
-    new LaunchEvent(new Interval(0, 1), new Launch(
-        new LaunchConfigurationForTest("asdfdsf"), ILaunchManager.DEBUG_MODE,
-        null), new LaunchConfigurationForTest("adfsdfdsf"), null);
+  public void constructorShouldThrowAnExceptionIfFilePathsAreNull() {
+    new LaunchEvent(
+        new Interval(0, 1),
+        mock(ILaunch.class),
+        mock(ILaunchConfiguration.class),
+        mock(ILaunchConfigurationType.class),
+        null);
   }
 
   @Test(expected = NullPointerException.class)
-  public void testConstructor_launchConfigNull() {
-    new LaunchEvent(new Interval(0, 1), new Launch(
-        new LaunchConfigurationForTest("a"), ILaunchManager.DEBUG_MODE, null),
-        null, Collections.<IPath> emptySet());
+  public void constructorShouldThrowAnExceptionIfLaunchConfigurationIsNull() {
+    new LaunchEvent(
+        new Interval(0, 1),
+        mock(ILaunch.class),
+        null,
+        mock(ILaunchConfigurationType.class),
+        Collections.<IPath> emptySet());
   }
 
   @Test(expected = NullPointerException.class)
-  public void testConstructor_launchNull() {
-    new LaunchEvent(new Interval(0, 1), null,
-        new LaunchConfigurationForTest("Adfd222"), Collections
-            .<IPath> emptySet());
+  public void constructorShouldThrowAnExceptionIfLaunchConfigurationTypeIsNull() {
+    new LaunchEvent(
+        new Interval(0, 1),
+        mock(ILaunch.class),
+        mock(ILaunchConfiguration.class),
+        null,
+        Collections.<IPath> emptySet());
+  }
+
+  @Test(expected = NullPointerException.class)
+  public void constructorShouldThrowAnExceptionIfLaunchIsNull() {
+    new LaunchEvent(
+        new Interval(0, 1),
+        null,
+        mock(ILaunchConfiguration.class),
+        mock(ILaunchConfigurationType.class),
+        Collections.<IPath> emptySet());
   }
 
   @Test(expected = UnsupportedOperationException.class)
-  public void testGetFileIds_unmodifiable() {
-    LaunchEvent event = new LaunchEvent(new Interval(0, 1), new Launch(
-        new LaunchConfigurationForTest("a"), ILaunchManager.DEBUG_MODE, null),
-        new LaunchConfigurationForTest("a"), new HashSet<IPath>());
+  public void getFilePathsShouldReturnAnUnmodifiableCollection() {
+    LaunchEvent event = new LaunchEvent(
+        new Interval(0, 1),
+        mock(ILaunch.class),
+        mock(ILaunchConfiguration.class),
+        mock(ILaunchConfigurationType.class),
+        new HashSet<IPath>());
     event.getFilePaths().add(new Path("/Should throw exception."));
   }
 
   @Test
-  public void testGetLaunch() {
-    ILaunch launch = new Launch(new LaunchConfigurationForTest("a"),
-        ILaunchManager.DEBUG_MODE, null);
-    LaunchEvent event = new LaunchEvent(new Interval(0, 1), launch,
-        new LaunchConfigurationForTest("bbb"), Collections.<IPath> emptySet());
+  public void getLaunchShouldReturnTheLaunch() {
+    ILaunch launch = mock(ILaunch.class);
+    LaunchEvent event = new LaunchEvent(
+        new Interval(0, 1),
+        launch,
+        mock(ILaunchConfiguration.class),
+        mock(ILaunchConfigurationType.class),
+        Collections.<IPath> emptySet());
 
-    assertSame(launch, event.getLaunch());
+    assertThat(event.getLaunch(), equalTo(launch));
   }
 
   @Test
-  public void testGetLaunchConfiguration() {
-    ILaunchConfiguration config = new LaunchConfigurationForTest("b");
-    LaunchEvent event = new LaunchEvent(new Interval(0, 1),
-        new Launch(config, ILaunchManager.DEBUG_MODE, null), config,
+  public void getLaunchConfigurationShouldReturnTheLaunchConfiguration() {
+    ILaunchConfiguration config = mock(ILaunchConfiguration.class);
+    LaunchEvent event = new LaunchEvent(
+        new Interval(0, 1),
+        mock(ILaunch.class),
+        config,
+        mock(ILaunchConfigurationType.class),
         Collections.<IPath> emptySet());
 
-    assertSame(config, event.getLaunchConfiguration());
+    assertThat(event.getLaunchConfiguration(), equalTo(config));
   }
 
+  @Test
+  public void getLaunchConfigurationTypeShouldReturnTheLaunchConfigurationType() {
+    ILaunchConfigurationType type = mock(ILaunchConfigurationType.class);
+    LaunchEvent event = new LaunchEvent(
+        new Interval(0, 1),
+        mock(ILaunch.class),
+        mock(ILaunchConfiguration.class),
+        type,
+        Collections.<IPath> emptySet());
+
+    assertThat(event.getLaunchConfigurationType(), equalTo(type));
+  }
 }

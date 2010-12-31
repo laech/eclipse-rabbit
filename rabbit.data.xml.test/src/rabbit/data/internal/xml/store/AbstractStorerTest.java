@@ -173,7 +173,7 @@ public abstract class AbstractStorerTest<E extends DiscreteEvent, T, S extends E
 
   @Test
   public void testInsert_withElementsInDifferentDates() throws Exception {
-    E event1 = createEvent(new DateTime());
+    E event1 = createEvent(new DateTime().withDayOfYear(1));
     E event2 = createEventDiff(event1.getTime().plusDays(1));
     storer.insert(event1);
     storer.insert(event2);

@@ -13,7 +13,8 @@ Require-Bundle: rabbit.data,
  rabbit.common,
  org.eclipse.mylyn.tasks.core,
  org.eclipse.mylyn.tasks.ui,
- org.eclipse.jdt.core
+ org.eclipse.jdt.core,
+ rabbit.common.testing
 Export-Package: rabbit.data.internal.xml,
  rabbit.data.internal.xml.access,
  rabbit.data.internal.xml.convert,

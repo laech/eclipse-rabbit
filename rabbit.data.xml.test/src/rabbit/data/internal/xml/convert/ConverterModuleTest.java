@@ -65,7 +65,7 @@ public class ConverterModuleTest {
             FileEventConverter.class},
         {
             new TypeLiteral<IConverter<JavaEvent, JavaEventType>>() {},
-            FileEventConverter.class},
+            JavaEventConverter.class},
         {
             new TypeLiteral<IConverter<LaunchEvent, LaunchEventType>>() {},
             LaunchEventConverter.class},

@@ -207,8 +207,8 @@ public class PartPage extends AbsPage {
         .addColorByAction(WORKSPACE)
         .build();
 
-    items.add(new ActionContributionItem(createHideViewsAction()));
-    items.add(new ActionContributionItem(createHideEditorsAction()));
+    items.add(new ActionContributionItem(hideViewsAction));
+    items.add(new ActionContributionItem(hideEditorsAction));
 
     for (IContributionItem item : items) {
       toolBar.add(item);

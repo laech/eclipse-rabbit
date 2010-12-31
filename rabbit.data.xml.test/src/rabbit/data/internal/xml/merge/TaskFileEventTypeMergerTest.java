@@ -53,9 +53,9 @@ public class TaskFileEventTypeMergerTest extends
    assertTrue(merger.isMergeable(t1, t2));
    
    TaskIdType id2 = t2.getTaskId();
-   id2.getCreationDate().setDay(id2.getCreationDate().getDay() + 1);
+   id2.getCreationDate().setYear(id2.getCreationDate().getYear() + 1);
    assertFalse(merger.isMergeable(t1, t2));
-   id2.getCreationDate().setDay(t1.getTaskId().getCreationDate().getDay());
+   id2.getCreationDate().setYear(t1.getTaskId().getCreationDate().getYear());
    assertTrue(merger.isMergeable(t1, t2));
    
    id2.setHandleId(id2.getHandleId() + "1");

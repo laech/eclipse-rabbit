@@ -16,13 +16,12 @@
 package rabbit.tracking.internal.trackers;
 
 import rabbit.data.store.model.LaunchEvent;
-import rabbit.tracking.internal.trackers.LaunchTracker;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 
-import org.eclipse.core.internal.registry.ConfigurationElement;
-import org.eclipse.core.internal.registry.ConfigurationElementHandle;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
@@ -36,11 +35,8 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationType;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
-import org.eclipse.debug.core.Launch;
 import org.eclipse.debug.core.model.IProcess;
 import org.eclipse.debug.core.model.ISuspendResume;
-import org.eclipse.debug.internal.core.LaunchConfiguration;
-import org.eclipse.debug.internal.core.LaunchConfigurationType;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -71,56 +67,7 @@ import java.util.concurrent.locks.ReentrantLock;
 /**
  * @see LaunchTracker
  */
-@SuppressWarnings("restriction")
 public class LaunchTrackerTest extends AbstractTrackerTest<LaunchEvent> {
-
-  // Empty class for testing.
-  private static class ConfigurationElementMock extends
-      ConfigurationElementHandle {
-
-    public ConfigurationElementMock() {
-      super(null, 0);
-    }
-
-    @Override
-    public String getAttribute(String propertyName) {
-      return null;
-    }
-
-    @Override
-    protected ConfigurationElement getConfigurationElement() {
-      return null;
-    }
-  }
-
-  // Empty class for testing.
-  private static class LaunchConfigurationMock extends LaunchConfiguration {
-
-    private ILaunchConfigurationType type = new LaunchConfigurationTypeMock();
-
-    protected LaunchConfigurationMock() {
-      super("Abc", null);
-    }
-
-    @Override
-    public ILaunchConfigurationType getType() throws CoreException {
-      return type;
-    }
-  }
-
-  // Empty class for testing.
-  private static class LaunchConfigurationTypeMock extends
-      LaunchConfigurationType {
-
-    public LaunchConfigurationTypeMock() {
-      super(new ConfigurationElementMock());
-    }
-
-    @Override
-    public String getName() {
-      return "MyType";
-    }
-  }
 
   /**
    * Listener to help testing.
@@ -207,7 +154,8 @@ public class LaunchTrackerTest extends AbstractTrackerTest<LaunchEvent> {
     StringBuilder content = new StringBuilder();
     content.append(format("package %s;%n", pkg.getElementName()));
     content.append(format("public class %s {%n", className));
-    content.append(format("  public static void main(String[] args) throws Exception {%n"));
+    content
+        .append(format("  public static void main(String[] args) throws Exception {%n"));
     content.append(format("    Thread.sleep(20);%n"));
     content.append(format("  }%n"));
     content.append(format("}"));
@@ -233,7 +181,8 @@ public class LaunchTrackerTest extends AbstractTrackerTest<LaunchEvent> {
     StringBuilder content = new StringBuilder();
     content.append(format("package %s;%n", pkg.getElementName()));
     content.append(format("public class %s {%n", className));
-    content.append(format("  public static void main(String[] args) throws Exception {%n"));
+    content
+        .append(format("  public static void main(String[] args) throws Exception {%n"));
     content.append(format("    Thread.sleep(100);%n")); // Sleep 100 millis.
     content.append(format("  }%n"));
     content.append(format("}"));
@@ -292,7 +241,8 @@ public class LaunchTrackerTest extends AbstractTrackerTest<LaunchEvent> {
     StringBuilder content = new StringBuilder();
     content.append(format("package %s;%n", pkg.getElementName()));
     content.append(format("public class %s {%n", className1));
-    content.append(format("  public static void main(String[] args) throws Exception {%n"));
+    content
+        .append(format("  public static void main(String[] args) throws Exception {%n"));
     content.append(format("    Thread.sleep(100);%n")); // Sleep 100 millis.
     content.append(format("  }%n"));
     content.append(format("}"));
@@ -303,7 +253,8 @@ public class LaunchTrackerTest extends AbstractTrackerTest<LaunchEvent> {
     content = new StringBuilder();
     content.append(format("package %s;%n", pkg.getElementName()));
     content.append(format("public class %s {%n", className2));
-    content.append(format("  public static void main(String[] args) throws Exception {%n"));
+    content
+        .append(format("  public static void main(String[] args) throws Exception {%n"));
     content.append(format("    Thread.sleep(200);%n")); // Sleep 200 millis.
     content.append(format("  }%n"));
     content.append(format("}"));
@@ -530,11 +481,14 @@ public class LaunchTrackerTest extends AbstractTrackerTest<LaunchEvent> {
 
   @Override
   protected LaunchEvent createEvent() {
-    ILaunch launch = new Launch(new LaunchConfigurationMock(),
-        ILaunchManager.RUN_MODE, null);
-    return new LaunchEvent(new Interval(0, 1), launch,
-        launch.getLaunchConfiguration(), new HashSet<IPath>(Arrays.asList(
-            new Path("/1"), new Path("/2"))));
+    ILaunchConfigurationType type = mock(ILaunchConfigurationType.class);
+    given(type.getIdentifier()).willReturn("typeId");
+    ILaunchConfiguration config = mock(ILaunchConfiguration.class);
+    given(config.getName()).willReturn("name");
+    ILaunch launch = mock(ILaunch.class);
+    given(launch.getLaunchMode()).willReturn("run");
+    return new LaunchEvent(new Interval(0, 1), launch, config, type,
+        new HashSet<IPath>(Arrays.asList(new Path("/1"), new Path("/2"))));
   }
 
   @Override
@@ -556,7 +510,8 @@ public class LaunchTrackerTest extends AbstractTrackerTest<LaunchEvent> {
   private ILaunchConfiguration launch(String configName, String projectName,
       String typeName, String mode) throws CoreException {
     ILaunchManager manager = DebugPlugin.getDefault().getLaunchManager();
-    ILaunchConfigurationType type = manager.getLaunchConfigurationType(IJavaLaunchConfigurationConstants.ID_JAVA_APPLICATION);
+    ILaunchConfigurationType type = manager
+        .getLaunchConfigurationType(IJavaLaunchConfigurationConstants.ID_JAVA_APPLICATION);
     ILaunchConfigurationWorkingCopy copy = type.newInstance(null, configName);
     copy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME,
         projectName);

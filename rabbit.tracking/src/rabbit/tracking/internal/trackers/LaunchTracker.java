@@ -23,6 +23,7 @@ import rabbit.tracking.internal.util.Recorder;
 import com.google.common.collect.Maps;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.debug.core.DebugEvent;
 import org.eclipse.debug.core.DebugException;
@@ -30,6 +31,7 @@ import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.IDebugEventSetListener;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
+import org.eclipse.debug.core.ILaunchConfigurationType;
 import org.eclipse.debug.core.model.IProcess;
 import org.eclipse.debug.core.model.ISourceLocator;
 import org.eclipse.debug.core.model.IStackFrame;
@@ -70,11 +72,21 @@ public class LaunchTracker extends AbstractTracker<LaunchEvent> {
         if (config == null) {
           return;
         }
+        ILaunchConfigurationType type = null;
+        try {
+          type = config.getType();
+        } catch (CoreException e) {
+          e.printStackTrace();
+          return;
+        }
+        
         Set<IPath> files = launchFiles.get(launch);
         if (files == null) {
           files = Collections.emptySet();
         }
-        addData(new LaunchEvent(new Interval(start, end), launch, config, files));
+        
+        Interval interval = new Interval(start, end);
+        addData(new LaunchEvent(interval, launch, config, type, files));
       }
     }
   };

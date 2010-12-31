@@ -116,12 +116,12 @@ public abstract class TreeViewerColumnSorter
 
     if (previousColumn == selectedColumn) {
       sortDirection = (sortDirection == SWT.UP) ? SWT.DOWN : SWT.UP;
-      viewer.refresh();
     } else {
       tree.setSortColumn(selectedColumn);
       sortDirection = SWT.UP;
       viewer.setComparator(this);
     }
+    viewer.refresh();
     tree.setSortDirection(sortDirection);
 
     viewer.setExpandedTreePaths(expandedTreePaths);

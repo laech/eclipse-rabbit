@@ -18,7 +18,6 @@ package rabbit.data.internal.xml.convert;
 import rabbit.data.internal.xml.schema.events.LaunchEventType;
 import rabbit.data.store.model.LaunchEvent;
 
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 
 /**
@@ -26,14 +25,8 @@ import org.eclipse.core.runtime.IPath;
  */
 public class LaunchEventConverter extends
     AbstractConverter<LaunchEvent, LaunchEventType> {
-  
-  /**
-   * Represents an unknown launch type.
-   */
-  private static final String UNKNOWN_TYPE = "Unknown";
-  
-  public LaunchEventConverter() {
-  }
+
+  public LaunchEventConverter() {}
 
   @Override
   protected LaunchEventType doConvert(LaunchEvent element) {
@@ -43,11 +36,7 @@ public class LaunchEventConverter extends
     }
     type.setTotalDuration(element.getInterval().toDurationMillis());
     type.setName(element.getLaunchConfiguration().getName());
-    try {
-      type.setLaunchTypeId(element.getLaunchConfiguration().getType().getIdentifier());
-    } catch (CoreException ex) {
-      type.setLaunchTypeId(UNKNOWN_TYPE);
-    }
+    type.setLaunchTypeId(element.getLaunchConfigurationType().getIdentifier());
     type.setLaunchModeId(element.getLaunch().getLaunchMode());
     type.setCount(1);
 

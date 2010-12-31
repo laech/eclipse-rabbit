@@ -23,6 +23,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
+import org.eclipse.debug.core.ILaunchConfigurationType;
 import org.joda.time.Interval;
 
 import java.util.Set;
@@ -39,30 +40,38 @@ public class LaunchEvent extends ContinuousEvent {
   /** Unmodifiable set of file paths. */
   private final ImmutableSet<IPath> filePaths;
 
+  private final ILaunchConfigurationType type;
+
+  /*
+   * Note that ILaunch.getLaunchConfiguration() and
+   * ILaunchConfiguration.getType() returns the objects we want but may return
+   * null, (we don't want null) therefore we specified them as non null
+   * parameters rather than just taking the ILaunch.
+   */
+
   /**
    * Constructs a new event.
-   * 
    * @param interval The time interval.
    * @param config The launch configuration.
    * @param filePaths The paths of the files associated with the launch, or an
-   *          empty collection.
+   *        empty collection.
    * @throws NullPointerException If any of the parameters are null.
-   * 
    * @see IResource#getFullPath()
    */
   public LaunchEvent(Interval interval, ILaunch launch,
-      ILaunchConfiguration config, Set<IPath> filePaths) {
+      ILaunchConfiguration config, ILaunchConfigurationType type,
+      Set<IPath> filePaths) {
     super(interval);
-    this.config = checkNotNull(config);
-    this.launch = checkNotNull(launch);
-    this.filePaths = ImmutableSet.copyOf(checkNotNull(filePaths));
+    this.type = checkNotNull(type, "type");
+    this.config = checkNotNull(config, "config");
+    this.launch = checkNotNull(launch, "launch");
+    this.filePaths = ImmutableSet.copyOf(checkNotNull(filePaths, "filePaths"));
   }
 
   /**
    * Gets the paths of the files involved.
-   * 
-   * @return An unmodifiable collection of IDs of the files involved, or an
-   *         empty collection.
+   * @return an unmodifiable collection of the files involved, or an empty
+   *         collection.
    */
   public final Set<IPath> getFilePaths() {
     return filePaths;
@@ -70,17 +79,23 @@ public class LaunchEvent extends ContinuousEvent {
 
   /**
    * Gets the launch.
-   * 
-   * @return The launch.
+   * @return the launch.
    */
   public final ILaunch getLaunch() {
     return launch;
   }
 
   /**
+   * Gets the launch configuration type.
+   * @return the type.
+   */
+  public final ILaunchConfigurationType getLaunchConfigurationType() {
+    return type;
+  }
+
+  /**
    * Gets the launch configuration.
-   * 
-   * @return The launch configuration.
+   * @return the launch configuration.
    */
   public final ILaunchConfiguration getLaunchConfiguration() {
     return config;
