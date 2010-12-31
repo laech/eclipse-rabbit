@@ -25,7 +25,8 @@ import rabbit.data.internal.xml.schema.events.EventListType;
 import rabbit.data.internal.xml.schema.events.LaunchEventListType;
 import rabbit.data.internal.xml.schema.events.LaunchEventType;
 
-import com.google.common.collect.Sets;
+import static com.google.common.collect.Sets.newHashSet;
+
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 
@@ -62,12 +63,14 @@ public class LaunchDataAccessor extends
     Duration duration = new Duration(type.getTotalDuration());
     LaunchConfigurationDescriptor config = new LaunchConfigurationDescriptor(
         type.getName(), type.getLaunchModeId(), type.getLaunchTypeId());
-    Set<IFile> files = Sets.newHashSet();
+    Set<IFile> files = newHashSet();
     IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
     for (String str : type.getFilePath()) {
       try {
         files.add(root.getFile(new Path(str)));
-      } catch (Exception ignoreFile) {
+      } catch (Exception e) {
+        System.err.println(getClass().getSimpleName()
+            + " - Invalid file path: str\n\t" + e.getMessage());
       }
     }
     return new LaunchData(date, ws, config, type.getCount(), duration, files);

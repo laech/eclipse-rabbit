@@ -163,7 +163,16 @@ public class XmlPlugin extends AbstractUIPlugin {
       properties.load(reader);
 
       // If exceptions occur, just restore to the defaults:
-    } catch (FileNotFoundException e) {} catch (IOException e) {} catch (IllegalArgumentException e) {} finally {
+    } catch (FileNotFoundException e) {
+      System.err.println(getClass().getSimpleName() + " - start: "
+          + e.getMessage());
+    } catch (IOException e) {
+      System.err.println(getClass().getSimpleName() + " - start: "
+          + e.getMessage());
+    } catch (IllegalArgumentException e) {
+      System.err.println(getClass().getSimpleName() + " - start: "
+          + e.getMessage());
+    } finally {
       IOUtils.closeQuietly(reader);
       checkProperties(properties);
     }
@@ -181,6 +190,8 @@ public class XmlPlugin extends AbstractUIPlugin {
       properties.store(writer, comment);
 
     } catch (IOException e) { // Nothing we can do
+      System.err.println(getClass().getSimpleName() + " - stop: "
+          + e.getMessage());
     } finally {
       IOUtils.closeQuietly(writer);
     }

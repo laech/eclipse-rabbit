@@ -284,6 +284,8 @@ public class JavaTracker extends AbstractTracker<JavaEvent> {
           recorder.start(element);
         } catch (JavaModelException e) {
           // Nothing we can do.
+          System.err.println(getClass().getSimpleName() + " - checkStart: "
+              + e.getMessage());
         }
       }
     });

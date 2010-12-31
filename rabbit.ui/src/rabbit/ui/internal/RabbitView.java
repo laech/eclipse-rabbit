@@ -319,7 +319,7 @@ public class RabbitView extends ViewPart {
 
       // Updates the current visible page, mark others as not updated:
       Boolean updated = pageStatus.get(page);
-      if (updated == null || updated == false) {
+      if (updated == null || !updated) {
         pageStatus.put(page, Boolean.TRUE);
         updatePage(page, preferences);
       }

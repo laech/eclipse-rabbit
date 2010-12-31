@@ -105,6 +105,8 @@ class StateHelper {
         result.add(Enum.valueOf(Category.class, str));
       } catch (IllegalArgumentException e) {
         // Ignore invalid ones
+        System.err.println(getClass().getSimpleName()
+            + " - retrieveSavedCategories: " + e.getMessage());
       }
     }
     return result;
@@ -140,7 +142,10 @@ class StateHelper {
     for (int i = 0; i < columns.length; i++) {
       try {
         columns[i].setWidth(Integer.parseInt(list.get(i)));
-      } catch (NumberFormatException ignored) {}
+      } catch (NumberFormatException e) {
+        System.err.println(getClass().getSimpleName()
+            + " - restoreColumnWidths: " + e.getMessage());
+      }
     }
     return this;
   }
@@ -218,6 +223,8 @@ class StateHelper {
       return Enum.valueOf(Category.class, str);
     } catch (IllegalArgumentException e) {
       // Ignore invalid
+      System.err.println(getClass().getSimpleName()
+          + " - retrieveSavedVisualCategory: " + e.getMessage());
     }
     return null;
   }
