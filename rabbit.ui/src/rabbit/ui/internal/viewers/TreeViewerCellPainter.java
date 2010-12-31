@@ -16,6 +16,7 @@
 package rabbit.ui.internal.viewers;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Lists.newLinkedList;
 
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.viewers.ColumnViewer;
@@ -23,13 +24,13 @@ import org.eclipse.jface.viewers.StyledCellLabelProvider;
 import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.ViewerColumn;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.DisposeEvent;
-import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.GC;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.TreeItem;
+
+import java.util.List;
 
 /**
  * A label provider for a tree viewer column that paints horizontal bars in the
@@ -37,12 +38,10 @@ import org.eclipse.swt.widgets.Event;
  */
 public class TreeViewerCellPainter extends StyledCellLabelProvider {
 
-  private Color background;
-  private Color foreground;
-  private IValueProvider valueProvider;
-
+  private Color customBackground;
+  private Color systemForeground;
+  private final IValueProvider valueProvider;
   private final boolean isLinux;
-  private final Point point;
 
   /**
    * @param valueProvider the provider for getting the values of each tree path.
@@ -50,23 +49,13 @@ public class TreeViewerCellPainter extends StyledCellLabelProvider {
    */
   public TreeViewerCellPainter(IValueProvider valueProvider) {
     this.valueProvider = checkNotNull(valueProvider, "valueProvider");
-    isLinux = Platform.getOS().equals(Platform.OS_LINUX);
-    point = new Point(0, 0);
+    this.isLinux = Platform.getOS().equals(Platform.OS_LINUX);
   }
 
   @Override
-  public void initialize(ColumnViewer viewer, ViewerColumn column) {
-    super.initialize(viewer, column);
-
-    Display display = viewer.getControl().getDisplay();
-    background = createColor(display);
-    viewer.getControl().addDisposeListener(new DisposeListener() {
-      @Override
-      public void widgetDisposed(DisposeEvent e) {
-        background.dispose();
-      }
-    });
-    foreground = display.getSystemColor(SWT.COLOR_LIST_BACKGROUND);
+  public void dispose() {
+    super.dispose();
+    customBackground.dispose();
   }
 
   /**
@@ -79,15 +68,20 @@ public class TreeViewerCellPainter extends StyledCellLabelProvider {
   }
 
   @Override
+  public void initialize(ColumnViewer viewer, ViewerColumn column) {
+    super.initialize(viewer, column);
+    Display display = viewer.getControl().getDisplay();
+    systemForeground = display.getSystemColor(SWT.COLOR_LIST_BACKGROUND);
+    customBackground = createColor(display);
+  }
+
+  @Override
   public void paint(Event event, Object element) {
     if (!valueProvider.shouldPaint(element)) {
       return;
     }
 
-    point.x = event.x + (event.width / 2);
-    point.y = event.y + (event.height / 2);
-    TreePath path = getViewer().getCell(point).getViewerRow().getTreePath();
-
+    TreePath path = getTreePath((TreeItem) event.item);
     int columnWidth = event.gc.getClipping().width;
     int width = getWidth(columnWidth, path);
     if (width == 0) {
@@ -115,14 +109,14 @@ public class TreeViewerCellPainter extends StyledCellLabelProvider {
       gc.setAlpha(alpha);
       gc.setAntialias(SWT.ON);
     }
-    gc.setBackground(background);
+    gc.setBackground(customBackground);
     gc.fillRectangle(x, y, 2, height);
     gc.fillRoundRectangle(x, y, width, height, 4, 4);
 
     gc.setAlpha(oldAlpha);
     gc.setAntialias(oldAnti);
 
-    gc.setForeground(foreground);
+    gc.setForeground(systemForeground);
     gc.drawLine(x, y, x, y + height - 1);
     gc.drawLine(x + width, y, x + width, y + height - 1);
 
@@ -139,6 +133,15 @@ public class TreeViewerCellPainter extends StyledCellLabelProvider {
    */
   protected Color createColor(Display display) {
     return new Color(display, 84, 141, 212);
+  }
+
+  private TreePath getTreePath(TreeItem item) {
+    List<Object> segments = newLinkedList();
+    while (item != null) {
+      segments.add(0, item.getData());
+      item = item.getParentItem();
+    }
+    return new TreePath(segments.toArray());
   }
 
   /**
