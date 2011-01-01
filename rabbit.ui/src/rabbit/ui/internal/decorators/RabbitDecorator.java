@@ -15,17 +15,17 @@
  */
 package rabbit.ui.internal.decorators;
 
-import rabbit.data.access.model.WorkspaceStorage;
-
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.jface.viewers.BaseLabelProvider;
 import org.eclipse.jface.viewers.IDecoration;
 import org.eclipse.jface.viewers.ILightweightLabelDecorator;
 import org.joda.time.LocalDate;
 
-public class RabbitDecorator
-    extends BaseLabelProvider implements ILightweightLabelDecorator {
-  
+import rabbit.data.access.model.WorkspaceStorage;
+
+public class RabbitDecorator extends BaseLabelProvider implements
+    ILightweightLabelDecorator {
+
   private static final String SEPARATOR = System.getProperty("file.separator");
 
   private LocalDate today;
@@ -33,6 +33,13 @@ public class RabbitDecorator
 
   public RabbitDecorator() {
     checkDateFields();
+  }
+
+  private void checkDateFields() {
+    if (System.currentTimeMillis() > endOfToday) {
+      today = new LocalDate();
+      endOfToday = today.toInterval().getEndMillis();
+    }
   }
 
   @Override
@@ -44,26 +51,17 @@ public class RabbitDecorator
     }
   }
 
-  private void checkDateFields() {
-    if (System.currentTimeMillis() > endOfToday) {
-      today = new LocalDate();
-      endOfToday = today.toInterval().getEndMillis();
-    }
-  }
-
   private void decorateDate(LocalDate date, IDecoration decoration) {
     checkDateFields();
-    if (date.getYear() == today.getYear()) {
-      switch (today.getDayOfYear() - date.getDayOfYear()) {
-      case 0:
-        decoration.addSuffix(" [Today]");
-        break;
-      case 1:
-        decoration.addSuffix(" [Yesterday]");
-        break;
-      default:
-        break;
-      }
+
+    int yearDiff = today.getYear() - date.getYear();
+    int dayOfYearDiff = today.getDayOfYear() - date.getDayOfYear();
+
+    if (yearDiff == 0 & dayOfYearDiff == 0) {
+      decoration.addSuffix(" [Today]");
+    } else if ((yearDiff == 0 & dayOfYearDiff == 1)
+        | (yearDiff == 1 & isFirstDayOfYear(today) & isLastDayOfYear(date))) {
+      decoration.addSuffix(" [Yesterday]");
     }
   }
 
@@ -75,5 +73,13 @@ public class RabbitDecorator
       String guess = ws.getStoragePath().lastSegment().replace(".", SEPARATOR);
       decoration.addSuffix(" [may be " + guess + "?]");
     }
+  }
+
+  private boolean isFirstDayOfYear(LocalDate date) {
+    return date.getDayOfYear() == 1;
+  }
+
+  private boolean isLastDayOfYear(LocalDate date) {
+    return (date.getMonthOfYear() == 12) & (date.getDayOfMonth() == 31);
   }
 }
