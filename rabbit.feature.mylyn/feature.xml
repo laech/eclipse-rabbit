@@ -2,7 +2,7 @@
 <feature
       id="rabbit.feature.mylyn"
       label="Rabbit Mylyn Feature"
-      version="1.0.0.qualifier">
+      version="1.2.0.qualifier">
 
    <description>
       Rabbit tracking on Mylyn Tasks, requires Mylyn to be installed (Most Eclipse packages would have Mylyn pre-installed).

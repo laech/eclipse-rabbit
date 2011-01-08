@@ -2,7 +2,7 @@
 <feature
       id="rabbit.feature.jdt"
       label="Rabbit JDT Feature"
-      version="1.0.0.qualifier">
+      version="1.2.0.qualifier">
 
    <description>
       Rabbit tracking on Java elements (classes, methods etc), requires JDT (Java Development Tools) to be installed (JDT is installed if your Eclipse can create Java projects).
