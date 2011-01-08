@@ -183,7 +183,9 @@ public class JavaTracker extends AbstractTracker<JavaEvent> {
         long start = recorder.getLastRecord().getStartTimeMillis();
         long end = recorder.getLastRecord().getEndTimeMillis();
         IJavaElement element = recorder.getLastRecord().getUserData();
-        addData(new JavaEvent(new Interval(start, end), element));
+        if (element != null) {
+          addData(new JavaEvent(new Interval(start, end), element));
+        }
       }
     }
   };
@@ -281,7 +283,9 @@ public class JavaTracker extends AbstractTracker<JavaEvent> {
         IJavaElement element = null;
         try {
           element = SelectionConverter.getElementAtOffset((JavaEditor) activePart);
-          recorder.start(element);
+          if (element != null) {
+            recorder.start(element);
+          }
         } catch (JavaModelException e) {
           // Nothing we can do.
           System.err.println(getClass().getSimpleName() + " - checkStart: "
