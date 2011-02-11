@@ -2,7 +2,7 @@
 <feature
       id="rabbit.feature"
       label="Rabbit Feature (Required)"
-      version="1.2.0.qualifier">
+      version="1.2.1.qualifier">
 
    <description>
       Contains general features of Rabbit.
