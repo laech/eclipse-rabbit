@@ -20,6 +20,7 @@ import rabbit.data.internal.xml.schema.events.TaskFileEventType;
 import rabbit.data.internal.xml.schema.events.TaskIdType;
 import rabbit.data.store.model.TaskFileEvent;
 
+import java.util.Date;
 import java.util.GregorianCalendar;
 
 /**
@@ -30,11 +31,20 @@ public class TaskFileEventConverter extends
 
   public TaskFileEventConverter() {
   }
-  
+
   @Override
   protected TaskFileEventType doConvert(TaskFileEvent event) {
+    Date date = event.getTask().getCreationDate();
+    if (date == null) {
+      
+      /*
+       * If task creation date is null, set it to earliest date possible
+       */
+      date = new Date(0);
+    }
+
     GregorianCalendar creationDate = new GregorianCalendar();
-    creationDate.setTime(event.getTask().getCreationDate());
+    creationDate.setTime(date);
 
     TaskIdType id = new TaskIdType();
     id.setCreationDate(DatatypeUtil.toXmlDateTime(creationDate));

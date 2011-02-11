@@ -15,18 +15,26 @@
  */
 package rabbit.data.internal.xml.convert;
 
-import rabbit.data.internal.xml.convert.TaskFileEventConverter;
 import rabbit.data.internal.xml.schema.events.TaskFileEventType;
 import rabbit.data.store.model.TaskFileEvent;
 
+import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 
 import org.eclipse.core.runtime.Path;
 import org.eclipse.mylyn.internal.tasks.core.LocalTask;
 import org.eclipse.mylyn.tasks.core.ITask;
 import org.joda.time.Interval;
+import org.junit.Test;
 
 import java.util.Date;
+import java.util.GregorianCalendar;
+
+import javax.xml.datatype.DatatypeFactory;
+import javax.xml.datatype.XMLGregorianCalendar;
 
 /**
  * @see TaskFileEventConverter
@@ -53,4 +61,21 @@ public class TaskFileEventConverterTest extends
     assertEquals(event.getFilePath().toString(), type.getFilePath());
   }
 
+  /*
+   * Issue #10 
+   */
+  @Test
+  public void aTaskWithoutCreationDateShouldBeAssignedWithEarliestDate() throws Exception {
+    GregorianCalendar calendar = new GregorianCalendar();
+    calendar.setTimeInMillis(0);
+    XMLGregorianCalendar expected = DatatypeFactory.newInstance().newXMLGregorianCalendar(calendar);
+    
+    ITask task = mock(ITask.class);
+    given(task.getCreationDate()).willReturn(null);
+
+    TaskFileEvent event = new TaskFileEvent(new Interval(0, 1), new Path("/a/b"), task);
+    TaskFileEventType type = converter.convert(event);
+    
+    assertThat(type.getTaskId().getCreationDate(), is(expected));
+  }
 }
