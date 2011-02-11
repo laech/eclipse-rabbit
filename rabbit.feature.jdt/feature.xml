@@ -223,19 +223,14 @@ Unless required by applicable law or agreed to in writing, software distributed 
    </license>
 
    <requires>
-      <import feature="rabbit.feature" version="1.1.0.qualifier"/>
       <import plugin="org.eclipse.ui"/>
       <import plugin="org.eclipse.jdt.core"/>
-      <import plugin="rabbit.common" version="1.0.0" match="greaterOrEqual"/>
-      <import plugin="rabbit.data" version="1.1.0" match="greaterOrEqual"/>
-      <import plugin="rabbit.data.handler" version="1.0.0" match="greaterOrEqual"/>
-      <import plugin="rabbit.tracking" version="1.1.0" match="greaterOrEqual"/>
       <import plugin="org.eclipse.jdt.ui"/>
       <import plugin="org.eclipse.ui.editors"/>
       <import plugin="org.eclipse.core.runtime"/>
       <import plugin="org.eclipse.jface.text"/>
-      <import plugin="rabbit.ui" version="1.1.0" match="greaterOrEqual"/>
       <import plugin="org.eclipse.core.resources"/>
+      <import feature="rabbit.feature" version="1.2.0" match="greaterOrEqual"/>
    </requires>
 
    <plugin
