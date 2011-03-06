@@ -15,6 +15,7 @@
  */
 package rabbit.data.internal.xml.convert;
 
+import rabbit.data.TasksContract;
 import rabbit.data.internal.xml.DatatypeUtil;
 import rabbit.data.internal.xml.schema.events.TaskFileEventType;
 import rabbit.data.internal.xml.schema.events.TaskIdType;
@@ -34,26 +35,20 @@ public class TaskFileEventConverter extends
 
   @Override
   protected TaskFileEventType doConvert(TaskFileEvent event) {
-    Date date = event.getTask().getCreationDate();
-    if (date == null) {
-      
-      /*
-       * If task creation date is null, set it to earliest date possible
-       */
-      date = new Date(0);
-    }
+    final Date date = TasksContract.getCreationDate(event.getTask());
 
-    GregorianCalendar creationDate = new GregorianCalendar();
+    final GregorianCalendar creationDate = new GregorianCalendar();
     creationDate.setTime(date);
 
-    TaskIdType id = new TaskIdType();
+    final TaskIdType id = new TaskIdType();
     id.setCreationDate(DatatypeUtil.toXmlDateTime(creationDate));
     id.setHandleId(event.getTask().getHandleIdentifier());
 
-    TaskFileEventType type = new TaskFileEventType();
+    final TaskFileEventType type = new TaskFileEventType();
     type.setDuration(event.getInterval().toDurationMillis());
     type.setFilePath(event.getFilePath().toString());
     type.setTaskId(id);
+
     return type;
   }
 

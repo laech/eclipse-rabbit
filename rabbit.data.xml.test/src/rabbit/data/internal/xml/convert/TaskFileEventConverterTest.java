@@ -15,17 +15,18 @@
  */
 package rabbit.data.internal.xml.convert;
 
+import rabbit.data.TasksContract;
 import rabbit.data.internal.xml.schema.events.TaskFileEventType;
 import rabbit.data.store.model.TaskFileEvent;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
 import org.eclipse.core.runtime.Path;
-import org.eclipse.mylyn.internal.tasks.core.LocalTask;
 import org.eclipse.mylyn.tasks.core.ITask;
 import org.joda.time.Interval;
 import org.junit.Test;
@@ -39,7 +40,6 @@ import javax.xml.datatype.XMLGregorianCalendar;
 /**
  * @see TaskFileEventConverter
  */
-@SuppressWarnings("restriction")
 public class TaskFileEventConverterTest extends 
     AbstractConverterTest<TaskFileEvent, TaskFileEventType> {
 
@@ -50,30 +50,47 @@ public class TaskFileEventConverterTest extends
 
   @Override
   public void testConvert() throws Exception {
-    ITask task = new LocalTask("abc", "a task");
-    task.setCreationDate(new Date());
-    TaskFileEvent event = new TaskFileEvent(new Interval(0, 1), new Path("/a/b"), task);
-    TaskFileEventType type = converter.convert(event);
+    final ITask task = mock(ITask.class);
+    given(task.getCreationDate()).willReturn(new Date());
+    final TaskFileEvent event = new TaskFileEvent(
+        new Interval(0, 1), new Path("/a/b"), task);
+    final TaskFileEventType type = converter.convert(event);
     
-    assertEquals(task.getHandleIdentifier(), type.getTaskId().getHandleId());
-    assertEquals(task.getCreationDate(), type.getTaskId().getCreationDate().toGregorianCalendar().getTime());
-    assertEquals(event.getInterval().toDurationMillis(), type.getDuration());
-    assertEquals(event.getFilePath().toString(), type.getFilePath());
+    assertEquals(
+        task.getHandleIdentifier(),
+        type.getTaskId().getHandleId());
+    assertEquals(
+        task.getCreationDate(), 
+        type.getTaskId().getCreationDate().toGregorianCalendar().getTime());
+    assertEquals(
+        event.getInterval().toDurationMillis(), 
+        type.getDuration());
+    assertEquals(
+        event.getFilePath().toString(),
+        type.getFilePath());
   }
 
   /*
    * Issue #10 
    */
   @Test
-  public void aTaskWithoutCreationDateShouldBeAssignedWithEarliestDate() throws Exception {
-    GregorianCalendar calendar = new GregorianCalendar();
-    calendar.setTimeInMillis(0);
-    XMLGregorianCalendar expected = DatatypeFactory.newInstance().newXMLGregorianCalendar(calendar);
+  public void aTaskWithoutCreationDateShouldBeAssignedWithNonNullDateFromTasksContract() 
+      throws Exception {
     
-    ITask task = mock(ITask.class);
+    final ITask task = mock(ITask.class);
     given(task.getCreationDate()).willReturn(null);
+    
+    final Date creationDate = TasksContract.getCreationDate(task);
+    assertTrue(creationDate != null);
+    
+    final GregorianCalendar calendar = new GregorianCalendar();
+    calendar.setTimeInMillis(creationDate.getTime());
+    
+    final XMLGregorianCalendar expected = 
+        DatatypeFactory.newInstance().newXMLGregorianCalendar(calendar);
 
-    TaskFileEvent event = new TaskFileEvent(new Interval(0, 1), new Path("/a/b"), task);
+    final TaskFileEvent event = new TaskFileEvent(
+        new Interval(0, 1), new Path("/a/b"), task);
     TaskFileEventType type = converter.convert(event);
     
     assertThat(type.getTaskId().getCreationDate(), is(expected));

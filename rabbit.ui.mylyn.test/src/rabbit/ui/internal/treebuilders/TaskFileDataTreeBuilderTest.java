@@ -15,6 +15,7 @@
  */
 package rabbit.ui.internal.treebuilders;
 
+import rabbit.data.TasksContract;
 import rabbit.data.access.model.IFileData;
 import rabbit.data.access.model.ITaskData;
 import rabbit.data.access.model.WorkspaceStorage;
@@ -45,6 +46,7 @@ import org.eclipse.mylyn.tasks.ui.TasksUi;
 import org.joda.time.Duration;
 import org.joda.time.LocalDate;
 import org.junit.Before;
+import org.junit.Test;
 
 import static java.util.Arrays.asList;
 
@@ -53,17 +55,17 @@ import java.util.Date;
 import java.util.List;
 
 @SuppressWarnings("restriction")
-public final class TaskFileDataTreeBuilderTest extends
-    AbstractDataTreeBuilderTest<IFileData> {
+public final class TaskFileDataTreeBuilderTest
+    extends AbstractDataTreeBuilderTest<IFileData> {
 
-  IWorkspaceRoot root;
-  IFile fileHasParentFolder;
-  ITask validTask;
-  LocalDate date;
-  Duration duration;
-  WorkspaceStorage ws;
+  private IWorkspaceRoot root;
+  private IFile fileHasParentFolder;
+  private ITask validTask;
+  private LocalDate date;
+  private Duration duration;
+  private WorkspaceStorage ws;
 
-  ITaskData data;
+  private ITaskData data;
 
   @Before
   public void setup() {
@@ -87,6 +89,42 @@ public final class TaskFileDataTreeBuilderTest extends
         .willReturn(
             new TaskId(validTask.getHandleIdentifier(), validTask
                 .getCreationDate()));
+  }
+  
+  /*
+   * Issue #11
+   */
+  @Test
+  public void shouldHandleTaskCreationDateWithTasksContract() throws Exception {
+    // Given a task has no creation date:
+    validTask.setCreationDate(null);
+    
+    // And data returns the earliest date, 
+    // which means the original task has no creation date:
+    given(data.get(ITaskData.TASK_ID))
+        .willReturn(
+            new TaskId(
+                validTask.getHandleIdentifier(), 
+                TasksContract.getEarliestDate())); // <--
+    
+
+    final ICategory[] categories = {Category.TASK};
+    final List<TreePath> expected = asList(newPath(validTask,
+        duration)); // duration is always appended.
+    
+    final ICategoryProvider provider = mock(ICategoryProvider.class);
+    given(provider.getSelected()).willReturn(asList(categories));
+    final ITreePathBuilder builder = create(provider);
+
+    final ITaskDataProvider input = mock(ITaskDataProvider.class);
+    given(input.get()).willReturn(asList(data));
+    
+    // When the tree path is built:
+    final List<TreePath> actual = builder.build(input);
+
+    // Then it should contain the valid task object if it understands
+    // the logic of "the earliest date is the substitution of no date":
+    assertThat(actual, equalTo(expected));
   }
 
   @Override

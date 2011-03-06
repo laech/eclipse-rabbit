@@ -15,6 +15,7 @@
  */
 package rabbit.ui.internal.treebuilders;
 
+import rabbit.data.TasksContract;
 import rabbit.data.access.model.ITaskData;
 import rabbit.data.common.TaskId;
 import rabbit.ui.IProvider;
@@ -97,7 +98,7 @@ public final class TaskDataTreeBuilder implements ITreePathBuilder {
           TaskId id = data.get(ITaskData.TASK_ID);
           ITask task = repository.getTask(id.getHandleIdentifier());
           if (task == null
-              || !Objects.equal(id.getCreationDate(), task.getCreationDate())) {
+              || !Objects.equal(id.getCreationDate(), TasksContract.getCreationDate(task))) {
             task = new UnrecognizedTask(id);
           }
           segments.add(task);
