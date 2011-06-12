@@ -55,7 +55,7 @@ import java.util.Date;
 import java.util.List;
 
 @SuppressWarnings("restriction")
-public final class TaskFileDataTreeBuilderTest
+public final class TaskDataTreeBuilderTest
     extends AbstractDataTreeBuilderTest<IFileData> {
 
   private IWorkspaceRoot root;
@@ -90,35 +90,37 @@ public final class TaskFileDataTreeBuilderTest
             new TaskId(validTask.getHandleIdentifier(), validTask
                 .getCreationDate()));
   }
-  
-  /*
-   * Issue #11
+
+  /**
+   * Issue #11 - If a task is available in Eclipse's "Task List", the "Tasks"
+   * page in Rabbit should correctly display the name of the task, not
+   * "Unrecognized Task...".
    */
   @Test
   public void shouldHandleTaskCreationDateWithTasksContract() throws Exception {
     // Given a task has no creation date:
     validTask.setCreationDate(null);
-    
-    // And data returns the earliest date, 
-    // which means the original task has no creation date:
-    given(data.get(ITaskData.TASK_ID))
-        .willReturn(
-            new TaskId(
-                validTask.getHandleIdentifier(), 
+
+    /*
+     * And data returns the earliest date, which means the original task has no
+     * creation date:
+     */
+    given(data.get(ITaskData.TASK_ID)).willReturn(
+        new TaskId(
+                validTask.getHandleIdentifier(),
                 TasksContract.getEarliestDate())); // <--
-    
 
     final ICategory[] categories = {Category.TASK};
     final List<TreePath> expected = asList(newPath(validTask,
         duration)); // duration is always appended.
-    
+
     final ICategoryProvider provider = mock(ICategoryProvider.class);
     given(provider.getSelected()).willReturn(asList(categories));
     final ITreePathBuilder builder = create(provider);
 
     final ITaskDataProvider input = mock(ITaskDataProvider.class);
     given(input.get()).willReturn(asList(data));
-    
+
     // When the tree path is built:
     final List<TreePath> actual = builder.build(input);
 
@@ -235,5 +237,4 @@ public final class TaskFileDataTreeBuilderTest
       }
     };
   }
-
 }
