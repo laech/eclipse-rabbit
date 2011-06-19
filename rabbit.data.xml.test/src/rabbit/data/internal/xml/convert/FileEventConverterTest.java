@@ -15,7 +15,6 @@
  */
 package rabbit.data.internal.xml.convert;
 
-import rabbit.data.internal.xml.convert.FileEventConverter;
 import rabbit.data.internal.xml.schema.events.FileEventType;
 import rabbit.data.store.model.FileEvent;
 
@@ -37,10 +36,11 @@ public class FileEventConverterTest extends
 
   @Override
   public void testConvert() throws Exception {
-    FileEvent event = new FileEvent(new Interval(0, 1), new Path("/file/acb"));
-    FileEventType type = converter.convert(event);
+    final Interval interval = new Interval(1000, 1000000);
+    final FileEvent event = new FileEvent(interval, new Path("/file/acb"));
+    final FileEventType type = converter.convert(event);
     assertEquals(event.getFilePath().toString(), type.getFilePath());
-    assertEquals(event.getInterval().toDurationMillis(), type.getDuration());
+    assertEquals(interval.toDurationMillis(), type.getDuration());
+    assertEquals(interval.getStartMillis(), type.getStartTime());
   }
-
 }

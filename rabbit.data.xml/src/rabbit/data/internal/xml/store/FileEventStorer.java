@@ -18,7 +18,6 @@ package rabbit.data.internal.xml.store;
 import rabbit.data.internal.xml.IDataStore;
 import rabbit.data.internal.xml.StoreNames;
 import rabbit.data.internal.xml.convert.IConverter;
-import rabbit.data.internal.xml.merge.IMerger;
 import rabbit.data.internal.xml.schema.events.EventListType;
 import rabbit.data.internal.xml.schema.events.FileEventListType;
 import rabbit.data.internal.xml.schema.events.FileEventType;
@@ -43,15 +42,14 @@ public final class FileEventStorer extends
    * Constructor.
    * 
    * @param converter Converter for converting an event to its corresponding XML
-   *          type.
-   * @param merger Merger for merging two XML types.
+   *        type.
    * @param store The data store to store the data to.
+   * @throws NullPointerException if any argument is <code>null</code>.
    */
   @Inject
   FileEventStorer(IConverter<FileEvent, FileEventType> converter,
-      IMerger<FileEventType> merger,
       @Named(StoreNames.FILE_STORE) IDataStore store) {
-    super(converter, merger, store);
+    super(converter, null, store);
   }
 
   @Override

@@ -87,7 +87,8 @@
   </xs:complexType>
   <xs:complexType name="fileEventType">
     <xs:complexContent>
-      <xs:extension base="durationEventType">
+      <!-- Changed from durationEventType to intervalEventType from Rabbit 1.3 -->
+      <xs:extension base="intervalEventType">
         <xs:attribute name="filePath" type="xs:string" use="required" />
       </xs:extension>
     </xs:complexContent>
