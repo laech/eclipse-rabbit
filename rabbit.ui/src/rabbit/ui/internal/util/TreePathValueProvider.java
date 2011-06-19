@@ -29,6 +29,7 @@ import com.google.common.collect.Sets;
 import org.eclipse.jface.viewers.TreePath;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Observable;
 import java.util.Set;
 
@@ -36,24 +37,22 @@ import javax.annotation.Nullable;
 
 /**
  * A value provider for tree paths.
- * <p>
+ * <p/>
  * {@link #getValue(Object)} can be used to find out the value of a particular
- * tree path, the path doesn't need to be a complete path from the root of the
- * tree to a leaf node, it can be a sub path such that it's a parent path of one
- * or more child paths, than the value of this parent path will be the sum of
- * all its child paths.
- * </p>
- * <p>
+ * tree path (it supports arguments as {@link TreePath}, or {@link List}), the
+ * path doesn't need to be a complete path from the root of the tree to a leaf
+ * node, it can be a sub path such that it's a parent path of one or more child
+ * paths, than the value of this parent path will be the sum of all its child
+ * paths.
+ * <p/>
  * This value provider also take a {@link IProvider} for getting the paths, the
  * paths supplied should be complete paths (all are tree leaves), and the value
  * of each of these paths is determined by a {@link IConverter}.
- * </p>
- * <p>
+ * <p/>
  * This class also accepts a {@link ICategorizer} for getting the category of
  * each path, if the category of a given path is equal to
  * {@link #getVisualCategory()} then {@link #shouldPaint(Object)} will return
  * true on the given path.
- * </p>
  */
 public final class TreePathValueProvider extends Observable
     implements IValueProvider, IVisualProvider {
@@ -67,6 +66,7 @@ public final class TreePathValueProvider extends Observable
 
   /**
    * Constructor.
+   * 
    * @param categorizer for categorizing tree paths.
    * @param treePathProvider for getting the tree leaf paths.
    * @param converter for getting value of a tree path supplied by
@@ -131,16 +131,20 @@ public final class TreePathValueProvider extends Observable
    * Gets the value of the given tree path. If the given tree path is a parent
    * path of one or more child paths, then the sum of the children values will
    * be returned.
+   * 
    * @param element the tree path to get the value for.
    * @return the value of the tree path, may be zero. Zero is also returned if
    *         the given element is not a tree path.
    */
   @Override
   public long getValue(@Nullable Object element) {
-    if (!(element instanceof TreePath)) {
+    if (element instanceof TreePath) {
+      return getValue((TreePath)element, getProvider().get());
+    } else if (element instanceof List) {
+      return getValue((List<?>)element, getProvider().get());
+    } else {
       return 0;
     }
-    return getValue((TreePath) element, getProvider().get());
   }
 
   @Override
@@ -153,6 +157,7 @@ public final class TreePathValueProvider extends Observable
    * equal to the given category, and the value of that path (from the root to
    * that element) is the highest of all, that the max value will be set to that
    * value.
+   * 
    * @param category the category.
    */
   public void setMaxValue(ICategory category) {
@@ -165,6 +170,7 @@ public final class TreePathValueProvider extends Observable
    * {@link Predicate#apply(Object)} returns true on the element, and the value
    * of that path (from the root to that element) is the highest of all, that
    * the max value will be set to that value.
+   * 
    * @param category the category.
    * @param predicate the predicate to select wanted elements.
    */
@@ -196,6 +202,7 @@ public final class TreePathValueProvider extends Observable
 
   /**
    * Sets the max value representing the highest value.
+   * 
    * @param max the new value.
    */
   public void setMaxValue(long max) {
@@ -207,6 +214,7 @@ public final class TreePathValueProvider extends Observable
    * categorizer then it will be ignored and this method will return false. If
    * {@link #getVisualCategory()} returns a different category after this change
    * then observers of this instance will get notified.
+   * 
    * @param category the new category.
    * @return true if the category is accepted, false otherwise.
    */
@@ -235,6 +243,9 @@ public final class TreePathValueProvider extends Observable
    * Gets the value of the given tree path. If the given tree path is a parent
    * path of one or more child paths, then the sum of the children values will
    * be returned.
+   * 
+   * @param path the path.
+   * @param leaves the leaves to match.
    * @return the value of the tree path, may be zero.
    */
   private long getValue(TreePath path, Collection<TreePath> leaves) {
@@ -243,6 +254,31 @@ public final class TreePathValueProvider extends Observable
       if (leaf.startsWith(path, null)) {
         value += converter.convert(leaf);
       }
+    }
+    return value;
+  }
+
+  /**
+   * Gets the value of the given tree path. If the given tree path is a parent
+   * path of one or more child paths, then the sum of the children values will
+   * be returned.
+   * 
+   * @param path the path.
+   * @param leaves the leaves to match.
+   * @return the value of the tree path, may be zero.
+   */
+  private long getValue(List<?> path, Collection<TreePath> leaves) {
+    long value = 0;
+    outer: for (TreePath leaf : leaves) {
+      if (leaf.getSegmentCount() < path.size()) {
+        continue;
+      }
+      for (int i = 0; i < path.size(); i++) {
+        if (!Objects.equal(leaf.getSegment(i), path.get(i))) {
+          continue outer;
+        }
+      }
+      value += converter.convert(leaf);
     }
     return value;
   }

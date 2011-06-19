@@ -18,6 +18,7 @@ package rabbit.ui.internal.util;
 import rabbit.ui.IProvider;
 
 import com.google.common.base.Predicates;
+import com.google.common.collect.Lists;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
@@ -37,6 +38,7 @@ import static java.lang.Boolean.TRUE;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -101,7 +103,7 @@ public class TreePathValueProviderTest {
   }
 
   @Test
-  public void getValueShouldReturnTheSumOfTheChildrenValueForAParentPath() {
+  public void getValueShouldReturnTheSumOfTheChildrenValueForAParentPathIfTheParentPathIsOfTypeTreePath() {
     TreePath leaf1 = new TreePath(new Object[]{"1", "2", "3"});
     TreePath leaf2 = new TreePath(new Object[]{"1", "2", "4"});
     TreePath leaf3 = new TreePath(new Object[]{"1", "5", "6"});
@@ -131,7 +133,37 @@ public class TreePathValueProviderTest {
   }
 
   @Test
-  public void getValueShouldReturnTheValueOfALeafPathSuppliedByTheConverter() {
+  public void getValueShouldReturnTheSumOfTheChildrenValueForAParentPathIfTheParentPathIsOfTypeList() {
+    final TreePath leaf1 = new TreePath(new Object[]{"1", "2", "3"});
+    final TreePath leaf2 = new TreePath(new Object[]{"1", "2", "4"});
+    final TreePath leaf3 = new TreePath(new Object[]{"1", "5", "6"});
+    final List<String> parentOf1n2 = Lists.newArrayList("1", "2");
+    final List<String> parentOfAll = Lists.newArrayList("1");
+
+    @SuppressWarnings("unchecked")
+    final IConverter<TreePath> converter = mock(IConverter.class);
+    given(converter.convert(leaf1)).willReturn(Long.valueOf(1));
+    given(converter.convert(leaf2)).willReturn(Long.valueOf(2));
+    given(converter.convert(leaf3)).willReturn(Long.valueOf(3));
+
+    @SuppressWarnings("unchecked")
+    final IProvider<TreePath> provider = mock(IProvider.class);
+    given(provider.get()).willReturn(Arrays.asList(leaf1, leaf2, leaf3));
+
+    final TreePathValueProvider values = create(
+        mock(ICategorizer.class),
+        provider,
+        converter);
+
+    long value = converter.convert(leaf1) + converter.convert(leaf2);
+    assertThat(values.getValue(parentOf1n2), equalTo(value));
+
+    value += converter.convert(leaf3);
+    assertThat(values.getValue(parentOfAll), equalTo(value));
+  }
+
+  @Test
+  public void getValueShouldReturnTheValueOfALeafPathSuppliedByTheConverterIfTheLeafIsOfTypeTreePath() {
     TreePath leaf = new TreePath(new Object[]{""});
     long value = 123;
 
@@ -145,6 +177,23 @@ public class TreePathValueProviderTest {
 
     TreePathValueProvider p = create(mock(ICategorizer.class), provider, c);
     assertThat(p.getValue(leaf), is(value));
+  }
+
+  @Test
+  public void getValueShouldReturnTheValueOfALeafPathSuppliedByTheConverterIfTheLeafIsOfTypeList() {
+    TreePath leaf = new TreePath(new Object[]{"1", "2"});
+    long value = 123;
+
+    @SuppressWarnings("unchecked")
+    IConverter<TreePath> c = mock(IConverter.class);
+    given(c.convert(leaf)).willReturn(Long.valueOf(value));
+
+    @SuppressWarnings("unchecked")
+    IProvider<TreePath> provider = mock(IProvider.class);
+    given(provider.get()).willReturn(Arrays.asList(leaf));
+
+    TreePathValueProvider p = create(mock(ICategorizer.class), provider, c);
+    assertThat(p.getValue(Lists.newArrayList("1", "2")), is(value));
   }
 
   @Test
@@ -242,11 +291,11 @@ public class TreePathValueProviderTest {
   public void setMaxValueWithCategoryAndPredicateShouldCalculateTheCorrectValue() {
     // @formatter:off
     // Given we have a tree that looks like the following:
-    // + - 1 - 2 - 3  // Value of this path = 1
-    //  \        \
-    //   \         4  // Value of this path = 10
-    //    \
-    //     2 - 2 - 2  // Value of this path = 2
+    // + - 1 - 2 - 3 // Value of this path = 1
+    // \ \
+    // \ 4 // Value of this path = 10
+    // \
+    // 2 - 2 - 2 // Value of this path = 2
     // @formatter:on
     TreePath leaf1 = new TreePath(new Object[]{"1", "2", "3"});
     TreePath leaf2 = new TreePath(new Object[]{"1", "2", "4"});
@@ -276,13 +325,14 @@ public class TreePathValueProviderTest {
     v.setMaxValue(category, Predicates.<Object> equalTo("3"));
 
     // @formatter:off
-    // Then the maximum value should have been set to the value of the element "3" that has the
+    // Then the maximum value should have been set to the value of the element
+    // "3" that has the
     // highest value, which is the one in bracket, with value of 1:
-    // + - 1 - 2 -(3)  // Value of this path = 1
-    //  \        \
-    //   \         4  // Value of this path = 10
-    //    \
-    //     2 - 2 - 2  // Value of this path = 2
+    // + - 1 - 2 -(3) // Value of this path = 1
+    // \ \
+    // \ 4 // Value of this path = 10
+    // \
+    // 2 - 2 - 2 // Value of this path = 2
     // @formatter:on
     assertThat(v.getMaxValue(), equalTo(1L));
   }
@@ -291,11 +341,11 @@ public class TreePathValueProviderTest {
   public void setMaxValueWithCategoryShouldCalculateTheCorrectValue_1() {
     // @formatter:off
     // Given we have a tree that looks like the following:
-    // + - 1 - 2 - 3  // Value of this path = 1
-    //  \        \
-    //   \         4  // Value of this path = 10
-    //    \
-    //     2 - 2 - 2  // Value of this path = 2
+    // + - 1 - 2 - 3 // Value of this path = 1
+    // \ \
+    // \ 4 // Value of this path = 10
+    // \
+    // 2 - 2 - 2 // Value of this path = 2
     // @formatter:on
     TreePath leaf1 = new TreePath(new Object[]{"1", "2", "3"});
     TreePath leaf2 = new TreePath(new Object[]{"1", "2", "4"});
@@ -326,13 +376,14 @@ public class TreePathValueProviderTest {
     v.setMaxValue(theCategory);
 
     // @formatter:off
-    // Then the maximum value should have been set to the value of the element "2" that has the
+    // Then the maximum value should have been set to the value of the element
+    // "2" that has the
     // highest value, which is the one in bracket, with value of 11 (1 + 10):
-    // + - 1 -(2)- 3  // Value of this path = 1
-    //  \        \
-    //   \         4  // Value of this path = 10
-    //    \
-    //     2 - 2 - 2  // Value of this path = 2
+    // + - 1 -(2)- 3 // Value of this path = 1
+    // \ \
+    // \ 4 // Value of this path = 10
+    // \
+    // 2 - 2 - 2 // Value of this path = 2
     // @formatter:on
     assertThat(v.getMaxValue(),
         equalTo(converter.convert(leaf1) + converter.convert(leaf2)));
@@ -372,15 +423,16 @@ public class TreePathValueProviderTest {
   @Test
   public void setMaxValueWithCategoryShouldCalculateTheCorrectValue_3() {
     // @formatter:off
-    // If we have a tree like the following, where the element "2" appears at multiple places at
+    // If we have a tree like the following, where the element "2" appears at
+    // multiple places at
     // different levels:
-    // 
-    // + - 1 - 2 - 3  // Value of this path is 1
-    //   \
-    //     2 - 2 - 4  // Value of this path is 10
-    //       \
-    //         3 - 2  // Value of this path is 2
-    // 
+    //
+    // + - 1 - 2 - 3 // Value of this path is 1
+    // \
+    // 2 - 2 - 4 // Value of this path is 10
+    // \
+    // 3 - 2 // Value of this path is 2
+    //
     // @formatter:on
     TreePath leaf1 = new TreePath(new Object[]{"1", "2", "3"});
     TreePath leaf2 = new TreePath(new Object[]{"2", "2", "4"});
@@ -412,14 +464,15 @@ public class TreePathValueProviderTest {
     v.setMaxValue(theCategory);
 
     // @formatter:off
-    // Then then the maximum value should be set to 12 in this example, which is the value of the
+    // Then then the maximum value should be set to 12 in this example, which is
+    // the value of the
     // highest element "2" in the tree (the one in bracket below):
-    // 
-    // + - 1 - 2 - 3  // Value of this path is 1
-    //   \
-    //    (2)- 2 - 4  // Value of this path is 10
-    //       \
-    //         3 - 2  // Value of this path is 2
+    //
+    // + - 1 - 2 - 3 // Value of this path is 1
+    // \
+    // (2)- 2 - 4 // Value of this path is 10
+    // \
+    // 3 - 2 // Value of this path is 2
     //
     // @formatter:on
     assertThat(v.getMaxValue(),

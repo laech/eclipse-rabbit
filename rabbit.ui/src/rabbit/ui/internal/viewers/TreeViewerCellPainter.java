@@ -16,12 +16,10 @@
 package rabbit.ui.internal.viewers;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.Lists.newLinkedList;
 
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.viewers.ColumnViewer;
 import org.eclipse.jface.viewers.StyledCellLabelProvider;
-import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.ViewerColumn;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
@@ -30,6 +28,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.TreeItem;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -42,6 +41,9 @@ public class TreeViewerCellPainter extends StyledCellLabelProvider {
   private Color systemForeground;
   private final IValueProvider valueProvider;
   private final boolean isLinux;
+
+  /** Used by {@link #getTreePath(TreeItem)} for storing path segments */
+  private final List<Object> tmpPathHelper = new ArrayList<Object>();
 
   /**
    * @param valueProvider the provider for getting the values of each tree path.
@@ -81,7 +83,7 @@ public class TreeViewerCellPainter extends StyledCellLabelProvider {
       return;
     }
 
-    TreePath path = getTreePath((TreeItem) event.item);
+    List<Object> path = getTreePath((TreeItem)event.item);
     int columnWidth = event.gc.getClipping().width;
     int width = getWidth(columnWidth, path);
     if (width == 0) {
@@ -102,7 +104,7 @@ public class TreeViewerCellPainter extends StyledCellLabelProvider {
      * cause the color bar to be half drawn.
      */
     if (!isLinux) {
-      int alpha = (int) (width / (float) columnWidth * 255);
+      int alpha = (int)(width / (float)columnWidth * 255);
       if (alpha < 100) {
         alpha = 100;
       }
@@ -135,26 +137,26 @@ public class TreeViewerCellPainter extends StyledCellLabelProvider {
     return new Color(display, 84, 141, 212);
   }
 
-  private TreePath getTreePath(TreeItem item) {
-    List<Object> segments = newLinkedList();
+  private List<Object> getTreePath(TreeItem item) {
+    tmpPathHelper.clear();
     while (item != null) {
-      segments.add(0, item.getData());
+      tmpPathHelper.add(0, item.getData());
       item = item.getParentItem();
     }
-    return new TreePath(segments.toArray());
+    return tmpPathHelper;
   }
 
   /**
    * Gets the width in pixels for the paint.
    */
-  private int getWidth(int columnWidth, TreePath path) {
+  private int getWidth(int columnWidth, List<Object> path) {
     long maxValue = valueProvider.getMaxValue();
     if (maxValue == 0) {
       return 0;
     }
 
     long value = valueProvider.getValue(path);
-    int width = (int) (value * columnWidth / (double) valueProvider
+    int width = (int)(value * columnWidth / (double)valueProvider
         .getMaxValue());
     width = ((value != 0) && (width == 0)) ? 2 : width;
 
