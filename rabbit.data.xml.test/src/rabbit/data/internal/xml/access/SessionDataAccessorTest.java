@@ -19,15 +19,18 @@ import rabbit.data.access.model.ISessionData;
 import rabbit.data.access.model.WorkspaceStorage;
 import rabbit.data.internal.xml.DataStore;
 import rabbit.data.internal.xml.DatatypeUtil;
-import rabbit.data.internal.xml.access.SessionDataAccessor;
 import rabbit.data.internal.xml.schema.events.EventListType;
 import rabbit.data.internal.xml.schema.events.SessionEventListType;
 import rabbit.data.internal.xml.schema.events.SessionEventType;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.Assert.assertThat;
 
+import org.eclipse.core.runtime.Path;
 import org.joda.time.LocalDate;
+import org.joda.time.LocalTime;
+import org.junit.Test;
 
 import java.util.List;
 
@@ -37,6 +40,28 @@ import java.util.List;
 public class SessionDataAccessorTest extends
     AbstractAccessorTest2<ISessionData, SessionEventType, SessionEventListType> {
 
+  @Test
+  public void localTimeIsNullIfStartTimeIs0() throws Exception {
+    final LocalDate date = new LocalDate();
+    final WorkspaceStorage workspace = new WorkspaceStorage(new Path("/"), null);
+    final SessionEventType type = new SessionEventType();
+    type.setStartTime(0); // <- time is 0
+    type.setDuration(19834);
+    final ISessionData data = accessor.createDataNode(date, workspace, type);
+    assertThat(data.get(ISessionData.TIME), is(nullValue()));
+  }
+
+  @Test
+  public void localTimeIsNullIfStartTimeIsNegative() throws Exception {
+    final LocalDate date = new LocalDate();
+    final WorkspaceStorage workspace = new WorkspaceStorage(new Path("/"), null);
+    final SessionEventType type = new SessionEventType();
+    type.setStartTime(-1); // <- time is negative
+    type.setDuration(19834);
+    final ISessionData data = accessor.createDataNode(date, workspace, type);
+    assertThat(data.get(ISessionData.TIME), is(nullValue()));
+  }
+
   @Override
   protected void assertValues(SessionEventType expected,
       LocalDate expectedDate, WorkspaceStorage expectedWs, ISessionData actual) {
@@ -44,6 +69,8 @@ public class SessionDataAccessorTest extends
     assertThat(actual.get(ISessionData.WORKSPACE), is(expectedWs));
     assertThat(actual.get(ISessionData.DURATION).getMillis(),
         is(expected.getDuration()));
+    assertThat(actual.get(ISessionData.TIME),
+        is(new LocalTime(expected.getStartTime())));
   }
 
   @Override
@@ -53,14 +80,15 @@ public class SessionDataAccessorTest extends
 
   @Override
   protected SessionEventListType createCategory() {
-    SessionEventListType list = new SessionEventListType();
+    final SessionEventListType list = new SessionEventListType();
     list.setDate(DatatypeUtil.toXmlDate(new LocalDate()));
     return list;
   }
 
   @Override
   protected SessionEventType createElement() {
-    SessionEventType type = new SessionEventType();
+    final SessionEventType type = new SessionEventType();
+    type.setStartTime(100);
     type.setDuration(19834);
     return type;
   }

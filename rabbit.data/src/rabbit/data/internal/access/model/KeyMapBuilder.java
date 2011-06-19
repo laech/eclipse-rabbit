@@ -21,14 +21,14 @@ import com.google.common.collect.ImmutableMap;
 import java.util.Map;
 
 /**
- * A builder for building an immutable map containing keys of type {@link IKey}.
- * Instances of this class are reusable. Calling {@link #build()} multiple times
- * will build a map with the same content.
+ * A builder for building an {@link ImmutableMap} containing keys of type
+ * {@link IKey}. Instances of this class are reusable. Calling {@link #build()}
+ * multiple times will build a map with the same content.
  */
 public final class KeyMapBuilder {
-  
+
   private final ImmutableMap.Builder<IKey<? extends Object>, Object> builder;
-  
+
   /**
    * Constructs a new builder.
    */
@@ -39,6 +39,7 @@ public final class KeyMapBuilder {
   /**
    * Associates a key with a value, adding the same key more than once will
    * cause the {@link #build()} method to fail.
+   * 
    * @param key The key.
    * @param value The value.
    * @return The builder itself.
@@ -47,9 +48,10 @@ public final class KeyMapBuilder {
     builder.put(key, value);
     return this;
   }
-  
+
   /**
    * Builds the immutable map.
+   * 
    * @return The map containing the keys and values.
    * @throws IllegalArgumentException If duplicate keys exist in the map.
    */

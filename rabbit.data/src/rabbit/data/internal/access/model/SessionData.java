@@ -23,7 +23,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.joda.time.Duration;
 import org.joda.time.LocalDate;
+import org.joda.time.LocalTime;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.annotation.Nullable;
@@ -40,24 +42,35 @@ public class SessionData implements ISessionData {
 
   /**
    * Constructor.
+   * 
    * @param date The date of the session.
    * @param workspace The workspace of the session.
    * @param duration The duration of the session.
-   * @throws NullPointerException If any of the arguments are null;
+   * @param time The time of the session (this is nullable for backward
+   *        compatibility reason).
+   * @throws NullPointerException If {@code date}, {@code duration},
+   *         {@code workspace} is <code>null</code>.
    */
   public SessionData(
-      LocalDate date, WorkspaceStorage workspace, Duration duration) {
-    
-    data = new KeyMapBuilder()
-        .put(DATE,      checkNotNull(date, "date"))
-        .put(WORKSPACE, checkNotNull(workspace, "workspace"))
-        .put(DURATION,  checkNotNull(duration, "duration"))
-        .build();
+      LocalDate date,
+      WorkspaceStorage workspace,
+      Duration duration,
+      @Nullable LocalTime time) {
+
+    final float loadFactor = 1;
+    final int capacity = time == null ? 3 : 4;
+    data = new HashMap<IKey<? extends Object>, Object>(capacity, loadFactor);
+    data.put(DATE, checkNotNull(date, "date"));
+    data.put(DURATION, checkNotNull(duration, "duration"));
+    data.put(WORKSPACE, checkNotNull(workspace, "workspace"));
+    if (time != null) {
+      data.put(TIME, time);
+    }
   }
 
   @SuppressWarnings("unchecked")
   @Override
   public <T> T get(@Nullable IKey<T> key) {
-    return (T) data.get(key);
+    return (T)data.get(key);
   }
 }

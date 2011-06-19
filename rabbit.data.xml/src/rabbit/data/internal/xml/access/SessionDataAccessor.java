@@ -14,6 +14,7 @@ import com.google.inject.name.Named;
 
 import org.joda.time.Duration;
 import org.joda.time.LocalDate;
+import org.joda.time.LocalTime;
 
 import java.util.Collection;
 
@@ -35,9 +36,12 @@ public class SessionDataAccessor extends
   }
 
   @Override
-  protected ISessionData createDataNode(LocalDate cal, WorkspaceStorage ws,
-      SessionEventType type) throws Exception {
-    return new SessionData(cal, ws, new Duration(type.getDuration()));
+  protected ISessionData createDataNode(LocalDate date,
+      WorkspaceStorage workspace, SessionEventType type) throws Exception {
+    final long startTime = type.getStartTime();
+    final LocalTime time = startTime > 0 ? new LocalTime(startTime) : null;
+    final Duration duration = new Duration(type.getDuration());
+    return new SessionData(date, workspace, duration, time);
   }
 
   @Override

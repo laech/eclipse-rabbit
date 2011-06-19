@@ -17,6 +17,7 @@ package rabbit.data.access.model;
 
 import org.joda.time.Duration;
 import org.joda.time.LocalDate;
+import org.joda.time.LocalTime;
 
 /**
  * Contains session data information.
@@ -31,15 +32,20 @@ public interface ISessionData extends IData {
   /**
    * Key for the date.
    */
-  static final IKey<LocalDate> DATE = Keys.DATE;
+  IKey<LocalDate> DATE = Keys.DATE;
+
+  /**
+   * Key for the time.
+   */
+  IKey<LocalTime> TIME = Keys.TIME;
 
   /**
    * Key for the workspace.
    */
-  static final IKey<WorkspaceStorage> WORKSPACE = Keys.WORKSPACE;
+  IKey<WorkspaceStorage> WORKSPACE = Keys.WORKSPACE;
 
   /**
    * Key for the duration.
    */
-  static final IKey<Duration> DURATION = Keys.DURATION;
+  IKey<Duration> DURATION = Keys.DURATION;
 }

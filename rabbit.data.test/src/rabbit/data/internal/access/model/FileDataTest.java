@@ -27,7 +27,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.Path;
 import org.joda.time.Duration;
 import org.joda.time.LocalDate;
-import org.junit.Before;
+import org.joda.time.LocalTime;
 import org.junit.Test;
 
 /**
@@ -35,81 +35,84 @@ import org.junit.Test;
  */
 public class FileDataTest {
 
-  private IFile file;
-  private LocalDate date;
-  private Duration duration;
-  private WorkspaceStorage workspace;
+  private final IFile file = mock(IFile.class);
+  private final LocalDate date = new LocalDate();
+  private final Duration duration = new Duration(11);
+  private final LocalTime time = new LocalTime();
+  private final WorkspaceStorage workspace = new WorkspaceStorage(
+      new Path("/a"), new Path("/b"));
 
-  @Before
-  public void prepare() {
-    file = mock(IFile.class);
-    date = new LocalDate();
-    duration = new Duration(10);
-    workspace = new WorkspaceStorage(new Path(""), new Path(""));
+  private final FileData data = create(date, workspace, duration, file, time);
+
+  @Test
+  public void shouldAllowToBeConstructedWithANullTime() throws Exception {
+    /*
+     * Time is allowed to be null because data don't have "time" before 1.3
+     */
+    create(date, workspace, duration, file, null);
+    // No exception
   }
 
   @Test
   public void shouldReturnNullIfKeyIsNull() {
-    assertThat(
-        create(date, workspace, duration, file).get(null),
-        is(nullValue()));
+    assertThat(data.get(null), is(nullValue()));
   }
 
   @Test
   public void shouldReturnTheDate() {
-    assertThat(
-        create(date, workspace, duration, file).get(IFileData.DATE),
-        is(date));
+    assertThat(data.get(IFileData.DATE), is(date));
   }
 
   @Test
   public void shouldReturnTheDuration() {
-    assertThat(
-        create(date, workspace, duration, file).get(IFileData.DURATION),
-        is(duration));
+    assertThat(data.get(IFileData.DURATION), is(duration));
   }
 
   @Test
   public void shouldReturnTheFile() {
-    assertThat(
-        create(date, workspace, duration, file).get(IFileData.FILE),
-        is(file));
+    assertThat(data.get(IFileData.FILE), is(file));
+  }
+
+  @Test
+  public void shouldReturnTheTime() throws Exception {
+    assertThat(data.get(IFileData.TIME), is(time));
   }
 
   @Test
   public void shouldReturnTheWorkspace() {
-    assertThat(
-        create(date, workspace, duration, file).get(IFileData.WORKSPACE),
-        is(workspace));
+    assertThat(data.get(IFileData.WORKSPACE), is(workspace));
   }
 
   @Test(expected = NullPointerException.class)
   public void shouldThrowNullPointerExceptionIfConstructedWithoutADate() {
-    create(null, workspace, duration, file);
+    create(null, workspace, duration, file, time);
   }
 
   @Test(expected = NullPointerException.class)
   public void shouldThrowNullPointerExceptionIfConstructedWithoutADuration() {
-    create(date, workspace, null, file);
+    create(date, workspace, null, file, time);
   }
 
   @Test(expected = NullPointerException.class)
   public void shouldThrowNullPointerExceptionIfConstructedWithoutAFile() {
-    create(date, workspace, duration, null);
+    create(date, workspace, duration, null, time);
   }
 
   @Test(expected = NullPointerException.class)
   public void shouldThrowNullPointerExceptionIfConstructedWithoutAWorkspace() {
-    create(date, null, duration, file);
+    create(date, null, duration, file, time);
   }
 
   /**
-   * @see FileData#FileData(LocalDate, WorkspaceStorage, Duration, IFile)
+   * @see FileData#FileData(LocalDate, WorkspaceStorage, Duration, IFile,
+   *      LocalTime)
    */
-  private FileData create(LocalDate date,
-                          WorkspaceStorage workspace,
-                          Duration duration,
-                          IFile file) {
-    return new FileData(date, workspace, duration, file);
+  private FileData create(
+      LocalDate date,
+      WorkspaceStorage workspace,
+      Duration duration,
+      IFile file,
+      LocalTime time) {
+    return new FileData(date, workspace, duration, file, time);
   }
 }

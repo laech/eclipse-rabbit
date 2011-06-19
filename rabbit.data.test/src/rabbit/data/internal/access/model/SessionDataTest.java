@@ -25,6 +25,7 @@ import static org.junit.Assert.assertThat;
 import org.eclipse.core.runtime.Path;
 import org.joda.time.Duration;
 import org.joda.time.LocalDate;
+import org.joda.time.LocalTime;
 import org.junit.Test;
 
 /**
@@ -32,68 +33,69 @@ import org.junit.Test;
  */
 public class SessionDataTest {
 
+  private final LocalDate date = new LocalDate();
+  private final LocalTime time = new LocalTime();
+  private final Duration duration = new Duration(11);
+  private final WorkspaceStorage workspace = new WorkspaceStorage(
+      new Path("/a"), new Path("/b"));
+
+  private final SessionData data = create(date, workspace, duration, time);
+
   @Test
   public void shouldReturnTheDate() {
-    LocalDate date = new LocalDate();
-    WorkspaceStorage ws = new WorkspaceStorage(new Path(""), new Path(""));
-    Duration duration = new Duration(10);
-    assertThat(create(date, ws, duration).get(ISessionData.DATE), is(date));
+    assertThat(data.get(ISessionData.DATE), is(date));
   }
-  
+
   @Test
   public void shouldReturnTheDuration() {
-    LocalDate date = new LocalDate();
-    WorkspaceStorage ws = new WorkspaceStorage(new Path(""), new Path(""));
-    Duration dur = new Duration(10);
-    assertThat(create(date, ws, dur).get(ISessionData.DURATION), is(dur));
+    assertThat(data.get(ISessionData.DURATION), is(duration));
   }
 
   @Test
   public void shouldReturnNullIfKeyIsNull() {
-    LocalDate date = new LocalDate();
-    WorkspaceStorage ws = new WorkspaceStorage(new Path(""), new Path(""));
-    Duration dur = new Duration(10);
-    assertThat(
-        create(date, ws, dur).get(null),
-        is(nullValue()));
+    assertThat(data.get(null), is(nullValue()));
+  }
+
+  @Test
+  public void shouldReturnTheTime() throws Exception {
+    assertThat(data.get(ISessionData.TIME), is(time));
   }
 
   @Test
   public void shouldReturnTheWorkspace() {
-    LocalDate date = new LocalDate();
-    WorkspaceStorage ws = new WorkspaceStorage(new Path(""), new Path(""));
-    Duration duration = new Duration(10);
-    assertThat(create(date, ws, duration).get(ISessionData.WORKSPACE), is(ws));
+    assertThat(data.get(ISessionData.WORKSPACE), is(workspace));
   }
-  
+
   @Test(expected = NullPointerException.class)
   public void shouldThrowNullPointerExceptionIfConstructedWithoutADate() {
-    LocalDate date = null;
-    WorkspaceStorage ws = new WorkspaceStorage(new Path(""), new Path(""));
-    Duration duration = new Duration(0);
-    create(date, ws, duration);
+    create(null, workspace, duration, time);
   }
-  
+
   @Test(expected = NullPointerException.class)
   public void shouldThrowNullPointerExceptionIfConstructedWithoutADuration() {
-    LocalDate date = new LocalDate();
-    WorkspaceStorage ws = new WorkspaceStorage(new Path(""), new Path(""));
-    Duration duration = null;
-    create(date, ws, duration);
+    create(date, workspace, null, time);
   }
-  
+
   @Test(expected = NullPointerException.class)
   public void shouldThrowNullPointerExceptionIfConstructedWithoutAWorkspace() {
-    LocalDate date = new LocalDate();
-    WorkspaceStorage ws = null;
-    Duration duration = new Duration(0);
-    create(date, ws, duration);
+    create(date, null, duration, time);
   }
-  
+
+  @Test
+  public void shouldAllowToBeConstructedWithANullTime() throws Exception {
+    /*
+     * Time is allowed to be null because data don't have "time" before 1.3
+     */
+    create(date, workspace, duration, null);
+    // No exception
+  }
+
   /**
-   * @see SessionData#SessionData(LocalDate, WorkspaceStorage, Duration)
+   * @see SessionData#SessionData(LocalDate, WorkspaceStorage, Duration,
+   *      LocalTime)
    */
-  private SessionData create(LocalDate d, WorkspaceStorage ws, Duration dur) {
-    return new SessionData(d, ws, dur);
+  private SessionData create(LocalDate date, WorkspaceStorage workspace,
+      Duration duration, LocalTime time) {
+    return new SessionData(date, workspace, duration, time);
   }
 }

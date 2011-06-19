@@ -18,6 +18,7 @@ package rabbit.data.access.model;
 import org.eclipse.core.resources.IFile;
 import org.joda.time.Duration;
 import org.joda.time.LocalDate;
+import org.joda.time.LocalTime;
 
 /**
  * Contains information about time spent on a file.
@@ -32,20 +33,25 @@ public interface IFileData extends IData {
   /**
    * Key for the date.
    */
-  static final IKey<LocalDate> DATE = Keys.DATE;
+  IKey<LocalDate> DATE = Keys.DATE;
 
   /**
    * Key for the workspace.
    */
-  static final IKey<WorkspaceStorage> WORKSPACE = Keys.WORKSPACE;
+  IKey<WorkspaceStorage> WORKSPACE = Keys.WORKSPACE;
 
   /**
    * Key for the duration.
    */
-  static final IKey<Duration> DURATION = Keys.DURATION;
+  IKey<Duration> DURATION = Keys.DURATION;
 
   /**
    * Key for the file.
    */
-  static final IKey<IFile> FILE = Keys.FILE;
+  IKey<IFile> FILE = Keys.FILE;
+
+  /**
+   * Key for the time.
+   */
+  IKey<LocalTime> TIME = Keys.TIME;
 }
