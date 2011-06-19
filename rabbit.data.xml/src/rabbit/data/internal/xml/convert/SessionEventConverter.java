@@ -31,6 +31,7 @@ public class SessionEventConverter extends
   protected SessionEventType doConvert(SessionEvent event) {
     SessionEventType type = new SessionEventType();
     type.setDuration(event.getInterval().toDurationMillis());
+    type.setStartTime(event.getInterval().getStartMillis());
     return type;
   }
 

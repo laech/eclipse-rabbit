@@ -51,7 +51,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
  * 
  * @param <E> The event type.
  * @param <T> The corresponding XML object type of the event type, this is the
- *          form when the event is stored in XML.
+ *        form when the event is stored in XML.
  * @param <S> A category type that holds the XML types according to event date.
  */
 public abstract class AbstractStorer<E extends DiscreteEvent, T, S extends EventGroupType>
@@ -79,14 +79,17 @@ public abstract class AbstractStorer<E extends DiscreteEvent, T, S extends Event
    * Constructor.
    * 
    * @param converter Converter for converting an event to its corresponding XML
-   *          type.
-   * @param merger Merger for merging two XML types.
+   *        type.
+   * @param merger Merger for merging two XML types, or null if all elements are
+   *        not mergeable.
    * @param store The data store to store the data to.
+   * @throws NullPointerException if the converter or the store is
+   *         <code>null</code>.
    */
   protected AbstractStorer(IConverter<E, T> converter, IMerger<T> merger,
       IDataStore store) {
     this.converter = checkNotNull(converter);
-    this.merger = checkNotNull(merger);
+    this.merger = merger;
     this.store = checkNotNull(store);
     data = new LinkedHashSet<S>();
     currentMonth = new LocalDate();
@@ -124,8 +127,12 @@ public abstract class AbstractStorer<E extends DiscreteEvent, T, S extends Event
     }
 
     if (!getDataStore().write(events, f)) {
-      XmlPlugin.getDefault().getLog().log(
-          new Status(IStatus.ERROR, XmlPlugin.PLUGIN_ID, "Unable to save data."));
+      XmlPlugin
+          .getDefault()
+          .getLog()
+          .log(
+              new Status(IStatus.ERROR, XmlPlugin.PLUGIN_ID,
+                  "Unable to save data."));
     }
     data.clear();
   }

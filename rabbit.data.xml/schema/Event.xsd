@@ -158,7 +158,8 @@
   </xs:complexType>
   <xs:complexType name="sessionEventType">
     <xs:complexContent>
-      <xs:extension base="durationEventType" />
+      <!-- Changed from durationEventType to intervalEventType from Rabbit 1.3 -->
+      <xs:extension base="intervalEventType" />
     </xs:complexContent>
   </xs:complexType>
   
@@ -213,4 +214,27 @@
     </xs:restriction>
   </xs:simpleType>
   
+  <!-- Represents a date time in milliseconds, compatible with Java's -->
+  <xs:simpleType name="dateTimeMillisType">
+    <xs:restriction base="xs:long">
+      <xs:minInclusive value="0" />
+    </xs:restriction>
+  </xs:simpleType>
+
+  <!-- 
+    Represents an interval which has a start time and a duration from 
+    the start time. The start time's type is long instead of xs:time
+    to avoid creating intermediate objects as they will be converted to
+    more specific Java types later.
+    
+    This type is added in Rabbit 1.3, the startTime attribute is therefore
+    0 for events before 1.3.
+  -->
+  <xs:complexType name="intervalEventType">
+    <xs:complexContent>
+      <xs:extension base="durationEventType">
+  	    <xs:attribute name="startTime" type="dateTimeMillisType" use="required" />
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
 </xs:schema>

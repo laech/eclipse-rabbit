@@ -15,8 +15,6 @@
  */
 package rabbit.data.internal.xml.convert;
 
-import rabbit.data.internal.xml.convert.AbstractConverter;
-import rabbit.data.internal.xml.convert.SessionEventConverter;
 import rabbit.data.internal.xml.schema.events.SessionEventType;
 import rabbit.data.store.model.SessionEvent;
 
@@ -37,13 +35,15 @@ public class SessionEventConverterTest extends
 
   @Override
   public void testConvert() throws Exception {
-    SessionEvent event = new SessionEvent(new Interval(0, 1));
-    SessionEventType type = converter.convert(event);
-    assertEquals(event.getInterval().toDurationMillis(), type.getDuration());
-    
-    event = new SessionEvent(new Interval(0, 1));
-    type = converter.convert(event);
-    assertEquals(event.getInterval().toDurationMillis(), type.getDuration());
+    Interval interval = new Interval(101, 10000);
+    SessionEventType type = converter.convert(new SessionEvent(interval));
+    assertEquals(interval.toDurationMillis(), type.getDuration());
+    assertEquals(interval.getStartMillis(), type.getStartTime());
+
+    interval = new Interval(100002, 101010101);
+    type = converter.convert(new SessionEvent(interval));
+    assertEquals(interval.toDurationMillis(), type.getDuration());
+    assertEquals(interval.getStartMillis(), type.getStartTime());
   }
 
 }
