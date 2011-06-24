@@ -7,7 +7,8 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ClassPath: .,
  lib/hamcrest-core-1.2.jar,
  lib/hamcrest-library-1.2.jar,
- lib/mockito-core-1.8.5.jar
+ lib/mockito-core-1.8.5.jar,
+ lib/com.springsource.org.objenesis-1.0.0.jar
 Export-Package: org.hamcrest,
  org.hamcrest.beans,
  org.hamcrest.collection,
