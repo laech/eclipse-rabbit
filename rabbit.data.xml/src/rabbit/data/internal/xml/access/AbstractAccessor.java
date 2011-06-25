@@ -67,7 +67,7 @@ public abstract class AbstractAccessor<T, E, S extends EventGroupType>
   }
 
   @Override
-  public Collection<T> getData(LocalDate start, LocalDate end) {
+  public final Collection<T> getData(LocalDate start, LocalDate end) {
     return filter(getXmlData(checkNotNull(start, "start date is null"),
         checkNotNull(end, "end date is null")));
   }
@@ -116,7 +116,6 @@ public abstract class AbstractAccessor<T, E, S extends EventGroupType>
    * @return The filtered data.
    */
   private Collection<T> filter(Multimap<WorkspaceStorage, S> data) {
-    long start = System.currentTimeMillis();
     if (data.isEmpty()) {
       return Collections.emptyList();
     }
@@ -152,8 +151,6 @@ public abstract class AbstractAccessor<T, E, S extends EventGroupType>
         }
       }
     }
-    long end = System.currentTimeMillis();
-    System.out.println("filter: " + (end - start) + " - " + result.size());
     return result;
   }
 
