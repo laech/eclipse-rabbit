@@ -27,7 +27,7 @@ import rabbit.data.internal.xml.schema.events.EventListType;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.collect.LinkedListMultimap;
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 
@@ -36,8 +36,10 @@ import org.joda.time.LocalDate;
 
 import java.io.File;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.xml.datatype.XMLGregorianCalendar;
 
@@ -65,9 +67,9 @@ public abstract class AbstractAccessor<T, E, S extends EventGroupType>
   }
 
   @Override
-  public final Collection<T> getData(LocalDate start, LocalDate end) {
+  public Collection<T> getData(LocalDate start, LocalDate end) {
     return filter(getXmlData(checkNotNull(start, "start date is null"),
-                             checkNotNull(end, "end date is null")));
+        checkNotNull(end, "end date is null")));
   }
 
   /**
@@ -110,14 +112,35 @@ public abstract class AbstractAccessor<T, E, S extends EventGroupType>
    * Filters the given data.
    * 
    * @param data The raw data between the two dates of
-   *          {@link #getData(LocalDate, LocalDate)}.
+   *        {@link #getData(LocalDate, LocalDate)}.
    * @return The filtered data.
    */
   private Collection<T> filter(Multimap<WorkspaceStorage, S> data) {
-    List<T> result = Lists.newLinkedList();
-    for (Map.Entry<WorkspaceStorage, S> entry : data.entries()) {
-      LocalDate date = toLocalDate(entry.getValue().getDate());
-      for (E element : getElements(entry.getValue())) {
+    long start = System.currentTimeMillis();
+    if (data.isEmpty()) {
+      return Collections.emptyList();
+    }
+
+    // Find the number of elements to convert
+    int capacity = 0;
+    for (Entry<WorkspaceStorage, S> entry : data.entries()) {
+      capacity += getElements(entry.getValue()).size();
+    }
+    if (capacity <= 0) {
+      return Collections.emptyList();
+    }
+
+    final List<T> result = Lists.newArrayListWithCapacity(capacity);
+    for (Entry<WorkspaceStorage, S> entry : data.entries()) {
+      final S category = entry.getValue();
+      final XMLGregorianCalendar xmlDate = category.getDate();
+      final Collection<E> elements = getElements(category);
+      if (elements.isEmpty() || xmlDate == null) {
+        continue;
+      }
+
+      final LocalDate date = toLocalDate(xmlDate);
+      for (E element : elements) {
         T node = null;
         try {
           node = createDataNode(date, entry.getKey(), element);
@@ -129,6 +152,8 @@ public abstract class AbstractAccessor<T, E, S extends EventGroupType>
         }
       }
     }
+    long end = System.currentTimeMillis();
+    System.out.println("filter: " + (end - start) + " - " + result.size());
     return result;
   }
 
@@ -140,28 +165,27 @@ public abstract class AbstractAccessor<T, E, S extends EventGroupType>
    * @return The data between the dates, inclusive.
    */
   private Multimap<WorkspaceStorage, S> getXmlData(LocalDate start,
-                                                   LocalDate end) {
+      LocalDate end) {
 
-    XMLGregorianCalendar startDate = toXmlDate(start);
-    XMLGregorianCalendar endDate = toXmlDate(end);
-    XmlPlugin plugin = XmlPlugin.getDefault();
+    final XMLGregorianCalendar startDate = toXmlDate(start);
+    final XMLGregorianCalendar endDate = toXmlDate(end);
+    final XmlPlugin plugin = XmlPlugin.getDefault();
 
-    IPath[] storagePaths = plugin.getStoragePaths();
-    Multimap<WorkspaceStorage, S> data = 
-        LinkedListMultimap.create(storagePaths.length);
-    Multimap<WorkspaceStorage, File> files = 
-        LinkedListMultimap.create(storagePaths.length);
+    final IPath[] storagePaths = plugin.getStoragePaths();
+    final Multimap<WorkspaceStorage, S> data = ArrayListMultimap.create();
+    final Multimap<WorkspaceStorage, File> files = ArrayListMultimap.create();
 
     for (IPath storagePath : storagePaths) {
-      List<File> fileList = getDataStore().getDataFiles(start, end, storagePath);
-      IPath workspacePath = plugin.getWorkspacePath(storagePath);
+      final List<File> fileList = getDataStore()
+          .getDataFiles(start, end, storagePath);
+      final IPath workspacePath = plugin.getWorkspacePath(storagePath);
       files.putAll(new WorkspaceStorage(storagePath, workspacePath), fileList);
     }
 
     for (Map.Entry<WorkspaceStorage, File> entry : files.entries()) {
       for (S list : getCategories(getDataStore().read(entry.getValue()))) {
 
-        XMLGregorianCalendar date = list.getDate();
+        final XMLGregorianCalendar date = list.getDate();
         if (date == null) {
           continue; // Ignore invalid data.
         }
@@ -170,6 +194,7 @@ public abstract class AbstractAccessor<T, E, S extends EventGroupType>
         }
       }
     }
+
     return data;
   }
 
