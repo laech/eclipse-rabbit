@@ -291,14 +291,15 @@ public class TreePathValueProviderTest {
   public void setMaxValueWithCategoryAndPredicateShouldCalculateTheCorrectValue() {
     // @formatter:off
     // Given we have a tree that looks like the following:
-    // + - 1 - 2 - 3 // Value of this path = 1
-    // \ \
-    // \ 4 // Value of this path = 10
-    // \
-    // 2 - 2 - 2 // Value of this path = 2
+    // + - 1 - 2 - 3  // Value of this path = 1
+    //  \        \
+    //   \         4  // Value of this path = 10
+    //    \
+    //     2 - 2 - 2  // Value of this path = 2
     // @formatter:on
-    TreePath leaf1 = new TreePath(new Object[]{"1", "2", "3"});
-    TreePath leaf2 = new TreePath(new Object[]{"1", "2", "4"});
+    // We create 2 unique string objects to test equality as well
+    TreePath leaf1 = new TreePath(new Object[]{new String("1"), "2", "3"});
+    TreePath leaf2 = new TreePath(new Object[]{new String("1"), "2", "4"});
     TreePath leaf3 = new TreePath(new Object[]{"2", "2", "2"});
 
     // And elements belong to the same category:
@@ -322,19 +323,19 @@ public class TreePathValueProviderTest {
 
     // When we call setMaxValue with predicate to say we only want element "3":
     TreePathValueProvider v = create(categorizer, provider, converter);
-    v.setMaxValue(category, Predicates.<Object> equalTo("3"));
+    v.setMaxValue(category, Predicates.<Object> equalTo("1"));
 
     // @formatter:off
     // Then the maximum value should have been set to the value of the element
     // "3" that has the
     // highest value, which is the one in bracket, with value of 1:
-    // + - 1 - 2 -(3) // Value of this path = 1
-    // \ \
-    // \ 4 // Value of this path = 10
-    // \
-    // 2 - 2 - 2 // Value of this path = 2
+    // + -(1)- 2 - 3  // Value of this path = 1
+    //  \        \
+    //   \         4  // Value of this path = 10
+    //    \
+    //     2 - 2 - 2  // Value of this path = 2
     // @formatter:on
-    assertThat(v.getMaxValue(), equalTo(1L));
+    assertThat(v.getMaxValue(), equalTo(11L));
   }
 
   @Test
@@ -342,10 +343,10 @@ public class TreePathValueProviderTest {
     // @formatter:off
     // Given we have a tree that looks like the following:
     // + - 1 - 2 - 3 // Value of this path = 1
-    // \ \
-    // \ 4 // Value of this path = 10
-    // \
-    // 2 - 2 - 2 // Value of this path = 2
+    //  \        \
+    //   \         4 // Value of this path = 10
+    //    \
+    //     2 - 2 - 2 // Value of this path = 2
     // @formatter:on
     TreePath leaf1 = new TreePath(new Object[]{"1", "2", "3"});
     TreePath leaf2 = new TreePath(new Object[]{"1", "2", "4"});
@@ -379,11 +380,11 @@ public class TreePathValueProviderTest {
     // Then the maximum value should have been set to the value of the element
     // "2" that has the
     // highest value, which is the one in bracket, with value of 11 (1 + 10):
-    // + - 1 -(2)- 3 // Value of this path = 1
-    // \ \
-    // \ 4 // Value of this path = 10
-    // \
-    // 2 - 2 - 2 // Value of this path = 2
+    // + - 1 -(2)- 3  // Value of this path = 1
+    //  \        \
+    //   \         4  // Value of this path = 10
+    //    \
+    //     2 - 2 - 2  // Value of this path = 2
     // @formatter:on
     assertThat(v.getMaxValue(),
         equalTo(converter.convert(leaf1) + converter.convert(leaf2)));
@@ -426,13 +427,13 @@ public class TreePathValueProviderTest {
     // If we have a tree like the following, where the element "2" appears at
     // multiple places at
     // different levels:
-    //
-    // + - 1 - 2 - 3 // Value of this path is 1
-    // \
-    // 2 - 2 - 4 // Value of this path is 10
-    // \
-    // 3 - 2 // Value of this path is 2
-    //
+    // 
+    // + - 1 - 2 - 3  // Value of this path is 1
+    //   \
+    //     2 - 2 - 4  // Value of this path is 10
+    //       \
+    //         3 - 2  // Value of this path is 2
+    // 
     // @formatter:on
     TreePath leaf1 = new TreePath(new Object[]{"1", "2", "3"});
     TreePath leaf2 = new TreePath(new Object[]{"2", "2", "4"});
@@ -467,12 +468,12 @@ public class TreePathValueProviderTest {
     // Then then the maximum value should be set to 12 in this example, which is
     // the value of the
     // highest element "2" in the tree (the one in bracket below):
-    //
-    // + - 1 - 2 - 3 // Value of this path is 1
-    // \
-    // (2)- 2 - 4 // Value of this path is 10
-    // \
-    // 3 - 2 // Value of this path is 2
+    // 
+    // + - 1 - 2 - 3  // Value of this path is 1
+    //   \
+    //    (2)- 2 - 4  // Value of this path is 10
+    //       \
+    //         3 - 2  // Value of this path is 2
     //
     // @formatter:on
     assertThat(v.getMaxValue(),

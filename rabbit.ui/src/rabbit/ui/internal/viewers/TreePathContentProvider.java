@@ -20,8 +20,6 @@ import rabbit.ui.IProvider;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Sets.newLinkedHashSet;
 
-import com.google.common.collect.ImmutableList;
-
 import org.eclipse.jface.viewers.ITreePathContentProvider;
 import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.Viewer;
@@ -155,7 +153,7 @@ public final class TreePathContentProvider
       @Nullable Object oldInput,
       @Nullable Object newInput) {
 
-    leaves = ImmutableList.copyOf(builder.build(newInput));
+    leaves = Collections.unmodifiableList(builder.build(newInput));
     
     setChanged();
     notifyObservers();

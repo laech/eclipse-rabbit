@@ -17,21 +17,22 @@ package rabbit.ui.internal.util;
 
 import rabbit.ui.IProvider;
 import rabbit.ui.internal.viewers.IValueProvider;
-import rabbit.ui.internal.viewers.TreePaths;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Predicates.alwaysTrue;
 
 import com.google.common.base.Objects;
 import com.google.common.base.Predicate;
-import com.google.common.collect.Sets;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
 import org.eclipse.jface.viewers.TreePath;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Observable;
-import java.util.Set;
 
 import javax.annotation.Nullable;
 
@@ -176,28 +177,34 @@ public final class TreePathValueProvider extends Observable
    */
   public void setMaxValue(ICategory category,
       Predicate<? super Object> predicate) {
-    Set<TreePath> paths = Sets.newHashSet();
-    Collection<TreePath> leaves = getProvider().get();
-    for (TreePath leaf : leaves) {
-      for (int i = 0; i < leaf.getSegmentCount(); ++i) {
 
-        Object segment = leaf.getSegment(i);
-        ICategory another = getCategorizer().getCategory(segment);
+    final Collection<TreePath> leaves = getProvider().get();
+    final Map<List<Object>, Long> values = Maps.newHashMap();
+    final List<Object> keyBuilder = Lists.newArrayList();
+    for (TreePath leaf : leaves) {
+      keyBuilder.clear();
+      for (int i = 0; i < leaf.getSegmentCount(); ++i) {
+        final Object segment = leaf.getSegment(i);
+        keyBuilder.add(segment);
+
+        final ICategory another = getCategorizer().getCategory(segment);
         if (Objects.equal(category, another) && predicate.apply(segment)) {
-          paths.add(TreePaths.headPath(leaf, i + 1));
+          final List<Object> id = Lists.newArrayList(keyBuilder);
+          Long val = values.get(id);
+          if (val == null) {
+            val = 0L;
+          }
+          values.put(id, val + getConverter().convert(leaf));
           break;
         }
       }
     }
 
-    long max = 0;
-    for (TreePath path : paths) {
-      long value = getValue(path, leaves);
-      if (value > max) {
-        max = value;
-      }
+    if (values.isEmpty()) {
+      setMaxValue(0);
+    } else {
+      setMaxValue(Collections.max(values.values()));
     }
-    setMaxValue(max);
   }
 
   /**
