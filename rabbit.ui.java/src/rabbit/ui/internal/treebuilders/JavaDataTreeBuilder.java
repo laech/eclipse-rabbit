@@ -26,8 +26,7 @@ import rabbit.ui.internal.viewers.ITreePathBuilder;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newArrayList;
-
-import com.google.common.collect.Lists;
+import static com.google.common.collect.Lists.newArrayListWithCapacity;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModel;
@@ -35,7 +34,9 @@ import org.eclipse.jface.viewers.TreePath;
 
 import static java.util.Collections.emptyList;
 
+import java.util.ArrayDeque;
 import java.util.Collection;
+import java.util.Deque;
 import java.util.List;
 
 public final class JavaDataTreeBuilder implements ITreePathBuilder {
@@ -43,7 +44,8 @@ public final class JavaDataTreeBuilder implements ITreePathBuilder {
   /**
    * Provides {@link IJavaData}.
    */
-  public static interface IJavaDataProvider extends IProvider<IJavaData> {}
+  public static interface IJavaDataProvider extends IProvider<IJavaData> {
+  }
 
   private final ICategoryProvider provider;
   private final ICategorizer categorizer;
@@ -59,23 +61,26 @@ public final class JavaDataTreeBuilder implements ITreePathBuilder {
       return emptyList();
     }
 
-    Collection<IJavaData> dataCol = ((IJavaDataProvider) input).get();
+    final Collection<IJavaData> dataCol = ((IJavaDataProvider)input).get();
     if (dataCol == null) {
       return emptyList();
     }
 
-    List<TreePath> result = newArrayList();
+    final List<TreePath> result = newArrayListWithCapacity(dataCol.size());
+    final List<ICategory> categories = provider.getSelected();
+    final List<Object> segments = newArrayList();
+    final Deque<IJavaElement> hierachy = new ArrayDeque<IJavaElement>();
     for (IJavaData data : dataCol) {
 
-      List<Object> segments = newArrayList();
-      for (ICategory c : provider.getSelected()) {
+      segments.clear();
+      for (ICategory c : categories) {
         if (!(c instanceof Category)) {
           continue;
         }
 
-        List<IJavaElement> elements = getHierarchy(data
-            .get(IJavaData.JAVA_ELEMENT));
-        switch ((Category) c) {
+        hierachy.clear();
+        getHierarchy(data.get(IJavaData.JAVA_ELEMENT), hierachy);
+        switch ((Category)c) {
         case WORKSPACE:
           segments.add(data.get(IJavaData.WORKSPACE));
           break;
@@ -87,7 +92,7 @@ public final class JavaDataTreeBuilder implements ITreePathBuilder {
             continue;
           }
 
-          for (IJavaElement e : elements) {
+          for (IJavaElement e : hierachy) {
             // We don't want to show any of the fields and anonymous classes:
             if (isAnonymousType(e) || isField(e)) {
               break;
@@ -102,30 +107,30 @@ public final class JavaDataTreeBuilder implements ITreePathBuilder {
       segments.add(data.get(IJavaData.DURATION));
       result.add(new TreePath(segments.toArray()));
     }
-
     return result;
   }
 
   /**
    * Gets the hierarchy from the given element to the java project.
+   * 
    * @param element the element.
+   * @param elements the list to add the elements to.
    * @return an ordered list of elements, the first element is the highest
    *         parent, the last element is the argument itself.
    */
-  private List<IJavaElement> getHierarchy(IJavaElement element) {
-    List<IJavaElement> elements = Lists.newArrayList();
+  private void getHierarchy(IJavaElement element, Deque<IJavaElement> elements) {
     elements.add(element);
     while ((element = element.getParent()) != null) {
-      elements.add(0, element);
+      elements.addFirst(element);
     }
-    if (elements.get(0) instanceof IJavaModel) {
-      elements.remove(0);
+    if (elements.getFirst() instanceof IJavaModel) {
+      elements.removeFirst();
     }
-    return elements;
   }
 
   /**
    * Checks whether the given Java element is an anonymous type.
+   * 
    * @param type the element to check.
    * @return true if the element is anonymous, false otherwise.
    */
@@ -138,6 +143,7 @@ public final class JavaDataTreeBuilder implements ITreePathBuilder {
 
   /**
    * Checks whether the given Java element is a field.
+   * 
    * @param element the element to check.
    * @return true if the element is a field, false otherwise.
    */
