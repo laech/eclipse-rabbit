@@ -24,6 +24,7 @@ import rabbit.ui.internal.viewers.ITreePathBuilder;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Lists.newArrayListWithCapacity;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
@@ -61,17 +62,17 @@ public final class FileDataTreeBuilder implements ITreePathBuilder {
       return emptyList();
     }
 
-    Collection<IFileData> dataCol = ((IFileDataProvider) input).get();
-    if (dataCol == null) {
+    final Collection<IFileData> dataCol = ((IFileDataProvider) input).get();
+    if (dataCol == null || dataCol.isEmpty()) {
       return emptyList();
     }
 
-    List<TreePath> result = newArrayList();
+    final List<TreePath> result = newArrayListWithCapacity(dataCol.size());
+    final List<Object> segments = newArrayList();
     for (IFileData data : dataCol) {
 
-      IFile file = data.get(IFileData.FILE);
-      List<Object> segments = newArrayList();
-
+      segments.clear();
+      final IFile file = data.get(IFileData.FILE);
       for (ICategory c : provider.getSelected()) {
         if (!(c instanceof Category)) {
           continue;
@@ -88,7 +89,7 @@ public final class FileDataTreeBuilder implements ITreePathBuilder {
           segments.add(file.getProject());
           break;
         case FOLDER:
-          IContainer parent = file.getParent();
+          final IContainer parent = file.getParent();
           if (!file.getProject().equals(parent)) {
             segments.add(parent);
           }

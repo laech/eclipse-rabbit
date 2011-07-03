@@ -25,6 +25,7 @@ import rabbit.ui.internal.viewers.ITreePathBuilder;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Lists.newArrayListWithCapacity;
 
 import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.ui.IPerspectiveDescriptor;
@@ -40,8 +41,8 @@ import java.util.List;
 /**
  * A {@link PerspectiveDataTreeBuilder} takes input as
  * {@link IPerspectiveDataProvider} and builds tree leaves based on the order of
- * the categories provided by the {@link ICategoryProvider}, the last segment
- * of every path will be the {@link Duration} data node of each
+ * the categories provided by the {@link ICategoryProvider}, the last segment of
+ * every path will be the {@link Duration} data node of each
  * {@link IPerspectiveData} provided by the provider.
  */
 public class PerspectiveDataTreeBuilder implements ITreePathBuilder {
@@ -50,7 +51,8 @@ public class PerspectiveDataTreeBuilder implements ITreePathBuilder {
    * Provides {@link IPerspectiveData}.
    */
   public static interface IPerspectiveDataProvider
-      extends IProvider<IPerspectiveData> {}
+      extends IProvider<IPerspectiveData> {
+  }
 
   private final ICategoryProvider provider;
 
@@ -64,25 +66,26 @@ public class PerspectiveDataTreeBuilder implements ITreePathBuilder {
       return emptyList();
     }
 
-    Collection<IPerspectiveData> dataCol =
-          ((IPerspectiveDataProvider) input).get();
-    if (dataCol == null) {
+    final Collection<IPerspectiveData> dataCol =
+        ((IPerspectiveDataProvider)input).get();
+    if (dataCol == null || dataCol.isEmpty()) {
       return emptyList();
     }
 
-    IPerspectiveRegistry registry =
+    final IPerspectiveRegistry registry =
         PlatformUI.getWorkbench().getPerspectiveRegistry();
 
-    List<TreePath> result = newArrayList();
+    final List<TreePath> result = newArrayListWithCapacity(dataCol.size());
+    final List<Object> segments = newArrayList();
     for (IPerspectiveData data : dataCol) {
 
-      List<Object> segments = newArrayList();
+      segments.clear();
       for (ICategory c : provider.getSelected()) {
         if (!(c instanceof Category)) {
           continue;
         }
 
-        switch ((Category) c) {
+        switch ((Category)c) {
         case WORKSPACE:
           segments.add(data.get(IPerspectiveData.WORKSPACE));
           break;
@@ -90,7 +93,7 @@ public class PerspectiveDataTreeBuilder implements ITreePathBuilder {
           segments.add(data.get(IPerspectiveData.DATE));
           break;
         case PERSPECTIVE:
-          String id = data.get(IPerspectiveData.PERSPECTIVE_ID);
+          final String id = data.get(IPerspectiveData.PERSPECTIVE_ID);
           IPerspectiveDescriptor p = registry.findPerspectiveWithId(id);
           if (p == null) {
             p = new UndefinedPerspectiveDescriptor(id);

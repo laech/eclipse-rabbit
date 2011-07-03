@@ -15,17 +15,13 @@
  */
 package rabbit.ui.internal.treebuilders;
 
-import rabbit.data.access.model.IKey;
 import rabbit.data.access.model.ISessionData;
 import rabbit.ui.IProvider;
 import rabbit.ui.internal.pages.Category;
-import rabbit.ui.internal.util.ICategory;
 import rabbit.ui.internal.util.ICategoryProvider;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
-import org.eclipse.jface.viewers.TreePath;
 import org.joda.time.Duration;
 
 import static java.util.Collections.emptyList;
@@ -46,31 +42,31 @@ public final class SessionDataTreeBuilder
   /**
    * Provides {@link ISessionData}.
    */
-  public static interface ISessionDataProvider extends IProvider<ISessionData> {}
+  public static interface ISessionDataProvider extends IProvider<ISessionData> {
+  }
 
   /**
    * @param categoryProvider the provider for providing categories.
    * @throws NullPointerException if argument is null.
    */
   public SessionDataTreeBuilder(ICategoryProvider categoryProvider) {
-    super(categoryProvider, ImmutableMap
-        .<ICategory, IKey<?>> builder()
-        .put(Category.DATE, ISessionData.DATE)
-        .put(Category.WORKSPACE, ISessionData.WORKSPACE)
-        .build());
+    super(categoryProvider, ImmutableMap.of(
+        Category.DATE, ISessionData.DATE,
+        Category.WORKSPACE, ISessionData.WORKSPACE));
+
   }
 
   @Override
   protected Collection<ISessionData> getData(Object input) {
     if (input instanceof ISessionDataProvider) {
-      return ((ISessionDataProvider) input).get();
+      return ((ISessionDataProvider)input).get();
     }
     return emptyList();
   }
 
   @Override
-  protected List<TreePath> transform(ISessionData data, TreePath path)
-      throws Exception {
-    return ImmutableList.of(path.createChildPath(data.get(ISessionData.DURATION)));
+  protected void appendExtras(ISessionData data, List<Object> segments) {
+    super.appendExtras(data, segments);
+    segments.add(data.get(ISessionData.DURATION));
   }
 }

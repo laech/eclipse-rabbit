@@ -25,6 +25,7 @@ import rabbit.ui.internal.viewers.ITreePathBuilder;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Lists.newArrayListWithCapacity;
 
 import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.ui.IEditorRegistry;
@@ -65,19 +66,20 @@ public class PartDataTreeBuilder implements ITreePathBuilder {
       return emptyList();
     }
 
-    Collection<IPartData> dataCol = ((IPartDataProvider) input).get();
-    if (dataCol == null) {
+    final Collection<IPartData> dataCol = ((IPartDataProvider) input).get();
+    if (dataCol == null || dataCol.isEmpty()) {
       return emptyList();
     }
 
-    IWorkbench workbench = PlatformUI.getWorkbench();
-    IViewRegistry viewRegistry = workbench.getViewRegistry();
-    IEditorRegistry editorRegistry = workbench.getEditorRegistry();
+    final IWorkbench workbench = PlatformUI.getWorkbench();
+    final IViewRegistry viewRegistry = workbench.getViewRegistry();
+    final IEditorRegistry editorRegistry = workbench.getEditorRegistry();
 
-    List<TreePath> result = newArrayList();
+    final List<TreePath> result = newArrayListWithCapacity(dataCol.size());
+    final List<Object> segments = newArrayList();
     for (IPartData data : dataCol) {
 
-      List<Object> segments = newArrayList();
+      segments.clear();
       for (ICategory c : provider.getSelected()) {
         if (!(c instanceof Category)) {
           continue;
@@ -91,7 +93,7 @@ public class PartDataTreeBuilder implements ITreePathBuilder {
           segments.add(data.get(IPartData.DATE));
           break;
         case WORKBENCH_TOOL:
-          String id = data.get(IPartData.PART_ID);
+          final String id = data.get(IPartData.PART_ID);
           IWorkbenchPartDescriptor part = viewRegistry.find(id);
           if (part == null) {
             part = editorRegistry.findEditor(id);

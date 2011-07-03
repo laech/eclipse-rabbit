@@ -28,6 +28,7 @@ import rabbit.ui.internal.viewers.ITreePathBuilder;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Lists.newArrayListWithCapacity;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
@@ -60,7 +61,8 @@ public final class LaunchDataTreeBuilder implements ITreePathBuilder {
   /**
    * Provides {@link ILaunchData}.
    */
-  public static interface ILaunchDataProvider extends IProvider<ILaunchData> {}
+  public static interface ILaunchDataProvider extends IProvider<ILaunchData> {
+  }
 
   public LaunchDataTreeBuilder(ICategoryProvider provider) {
     this.provider = checkNotNull(provider);
@@ -72,23 +74,29 @@ public final class LaunchDataTreeBuilder implements ITreePathBuilder {
       return emptyList();
     }
 
-    Collection<ILaunchData> dataCol = ((ILaunchDataProvider) input).get();
-    if (dataCol == null) {
+    final Collection<ILaunchData> dataCol = ((ILaunchDataProvider)input).get();
+    if (dataCol == null || dataCol.isEmpty()) {
       return emptyList();
     }
 
-    List<TreePath> result = newArrayList();
-    ILaunchManager manager = DebugPlugin.getDefault().getLaunchManager();
+    // Initial capacity is size * 2, as each node will become at least two
+    // paths, one for count and one for duration, may also contain file paths if
+    // there are files associated with the data node
+    final int initialCapacity = dataCol.size() * 2;
+    final List<TreePath> result = newArrayListWithCapacity(initialCapacity);
+    final List<Object> segments = newArrayList();
+    final ILaunchManager manager = DebugPlugin.getDefault().getLaunchManager();
     for (ILaunchData data : dataCol) {
 
-      List<Object> segments = newArrayList();
+      segments.clear();
       for (ICategory category : provider.getSelected()) {
         if (!(category instanceof Category)) {
           continue;
         }
 
-        LaunchConfigurationDescriptor d = data.get(ILaunchData.LAUNCH_CONFIG);
-        switch ((Category) category) {
+        final LaunchConfigurationDescriptor d = data
+            .get(ILaunchData.LAUNCH_CONFIG);
+        switch ((Category)category) {
         case LAUNCH:
           segments.add(new LaunchName(d.getLaunchName(), d.getLaunchTypeId()));
           break;
@@ -121,17 +129,17 @@ public final class LaunchDataTreeBuilder implements ITreePathBuilder {
         }
       }
 
-      TreePath parent = new TreePath(segments.toArray());
+      final TreePath parent = new TreePath(segments.toArray());
       result.add(parent.createChildPath(data.get(ILaunchData.COUNT)));
       result.add(parent.createChildPath(data.get(ILaunchData.DURATION)));
-      
+
       for (IFile file : data.get(ILaunchData.FILES)) {
         TreePath filePath = parent;
-        
-        IProject project = file.getProject();
+
+        final IProject project = file.getProject();
         filePath = filePath.createChildPath(project);
-        
-        IContainer parentFolder = file.getParent();
+
+        final IContainer parentFolder = file.getParent();
         if (!project.equals(parentFolder)) {
           filePath = filePath.createChildPath(parentFolder);
         }

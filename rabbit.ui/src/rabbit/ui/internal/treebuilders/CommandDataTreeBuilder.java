@@ -16,16 +16,11 @@
 package rabbit.ui.internal.treebuilders;
 
 import rabbit.data.access.model.ICommandData;
-import rabbit.data.access.model.IKey;
 import rabbit.ui.IProvider;
 import rabbit.ui.internal.pages.Category;
-import rabbit.ui.internal.util.ICategory;
 import rabbit.ui.internal.util.ICategoryProvider;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-
-import org.eclipse.jface.viewers.TreePath;
 
 import static java.util.Collections.emptyList;
 
@@ -45,14 +40,15 @@ public final class CommandDataTreeBuilder
   /**
    * Provides {@link ICommandData}.
    */
-  public static interface ICommandDataProvider extends IProvider<ICommandData> {}
+  public static interface ICommandDataProvider extends IProvider<ICommandData> {
+  }
 
   /**
    * @param categoryProvider the provider for providing categories.
    * @throws NullPointerException if argument is null.
    */
   public CommandDataTreeBuilder(ICategoryProvider categoryProvider) {
-    super(categoryProvider, ImmutableMap.<ICategory, IKey<?>> of(
+    super(categoryProvider, ImmutableMap.of(
         Category.COMMAND, ICommandData.COMMAND,
         Category.DATE, ICommandData.DATE,
         Category.WORKSPACE, ICommandData.WORKSPACE));
@@ -61,14 +57,14 @@ public final class CommandDataTreeBuilder
   @Override
   protected Collection<ICommandData> getData(Object input) {
     if (input instanceof ICommandDataProvider) {
-      return ((ICommandDataProvider) input).get();
+      return ((ICommandDataProvider)input).get();
     }
     return emptyList();
   }
 
   @Override
-  protected List<TreePath> transform(ICommandData data, TreePath path)
-      throws Exception {
-    return ImmutableList.of(path.createChildPath(data.get(ICommandData.COUNT)));
+  protected void appendExtras(ICommandData data, List<Object> segments) {
+    super.appendExtras(data, segments);
+    segments.add(data.get(ICommandData.COUNT));
   }
 }

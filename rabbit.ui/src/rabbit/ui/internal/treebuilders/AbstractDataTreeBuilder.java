@@ -29,7 +29,6 @@ import com.google.common.collect.ImmutableMap;
 
 import org.eclipse.jface.viewers.TreePath;
 
-import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 
 import java.util.Collection;
@@ -40,6 +39,7 @@ import java.util.Map;
  * Internal abstract class for implementing a tree builder. This type of builder
  * will usually take an {@code IProvider} as input and builds a collection of
  * tree paths based on the categories provided by an {@link ICategoryProvider}.
+ * 
  * @param <T> the type of data.
  */
 public abstract class AbstractDataTreeBuilder<T extends IData>
@@ -50,6 +50,7 @@ public abstract class AbstractDataTreeBuilder<T extends IData>
 
   /**
    * Constructor.
+   * 
    * @param categoryProvider the category provider for providing categories.
    * @param keys a map categorizes each category to a key, then the keys will be
    *        used to get the data.
@@ -64,22 +65,23 @@ public abstract class AbstractDataTreeBuilder<T extends IData>
 
   @Override
   public List<TreePath> build(Object input) {
-    Collection<T> data = getData(input);
-    if (data == null) {
-      data = emptyList();
+    final Collection<T> data = getData(input);
+    if (data == null || data.isEmpty()) {
+      return emptyList();
     }
 
-    List<TreePath> paths = newArrayListWithCapacity(data.size());
+    final List<TreePath> paths = newArrayListWithCapacity(data.size());
+    final List<Object> segments = newArrayList();
     for (T node : data) {
-      List<Object> segments = newArrayList();
+
+      segments.clear();
       for (ICategory category : categoryProvider.getSelected()) {
         segments.add(node.get(keys.get(category)));
       }
 
       try {
-        // Note that new TreePath(...) will also throw an exception if one of
-        // the segments is null:
-        paths.addAll(transform(node, new TreePath(segments.toArray())));
+        appendExtras(node, segments);
+        paths.add(new TreePath(segments.toArray()));
       } catch (Exception e) {
         e.printStackTrace();
       }
@@ -89,24 +91,21 @@ public abstract class AbstractDataTreeBuilder<T extends IData>
 
   /**
    * Gets the data from the input. The return value must not be null.
+   * 
    * @param input the input element.
    * @return a collection of data, may be empty but must not be null.
    */
   protected abstract Collection<T> getData(Object input);
 
   /**
-   * Transforms the given data and path to a new collection of tree paths.
-   * Subclasses may override this method to return tree paths to be included in
-   * the final collection. The default implementation simply returns the given
-   * path.
-   * @param data the data to build the paths for.
-   * @param path the path that has been built with the data, note that this path
-   *        will not be included in the final collection, but the returned paths
-   *        will be.
-   * @return a collection of paths transformed from the data and the path.
-   * @throws Exception if any error occurs.
+   * Gives subclasses an opportunity to append extra data to the list of object
+   * already taken from the data node from the given data.
+   * 
+   * @param data the data node that is currently being constructed to a
+   *        {@link TreePath}.
+   * @param segments the data already taken from the data node.
    */
-  protected List<TreePath> transform(T data, TreePath path) throws Exception {
-    return asList(path);
+  protected void appendExtras(T data, List<Object> segments) {
+    // Default implementation does nothing
   }
 }
