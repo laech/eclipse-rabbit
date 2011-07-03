@@ -27,6 +27,7 @@ import rabbit.ui.internal.viewers.ITreePathBuilder;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Lists.newArrayListWithCapacity;
 
 import com.google.common.base.Objects;
 
@@ -55,7 +56,8 @@ public final class TaskDataTreeBuilder implements ITreePathBuilder {
   /**
    * Provides {@link ITaskData}.
    */
-  public static interface ITaskDataProvider extends IProvider<ITaskData> {}
+  public static interface ITaskDataProvider extends IProvider<ITaskData> {
+  }
 
   private final ICategoryProvider provider;
 
@@ -69,25 +71,24 @@ public final class TaskDataTreeBuilder implements ITreePathBuilder {
       return emptyList();
     }
 
-    Collection<ITaskData> dataCol = ((ITaskDataProvider) input).get();
-    if (dataCol == null) {
+    final Collection<ITaskData> dataCol = ((ITaskDataProvider)input).get();
+    if (dataCol == null || dataCol.isEmpty()) {
       return emptyList();
     }
 
-    List<TreePath> result = newArrayList();
-    IRepositoryModel repository = TasksUi.getRepositoryModel();
-
+    final List<TreePath> result = newArrayListWithCapacity(dataCol.size());
+    final IRepositoryModel repository = TasksUi.getRepositoryModel();
+    final List<Object> segments = newArrayList();
     for (ITaskData data : dataCol) {
 
-      IFile file = data.get(ITaskData.FILE);
-      List<Object> segments = newArrayList();
-
+      segments.clear();
+      final IFile file = data.get(ITaskData.FILE);
       for (ICategory c : provider.getSelected()) {
         if (!(c instanceof Category)) {
           continue;
         }
 
-        switch ((Category) c) {
+        switch ((Category)c) {
         case WORKSPACE:
           segments.add(data.get(ITaskData.WORKSPACE));
           break;
@@ -98,7 +99,8 @@ public final class TaskDataTreeBuilder implements ITreePathBuilder {
           TaskId id = data.get(ITaskData.TASK_ID);
           ITask task = repository.getTask(id.getHandleIdentifier());
           if (task == null
-              || !Objects.equal(id.getCreationDate(), TasksContract.getCreationDate(task))) {
+              || !Objects.equal(id.getCreationDate(),
+                  TasksContract.getCreationDate(task))) {
             task = new UnrecognizedTask(id);
           }
           segments.add(task);
