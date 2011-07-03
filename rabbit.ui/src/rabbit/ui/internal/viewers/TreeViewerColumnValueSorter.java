@@ -17,17 +17,24 @@ package rabbit.ui.internal.viewers;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.primitives.Longs;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
 import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.swt.SWT;
+
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
 
 /**
  * This sorter uses a {@link IValueProvider} to get the values of each tree path
  * and sorts the paths base on the values received.
  */
-public class TreeViewerColumnValueSorter extends TreeViewerColumnSorter {
+public final class TreeViewerColumnValueSorter extends TreeViewerColumnSorter {
 
   private final IValueProvider valueProvider;
 
@@ -44,12 +51,40 @@ public class TreeViewerColumnValueSorter extends TreeViewerColumnSorter {
   }
 
   @Override
-  public int doCompare(Viewer v, TreePath parentPath, Object e1, Object e2) {
-    if (parentPath == null) {
-      parentPath = TreePath.EMPTY;
+  public void sort(Viewer viewer, TreePath parent, Object[] elements) {
+    if (parent == null) {
+      parent = TreePath.EMPTY;
     }
-    return Longs.compare(
-          valueProvider.getValue(parentPath.createChildPath(e1)),
-          valueProvider.getValue(parentPath.createChildPath(e2)));
+    final List<Object> tmpList = Lists
+        .newArrayListWithCapacity(parent.getSegmentCount() + 1);
+    for (int i = 0; i < parent.getSegmentCount(); ++i) {
+      tmpList.add(parent.getSegment(i));
+    }
+
+    final Map<Object, Long> values = Maps
+        .newHashMapWithExpectedSize(elements.length);
+    for (Object obj : elements) {
+      tmpList.add(obj);
+      final long value = valueProvider.getValue(tmpList);
+      values.put(obj, Long.valueOf(value));
+      tmpList.remove(tmpList.size() - 1);
+    }
+    Arrays.sort(elements, new Comparator<Object>() {
+      @Override
+      public int compare(Object o1, Object o2) {
+        int result = values.get(o1).compareTo(values.get(o2));
+        if (getSortDirection() == SWT.DOWN) {
+          result *= -1;
+        }
+        return result;
+      }
+    });
+  }
+
+  @Override
+  public int doCompare(Viewer v, TreePath parentPath, Object e1, Object e2) {
+    // Doing sorting here is slower, we override sort(Viewer, TreePath, Object[]
+    // instead, which means this method won't get called anymore
+    throw new UnsupportedOperationException();
   }
 }
