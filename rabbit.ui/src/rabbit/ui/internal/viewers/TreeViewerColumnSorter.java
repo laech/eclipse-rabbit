@@ -54,6 +54,7 @@ public abstract class TreeViewerColumnSorter
 
   /**
    * Constructor.
+   * 
    * @param parent The parent viewer.
    * @throws NullPointerException If argument is null.
    */
@@ -83,6 +84,7 @@ public abstract class TreeViewerColumnSorter
 
   /**
    * Gets the currently selected column.
+   * 
    * @return The selected column.
    */
   public TreeColumn getSelectedColumn() {
@@ -109,7 +111,7 @@ public abstract class TreeViewerColumnSorter
     }
     TreePath[] expandedTreePaths = viewer.getExpandedTreePaths();
 
-    selectedColumn = (TreeColumn) e.widget;
+    selectedColumn = (TreeColumn)e.widget;
     Tree tree = selectedColumn.getParent();
     TreeColumn previousColumn = tree.getSortColumn();
     sortDirection = tree.getSortDirection();
@@ -121,7 +123,9 @@ public abstract class TreeViewerColumnSorter
       sortDirection = SWT.UP;
       viewer.setComparator(this);
     }
+    tree.setRedraw(false);
     viewer.refresh();
+    tree.setRedraw(true);
     tree.setSortDirection(sortDirection);
 
     viewer.setExpandedTreePaths(expandedTreePaths);
@@ -144,4 +148,14 @@ public abstract class TreeViewerColumnSorter
    */
   protected abstract int doCompare(Viewer v, TreePath parentPath, Object e1,
       Object e2);
+
+  /**
+   * Gets the current sorting direction.
+   * 
+   * @return the current sorting direction.One of {@link SWT#NONE},
+   *         {@link SWT#UP}, {@link SWT#DOWN}.
+   */
+  protected int getSortDirection() {
+    return sortDirection;
+  }
 }
