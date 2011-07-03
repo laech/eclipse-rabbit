@@ -15,6 +15,7 @@
  */
 package rabbit.data.internal.xml.convert;
 
+import rabbit.data.internal.xml.DatatypeUtil;
 import rabbit.data.internal.xml.schema.events.FileEventType;
 import rabbit.data.store.model.FileEvent;
 
@@ -26,13 +27,14 @@ public class FileEventConverter extends
 
   public FileEventConverter() {
   }
-  
+
   @Override
   protected FileEventType doConvert(FileEvent element) {
     final FileEventType type = new FileEventType();
     type.setDuration(element.getInterval().toDurationMillis());
-    type.setStartTime(element.getInterval().getStartMillis());
     type.setFilePath(element.getFilePath().toString());
+    type.setIntervalArray(
+        DatatypeUtil.toIntervalArrayString(element.getInterval()));
     return type;
   }
 

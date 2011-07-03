@@ -221,6 +221,24 @@
       <xs:minInclusive value="0" />
     </xs:restriction>
   </xs:simpleType>
+  
+  <!--
+    Represents an "array" of intervals, the format is:
+    
+    startTimeMillis:durationMillis;startTimeMillis:durationMillis
+    
+    13498347961:1234;133987344:485920
+    
+    startTimeMillis the the start time of the interval in milliseconds,
+    durationMillis is the duration of the interval, startTimeMillis and durationMillis
+    are separated by a ':'. If there is more than one pair of these,
+    they will be separated by a ';'.
+    
+    Added in Rabbit 1.3.
+   -->
+  <xs:simpleType name="intervalArrayType">
+    <xs:restriction base="xs:string" />
+  </xs:simpleType>
 
   <!-- 
     Represents an interval which has a start time and a duration from 
@@ -228,13 +246,13 @@
     to avoid creating intermediate objects as they will be converted to
     more specific Java types later.
     
-    This type is added in Rabbit 1.3, the startTime attribute is therefore
-    0 for events before 1.3.
+    This type is added in Rabbit 1.3, the durationArray attribute is therefore
+    null for events before 1.3.
   -->
   <xs:complexType name="intervalEventType">
     <xs:complexContent>
       <xs:extension base="durationEventType">
-  	    <xs:attribute name="startTime" type="dateTimeMillisType" use="required" />
+        <xs:attribute name="intervalArray" type="intervalArrayType" use="optional" />
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>

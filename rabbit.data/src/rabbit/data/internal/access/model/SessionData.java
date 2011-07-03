@@ -21,11 +21,11 @@ import rabbit.data.access.model.WorkspaceStorage;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.collect.ImmutableMap;
+
 import org.joda.time.Duration;
 import org.joda.time.LocalDate;
-import org.joda.time.LocalTime;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import javax.annotation.Nullable;
@@ -46,26 +46,18 @@ public class SessionData implements ISessionData {
    * @param date The date of the session.
    * @param workspace The workspace of the session.
    * @param duration The duration of the session.
-   * @param time The time of the session (this is nullable for backward
-   *        compatibility reason).
    * @throws NullPointerException If {@code date}, {@code duration},
    *         {@code workspace} is <code>null</code>.
    */
   public SessionData(
       LocalDate date,
       WorkspaceStorage workspace,
-      Duration duration,
-      @Nullable LocalTime time) {
+      Duration duration) {
 
-    final float loadFactor = 1;
-    final int capacity = time == null ? 3 : 4;
-    data = new HashMap<IKey<? extends Object>, Object>(capacity, loadFactor);
-    data.put(DATE, checkNotNull(date, "date"));
-    data.put(DURATION, checkNotNull(duration, "duration"));
-    data.put(WORKSPACE, checkNotNull(workspace, "workspace"));
-    if (time != null) {
-      data.put(TIME, time);
-    }
+    data = ImmutableMap.of(
+        DATE, checkNotNull(date, "date"),
+        DURATION, checkNotNull(duration, "duration"),
+        WORKSPACE, checkNotNull(workspace, "workspace"));
   }
 
   @SuppressWarnings("unchecked")

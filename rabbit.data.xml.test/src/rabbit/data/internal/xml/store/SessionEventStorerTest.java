@@ -17,6 +17,7 @@ package rabbit.data.internal.xml.store;
 
 import rabbit.data.internal.xml.DataStore;
 import rabbit.data.internal.xml.convert.SessionEventConverter;
+import rabbit.data.internal.xml.merge.SessionEventTypeMerger;
 import rabbit.data.internal.xml.schema.events.SessionEventListType;
 import rabbit.data.internal.xml.schema.events.SessionEventType;
 import rabbit.data.store.model.SessionEvent;
@@ -44,8 +45,10 @@ public class SessionEventStorerTest extends
 
   @Override
   protected SessionEventStorer createStorer() {
-    return new SessionEventStorer(new SessionEventConverter(),
-                                  DataStore.SESSION_STORE);
+    return new SessionEventStorer(
+        new SessionEventConverter(),
+        new SessionEventTypeMerger(),
+        DataStore.SESSION_STORE);
   }
 
   @Override

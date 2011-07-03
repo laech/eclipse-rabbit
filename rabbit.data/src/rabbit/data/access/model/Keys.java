@@ -22,7 +22,6 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.jdt.core.IJavaElement;
 import org.joda.time.Duration;
 import org.joda.time.LocalDate;
-import org.joda.time.LocalTime;
 
 import java.util.Set;
 
@@ -91,11 +90,6 @@ public class Keys {
    * Key for a workspace.
    */
   public static final IKey<WorkspaceStorage> WORKSPACE = Key.create();
-  
-  /**
-   * Key for a time.
-   */
-  public static final IKey<LocalTime> TIME = Key.create();
   
   private Keys() {}
 }

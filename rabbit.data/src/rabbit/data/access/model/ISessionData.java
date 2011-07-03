@@ -17,15 +17,12 @@ package rabbit.data.access.model;
 
 import org.joda.time.Duration;
 import org.joda.time.LocalDate;
-import org.joda.time.LocalTime;
 
 /**
  * Contains session data information.
  * <p>
  * Values represented by the keys defined in this interface are not null.
  * </p>
- * 
- * @noimplement
  */
 public interface ISessionData extends IData {
 
@@ -33,11 +30,6 @@ public interface ISessionData extends IData {
    * Key for the date.
    */
   IKey<LocalDate> DATE = Keys.DATE;
-
-  /**
-   * Key for the time.
-   */
-  IKey<LocalTime> TIME = Keys.TIME;
 
   /**
    * Key for the workspace.

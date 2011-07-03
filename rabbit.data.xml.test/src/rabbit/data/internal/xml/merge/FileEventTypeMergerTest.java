@@ -15,6 +15,7 @@
  */
 package rabbit.data.internal.xml.merge;
 
+import rabbit.data.internal.xml.DatatypeUtil;
 import rabbit.data.internal.xml.merge.FileEventTypeMerger;
 import rabbit.data.internal.xml.schema.events.FileEventType;
 
@@ -105,43 +106,54 @@ public class FileEventTypeMergerTest extends AbstractMergerTest<FileEventType> {
 
   @Override
   public void testMerge() throws Exception {
-    FileEventType t1 = createTargetType();
+    final FileEventType t1 = createTargetType();
     t1.setDuration(100);
+    t1.setIntervalArray("100:200");
 
-    FileEventType t2 = createTargetTypeDiff();
+    final FileEventType t2 = createTargetTypeDiff();
     t2.setFilePath(t1.getFilePath());
     t2.setDuration(3000);
+    t2.setIntervalArray("4000:12");
 
-    String fileId = t1.getFilePath();
-    long totalDuration = t1.getDuration() + t2.getDuration();
+    final String fileId = t1.getFilePath();
+    final long totalDuration = t1.getDuration() + t2.getDuration();
+    final String interval = DatatypeUtil.toIntervalArrayString(
+        t1.getIntervalArray(), t2.getIntervalArray());
 
-    FileEventType result = merger.merge(t1, t2);
+    final FileEventType result = merger.merge(t1, t2);
     assertEquals(fileId, result.getFilePath());
     assertEquals(totalDuration, result.getDuration());
+    assertEquals(interval, result.getIntervalArray());
   }
 
   @Override
   public void testMerge_notModifyParams() throws Exception {
-    String fileId = "amAnCommandId";
-    int duration1 = 10010;
-    int duration2 = 187341;
-    
-    FileEventType type1 = new FileEventType();
+    final String fileId = "amAnCommandId";
+    final int duration1 = 10010;
+    final int duration2 = 187341;
+    final String interval1 = "1000:1";
+    final String interval2 = "19999:2";
+
+    final FileEventType type1 = new FileEventType();
     type1.setFilePath(fileId);
     type1.setDuration(duration1);
+    type1.setIntervalArray(interval1);
     FileEventType type2 = new FileEventType();
     type2.setFilePath(fileId);
     type2.setDuration(duration2);
-    
-    FileEventType result = merger.merge(type1, type2);
+    type2.setIntervalArray(interval2);
+
+    final FileEventType result = merger.merge(type1, type2);
     assertNotSame(type1, result);
     assertNotSame(type2, result);
     assertEquals(fileId, type1.getFilePath());
     assertEquals(duration1, type1.getDuration());
+    assertEquals(interval1, type1.getIntervalArray());
     assertEquals(fileId, type2.getFilePath());
     assertEquals(duration2, type2.getDuration());
+    assertEquals(interval2, type2.getIntervalArray());
   }
-  
+
   @Override
   protected FileEventTypeMerger createMerger() {
     return new FileEventTypeMerger();
@@ -152,6 +164,7 @@ public class FileEventTypeMergerTest extends AbstractMergerTest<FileEventType> {
     FileEventType type = new FileEventType();
     type.setFilePath("afileId");
     type.setDuration(10);
+    type.setIntervalArray("2:3");
     return type;
   }
 
@@ -160,6 +173,7 @@ public class FileEventTypeMergerTest extends AbstractMergerTest<FileEventType> {
     FileEventType type = new FileEventType();
     type.setFilePath("afileIdabcdefg123");
     type.setDuration(110);
+    type.setIntervalArray("1:2");
     return type;
   }
 

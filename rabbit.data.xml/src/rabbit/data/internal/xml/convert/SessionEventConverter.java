@@ -15,15 +15,16 @@
  */
 package rabbit.data.internal.xml.convert;
 
+import rabbit.data.internal.xml.DatatypeUtil;
 import rabbit.data.internal.xml.schema.events.SessionEventType;
 import rabbit.data.store.model.SessionEvent;
 
 /**
  * Converts {@link SessionEvent} to {@link SessionEventType}.
  */
-public class SessionEventConverter extends 
+public class SessionEventConverter extends
     AbstractConverter<SessionEvent, SessionEventType> {
-  
+
   public SessionEventConverter() {
   }
 
@@ -31,7 +32,8 @@ public class SessionEventConverter extends
   protected SessionEventType doConvert(SessionEvent event) {
     SessionEventType type = new SessionEventType();
     type.setDuration(event.getInterval().toDurationMillis());
-    type.setStartTime(event.getInterval().getStartMillis());
+    type.setIntervalArray(
+        DatatypeUtil.toIntervalArrayString(event.getInterval()));
     return type;
   }
 

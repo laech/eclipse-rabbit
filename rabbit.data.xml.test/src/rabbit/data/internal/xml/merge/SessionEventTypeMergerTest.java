@@ -15,8 +15,6 @@
  */
 package rabbit.data.internal.xml.merge;
 
-import rabbit.data.internal.xml.merge.AbstractMerger;
-import rabbit.data.internal.xml.merge.SessionEventTypeMerger;
 import rabbit.data.internal.xml.schema.events.SessionEventType;
 
 import static org.junit.Assert.assertEquals;
@@ -31,7 +29,7 @@ import org.junit.Test;
  */
 public class SessionEventTypeMergerTest extends
     AbstractMergerTest<SessionEventType> {
-  
+
   @Override
   protected AbstractMerger<SessionEventType> createMerger() {
     return new SessionEventTypeMerger();
@@ -41,6 +39,7 @@ public class SessionEventTypeMergerTest extends
   protected SessionEventType createTargetType() {
     SessionEventType type = new SessionEventType();
     type.setDuration(109);
+    type.setIntervalArray("100:100");
     return type;
   }
 
@@ -58,7 +57,9 @@ public class SessionEventTypeMergerTest extends
 
   @Override
   public void testIsMergeable() throws Exception {
-    assertTrue(merger.isMergeable(new SessionEventType(), new SessionEventType()));
+    assertTrue(merger.isMergeable(
+        new SessionEventType(),
+        new SessionEventType()));
   }
 
   @Override
@@ -67,28 +68,36 @@ public class SessionEventTypeMergerTest extends
     int duration2 = 120934;
     SessionEventType t1 = new SessionEventType();
     t1.setDuration(duration1);
+    t1.setIntervalArray("100:200;400:100");
     SessionEventType t2 = new SessionEventType();
     t2.setDuration(duration2);
-    
+    t2.setIntervalArray("400:1");
+
     SessionEventType result = merger.merge(t1, t2);
     assertEquals(duration1 + duration2, result.getDuration());
+    assertEquals(t1.getIntervalArray() + ";" + t2.getIntervalArray(),
+        result.getIntervalArray());
   }
 
   @Override
   public void testMerge_notModifyParams() throws Exception {
-    int duration1 = 98123;
-    int duration2 = 12934;
-    SessionEventType t1 = new SessionEventType();
+    final int duration1 = 98123;
+    final int duration2 = 12934;
+    final String interval1 = "100:200";
+    final String interval2 = "200:300;500:600";
+    final SessionEventType t1 = new SessionEventType();
     t1.setDuration(duration1);
-    SessionEventType t2 = new SessionEventType();
+    t1.setIntervalArray(interval1);
+    final SessionEventType t2 = new SessionEventType();
     t2.setDuration(duration2);
-    
-    SessionEventType result = merger.merge(t1, t2);
+    t2.setIntervalArray(interval2);
+
+    final SessionEventType result = merger.merge(t1, t2);
     assertNotSame(t1, result);
     assertNotSame(t2, result);
     assertEquals(duration1, t1.getDuration());
     assertEquals(duration2, t2.getDuration());
-    assertEquals(duration1 + duration2, result.getDuration());
+    assertEquals(interval1, t1.getIntervalArray());
+    assertEquals(interval2, t2.getIntervalArray());
   }
-
 }

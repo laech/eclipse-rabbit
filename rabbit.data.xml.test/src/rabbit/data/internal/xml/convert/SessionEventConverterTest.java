@@ -15,6 +15,7 @@
  */
 package rabbit.data.internal.xml.convert;
 
+import rabbit.data.internal.xml.DatatypeUtil;
 import rabbit.data.internal.xml.schema.events.SessionEventType;
 import rabbit.data.store.model.SessionEvent;
 
@@ -38,12 +39,14 @@ public class SessionEventConverterTest extends
     Interval interval = new Interval(101, 10000);
     SessionEventType type = converter.convert(new SessionEvent(interval));
     assertEquals(interval.toDurationMillis(), type.getDuration());
-    assertEquals(interval.getStartMillis(), type.getStartTime());
+    assertEquals(DatatypeUtil.toIntervalArrayString(interval),
+        type.getIntervalArray());
 
     interval = new Interval(100002, 101010101);
     type = converter.convert(new SessionEvent(interval));
     assertEquals(interval.toDurationMillis(), type.getDuration());
-    assertEquals(interval.getStartMillis(), type.getStartTime());
+    assertEquals(DatatypeUtil.toIntervalArrayString(interval),
+        type.getIntervalArray());
   }
 
 }

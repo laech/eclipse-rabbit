@@ -57,11 +57,6 @@ public class SessionDataTest {
   }
 
   @Test
-  public void shouldReturnTheTime() throws Exception {
-    assertThat(data.get(ISessionData.TIME), is(time));
-  }
-
-  @Test
   public void shouldReturnTheWorkspace() {
     assertThat(data.get(ISessionData.WORKSPACE), is(workspace));
   }
@@ -91,11 +86,10 @@ public class SessionDataTest {
   }
 
   /**
-   * @see SessionData#SessionData(LocalDate, WorkspaceStorage, Duration,
-   *      LocalTime)
+   * @see SessionData#SessionData(LocalDate, WorkspaceStorage, Duration)
    */
   private SessionData create(LocalDate date, WorkspaceStorage workspace,
       Duration duration, LocalTime time) {
-    return new SessionData(date, workspace, duration, time);
+    return new SessionData(date, workspace, duration);
   }
 }

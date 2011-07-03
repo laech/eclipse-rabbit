@@ -33,7 +33,6 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Path;
 import org.joda.time.Duration;
 import org.joda.time.LocalDate;
-import org.joda.time.LocalTime;
 
 import java.util.Collection;
 
@@ -57,11 +56,9 @@ public class FileDataAccessor extends
   @Override
   protected IFileData createDataNode(LocalDate date, WorkspaceStorage ws,
       FileEventType type) throws Exception {
-    final long startTime = type.getStartTime();
-    final LocalTime time = startTime > 0 ? new LocalTime(startTime) : null;
     final IFile file = workspaceRoot().getFile(new Path(type.getFilePath()));
     final Duration duration = new Duration(type.getDuration());
-    return new FileData(date, ws, duration, file, time);
+    return new FileData(date, ws, duration, file);
   }
 
   @Override

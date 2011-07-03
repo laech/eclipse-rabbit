@@ -15,13 +15,14 @@
  */
 package rabbit.data.internal.xml.merge;
 
+import rabbit.data.internal.xml.DatatypeUtil;
 import rabbit.data.internal.xml.schema.events.FileEventType;
 
 /**
  * Merger for {@link FileEventType}.
  */
 public class FileEventTypeMerger extends AbstractMerger<FileEventType> {
-  
+
   public FileEventTypeMerger() {
   }
 
@@ -30,12 +31,15 @@ public class FileEventTypeMerger extends AbstractMerger<FileEventType> {
     FileEventType result = new FileEventType();
     result.setFilePath(t1.getFilePath());
     result.setDuration(t1.getDuration() + t2.getDuration());
+    result.setIntervalArray(DatatypeUtil.toIntervalArrayString(
+        t1.getIntervalArray(), t2.getIntervalArray()));
     return result;
   }
 
   @Override
   public boolean doIsMergeable(FileEventType t1, FileEventType t2) {
-    return (t1.getFilePath() != null) && (t1.getFilePath().equals(t2.getFilePath()));
+    return (t1.getFilePath() != null)
+        && (t1.getFilePath().equals(t2.getFilePath()));
   }
 
 }

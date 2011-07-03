@@ -27,7 +27,6 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.Path;
 import org.joda.time.Duration;
 import org.joda.time.LocalDate;
-import org.joda.time.LocalTime;
 import org.junit.Test;
 
 /**
@@ -38,20 +37,10 @@ public class FileDataTest {
   private final IFile file = mock(IFile.class);
   private final LocalDate date = new LocalDate();
   private final Duration duration = new Duration(11);
-  private final LocalTime time = new LocalTime();
   private final WorkspaceStorage workspace = new WorkspaceStorage(
       new Path("/a"), new Path("/b"));
 
-  private final FileData data = create(date, workspace, duration, file, time);
-
-  @Test
-  public void shouldAllowToBeConstructedWithANullTime() throws Exception {
-    /*
-     * Time is allowed to be null because data don't have "time" before 1.3
-     */
-    create(date, workspace, duration, file, null);
-    // No exception
-  }
+  private final FileData data = create(date, workspace, duration, file);
 
   @Test
   public void shouldReturnNullIfKeyIsNull() {
@@ -74,45 +63,38 @@ public class FileDataTest {
   }
 
   @Test
-  public void shouldReturnTheTime() throws Exception {
-    assertThat(data.get(IFileData.TIME), is(time));
-  }
-
-  @Test
   public void shouldReturnTheWorkspace() {
     assertThat(data.get(IFileData.WORKSPACE), is(workspace));
   }
 
   @Test(expected = NullPointerException.class)
   public void shouldThrowNullPointerExceptionIfConstructedWithoutADate() {
-    create(null, workspace, duration, file, time);
+    create(null, workspace, duration, file);
   }
 
   @Test(expected = NullPointerException.class)
   public void shouldThrowNullPointerExceptionIfConstructedWithoutADuration() {
-    create(date, workspace, null, file, time);
+    create(date, workspace, null, file);
   }
 
   @Test(expected = NullPointerException.class)
   public void shouldThrowNullPointerExceptionIfConstructedWithoutAFile() {
-    create(date, workspace, duration, null, time);
+    create(date, workspace, duration, null);
   }
 
   @Test(expected = NullPointerException.class)
   public void shouldThrowNullPointerExceptionIfConstructedWithoutAWorkspace() {
-    create(date, null, duration, file, time);
+    create(date, null, duration, file);
   }
 
   /**
-   * @see FileData#FileData(LocalDate, WorkspaceStorage, Duration, IFile,
-   *      LocalTime)
+   * @see FileData#FileData(LocalDate, WorkspaceStorage, Duration, IFile)
    */
   private FileData create(
       LocalDate date,
       WorkspaceStorage workspace,
       Duration duration,
-      IFile file,
-      LocalTime time) {
-    return new FileData(date, workspace, duration, file, time);
+      IFile file) {
+    return new FileData(date, workspace, duration, file);
   }
 }

@@ -17,6 +17,7 @@ package rabbit.data.internal.xml.store;
 
 import rabbit.data.internal.xml.DataStore;
 import rabbit.data.internal.xml.convert.FileEventConverter;
+import rabbit.data.internal.xml.merge.FileEventTypeMerger;
 import rabbit.data.internal.xml.schema.events.FileEventListType;
 import rabbit.data.internal.xml.schema.events.FileEventType;
 import rabbit.data.store.model.FileEvent;
@@ -35,8 +36,10 @@ public class FileEventStorerTest extends
 
   @Override
   protected FileEventStorer createStorer() {
-    return new FileEventStorer(new FileEventConverter(),
-                               DataStore.FILE_STORE);
+    return new FileEventStorer(
+        new FileEventConverter(),
+        new FileEventTypeMerger(),
+        DataStore.FILE_STORE);
   }
 
   @Override
@@ -54,5 +57,4 @@ public class FileEventStorerTest extends
     return Objects.equal(t1.getFilePath(), t2.getFilePath())
         && t1.getDuration() == t2.getDuration();
   }
-
 }

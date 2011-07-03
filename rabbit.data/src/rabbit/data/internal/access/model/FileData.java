@@ -21,12 +21,12 @@ import rabbit.data.access.model.WorkspaceStorage;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.collect.ImmutableMap;
+
 import org.eclipse.core.resources.IFile;
 import org.joda.time.Duration;
 import org.joda.time.LocalDate;
-import org.joda.time.LocalTime;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import javax.annotation.Nullable;
@@ -48,8 +48,6 @@ public class FileData implements IFileData {
    * @param workspace The workspace of the session.
    * @param duration The duration of the session.
    * @param file The workspace file.
-   * @param time The time of the session (this is nullable for backward
-   *        compatibility reason).
    * @throws NullPointerException If {@code date}, {@code workspace},
    *         {@code duration}, or {@code file} is <code>null</code>.
    */
@@ -57,19 +55,13 @@ public class FileData implements IFileData {
       LocalDate date,
       WorkspaceStorage workspace,
       Duration duration,
-      IFile file,
-      @Nullable LocalTime time) {
+      IFile file) {
 
-    final float loadFactor = 1;
-    final int capacity = time == null ? 4 : 5;
-    data = new HashMap<IKey<? extends Object>, Object>(capacity, loadFactor);
-    data.put(DATE, checkNotNull(date, "date"));
-    data.put(WORKSPACE, checkNotNull(workspace, "workspace"));
-    data.put(DURATION, checkNotNull(duration, "duration"));
-    data.put(FILE, checkNotNull(file, "file"));
-    if (time != null) {
-      data.put(TIME, time);
-    }
+    data = ImmutableMap.of(
+        DATE, checkNotNull(date, "date"),
+        WORKSPACE, checkNotNull(workspace, "workspace"),
+        DURATION, checkNotNull(duration, "duration"),
+        FILE, checkNotNull(file, "file"));
   }
 
   @SuppressWarnings("unchecked")

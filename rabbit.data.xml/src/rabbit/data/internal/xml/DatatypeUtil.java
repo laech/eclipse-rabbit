@@ -15,11 +15,17 @@
  */
 package rabbit.data.internal.xml;
 
+import rabbit.data.internal.xml.schema.events.IntervalEventType;
+
+import com.google.common.base.Strings;
+
 import org.joda.time.DateTime;
+import org.joda.time.Interval;
 import org.joda.time.LocalDate;
 
 import java.util.GregorianCalendar;
 
+import javax.annotation.Nullable;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeConstants;
 import javax.xml.datatype.DatatypeFactory;
@@ -59,7 +65,6 @@ public class DatatypeUtil {
    *         otherwise.
    */
   public static boolean isSameDate(DateTime date1, XMLGregorianCalendar date2) {
-
     return (date2.getYear() == date1.getYear())
         && (date2.getMonth() == date1.getMonthOfYear())
         && (date2.getDay() == date1.getDayOfMonth());
@@ -109,22 +114,26 @@ public class DatatypeUtil {
    * @return The converted calendar.
    */
   public static XMLGregorianCalendar toXmlDate(DateTime cal) {
-    return datatypeFactory.newXMLGregorianCalendarDate(cal.getYear(), cal
-        .getMonthOfYear(), cal.getDayOfMonth(),
+    return datatypeFactory.newXMLGregorianCalendarDate(
+        cal.getYear(),
+        cal.getMonthOfYear(),
+        cal.getDayOfMonth(),
         DatatypeConstants.FIELD_UNDEFINED);
   }
 
   /**
-   * Converts a {@link LocalDate} to {@link XMLGregorianCalendar}. The
-   * converted calendar is a date, which means only the year, month and day of
-   * month fields are set.
+   * Converts a {@link LocalDate} to {@link XMLGregorianCalendar}. The converted
+   * calendar is a date, which means only the year, month and day of month
+   * fields are set.
    * 
    * @param cal The calendar to convert from.
    * @return The converted calendar.
    */
   public static XMLGregorianCalendar toXmlDate(LocalDate cal) {
-    return datatypeFactory.newXMLGregorianCalendarDate(cal.getYear(), cal
-        .getMonthOfYear(), cal.getDayOfMonth(),
+    return datatypeFactory.newXMLGregorianCalendarDate(
+        cal.getYear(),
+        cal.getMonthOfYear(),
+        cal.getDayOfMonth(),
         DatatypeConstants.FIELD_UNDEFINED);
   }
 
@@ -137,5 +146,57 @@ public class DatatypeUtil {
    */
   public static XMLGregorianCalendar toXmlDateTime(GregorianCalendar cal) {
     return datatypeFactory.newXMLGregorianCalendar(cal);
+  }
+
+  /**
+   * Converts the given {@link Interval} to the format compatible for
+   * {@link IntervalEventType#setDurationArray(String)}.
+   * 
+   * @param interval the interval to convert.
+   * @return the formated string data type.
+   */
+  public static String toIntervalArrayString(Interval interval) {
+    return interval.getStartMillis() + ":" + interval.toDurationMillis();
+  }
+
+  /**
+   * Converts the given {@link Interval} to the format compatible for
+   * {@link IntervalEventType#setDurationArray(String)}, then merge it with an
+   * existing interval array string.
+   * 
+   * @param intervalArrayString the existing array string, can be
+   *        <code>null</code>.
+   * @param newInterval the new interval to convert and merge.
+   * @return a merged interval array string.
+   */
+  public static String toIntervalArrayString(
+      @Nullable String intervalArrayString, Interval newInterval) {
+    final String newString = toIntervalArrayString(newInterval);
+    return toIntervalArrayString(intervalArrayString, newString);
+  }
+
+  /**
+   * Merges two interval array strings together.
+   * 
+   * @param intervalArrayString1 array string 1, nullable.
+   * @param intervalArrayString2 array string 2, nullable.
+   * @return the new array string, or <code>null</code> if both strings are
+   *         <code>null</code>/empty.
+   */
+  public static String toIntervalArrayString(
+      @Nullable String intervalArrayString1,
+      @Nullable String intervalArrayString2) {
+    if (Strings.isNullOrEmpty(intervalArrayString1)) {
+      if (Strings.isNullOrEmpty(intervalArrayString2)) {
+        return null;
+      } else {
+        return intervalArrayString2;
+      }
+    }
+    if (Strings.isNullOrEmpty(intervalArrayString2)) {
+      return intervalArrayString1;
+    } else {
+      return intervalArrayString1 + ";" + intervalArrayString2;
+    }
   }
 }

@@ -15,13 +15,14 @@
  */
 package rabbit.data.internal.xml.merge;
 
+import rabbit.data.internal.xml.DatatypeUtil;
 import rabbit.data.internal.xml.schema.events.SessionEventType;
 
 /**
  * Merges {@link SessionEventType} elements.
  */
 public class SessionEventTypeMerger extends AbstractMerger<SessionEventType> {
-  
+
   public SessionEventTypeMerger() {
   }
 
@@ -33,8 +34,10 @@ public class SessionEventTypeMerger extends AbstractMerger<SessionEventType> {
 
   @Override
   protected SessionEventType doMerge(SessionEventType t1, SessionEventType t2) {
-    SessionEventType type = new SessionEventType();
+    final SessionEventType type = new SessionEventType();
     type.setDuration(t1.getDuration() + t2.getDuration());
+    type.setIntervalArray(DatatypeUtil.toIntervalArrayString(
+        t1.getIntervalArray(), t2.getIntervalArray()));
     return type;
   }
 

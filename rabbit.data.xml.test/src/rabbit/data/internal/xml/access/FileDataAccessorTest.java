@@ -18,7 +18,6 @@ package rabbit.data.internal.xml.access;
 import static rabbit.data.access.model.IFileData.DATE;
 import static rabbit.data.access.model.IFileData.DURATION;
 import static rabbit.data.access.model.IFileData.FILE;
-import static rabbit.data.access.model.IFileData.TIME;
 import static rabbit.data.access.model.IFileData.WORKSPACE;
 
 import rabbit.data.access.model.IFileData;
@@ -29,13 +28,10 @@ import rabbit.data.internal.xml.schema.events.FileEventListType;
 import rabbit.data.internal.xml.schema.events.FileEventType;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.Assert.assertThat;
 
 import org.eclipse.core.runtime.Path;
 import org.joda.time.LocalDate;
-import org.joda.time.LocalTime;
-import org.junit.Test;
 
 import java.util.List;
 
@@ -45,30 +41,6 @@ import java.util.List;
 public class FileDataAccessorTest extends
     AbstractAccessorTest2<IFileData, FileEventType, FileEventListType> {
 
-  @Test
-  public void localTimeIsNullIfStartTimeIs0() throws Exception {
-    final LocalDate date = new LocalDate();
-    final WorkspaceStorage workspace = new WorkspaceStorage(new Path("/"), null);
-    final FileEventType type = new FileEventType();
-    type.setStartTime(0); // <- time is 0
-    type.setDuration(19834);
-    type.setFilePath("/a/b");
-    final IFileData data = accessor.createDataNode(date, workspace, type);
-    assertThat(data.get(IFileData.TIME), is(nullValue()));
-  }
-
-  @Test
-  public void localTimeIsNullIfStartTimeIsNegative() throws Exception {
-    final LocalDate date = new LocalDate();
-    final WorkspaceStorage workspace = new WorkspaceStorage(new Path("/"), null);
-    final FileEventType type = new FileEventType();
-    type.setStartTime(-1); // <- time is negative
-    type.setDuration(19834);
-    type.setFilePath("/a/b");
-    final IFileData data = accessor.createDataNode(date, workspace, type);
-    assertThat(data.get(IFileData.TIME), is(nullValue()));
-  }
-
   @Override
   protected void assertValues(FileEventType expected, LocalDate expectedDate,
       WorkspaceStorage expectedWs, IFileData actual) {
@@ -77,7 +49,6 @@ public class FileDataAccessorTest extends
     assertThat(actual.get(WORKSPACE), is(expectedWs));
     assertThat(actual.get(FILE).getFullPath(),
         is(Path.fromPortableString(expected.getFilePath())));
-    assertThat(actual.get(TIME), is(new LocalTime(expected.getStartTime())));
   }
 
   @Override
@@ -95,7 +66,6 @@ public class FileDataAccessorTest extends
     final FileEventType type = new FileEventType();
     type.setDuration(1000);
     type.setFilePath("/project/file.txt");
-    type.setStartTime(1010);
     return type;
   }
 
