@@ -15,9 +15,11 @@
  */
 package rabbit.data.internal.xml.convert;
 
-import rabbit.data.internal.xml.DatatypeUtil;
+import rabbit.data.internal.xml.schema.events.IntervalType;
 import rabbit.data.internal.xml.schema.events.SessionEventType;
 import rabbit.data.store.model.SessionEvent;
+
+import org.joda.time.Interval;
 
 /**
  * Converts {@link SessionEvent} to {@link SessionEventType}.
@@ -30,10 +32,17 @@ public class SessionEventConverter extends
 
   @Override
   protected SessionEventType doConvert(SessionEvent event) {
-    SessionEventType type = new SessionEventType();
-    type.setDuration(event.getInterval().toDurationMillis());
-    type.setIntervalArray(
-        DatatypeUtil.toIntervalArrayString(event.getInterval()));
+    final Interval interval = event.getInterval();
+    final long start = interval.getStartMillis();
+    final long duration = interval.toDurationMillis();
+    final SessionEventType type = new SessionEventType();
+    type.setDuration(duration);
+
+    final IntervalType intervalType = new IntervalType();
+    intervalType.setDuration(duration);
+    intervalType.setStartTime(start);
+    type.getInterval().add(intervalType);
+
     return type;
   }
 

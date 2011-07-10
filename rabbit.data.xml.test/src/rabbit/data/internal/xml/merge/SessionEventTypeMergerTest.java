@@ -15,6 +15,7 @@
  */
 package rabbit.data.internal.xml.merge;
 
+import rabbit.data.internal.xml.schema.events.IntervalType;
 import rabbit.data.internal.xml.schema.events.SessionEventType;
 
 import static org.junit.Assert.assertEquals;
@@ -23,6 +24,8 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Ignore;
 import org.junit.Test;
+
+import java.util.Arrays;
 
 /**
  * @see SessionEventTypeMerger
@@ -37,9 +40,12 @@ public class SessionEventTypeMergerTest extends
 
   @Override
   protected SessionEventType createTargetType() {
-    SessionEventType type = new SessionEventType();
+    final SessionEventType type = new SessionEventType();
     type.setDuration(109);
-    type.setIntervalArray("100:100");
+    final IntervalType interval = new IntervalType();
+    interval.setStartTime(100);
+    interval.setDuration(1000);
+    type.getInterval().add(interval);
     return type;
   }
 
@@ -64,40 +70,69 @@ public class SessionEventTypeMergerTest extends
 
   @Override
   public void testMerge() throws Exception {
-    int duration1 = 9823;
-    int duration2 = 120934;
-    SessionEventType t1 = new SessionEventType();
-    t1.setDuration(duration1);
-    t1.setIntervalArray("100:200;400:100");
-    SessionEventType t2 = new SessionEventType();
-    t2.setDuration(duration2);
-    t2.setIntervalArray("400:1");
+    final int duration1 = 9823;
+    final int duration2 = 120934;
 
-    SessionEventType result = merger.merge(t1, t2);
+    final IntervalType interval1 = new IntervalType();
+    interval1.setDuration(100);
+    interval1.setStartTime(1000);
+
+    final IntervalType interval2 = new IntervalType();
+    interval2.setDuration(102);
+    interval2.setStartTime(2000);
+
+    final IntervalType interval3 = new IntervalType();
+    interval3.setDuration(1);
+    interval3.setStartTime(1020);
+
+    final SessionEventType t1 = new SessionEventType();
+    t1.setDuration(duration1);
+    t1.getInterval().add(interval1);
+    t1.getInterval().add(interval2);
+    final SessionEventType t2 = new SessionEventType();
+    t2.setDuration(duration2);
+    t2.getInterval().add(interval3);
+
+    final SessionEventType result = merger.merge(t1, t2);
     assertEquals(duration1 + duration2, result.getDuration());
-    assertEquals(t1.getIntervalArray() + ";" + t2.getIntervalArray(),
-        result.getIntervalArray());
+    assertTrue(result.getInterval().containsAll(
+        Arrays.asList(interval1, interval2, interval3)));
   }
 
   @Override
   public void testMerge_notModifyParams() throws Exception {
     final int duration1 = 98123;
     final int duration2 = 12934;
-    final String interval1 = "100:200";
-    final String interval2 = "200:300;500:600";
+    final int intervalStart1 = 1000;
+    final int intervalStart2 = 10000;
+    final int intervalDuration1 = 200;
+    final int intervalDuration2 = 1001;
+
+    final IntervalType interval1 = new IntervalType();
+    interval1.setDuration(intervalDuration1);
+    interval1.setStartTime(intervalStart1);
+
+    final IntervalType interval2 = new IntervalType();
+    interval2.setDuration(intervalDuration2);
+    interval2.setStartTime(intervalStart2);
+
     final SessionEventType t1 = new SessionEventType();
     t1.setDuration(duration1);
-    t1.setIntervalArray(interval1);
+    t1.getInterval().add(interval1);
     final SessionEventType t2 = new SessionEventType();
     t2.setDuration(duration2);
-    t2.setIntervalArray(interval2);
+    t2.getInterval().add(interval2);
 
     final SessionEventType result = merger.merge(t1, t2);
     assertNotSame(t1, result);
     assertNotSame(t2, result);
     assertEquals(duration1, t1.getDuration());
     assertEquals(duration2, t2.getDuration());
-    assertEquals(interval1, t1.getIntervalArray());
-    assertEquals(interval2, t2.getIntervalArray());
+    assertEquals(1, t1.getInterval().size());
+    assertEquals(intervalDuration1, t1.getInterval().get(0).getDuration());
+    assertEquals(intervalStart1, t1.getInterval().get(0).getStartTime());
+    assertEquals(1, t1.getInterval().size());
+    assertEquals(intervalDuration2, t2.getInterval().get(0).getDuration());
+    assertEquals(intervalStart2, t2.getInterval().get(0).getStartTime());
   }
 }

@@ -15,7 +15,6 @@
  */
 package rabbit.data.internal.xml.merge;
 
-import rabbit.data.internal.xml.DatatypeUtil;
 import rabbit.data.internal.xml.schema.events.FileEventType;
 
 /**
@@ -31,8 +30,8 @@ public class FileEventTypeMerger extends AbstractMerger<FileEventType> {
     FileEventType result = new FileEventType();
     result.setFilePath(t1.getFilePath());
     result.setDuration(t1.getDuration() + t2.getDuration());
-    result.setIntervalArray(DatatypeUtil.toIntervalArrayString(
-        t1.getIntervalArray(), t2.getIntervalArray()));
+    result.getInterval().addAll(t1.getInterval());
+    result.getInterval().addAll(t2.getInterval());
     return result;
   }
 

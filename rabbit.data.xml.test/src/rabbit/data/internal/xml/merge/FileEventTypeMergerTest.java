@@ -15,9 +15,8 @@
  */
 package rabbit.data.internal.xml.merge;
 
-import rabbit.data.internal.xml.DatatypeUtil;
-import rabbit.data.internal.xml.merge.FileEventTypeMerger;
 import rabbit.data.internal.xml.schema.events.FileEventType;
+import rabbit.data.internal.xml.schema.events.IntervalType;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -26,6 +25,8 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import org.junit.Test;
+
+import java.util.Arrays;
 
 /**
  * @see FileEventTypeMerger
@@ -106,24 +107,36 @@ public class FileEventTypeMergerTest extends AbstractMergerTest<FileEventType> {
 
   @Override
   public void testMerge() throws Exception {
+    final IntervalType interval1 = new IntervalType();
+    interval1.setDuration(100);
+    interval1.setStartTime(1000);
+
+    final IntervalType interval2 = new IntervalType();
+    interval2.setDuration(102);
+    interval2.setStartTime(2000);
+
+    final IntervalType interval3 = new IntervalType();
+    interval3.setDuration(1);
+    interval3.setStartTime(1020);
+
     final FileEventType t1 = createTargetType();
     t1.setDuration(100);
-    t1.setIntervalArray("100:200");
+    t1.getInterval().add(interval1);
 
     final FileEventType t2 = createTargetTypeDiff();
     t2.setFilePath(t1.getFilePath());
     t2.setDuration(3000);
-    t2.setIntervalArray("4000:12");
+    t2.getInterval().add(interval2);
+    t2.getInterval().add(interval3);
 
     final String fileId = t1.getFilePath();
     final long totalDuration = t1.getDuration() + t2.getDuration();
-    final String interval = DatatypeUtil.toIntervalArrayString(
-        t1.getIntervalArray(), t2.getIntervalArray());
 
     final FileEventType result = merger.merge(t1, t2);
     assertEquals(fileId, result.getFilePath());
     assertEquals(totalDuration, result.getDuration());
-    assertEquals(interval, result.getIntervalArray());
+    assertTrue(result.getInterval().containsAll(
+        Arrays.asList(interval1, interval2, interval3)));
   }
 
   @Override
@@ -131,27 +144,41 @@ public class FileEventTypeMergerTest extends AbstractMergerTest<FileEventType> {
     final String fileId = "amAnCommandId";
     final int duration1 = 10010;
     final int duration2 = 187341;
-    final String interval1 = "1000:1";
-    final String interval2 = "19999:2";
+    final int intervalStart1 = 1000;
+    final int intervalStart2 = 10000;
+    final int intervalDuration1 = 200;
+    final int intervalDuration2 = 1001;
 
-    final FileEventType type1 = new FileEventType();
-    type1.setFilePath(fileId);
-    type1.setDuration(duration1);
-    type1.setIntervalArray(interval1);
-    FileEventType type2 = new FileEventType();
-    type2.setFilePath(fileId);
-    type2.setDuration(duration2);
-    type2.setIntervalArray(interval2);
+    final IntervalType interval1 = new IntervalType();
+    interval1.setDuration(intervalDuration1);
+    interval1.setStartTime(intervalStart1);
 
-    final FileEventType result = merger.merge(type1, type2);
-    assertNotSame(type1, result);
-    assertNotSame(type2, result);
-    assertEquals(fileId, type1.getFilePath());
-    assertEquals(duration1, type1.getDuration());
-    assertEquals(interval1, type1.getIntervalArray());
-    assertEquals(fileId, type2.getFilePath());
-    assertEquals(duration2, type2.getDuration());
-    assertEquals(interval2, type2.getIntervalArray());
+    final IntervalType interval2 = new IntervalType();
+    interval2.setDuration(intervalDuration2);
+    interval2.setStartTime(intervalStart2);
+
+    final FileEventType t1 = new FileEventType();
+    t1.setFilePath(fileId);
+    t1.setDuration(duration1);
+    t1.getInterval().add(interval1);
+    final FileEventType t2 = new FileEventType();
+    t2.setFilePath(fileId);
+    t2.setDuration(duration2);
+    t2.getInterval().add(interval2);
+
+    final FileEventType result = merger.merge(t1, t2);
+    assertNotSame(t1, result);
+    assertNotSame(t2, result);
+    assertEquals(fileId, t1.getFilePath());
+    assertEquals(duration1, t1.getDuration());
+    assertEquals(fileId, t2.getFilePath());
+    assertEquals(duration2, t2.getDuration());
+    assertEquals(1, t1.getInterval().size());
+    assertEquals(intervalDuration1, t1.getInterval().get(0).getDuration());
+    assertEquals(intervalStart1, t1.getInterval().get(0).getStartTime());
+    assertEquals(1, t1.getInterval().size());
+    assertEquals(intervalDuration2, t2.getInterval().get(0).getDuration());
+    assertEquals(intervalStart2, t2.getInterval().get(0).getStartTime());
   }
 
   @Override
@@ -164,7 +191,11 @@ public class FileEventTypeMergerTest extends AbstractMergerTest<FileEventType> {
     FileEventType type = new FileEventType();
     type.setFilePath("afileId");
     type.setDuration(10);
-    type.setIntervalArray("2:3");
+
+    final IntervalType interval = new IntervalType();
+    interval.setStartTime(100);
+    interval.setDuration(1000);
+    type.getInterval().add(interval);
     return type;
   }
 
@@ -173,7 +204,11 @@ public class FileEventTypeMergerTest extends AbstractMergerTest<FileEventType> {
     FileEventType type = new FileEventType();
     type.setFilePath("afileIdabcdefg123");
     type.setDuration(110);
-    type.setIntervalArray("1:2");
+
+    final IntervalType interval = new IntervalType();
+    interval.setStartTime(200);
+    interval.setDuration(2000);
+    type.getInterval().add(interval);
     return type;
   }
 

@@ -15,7 +15,6 @@
  */
 package rabbit.data.internal.xml.convert;
 
-import rabbit.data.internal.xml.DatatypeUtil;
 import rabbit.data.internal.xml.schema.events.FileEventType;
 import rabbit.data.store.model.FileEvent;
 
@@ -42,7 +41,9 @@ public class FileEventConverterTest extends
     final FileEventType type = converter.convert(event);
     assertEquals(event.getFilePath().toString(), type.getFilePath());
     assertEquals(interval.toDurationMillis(), type.getDuration());
-    assertEquals(DatatypeUtil.toIntervalArrayString(interval),
-        type.getIntervalArray());
+    assertEquals(interval.getStartMillis(),
+        type.getInterval().get(0).getStartTime());
+    assertEquals(interval.toDurationMillis(),
+        type.getInterval().get(0).getDuration());
   }
 }

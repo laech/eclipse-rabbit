@@ -26,7 +26,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import org.joda.time.DateTime;
-import org.joda.time.Interval;
 import org.joda.time.LocalDate;
 import org.junit.Test;
 
@@ -118,67 +117,5 @@ public class DatatypeUtilTest {
     assertEquals(cal.get(Calendar.MINUTE), xmlCal.getMinute());
     assertEquals(cal.get(Calendar.SECOND), xmlCal.getSecond());
     assertEquals(cal.getTime(), xmlCal.toGregorianCalendar().getTime());
-  }
-
-  @Test
-  public void toToIntervalArrayString_Interval() throws Exception {
-    final String expected = "100:200";
-    final Interval interval = new Interval(100, 100 + 200);
-    final String actual = DatatypeUtil.toIntervalArrayString(interval);
-    assertEquals(expected, actual);
-  }
-
-  @Test
-  public void toIntervalArrayString_StringAndInterval() throws Exception {
-    final String expected = "100:200;300:100";
-    final Interval interval = new Interval(300, 300 + 100);
-    final String existing = "100:200";
-    final String actual = DatatypeUtil
-        .toIntervalArrayString(existing, interval);
-    assertEquals(expected, actual);
-  }
-
-  @Test
-  public void toIntervalArrayString_StringAndInterval_nullString() {
-    final String expected = "300:100";
-    final Interval interval = new Interval(300, 300 + 100);
-    final String actual = DatatypeUtil.toIntervalArrayString(null, interval);
-    assertEquals(expected, actual);
-  }
-
-  @Test
-  public void toIntervalArrayString_StringAndString() {
-    final String expected = "100:100;100:500";
-    final String str1 = "100:100";
-    final String str2 = "100:500";
-    final String actual = DatatypeUtil.toIntervalArrayString(str1, str2);
-    assertEquals(expected, actual);
-  }
-
-  @Test
-  public void toIntervalArrayString_StringAndString_firstStringIsNull() {
-    final String expected = "100:200";
-    final String str1 = null;
-    final String str2 = "100:200";
-    final String actual = DatatypeUtil.toIntervalArrayString(str1, str2);
-    assertEquals(expected, actual);
-  }
-
-  @Test
-  public void toIntervalArrayString_StringAndString_secondStringIsNull() {
-    final String expected = "100:500";
-    final String str1 = "100:500";
-    final String str2 = null;
-    final String actual = DatatypeUtil.toIntervalArrayString(str1, str2);
-    assertEquals(expected, actual);
-  }
-
-  @Test
-  public void toIntervalArrayString_StringAndString_bothStringsAreNull() {
-    final String expected = null;
-    final String str1 = null;
-    final String str2 = null;
-    final String actual = DatatypeUtil.toIntervalArrayString(str1, str2);
-    assertEquals(expected, actual);
   }
 }

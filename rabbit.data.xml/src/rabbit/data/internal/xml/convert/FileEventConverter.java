@@ -15,9 +15,11 @@
  */
 package rabbit.data.internal.xml.convert;
 
-import rabbit.data.internal.xml.DatatypeUtil;
 import rabbit.data.internal.xml.schema.events.FileEventType;
+import rabbit.data.internal.xml.schema.events.IntervalType;
 import rabbit.data.store.model.FileEvent;
+
+import org.joda.time.Interval;
 
 /**
  * Converts from {@link FileEvent} to {@link FileEventType}.
@@ -30,11 +32,19 @@ public class FileEventConverter extends
 
   @Override
   protected FileEventType doConvert(FileEvent element) {
+    final Interval interval = element.getInterval();
+    final long start = interval.getStartMillis();
+    final long duration = interval.toDurationMillis();
+
     final FileEventType type = new FileEventType();
     type.setDuration(element.getInterval().toDurationMillis());
     type.setFilePath(element.getFilePath().toString());
-    type.setIntervalArray(
-        DatatypeUtil.toIntervalArrayString(element.getInterval()));
+
+    final IntervalType intervalType = new IntervalType();
+    intervalType.setDuration(duration);
+    intervalType.setStartTime(start);
+    type.getInterval().add(intervalType);
+
     return type;
   }
 
