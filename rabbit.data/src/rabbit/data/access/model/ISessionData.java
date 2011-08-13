@@ -1,5 +1,5 @@
 /*
- * Copyright 2010 The Rabbit Eclipse Plug-in Project
+ * Copyright 2011 The Rabbit Eclipse Plug-in Project
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -16,13 +16,15 @@
 package rabbit.data.access.model;
 
 import org.joda.time.Duration;
+import org.joda.time.Interval;
 import org.joda.time.LocalDate;
+
+import java.util.List;
 
 /**
  * Contains session data information.
- * <p>
+ * <p/>
  * Values represented by the keys defined in this interface are not null.
- * </p>
  */
 public interface ISessionData extends IData {
 
@@ -40,4 +42,9 @@ public interface ISessionData extends IData {
    * Key for the duration.
    */
   IKey<Duration> DURATION = Keys.DURATION;
+
+  /**
+   * Key for the session intervals.
+   */
+  IKey<List<Interval>> INTERVALS = Keys.INTERVALS;
 }

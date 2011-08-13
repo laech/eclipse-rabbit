@@ -15,17 +15,29 @@
  */
 package rabbit.data.internal.xml.access;
 
+import static rabbit.data.access.model.ISessionData.DATE;
+import static rabbit.data.access.model.ISessionData.DURATION;
+import static rabbit.data.access.model.ISessionData.WORKSPACE;
+import static rabbit.data.internal.xml.DataStore.SESSION_STORE;
+
 import rabbit.data.access.model.ISessionData;
 import rabbit.data.access.model.WorkspaceStorage;
-import rabbit.data.internal.xml.DataStore;
 import rabbit.data.internal.xml.DatatypeUtil;
 import rabbit.data.internal.xml.schema.events.EventListType;
+import rabbit.data.internal.xml.schema.events.IntervalType;
 import rabbit.data.internal.xml.schema.events.SessionEventListType;
 import rabbit.data.internal.xml.schema.events.SessionEventType;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static com.google.common.collect.Collections2.transform;
 
+import com.google.common.base.Function;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.core.IsNot.not;
+import static org.junit.Assert.assertThat;
+import static org.junit.matchers.JUnitMatchers.hasItems;
+
+import org.joda.time.Interval;
 import org.joda.time.LocalDate;
 
 import java.util.List;
@@ -39,15 +51,29 @@ public class SessionDataAccessorTest extends
   @Override
   protected void assertValues(SessionEventType expected,
       LocalDate expectedDate, WorkspaceStorage expectedWs, ISessionData actual) {
-    assertThat(actual.get(ISessionData.DATE), is(expectedDate));
-    assertThat(actual.get(ISessionData.WORKSPACE), is(expectedWs));
-    assertThat(actual.get(ISessionData.DURATION).getMillis(),
-        is(expected.getDuration()));
+    assertThat(actual.get(DATE), is(expectedDate));
+    assertThat(actual.get(WORKSPACE), is(expectedWs));
+    assertThat(actual.get(DURATION).getMillis(), is(expected.getDuration()));
+
+    List<Interval> actualIntervals = actual.get(ISessionData.INTERVALS);
+    List<IntervalType> types = expected.getInterval();
+    Interval[] expectedIntervals = transform(types,
+        new Function<IntervalType, Interval>() {
+          @Override
+          public Interval apply(IntervalType type) {
+            return new Interval(
+                type.getStartTime(),
+                type.getStartTime() + type.getDuration());
+          }
+        }).toArray(new Interval[types.size()]);
+    assertThat(types.size(), is(not(0)));
+    assertThat(actualIntervals.size(), is(types.size()));
+    assertThat(actualIntervals, hasItems(expectedIntervals));
   }
 
   @Override
   protected SessionDataAccessor create() {
-    return new SessionDataAccessor(DataStore.SESSION_STORE);
+    return new SessionDataAccessor(SESSION_STORE);
   }
 
   @Override
@@ -59,8 +85,16 @@ public class SessionDataAccessorTest extends
 
   @Override
   protected SessionEventType createElement() {
+    final IntervalType interval1 = new IntervalType();
+    interval1.setDuration(1000);
+    interval1.setStartTime(10);
+    final IntervalType interval2 = new IntervalType();
+    interval2.setDuration(2000);
+    interval2.setStartTime(20);
     final SessionEventType type = new SessionEventType();
     type.setDuration(19834);
+    type.getInterval().add(interval1);
+    type.getInterval().add(interval2);
     return type;
   }
 

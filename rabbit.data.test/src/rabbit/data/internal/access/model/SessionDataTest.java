@@ -15,7 +15,11 @@
  */
 package rabbit.data.internal.access.model;
 
-import rabbit.data.access.model.ISessionData;
+import static rabbit.data.access.model.ISessionData.DATE;
+import static rabbit.data.access.model.ISessionData.DURATION;
+import static rabbit.data.access.model.ISessionData.INTERVALS;
+import static rabbit.data.access.model.ISessionData.WORKSPACE;
+
 import rabbit.data.access.model.WorkspaceStorage;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -24,32 +28,27 @@ import static org.junit.Assert.assertThat;
 
 import org.eclipse.core.runtime.Path;
 import org.joda.time.Duration;
+import org.joda.time.Interval;
 import org.joda.time.LocalDate;
-import org.joda.time.LocalTime;
 import org.junit.Test;
+
+import static java.util.Arrays.asList;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @see SessionData
  */
 public class SessionDataTest {
 
-  private final LocalDate date = new LocalDate();
-  private final LocalTime time = new LocalTime();
-  private final Duration duration = new Duration(11);
-  private final WorkspaceStorage workspace = new WorkspaceStorage(
+  final LocalDate date = new LocalDate();
+  final Duration duration = new Duration(11);
+  final List<Interval> intervals = asList(new Interval(10, 100));
+  final WorkspaceStorage workspace = new WorkspaceStorage(
       new Path("/a"), new Path("/b"));
 
-  private final SessionData data = create(date, workspace, duration, time);
-
-  @Test
-  public void shouldReturnTheDate() {
-    assertThat(data.get(ISessionData.DATE), is(date));
-  }
-
-  @Test
-  public void shouldReturnTheDuration() {
-    assertThat(data.get(ISessionData.DURATION), is(duration));
-  }
+  final SessionData data = create(date, workspace, duration, intervals);
 
   @Test
   public void shouldReturnNullIfKeyIsNull() {
@@ -57,39 +56,51 @@ public class SessionDataTest {
   }
 
   @Test
+  public void shouldReturnTheDate() {
+    assertThat(data.get(DATE), is(date));
+  }
+
+  @Test
+  public void shouldReturnTheDuration() {
+    assertThat(data.get(DURATION), is(duration));
+  }
+
+  @Test
+  public void shouldReturnTheIntervals() {
+    assertThat(data.get(INTERVALS), is(intervals));
+  }
+
+  @Test(expected = UnsupportedOperationException.class)
+  public void shouldReturnTheIntervalsAsAnImmutableCollection() {
+    create(date, workspace, duration, new ArrayList<Interval>())
+        .get(INTERVALS).add(new Interval(1, 2));
+  }
+
+  @Test
   public void shouldReturnTheWorkspace() {
-    assertThat(data.get(ISessionData.WORKSPACE), is(workspace));
+    assertThat(data.get(WORKSPACE), is(workspace));
   }
 
   @Test(expected = NullPointerException.class)
   public void shouldThrowNullPointerExceptionIfConstructedWithoutADate() {
-    create(null, workspace, duration, time);
+    create(null, workspace, duration, intervals);
   }
 
   @Test(expected = NullPointerException.class)
   public void shouldThrowNullPointerExceptionIfConstructedWithoutADuration() {
-    create(date, workspace, null, time);
+    create(date, workspace, null, intervals);
   }
 
   @Test(expected = NullPointerException.class)
   public void shouldThrowNullPointerExceptionIfConstructedWithoutAWorkspace() {
-    create(date, null, duration, time);
-  }
-
-  @Test
-  public void shouldAllowToBeConstructedWithANullTime() throws Exception {
-    /*
-     * Time is allowed to be null because data don't have "time" before 1.3
-     */
-    create(date, workspace, duration, null);
-    // No exception
+    create(date, null, duration, intervals);
   }
 
   /**
-   * @see SessionData#SessionData(LocalDate, WorkspaceStorage, Duration)
+   * @see SessionData#SessionData(LocalDate, WorkspaceStorage, Duration, List)
    */
   private SessionData create(LocalDate date, WorkspaceStorage workspace,
-      Duration duration, LocalTime time) {
-    return new SessionData(date, workspace, duration);
+      Duration duration, List<Interval> intervals) {
+    return new SessionData(date, workspace, duration, intervals);
   }
 }

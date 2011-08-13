@@ -15,14 +15,18 @@
  */
 package rabbit.data.access.model;
 
+import static rabbit.data.access.model.Key.create;
+
 import rabbit.data.common.TaskId;
 
 import org.eclipse.core.commands.Command;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jdt.core.IJavaElement;
 import org.joda.time.Duration;
+import org.joda.time.Interval;
 import org.joda.time.LocalDate;
 
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -33,63 +37,68 @@ public class Keys {
   /**
    * Key for a command.
    */
-  public static final IKey<Command> COMMAND = Key.create();
-  
+  public static final IKey<Command> COMMAND = create();
+
   /**
    * Key for a count.
    */
-  public static final IKey<Integer> COUNT = Key.create();
-  
+  public static final IKey<Integer> COUNT = create();
+
   /**
    * Key for a date.
    */
-  public static final IKey<LocalDate> DATE = Key.create();
-  
+  public static final IKey<LocalDate> DATE = create();
+
   /**
    * Key for a duration.
    */
-  public static final IKey<Duration> DURATION = Key.create();
-  
+  public static final IKey<Duration> DURATION = create();
+
   /**
    * Key for a file.
    */
-  public static final IKey<IFile> FILE = Key.create();
-  
+  public static final IKey<IFile> FILE = create();
+
   /**
    * Key for a set of files.
    */
-  public static final IKey<Set<IFile>> FILES = Key.create();
-  
+  public static final IKey<Set<IFile>> FILES = create();
 
   /**
    * Key for a Java element.
    */
-  public static final IKey<IJavaElement> JAVA_ELEMENT = Key.create();
+  public static final IKey<IJavaElement> JAVA_ELEMENT = create();
 
   /**
    * Key for a launch configuration.
    */
-  public static final IKey<LaunchConfigurationDescriptor> LAUNCH_CONFIG = Key.create();
+  public static final IKey<LaunchConfigurationDescriptor> LAUNCH_CONFIG = create();
 
   /**
    * Key for a workbench part ID.
    */
-  public static final IKey<String> PART_ID = Key.create();
+  public static final IKey<String> PART_ID = create();
 
   /**
    * Key for a perspective ID.
    */
-  public static final IKey<String> PERSPECTIVE_ID = Key.create();
-  
+  public static final IKey<String> PERSPECTIVE_ID = create();
+
   /**
    * Key for a task ID.
    */
-  public static final IKey<TaskId> TASK_ID = Key.create();
+  public static final IKey<TaskId> TASK_ID = create();
 
   /**
    * Key for a workspace.
    */
-  public static final IKey<WorkspaceStorage> WORKSPACE = Key.create();
-  
-  private Keys() {}
+  public static final IKey<WorkspaceStorage> WORKSPACE = create();
+
+  /**
+   * Key for a list of intervals.
+   */
+  public static final IKey<List<Interval>> INTERVALS = create();
+
+  private Keys() {
+  }
 }

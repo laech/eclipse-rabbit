@@ -21,11 +21,14 @@ import rabbit.data.access.model.WorkspaceStorage;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
 import org.joda.time.Duration;
+import org.joda.time.Interval;
 import org.joda.time.LocalDate;
 
+import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Nullable;
@@ -46,18 +49,37 @@ public class SessionData implements ISessionData {
    * @param date The date of the session.
    * @param workspace The workspace of the session.
    * @param duration The duration of the session.
+   * @throws NullPointerException If any argument is {@code null}
+   */
+  public SessionData(
+      LocalDate date,
+      WorkspaceStorage workspace,
+      Duration duration) {
+    this(date, workspace, duration, ImmutableList.<Interval> of());
+  }
+
+  /**
+   * Constructor.
+   * 
+   * @param date The date of the session.
+   * @param workspace The workspace of the session.
+   * @param duration The duration of the session.
+   * @param intervals The intervals representing the active durations of the
+   *        session.
    * @throws NullPointerException If {@code date}, {@code duration},
    *         {@code workspace} is <code>null</code>.
    */
   public SessionData(
       LocalDate date,
       WorkspaceStorage workspace,
-      Duration duration) {
+      Duration duration,
+      List<Interval> intervals) {
 
     data = ImmutableMap.of(
         DATE, checkNotNull(date, "date"),
         DURATION, checkNotNull(duration, "duration"),
-        WORKSPACE, checkNotNull(workspace, "workspace"));
+        WORKSPACE, checkNotNull(workspace, "workspace"),
+        INTERVALS, ImmutableList.copyOf(checkNotNull(intervals, "intervals")));
   }
 
   @SuppressWarnings("unchecked")
