@@ -155,6 +155,9 @@ public final class TreePathContentProvider
 
     leaves = Collections.unmodifiableList(builder.build(newInput));
     
+    // TODO remove
+    System.out.println("nData: " + leaves.size());
+    
     setChanged();
     notifyObservers();
   }

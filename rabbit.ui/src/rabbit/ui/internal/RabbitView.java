@@ -50,7 +50,6 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.DateTime;
@@ -225,42 +224,48 @@ public final class RabbitView extends ViewPart {
     // Header:
     Composite header = toolkit.createComposite(right);
     GridLayout headerLayout = new GridLayout(3, false);
-    // if (isLinux) { // Make GTK widgets have less spaces:
-    headerLayout.marginHeight = 0;
-    // headerLayout.marginWidth = 0;
-    // headerLayout.horizontalSpacing = 0;
-    // headerLayout.verticalSpacing = 0;
-    // }
+    if (isLinux) { // Make GTK widgets have less spaces:
+      headerLayout.marginHeight = 0;
+      headerLayout.marginWidth = 0;
+      headerLayout.horizontalSpacing = 0;
+      headerLayout.verticalSpacing = 0;
+    }
     header.setLayout(headerLayout);
     GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER)
         .grab(true, false).applyTo(header);
     {
       int toolbarStyle = (!isLinux) ? SWT.FLAT : SWT.NONE;
 
-      // ToolBar bar = new ToolBar(header, toolbarStyle);
-      Button button = new Button(header, SWT.PUSH);
-      button.setBackground(header.getBackground());
-      button.setText("Select Metrics");
-      button.setToolTipText("Select metrics to view");
-      GridDataFactory.swtDefaults().hint(150, SWT.DEFAULT)
-          .align(SWT.BEGINNING, SWT.CENTER).applyTo(button);
-      loadPagesMenu(button.getShell(), button);
-
       ToolBar bar = new ToolBar(header, toolbarStyle);
-      // bar.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-      GridDataFactory.fillDefaults().grab(true, false).indent(5, 0)
-          .align(SWT.BEGINNING, SWT.CENTER).applyTo(bar);
-      toolkit.adapt(bar, false, false);
+      final ToolBarManager metricsBar = new ToolBarManager(bar);
+      metricsBar.add(new Action("Select Metrics", IAction.AS_PUSH_BUTTON) {
+        Menu menu = buildPagesMenu(metricsBar.getControl().getShell(), this);
+
+        @Override
+        public void runWithEvent(Event event) {
+          super.runWithEvent(event);
+          menu.setLocation(metricsBar.getControl().toDisplay(event.x, event.y));
+          menu.setVisible(true);
+        }
+      });
+      metricsBar.update(false);
+      GridDataFactory
+          .swtDefaults()
+          .hint(120, SWT.DEFAULT)
+          .align(SWT.BEGINNING, SWT.CENTER)
+          .applyTo(bar);
+
+      bar = new ToolBar(header, toolbarStyle);
+      bar.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
       extensionToolBar = new ToolBarManager(bar);
 
       bar = new ToolBar(header, toolbarStyle);
-      toolkit.adapt(bar, false, false);
       createToolBarItems(new ToolBarManager(bar));
     }
     displayPanel = toolkit.createComposite(right);
     displayPanel.setLayout(stackLayout);
-    GridDataFactory.fillDefaults().grab(true, true).span(3, 1).applyTo(
-        displayPanel);
+    GridDataFactory.fillDefaults().grab(true, true).span(3, 1)
+        .applyTo(displayPanel);
 
     // Greeting message:
     Composite cmp = toolkit.createComposite(displayPanel);
@@ -524,19 +529,10 @@ public final class RabbitView extends ViewPart {
     return tree;
   }
 
-  private void loadPagesMenu(Decorations menuParent, final Button menuTaget) {
+  private Menu buildPagesMenu(Decorations menuParent, final IAction menuTaget) {
     final SortedMap<CategoryDescriptor, List<PageDescriptor>> tree = loadPages();
 
     final Menu menu = new Menu(menuParent, SWT.POP_UP);
-    menuTaget.addSelectionListener(new SelectionAdapter() {
-      @Override
-      public void widgetSelected(SelectionEvent e) {
-        super.widgetSelected(e);
-        menu.setLocation(menuTaget.toDisplay(e.x, e.y));
-        menu.setVisible(true);
-      }
-    });
-
     final SelectionListener itemSelectionListener = new SelectionAdapter() {
       @Override
       public void widgetSelected(SelectionEvent e) {
@@ -576,6 +572,7 @@ public final class RabbitView extends ViewPart {
         }
       }
     }
+    return menu;
   }
 
   /**

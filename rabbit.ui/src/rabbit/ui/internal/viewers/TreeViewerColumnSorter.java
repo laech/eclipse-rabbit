@@ -105,6 +105,8 @@ public abstract class TreeViewerColumnSorter
 
   @Override
   public void widgetSelected(SelectionEvent e) {
+    long start = System.currentTimeMillis();
+
     Widget item = e.widget;
     if (!(item instanceof TreeColumn)) {
       return;
@@ -129,6 +131,8 @@ public abstract class TreeViewerColumnSorter
     tree.setSortDirection(sortDirection);
 
     viewer.setExpandedTreePaths(expandedTreePaths);
+
+    System.out.println("Sort: " + (System.currentTimeMillis() - start));
   }
 
   /**
