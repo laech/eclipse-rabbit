@@ -36,23 +36,23 @@ public class RabbitUITest {
     RabbitUI.getDefault().setDefaultDisplayDatePeriod(10);
     assertEquals(10, RabbitUI.getDefault().getDefaultDisplayDatePeriod());
   }
-
-  @Test
-  public void testExtensionId() {
-    assertTrue(Platform.getExtensionRegistry().getConfigurationElementsFor(
-        RabbitUI.UI_PAGE_EXTENSION_ID).length > 0);
-  }
-
-  @Test
-  public void testLoadRootElements() {
-    assertNotNull(RabbitUI.getDefault().loadRootPages());
-    assertFalse(RabbitUI.getDefault().loadRootPages().isEmpty());
-  }
-
-  @Test
-  public void testPluginId() {
-    assertEquals(RabbitUI.getDefault().getBundle().getSymbolicName(),
-        RabbitUI.PLUGIN_ID);
-  }
+//
+//  @Test
+//  public void testExtensionId() {
+//    assertTrue(Platform.getExtensionRegistry().getConfigurationElementsFor(
+//        RabbitUI.UI_PAGE_EXTENSION_ID).length > 0);
+//  }
+//
+//  @Test
+//  public void testLoadRootElements() {
+//    assertNotNull(RabbitUI.getDefault().loadRootPages());
+//    assertFalse(RabbitUI.getDefault().loadRootPages().isEmpty());
+//  }
+//
+//  @Test
+//  public void testPluginId() {
+//    assertEquals(RabbitUI.getDefault().getBundle().getSymbolicName(),
+//        RabbitUI.PLUGIN_ID);
+//  }
 
 }

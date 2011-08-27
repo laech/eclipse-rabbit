@@ -18,6 +18,14 @@ package rabbit.ui.internal;
 import rabbit.tracking.internal.TrackingPlugin;
 import rabbit.ui.IPage;
 import rabbit.ui.Preference;
+import rabbit.ui.internal.extension.CategoryDescriptor;
+import rabbit.ui.internal.extension.PageDescriptor;
+
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Maps.newTreeMap;
+
+import com.google.common.base.Objects;
+import com.google.common.collect.Lists;
 
 import org.eclipse.core.runtime.IProduct;
 import org.eclipse.core.runtime.Platform;
@@ -30,21 +38,28 @@ import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StackLayout;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.FillLayout;
-import org.eclipse.swt.layout.FormAttachment;
-import org.eclipse.swt.layout.FormData;
-import org.eclipse.swt.layout.FormLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.DateTime;
+import org.eclipse.swt.widgets.Decorations;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
-import org.eclipse.swt.widgets.Sash;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.IViewSite;
@@ -56,21 +71,38 @@ import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.progress.IWorkbenchSiteProgressService;
 
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.SortedMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
  * A view to show metrics.
  */
-public class RabbitView extends ViewPart {
+public final class RabbitView extends ViewPart {
+
+  private static class ImageDisposer implements DisposeListener {
+    private final Image image;
+
+    ImageDisposer(Image image) {
+      this.image = checkNotNull(image);
+    }
+
+    @Override
+    public void widgetDisposed(DisposeEvent e) {
+      image.dispose();
+    }
+  }
+
+  private static final CategoryDescriptor DEFAULT =
+      new CategoryDescriptor("", "");
 
   /** Preference constant for saving/restoring the view state. */
   private static final String PREF_RABBIT_VIEW = "rabbitView";
-
-  /** Preference constant for saving/restoring the view state. */
-  private static final String PREF_METRICS_WIDTH = "metricsPanelWidth";
 
   /**
    * Checks whether the two calendars has the same year, month, and day of
@@ -110,7 +142,7 @@ public class RabbitView extends ViewPart {
     widget.setMonth(date.get(Calendar.MONTH));
     widget.setDay(date.get(Calendar.DAY_OF_MONTH));
   }
-  
+
   /**
    * Gets the version of Eclipse. Not completely reliable.
    * 
@@ -128,7 +160,7 @@ public class RabbitView extends ViewPart {
       return "";
     }
   }
-  
+
   /**
    * A map containing page status (updated or not), if a page is not updated
    * (value return false), then it will be updated before it's displayed (when a
@@ -141,36 +173,34 @@ public class RabbitView extends ViewPart {
 
   /** A map containing pages and their tool bar items. */
   private Map<IPage, IContributionItem[]> pageToolItems;
-  
+
   /** A tool bar for pages to create their tool bar items. */
   private IToolBarManager extensionToolBar;
-  
+
   private FormToolkit toolkit;
 
   /**
-   * The layout of {@link #displayPanel}, used to show/hide pages on user 
+   * The layout of {@link #displayPanel}, used to show/hide pages on user
    * selection.
    */
   private StackLayout stackLayout;
 
   /** The composite to show the page that is selected by the user. */
   private Composite displayPanel;
-  
+
   /** The preferences for the pages. */
   private final Preference preferences;
-  
+
   /** True if this OS is Windows, false otherwise. */
-  private final boolean isWindowsOS = Platform.getOS().equals(Platform.OS_WIN32);
+  private final boolean isWindowsOS = Platform.getOS()
+      .equals(Platform.OS_WIN32);
 
   /** True if this OS is linux, false otherwise. */
   private final boolean isLinux = Platform.getOS().equals(Platform.OS_LINUX);
-  
+
   /** File to save/restore the view state, may be null. */
   private IMemento memento;
-  
-  /** The form data of the sash dividing the two panels. */
-  private FormData sashFormData;
-  
+
   /**
    * Constructs a new view.
    */
@@ -183,73 +213,46 @@ public class RabbitView extends ViewPart {
     stackLayout = new StackLayout();
     preferences = new Preference();
   }
-  
+
   @Override
   public void createPartControl(Composite parent) {
     Form form = toolkit.createForm(parent);
-    form.getBody().setLayout(new FormLayout());
+    // form.getBody().setLayout(new FillLayout());
 
-    sashFormData = new FormData();
-    sashFormData.width = 1;
-    sashFormData.top = new FormAttachment(0, 0);
-    sashFormData.left = new FormAttachment(0, 200);
-    sashFormData.bottom = new FormAttachment(100, 0);
-    final Sash sash = new Sash(form.getBody(), SWT.VERTICAL);
-    sash.setBackground(toolkit.getColors().getBorderColor());
-    sash.setLayoutData(sashFormData);
-    sash.addListener(SWT.Selection, new Listener() {
-      @Override
-      public void handleEvent(Event e) {
-        ((FormData) sash.getLayoutData()).left = new FormAttachment(0, e.x);
-        sash.getParent().layout();
-      }
-    });
-
-    // Extension list:
-    FormData leftData = new FormData();
-    leftData.top = new FormAttachment(0, 0);
-    leftData.left = new FormAttachment(0, 0);
-    leftData.right = new FormAttachment(sash, 0);
-    leftData.bottom = new FormAttachment(100, 0);
-    Form left = toolkit.createForm(form.getBody());
-    left.setText("Metrics");
-    left.setLayoutData(leftData);
-    left.getBody().setLayout(new FillLayout());
-    MetricsPanel list = new MetricsPanel(this);
-    list.createContents(left.getBody());
-
-    // Displaying area:
-    FormData rightData = new FormData();
-    rightData.top = new FormAttachment(0, 0);
-    rightData.left = new FormAttachment(sash, 0);
-    rightData.right = new FormAttachment(100, 0);
-    rightData.bottom = new FormAttachment(100, 0);
-
-    Composite right = toolkit.createComposite(form.getBody());
-    right.setLayoutData(rightData);
+    Composite right = form.getBody();
     GridLayoutFactory.fillDefaults().spacing(0, 0).applyTo(right);
 
     // Header:
     Composite header = toolkit.createComposite(right);
-    GridLayout headerLayout = new GridLayout(2, false);
-    if (isLinux) { // Make GTK widgets have less spaces:
-      headerLayout.marginHeight = 0;
-      headerLayout.marginWidth = 0;
-      headerLayout.horizontalSpacing = 0;
-      headerLayout.verticalSpacing = 0;
-    }
+    GridLayout headerLayout = new GridLayout(3, false);
+    // if (isLinux) { // Make GTK widgets have less spaces:
+    headerLayout.marginHeight = 0;
+    // headerLayout.marginWidth = 0;
+    // headerLayout.horizontalSpacing = 0;
+    // headerLayout.verticalSpacing = 0;
+    // }
     header.setLayout(headerLayout);
     GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER)
         .grab(true, false).applyTo(header);
     {
       int toolbarStyle = (!isLinux) ? SWT.FLAT : SWT.NONE;
-      
+
+      // ToolBar bar = new ToolBar(header, toolbarStyle);
+      Button button = new Button(header, SWT.PUSH);
+      button.setBackground(header.getBackground());
+      button.setText("Select Metrics");
+      button.setToolTipText("Select metrics to view");
+      GridDataFactory.swtDefaults().hint(150, SWT.DEFAULT)
+          .align(SWT.BEGINNING, SWT.CENTER).applyTo(button);
+      loadPagesMenu(button.getShell(), button);
+
       ToolBar bar = new ToolBar(header, toolbarStyle);
-      bar.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+      // bar.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+      GridDataFactory.fillDefaults().grab(true, false).indent(5, 0)
+          .align(SWT.BEGINNING, SWT.CENTER).applyTo(bar);
       toolkit.adapt(bar, false, false);
       extensionToolBar = new ToolBarManager(bar);
 
-      
       bar = new ToolBar(header, toolbarStyle);
       toolkit.adapt(bar, false, false);
       createToolBarItems(new ToolBarManager(bar));
@@ -272,12 +275,12 @@ public class RabbitView extends ViewPart {
     }
     stackLayout.topControl = cmp;
     displayPanel.layout();
-    
+
     if (memento != null) {
       restoreState(memento);
     }
   }
-  
+
   /**
    * Displays the given page.
    * 
@@ -299,7 +302,7 @@ public class RabbitView extends ViewPart {
         cmp.setLayout(new FillLayout());
         page.createContents(cmp);
         pages.put(page, cmp);
-        
+
         // Restores the state:
         if (memento != null) {
           page.onRestoreState(memento);
@@ -329,7 +332,7 @@ public class RabbitView extends ViewPart {
     stackLayout.topControl = cmp;
     displayPanel.layout();
   }
-  
+
   @Override
   public void dispose() {
     toolkit.dispose();
@@ -347,7 +350,6 @@ public class RabbitView extends ViewPart {
   @Override
   public void saveState(IMemento memento) {
     memento = memento.createChild(PREF_RABBIT_VIEW);
-    memento.putInteger(PREF_METRICS_WIDTH, sashFormData.left.offset);
     for (IPage page : pages.keySet()) {
       page.onSaveState(memento);
     }
@@ -426,7 +428,7 @@ public class RabbitView extends ViewPart {
       }
     });
   }
-  
+
   /**
    * Creates the tool bar items.
    * 
@@ -447,7 +449,7 @@ public class RabbitView extends ViewPart {
     if (isWindowsOS) { // Looks better:
       createSpace(toolBar);
     }
-    
+
     IAction refresh = new Action("Refresh") {
       @Override
       public void run() {
@@ -471,6 +473,7 @@ public class RabbitView extends ViewPart {
 
   /**
    * Restores the view state.
+   * 
    * @param memento The settings.
    */
   private void restoreState(IMemento memento) {
@@ -478,23 +481,103 @@ public class RabbitView extends ViewPart {
     if (memento == null) {
       return;
     }
-    Integer width = memento.getInteger(PREF_METRICS_WIDTH);
-    if (width != null && width > 0) {
-      sashFormData.left.offset = width;
+  }
+
+  private void updatePage(IPage page, Preference preference) {
+    final Job job = page.updateJob(preference);
+    if (job == null) {
+      return;
+    }
+
+    final IWorkbenchSiteProgressService service = (IWorkbenchSiteProgressService)
+        getSite().getService(IWorkbenchSiteProgressService.class);
+
+    if (service != null) {
+      service.schedule(job);
     }
   }
 
-  private void updatePage(final IPage page, final Preference preference) {
-    Job job = page.updateJob(preference);
-    if (job == null)
-      return;
-    
-    IWorkbenchSiteProgressService service = (IWorkbenchSiteProgressService) 
-        getSite().getService(IWorkbenchSiteProgressService.class);
-    
-    service.schedule(job);
+  private SortedMap<CategoryDescriptor, List<PageDescriptor>> loadPages() {
+    final RabbitUI ui = RabbitUI.getDefault();
+
+    final SortedMap<CategoryDescriptor, List<PageDescriptor>> tree = newTreeMap();
+    tree.put(DEFAULT, Lists.<PageDescriptor> newLinkedList());
+    for (CategoryDescriptor category : ui.getPageCategories()) {
+      tree.put(category, Lists.<PageDescriptor> newLinkedList());
+    }
+
+    for (PageDescriptor page : ui.getPages()) {
+      final String categoryId = page.getCategoryId();
+      boolean foundCategory = false;
+      for (Entry<CategoryDescriptor, List<PageDescriptor>> e : tree.entrySet()) {
+        if (Objects.equal(categoryId, e.getKey().getId())) {
+          e.getValue().add(page);
+          foundCategory = true;
+          break;
+        }
+      }
+      if (!foundCategory) {
+        tree.get(DEFAULT).add(page);
+      }
+    }
+
+    return tree;
   }
-  
+
+  private void loadPagesMenu(Decorations menuParent, final Button menuTaget) {
+    final SortedMap<CategoryDescriptor, List<PageDescriptor>> tree = loadPages();
+
+    final Menu menu = new Menu(menuParent, SWT.POP_UP);
+    menuTaget.addSelectionListener(new SelectionAdapter() {
+      @Override
+      public void widgetSelected(SelectionEvent e) {
+        super.widgetSelected(e);
+        menu.setLocation(menuTaget.toDisplay(e.x, e.y));
+        menu.setVisible(true);
+      }
+    });
+
+    final SelectionListener itemSelectionListener = new SelectionAdapter() {
+      @Override
+      public void widgetSelected(SelectionEvent e) {
+        super.widgetSelected(e);
+        final MenuItem item = (MenuItem)e.widget;
+        menuTaget.setText(item.getText());
+        display((IPage)item.getData());
+      }
+    };
+
+    for (Entry<CategoryDescriptor, List<PageDescriptor>> e : tree.entrySet()) {
+      final CategoryDescriptor category = e.getKey();
+      final List<PageDescriptor> pages = e.getValue();
+      if (pages.isEmpty()) {
+        continue;
+      }
+      if (menu.getItemCount() > 0) {
+        new MenuItem(menu, SWT.SEPARATOR);
+      }
+      if (!DEFAULT.equals(category)) {
+        final MenuItem item = new MenuItem(menu, SWT.NONE);
+        item.setEnabled(false);
+        item.setText(category.getName());
+      }
+
+      Collections.sort(pages);
+      for (PageDescriptor page : pages) {
+        final MenuItem item = new MenuItem(menu, SWT.NONE);
+        item.setText(page.getName());
+        item.setData(page.getPage());
+        item.addSelectionListener(itemSelectionListener);
+        final ImageDescriptor icon = page.getIcon();
+        final Image image = (icon == null) ? null : icon.createImage();
+        if (image != null) {
+          item.setImage(image);
+          item.addDisposeListener(new ImageDisposer(image));
+        }
+      }
+    }
+  }
+
   /**
    * Updates the pages to current preference.
    */

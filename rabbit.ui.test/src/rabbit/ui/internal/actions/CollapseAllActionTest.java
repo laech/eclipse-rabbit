@@ -15,9 +15,6 @@
  */
 package rabbit.ui.internal.actions;
 
-import rabbit.ui.internal.AbstractTreeContentProvider;
-import rabbit.ui.internal.actions.CollapseAllAction;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -25,7 +22,9 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 import org.junit.AfterClass;
@@ -38,10 +37,12 @@ import org.junit.Test;
 public class CollapseAllActionTest {
 
   private static final Shell shell;
+
   @AfterClass
   public static void afterClass() {
     shell.dispose();
   }
+
   private final TreeViewer viewer;
 
   private final IAction action;
@@ -67,30 +68,43 @@ public class CollapseAllActionTest {
 
   @Test
   public void testRun() {
-    viewer.setContentProvider(new AbstractTreeContentProvider() {
+    viewer.setContentProvider(new ITreeContentProvider() {
 
       private int counter = 0;
 
       @Override
       public Object[] getChildren(Object parentElement) {
         if (counter++ == 0)
-          return new Object[] { "a" };
+          return new Object[]{"a"};
         else
           return new Object[0];
       }
 
       @Override
       public Object[] getElements(Object inputElement) {
-        return (Object[]) inputElement;
+        return (Object[])inputElement;
       }
 
       @Override
       public boolean hasChildren(Object element) {
         return true;
       }
+
+      @Override
+      public void dispose() {
+      }
+
+      @Override
+      public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
+      }
+
+      @Override
+      public Object getParent(Object element) {
+        return null;
+      }
     });
 
-    viewer.setInput(new String[] { "1", "2", "3" });
+    viewer.setInput(new String[]{"1", "2", "3"});
     viewer.expandAll();
     assertFalse(viewer.getExpandedElements().length == 0);
 

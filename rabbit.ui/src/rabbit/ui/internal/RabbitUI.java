@@ -15,25 +15,19 @@
  */
 package rabbit.ui.internal;
 
-import rabbit.ui.IPage;
-import rabbit.ui.internal.util.PageDescriptor;
+import rabbit.ui.internal.extension.CategoryDescriptor;
+import rabbit.ui.internal.extension.PageDescriptor;
 
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
+import com.google.common.collect.ImmutableList;
+
+import static org.eclipse.core.runtime.Platform.getExtensionRegistry;
 
 import org.eclipse.core.runtime.IConfigurationElement;
-import org.eclipse.core.runtime.ISafeRunnable;
-import org.eclipse.core.runtime.Platform;
-import org.eclipse.core.runtime.SafeRunner;
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.ui.ISharedImages;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
-import java.util.Collection;
-import java.util.Set;
+import java.util.List;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -43,7 +37,7 @@ public class RabbitUI extends AbstractUIPlugin {
   // The plug-in ID
   public static final String PLUGIN_ID = "rabbit.ui";
 
-  public static final String UI_PAGE_EXTENSION_ID = "rabbit.ui.pages";
+  private static final String UI_PAGE_EXTENSION_ID = "rabbit.ui.pages";
 
   public static final String DEFAULT_DISPLAY_DATE_PERIOD = "defaultDisplayDatePeriod";
 
@@ -95,71 +89,51 @@ public class RabbitUI extends AbstractUIPlugin {
     plugin = null;
     super.stop(context);
   }
-  
+
   /**
-   * Loads the root pages.
+   * Loads the page category extensions.
    * 
-   * @return The root pages.
+   * @return an unmodifiable list of categories, or an empty list if no
+   *         extensions found
    */
-  public Collection<PageDescriptor> loadRootPages() {
-    final Set<PageDescriptor> pages = Sets.newLinkedHashSet();
-    for (final IConfigurationElement e : Platform.getExtensionRegistry()
-        .getConfigurationElementsFor(UI_PAGE_EXTENSION_ID)) {
+  public List<CategoryDescriptor> getPageCategories() {
+    final ImmutableList.Builder<CategoryDescriptor> builder =
+        ImmutableList.builder();
 
-      SafeRunner.run(new ISafeRunnable() {
+    final IConfigurationElement[] elements = getExtensionRegistry()
+        .getConfigurationElementsFor(UI_PAGE_EXTENSION_ID);
 
-        @Override
-        public void handleException(Throwable e) {
+    for (IConfigurationElement element : elements) {
+      if (CategoryDescriptor.isCategoryElement(element)) {
+        try {
+          builder.add(CategoryDescriptor.from(element));
+        } catch (IllegalArgumentException e) {
           e.printStackTrace();
         }
-
-        @Override
-        public void run() throws Exception {
-          String id = e.getAttribute("id");
-          String name = e.getAttribute("name");
-          String desc = e.getAttribute("description");
-          String imagePath = e.getAttribute("icon");
-          String parent = e.getAttribute("parent");
-
-          Object o = e.createExecutableExtension("class");
-          if (!(o instanceof IPage)) {
-            return;
-          }
-
-          ImageDescriptor image = null;
-          if (imagePath != null) {
-            image = imageDescriptorFromPlugin(e.getContributor().getName(),
-                imagePath);
-          }
-          if (image == null) {
-            image = PlatformUI.getWorkbench().getSharedImages()
-                .getImageDescriptor(ISharedImages.IMG_OBJ_ELEMENT);
-          }
-          IPage page = (IPage) o;
-          pages.add(new PageDescriptor(id, name, page, desc, image, parent));
-        }
-      });
-
+      }
     }
+    return builder.build();
+  }
 
-    // Run through all the elements and
-    // restructure them:
-    ImmutableSet.Builder<PageDescriptor> builder = ImmutableSet.builder();
-    for (PageDescriptor child : pages) {
-      if (child.getParentId() == null) {
-        builder.add(child);
-        continue;
-      }
-      boolean added = false;
-      for (PageDescriptor parent : pages) {
-        if (parent.getId().equals(child.getParentId())) {
-          parent.getChildren().add(child);
-          added = true;
-          break;
+  /**
+   * Loads a list of page extensions.
+   * 
+   * @return an unmodifiable list of pages, or an empty list if no pages found
+   */
+  public List<PageDescriptor> getPages() {
+    final ImmutableList.Builder<PageDescriptor> builder =
+        ImmutableList.builder();
+
+    final IConfigurationElement[] elements = getExtensionRegistry()
+        .getConfigurationElementsFor(UI_PAGE_EXTENSION_ID);
+
+    for (IConfigurationElement element : elements) {
+      if (PageDescriptor.isPageElement(element)) {
+        try {
+          builder.add(PageDescriptor.from(element));
+        } catch (IllegalArgumentException e) {
+          e.printStackTrace();
         }
-      }
-      if (!added) {
-        builder.add(child);
       }
     }
     return builder.build();

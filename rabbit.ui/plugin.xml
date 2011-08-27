@@ -20,67 +20,55 @@
    </extension>
    <extension
          point="rabbit.ui.pages">
-      <page
-            class="rabbit.ui.internal.pages.EclipseUsageCategory"
-            description="Contains pages that display Eclipse usage information"
-            icon="icons/full/obj16/eclipse.gif"
-            id="rabbit.ui.pages.eclipseUsage"
+      <category
+            id="rabbit.ui.categories.eclipse"
             name="Eclipse Usage">
-      </page>
-      <page
-            class="rabbit.ui.internal.pages.ProjectCategory"
-            description="Contains pages that display information relating to projects"
-            icon="icons/full/obj16/projectclosed.gif"
-            id="rabbit.ui.pages.projectRelated"
+      </category>
+      <category
+            id="rabbit.ui.categories.project"
             name="Project Related">
-      </page>
+      </category>
       <page
+            category="rabbit.ui.categories.eclipse"
             class="rabbit.ui.internal.pages.CommandPage"
-            description="Command execution counts"
             icon="icons/full/obj16/cut.gif"
             id="rabbit.ui.pages.command"
-            name="Commands"
-            parent="rabbit.ui.pages.eclipseUsage">
+            name="Commands">
       </page>
       <page
+            category="rabbit.ui.categories.eclipse"
             class="rabbit.ui.internal.pages.PartPage"
-            description="Time spent using different views and editors"
             icon="icons/full/obj16/defaultview.gif"
             id="rabbit.ui.pages.workbenchPart"
-            name="Editors and Views"
-            parent="rabbit.ui.pages.eclipseUsage">
+            name="Editors and Views">
       </page>
       <page
+            category="rabbit.ui.categories.eclipse"
             class="rabbit.ui.internal.pages.SessionPage"
-            description="Time spent within Eclipse"
             icon="icons/full/obj16/home.gif"
             id="rabbit.ui.pages.session"
-            name="Sessions"
-            parent="rabbit.ui.pages.eclipseUsage">
+            name="Sessions">
       </page>
       <page
+            category="rabbit.ui.categories.eclipse"
             class="rabbit.ui.internal.pages.PerspectivePage"
-            description="Time spent using different perspectives"
             icon="icons/full/obj16/defaultpersp.gif"
             id="rabbit.ui.pages.perspective"
-            name="Perspectives"
-            parent="rabbit.ui.pages.eclipseUsage">
+            name="Perspectives">
       </page>
       <page
+            category="rabbit.ui.categories.project"
             class="rabbit.ui.internal.pages.ResourcePage"
-            description="Time spent working on different resources"
             icon="icons/full/obj16/res.gif"
             id="rabbit.ui.pages.resource"
-            name="Resources"
-            parent="rabbit.ui.pages.projectRelated">
+            name="Resources">
       </page>
       <page
+            category="rabbit.ui.categories.project"
             class="rabbit.ui.internal.pages.LaunchPage"
-            description="Displays information about launch events and resources involved when debugging"
             icon="icons/full/obj16/launch.gif"
             id="rabbit.ui.pages.launch"
-            name="Launches"
-            parent="rabbit.ui.pages.projectRelated">
+            name="Launches">
       </page>
    </extension>
    <extension
