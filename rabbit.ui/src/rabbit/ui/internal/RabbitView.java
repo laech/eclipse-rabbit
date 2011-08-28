@@ -234,7 +234,7 @@ public final class RabbitView extends ViewPart {
     GridDataFactory.fillDefaults().align(SWT.FILL, SWT.CENTER)
         .grab(true, false).applyTo(header);
     {
-      int toolbarStyle = (!isLinux) ? SWT.FLAT : SWT.NONE;
+      int toolbarStyle = SWT.NONE;
 
       ToolBar bar = new ToolBar(header, toolbarStyle);
       final ToolBarManager metricsBar = new ToolBarManager(bar);
@@ -252,7 +252,7 @@ public final class RabbitView extends ViewPart {
       GridDataFactory
           .swtDefaults()
           .hint(120, SWT.DEFAULT)
-          .align(SWT.BEGINNING, SWT.CENTER)
+          .align(SWT.BEGINNING, SWT.FILL)
           .applyTo(bar);
 
       bar = new ToolBar(header, toolbarStyle);
