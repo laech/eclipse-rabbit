@@ -16,6 +16,8 @@
 package rabbit.ui.internal.viewers;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Maps.newHashMap;
 
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.viewers.ColumnViewer;
@@ -28,8 +30,11 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.TreeItem;
 
+import static java.util.Collections.emptyMap;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * A label provider for a tree viewer column that paints horizontal bars in the
@@ -41,6 +46,10 @@ public class TreeViewerCellPainter extends StyledCellLabelProvider {
   private Color systemForeground;
   private final IValueProvider valueProvider;
   private final boolean isLinux;
+  private final boolean useCache;
+
+  /** Cache of paths and their values */
+  private final Map<List<Object>, Long> cache;
 
   /** Used by {@link #getTreePath(TreeItem)} for storing path segments */
   private final List<Object> tmpPathHelper = new ArrayList<Object>();
@@ -48,16 +57,39 @@ public class TreeViewerCellPainter extends StyledCellLabelProvider {
   /**
    * @param valueProvider the provider for getting the values of each tree path.
    * @throws NullPointerException if argument is null.
+   * @deprecated use {@link #TreeViewerCellPainter(IValueProvider, boolean)}
+   *             instead
    */
+  @Deprecated
   public TreeViewerCellPainter(IValueProvider valueProvider) {
+    this(valueProvider, false);
+  }
+
+  /**
+   * Constructs a new cell painter.
+   * 
+   * @param valueProvider the value provider to provide values for each path
+   *        that needs to be painted
+   * @param useCache {@code true} to enable caching for the values returned by
+   *        {@code valueProvider}, {@code false } to disable it. If enabled, you
+   *        need to call {@link #clearCache()} whenever your viewer's content or
+   *        structure changes.
+   */
+  public TreeViewerCellPainter(IValueProvider valueProvider, boolean useCache) {
     this.valueProvider = checkNotNull(valueProvider, "valueProvider");
     this.isLinux = Platform.getOS().equals(Platform.OS_LINUX);
+    this.useCache = useCache;
+    if (useCache) {
+      cache = newHashMap();
+    } else {
+      cache = emptyMap();
+    }
   }
 
   @Override
   public void dispose() {
-    super.dispose();
     customBackground.dispose();
+    super.dispose();
   }
 
   /**
@@ -127,6 +159,17 @@ public class TreeViewerCellPainter extends StyledCellLabelProvider {
   }
 
   /**
+   * Clears the value cache. Has no affect is cache is not enabled.
+   * 
+   * @see #TreeViewerCellPainter(IValueProvider, boolean)
+   */
+  public void clearCache() {
+    if (useCache) {
+      cache.clear();
+    }
+  }
+
+  /**
    * Creates the desired color for painting the cells. Callers of this method
    * must dispose the returned color themselves.
    * 
@@ -155,9 +198,18 @@ public class TreeViewerCellPainter extends StyledCellLabelProvider {
       return 0;
     }
 
-    long value = valueProvider.getValue(path);
-    int width = (int)(value * columnWidth / (double)valueProvider
-        .getMaxValue());
+    long value = 0;
+    if (useCache) {
+      Long cached = cache.get(path);
+      if (cached == null) {
+        cached = valueProvider.getValue(path);
+        cache.put(newArrayList(path), cached);
+      }
+      value = cached.longValue();
+    } else {
+      value = valueProvider.getValue(path);
+    }
+    int width = (int)(value * columnWidth / (double)maxValue);
     width = ((value != 0) && (width == 0)) ? 2 : width;
 
     if (value != 0 && width < 2) {
