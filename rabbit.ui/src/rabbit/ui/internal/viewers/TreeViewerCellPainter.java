@@ -35,12 +35,40 @@ import static java.util.Collections.emptyMap;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Observable;
+import java.util.Observer;
 
 /**
  * A label provider for a tree viewer column that paints horizontal bars in the
  * cells.
+ * <p/>
+ * This class also supports caching of the values returned by an
+ * {@link IValueProvider}, when enabled, it may have performance improvements on
+ * large dataset, but {@link #clearCache()} must be called when the owner
+ * viewer's content or structure is changed so that old values will not be used.
+ * <p/>
+ * This class also implements {@link Observer} who's
+ * {@link #update(Observable, Object)} method will call {@link #clearCache()}.
  */
-public class TreeViewerCellPainter extends StyledCellLabelProvider {
+public class TreeViewerCellPainter extends StyledCellLabelProvider
+    implements Observer {
+
+  /**
+   * Creates a cache enabled {@link TreeViewerCellPainter} to observe on an
+   * {@link Observable}.
+   * 
+   * @param provider the provider that will provide values for paths, it must
+   *        support {@link IValueProvider#getValue(Object)} with the argument as
+   *        a {@link List} representing a tree path
+   * @param observable the object to observe on
+   * @return a new {@link TreeViewerCellPainter}
+   */
+  public static TreeViewerCellPainter observe(IValueProvider provider,
+      Observable observable) {
+    TreeViewerCellPainter painter = new TreeViewerCellPainter(provider, true);
+    observable.addObserver(painter);
+    return painter;
+  }
 
   private Color customBackground;
   private Color systemForeground;
@@ -55,28 +83,31 @@ public class TreeViewerCellPainter extends StyledCellLabelProvider {
   private final List<Object> tmpPathHelper = new ArrayList<Object>();
 
   /**
-   * @param valueProvider the provider for getting the values of each tree path.
+   * @param provider the provider for getting the values of each tree path.
    * @throws NullPointerException if argument is null.
    * @deprecated use {@link #TreeViewerCellPainter(IValueProvider, boolean)}
    *             instead
    */
   @Deprecated
-  public TreeViewerCellPainter(IValueProvider valueProvider) {
-    this(valueProvider, false);
+  public TreeViewerCellPainter(IValueProvider provider) {
+    this(provider, false);
   }
 
   /**
    * Constructs a new cell painter.
    * 
-   * @param valueProvider the value provider to provide values for each path
-   *        that needs to be painted
+   * @param provider the value provider to provide values for each path that
+   *        needs to be painted, it must support
+   *        {@link IValueProvider#getValue(Object)} with the argument as a
+   *        {@link List} representing a tree path
+   * 
    * @param useCache {@code true} to enable caching for the values returned by
    *        {@code valueProvider}, {@code false } to disable it. If enabled, you
    *        need to call {@link #clearCache()} whenever your viewer's content or
    *        structure changes.
    */
-  public TreeViewerCellPainter(IValueProvider valueProvider, boolean useCache) {
-    this.valueProvider = checkNotNull(valueProvider, "valueProvider");
+  public TreeViewerCellPainter(IValueProvider provider, boolean useCache) {
+    this.valueProvider = checkNotNull(provider, "valueProvider");
     this.isLinux = Platform.getOS().equals(Platform.OS_LINUX);
     this.useCache = useCache;
     if (useCache) {
@@ -216,5 +247,10 @@ public class TreeViewerCellPainter extends StyledCellLabelProvider {
       width = 2;
     }
     return width;
+  }
+
+  @Override
+  public void update(Observable o, Object arg) {
+    clearCache();
   }
 }
