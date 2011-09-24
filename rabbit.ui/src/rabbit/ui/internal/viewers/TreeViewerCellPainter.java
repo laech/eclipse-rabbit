@@ -246,7 +246,6 @@ public final class TreeViewerCellPainter extends StyledCellLabelProvider
    * @see #TreeViewerCellPainter(IValueProvider, boolean)
    */
   public void clearCache() {
-    System.err.println("clearCache");
     if (useCache) {
       cache.clear();
     }
