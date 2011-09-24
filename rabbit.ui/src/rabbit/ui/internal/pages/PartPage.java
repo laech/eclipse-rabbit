@@ -69,6 +69,7 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.TreeViewerColumn;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorDescriptor;
@@ -168,7 +169,7 @@ public class PartPage extends AbsPage {
         newTreeViewerColumn(viewer, SWT.LEFT, "Name", 200);
     mainColumn.getColumn().addSelectionListener(labelSorter);
     ILabelDecorator decorator =
-      PlatformUI.getWorkbench().getDecoratorManager().getLabelDecorator();
+        PlatformUI.getWorkbench().getDecoratorManager().getLabelDecorator();
     mainColumn.setLabelProvider(new DecoratingStyledCellLabelProvider(
         mainLabels, decorator, null));
 
@@ -181,13 +182,8 @@ public class PartPage extends AbsPage {
     TreeViewerColumn durationGraphColumn =
         newTreeViewerColumn(viewer, SWT.LEFT, "", 100);
     durationGraphColumn.getColumn().addSelectionListener(durationSorter);
-    durationGraphColumn.setLabelProvider(new TreeViewerCellPainter(
-        durationProvider) {
-      @Override
-      protected Color createColor(Display display) {
-        return new Color(display, 49, 132, 155);
-      }
-    });
+    durationGraphColumn.setLabelProvider(TreeViewerCellPainter.observe(
+        durationProvider, durationProvider, new RGB(49, 132, 155)));
   }
 
   @Override
@@ -244,7 +240,7 @@ public class PartPage extends AbsPage {
 
   @Override
   protected Category getVisualCategory() {
-    return (Category) durationProvider.getVisualCategory();
+    return (Category)durationProvider.getVisualCategory();
   }
 
   @Override
@@ -260,7 +256,7 @@ public class PartPage extends AbsPage {
 
   @Override
   protected void updateMaxValue() {
-    durationProvider.setMaxValue(durationProvider.getVisualCategory());
+    durationProvider.setVisualCategory(durationProvider.getVisualCategory());
   }
 
   private ICategorizer createCategorizer() {
@@ -305,7 +301,7 @@ public class PartPage extends AbsPage {
     if (hideViewsAction.isChecked()) {
       predicate = and(predicate, not(hideViewsAction.elementsToHide));
     }
-    durationProvider.setMaxValue(
+    durationProvider.setVisualCategory(
         durationProvider.getVisualCategory(), predicate);
     filteredTree.getViewer().getTree().setRedraw(false);
     filteredTree.getViewer().refresh(false);

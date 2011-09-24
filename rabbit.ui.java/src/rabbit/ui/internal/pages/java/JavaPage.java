@@ -117,7 +117,8 @@ public final class JavaPage extends AbsPage {
   private TreePathValueProvider durationProvider;
   private TreePathContentProvider contentProvider;
 
-  public JavaPage() {}
+  public JavaPage() {
+  }
 
   @Override
   public void createContents(Composite parent) {
@@ -129,7 +130,7 @@ public final class JavaPage extends AbsPage {
         JAVA_PACKAGE,
         JAVA_TYPE_ROOT,
         JAVA_MEMBER,
-        };
+    };
     categoryProvider = new CategoryProvider(supported,
         PROJECT, JAVA_PACKAGE_ROOT, JAVA_PACKAGE, JAVA_TYPE_ROOT, JAVA_MEMBER);
     categoryProvider.addObserver(this);
@@ -182,8 +183,8 @@ public final class JavaPage extends AbsPage {
     TreeViewerColumn durationGraphColumn =
         newTreeViewerColumn(viewer, SWT.LEFT, "", 100);
     durationGraphColumn.getColumn().addSelectionListener(durationSorter);
-    durationGraphColumn.setLabelProvider(new TreeViewerCellPainter(
-        durationProvider));
+    durationGraphColumn.setLabelProvider(TreeViewerCellPainter.observe(
+        durationProvider, durationProvider));
   }
 
   @Override
@@ -259,7 +260,7 @@ public final class JavaPage extends AbsPage {
 
   @Override
   protected Category getVisualCategory() {
-    return (Category) durationProvider.getVisualCategory();
+    return (Category)durationProvider.getVisualCategory();
   }
 
   @Override
@@ -275,7 +276,7 @@ public final class JavaPage extends AbsPage {
 
   @Override
   protected void updateMaxValue() {
-    durationProvider.setMaxValue(durationProvider.getVisualCategory());
+    durationProvider.setVisualCategory(durationProvider.getVisualCategory());
   }
 
   private TreePathValueProvider createDurationValueProvider() {

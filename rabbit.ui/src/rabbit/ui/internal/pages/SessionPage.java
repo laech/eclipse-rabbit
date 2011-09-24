@@ -59,6 +59,7 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.TreeViewerColumn;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
@@ -80,14 +81,16 @@ public final class SessionPage extends AbsPage {
   private TreePathValueProvider valueProvider;
   private TreePathContentProvider contentProvider;
 
-  public SessionPage() {}
+  public SessionPage() {
+  }
 
   @Override
   public void createContents(Composite parent) {
     Category[] supported = {WORKSPACE, DATE};
     categoryProvider = new CategoryProvider(supported, DATE);
     categoryProvider.addObserver(this);
-    contentProvider = new TreePathContentProvider(new SessionDataTreeBuilder(categoryProvider));
+    contentProvider = new TreePathContentProvider(new SessionDataTreeBuilder(
+        categoryProvider));
     contentProvider.addObserver(this);
     valueProvider = createValueProvider();
     valueProvider.addObserver(this);
@@ -95,41 +98,45 @@ public final class SessionPage extends AbsPage {
     // The main label provider for the first column:
     CompositeCellLabelProvider mainLabels = new CompositeCellLabelProvider(
         new DateLabelProvider(), new WorkspaceStorageLabelProvider());
-    
+
     // The viewer:
-    filteredTree = Viewers.newFilteredTree(parent, new TreePathPatternFilter(mainLabels));
+    filteredTree = Viewers.newFilteredTree(parent, new TreePathPatternFilter(
+        mainLabels));
     TreeViewer viewer = filteredTree.getViewer();
-    FilterableTreePathContentProvider filteredContentProvider = 
+    FilterableTreePathContentProvider filteredContentProvider =
         new FilterableTreePathContentProvider(contentProvider);
     filteredContentProvider.addFilter(instanceOf(Duration.class));
     viewer.setContentProvider(filteredContentProvider);
 
     // Column sorters:
-    TreeViewerColumnSorter labelSorter = new InternalTreeViewerColumnLabelSorter(viewer, mainLabels);
-    TreeViewerColumnSorter durationSorter = new TreeViewerColumnValueSorter(viewer, valueProvider);
+    TreeViewerColumnSorter labelSorter = new InternalTreeViewerColumnLabelSorter(
+        viewer, mainLabels);
+    TreeViewerColumnSorter durationSorter = new TreeViewerColumnValueSorter(
+        viewer, valueProvider);
 
     // The columns:
-    
-    TreeViewerColumn mainColumn = newTreeViewerColumn(viewer, SWT.LEFT, "Name", 200);
+
+    TreeViewerColumn mainColumn = newTreeViewerColumn(viewer, SWT.LEFT, "Name",
+        200);
     mainColumn.getColumn().addSelectionListener(labelSorter);
-    ILabelDecorator decorator = PlatformUI.getWorkbench().getDecoratorManager().getLabelDecorator();
-    mainColumn.setLabelProvider(new DecoratingStyledCellLabelProvider(mainLabels, decorator, null));
-    
+    ILabelDecorator decorator = PlatformUI.getWorkbench().getDecoratorManager()
+        .getLabelDecorator();
+    mainColumn.setLabelProvider(new DecoratingStyledCellLabelProvider(
+        mainLabels, decorator, null));
 
-    TreeViewerColumn durationColumn = newTreeViewerColumn(viewer, SWT.RIGHT, "Duration", 150);
+    TreeViewerColumn durationColumn = newTreeViewerColumn(viewer, SWT.RIGHT,
+        "Duration", 150);
     durationColumn.getColumn().addSelectionListener(durationSorter);
-    durationColumn.setLabelProvider(new TreePathDurationLabelProvider(valueProvider));
+    durationColumn.setLabelProvider(new TreePathDurationLabelProvider(
+        valueProvider));
 
-    TreeViewerColumn graphColumn = newTreeViewerColumn(viewer, SWT.LEFT, "", 100);
+    TreeViewerColumn graphColumn = newTreeViewerColumn(viewer, SWT.LEFT, "",
+        100);
     graphColumn.getColumn().addSelectionListener(durationSorter);
-    graphColumn.setLabelProvider(new TreeViewerCellPainter(valueProvider) {
-      @Override
-      protected Color createColor(Display display) {
-        return new Color(display, 208, 145, 60);
-      }
-    });
+    graphColumn.setLabelProvider(TreeViewerCellPainter.observe(valueProvider,
+        valueProvider, new RGB(208, 145, 60)));
   }
-  
+
   @Override
   public IContributionItem[] createToolBarItems(IToolBarManager toolBar) {
     List<IContributionItem> items = new CommonToolBarBuilder()
@@ -172,7 +179,8 @@ public final class SessionPage extends AbsPage {
         instanceOf(WorkspaceStorage.class), WORKSPACE);
     ICategorizer categorizer = new Categorizer(categories);
     IConverter<TreePath> converter = new TreePathDurationConverter();
-    return new TreePathValueProvider(categorizer, contentProvider, converter, DATE);
+    return new TreePathValueProvider(categorizer, contentProvider, converter,
+        DATE);
   }
 
   private IAccessor<ISessionData> getAccessor() {
@@ -181,7 +189,7 @@ public final class SessionPage extends AbsPage {
 
   @Override
   protected Category getVisualCategory() {
-    return (Category) valueProvider.getVisualCategory();
+    return (Category)valueProvider.getVisualCategory();
   }
 
   @Override
@@ -191,7 +199,7 @@ public final class SessionPage extends AbsPage {
 
   @Override
   protected void updateMaxValue() {
-    valueProvider.setMaxValue(valueProvider.getVisualCategory());
+    valueProvider.setVisualCategory(valueProvider.getVisualCategory());
   }
 
   @Override

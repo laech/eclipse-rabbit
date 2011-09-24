@@ -154,28 +154,99 @@ public final class TreePathValueProvider extends Observable
   }
 
   /**
-   * Sets the max value using a category. If the category of a tree node is
-   * equal to the given category, and the value of that path (from the root to
-   * that element) is the highest of all, that the max value will be set to that
-   * value.
+   * Sets the visual category and calculates the max value using the category.
+   * If the category is not supported by the categorizer then it will be ignored
+   * and this method will return false, otherwise {@code true} will be returned,
+   * and observers will be notified.
    * 
-   * @param category the category.
+   * @param category the new category
+   * @return {@code true} if the category is accepted, {@code false} otherwise
    */
-  public void setMaxValue(ICategory category) {
-    setMaxValue(category, alwaysTrue());
+  @Override
+  public boolean setVisualCategory(ICategory category) {
+    return setVisualCategory(category, alwaysTrue());
   }
 
   /**
-   * Sets the max value using a category a predicate. If the category of a tree
-   * node is equal to the given category, and the
-   * {@link Predicate#apply(Object)} returns true on the element, and the value
-   * of that path (from the root to that element) is the highest of all, that
-   * the max value will be set to that value.
+   * Sets the visual category and calculates the max value using the category.
+   * If the category is not supported by the categorizer then it will be ignored
+   * and this method will return {@code false}, otherwise {@code true} will be
+   * returned, and observers will be notified.
    * 
-   * @param category the category.
-   * @param predicate the predicate to select wanted elements.
+   * @param category the new category
+   * @param predicate the predicate to select wanted elements, only elements
+   *        passes the predicate will be included when calculating the max value
+   * @return {@code true} if the category is accepted, {@code false} otherwise
    */
-  public void setMaxValue(ICategory category,
+  public boolean setVisualCategory(ICategory category,
+      Predicate<? super Object> predicate) {
+
+    if (getCategorizer().hasCategory(category)) {
+      ICategory oldCategory = getVisualCategory();
+      long oldMax = getMaxValue();
+      visual = category;
+      setMaxValue(category, predicate);
+      if (!Objects.equal(oldCategory, visual) || oldMax != getMaxValue()) {
+        setChanged();
+        notifyObservers();
+      }
+      return true;
+    }
+    return false;
+  }
+
+  @Override
+  public boolean shouldPaint(Object element) {
+    return Objects.equal(
+        getVisualCategory(),
+        getCategorizer().getCategory(element));
+  }
+
+  /**
+   * Gets the value of the given tree path. If the given tree path is a parent
+   * path of one or more child paths, then the sum of the children values will
+   * be returned.
+   * 
+   * @param path the path.
+   * @param leaves the leaves to match.
+   * @return the value of the tree path, may be zero.
+   */
+  private long getValue(List<?> path, Collection<TreePath> leaves) {
+    long value = 0;
+    outer: for (TreePath leaf : leaves) {
+      if (leaf.getSegmentCount() < path.size()) {
+        continue;
+      }
+      for (int i = 0; i < path.size(); i++) {
+        if (!Objects.equal(leaf.getSegment(i), path.get(i))) {
+          continue outer;
+        }
+      }
+      value += converter.convert(leaf);
+    }
+    return value;
+  }
+
+  /**
+   * Gets the value of the given tree path. If the given tree path is a parent
+   * path of one or more child paths, then the sum of the children values will
+   * be returned.
+   * 
+   * @param path the path.
+   * @param leaves the leaves to match.
+   * @return the value of the tree path, may be zero.
+   */
+  private long getValue(TreePath path, Collection<TreePath> leaves) {
+    long value = 0;
+    for (TreePath leaf : leaves) {
+      if (leaf.startsWith(path, null)) {
+        value += converter.convert(leaf);
+      }
+    }
+    return value;
+  }
+
+  private void setMaxValue(ICategory category,
       Predicate<? super Object> predicate) {
 
     final Collection<TreePath> leaves = getProvider().get();
@@ -207,86 +278,7 @@ public final class TreePathValueProvider extends Observable
     }
   }
 
-  /**
-   * Sets the max value representing the highest value.
-   * 
-   * @param max the new value.
-   */
-  public void setMaxValue(long max) {
+  private void setMaxValue(long max) {
     this.max = max;
-  }
-
-  /**
-   * Sets the visual category. If the category is not supported by the
-   * categorizer then it will be ignored and this method will return false. If
-   * {@link #getVisualCategory()} returns a different category after this change
-   * then observers of this instance will get notified.
-   * 
-   * @param category the new category.
-   * @return true if the category is accepted, false otherwise.
-   */
-  @Override
-  public boolean setVisualCategory(ICategory category) {
-    if (getCategorizer().hasCategory(category)) {
-      ICategory old = visual;
-      visual = category;
-      if (!Objects.equal(old, visual)) {
-        setChanged();
-        notifyObservers();
-      }
-      return true;
-    }
-    return false;
-  }
-
-  @Override
-  public boolean shouldPaint(Object element) {
-    return Objects.equal(
-        getVisualCategory(),
-        getCategorizer().getCategory(element));
-  }
-
-  /**
-   * Gets the value of the given tree path. If the given tree path is a parent
-   * path of one or more child paths, then the sum of the children values will
-   * be returned.
-   * 
-   * @param path the path.
-   * @param leaves the leaves to match.
-   * @return the value of the tree path, may be zero.
-   */
-  private long getValue(TreePath path, Collection<TreePath> leaves) {
-    long value = 0;
-    for (TreePath leaf : leaves) {
-      if (leaf.startsWith(path, null)) {
-        value += converter.convert(leaf);
-      }
-    }
-    return value;
-  }
-
-  /**
-   * Gets the value of the given tree path. If the given tree path is a parent
-   * path of one or more child paths, then the sum of the children values will
-   * be returned.
-   * 
-   * @param path the path.
-   * @param leaves the leaves to match.
-   * @return the value of the tree path, may be zero.
-   */
-  private long getValue(List<?> path, Collection<TreePath> leaves) {
-    long value = 0;
-    outer: for (TreePath leaf : leaves) {
-      if (leaf.getSegmentCount() < path.size()) {
-        continue;
-      }
-      for (int i = 0; i < path.size(); i++) {
-        if (!Objects.equal(leaf.getSegment(i), path.get(i))) {
-          continue outer;
-        }
-      }
-      value += converter.convert(leaf);
-    }
-    return value;
   }
 }

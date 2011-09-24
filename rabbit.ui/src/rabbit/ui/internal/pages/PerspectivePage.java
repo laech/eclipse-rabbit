@@ -61,6 +61,7 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.TreeViewerColumn;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IPerspectiveDescriptor;
@@ -83,7 +84,8 @@ public class PerspectivePage extends AbsPage {
   private TreePathValueProvider durationProvider;
   private TreePathContentProvider contentProvider;
 
-  public PerspectivePage() {}
+  public PerspectivePage() {
+  }
 
   @Override
   public void createContents(Composite parent) {
@@ -138,13 +140,9 @@ public class PerspectivePage extends AbsPage {
     TreeViewerColumn durationGraphColumn =
         newTreeViewerColumn(viewer, SWT.LEFT, "", 100);
     durationGraphColumn.getColumn().addSelectionListener(durationSorter);
-    durationGraphColumn.setLabelProvider(new TreeViewerCellPainter(
-        durationProvider) {
-      @Override
-      protected Color createColor(Display display) {
-        return new Color(display, 218, 176, 0);
-      }
-    });
+    durationGraphColumn.setLabelProvider(
+        TreeViewerCellPainter.observe(durationProvider, durationProvider,
+            new RGB(218, 176, 0)));
   }
 
   @Override
@@ -198,7 +196,7 @@ public class PerspectivePage extends AbsPage {
 
   @Override
   protected Category getVisualCategory() {
-    return (Category) durationProvider.getVisualCategory();
+    return (Category)durationProvider.getVisualCategory();
   }
 
   @Override
@@ -214,7 +212,7 @@ public class PerspectivePage extends AbsPage {
 
   @Override
   protected void updateMaxValue() {
-    durationProvider.setMaxValue(durationProvider.getVisualCategory());
+    durationProvider.setVisualCategory(durationProvider.getVisualCategory());
   }
 
   private ICategorizer createCategorizer() {

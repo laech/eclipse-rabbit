@@ -43,15 +43,15 @@ public abstract class AbsPage implements IPage, Observer {
   public void onRestoreState(IMemento memento) {
     String id = getClass().getSimpleName();
     TreeColumn[] columns = getFilteredTree().getViewer().getTree().getColumns();
-    
+
     StateHelper helper = StateHelper.of(memento, id);
     helper.restoreColumnWidths(columns);
-    
+
     Category visual = helper.retrieveSavedVisualCategory();
     if (visual != null) {
       setVisualCategory(visual);
     }
-    
+
     List<Category> selected = helper.retrieveSavedCategories();
     if (selected != null) {
       setSelectedCategories(selected);
@@ -72,7 +72,6 @@ public abstract class AbsPage implements IPage, Observer {
   @Override
   public void update(Observable o, Object arg) {
     if (o instanceof IVisualProvider) {
-      updateMaxValue();
       refresh(getFilteredTree().getViewer());
 
     } else if (o instanceof ICategoryProvider) {
@@ -82,33 +81,33 @@ public abstract class AbsPage implements IPage, Observer {
       updateMaxValue();
     }
   }
-  
+
   protected abstract FilteredTree getFilteredTree();
-  
+
   /**
    * @return the current selected categories.
    * @see ICategoryProvider#getSelected()
    */
   protected abstract Category[] getSelectedCategories();
-  
+
   /**
    * @return the current visual category.
    * @see IVisualProvider#getVisualCategory()
    */
   protected abstract Category getVisualCategory();
-  
+
   /**
    * @param categories the categories to set.
    * @see ICategoryProvider#setSelected(ICategory...)
    */
   protected abstract void setSelectedCategories(List<Category> categories);
-  
+
   /**
    * @param category the category to set.
    * @see TreePathValueProvider#setVisualCategory(ICategory)
    */
   protected abstract void setVisualCategory(Category category);
-  
+
   /**
    * Updates {@link IValueProvider#getMaxValue()}.
    */

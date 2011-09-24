@@ -68,9 +68,8 @@ import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.TreeViewerColumn;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.FilteredTree;
 import org.joda.time.Duration;
@@ -91,7 +90,8 @@ public class LaunchPage extends AbsPage {
   private TreePathValueProvider countProvider;
   private TreePathContentProvider contentProvider;
 
-  public LaunchPage() {}
+  public LaunchPage() {
+  }
 
   @Override
   public void createContents(Composite parent) {
@@ -153,12 +153,9 @@ public class LaunchPage extends AbsPage {
     TreeViewerColumn countGraphColumn =
         newTreeViewerColumn(viewer, SWT.LEFT, "", 100);
     countGraphColumn.getColumn().addSelectionListener(countSorter);
-    countGraphColumn.setLabelProvider(new TreeViewerCellPainter(countProvider) {
-      @Override
-      protected Color createColor(Display display) {
-        return new Color(display, 118, 146, 60);
-      }
-    });
+    countGraphColumn.setLabelProvider(
+        TreeViewerCellPainter.observe(countProvider, countProvider,
+            new RGB(118, 146, 60)));
 
     TreeViewerColumn durationColumn =
         newTreeViewerColumn(viewer, SWT.RIGHT, "Total Duration", 150);
@@ -169,13 +166,9 @@ public class LaunchPage extends AbsPage {
     TreeViewerColumn durationGraphColumn =
         newTreeViewerColumn(viewer, SWT.LEFT, "", 100);
     durationGraphColumn.getColumn().addSelectionListener(durationSorter);
-    durationGraphColumn.setLabelProvider(new TreeViewerCellPainter(
-        durationProvider) {
-      @Override
-      protected Color createColor(Display display) {
-        return new Color(display, 49, 132, 155);
-      }
-    });
+    durationGraphColumn.setLabelProvider(
+        TreeViewerCellPainter.observe(durationProvider, durationProvider,
+            new RGB(49, 132, 155)));
   }
 
   @Override
@@ -233,7 +226,7 @@ public class LaunchPage extends AbsPage {
 
   @Override
   protected Category getVisualCategory() {
-    return (Category) durationProvider.getVisualCategory();
+    return (Category)durationProvider.getVisualCategory();
   }
 
   @Override
@@ -250,8 +243,8 @@ public class LaunchPage extends AbsPage {
 
   @Override
   protected void updateMaxValue() {
-    durationProvider.setMaxValue(durationProvider.getVisualCategory());
-    countProvider.setMaxValue(countProvider.getVisualCategory());
+    durationProvider.setVisualCategory(durationProvider.getVisualCategory());
+    countProvider.setVisualCategory(countProvider.getVisualCategory());
   }
 
   private TreePathValueProvider createDurationValueProvider() {

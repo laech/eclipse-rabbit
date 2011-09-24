@@ -26,6 +26,7 @@ import org.eclipse.jface.viewers.ViewerColumn;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.GC;
+import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.TreeItem;
@@ -50,8 +51,10 @@ import java.util.Observer;
  * This class also implements {@link Observer} who's
  * {@link #update(Observable, Object)} method will call {@link #clearCache()}.
  */
-public class TreeViewerCellPainter extends StyledCellLabelProvider
+public final class TreeViewerCellPainter extends StyledCellLabelProvider
     implements Observer {
+
+  private static final RGB DEFAULT_BACKGROUND_RGB = new RGB(84, 141, 212);
 
   /**
    * Creates a cache enabled {@link TreeViewerCellPainter} to observe on an
@@ -62,6 +65,7 @@ public class TreeViewerCellPainter extends StyledCellLabelProvider
    *        a {@link List} representing a tree path
    * @param observable the object to observe on
    * @return a new {@link TreeViewerCellPainter}
+   * @throws NullPointerException if {@code provider} is {@code null}
    */
   public static TreeViewerCellPainter observe(IValueProvider provider,
       Observable observable) {
@@ -70,8 +74,29 @@ public class TreeViewerCellPainter extends StyledCellLabelProvider
     return painter;
   }
 
+  /**
+   * Creates a cache enabled {@link TreeViewerCellPainter} to observe on an
+   * {@link Observable}.
+   * 
+   * @param provider the provider that will provide values for paths, it must
+   *        support {@link IValueProvider#getValue(Object)} with the argument as
+   *        a {@link List} representing a tree path
+   * @param observable the object to observe on
+   * @param customColor optional custom color for painting
+   * @return a new {@link TreeViewerCellPainter}
+   * @throws NullPointerException if {@code provider} is {@code null}
+   */
+  public static TreeViewerCellPainter observe(IValueProvider provider,
+      Observable observable, RGB customColor) {
+    TreeViewerCellPainter painter = new TreeViewerCellPainter(provider, true,
+        customColor);
+    observable.addObserver(painter);
+    return painter;
+  }
+
   private Color customBackground;
   private Color systemForeground;
+  private final RGB backgroundRgb;
   private final IValueProvider valueProvider;
   private final boolean isLinux;
   private final boolean useCache;
@@ -105,8 +130,32 @@ public class TreeViewerCellPainter extends StyledCellLabelProvider
    *        {@code valueProvider}, {@code false } to disable it. If enabled, you
    *        need to call {@link #clearCache()} whenever your viewer's content or
    *        structure changes.
+   * 
+   * @throws NullPointerException if {@code provider} is {@code null}
    */
   public TreeViewerCellPainter(IValueProvider provider, boolean useCache) {
+    this(provider, useCache, null);
+  }
+
+  /**
+   * Constructs a new cell painter.
+   * 
+   * @param provider the value provider to provide values for each path that
+   *        needs to be painted, it must support
+   *        {@link IValueProvider#getValue(Object)} with the argument as a
+   *        {@link List} representing a tree path
+   * 
+   * @param useCache {@code true} to enable caching for the values returned by
+   *        {@code valueProvider}, {@code false } to disable it. If enabled, you
+   *        need to call {@link #clearCache()} whenever your viewer's content or
+   *        structure changes.
+   * 
+   * @param customColor optional custom color for painting
+   * 
+   * @throws NullPointerException if {@code provider} is {@code null}
+   */
+  public TreeViewerCellPainter(
+      IValueProvider provider, boolean useCache, RGB customRgbColor) {
     this.valueProvider = checkNotNull(provider, "valueProvider");
     this.isLinux = Platform.getOS().equals(Platform.OS_LINUX);
     this.useCache = useCache;
@@ -115,6 +164,8 @@ public class TreeViewerCellPainter extends StyledCellLabelProvider
     } else {
       cache = emptyMap();
     }
+    this.backgroundRgb = customRgbColor != null ? customRgbColor
+        : DEFAULT_BACKGROUND_RGB;
   }
 
   @Override
@@ -195,20 +246,14 @@ public class TreeViewerCellPainter extends StyledCellLabelProvider
    * @see #TreeViewerCellPainter(IValueProvider, boolean)
    */
   public void clearCache() {
+    System.err.println("clearCache");
     if (useCache) {
       cache.clear();
     }
   }
 
-  /**
-   * Creates the desired color for painting the cells. Callers of this method
-   * must dispose the returned color themselves.
-   * 
-   * @param display the display to create the color for.
-   * @return a new color.
-   */
-  protected Color createColor(Display display) {
-    return new Color(display, 84, 141, 212);
+  private Color createColor(Display display) {
+    return new Color(display, backgroundRgb);
   }
 
   private List<Object> getTreePath(TreeItem item) {

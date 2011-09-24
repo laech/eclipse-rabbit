@@ -32,6 +32,8 @@ import static org.mockito.Mockito.when;
 import org.eclipse.jface.viewers.TreePath;
 import org.junit.Test;
 import org.mockito.Mockito;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
@@ -77,14 +79,6 @@ public class TreePathValueProviderTest {
         newProvider(),
         converter);
     assertThat(v.getConverter(), is(converter));
-  }
-
-  @Test
-  public void getMaxValueShouldReturnTheValueThatHasBeenSet() {
-    long max = 123;
-    TreePathValueProvider v = create();
-    v.setMaxValue(max);
-    assertThat(v.getMaxValue(), is(max));
   }
 
   @Test
@@ -234,33 +228,46 @@ public class TreePathValueProviderTest {
   }
 
   @Test
-  public void setVisualCategoryShouldNotNotifyObserversWhenTheCategoryIsUnchanged() {
-    // Given we have a provider who's category has been set:
+  public void setVisualCategoryShouldNotifyObserversWhenTheCategoryIsUnchangedButMaxValueIsChanged() {
     ICategory category = mock(ICategory.class);
     ICategorizer categorizer = mock(ICategorizer.class);
     given(categorizer.hasCategory(category)).willReturn(TRUE);
-    TreePathValueProvider provider = create(categorizer, newProvider(),
-        newConverter());
-    provider.setVisualCategory(category);
+    given(categorizer.getCategory(Mockito.any())).willReturn(category);
 
-    // And we have an observer observing on the provider:
+    @SuppressWarnings("unchecked")
+    IConverter<TreePath> converter = mock(IConverter.class);
+    given(converter.convert(Mockito.<TreePath> any())).willAnswer(
+        new Answer<Long>() {
+          long value = 0;
+
+          @Override
+          public Long answer(InvocationOnMock invocation) throws Throwable {
+            return Long.valueOf(value++);
+          }
+        });
+
+    @SuppressWarnings("unchecked")
+    IProvider<TreePath> pathProvider = mock(IProvider.class);
+    given(pathProvider.get()).willReturn(
+        Arrays.asList(new TreePath(new String[]{"1"})));
+
+    TreePathValueProvider valueProvider = create(categorizer, pathProvider,
+        converter);
+    valueProvider.setVisualCategory(category);
+
     final int[] updateCount = {0};
     Observer observer = new Observer() {
       @Override
       public void update(Observable ob, Object arg) {
-        // Updates the counter when notified:
         updateCount[0]++;
       }
     };
-    provider.addObserver(observer);
+    valueProvider.addObserver(observer);
 
-    // When we call the change category method with the same category:
-    assertThat(provider.setVisualCategory(provider.getVisualCategory()),
+    assertThat(
+        valueProvider.setVisualCategory(valueProvider.getVisualCategory()),
         is(TRUE));
-
-    // Then the observer should not be notified because the actual category is
-    // not changed:
-    assertThat(updateCount[0], equalTo(0));
+    assertThat(updateCount[0], equalTo(1));
   }
 
   @Test
@@ -288,7 +295,7 @@ public class TreePathValueProviderTest {
   }
 
   @Test
-  public void setMaxValueWithCategoryAndPredicateShouldCalculateTheCorrectValue() {
+  public void setVisualCategoryWithPredicateShouldCalculateTheCorrectValue() {
     // @formatter:off
     // Given we have a tree that looks like the following:
     // + - 1 - 2 - 3  // Value of this path = 1
@@ -305,6 +312,7 @@ public class TreePathValueProviderTest {
     // And elements belong to the same category:
     ICategory category = mock(ICategory.class);
     ICategorizer categorizer = mock(ICategorizer.class);
+    given(categorizer.hasCategory(category)).willReturn(true);
     given(categorizer.getCategory("2")).willReturn(category);
     given(categorizer.getCategory("1")).willReturn(category);
     given(categorizer.getCategory("3")).willReturn(category);
@@ -323,7 +331,8 @@ public class TreePathValueProviderTest {
 
     // When we call setMaxValue with predicate to say we only want element "3":
     TreePathValueProvider v = create(categorizer, provider, converter);
-    v.setMaxValue(category, Predicates.<Object> equalTo("1"));
+    assertThat(v.setVisualCategory(category, Predicates.<Object> equalTo("1")),
+        is(true));
 
     // @formatter:off
     // Then the maximum value should have been set to the value of the element
@@ -339,7 +348,7 @@ public class TreePathValueProviderTest {
   }
 
   @Test
-  public void setMaxValueWithCategoryShouldCalculateTheCorrectValue_1() {
+  public void setVisualCategoryShouldCalculateTheCorrectValue_1() {
     // @formatter:off
     // Given we have a tree that looks like the following:
     // + - 1 - 2 - 3 // Value of this path = 1
@@ -356,6 +365,8 @@ public class TreePathValueProviderTest {
     ICategory theCategory = mock(ICategory.class);
     ICategory tmpCategory = mock(ICategory.class);
     ICategorizer categorizer = mock(ICategorizer.class);
+    given(categorizer.hasCategory(tmpCategory)).willReturn(true);
+    given(categorizer.hasCategory(theCategory)).willReturn(true);
     given(categorizer.getCategory("2")).willReturn(theCategory);
     given(categorizer.getCategory("1")).willReturn(tmpCategory);
     given(categorizer.getCategory("3")).willReturn(tmpCategory);
@@ -374,7 +385,7 @@ public class TreePathValueProviderTest {
 
     // When we call setMaxValue with element "2"'s category:
     TreePathValueProvider v = create(categorizer, provider, converter);
-    v.setMaxValue(theCategory);
+    assertThat(v.setVisualCategory(theCategory), is(true));
 
     // @formatter:off
     // Then the maximum value should have been set to the value of the element
@@ -391,7 +402,7 @@ public class TreePathValueProviderTest {
   }
 
   @Test
-  public void setMaxValueWithCategoryShouldCalculateTheCorrectValue_2() {
+  public void setVisualCategoryShouldCalculateTheCorrectValue_2() {
     // Given our tree has only one path:
     TreePath leaf1 = new TreePath(new Object[]{"1", "2", "3"});
 
@@ -404,6 +415,8 @@ public class TreePathValueProviderTest {
     ICategory theCategory = mock(ICategory.class);
     ICategory tmpCategory = mock(ICategory.class);
     ICategorizer categorizer = mock(ICategorizer.class);
+    given(categorizer.hasCategory(tmpCategory)).willReturn(true);
+    given(categorizer.hasCategory(theCategory)).willReturn(true);
     given(categorizer.getCategory("2")).willReturn(theCategory);
     given(categorizer.getCategory("1")).willReturn(tmpCategory);
     given(categorizer.getCategory("3")).willReturn(tmpCategory);
@@ -415,14 +428,14 @@ public class TreePathValueProviderTest {
     // When we call setMaxValue with the category belonging to one of the
     // elements of the path:
     TreePathValueProvider v = create(categorizer, provider, converter);
-    v.setMaxValue(theCategory);
+    assertThat(v.setVisualCategory(theCategory), is(true));
 
     // Then the maximum value is set to the value of the tree path:
     assertThat(v.getMaxValue(), equalTo(converter.convert(leaf1)));
   }
 
   @Test
-  public void setMaxValueWithCategoryShouldCalculateTheCorrectValue_3() {
+  public void setVisualCategoryShouldCalculateTheCorrectValue_3() {
     // @formatter:off
     // If we have a tree like the following, where the element "2" appears at
     // multiple places at
@@ -443,6 +456,8 @@ public class TreePathValueProviderTest {
     ICategory theCategory = mock(ICategory.class);
     ICategory tmpCategory = mock(ICategory.class);
     ICategorizer categorizer = mock(ICategorizer.class);
+    given(categorizer.hasCategory(tmpCategory)).willReturn(true);
+    given(categorizer.hasCategory(theCategory)).willReturn(true);
     given(categorizer.getCategory("2")).willReturn(theCategory);
     given(categorizer.getCategory("1")).willReturn(tmpCategory);
     given(categorizer.getCategory("3")).willReturn(tmpCategory);
@@ -462,7 +477,7 @@ public class TreePathValueProviderTest {
     // When we call setMaxValue(ICategory) using the category belonging to the
     // element "2"
     TreePathValueProvider v = create(categorizer, provider, converter);
-    v.setMaxValue(theCategory);
+    assertThat(v.setVisualCategory(theCategory), is(true));
 
     // @formatter:off
     // Then then the maximum value should be set to 12 in this example, which is
@@ -488,7 +503,7 @@ public class TreePathValueProviderTest {
     given(categorizer.hasCategory(category)).willReturn(TRUE);
 
     TreePathValueProvider v = create(categorizer, newProvider(), newConverter());
-    v.setVisualCategory(category);
+    assertThat(v.setVisualCategory(category), is(true));
 
     // When an object belongs to a different category:
     Object element = Integer.valueOf(0);

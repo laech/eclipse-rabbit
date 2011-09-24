@@ -83,7 +83,8 @@ public class CommandPage extends AbsPage {
   private TreePathValueProvider valueProvider;
   private TreePathContentProvider contentProvider;
 
-  public CommandPage() {}
+  public CommandPage() {
+  }
 
   @Override
   public void createContents(Composite parent) {
@@ -143,7 +144,8 @@ public class CommandPage extends AbsPage {
     TreeViewerColumn graphColumn =
         newTreeViewerColumn(viewer, SWT.LEFT, "", 100);
     graphColumn.getColumn().addSelectionListener(countSorter);
-    graphColumn.setLabelProvider(new TreeViewerCellPainter(valueProvider));
+    graphColumn.setLabelProvider(
+        TreeViewerCellPainter.observe(valueProvider, valueProvider));
   }
 
   @Override
@@ -195,7 +197,7 @@ public class CommandPage extends AbsPage {
 
   @Override
   protected Category getVisualCategory() {
-    return (Category) valueProvider.getVisualCategory();
+    return (Category)valueProvider.getVisualCategory();
   }
 
   @Override
@@ -210,7 +212,7 @@ public class CommandPage extends AbsPage {
 
   @Override
   protected void updateMaxValue() {
-    valueProvider.setMaxValue(valueProvider.getVisualCategory());
+    valueProvider.setVisualCategory(valueProvider.getVisualCategory());
   }
 
   private TreePathValueProvider createValueProvider() {

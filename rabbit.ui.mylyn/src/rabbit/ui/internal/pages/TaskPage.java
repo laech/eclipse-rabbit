@@ -74,6 +74,7 @@ import org.eclipse.jface.viewers.TreeViewerColumn;
 import org.eclipse.mylyn.tasks.core.ITask;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
@@ -95,7 +96,8 @@ public class TaskPage extends AbsPage {
   private TreePathValueProvider durationProvider;
   private TreePathContentProvider contentProvider;
 
-  public TaskPage() {}
+  public TaskPage() {
+  }
 
   @Override
   public void createContents(Composite parent) {
@@ -152,13 +154,8 @@ public class TaskPage extends AbsPage {
     TreeViewerColumn durationGraphColumn =
         newTreeViewerColumn(viewer, SWT.LEFT, "", 100);
     durationGraphColumn.getColumn().addSelectionListener(durationSorter);
-    durationGraphColumn.setLabelProvider(new TreeViewerCellPainter(
-        durationProvider) {
-      @Override
-      protected Color createColor(Display display) {
-        return new Color(display, 75, 172, 98);
-      }
-    });
+    durationGraphColumn.setLabelProvider(TreeViewerCellPainter.observe(
+        durationProvider, durationProvider, new RGB(75, 172, 98)));
   }
 
   @Override
@@ -215,7 +212,7 @@ public class TaskPage extends AbsPage {
 
   @Override
   protected Category getVisualCategory() {
-    return (Category) durationProvider.getVisualCategory();
+    return (Category)durationProvider.getVisualCategory();
   }
 
   @Override
@@ -231,7 +228,7 @@ public class TaskPage extends AbsPage {
 
   @Override
   protected void updateMaxValue() {
-    durationProvider.setMaxValue(durationProvider.getVisualCategory());
+    durationProvider.setVisualCategory(durationProvider.getVisualCategory());
   }
 
   private ICategorizer createCategorizer() {
