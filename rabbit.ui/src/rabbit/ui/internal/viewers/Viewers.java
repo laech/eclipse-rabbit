@@ -40,6 +40,7 @@ public final class Viewers {
 
   /**
    * Creates a new, configured {@link FilteredTree}.
+   * 
    * @param parent the parent composite.
    * @param filter the filter for the tree.
    * @return a {@link FilteredTree}.
@@ -56,9 +57,9 @@ public final class Viewers {
     tree.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
     // Make it look a bit nicer for us:
-    GridLayout layout = (GridLayout) tree.getLayout();
+    GridLayout layout = (GridLayout)tree.getLayout();
     layout.verticalSpacing = 0;
-    layout = (GridLayout) tree.getFilterControl().getParent().getLayout();
+    layout = (GridLayout)tree.getFilterControl().getParent().getLayout();
     layout.marginHeight = 5;
     layout.marginWidth = 5;
 
@@ -72,12 +73,13 @@ public final class Viewers {
   }
 
   /**
-   * Creates a new {@link TreeViewerColumn}.
-   * @param viewer the parent viewer.
-   * @param style the style of the column.
-   * @param text the text of the column.
+   * Creates a new {@link TreeViewerColumn} that is resizable and moveable.
+   * 
+   * @param viewer the parent viewer
+   * @param style the style of the column
+   * @param text the text of the column
    * @param width the width of the column
-   * @return a column.
+   * @return a column
    */
   public static TreeViewerColumn newTreeViewerColumn(
       TreeViewer viewer, int style, String text, int width) {
@@ -86,6 +88,21 @@ public final class Viewers {
     column.getColumn().setMoveable(true);
     column.getColumn().setWidth(width);
     column.getColumn().setText(text);
+    return column;
+  }
+
+  /**
+   * Creates a new {@link TreeViewerColumn} that is resizable and moveable.
+   * 
+   * @param viewer the parent viewer
+   * @param style the style of the column
+   * @return a column
+   */
+  public static TreeViewerColumn newTreeViewerColumn(TreeViewer viewer,
+      int style) {
+    TreeViewerColumn column = new TreeViewerColumn(viewer, style);
+    column.getColumn().setResizable(true);
+    column.getColumn().setMoveable(true);
     return column;
   }
 
@@ -137,7 +154,7 @@ public final class Viewers {
           return;
         }
 
-        ITreeSelection selection = (ITreeSelection) e.getSelection();
+        ITreeSelection selection = (ITreeSelection)e.getSelection();
         TreePath[] paths = selection.getPaths();
         if (paths != null && paths.length > 0) {
           viewer.setExpandedState(paths[0], !viewer.getExpandedState(paths[0]));
@@ -146,5 +163,6 @@ public final class Viewers {
     });
   }
 
-  private Viewers() {}
+  private Viewers() {
+  }
 }
