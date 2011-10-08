@@ -128,6 +128,17 @@ public final class Viewers {
   }
 
   /**
+   * Sets the input to the given viewer.
+   */
+  public static void setInput(TreeViewer viewer, Object input) {
+    viewer.getTree().setRedraw(false);
+    TreePath[] expandedPaths = viewer.getExpandedTreePaths();
+    viewer.setInput(input);
+    viewer.setExpandedTreePaths(expandedPaths);
+    viewer.getTree().setRedraw(true);
+  }
+
+  /**
    * Clears the selection when user clicks on empty area.
    */
   private static void clearEmptySelection(final TreeViewer viewer) {

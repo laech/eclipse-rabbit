@@ -72,7 +72,7 @@ public abstract class UpdateJob<T> extends Job {
       return Status.CANCEL_STATUS;
     }
 
-    PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+    PlatformUI.getWorkbench().getDisplay().asyncExec(new Runnable() {
       @Override
       public void run() {
         viewer.getTree().setRedraw(false);

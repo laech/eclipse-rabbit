@@ -46,51 +46,60 @@ import rabbit.ui.internal.viewers.TreePathPatternFilter;
 import rabbit.ui.internal.viewers.TreeViewerCellPainter;
 import rabbit.ui.internal.viewers.TreeViewerColumnSorter;
 import rabbit.ui.internal.viewers.TreeViewerColumnValueSorter;
+import rabbit.ui.internal.viewers.Viewers;
 import rabbit.ui.internal.viewers.WorkspaceStorageLabelProvider;
 
 import static com.google.common.base.Predicates.instanceOf;
+import static com.google.common.collect.Maps.newHashMap;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
 
 import static org.jfree.chart.ChartFactory.createGanttChart;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.IContributionItem;
-import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.viewers.DecoratingStyledCellLabelProvider;
 import org.eclipse.jface.viewers.ILabelDecorator;
 import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.TreeViewerColumn;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.CTabFolder;
-import org.eclipse.swt.custom.CTabItem;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.TreeColumn;
+import org.eclipse.ui.IMemento;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.FilteredTree;
-import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.labels.CategoryToolTipGenerator;
+import org.jfree.chart.labels.IntervalCategoryToolTipGenerator;
 import org.jfree.chart.plot.CategoryPlot;
-import org.jfree.chart.renderer.category.CategoryItemRenderer;
 import org.jfree.chart.renderer.category.IntervalBarRenderer;
 import org.jfree.chart.renderer.category.StandardBarPainter;
+import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.gantt.Task;
 import org.jfree.data.gantt.TaskSeries;
 import org.jfree.data.gantt.TaskSeriesCollection;
+import org.jfree.data.time.SimpleTimePeriod;
 import org.jfree.experimental.chart.swt.ChartComposite;
 import org.joda.time.Duration;
 import org.joda.time.Interval;
 import org.joda.time.LocalDate;
 
+import static java.awt.Color.LIGHT_GRAY;
+import static java.awt.Color.WHITE;
+
+import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.GradientPaint;
+import java.awt.Shape;
+import java.awt.Stroke;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Observable;
@@ -99,168 +108,246 @@ import java.util.Observer;
 /**
  * A page displaying how much time is spent on using Eclipse every day.
  */
-public final class SessionPage extends SaveStateViewerPage {
+public final class SessionPage extends TabbedPage<ISessionData> {
 
-  private FilteredTree tree;
-  private CategoryProvider viewerCategories;
-  private TreePathValueProvider viewerValues;
-  private TreePathContentProvider viewerContents;
-  private ChartComposite chartComposite;
-  private SimpleVisualProvider chartVisualProvider;
+  private static final class ViewerPage
+      extends SaveStateViewerDataPage<ISessionData> {
 
-  private List<IContributionItem> viewerItems;
-  private List<IContributionItem> chartItems;
-  private IToolBarManager toolBar;
-  
-  private Collection<ISessionData> data;
-  private Preference pref;
+    private FilteredTree tree;
+    private CategoryProvider categories;
+    private TreePathValueProvider values;
+    private TreePathContentProvider contents;
 
-  public SessionPage() {
-  }
+    @Override
+    public void createContents(Composite parent) {
+      categories = createCategoryProvider();
+      contents = createContentProvider();
+      values = createValueProvider();
 
-  @Override
-  public void createContents(Composite parent) {
-    CTabFolder folder = new CTabFolder(parent, SWT.BOTTOM);
+      // The main label provider for the first column:
+      CompositeCellLabelProvider nameLabels = new CompositeCellLabelProvider(
+          new DateLabelProvider(), new WorkspaceStorageLabelProvider());
 
-    final CTabItem viewerTab = new CTabItem(folder, SWT.NONE);
-    viewerTab.setText("Viewer");
-    createTabForViewer(folder, viewerTab);
-    folder.setSelection(viewerTab);
+      // The viewer:
+      tree = newFilteredTree(parent, new TreePathPatternFilter(nameLabels));
+      TreeViewer viewer = tree.getViewer();
+      FilterableTreePathContentProvider filteredContentProvider =
+          new FilterableTreePathContentProvider(contents);
+      filteredContentProvider.addFilter(instanceOf(Duration.class));
+      viewer.setContentProvider(filteredContentProvider);
 
-    final CTabItem chartTab = new CTabItem(folder, SWT.NONE);
-    chartTab.setText("Chart");
-    chartTab.setControl(createTabForChart(folder));
+      // Column sorters:
+      TreeViewerColumnSorter labelSorter =
+          new InternalTreeViewerColumnLabelSorter(viewer, nameLabels);
+      TreeViewerColumnSorter durationSorter =
+          new TreeViewerColumnValueSorter(viewer, values);
 
-    folder.addSelectionListener(new SelectionAdapter() {
-      @Override
-      public void widgetSelected(SelectionEvent e) {
-        super.widgetSelected(e);
-        if (viewerTab.equals(e.item)) {
-          showOnlyViewerToolbarItems();
-        } else if (chartTab.equals(e.item)) {
-          showOnlyChartToolbarItems();
+      // The columns:
+
+      TreeViewerColumn name = newTreeViewerColumn(viewer, SWT.LEFT);
+      name.getColumn().setText("Name");
+      name.getColumn().setWidth(200);
+      name.getColumn().addSelectionListener(labelSorter);
+      name.setLabelProvider(new DecoratingStyledCellLabelProvider(
+          nameLabels, getPlatformLabelDecorator(), null));
+
+      TreeViewerColumn duration = newTreeViewerColumn(viewer, SWT.RIGHT);
+      duration.getColumn().setText("Duration");
+      duration.getColumn().setWidth(150);
+      duration.getColumn().addSelectionListener(durationSorter);
+      duration.setLabelProvider(new TreePathDurationLabelProvider(values));
+
+      TreeViewerColumn graph = newTreeViewerColumn(viewer, SWT.LEFT);
+      graph.getColumn().setWidth(100);
+      graph.getColumn().addSelectionListener(durationSorter);
+      graph.setLabelProvider(TreeViewerCellPainter.observe(values,
+          values, new RGB(208, 145, 60)));
+    }
+
+    @Override
+    public IContributionItem[] createToolBarItems() {
+      List<IContributionItem> items = new CommonToolBarBuilder()
+          .enableFilterControlAction(tree, true)
+          .enableTreeAction(tree.getViewer())
+          .enableGroupByAction(categories)
+          .enableColorByAction(values)
+          .addGroupByAction(DATE)
+          .addGroupByAction(WORKSPACE, DATE)
+          .addColorByAction(DATE)
+          .addColorByAction(WORKSPACE)
+          .build();
+
+      return items.toArray(new IContributionItem[items.size()]);
+    }
+
+    @Override
+    protected TreeColumn[] getColumns() {
+      return tree.getViewer().getTree().getColumns();
+    }
+
+    @Override
+    protected Category[] getSelectedCategories() {
+      return categories.getSelected().toArray(new Category[0]);
+    }
+
+    @Override
+    protected Category getVisualCategory() {
+      return (Category)values.getVisualCategory();
+    }
+
+    @Override
+    protected void setSelectedCategories(List<Category> categories) {
+      this.categories.setSelected(categories.toArray(
+          new Category[categories.size()]));
+    }
+
+    @Override
+    protected void setVisualCategory(Category category) {
+      values.setVisualCategory(category);
+    }
+
+    private CategoryProvider createCategoryProvider() {
+      Category[] supported = new Category[]{WORKSPACE, DATE};
+      CategoryProvider provider = new CategoryProvider(supported, DATE);
+      provider.addObserver(new Observer() {
+        @Override
+        public void update(Observable o, Object arg) {
+          resetInput(tree.getViewer());
         }
-      }
-    });
-  }
-
-  @Override
-  public IContributionItem[] createToolBarItems(IToolBarManager toolBar) {
-    this.toolBar = toolBar;
-    viewerItems = new CommonToolBarBuilder()
-        .enableFilterControlAction(tree, true)
-        .enableTreeAction(tree.getViewer())
-        .enableGroupByAction(viewerCategories)
-        .enableColorByAction(viewerValues)
-        .addGroupByAction(DATE)
-        .addGroupByAction(WORKSPACE, DATE)
-        .addColorByAction(DATE)
-        .addColorByAction(WORKSPACE)
-        .build();
-
-    chartVisualProvider = new SimpleVisualProvider();
-    chartVisualProvider.addObserver(new Observer() {
-      @Override
-      public void update(Observable o, Object arg) {
-        JFreeChart chart = createChart2(
-            new LocalDate(pref.getStartDate().getTimeInMillis()),
-            new LocalDate(pref.getEndDate().getTimeInMillis()));
-        CategoryPlot plot = chart.getCategoryPlot();
-        plot.setBackgroundPaint(Color.WHITE);
-        plot.setOutlineVisible(false);
-        CategoryItemRenderer renderer = plot.getRenderer();
-        renderer.setSeriesPaint(0, new Color(208, 145, 60));
-        ((IntervalBarRenderer)renderer).setShadowVisible(false);
-        ((IntervalBarRenderer)renderer)
-            .setBarPainter(new StandardBarPainter());
-        chartComposite.setChart(chart);
-        chartComposite.redraw();
-      }
-    });
-    chartItems = new CommonToolBarBuilder()
-        .enableColorByAction(chartVisualProvider)
-        .addColorByAction(DATE)
-        .addColorByAction(WORKSPACE)
-        .build();
-
-    for (IContributionItem item : viewerItems) {
-      toolBar.add(item);
-    }
-    for (IContributionItem item : chartItems) {
-      toolBar.add(item);
+      });
+      return provider;
     }
 
-    return viewerItems.toArray(new IContributionItem[viewerItems.size()]);
+    private TreePathContentProvider createContentProvider() {
+      TreePathContentProvider provider = new TreePathContentProvider(
+          new SessionDataTreeBuilder(categories));
+      provider.addObserver(new Observer() {
+        @Override
+        public void update(Observable o, Object arg) {
+          values.setVisualCategory(values.getVisualCategory());
+        }
+      });
+      return provider;
+    }
+
+    private TreePathValueProvider createValueProvider() {
+      Map<Predicate<Object>, Category> categories = ImmutableMap.of(
+          instanceOf(LocalDate.class), DATE,
+          instanceOf(WorkspaceStorage.class), WORKSPACE);
+      ICategorizer categorizer = new Categorizer(categories);
+      IConverter<TreePath> converter = new TreePathDurationConverter();
+      TreePathValueProvider provider = new TreePathValueProvider(categorizer,
+          contents, converter, DATE);
+      provider.addObserver(new Observer() {
+        @Override
+        public void update(Observable o, Object arg) {
+          refresh(tree.getViewer());
+        }
+      });
+      return provider;
+    }
+
+    private ILabelDecorator getPlatformLabelDecorator() {
+      return PlatformUI.getWorkbench().getDecoratorManager()
+          .getLabelDecorator();
+    }
+
+    @Override
+    public String getName() {
+      return "Viewer";
+    }
+
+    @Override
+    public void update(final Collection<ISessionData> data) {
+      Viewers.setInput(tree.getViewer(), new ISessionDataProvider() {
+        @Override
+        public Collection<ISessionData> get() {
+          return data;
+        }
+      });
+    }
   }
 
-  @Override
-  public Job updateJob(final Preference pref) {
-    this.pref = pref;
-    TreeViewer viewer = tree.getViewer();
-    return new UpdateJob<ISessionData>(viewer, pref, getAccessor()) {
-      @Override
-      protected Object getInput(final Collection<ISessionData> data) {
-        return new ISessionDataProvider() {
-          @Override
-          public Collection<ISessionData> get() {
-            SessionPage.this.data = data;
-            JFreeChart chart = createChart2(
-                new LocalDate(pref.getStartDate().getTimeInMillis()),
-                new LocalDate(pref.getEndDate().getTimeInMillis()));
-            CategoryPlot plot = chart.getCategoryPlot();
-            plot.setBackgroundPaint(Color.WHITE);
-            plot.setOutlineVisible(false);
-            CategoryItemRenderer renderer = plot.getRenderer();
-            renderer.setSeriesPaint(0, new Color(208, 145, 60));
-            ((IntervalBarRenderer)renderer).setShadowVisible(false);
-            ((IntervalBarRenderer)renderer)
-                .setBarPainter(new StandardBarPainter());
-            chartComposite.setChart(chart);
-            chartComposite.redraw();
-            return data;
-          }
-        };
-      }
-    };
-  }
+  private static final class ChartPage implements IDataPage<ISessionData> {
 
-  @Override
-  protected TreeColumn[] getColumns() {
-    return tree.getViewer().getTree().getColumns();
-  }
+    private ChartComposite chartComposite;
+    private SimpleVisualProvider visual;
+    private Collection<ISessionData> data;
 
-  @Override
-  protected Category[] getSelectedCategories() {
-    return viewerCategories.getSelected().toArray(new Category[0]);
-  }
+    private final TaskSeries series;
+    private final Date start;
+    private final Date end;
 
-  @Override
-  protected Category getVisualCategory() {
-    return (Category)viewerValues.getVisualCategory();
-  }
+    ChartPage() {
+      series = new TaskSeries("");
+      start = new Date();
+      end = new Date();
+    }
 
-  @Override
-  protected void setSelectedCategories(List<Category> categories) {
-    this.viewerCategories.setSelected(categories.toArray(
-        new Category[categories.size()]));
-  }
+    @Override
+    public void createContents(Composite parent) {
+      TaskSeriesCollection dataset = new TaskSeriesCollection();
+      dataset.add(series);
 
-  @Override
-  protected void setVisualCategory(Category category) {
-    viewerValues.setVisualCategory(category);
-  }
+      String title = null;
+      String categoryAxisLabel = null;
+      String dateAxisLabel = null;
+      boolean showLegend = false;
+      boolean showTooltips = true;
+      boolean showUrls = false;
+      JFreeChart chart = createGanttChart(title, categoryAxisLabel,
+          dateAxisLabel, dataset, showLegend, showTooltips, showUrls);
 
-  private JFreeChart createChart2(LocalDate start, LocalDate end) {
-    ICategory category = chartVisualProvider.getVisualCategory();
-    Map<Object, Task> tasks = Maps.newHashMap();
-    TaskSeries serise = new TaskSeries("Unavailable");
-    for (ISessionData d : data) {
-      List<Interval> intervals = d.get(ISessionData.INTERVALS);
-      if (!intervals.isEmpty()) {
+      CategoryPlot plot = chart.getCategoryPlot();
+      plot.setRangeGridlinePaint(LIGHT_GRAY);
+      plot.setBackgroundPaint(WHITE);
+      plot.setOutlineVisible(false);
+      plot.setNoDataMessage("No data");
+
+      IntervalBarRenderer renderer = (IntervalBarRenderer)plot.getRenderer();
+      renderer.setSeriesPaint(0, new Color(208, 145, 60));
+      renderer.setShadowPaint(LIGHT_GRAY);
+      renderer.setBarPainter(new StandardBarPainter());
+
+      chartComposite = new ChartComposite(parent, SWT.NONE, chart, true);
+    }
+
+    @Override
+    public IContributionItem[] createToolBarItems() {
+      visual = new SimpleVisualProvider();
+      visual.setVisualCategory(DATE);
+      visual.addObserver(new Observer() {
+        @Override
+        public void update(Observable o, Object arg) {
+          updateChart(data);
+        }
+      });
+
+      List<IContributionItem> items = new CommonToolBarBuilder()
+          .enableColorByAction(visual)
+          .addColorByAction(DATE)
+          .addColorByAction(WORKSPACE)
+          .build();
+
+      return items.toArray(new IContributionItem[items.size()]);
+    }
+
+    private void updateChart(Collection<ISessionData> data) {
+      series.removeAll();
+
+      ICategory category = visual.getVisualCategory();
+      Map<Object, Task> tasks = newHashMap();
+      SimpleTimePeriod undefined = new SimpleTimePeriod(start, end);
+      for (ISessionData d : data) {
+        List<Interval> intervals = d.get(ISessionData.INTERVALS);
+        if (intervals.isEmpty()) {
+          continue;
+        }
+
         Object key;
         String name;
+        LocalDate date = d.get(ISessionData.DATE);
         if (DATE.equals(category)) {
-          LocalDate date = d.get(ISessionData.DATE);
           key = date;
           name = date.toString();
 
@@ -280,147 +367,68 @@ public final class SessionPage extends SaveStateViewerPage {
 
         Task task = tasks.get(key);
         if (task == null) {
-          task = new Task(name,
-              start.toDateMidnight().toDate(),
-              end.toDateMidnight().plusDays(1).toDate());
+          task = new Task(name, undefined);
           tasks.put(key, task);
         }
-        serise.add(task);
-        System.err.println(intervals.size());
+        series.add(task);
         for (Interval interval : intervals) {
-          task.addSubtask(new Task(interval.toString(),
-              interval.getStart().toDate(),
-              interval.getEnd().toDate()));
+          long start = interval.getStartMillis();
+          long end = interval.getEndMillis();
+          task.addSubtask(new Task("", new Date(start), new Date(end)));
         }
       }
+
+      chartComposite.redraw();
     }
 
-    TaskSeriesCollection dataset = new TaskSeriesCollection();
-    dataset.add(serise);
+    @Override
+    public String getName() {
+      return "Chart";
+    }
 
-    return createGanttChart(null, null, null, dataset, false, true, false);
+    @Override
+    public void onRestoreState(IMemento memento) {
+    }
+
+    @Override
+    public void onSaveState(IMemento memento) {
+    }
+
+    @Override
+    public void update(Collection<ISessionData> data) {
+      this.data = data;
+      updateChart(data);
+    }
   }
 
-  private Composite createTabForChart(CTabFolder folder) {
-    TaskSeriesCollection dataset = new TaskSeriesCollection();
-    JFreeChart chart = ChartFactory.createGanttChart(null, null, null, dataset,
-        true, true, true);
-    chartComposite = new ChartComposite(folder, SWT.NONE, chart, true);
-    return chartComposite;
+  private ChartPage chart;
+
+  public SessionPage() {
+    chart = new ChartPage();
   }
 
-  private void createTabForViewer(CTabFolder folder, CTabItem tab) {
-    viewerCategories = createViewerCategoryProvider();
-    viewerContents = createViewerContentProvider();
-    viewerValues = createViewerValueProvider();
-
-    // The main label provider for the first column:
-    CompositeCellLabelProvider nameLabels = new CompositeCellLabelProvider(
-        new DateLabelProvider(), new WorkspaceStorageLabelProvider());
-
-    // The viewer:
-    tree = newFilteredTree(folder, new TreePathPatternFilter(nameLabels));
-    tab.setControl(tree);
-    TreeViewer viewer = tree.getViewer();
-    FilterableTreePathContentProvider filteredContentProvider =
-        new FilterableTreePathContentProvider(viewerContents);
-    filteredContentProvider.addFilter(instanceOf(Duration.class));
-    viewer.setContentProvider(filteredContentProvider);
-
-    // Column sorters:
-    TreeViewerColumnSorter labelSorter =
-        new InternalTreeViewerColumnLabelSorter(viewer, nameLabels);
-    TreeViewerColumnSorter durationSorter =
-        new TreeViewerColumnValueSorter(viewer, viewerValues);
-
-    // The columns:
-
-    TreeViewerColumn name = newTreeViewerColumn(viewer, SWT.LEFT);
-    name.getColumn().setText("Name");
-    name.getColumn().setWidth(200);
-    name.getColumn().addSelectionListener(labelSorter);
-    name.setLabelProvider(new DecoratingStyledCellLabelProvider(
-        nameLabels, getPlatformLabelDecorator(), null));
-
-    TreeViewerColumn duration = newTreeViewerColumn(viewer, SWT.RIGHT);
-    duration.getColumn().setText("Duration");
-    duration.getColumn().setWidth(150);
-    duration.getColumn().addSelectionListener(durationSorter);
-    duration.setLabelProvider(new TreePathDurationLabelProvider(viewerValues));
-
-    TreeViewerColumn graph = newTreeViewerColumn(viewer, SWT.LEFT);
-    graph.getColumn().setWidth(100);
-    graph.getColumn().addSelectionListener(durationSorter);
-    graph.setLabelProvider(TreeViewerCellPainter.observe(viewerValues,
-        viewerValues, new RGB(208, 145, 60)));
-  }
-
-  private CategoryProvider createViewerCategoryProvider() {
-    Category[] supported = new Category[]{WORKSPACE, DATE};
-    CategoryProvider provider = new CategoryProvider(supported, DATE);
-    provider.addObserver(new Observer() {
+  @Override
+  public Job updateJob(final Preference pref) {
+    final LocalDate start = LocalDate.fromCalendarFields(pref.getStartDate());
+    final LocalDate end = LocalDate.fromCalendarFields(pref.getEndDate());
+    return new AsyncJob<ISessionData>(getAccessor(), start, end) {
       @Override
-      public void update(Observable o, Object arg) {
-        resetInput(tree.getViewer());
+      protected void onFinishUi(Collection<ISessionData> data) {
+        super.onFinishUi(data);
+        chart.start.setTime(pref.getStartDate().getTimeInMillis());
+        chart.end.setTime(pref.getEndDate().getTimeInMillis());
+        update(data);
       }
-    });
-    return provider;
-  }
-
-  private TreePathContentProvider createViewerContentProvider() {
-    TreePathContentProvider provider = new TreePathContentProvider(
-        new SessionDataTreeBuilder(viewerCategories));
-    provider.addObserver(new Observer() {
-      @Override
-      public void update(Observable o, Object arg) {
-        viewerValues.setVisualCategory(viewerValues.getVisualCategory());
-      }
-    });
-    return provider;
-  }
-
-  private TreePathValueProvider createViewerValueProvider() {
-    Map<Predicate<Object>, Category> categories = ImmutableMap.of(
-        instanceOf(LocalDate.class), DATE,
-        instanceOf(WorkspaceStorage.class), WORKSPACE);
-    ICategorizer categorizer = new Categorizer(categories);
-    IConverter<TreePath> converter = new TreePathDurationConverter();
-    TreePathValueProvider provider = new TreePathValueProvider(categorizer,
-        viewerContents, converter, DATE);
-    provider.addObserver(new Observer() {
-      @Override
-      public void update(Observable o, Object arg) {
-        refresh(tree.getViewer());
-      }
-    });
-    return provider;
+    };
   }
 
   private IAccessor<ISessionData> getAccessor() {
     return DataHandler.getAccessor(ISessionData.class);
   }
 
-  private ILabelDecorator getPlatformLabelDecorator() {
-    return PlatformUI.getWorkbench().getDecoratorManager().getLabelDecorator();
-  }
-
-  private void showOnlyChartToolbarItems() {
-    for (IContributionItem item : chartItems) {
-      item.setVisible(true);
-    }
-    for (IContributionItem item : viewerItems) {
-      item.setVisible(false);
-    }
-    toolBar.update(true);
-  }
-
-  private void showOnlyViewerToolbarItems() {
-    for (IContributionItem item : viewerItems) {
-      item.setVisible(true);
-    }
-    for (IContributionItem item : chartItems) {
-      item.setVisible(false);
-    }
-    toolBar.update(true);
+  @Override
+  @SuppressWarnings("unchecked")
+  protected IDataPage<ISessionData>[] getPages() {
+    return new IDataPage[]{new ViewerPage(), chart};
   }
 }
