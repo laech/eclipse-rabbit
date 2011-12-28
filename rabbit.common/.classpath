@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry exported="true" kind="lib" path="lib/commons-io-1.4.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/guice-2.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/jsr305.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/aopalliance.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/guava-r09.jar" sourcepath="/Volumes/T/guava"/>
-	<classpathentry exported="true" kind="lib" path="lib/joda-time-2.0.jar" sourcepath="/Volumes/T/joda-time"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/aopalliance-1.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/commons-io-2.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/guava-11.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/guice-3.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/javax.inject-1.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/joda-time-2.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/jsr305-1.3.9.jar"/>
+	<classpathentry exported="true" kind="lib" path="target/dependency/scala-library-2.9.1.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="output" path="bin"/>

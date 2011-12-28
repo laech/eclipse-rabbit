@@ -13,8 +13,7 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.ui.ide,
  org.eclipse.ui.forms,
  rabbit.tracking;bundle-version="1.1.0",
- rabbit.common;bundle-version="1.0.0",
- org.scala-ide.scala.library
+ rabbit.common;bundle-version="1.0.0"
 Bundle-ActivationPolicy: lazy
 Eclipse-ExtensibleAPI: true
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6

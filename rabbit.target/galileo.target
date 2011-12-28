@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?pde version="3.6"?>
+
+<target name="Target Platform for Rabbit" sequenceNumber="2">
+<locations>
+<location includeAllPlatforms="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
+<unit id="org.eclipse.jdt.feature.group" version="3.5.2.r352_v20100108-7r88FEwFI0WTuoBl0iaG0tyhfZH6"/>
+<unit id="org.eclipse.platform.ide" version="3.5.2.M20100211-1343"/>
+<unit id="org.eclipse.equinox.executable.feature.group" version="3.3.201.R35x_v20091211-7M-FngFELSU3Pqlv3JdZn"/>
+<unit id="org.eclipse.mylyn_feature.feature.group" version="3.2.3.v20100217-0100-e3x"/>
+<repository location="http://download.eclipse.org/releases/galileo"/>
+</location>
+</locations>
+</target>
