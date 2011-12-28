@@ -20,8 +20,12 @@ import scala.math.Ordering
 /** An object whose internal content can be ordered. */
 trait Sortable {
 
+  private var _ordering: Ordering[Any] = _
+
   /** The ordering of this instance's content, may be `null` if content is not
     * currently ordered.
     */
-  var ordering: Ordering[Any]
+  def ordering = _ordering
+
+  def ordering_=(ordering: Ordering[Any]) = _ordering = ordering
 }

@@ -21,6 +21,7 @@ import org.eclipse.jface.viewers.TreePath
 trait TreePathChildrenProvider {
 
   /** Gets all the children of the given path.
+    *
     * @param path the parent path
     * @return the children of the path, or an empty array if none
     */

@@ -34,7 +34,7 @@ import org.eclipse.swt.SWT
   *      column is to be sorting ascendingly, descending sorting will be
   *      handled by this instance
   */
-final class TreeViewerColumnSorter(
+final class TreeColumnSorter(
   private val viewer: TreeViewer,
   private val sortable: Sortable,
   private val asc: Ordering[Any]) extends SelectionListener {
