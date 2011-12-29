@@ -15,17 +15,33 @@
  */
 package rabbit.tracking.internal.trackers;
 
-import rabbit.data.store.model.LaunchEvent;
-
+import static java.lang.String.format;
+import static org.eclipse.jdt.core.JavaCore.newContainerEntry;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IProjectDescription;
+import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.debug.core.DebugEvent;
 import org.eclipse.debug.core.DebugPlugin;
@@ -37,6 +53,7 @@ import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.core.model.IProcess;
 import org.eclipse.debug.core.model.ISuspendResume;
+import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -44,31 +61,22 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.debug.core.JDIDebugModel;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
-import org.eclipse.jdt.ui.actions.OpenJavaPerspectiveAction;
-import org.eclipse.jdt.ui.wizards.JavaCapabilityConfigurationPage;
+import org.eclipse.jdt.launching.IVMInstall;
+import org.eclipse.jdt.launching.IVMInstallType;
+import org.eclipse.jdt.launching.JavaRuntime;
 import org.joda.time.Interval;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import static java.lang.String.format;
-
-import java.io.IOException;
-import java.net.URI;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+import rabbit.data.store.model.LaunchEvent;
 
 /**
  * @see LaunchTracker
  */
 public class LaunchTrackerTest extends AbstractTrackerTest<LaunchEvent> {
 
+  // TODO clean it up a bit, some tests are not reliable
+  
   /**
    * Listener to help testing.
    */
@@ -130,20 +138,43 @@ public class LaunchTrackerTest extends AbstractTrackerTest<LaunchEvent> {
 
   private static IPackageFragment pkg;
 
-  @BeforeClass
+  @BeforeClass 
   public static void beforeClass() throws Exception {
-    new OpenJavaPerspectiveAction().run();
-
     // Create a new Java project:
-    IProject proj = ResourcesPlugin.getWorkspace().getRoot().getProject("P");
-    JavaCapabilityConfigurationPage.createProject(proj, (URI) null, null);
-    IJavaProject javaProj = JavaCore.create(proj);
-    JavaCapabilityConfigurationPage page = new JavaCapabilityConfigurationPage();
-    page.init(javaProj, null, null, true);
-    page.configureJavaProject(null);
+    IProgressMonitor progressMonitor = new NullProgressMonitor();
+    IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
+    IProject project = root.getProject("P");
+    project.create(progressMonitor);
+    project.open(progressMonitor);
+
+    // Add Java nature
+    IProjectDescription description = project.getDescription();
+    String[] natures = description.getNatureIds();
+    String[] newNatures = new String[natures.length + 1];
+    System.arraycopy(natures, 0, newNatures, 0, natures.length);
+    newNatures[natures.length] = JavaCore.NATURE_ID;
+    description.setNatureIds(newNatures);
+    project.setDescription(description, progressMonitor);
+
+    IJavaProject javaProject = JavaCore.create(project);
+
+    // Set Java runtime
+    Set<IClasspathEntry> entries = new HashSet<IClasspathEntry>();
+    entries.addAll(Arrays.asList(javaProject.getRawClasspath()));
+    outer: for (IVMInstallType type : JavaRuntime.getVMInstallTypes()) {
+      for (IVMInstall install : type.getVMInstalls()) {
+        entries.add(newContainerEntry(new Path(JavaRuntime.JRE_CONTAINER)
+            .append(install.getVMInstallType().getId())
+            .append(install.getName())));
+        break outer;
+      }
+    }
+    
+    javaProject.setRawClasspath(
+        entries.toArray(new IClasspathEntry[entries.size()]), progressMonitor);
 
     // Create a package:
-    IPackageFragmentRoot src = javaProj.getPackageFragmentRoots()[0];
+    IPackageFragmentRoot src = javaProject.getPackageFragmentRoots()[0];
     pkg = src.createPackageFragment("pkg", true, null);
   }
 
@@ -378,6 +409,7 @@ public class LaunchTrackerTest extends AbstractTrackerTest<LaunchEvent> {
         }
       }
     }
+    Thread.sleep(500);
     suspendResume[0].resume();
     Thread.sleep(500);
     tracker.setEnabled(false);
