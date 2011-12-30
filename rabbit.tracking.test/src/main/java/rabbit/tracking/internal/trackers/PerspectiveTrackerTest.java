@@ -15,54 +15,54 @@
  */
 package rabbit.tracking.internal.trackers;
 
-import rabbit.data.store.model.PerspectiveEvent;
-import rabbit.tracking.internal.IdleDetector;
-import rabbit.tracking.internal.TrackingPlugin;
-import rabbit.tracking.internal.trackers.PerspectiveTracker;
-
+import static java.lang.System.currentTimeMillis;
+import static java.lang.Thread.sleep;
+import static org.eclipse.ui.PlatformUI.getWorkbench;
+import static org.hamcrest.collection.IsArrayWithSize.emptyArray;
+import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
+import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsNull.notNullValue;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-
-import org.eclipse.ui.IPerspectiveDescriptor;
-import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.IWorkbenchWindow;
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.WorkbenchException;
-import org.joda.time.Interval;
-import org.junit.Before;
-import org.junit.Test;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Observable;
 import java.util.Random;
 
-/**
- * Test for {@link PerspectiveTracker}
- */
+import org.eclipse.ui.IPerspectiveDescriptor;
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.WorkbenchException;
+import org.joda.time.Interval;
+import org.junit.Before;
+import org.junit.Test;
+
+import rabbit.data.store.model.PerspectiveEvent;
+import rabbit.tracking.internal.IdleDetector;
+import rabbit.tracking.internal.TrackingPlugin;
+
 public class PerspectiveTrackerTest extends
     AbstractTrackerTest<PerspectiveEvent> {
 
   private PerspectiveTracker tracker;
 
-  @Before
-  public void setUp() {
+  @Before public void setup() {
     tracker = createTracker();
 
-    IWorkbench wb = PlatformUI.getWorkbench();
-    wb.getActiveWorkbenchWindow().getActivePage()
-        .setPerspective(wb.getPerspectiveRegistry().getPerspectives()[1]);
+    IWorkbench workbench = getWorkbench();
+    workbench.getActiveWorkbenchWindow().getActivePage().setPerspective(
+        workbench.getPerspectiveRegistry().getPerspectives()[1]);
   }
 
-  @Test
-  public void testChangePerspective() throws InterruptedException {
+  @Test public void shouldTrackOnPerspectiveChange() throws Exception {
     IWorkbenchWindow win = getActiveWindow();
     IPerspectiveDescriptor oldPers = win.getActivePage().getPerspective();
     IPerspectiveDescriptor newPers = null;
 
-    for (IPerspectiveDescriptor p : PlatformUI.getWorkbench()
+    for (IPerspectiveDescriptor p : getWorkbench()
         .getPerspectiveRegistry().getPerspectives()) {
       if (!p.equals(oldPers)) {
         newPers = p;
@@ -70,39 +70,39 @@ public class PerspectiveTrackerTest extends
       }
     }
 
-    long preStart = System.currentTimeMillis();
+    long preStart = currentTimeMillis();
     tracker.setEnabled(true);
-    long postStart = System.currentTimeMillis();
+    long postStart = currentTimeMillis();
 
-    Thread.sleep(20);
+    sleep(20);
 
-    long preEnd = System.currentTimeMillis();
+    long preEnd = currentTimeMillis();
+    win.getActivePage().closeAllPerspectives(false, false);
     win.getActivePage().setPerspective(newPers);
-    long postEnd = System.currentTimeMillis();
+    long postEnd = currentTimeMillis();
 
-    assertEquals(1, tracker.getData().size());
+    assertThat(tracker.getData(), hasSize(1));
     PerspectiveEvent event = tracker.getData().iterator().next();
-    assertEquals(oldPers, event.getPerspective());
+    assertThat(event.getPerspective(), is(oldPers));
 
     long start = event.getInterval().getStartMillis();
     long end = event.getInterval().getEndMillis();
     checkTime(preStart, start, postStart, preEnd, end, postEnd);
   }
 
-  @Test
-  public void testClosePerspectives() throws InterruptedException {
+  @Test public void shouldTrackOnPerspectiveClose() throws Exception {
     IWorkbenchPage page = getActiveWindow().getActivePage();
     IPerspectiveDescriptor perspective = page.getPerspective();
 
-    long preStart = System.currentTimeMillis();
+    long preStart = currentTimeMillis();
     tracker.setEnabled(true);
-    long postStart = System.currentTimeMillis();
+    long postStart = currentTimeMillis();
 
-    Thread.sleep(20);
+    sleep(20);
 
-    long preEnd = System.currentTimeMillis();
+    long preEnd = currentTimeMillis();
     page.closeAllPerspectives(false, false);
-    long postEnd = System.currentTimeMillis();
+    long postEnd = currentTimeMillis();
 
     assertEquals(1, tracker.getData().size());
     PerspectiveEvent e = tracker.getData().iterator().next();
@@ -113,74 +113,73 @@ public class PerspectiveTrackerTest extends
     checkTime(preStart, start, postStart, preEnd, end, postEnd);
   }
 
-  @Test
-  public void testCloseWindow() throws Exception {
+  @Test public void shouldTrackOnWindowClose() throws Exception {
     IWorkbenchWindow win = openWindow();
     IPerspectiveDescriptor perspective = win.getActivePage().getPerspective();
 
-    long preStart = System.currentTimeMillis();
+    long preStart = currentTimeMillis();
     tracker.setEnabled(true);
-    long postStart = System.currentTimeMillis();
-    Thread.sleep(20);
-    long preEnd = System.currentTimeMillis();
+    long postStart = currentTimeMillis();
+    sleep(15);
+    long preEnd = currentTimeMillis();
     assertTrue(win.close());
-    long postEnd = System.currentTimeMillis();
+    long postEnd = currentTimeMillis();
 
-    assertEquals(1, tracker.getData().size());
+    assertThat(tracker.getData(), hasSize(1));
     PerspectiveEvent e = tracker.getData().iterator().next();
-    assertEquals(perspective, e.getPerspective());
+    assertThat(e.getPerspective(), is(perspective));
 
     long start = e.getInterval().getStartMillis();
     long end = e.getInterval().getEndMillis();
     checkTime(preStart, start, postStart, preEnd, end, postEnd);
   }
 
-  @Test
-  public void testDisabled() throws Exception {
+  @Test public void shouldNotTrackIfDisabled() throws Exception {
     tracker.setEnabled(false);
 
     // Test IPerspectiveListener.
-    Thread.sleep(20);
-    getActiveWindow().getActivePage().setPerspective(getRandomPerspective());
-    assertTrue(tracker.getData().isEmpty());
+    IWorkbenchPage page = getActiveWindow().getActivePage();
+    page.closeAllPerspectives(false, false);
+    page.setPerspective(getRandomPerspective());
+    assertThat(tracker.getData().toArray(), is(emptyArray()));
 
     // Test IWindowListener.
-    Thread.sleep(20);
-    getActiveWindow().getWorkbench().openWorkbenchWindow(null);
-    assertTrue(tracker.getData().isEmpty());
+    IWorkbenchWindow window = getWorkbench().openWorkbenchWindow(null);
+    try {
+      assertThat(tracker.getData().toArray(), is(emptyArray()));
+    } finally {
+      window.close();
+    }
 
     // Test IdleDetector
-    Thread.sleep(20);
     callIdleDetectorToNotify();
-    assertTrue(tracker.getData().isEmpty());
+    assertThat(tracker.getData().toArray(), is(emptyArray()));
   }
 
-  @Test
-  public void testEnable_noActiveWorkbenchWindow() throws Exception {
-    for (IWorkbenchWindow win : PlatformUI.getWorkbench().getWorkbenchWindows()) {
+  @Test public void shouldNotTrackIfNoWindowIsActive() throws Exception {
+    for (IWorkbenchWindow win : getWorkbench().getWorkbenchWindows()) {
       win.getShell().setMinimized(true);
     }
 
     try {
       tracker.setEnabled(true);
-      Thread.sleep(50);
+      sleep(5);
       tracker.setEnabled(false);
-      assertTrue(tracker.getData().isEmpty());
+      assertThat(tracker.getData().toArray(), is(emptyArray()));
 
     } finally {
-      for (IWorkbenchWindow w : PlatformUI.getWorkbench().getWorkbenchWindows()) {
-        w.getShell().setMinimized(false);
+      for (IWorkbenchWindow win : getWorkbench().getWorkbenchWindows()) {
+        win.getShell().setMinimized(false);
       }
     }
   }
 
-  @Test
-  public void testEnableThenDisable() throws InterruptedException {
+  @Test public void shouldTrackWithTheCorrectTime() throws Exception {
     long preStart = System.currentTimeMillis();
     tracker.setEnabled(true);
     long postStart = System.currentTimeMillis();
 
-    Thread.sleep(20);
+    sleep(20);
 
     long preEnd = System.currentTimeMillis();
     tracker.setEnabled(false);
@@ -188,15 +187,14 @@ public class PerspectiveTrackerTest extends
 
     assertEquals(1, tracker.getData().size());
     PerspectiveEvent e = tracker.getData().iterator().next();
-    assertNotNull(e.getPerspective());
+    assertThat(e.getPerspective(), is(notNullValue()));
 
     long start = e.getInterval().getStartMillis();
     long end = e.getInterval().getEndMillis();
     checkTime(preStart, start, postStart, preEnd, end, postEnd);
   }
 
-  @Test
-  public void testIdleDetector() throws Exception {
+  @Test public void shouldTrackIdleDetectNotifications() throws Exception {
     IPerspectiveDescriptor perspective = getActiveWindow().getActivePage()
         .getPerspective();
 
@@ -204,89 +202,101 @@ public class PerspectiveTrackerTest extends
     tracker.setEnabled(true);
     long postStart = System.currentTimeMillis();
 
-    Thread.sleep(20);
+    sleep(20);
 
     long preEnd = System.currentTimeMillis();
     callIdleDetectorToNotify();
     long postEnd = System.currentTimeMillis();
 
-    assertEquals(1, tracker.getData().size());
+    assertThat(tracker.getData(), hasSize(1));
     PerspectiveEvent e = tracker.getData().iterator().next();
-    assertEquals(perspective, e.getPerspective());
+    assertThat(e.getPerspective(), is(perspective));
 
     long start = e.getInterval().getStartMillis();
     long end = e.getInterval().getEndMillis();
     checkTime(preStart, start, postStart, preEnd, end, postEnd);
   }
 
-  @Test
-  public void testNewWindow() throws Exception {
+  @Test public void shouldTrackOnNewlyOpenedWindow() throws Exception {
     tracker.setEnabled(true);
 
     long preStart = System.currentTimeMillis();
     IWorkbenchWindow window = openWindow(); // Opens a second window
-    long postStart = System.currentTimeMillis();
+    try {
+      long postStart = System.currentTimeMillis();
 
-    IPerspectiveDescriptor persp = window.getActivePage().getPerspective();
-    tracker.flushData(); // Removes data from the first window
+      IPerspectiveDescriptor persp = window.getActivePage().getPerspective();
+      tracker.flushData(); // Removes data from the first window
 
-    Thread.sleep(100);
+      sleep(10);
 
-    long preEnd = System.currentTimeMillis();
-    window.getActivePage().setPerspective(
-        window.getWorkbench().getPerspectiveRegistry().getPerspectives()[1]);
-    long postEnd = System.currentTimeMillis();
+      long preEnd = System.currentTimeMillis();
+      IWorkbenchPage page = window.getActivePage();
+      page.closeAllPerspectives(false, false);
+      page.setPerspective(getRandomPerspective());
+      long postEnd = System.currentTimeMillis();
 
-    assertEquals(1, tracker.getData().size());
-    PerspectiveEvent event = tracker.getData().iterator().next();
-    assertEquals(persp, event.getPerspective());
+      assertThat(tracker.getData(), hasSize(1));
+      PerspectiveEvent event = tracker.getData().iterator().next();
+      assertThat(event.getPerspective(), is(persp));
 
-    long start = event.getInterval().getStartMillis();
-    long end = event.getInterval().getEndMillis();
-    checkTime(preStart, start, postStart, preEnd, end, postEnd);
+      long start = event.getInterval().getStartMillis();
+      long end = event.getInterval().getEndMillis();
+      checkTime(preStart, start, postStart, preEnd, end, postEnd);
+    } finally {
+      window.close();
+    }
   }
 
-  @Test
-  public void testObserverIsAdded() {
+  @Test public void shouldStartObservingOnIdleDetectorWhenEnabled() {
     IdleDetector dt = TrackingPlugin.getDefault().getIdleDetector();
-    tracker.setEnabled(false); // It should remove itself from the observable
+    tracker.setEnabled(false);
     int count = dt.countObservers();
-    tracker.setEnabled(true); // It should add itself to the observable
-    assertEquals(count + 1, dt.countObservers());
+    tracker.setEnabled(true);
+    assertThat(dt.countObservers(), is(count + 1));
   }
 
-  @Test
-  public void testWindowDeactivated() throws Exception {
+  @Test public void shouldStopObservingOnIdleDetectorWhenEnabled() {
+    IdleDetector dt = TrackingPlugin.getDefault().getIdleDetector();
+    tracker.setEnabled(true);
+    int count = dt.countObservers();
+    tracker.setEnabled(false);
+    assertThat(dt.countObservers(), is(count - 1));
+  }
+
+  @Test public void shouldTrackAnEventWhenWindowDeactivates() throws Exception {
     IWorkbenchPage page = getActiveWindow().getActivePage();
 
-    long preStart = System.currentTimeMillis();
+    long preStart = currentTimeMillis();
     tracker.setEnabled(true);
-    long postStart = System.currentTimeMillis();
+    long postStart = currentTimeMillis();
 
-    Thread.sleep(20);
+    sleep(10);
 
-    long preEnd = System.currentTimeMillis();
+    long preEnd = currentTimeMillis();
     // Open new window to cause the current window to loose focus
-    page.getWorkbenchWindow().getWorkbench().openWorkbenchWindow(null);
-    long postEnd = System.currentTimeMillis();
+    IWorkbenchWindow win = getWorkbench().openWorkbenchWindow(null);
+    try {
+      long postEnd = currentTimeMillis();
 
-    assertEquals(1, tracker.getData().size());
-    PerspectiveEvent e = tracker.getData().iterator().next();
-    assertEquals(page.getPerspective(), e.getPerspective());
+      assertThat(tracker.getData(), hasSize(1));
+      PerspectiveEvent e = tracker.getData().iterator().next();
+      assertThat(e.getPerspective(), is(page.getPerspective()));
 
-    long start = e.getInterval().getStartMillis();
-    long end = e.getInterval().getEndMillis();
-    checkTime(preStart, start, postStart, preEnd, end, postEnd);
+      long start = e.getInterval().getStartMillis();
+      long end = e.getInterval().getEndMillis();
+      checkTime(preStart, start, postStart, preEnd, end, postEnd);
+    } finally {
+      win.close();
+    }
   }
 
-  @Override
-  protected PerspectiveEvent createEvent() {
+  @Override protected PerspectiveEvent createEvent() {
     return new PerspectiveEvent(new Interval(0, 1), getActiveWindow()
         .getActivePage().getPerspective());
   }
 
-  @Override
-  protected PerspectiveTracker createTracker() {
+  @Override protected PerspectiveTracker createTracker() {
     return new PerspectiveTracker();
   }
 
@@ -310,16 +320,16 @@ public class PerspectiveTrackerTest extends
   }
 
   private IWorkbenchWindow getActiveWindow() {
-    return PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+    return getWorkbench().getActiveWorkbenchWindow();
   }
 
   private IPerspectiveDescriptor getRandomPerspective() {
-    IPerspectiveDescriptor[] ps = PlatformUI.getWorkbench()
-        .getPerspectiveRegistry().getPerspectives();
+    IPerspectiveDescriptor[] ps = getWorkbench().getPerspectiveRegistry()
+        .getPerspectives();
     return ps[new Random().nextInt(ps.length)];
   }
 
   private IWorkbenchWindow openWindow() throws WorkbenchException {
-    return PlatformUI.getWorkbench().openWorkbenchWindow(null);
+    return getWorkbench().openWorkbenchWindow(null);
   }
 }

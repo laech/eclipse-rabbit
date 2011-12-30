@@ -7,7 +7,6 @@ Fragment-Host: rabbit.tracking
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.ui,
- org.junit4,
  org.eclipse.core.resources,
  org.eclipse.ui.ide,
  org.eclipse.debug.core,
@@ -20,6 +19,12 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.jdt.debug,
  org.eclipse.ui.editors,
  org.eclipse.jface.text,
- rabbit.common.testing
+ org.junit4
 Export-Package: rabbit.tracking.internal,
  rabbit.tracking.internal.trackers
+Bundle-ClassPath: target/dependency/scalatest_2.9.1-1.6.1.jar,
+ target/dependency/mockito-core-1.9.0.jar,
+ target/dependency/objenesis-1.0.jar,
+ target/dependency/hamcrest-core-1.3.RC2.jar,
+ target/dependency/hamcrest-library-1.3.RC2.jar,
+ .

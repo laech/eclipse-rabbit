@@ -22,19 +22,22 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Event;
-import org.eclipse.swt.widgets.Shell;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 
 import java.lang.reflect.Field;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
+
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.PlatformUI;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 /**
  * @see IdleDetector
@@ -59,26 +62,24 @@ public class IdleDetectorTest {
     }
   }
 
-  private Display display;
-  private Shell shell;
+  private static final Display DISPLAY = PlatformUI.getWorkbench().getDisplay();
+  private static Shell shell;
 
   @After
   public void after() {
     shell.dispose();
-    display.dispose();
   }
 
   @Before
   public void before() {
-    display = new Display();
-    shell = new Shell(display);
+    shell = new Shell(DISPLAY);
   }
 
   @Test
   public void shouldBeAbleToDetectThatTheUserHasReturnedToActiveByPressingAKey() throws Exception {
     long idleInterval = 50;
     long runDelay = 10;
-    IdleDetector d = create(display, idleInterval, runDelay);
+    IdleDetector d = create(DISPLAY, idleInterval, runDelay);
     d.setRunning(true);
 
     Thread.sleep((idleInterval + runDelay) * 2);
@@ -92,7 +93,7 @@ public class IdleDetectorTest {
   public void observersShouldBeNotifiedWhenTheUserReturnsToActiveByPressingAKey() throws Exception {
     long idleInterval = 100;
     long runDelay = 10;
-    IdleDetector d = new IdleDetector(display, idleInterval, runDelay);
+    IdleDetector d = new IdleDetector(DISPLAY, idleInterval, runDelay);
 
     ObserverTester ob = new ObserverTester();
     d.addObserver(ob);
@@ -113,7 +114,7 @@ public class IdleDetectorTest {
   public void shouldBeAbleToDetectThatTheUserHasReturnedToActiveByClickingTheMouse() throws Exception {
     long idleInterval = 500;
     long runDelay = 10;
-    IdleDetector d = new IdleDetector(display, idleInterval, runDelay);
+    IdleDetector d = new IdleDetector(DISPLAY, idleInterval, runDelay);
     d.setRunning(true);
 
     Thread.sleep(idleInterval + (runDelay * 2));
@@ -127,7 +128,7 @@ public class IdleDetectorTest {
   public void observersShouldBeNotifiedWhenTheUserReturnsToActiveByClickingTheMouse() throws Exception {
     long idleInterval = 500;
     long runDelay = 10;
-    IdleDetector d = new IdleDetector(display, idleInterval, runDelay);
+    IdleDetector d = new IdleDetector(DISPLAY, idleInterval, runDelay);
 
     ObserverTester ob = new ObserverTester();
     d.addObserver(ob);
@@ -149,7 +150,7 @@ public class IdleDetectorTest {
   public void observersShouldNotBeNotifiedWhenTheUserIsActive() throws Exception {
     long idleInterval = 50;
     long runDelay = 10;
-    IdleDetector d = new IdleDetector(display, idleInterval, runDelay);
+    IdleDetector d = new IdleDetector(DISPLAY, idleInterval, runDelay);
 
     ObserverTester ob = new ObserverTester();
     d.addObserver(ob);
@@ -179,18 +180,20 @@ public class IdleDetectorTest {
 
   @Test(expected = IllegalArgumentException.class)
   public void shouldThrowIllegalArgumentExceptionIfConstructedWithANegativeDelay() {
-    new IdleDetector(display, 10, -1);
+    new IdleDetector(DISPLAY, 10, -1);
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void shouldThrowIllegalArgumentExceptionIfConstructedWithANegativeInterval() {
-    new IdleDetector(display, -1, 10);
+    new IdleDetector(DISPLAY, -1, 10);
   }
 
   @Test
   public void shouldDoNothingAfterTheDisplayHasBeenDisposed() {
+    Display display = mock(Display.class);
+    given(display.isDisposed()).willReturn(false);
     IdleDetector d = new IdleDetector(display, 10, 10);
-    display.dispose();
+    given(display.isDisposed()).willReturn(true);
 
     try {
       d.setRunning(true);
@@ -202,27 +205,27 @@ public class IdleDetectorTest {
 
   @Test
   public void shouldReturnTheDisplay() {
-    Display actualDisplay = create(display, 1, 1).getDisplay();
-    assertThat(actualDisplay, sameInstance(display));
+    Display actualDisplay = create(DISPLAY, 1, 1).getDisplay();
+    assertThat(actualDisplay, sameInstance(DISPLAY));
   }
 
   @Test
   public void shouldReturnTheIdleInterval() {
     long expected = 1936l;
-    long actual =  create(display, expected, 1).getIdleInterval();
+    long actual =  create(DISPLAY, expected, 1).getIdleInterval();
     assertThat(actual, is(expected));
   }
 
   @Test
   public void shouldReturnTheDelay() {
     long expectedDelay = 1231;
-    long actualDelay = create(display, 101010, expectedDelay).getRunDelay();
+    long actualDelay = create(DISPLAY, 101010, expectedDelay).getRunDelay();
     assertThat(actualDelay, is(expectedDelay));
   }
 
   @Test
   public void shouldNotBeRunningWhenFirstConstructed() {
-    assertThat(create(display, 10, 10).isRunning(), is(false));
+    assertThat(create(DISPLAY, 10, 10).isRunning(), is(false));
   }
   
   private IdleDetector create(Display display, long idleTime, long delay) {
@@ -231,7 +234,7 @@ public class IdleDetectorTest {
 
   @Test
   public void theUserShouldBeActiveWhenTheIdleDetectorIsFirstConstructed() {
-    assertTrue(new IdleDetector(display, 10, 10).isUserActive());
+    assertTrue(new IdleDetector(DISPLAY, 10, 10).isUserActive());
   }
 
   @Test
@@ -239,7 +242,7 @@ public class IdleDetectorTest {
     // IdleDetector is not running, so no observers should be notified
     long idleInterval = 500;
     long runDelay = 10;
-    IdleDetector d = new IdleDetector(display, idleInterval, runDelay);
+    IdleDetector d = new IdleDetector(DISPLAY, idleInterval, runDelay);
 
     ObserverTester ob = new ObserverTester();
     d.addObserver(ob);
@@ -257,7 +260,7 @@ public class IdleDetectorTest {
 
   @Test
   public void testSetRunning() {
-    IdleDetector d = new IdleDetector(display, 100, 100);
+    IdleDetector d = new IdleDetector(DISPLAY, 100, 100);
     assertFalse(d.isRunning());
 
     try {

@@ -7,10 +7,10 @@ Bundle-Activator: rabbit.tracking.internal.TrackingPlugin
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  org.eclipse.debug.core,
- rabbit.data.handler;bundle-version="1.0.0",
+ rabbit.data.handler,
  org.eclipse.ui.ide,
- rabbit.data;bundle-version="1.1.0",
- rabbit.common;bundle-version="1.0.0"
+ rabbit.data,
+ rabbit.common
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: rabbit.tracking,
