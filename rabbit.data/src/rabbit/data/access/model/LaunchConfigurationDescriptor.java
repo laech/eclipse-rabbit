@@ -4,10 +4,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.Objects;
 
-import org.eclipse.debug.core.DebugPlugin;
-import org.eclipse.debug.core.ILaunchConfigurationType;
-import org.eclipse.debug.core.ILaunchMode;
-
 /**
  * Data descriptor for launch configurations.
  */
@@ -32,25 +28,6 @@ public class LaunchConfigurationDescriptor {
     this.launchName = checkNotNull(name);
     this.launchModeId = checkNotNull(launchModeId);
     this.launchTypeId = checkNotNull(launchTypeId);
-  }
-  
-  /**
-   * Finds the launch configuration type that has the same ID as
-   * {@link #getLaunchTypeId()}.
-   * @return The launch configuration type, or null if not found.
-   */
-  public final ILaunchConfigurationType findLaunchConfigurationType() {
-    return DebugPlugin.getDefault().getLaunchManager()
-        .getLaunchConfigurationType(getLaunchTypeId());
-  }
-  
-  /**
-   * Finds the launch mode that has the same ID as {@link #getLaunchModeId()}.
-   * @return The launch mode, or null if not found.
-   */
-  public final ILaunchMode findLaunchMode() {
-    return DebugPlugin.getDefault().getLaunchManager()
-        .getLaunchMode(getLaunchModeId());
   }
 
   /**
