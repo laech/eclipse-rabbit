@@ -1,5 +1,13 @@
 package rabbit.ui.internal.extension;
 
+import static org.eclipse.core.runtime.IStatus.OK;
+import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsInstanceOf.instanceOf;
+import static org.hamcrest.core.IsNull.notNullValue;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 import static rabbit.ui.internal.extension.PageDescriptor.ATTR_CATEGORY_ID;
 import static rabbit.ui.internal.extension.PageDescriptor.ATTR_CLASS;
 import static rabbit.ui.internal.extension.PageDescriptor.ATTR_ICON_PATH;
@@ -7,33 +15,20 @@ import static rabbit.ui.internal.extension.PageDescriptor.ATTR_ID;
 import static rabbit.ui.internal.extension.PageDescriptor.ATTR_NAME;
 import static rabbit.ui.internal.extension.PageDescriptor.ELEMENT_NAME;
 
-import rabbit.ui.IPage;
-import rabbit.ui.test.Constants;
-import rabbit.ui.test.util.EmptyPage;
-
-import static org.eclipse.core.runtime.IStatus.OK;
-import static org.hamcrest.core.Is.is;
-import static org.hamcrest.core.IsInstanceOf.instanceOf;
-import static org.hamcrest.core.IsNull.notNullValue;
-import static org.junit.Assert.assertThat;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IContributor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.resource.ImageDescriptor;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
-public final class PageDescriptorTest extends NamedExtensionDescriptorTest {
+import rabbit.ui.IPage;
+import rabbit.ui.test.Constants;
+import rabbit.ui.test.util.EmptyPage;
 
-  @Rule
-  public ExpectedException thrown = ExpectedException.none();
+public final class PageDescriptorTest extends NamedExtensionDescriptorTest {
 
   private final String id = "a.b.c";
   private final String name = "Hello";
@@ -48,11 +43,10 @@ public final class PageDescriptorTest extends NamedExtensionDescriptorTest {
    */
   private IConfigurationElement element;
 
-  @Override
-  public void setup() {
+  @Override public void setup() {
     super.setup();
     descriptor = create(id, name, page, icon, categoryId);
-    
+
     IContributor contributor = mock(IContributor.class);
     given(contributor.getName()).willReturn(Constants.PLUGIN_ID);
 
@@ -72,20 +66,17 @@ public final class PageDescriptorTest extends NamedExtensionDescriptorTest {
     }
   }
 
-  @Test
-  public void checkTestHasBeenSetupCorrectly() throws Exception {
+  @Test public void checkTestHasBeenSetupCorrectly() throws Exception {
     // Make sure there is no exception will be thrown
     PageDescriptor.from(element);
   }
 
-  @Test
-  public void fromShouldAcceptPluginIdAsNull() throws Exception {
+  @Test public void fromShouldAcceptPluginIdAsNull() throws Exception {
     PageDescriptor.from(element);
     // No exception
   }
 
-  @Test
-  public void fromShouldConstructADescriptorUsingAttributesFromTheElement() {
+  @Test public void fromShouldConstructADescriptorUsingAttributesFromTheElement() {
     PageDescriptor page = PageDescriptor.from(element);
     assertThat(page.getCategoryId(), is(categoryId));
     assertThat(page.getId(), is(id));
@@ -94,109 +85,116 @@ public final class PageDescriptorTest extends NamedExtensionDescriptorTest {
     assertThat(page.getPage(), is(instanceOf(EmptyPage.class)));
   }
 
-  @Test
-  public void fromShouldThrowExceptionIfElementNameIsUnexpected() {
+  @Test public void fromShouldThrowExceptionIfElementNameIsUnexpected() {
     given(element.getName()).willReturn("unexpected");
-    thrown.expect(IllegalArgumentException.class);
-    PageDescriptor.from(element);
+    try {
+      PageDescriptor.from(element);
+      fail();
+    } catch (IllegalArgumentException e) {
+      // Pass
+    }
   }
 
-  @Test
-  public void fromShouldThrowExceptionIfIdIsNull() {
+  @Test public void fromShouldThrowExceptionIfIdIsNull() {
     given(element.getAttribute(ATTR_ID)).willReturn(null);
-    thrown.expect(IllegalArgumentException.class);
-    PageDescriptor.from(element);
+    try {
+      PageDescriptor.from(element);
+      fail();
+    } catch (IllegalArgumentException e) {
+      // Pass
+    }
   }
 
-  @Test
-  public void fromShouldThrowExceptionIfNameIsNull() {
+  @Test public void fromShouldThrowExceptionIfNameIsNull() {
     given(element.getAttribute(ATTR_NAME)).willReturn(null);
-    thrown.expect(IllegalArgumentException.class);
-    PageDescriptor.from(element);
+    try {
+      PageDescriptor.from(element);
+      fail();
+    } catch (IllegalArgumentException e) {
+      // Pass
+    }
   }
 
-  @Test
-  public void fromShouldThrowExceptionIfPageClassIsNull() throws Exception {
+  @Test public void fromShouldThrowExceptionIfPageClassIsNull()
+      throws Exception {
     given(element.getAttribute(ATTR_CLASS)).willReturn(null);
     given(element.createExecutableExtension(ATTR_CLASS)).willReturn(null);
-    thrown.expect(IllegalArgumentException.class);
-    PageDescriptor.from(element);
+    try {
+      PageDescriptor.from(element);
+      fail();
+    } catch (IllegalArgumentException e) {
+      // Pass
+    }
   }
 
-  @Test
-  public void fromShouldThrowExeptionIfPageClassCannotBeInstantiated()
+  @Test public void fromShouldThrowExeptionIfPageClassCannotBeInstantiated()
       throws Exception {
     given(element.getAttribute(ATTR_CLASS)).willReturn("invalid.class.name");
     given(element.createExecutableExtension(ATTR_CLASS)).willAnswer(
         new Answer<Void>() {
-          @Override
-          public Void answer(InvocationOnMock invocation) throws Throwable {
+          @Override public Void answer(InvocationOnMock invocation)
+              throws Throwable {
             throw new CoreException(new Status(OK, Constants.PLUGIN_ID,
                 "no msg"));
           }
         });
-    thrown.expect(IllegalArgumentException.class);
-    PageDescriptor.from(element);
+    try {
+      PageDescriptor.from(element);
+      fail();
+    } catch (IllegalArgumentException e) {
+      // Pass
+    }
   }
 
-  @Test
-  public void fromShouldThrowNoExceptionIfCategoryIdIsNull() {
+  @Test public void fromShouldThrowNoExceptionIfCategoryIdIsNull() {
     given(element.getAttribute(ATTR_CATEGORY_ID)).willReturn(null);
     PageDescriptor.from(element);
     // No exception
   }
 
-  @Test
-  public void fromShouldThrowNoExceptionIfIconPathIsNull() throws Exception {
+  @Test public void fromShouldThrowNoExceptionIfIconPathIsNull()
+      throws Exception {
     given(element.getAttribute(ATTR_ICON_PATH)).willReturn(null);
     PageDescriptor.from(element);
     // No exception
   }
 
-  @Test
-  public void isPageElementShouldReturnTrueForAPageElement() {
+  @Test public void isPageElementShouldReturnTrueForAPageElement() {
     assertThat(PageDescriptor.isPageElement(element), is(true));
   }
 
-  @Test
-  public void isPageElementShouldReturnFalseForANonPageElement() {
+  @Test public void isPageElementShouldReturnFalseForANonPageElement() {
     given(element.getName()).willReturn("z");
     assertThat(PageDescriptor.isPageElement(element), is(false));
   }
 
-  @Test
+  @Test(expected = NullPointerException.class)//
   public void isPageElementShouldThrowExceptionIsElementIsNull() {
-    thrown.expect(NullPointerException.class);
     PageDescriptor.isPageElement(null);
   }
 
-  @Test
-  public void getPageShouldReturnThePage() {
-    assertThat(descriptor.getPage(), is((IPage)page));
+  @Test public void getPageShouldReturnThePage() {
+    assertThat(descriptor.getPage(), is((IPage) page));
   }
 
-  @Test
-  public void getIconShouldReturnTheIcon() {
+  @Test public void getIconShouldReturnTheIcon() {
     assertThat(descriptor.getIcon(), is(icon));
   }
 
-  @Test
-  public void getCategoryIdShouldReturnTheCategoryId() {
+  @Test public void getCategoryIdShouldReturnTheCategoryId() {
     assertThat(descriptor.getCategoryId(), is(categoryId));
   }
 
-  @Test(expected = NullPointerException.class)
+  @Test(expected = NullPointerException.class)//
   public void constructorShouldThrowExceptionIfPageIsNull() {
     create(id, name, null, icon, categoryId);
   }
 
-  @Test
-  public void constructorShouldThrowNoExceptionIfIconIsNull() {
+  @Test public void constructorShouldThrowNoExceptionIfIconIsNull() {
     create(id, name, page, null, categoryId);
   }
 
-  @Override
-  protected PageDescriptor create(String id, String name) {
+  @Override protected PageDescriptor create(String id, String name) {
     return create(id, name, page, icon, categoryId);
   }
 

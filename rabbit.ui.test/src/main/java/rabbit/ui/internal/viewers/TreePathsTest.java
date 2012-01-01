@@ -18,81 +18,77 @@ package rabbit.ui.internal.viewers;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 import org.eclipse.jface.viewers.TreePath;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
-/**
- * Tests for {@link TreePaths}
- */
 public class TreePathsTest {
 
   private static TreePath newPath() {
-    return new TreePath(new Object[]{"1", "2", "3"});
+    return new TreePath(new Object[]{"1","2","3"});
   }
 
-  @Rule
-  public ExpectedException thrown = ExpectedException.none();
-
-  @Test
-  public void headPathShouldReturnTheCorrectSubPath() {
-    TreePath path = new TreePath(new Object[]{"a", "b", "c"});
+  @Test public void headPathShouldReturnTheCorrectSubPath() {
+    TreePath path = new TreePath(new Object[]{"a","b","c"});
     TreePath expected = path.getParentPath();
     TreePath actual = TreePaths.headPath(path, path.getSegmentCount() - 1);
     assertThat(actual, equalTo(expected));
   }
 
-  @Test
-  public void headPathShouldThrowAnExceptionIfIndexIsGreaterThanThePathLength() {
+  @Test public void headPathShouldThrowAnExceptionIfIndexIsGreaterThanThePathLength() {
     TreePath path = newPath();
-    thrown.expect(IllegalArgumentException.class);
-    TreePaths.headPath(path, path.getSegmentCount() + 1);
+    try {
+      TreePaths.headPath(path, path.getSegmentCount() + 1);
+      fail();
+    } catch (IllegalArgumentException e) {
+      // Pass
+    }
   }
-  
-  @Test
-  public void headPathShouldReturnAnEqualPathIfIndexIsEqualToThePathLength() {
+
+  @Test public void headPathShouldReturnAnEqualPathIfIndexIsEqualToThePathLength() {
     TreePath path = newPath();
     assertThat(TreePaths.headPath(path, path.getSegmentCount()), equalTo(path));
   }
 
-  @Test
-  public void headPathShouldThrowAnExceptionIfIndexIsNegative() {
+  @Test public void headPathShouldThrowAnExceptionIfIndexIsNegative() {
     TreePath path = newPath();
-    thrown.expect(IllegalArgumentException.class);
-    TreePaths.headPath(path, -1);
+    try {
+      TreePaths.headPath(path, -1);
+      fail();
+    } catch (IllegalArgumentException e) {
+      // Pass
+    }
   }
 
-  @Test
-  public void indexOfShouldReturnNegative1IfNotFound() {
-    TreePath path = new TreePath(new Object[]{"a", "b", "c"});
+  @Test public void indexOfShouldReturnNegative1IfNotFound() {
+    TreePath path = new TreePath(new Object[]{"a","b","c"});
     assertThat(TreePaths.indexOf(path, "d"), is(-1));
   }
 
-  @Test
-  public void indexOfShouldReturnTheCorrectIndex() {
-    TreePath path = new TreePath(new Object[]{"a", "b", "c"});
+  @Test public void indexOfShouldReturnTheCorrectIndex() {
+    TreePath path = new TreePath(new Object[]{"a","b","c"});
     int index = 1; // Index of "b"
     assertThat(TreePaths.indexOf(path, "b"), is(index));
   }
 
-  @Test
-  public void indexOfShouldReturnTheFirstIndex() {
-    TreePath path = new TreePath(new Object[]{"a", "a", "a"});
+  @Test public void indexOfShouldReturnTheFirstIndex() {
+    TreePath path = new TreePath(new Object[]{"a","a","a"});
     assertThat(TreePaths.indexOf(path, "a"), is(0));
   }
 
-  @Test
+  @Test(expected = NullPointerException.class)//
   public void indexOfShouldThrowAnExceptionIfPathIsNull() {
-    thrown.expect(NullPointerException.class);
     TreePaths.indexOf(null, "");
   }
 
-  @Test
-  public void indexOfShouldThrowAnExceptionIfSegmentIsNull() {
+  @Test public void indexOfShouldThrowAnExceptionIfSegmentIsNull() {
     TreePath path = newPath();
-    thrown.expect(NullPointerException.class);
-    TreePaths.indexOf(path, null);
+    try {
+      TreePaths.indexOf(path, null);
+      fail();
+    } catch (NullPointerException e) {
+      // Pass
+    }
   }
 }

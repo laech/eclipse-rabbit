@@ -15,44 +15,40 @@
  */
 package rabbit.ui.internal.actions;
 
-import rabbit.ui.internal.util.ICategory;
-import rabbit.ui.internal.util.IVisualProvider;
-
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.resource.ImageDescriptor;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
-/**
- * @see PaintCategoryAction
- */
+import rabbit.ui.internal.util.ICategory;
+import rabbit.ui.internal.util.IVisualProvider;
+
 public class PaintCategoryActionTest {
 
-  @Rule
-  public ExpectedException thrown = ExpectedException.none();
-
-  @Test
-  public void runShouldSetTheProvidersPaintCategory() {
+  @Test public void runShouldSetTheProvidersPaintCategory() {
     @SuppressWarnings("serial")
-    class MyException extends RuntimeException {}
+    class MyException extends RuntimeException {
+    }
     ICategory category = mock(ICategory.class);
     IVisualProvider provider = mock(IVisualProvider.class);
     doThrow(new MyException()).when(provider).setVisualCategory(category);
 
     IAction action = create(category, provider);
-    thrown.expect(MyException.class);
-    action.run();
+    try {
+      action.run();
+      fail();
+    } catch (MyException e) {
+      // Pass
+    }
   }
 
-  @Test
-  public void shouldSetTheImageOfTheActionToBeTheSameAsTheImageOfTheCategory() {
+  @Test public void shouldSetTheImageOfTheActionToBeTheSameAsTheImageOfTheCategory() {
     ICategory category = mock(ICategory.class);
     ImageDescriptor image = mock(ImageDescriptor.class);
     given(category.getImageDescriptor()).willReturn(image);
@@ -62,8 +58,7 @@ public class PaintCategoryActionTest {
         equalTo(category.getImageDescriptor()));
   }
 
-  @Test
-  public void shouldSetTheTextOfTheActionToBeTheSameAsTheTextOfTheCategory() {
+  @Test public void shouldSetTheTextOfTheActionToBeTheSameAsTheTextOfTheCategory() {
     ICategory category = mock(ICategory.class);
     given(category.getText()).willReturn("Hello");
 
@@ -71,15 +66,13 @@ public class PaintCategoryActionTest {
     assertThat(action.getText(), equalTo(category.getText()));
   }
 
-  @Test
+  @Test(expected = NullPointerException.class)//
   public void shouldThrowAnExceptionIfTryToConstructWithoutACategory() {
-    thrown.expect(NullPointerException.class);
     create(null, mock(IVisualProvider.class));
   }
 
-  @Test
+  @Test(expected = NullPointerException.class)//
   public void shouldThrowAnExceptionIfTryToConstructWithANullProvider() {
-    thrown.expect(NullPointerException.class);
     create(mock(ICategory.class), new IVisualProvider[]{null});
   }
 
