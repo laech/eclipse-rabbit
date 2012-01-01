@@ -15,6 +15,7 @@
  */
 package rabbit.ui.internal.viewers;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
@@ -24,7 +25,6 @@ import static org.mockito.Mockito.mock;
 
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
@@ -52,10 +52,8 @@ public final class TreeViewerColumnValueSorterTest
         .willReturn(new Object[]{bigger, smaller});
 
     IValueProvider valueProvider = mock(IValueProvider.class);
-    given(valueProvider.getValue(new TreePath(new Object[]{bigger})))
-        .willReturn(bigger);
-    given(valueProvider.getValue(new TreePath(new Object[]{smaller})))
-        .willReturn(smaller);
+    given(valueProvider.getValue(newArrayList(bigger))).willReturn(bigger);
+    given(valueProvider.getValue(newArrayList(smaller))).willReturn(smaller);
 
     TreeViewer viewer = new TreeViewer(shell);
     viewer.setContentProvider(contentProvider);
