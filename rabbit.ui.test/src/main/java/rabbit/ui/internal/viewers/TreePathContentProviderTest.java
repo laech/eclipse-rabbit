@@ -150,9 +150,9 @@ public class TreePathContentProviderTest {
 
   @Test
   public void getElementsShouldReturnTheDistinctElementsOfAllLeaves() {
-    // Given we have 3 leaves, the 0th segments of 2 of them are equal::
+    // Given we have 3 leaves, the 0th segments of 2 of them are equal:
     TreePath leaf1 = new TreePath(new Object[]{0, 1});
-    TreePath leaf2 = new TreePath(new Object[]{2, 3});
+    TreePath leaf2 = new TreePath(new Object[]{0, 3});
     TreePath leaf3 = new TreePath(new Object[]{9, 8});
     Object input = new Object();
 
