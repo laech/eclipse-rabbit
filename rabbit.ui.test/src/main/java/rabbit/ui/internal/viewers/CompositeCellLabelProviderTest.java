@@ -33,7 +33,7 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
-import org.junit.AfterClass;
+import org.eclipse.ui.PlatformUI;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
@@ -48,12 +48,7 @@ public class CompositeCellLabelProviderTest {
 
   @BeforeClass
   public static void setupBeforeClass() {
-    display = new Display();
-  }
-
-  @AfterClass
-  public static void tearDownAfterClass() {
-    display.dispose();
+    display = PlatformUI.getWorkbench().getDisplay();
   }
 
   @Test
