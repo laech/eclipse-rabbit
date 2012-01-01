@@ -46,19 +46,6 @@ public class LaunchLabelProviderTest extends NullLabelProviderTest {
   }
 
   @Test
-  public void getImageShouldReturnAnImageForAValidLaunchConfigurationType() {
-    ILaunchConfigurationType type = manager.getLaunchConfigurationTypes()[0];
-    assertThat(provider.getImage(type), notNullValue());
-  }
-
-  @Test
-  public void getImageShouldReturnAnImageForALaunchNameWithAValidLaunchConfigurationTypeId() {
-    LaunchName launch = new LaunchName("abc",
-        manager.getLaunchConfigurationTypes()[0].getIdentifier());
-    assertThat(provider.getImage(launch), notNullValue());
-  }
-
-  @Test
   public void getTextShouldReturnTheLabelOfALaunchModeWithoutTheShortcutChar() {
     String originalLabel = "&Run";
     String expectedLabel = "Run";
