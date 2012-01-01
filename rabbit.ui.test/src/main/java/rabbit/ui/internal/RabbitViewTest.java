@@ -46,7 +46,7 @@ public final class RabbitViewTest {
   @Test
   public void testDispose() throws Exception {
     final RabbitView view = showRabbitView();
-    view.dispose();
+    getWorkbench().getActiveWorkbenchWindow().getActivePage().hideView(view);
 
     final Field toolkit = RabbitView.class.getDeclaredField("toolkit");
     toolkit.setAccessible(true);
