@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: rabbit.ui.test
 Bundle-SymbolicName: rabbit.ui.test
-Bundle-Version: 1.2.0.qualifier
+Bundle-Version: 1.3.0.qualifier
 Fragment-Host: rabbit.ui
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Require-Bundle: org.eclipse.core.resources,
@@ -17,7 +17,11 @@ Require-Bundle: org.eclipse.core.resources,
  org.eclipse.ui.forms,
  org.eclipse.debug.ui,
  rabbit.common,
- rabbit.common.testing
+ rabbit.common.testing,
+ org.apache.log4j,
+ org.hamcrest,
+ org.eclipse.jdt.ui,
+ org.eclipse.jdt.core
 Export-Package: rabbit.ui.internal,
  rabbit.ui.internal.actions,
  rabbit.ui.internal.decorators,

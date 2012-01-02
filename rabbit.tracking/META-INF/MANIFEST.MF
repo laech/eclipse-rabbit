@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Rabbit Tracking
 Bundle-SymbolicName: rabbit.tracking;singleton:=true
-Bundle-Version: 1.2.0.qualifier
+Bundle-Version: 1.3.0.qualifier
 Bundle-Activator: rabbit.tracking.internal.TrackingPlugin
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
@@ -18,4 +18,3 @@ Export-Package: rabbit.tracking,
  rabbit.tracking.internal.startup;x-internal:=true,
  rabbit.tracking.internal.trackers;x-friends:="rabbit.tracking.mylyn,rabbit.tracking.java",
  rabbit.tracking.internal.util
-Eclipse-ExtensibleAPI: true

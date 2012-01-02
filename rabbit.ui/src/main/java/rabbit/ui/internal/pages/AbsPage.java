@@ -82,34 +82,34 @@ public abstract class AbsPage implements IPage, Observer {
     }
   }
 
-  protected abstract FilteredTree getFilteredTree();
+  public abstract FilteredTree getFilteredTree();
 
   /**
    * @return the current selected categories.
    * @see ICategoryProvider#getSelected()
    */
-  protected abstract Category[] getSelectedCategories();
+  public abstract Category[] getSelectedCategories();
 
   /**
    * @return the current visual category.
    * @see IVisualProvider#getVisualCategory()
    */
-  protected abstract Category getVisualCategory();
+  public abstract Category getVisualCategory();
 
   /**
    * @param categories the categories to set.
    * @see ICategoryProvider#setSelected(ICategory...)
    */
-  protected abstract void setSelectedCategories(List<Category> categories);
+  public abstract void setSelectedCategories(List<Category> categories);
 
   /**
    * @param category the category to set.
    * @see TreePathValueProvider#setVisualCategory(ICategory)
    */
-  protected abstract void setVisualCategory(Category category);
+  public abstract void setVisualCategory(Category category);
 
   /**
    * Updates {@link IValueProvider#getMaxValue()}.
    */
-  protected abstract void updateMaxValue();
+  public abstract void updateMaxValue();
 }

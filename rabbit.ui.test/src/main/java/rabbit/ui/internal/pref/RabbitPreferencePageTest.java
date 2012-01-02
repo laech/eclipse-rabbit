@@ -15,17 +15,19 @@
  */
 package rabbit.ui.internal.pref;
 
-import rabbit.ui.internal.RabbitUI;
-import rabbit.ui.internal.pref.RabbitPreferencePage;
-
+import static org.eclipse.ui.PlatformUI.getWorkbench;
+import static org.eclipse.ui.dialogs.PreferencesUtil.createPreferenceDialogOn;
 import static org.junit.Assert.assertEquals;
 
+import org.eclipse.jface.preference.PreferenceDialog;
 import org.eclipse.swtbot.eclipse.finder.SWTWorkbenchBot;
 import org.eclipse.swtbot.swt.finder.junit.SWTBotJunit4ClassRunner;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotSpinner;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import rabbit.ui.internal.RabbitUI;
 
 /**
  * Test for {@link RabbitPreferencePage}
@@ -93,8 +95,11 @@ public class RabbitPreferencePageTest {
   }
 
   private void openRabbitPreferences() {
-    bot.menu("Window").menu("Preferences").click();
-    bot.tree().select("Rabbit");
+    PreferenceDialog dialog = createPreferenceDialogOn(
+        getWorkbench().getActiveWorkbenchWindow().getShell(), 
+        "rabbit.ui.mainPref", null, null);
+    dialog.setBlockOnOpen(false);
+    dialog.open();
   }
 
 }

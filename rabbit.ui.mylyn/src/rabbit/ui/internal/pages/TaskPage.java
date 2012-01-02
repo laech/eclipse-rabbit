@@ -201,33 +201,33 @@ public class TaskPage extends AbsPage {
   }
 
   @Override
-  protected FilteredTree getFilteredTree() {
+  public FilteredTree getFilteredTree() {
     return filteredTree;
   }
 
   @Override
-  protected Category[] getSelectedCategories() {
+  public Category[] getSelectedCategories() {
     return categoryProvider.getSelected().toArray(new Category[0]);
   }
 
   @Override
-  protected Category getVisualCategory() {
+  public Category getVisualCategory() {
     return (Category)durationProvider.getVisualCategory();
   }
 
   @Override
-  protected void setSelectedCategories(List<Category> categories) {
+  public void setSelectedCategories(List<Category> categories) {
     Category[] selected = categories.toArray(new Category[0]);
     categoryProvider.setSelected(selected);
   }
 
   @Override
-  protected void setVisualCategory(Category category) {
+  public void setVisualCategory(Category category) {
     durationProvider.setVisualCategory(category);
   }
 
   @Override
-  protected void updateMaxValue() {
+  public void updateMaxValue() {
     durationProvider.setVisualCategory(durationProvider.getVisualCategory());
   }
 

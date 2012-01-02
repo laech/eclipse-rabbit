@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <description name="Rabbit">
+      Update Site for Rabbit
+   </description>
+   <feature url="features/rabbit.feature_1.3.0.qualifier.jar" id="rabbit.feature" version="1.3.0.qualifier">
+      <category name="rabbit"/>
+   </feature>
+   <feature url="features/rabbit.feature.jdt_1.3.0.qualifier.jar" id="rabbit.feature.jdt" version="1.3.0.qualifier">
+      <category name="rabbit"/>
+   </feature>
+   <feature url="features/rabbit.feature.mylyn_1.3.0.qualifier.jar" id="rabbit.feature.mylyn" version="1.3.0.qualifier">
+      <category name="rabbit"/>
+   </feature>
+   <category-def name="rabbit" label="Rabbit"/>
+</site>

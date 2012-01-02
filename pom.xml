@@ -1,18 +1,54 @@
 <project
-   xmlns="http://maven.apache.org/POM/4.0.0"
-   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
   <groupId>rabbit</groupId>
   <artifactId>rabbit.parent</artifactId>
-  <version>0</version>
+  <version>1.3.0-SNAPSHOT</version>
   <packaging>pom</packaging>
+
+  <pluginRepositories>
+    <pluginRepository>
+      <id>tycho-snapshots</id>
+      <url>https://oss.sonatype.org/content/groups/public/</url>
+    </pluginRepository>
+  </pluginRepositories>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <tycho.version>0.13.0</tycho.version>
+  </properties>
 
   <modules>
     <module>rabbit.common</module>
     <module>rabbit.common.testing</module>
+    <module>rabbit.data</module>
+    <module>rabbit.data.test</module>
+    <module>rabbit.data.xml</module>
+    <module>rabbit.data.xml.test</module>
+    <module>rabbit.data.xml.ui</module>
+    <module>rabbit.data.xml.ui.test</module>
+    <module>rabbit.data.handler</module>
+    <module>rabbit.data.handler.test</module>
+    <module>rabbit.tracking</module>
     <module>rabbit.tracking.test</module>
+    <module>rabbit.tracking.java</module>
+    <module>rabbit.tracking.java.test</module>
+    <module>rabbit.tracking.mylyn</module>
+    <module>rabbit.tracking.mylyn.test</module>
+    <module>rabbit.ui</module>
+    <module>rabbit.ui.test</module>
+    <module>rabbit.ui.java</module>
+    <module>rabbit.ui.java.test</module>
+    <module>rabbit.ui.mylyn</module>
+    <module>rabbit.ui.mylyn.test</module>
+    <module>rabbit.feature</module>
+    <module>rabbit.feature.jdt</module>
+    <module>rabbit.feature.mylyn</module>
+    <module>rabbit.repository</module>
+    <module>rabbit.target</module>
   </modules>
 
   <dependencyManagement>
@@ -53,9 +89,9 @@
         <version>4.10</version>
       </dependency>
       <dependency>
-	<groupId>org.hamcrest</groupId>
-	<artifactId>hamcrest-core</artifactId>
-	<version>1.3.RC2</version>
+        <groupId>org.hamcrest</groupId>
+        <artifactId>hamcrest-core</artifactId>
+        <version>1.3.RC2</version>
       </dependency>
       <dependency>
         <groupId>org.hamcrest</groupId>
@@ -70,9 +106,89 @@
     </dependencies>
   </dependencyManagement>
 
-  <!-- 
-       Run "mvn dependency:copy-dependencies" to download dependencies for
-       common projects.
-  -->
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.eclipse.tycho</groupId>
+          <artifactId>tycho-surefire-plugin</artifactId>
+          <version>${tycho.version}</version>
+          <configuration>
+            <useUIHarness>true</useUIHarness>
+            <argLine>-XX:MaxPermSize=128M</argLine>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.scala-tools</groupId>
+          <artifactId>maven-scala-plugin</artifactId>
+          <version>2.15.2</version>
+          <executions>
+            <execution>
+              <goals>
+                <goal>compile</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+
+    <plugins>
+      <plugin>
+        <groupId>org.eclipse.tycho</groupId>
+        <artifactId>tycho-maven-plugin</artifactId>
+        <version>${tycho.version}</version>
+        <extensions>true</extensions>
+      </plugin>
+      <plugin>
+        <groupId>org.eclipse.tycho</groupId>
+        <artifactId>target-platform-configuration</artifactId>
+        <version>${tycho.version}</version>
+        <configuration>
+          <target>
+            <artifact>
+              <groupId>rabbit</groupId>
+              <artifactId>rabbit.target</artifactId>
+              <version>1.3.0-SNAPSHOT</version>
+              <classifier>galileo</classifier>
+            </artifact>
+          </target>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+  <profiles>
+    <profile>
+      <id>osx</id>
+      <activation>
+        <os>
+          <family>mac</family>
+        </os>
+      </activation>
+      <build>
+        <pluginManagement>
+          <plugins>
+            <plugin>
+              <groupId>org.eclipse.tycho</groupId>
+              <artifactId>tycho-surefire-plugin</artifactId>
+              <version>${tycho.version}</version>
+              <configuration>
+                <dependencies>
+                  <dependency>
+                    <type>eclipse-plugin</type>
+                    <artifactId>org.eclipse.jdt.launching.macosx</artifactId>
+                    <version>3.2.0</version>
+                  </dependency>
+                </dependencies>
+                <!-- Need this flag on mac otherwise test UI won't start -->
+                <argLine>-XstartOnFirstThread</argLine>
+              </configuration>
+            </plugin>
+          </plugins>
+        </pluginManagement>
+      </build>
+    </profile>
+  </profiles>
 
 </project>

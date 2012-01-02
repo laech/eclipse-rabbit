@@ -15,21 +15,24 @@
  */
 package rabbit.data.internal.xml.ui;
 
-import rabbit.data.internal.xml.XmlPlugin;
-
+import static org.eclipse.ui.dialogs.PreferencesUtil.createPreferenceDialogOn;
 import static org.junit.Assert.assertEquals;
 
+import java.io.File;
+
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.jface.preference.PreferenceDialog;
 import org.eclipse.swtbot.eclipse.finder.SWTWorkbenchBot;
 import org.eclipse.swtbot.swt.finder.exceptions.WidgetNotFoundException;
 import org.eclipse.swtbot.swt.finder.junit.SWTBotJunit4ClassRunner;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotText;
+import org.eclipse.ui.PlatformUI;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.io.File;
+import rabbit.data.internal.xml.XmlPlugin;
 
 @RunWith(SWTBotJunit4ClassRunner.class)
 public class StoragePathPreferencePageTest {
@@ -122,8 +125,15 @@ public class StoragePathPreferencePageTest {
   }
 
   private void openRabbitPreferences() {
-    bot.menu("Window").menu("Preferences").click();
-    bot.tree().expandNode("Rabbit").select("Storage Location");
+    PlatformUI.getWorkbench().getDisplay().syncExec(new Runnable() {
+      @Override public void run() {
+        PreferenceDialog dialog = createPreferenceDialogOn(
+            bot.getDisplay().getActiveShell(),
+            "rabbit.data.xml.ui.preferencePages.storage", null, null);
+        dialog.setBlockOnOpen(false);
+        dialog.open();
+      }
+    });
   }
 
 }

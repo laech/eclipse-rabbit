@@ -26,9 +26,7 @@ import static java.util.Collections.emptyList;
 
 import java.util.Collection;
 
-/**
- * Tracks workbench {@link Job}s
- */
+// TODO experimental
 public final class JobTracker implements ITracker<Void>, IJobChangeListener {
 
   private boolean enabled;
@@ -53,12 +51,12 @@ public final class JobTracker implements ITracker<Void>, IJobChangeListener {
 
   @Override
   public void setEnabled(boolean enable) {
-    this.enabled = enable;
-    if (enable) {
-      Job.getJobManager().addJobChangeListener(this);
-    } else {
-      Job.getJobManager().removeJobChangeListener(this);
-    }
+//    this.enabled = enable;
+//    if (enable) {
+//      Job.getJobManager().addJobChangeListener(this);
+//    } else {
+//      Job.getJobManager().removeJobChangeListener(this);
+//    }
   }
 
   @Override
@@ -73,12 +71,12 @@ public final class JobTracker implements ITracker<Void>, IJobChangeListener {
 
   @Override
   public void done(IJobChangeEvent event) {
-    Job job = event.getJob();
-    System.out.println("done: " + job.getName());
-    IStatus result = job.getResult();
-    if (result != null) {
-      System.out.println("\t" + result.getPlugin());
-    }
+//    Job job = event.getJob();
+//    System.out.println("done: " + job.getName());
+//    IStatus result = job.getResult();
+//    if (result != null) {
+//      System.out.println("\t" + result.getPlugin());
+//    }
   }
 
   @Override
@@ -93,6 +91,6 @@ public final class JobTracker implements ITracker<Void>, IJobChangeListener {
 
   @Override
   public void sleeping(IJobChangeEvent event) {
-    System.out.println("sleeping: " + event.getJob().getName());
+//    System.out.println("sleeping: " + event.getJob().getName());
   }
 }

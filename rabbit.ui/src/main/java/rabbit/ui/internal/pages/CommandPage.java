@@ -186,32 +186,32 @@ public class CommandPage extends AbsPage {
   }
 
   @Override
-  protected FilteredTree getFilteredTree() {
+  public FilteredTree getFilteredTree() {
     return filteredTree;
   }
 
   @Override
-  protected Category[] getSelectedCategories() {
+  public Category[] getSelectedCategories() {
     return categoryProvider.getSelected().toArray(new Category[0]);
   }
 
   @Override
-  protected Category getVisualCategory() {
+  public Category getVisualCategory() {
     return (Category)valueProvider.getVisualCategory();
   }
 
   @Override
-  protected void setSelectedCategories(List<Category> categories) {
+  public void setSelectedCategories(List<Category> categories) {
     categoryProvider.setSelected(categories.toArray(new Category[0]));
   }
 
   @Override
-  protected void setVisualCategory(Category category) {
+  public void setVisualCategory(Category category) {
     valueProvider.setVisualCategory(category);
   }
 
   @Override
-  protected void updateMaxValue() {
+  public void updateMaxValue() {
     valueProvider.setVisualCategory(valueProvider.getVisualCategory());
   }
 

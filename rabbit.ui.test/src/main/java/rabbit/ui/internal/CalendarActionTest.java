@@ -15,15 +15,19 @@
  */
 package rabbit.ui.internal;
 
-import rabbit.ui.internal.CalendarAction;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+
+import java.text.Format;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swtbot.swt.finder.junit.SWTBotJunit4ClassRunner;
 import org.eclipse.swtbot.swt.finder.widgets.SWTBotDateTime;
@@ -34,11 +38,6 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import java.text.Format;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
 
 /**
  * @see CalendarAction
@@ -134,7 +133,7 @@ public class CalendarActionTest {
     });
 
     SWTBotShell bot = new SWTBotShell(action.getShell());
-    bot.bot().link().click();
+    bot.bot().link().widget.notifyListeners(SWT.Selection, new Event());
 
     Format format = new SimpleDateFormat(CalendarAction.DATE_FORMAT);
     assertEquals(format.format(today.getTime()), action.getText());

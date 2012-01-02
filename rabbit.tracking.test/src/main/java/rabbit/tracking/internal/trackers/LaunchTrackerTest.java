@@ -76,7 +76,7 @@ import rabbit.data.store.model.LaunchEvent;
 public class LaunchTrackerTest extends AbstractTrackerTest<LaunchEvent> {
 
   // TODO clean it up a bit, some tests are not reliable
-  
+
   /**
    * Listener to help testing.
    */
@@ -86,8 +86,7 @@ public class LaunchTrackerTest extends AbstractTrackerTest<LaunchEvent> {
     private Map<String, Long> terminationTimes = new HashMap<String, Long>();
     private Map<String, ILaunch> launches = new HashMap<String, ILaunch>();
 
-    @Override
-    public void handleDebugEvents(DebugEvent[] events) {
+    @Override public void handleDebugEvents(DebugEvent[] events) {
       for (DebugEvent e : events) {
         if (e.getSource() instanceof IProcess) {
           IProcess process = (IProcess) e.getSource();
@@ -138,8 +137,7 @@ public class LaunchTrackerTest extends AbstractTrackerTest<LaunchEvent> {
 
   private static IPackageFragment pkg;
 
-  @BeforeClass 
-  public static void beforeClass() throws Exception {
+  @BeforeClass public static void beforeClass() throws Exception {
     // Create a new Java project:
     IProgressMonitor progressMonitor = new NullProgressMonitor();
     IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
@@ -161,15 +159,22 @@ public class LaunchTrackerTest extends AbstractTrackerTest<LaunchEvent> {
     // Set Java runtime
     Set<IClasspathEntry> entries = new HashSet<IClasspathEntry>();
     entries.addAll(Arrays.asList(javaProject.getRawClasspath()));
+    IClasspathEntry containerEntry = null;
     outer: for (IVMInstallType type : JavaRuntime.getVMInstallTypes()) {
       for (IVMInstall install : type.getVMInstalls()) {
-        entries.add(newContainerEntry(new Path(JavaRuntime.JRE_CONTAINER)
+        containerEntry = newContainerEntry(new Path(JavaRuntime.JRE_CONTAINER)
             .append(install.getVMInstallType().getId())
-            .append(install.getName())));
+            .append(install.getName()));
         break outer;
       }
     }
-    
+
+    if (containerEntry != null) {
+      entries.add(containerEntry);
+    } else {
+      throw new AssertionError("Can't find JRE installation.");
+    }
+
     javaProject.setRawClasspath(
         entries.toArray(new IClasspathEntry[entries.size()]), progressMonitor);
 
@@ -178,8 +183,7 @@ public class LaunchTrackerTest extends AbstractTrackerTest<LaunchEvent> {
     pkg = src.createPackageFragment("pkg", true, null);
   }
 
-  @Test
-  public void testDisabled() throws Exception {
+  @Test public void testDisabled() throws Exception {
     // Create a new Java class:
     String className = "TestDisabled";
     StringBuilder content = new StringBuilder();
@@ -203,8 +207,7 @@ public class LaunchTrackerTest extends AbstractTrackerTest<LaunchEvent> {
   /*
    * Tests the launching in normal mode ("run");
    */
-  @Test
-  public void testEnabled() throws CoreException, IOException,
+  @Test public void testEnabled() throws CoreException, IOException,
       InterruptedException {
 
     // Create a new Java class:
@@ -266,8 +269,7 @@ public class LaunchTrackerTest extends AbstractTrackerTest<LaunchEvent> {
     checkTime(preStart, start, postStart, preEnd, end, postEnd);
   }
 
-  @Test
-  public void testEnabled_multipleLaunches() throws Exception {
+  @Test public void testEnabled_multipleLaunches() throws Exception {
     String className1 = "TestEnabled_MultipleLaunches1";
     StringBuilder content = new StringBuilder();
     content.append(format("package %s;%n", pkg.getElementName()));
@@ -359,8 +361,7 @@ public class LaunchTrackerTest extends AbstractTrackerTest<LaunchEvent> {
     checkTime(preStart, start, postStart, preEnd, end, postEnd);
   }
 
-  @Test
-  public void testEnabled_withBreakpoint() throws Exception {
+  @Test public void testEnabled_withBreakpoint() throws Exception {
     String className = "TestEnabledWithBreakpoint";
     StringBuilder content = new StringBuilder();
     content.append(format("package %s;%n", pkg.getElementName()));
@@ -379,8 +380,7 @@ public class LaunchTrackerTest extends AbstractTrackerTest<LaunchEvent> {
 
     final ISuspendResume[] suspendResume = new ISuspendResume[1];
     MyDebugListener listener = new MyDebugListener() {
-      @Override
-      public void handleDebugEvents(DebugEvent[] events) {
+      @Override public void handleDebugEvents(DebugEvent[] events) {
         super.handleDebugEvents(events);
         for (DebugEvent e : events) {
           if (e.getKind() == DebugEvent.SUSPEND) {
@@ -429,8 +429,7 @@ public class LaunchTrackerTest extends AbstractTrackerTest<LaunchEvent> {
     checkTime(preStart, start, postStart, preEnd, end, postEnd);
   }
 
-  @Test
-  public void testEnabled_withBreakpointsAndFiles() throws Exception {
+  @Test public void testEnabled_withBreakpointsAndFiles() throws Exception {
     String className1 = "TestEnabledWithBreakpointsAndFiles1";
     StringBuilder content = new StringBuilder();
     content.append(format("package %s;%n", pkg.getElementName()));
@@ -465,8 +464,7 @@ public class LaunchTrackerTest extends AbstractTrackerTest<LaunchEvent> {
 
     final ISuspendResume[] suspendResume = new ISuspendResume[1];
     MyDebugListener listener = new MyDebugListener() {
-      @Override
-      public void handleDebugEvents(DebugEvent[] events) {
+      @Override public void handleDebugEvents(DebugEvent[] events) {
         super.handleDebugEvents(events);
         for (DebugEvent e : events) {
           if (e.getKind() == DebugEvent.SUSPEND) {
@@ -511,8 +509,7 @@ public class LaunchTrackerTest extends AbstractTrackerTest<LaunchEvent> {
     assertTrue(event.getFilePaths().contains(unit2.getResource().getFullPath()));
   }
 
-  @Override
-  protected LaunchEvent createEvent() {
+  @Override protected LaunchEvent createEvent() {
     ILaunchConfigurationType type = mock(ILaunchConfigurationType.class);
     given(type.getIdentifier()).willReturn("typeId");
     ILaunchConfiguration config = mock(ILaunchConfiguration.class);
@@ -523,8 +520,7 @@ public class LaunchTrackerTest extends AbstractTrackerTest<LaunchEvent> {
         new HashSet<IPath>(Arrays.asList(new Path("/1"), new Path("/2"))));
   }
 
-  @Override
-  protected LaunchTracker createTracker() {
+  @Override protected LaunchTracker createTracker() {
     return new LaunchTracker();
   }
 
