@@ -16,19 +16,19 @@
 
 package rabbit.tracking;
 
-import org.joda.time.Instant;
+import org.joda.time.Duration;
 
 /**
- * Represents an event happened at a particular time.
+ * An event with duration.
  * 
  * @since 2.0
  */
-public interface IEvent {
+public interface ITimedEvent {
 
   /**
-   * Gets the start time of this event.
+   * Gets the duration of this event.
    * 
-   * @return the start time of this event, not null
+   * @return the duration of this event, not null
    */
-  Instant getInstant();
+  Duration getDuration();
 }

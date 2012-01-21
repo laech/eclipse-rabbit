@@ -18,47 +18,36 @@ package rabbit.tracking;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import org.joda.time.Duration;
 import org.joda.time.Instant;
 
-import com.google.common.base.Objects;
-import com.google.common.base.Objects.ToStringHelper;
-
 /**
- * Default implementation of an event.
+ * Default implementation of a timed event.
  * 
  * @since 2.0
  */
-public class Event implements IEvent {
+public class TimedEvent extends Event implements ITimedEvent {
 
-  private final Instant instant;
+  private final Duration duration;
 
   /**
    * Constructs a new event.
    * 
    * @param instant the instant of this event
-   * @throws NullPointerException if instant is null
+   * @param duration the duration of this event
+   * @throws NullPointerException if any argument is null
    */
-  public Event(Instant instant) {
-    this.instant = checkNotNull(instant, "instant");
+  public TimedEvent(Instant instant, Duration duration) {
+    super(instant);
+    this.duration = checkNotNull(duration, "duration");
   }
 
-  @Override public final Instant getInstant() {
-    return instant;
+  @Override public final Duration getDuration() {
+    return duration;
   }
 
   @Override public String toString() {
-    return toStringHelper().toString();
+    return toStringHelper().add("duration", getDuration()).toString();
   }
 
-  /**
-   * Helper method returning a {@link ToStringHelper} already containing known
-   * properties of this event.
-   * 
-   * @return a {@link ToStringHelper} for constructing a string representation
-   *         of this event
-   */
-  protected final ToStringHelper toStringHelper() {
-    return Objects.toStringHelper(this)
-        .add("instant", getInstant());
-  }
 }
