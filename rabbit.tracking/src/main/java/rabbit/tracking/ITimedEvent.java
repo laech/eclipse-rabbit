@@ -17,13 +17,21 @@
 package rabbit.tracking;
 
 import org.joda.time.Duration;
+import org.joda.time.Instant;
 
 /**
  * An event with duration.
  * 
  * @since 2.0
  */
-public interface ITimedEvent {
+public interface ITimedEvent extends IEvent {
+
+  /**
+   * {@inheritDoc}
+   * <p/>
+   * This represents the start time of an {@link ITimedEvent}.
+   */
+  @Override Instant getInstant();
 
   /**
    * Gets the duration of this event.

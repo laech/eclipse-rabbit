@@ -26,9 +26,9 @@ import org.joda.time.Instant;
 public interface IEvent {
 
   /**
-   * Gets the start time of this event.
+   * Gets the time of this event.
    * 
-   * @return the start time of this event, not null
+   * @return the time of this event, not null
    */
   Instant getInstant();
 }
