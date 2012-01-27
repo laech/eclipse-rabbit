@@ -49,7 +49,7 @@ public final class TrackingPluginTest {
     bundle.start();
   }
 
-  @Test public void shouldDisableTrackerOnStop() throws Exception {
+  @Test public void disablesTrackerOnStop() throws Exception {
     ITracker tracker = mock(ITracker.class);
     setTrackers(plugin, tracker);
     bundle.stop();
@@ -57,7 +57,7 @@ public final class TrackingPluginTest {
     verify(tracker).saveData();
   }
 
-  @Test public void shouldDisableTrackersOnShutdown() throws Exception {
+  @Test public void disablesTrackersOnShutdown() throws Exception {
     ITracker tracker = mock(ITracker.class);
     setTrackers(plugin, tracker);
     assertThat(plugin.preShutdown(null, false), is(true));
@@ -66,7 +66,7 @@ public final class TrackingPluginTest {
     verifyNoMoreInteractions(tracker);
   }
 
-  @Test public void shouldSaveCurrentDataWhenAsked() throws Exception {
+  @Test public void savesCurrentDataOnRequest() throws Exception {
     ITracker tracker = mock(ITracker.class);
     setTrackers(plugin, tracker);
     plugin.saveCurrentData();

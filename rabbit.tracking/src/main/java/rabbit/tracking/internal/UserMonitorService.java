@@ -47,15 +47,15 @@ public final class UserMonitorService
   /**
    * Starts a service.
    * 
+   * @param display the display to observe on
    * @param timeout if no activity received in this amount of time, the user is
    *        considered inactive
    * @param unit the unit for the timeout
-   * @param display the display to observe on
    * @throws NullPointerException if any argument is null
    * @throws IllegalArgumentException if timeout is negative
    */
-  public static UserMonitorService start(long timeout, TimeUnit unit,
-      Display display) {
+  public static UserMonitorService start(Display display, long timeout,
+      TimeUnit unit) {
     UserMonitorService monitor = new UserMonitorService(display, timeout, unit);
     monitor.start();
     return monitor;
@@ -118,20 +118,26 @@ public final class UserMonitorService
 
   private final AtomicLong lastEventNanos;
   private final AtomicBoolean active;
+  private final AtomicBoolean started;
   private final WorkerThread worker;
 
-  @VisibleForTesting UserMonitorService(Display d, long timeout, TimeUnit unit) {
+  @VisibleForTesting//
+  UserMonitorService(Display display, long timeout, TimeUnit unit) {
     checkArgument(timeout >= 0, "timeout = " + timeout);
-    this.display = checkNotNull(d, "display");
+    this.display = checkNotNull(display, "display");
     this.timeout = checkNotNull(unit, "unit").toMillis(timeout);
     this.eventListener = new EventListener();
     this.listeners = new CopyOnWriteArraySet<IUserListener>();
     this.active = new AtomicBoolean(true);
+    this.started = new AtomicBoolean();
     this.lastEventNanos = new AtomicLong();
     this.worker = new WorkerThread();
   }
 
   @VisibleForTesting void start() {
+    if (!started.compareAndSet(false, true)) {
+      throw new IllegalStateException("already started");
+    }
     display.asyncExec(new Runnable() {
       @Override public void run() {
         for (int event : FILTER_EVENTS) {
@@ -140,6 +146,13 @@ public final class UserMonitorService
       }
     });
     worker.start();
+  }
+
+  /**
+   * Gets the timeout in milliseconds.
+   */
+  public long getTimeout() {
+    return timeout;
   }
 
   @Override public void addListener(IUserListener listener) {
@@ -151,7 +164,14 @@ public final class UserMonitorService
   }
 
   @Override public boolean isUserActive() {
+    if (!started.get()) {
+      throw new IllegalStateException("service is not started");
+    }
     return active.get();
+  }
+  
+  public boolean isStarted() {
+    return started.get();
   }
 
   private void onActive() {
@@ -173,6 +193,9 @@ public final class UserMonitorService
   }
 
   @Override public void dispose() {
+    if (!started.compareAndSet(true, false)) {
+      throw new IllegalStateException("service is not currently running");
+    }
     worker.terminate();
     listeners.clear();
     display.asyncExec(new Runnable() {
