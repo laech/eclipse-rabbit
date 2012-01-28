@@ -3,31 +3,18 @@
 <plugin>
    <extension-point id="rabbit.tracking.trackers" name="Tracker Extensions" schema="schema/trackers.exsd"/>
    <extension
-         point="rabbit.tracking.trackers">
-      <tracker
-            class="rabbit.tracking.internal.trackers.CommandTracker">
-      </tracker>
-      <tracker
-            class="rabbit.tracking.internal.trackers.FileTracker">
-      </tracker>
-      <tracker
-            class="rabbit.tracking.internal.trackers.LaunchTracker">
-      </tracker>
-      <tracker
-            class="rabbit.tracking.internal.trackers.PartTracker">
-      </tracker>
-      <tracker
-            class="rabbit.tracking.internal.trackers.PerspectiveTracker">
-      </tracker>
-      <tracker
-            class="rabbit.tracking.internal.trackers.SessionTracker">
-      </tracker>
-   </extension>
-   <extension
          point="org.eclipse.ui.startup">
       <startup
             class="rabbit.tracking.internal.startup.Startup">
       </startup>
+   </extension>
+   <extension
+         point="org.eclipse.ui.services">
+      <serviceFactory
+            factoryClass="rabbit.tracking.internal.UserMonitorServiceFactory">
+         <service
+               serviceClass="rabbit.tracking.IUserMonitorService"></service>
+      </serviceFactory>
    </extension>
 
 </plugin>

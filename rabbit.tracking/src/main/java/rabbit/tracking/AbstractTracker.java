@@ -16,6 +16,8 @@
 
 package rabbit.tracking;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 /**
  * Implements common tracker behaviors.
  * 
@@ -23,28 +25,24 @@ package rabbit.tracking;
  */
 public abstract class AbstractTracker implements ITracker {
 
-  private volatile boolean enabled;
+  private final AtomicBoolean enabled;
 
   /** Constructor for subclass. */
   protected AbstractTracker() {
-    enabled = false;
+    enabled = new AtomicBoolean(false);
   }
 
   @Override public boolean isEnabled() {
-    return enabled;
+    return enabled.get();
   }
 
   @Override public void setEnabled(boolean enable) {
-    synchronized (this) {
-      if (this.enabled == enable) {
-        return;
+    if (enabled.compareAndSet(!enable, enable)) {
+      if (enable) {
+        onEnable();
+      } else {
+        onDisable();
       }
-      this.enabled = enable;
-    }
-    if (enable) {
-      onEnable();
-    } else {
-      onDisable();
     }
   }
 

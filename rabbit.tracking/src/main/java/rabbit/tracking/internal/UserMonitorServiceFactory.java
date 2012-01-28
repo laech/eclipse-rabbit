@@ -17,8 +17,8 @@
 package rabbit.tracking.internal;
 
 import static java.util.concurrent.TimeUnit.MINUTES;
-import static org.eclipse.ui.PlatformUI.getWorkbench;
 
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.services.AbstractServiceFactory;
 import org.eclipse.ui.services.IServiceLocator;
 
@@ -32,6 +32,6 @@ public final class UserMonitorServiceFactory extends AbstractServiceFactory {
       Class serviceInterface,
       IServiceLocator parentLocator,
       IServiceLocator locator) {
-    return UserMonitorService.start(getWorkbench().getDisplay(), 1, MINUTES);
+    return UserMonitorService.start(PlatformUI.getWorkbench().getDisplay(), 1, MINUTES);
   }
 }

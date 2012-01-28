@@ -31,6 +31,7 @@ import static org.mockito.Mockito.mock;
 
 import java.lang.reflect.Field;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
@@ -40,7 +41,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import rabbit.tracking.IUserListener;
-import scala.actors.threadpool.AtomicInteger;
 
 public final class UserMonitorServiceTest {
 
@@ -81,7 +81,9 @@ public final class UserMonitorServiceTest {
   private UserMonitorService service;
 
   @After public void after() {
-    service.dispose();
+    if (service.isStarted()) {
+      service.dispose();
+    }
     display.asyncExec(new Runnable() {
       @Override public void run() {
         shell.dispose();
@@ -273,8 +275,6 @@ public final class UserMonitorServiceTest {
     sleep(timeout);
     assertThat(listener.inactiveCount.get(), is(0));
     assertThat(listener.activeCount.get(), is(0));
-
-    service.dispose();
   }
 
   @Test public void shouldTerminateWorkerThreadWhenDispose() throws Exception {
@@ -296,7 +296,8 @@ public final class UserMonitorServiceTest {
     create(10, null);
   }
 
-  @Test public void userShouldBeAssumedActiveWhenFirstConstructed() {
+  @Test(expected = IllegalStateException.class)//
+  public void isUserActiveShouldThrowExceptionIfNotEnabled() {
     assertTrue(create(10).isUserActive());
   }
 
@@ -346,6 +347,6 @@ public final class UserMonitorServiceTest {
   private Thread getWorker(UserMonitorService monitor) throws Exception {
     Field field = monitor.getClass().getDeclaredField("worker");
     field.setAccessible(true);
-    return (Thread) field.get(monitor);
+    return (Thread)field.get(monitor);
   }
 }

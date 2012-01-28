@@ -3,10 +3,10 @@
 <schema targetNamespace="rabbit.tracking" xmlns="http://www.w3.org/2001/XMLSchema">
 <annotation>
       <appinfo>
-         <meta.schema plugin="rabbit.tracking" id="rabbit.tracking.trackers" name="Tracker Extensions"/>
+         <meta.schema plugin="rabbit.tracking" id="trackers" name="Trackers"/>
       </appinfo>
       <documentation>
-         Extension for trackers.
+         The trackers extension point allows plug-ins to contribute new trackers.
       </documentation>
    </annotation>
 
@@ -52,7 +52,7 @@
          <attribute name="class" type="string" use="required">
             <annotation>
                <documentation>
-                  
+                  The fully qualified name of the tracker class that implements &lt;samp&gt;rabbit.tracking.ITracker&lt;/samp&gt;
                </documentation>
                <appinfo>
                   <meta.attribute kind="java" basedOn=":rabbit.tracking.ITracker"/>
@@ -62,17 +62,66 @@
       </complexType>
    </element>
 
+   <annotation>
+      <appinfo>
+         <meta.section type="since"/>
+      </appinfo>
+      <documentation>
+         2.0
+      </documentation>
+   </annotation>
 
    <annotation>
       <appinfo>
          <meta.section type="examples"/>
       </appinfo>
       <documentation>
-         [Enter extension point usage example here.]
+         The following is an example on how to specify a trackers.
+&lt;p&gt;
+&lt;pre&gt;
+   &lt;tracker class=&quot;com.example.ExampleTracker&quot;&gt;
+&lt;/pre&gt;
+&lt;/p&gt;
       </documentation>
    </annotation>
 
+   <annotation>
+      <appinfo>
+         <meta.section type="apiinfo"/>
+      </appinfo>
+      <documentation>
+         Supplied tracker must implement &lt;code&gt;rabbit.tracking.ITracker&lt;/code&gt;.
+      </documentation>
+   </annotation>
 
+   <annotation>
+      <appinfo>
+         <meta.section type="implementation"/>
+      </appinfo>
+      <documentation>
+         The rabbit.tracking plug-in provides abstract implementations for trackers which may be useful for implementor.
+      </documentation>
+   </annotation>
 
+   <annotation>
+      <appinfo>
+         <meta.section type="copyright"/>
+      </appinfo>
+      <documentation>
+         Copyright 2012 The Rabbit Eclipse Plug-in Project
+
+Licensed under the Apache License, Version 2.0 (the &quot;License&quot;); you may not
+use this file except in compliance with the License. You may obtain a copy of
+the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an &quot;AS IS&quot; BASIS, WITHOUT
+WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+License for the specific language governing permissions and limitations under
+the License.
+      </documentation>
+   </annotation>
 
 </schema>
