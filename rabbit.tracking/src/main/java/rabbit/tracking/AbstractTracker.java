@@ -27,8 +27,7 @@ public abstract class AbstractTracker implements ITracker {
 
   private final AtomicBoolean enabled;
 
-  /** Constructor for subclass. */
-  protected AbstractTracker() {
+  public AbstractTracker() {
     enabled = new AtomicBoolean(false);
   }
 

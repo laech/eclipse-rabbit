@@ -23,6 +23,9 @@ import org.junit.Test;
 
 public final class AbstractTrackerTest extends AbstractTrackerSpec {
 
+  public AbstractTrackerTest() {
+  }
+
   @Test public void shouldCallOnEnableWhenEnabling() {
     AbstractTrackerTester tracker = create();
     tracker.setEnabled(false);

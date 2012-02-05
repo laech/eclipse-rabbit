@@ -22,7 +22,7 @@ import org.eclipse.ui.services.IServiceLocator;
  * Monitors the state of the user and notifies listeners when user becomes
  * active/inactive.
  * <p/>
- * This service can be obtained via a {@link IServiceLocator}.
+ * This service can be obtained via an {@link IServiceLocator}.
  * 
  * @since 2.0
  * @noimplement this interface is not intended to be implemented by clients

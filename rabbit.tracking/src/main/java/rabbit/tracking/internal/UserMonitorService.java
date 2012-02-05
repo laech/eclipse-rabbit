@@ -194,7 +194,7 @@ public final class UserMonitorService
 
   @Override public void dispose() {
     if (!started.compareAndSet(true, false)) {
-      throw new IllegalStateException("service is not currently running");
+      return;
     }
     worker.terminate();
     listeners.clear();

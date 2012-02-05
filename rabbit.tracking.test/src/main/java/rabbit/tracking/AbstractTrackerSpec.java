@@ -23,17 +23,17 @@ import org.junit.Test;
 
 public abstract class AbstractTrackerSpec {
 
-  @Test public void shouldBeDisabledByDefault() {
+  @Test public void isDisabledByDefault() {
     assertThat(create().isEnabled(), is(false));
   }
 
-  @Test public void shouldBeEnabledWhenSetToEnable() {
+  @Test public void isEnabledWhenSetToEnable() {
     AbstractTracker tracker = create();
     tracker.setEnabled(true);
     assertThat(tracker.isEnabled(), is(true));
   }
 
-  @Test public void shouldBeDisabledWhenSetToDisable() throws Exception {
+  @Test public void isDisabledWhenSetToDisable() {
     AbstractTracker tracker = create();
     tracker.setEnabled(false);
     assertThat(tracker.isEnabled(), is(false));
