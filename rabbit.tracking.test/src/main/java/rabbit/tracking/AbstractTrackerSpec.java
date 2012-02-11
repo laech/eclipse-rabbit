@@ -19,22 +19,32 @@ package rabbit.tracking;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 public abstract class AbstractTrackerSpec {
 
+  private AbstractTracker tracker;
+
+  @Before public void setup() throws Exception {
+    tracker = create();
+  }
+
+  @After public void teardown() throws Exception {
+    tracker.setEnabled(false);
+  }
+
   @Test public void isDisabledByDefault() {
-    assertThat(create().isEnabled(), is(false));
+    assertThat(tracker.isEnabled(), is(false));
   }
 
   @Test public void isEnabledWhenSetToEnable() {
-    AbstractTracker tracker = create();
     tracker.setEnabled(true);
     assertThat(tracker.isEnabled(), is(true));
   }
 
   @Test public void isDisabledWhenSetToDisable() {
-    AbstractTracker tracker = create();
     tracker.setEnabled(false);
     assertThat(tracker.isEnabled(), is(false));
   }

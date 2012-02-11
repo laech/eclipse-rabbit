@@ -14,27 +14,25 @@
  * the License.
  */
 
-package rabbit.tracking;
+package rabbit.tracking.internal.workbench.util;
 
-/**
- * A listener for listening to state events of a tracker.
- * 
- * @since 2.0
- */
-public interface ITrackerListener {
+import org.eclipse.ui.IPartListener;
+import org.eclipse.ui.IWorkbenchPart;
 
-  /**
-   * Called after the tracker is enabled.
-   */
-  void onEnabled();
+public class PartListener implements IPartListener {
 
-  /**
-   * Called after the tracker is disabled.
-   */
-  void onDisabled();
+  @Override public void partActivated(IWorkbenchPart part) {
+  }
 
-  /**
-   * Called when the tracker is being asked to save its data.
-   */
-  void onSaveData();
+  @Override public void partBroughtToTop(IWorkbenchPart part) {
+  }
+
+  @Override public void partClosed(IWorkbenchPart part) {
+  }
+
+  @Override public void partDeactivated(IWorkbenchPart part) {
+  }
+
+  @Override public void partOpened(IWorkbenchPart part) {
+  }
 }

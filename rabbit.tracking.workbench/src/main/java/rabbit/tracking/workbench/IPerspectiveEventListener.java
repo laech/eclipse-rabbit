@@ -14,27 +14,13 @@
  * the License.
  */
 
-package rabbit.tracking;
+package rabbit.tracking.workbench;
 
-/**
- * A listener for listening to state events of a tracker.
- * 
- * @since 2.0
- */
-public interface ITrackerListener {
+import rabbit.tracking.IEventListener;
+import rabbit.tracking.ITrackerListener;
 
-  /**
-   * Called after the tracker is enabled.
-   */
-  void onEnabled();
+// FIXME 
+public interface IPerspectiveEventListener
+    extends IEventListener<IPerspectiveEvent>, ITrackerListener {
 
-  /**
-   * Called after the tracker is disabled.
-   */
-  void onDisabled();
-
-  /**
-   * Called when the tracker is being asked to save its data.
-   */
-  void onSaveData();
 }

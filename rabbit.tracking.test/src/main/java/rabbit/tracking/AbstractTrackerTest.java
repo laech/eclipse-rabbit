@@ -23,18 +23,28 @@ import org.junit.Test;
 
 public final class AbstractTrackerTest extends AbstractTrackerSpec {
 
+  private AbstractTrackerTester tracker;
+
+  @Override public void setup() throws Exception {
+    super.setup();
+    tracker = create();
+  }
+
+  @Override public void teardown() throws Exception {
+    super.teardown();
+    tracker.setEnabled(false);
+  }
+
   public AbstractTrackerTest() {
   }
 
   @Test public void shouldCallOnEnableWhenEnabling() {
-    AbstractTrackerTester tracker = create();
     tracker.setEnabled(false);
     tracker.setEnabled(true);
     assertThat(tracker.enableCount, is(1));
   }
 
   @Test public void shouldCallOnEnableOnlyIfPreviouslyDisabled() {
-    AbstractTrackerTester tracker = create();
     tracker.setEnabled(false);
     tracker.setEnabled(true);
     tracker.setEnabled(true);
@@ -42,14 +52,12 @@ public final class AbstractTrackerTest extends AbstractTrackerSpec {
   }
 
   @Test public void shouldCallOnDisableWhenDisabling() {
-    AbstractTrackerTester tracker = create();
     tracker.setEnabled(true);
     tracker.setEnabled(false);
     assertThat(tracker.disableCount, is(1));
   }
 
   @Test public void shouldCallOnDisableOnlyIfPreviouslyEnabled() {
-    AbstractTrackerTester tracker = create();
     tracker.setEnabled(true);
     tracker.setEnabled(false);
     tracker.setEnabled(false);

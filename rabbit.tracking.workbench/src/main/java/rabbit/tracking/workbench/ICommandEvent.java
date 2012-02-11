@@ -14,27 +14,24 @@
  * the License.
  */
 
-package rabbit.tracking;
+package rabbit.tracking.workbench;
+
+import org.eclipse.core.commands.ExecutionEvent;
+
+import rabbit.tracking.IEvent;
 
 /**
- * A listener for listening to state events of a tracker.
+ * A command execution event.
  * 
  * @since 2.0
+ * @noimplement this interface is not intended to be implemented by clients
  */
-public interface ITrackerListener {
+public interface ICommandEvent extends IEvent {
 
   /**
-   * Called after the tracker is enabled.
+   * Gets the execution event.
+   * 
+   * @return the execution, not null
    */
-  void onEnabled();
-
-  /**
-   * Called after the tracker is disabled.
-   */
-  void onDisabled();
-
-  /**
-   * Called when the tracker is being asked to save its data.
-   */
-  void onSaveData();
+  ExecutionEvent getExecutionEvent();
 }
