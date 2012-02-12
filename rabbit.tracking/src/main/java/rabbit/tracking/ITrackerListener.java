@@ -17,11 +17,19 @@
 package rabbit.tracking;
 
 /**
- * A listener for listening to state events of a tracker.
+ * A listener for listening to events of a tracker.
  * 
+ * @param <E> the event type
  * @since 2.0
  */
-public interface ITrackerListener {
+public interface ITrackerListener<E> {
+
+  /**
+   * Called when a new event is captured.
+   * 
+   * @param event the new event captured, not null
+   */
+  void onEvent(E event);
 
   /**
    * Called after the tracker is enabled.
