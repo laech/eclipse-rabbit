@@ -26,21 +26,21 @@ import java.util.Collection;
 import org.junit.Before;
 import org.junit.Test;
 
-import rabbit.tracking.ITrackerListener;
+import rabbit.tracking.ITrackerEventListener;
 
-public final class TrackerListenerSupportTest {
+public final class TrackerEventListenerSupportTest {
 
-  private static class TrackerListenerSupportTester extends TrackerListenerSupport<Object> {
+  private static class TrackerListenerSupportTester extends TrackerEventListenerSupport<Object> {
 
-    ITrackerListener<Object> listener;
+    ITrackerEventListener<Object> listener;
 
     @SuppressWarnings("unchecked")//
     TrackerListenerSupportTester() {
-      listener = mock(ITrackerListener.class);
+      listener = mock(ITrackerEventListener.class);
     }
 
     @SuppressWarnings("unchecked")//
-    @Override protected Collection<ITrackerListener<Object>> getListeners() {
+    @Override protected Collection<ITrackerEventListener<Object>> getListeners() {
       return asList(listener);
     }
   }

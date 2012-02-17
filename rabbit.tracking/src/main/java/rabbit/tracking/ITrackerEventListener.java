@@ -22,7 +22,7 @@ package rabbit.tracking;
  * @param <E> the event type
  * @since 2.0
  */
-public interface ITrackerListener<E> {
+public interface ITrackerEventListener<E> {
 
   /**
    * Called when a new event is captured.

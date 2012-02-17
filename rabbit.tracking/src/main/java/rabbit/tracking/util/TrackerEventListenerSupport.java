@@ -18,24 +18,24 @@ package rabbit.tracking.util;
 
 import java.util.Collection;
 
-import rabbit.tracking.ITrackerListener;
+import rabbit.tracking.ITrackerEventListener;
 
 /**
  * Helper class for sending notifications to a collection of
- * {@link ITrackerListener}s.
+ * {@link ITrackerEventListener}s.
  * 
  * @since 2.0
  */
-public abstract class TrackerListenerSupport<E> {
+public abstract class TrackerEventListenerSupport<E> {
 
-  public TrackerListenerSupport() {
+  public TrackerEventListenerSupport() {
   }
 
   /**
    * Notifies the listeners that the tracker has been requested to save data.
    */
   public final void notifyOnSaveData() {
-    for (ITrackerListener<? super E> listener : getListeners()) {
+    for (ITrackerEventListener<? super E> listener : getListeners()) {
       listener.onSaveData();
     }
   }
@@ -44,7 +44,7 @@ public abstract class TrackerListenerSupport<E> {
    * Notifies the listeners that the tracker is enabled.
    */
   public final void notifyOnEnabled() {
-    for (ITrackerListener<? super E> listener : getListeners()) {
+    for (ITrackerEventListener<? super E> listener : getListeners()) {
       listener.onEnabled();
     }
   }
@@ -53,7 +53,7 @@ public abstract class TrackerListenerSupport<E> {
    * Notifies the listeners that the tracker is disabled.
    */
   public final void notifyOnDisabled() {
-    for (ITrackerListener<? super E> listener : getListeners()) {
+    for (ITrackerEventListener<? super E> listener : getListeners()) {
       listener.onDisabled();
     }
   }
@@ -64,7 +64,7 @@ public abstract class TrackerListenerSupport<E> {
    * @param event the event, not null
    */
   public final void notifyOnEvent(E event) {
-    for (ITrackerListener<? super E> listener : getListeners()) {
+    for (ITrackerEventListener<? super E> listener : getListeners()) {
       listener.onEvent(event);
     }
   }
@@ -74,5 +74,5 @@ public abstract class TrackerListenerSupport<E> {
    * 
    * @return the listeners, or an empty collection if none
    */
-  protected abstract Collection<? extends ITrackerListener<? super E>> getListeners();
+  protected abstract Collection<? extends ITrackerEventListener<? super E>> getListeners();
 }

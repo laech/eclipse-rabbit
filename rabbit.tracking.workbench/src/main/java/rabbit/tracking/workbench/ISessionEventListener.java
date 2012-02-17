@@ -16,11 +16,9 @@
 
 package rabbit.tracking.workbench;
 
-import rabbit.tracking.IEventListener;
-import rabbit.tracking.ITrackerListener;
+import rabbit.tracking.ITrackerEventListener;
 
 // FIXME 
-public interface ISessionEventListener
-    extends IEventListener<ISessionEvent>, ITrackerListener {
+public interface ISessionEventListener extends ITrackerEventListener<ISessionEvent> {
 
 }
