@@ -20,8 +20,18 @@ import org.eclipse.ui.IWorkbenchPart;
 
 import rabbit.tracking.ITimedEvent;
 
+/**
+ * Event representing time spent on a workbench part.
+ * 
+ * @since 2.0
+ */
 public interface IPartEvent extends ITimedEvent {
 
+  /**
+   * Gets the workbench part of this event.
+   * 
+   * @return the workbench part, not null
+   */
   IWorkbenchPart getPart();
 
 }

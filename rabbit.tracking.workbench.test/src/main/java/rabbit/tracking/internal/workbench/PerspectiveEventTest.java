@@ -15,37 +15,50 @@
  */
 package rabbit.tracking.internal.workbench;
 
-import rabbit.data.store.model.PerspectiveEvent;
-
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.core.Is.is;
+import static org.joda.time.Duration.millis;
+import static org.joda.time.Instant.now;
+import static org.mockito.Mockito.mock;
 
 import org.eclipse.ui.IPerspectiveDescriptor;
-import org.eclipse.ui.PlatformUI;
-import org.joda.time.Interval;
+import org.joda.time.Duration;
+import org.joda.time.Instant;
+import org.junit.Before;
 import org.junit.Test;
 
-/**
- * @see PerspectiveEvent
- */
-public class PerspectiveEventTest extends ContinuousEventTest {
+import rabbit.tracking.TimedEventTest;
 
-  IPerspectiveDescriptor pers = PlatformUI.getWorkbench()
-      .getPerspectiveRegistry().getPerspectives()[1];
-  private PerspectiveEvent event = createEvent(new Interval(0, 1));
+public final class PerspectiveEventTest extends TimedEventTest {
 
-  @Test(expected = NullPointerException.class)
-  public void testConstructor_withPerspectiveNull() {
-    new PerspectiveEvent(new Interval(0, 1), null);
+  private Duration duration;
+  private Instant instant;
+  private IPerspectiveDescriptor perspective;
+
+  private PerspectiveEvent event;
+
+  @Before public void init() {
+    instant = now();
+    duration = millis(10);
+    perspective = mock(IPerspectiveDescriptor.class);
+    event = create(instant, duration, perspective);
   }
 
-  @Test
-  public void testGetPerspective() {
-    assertEquals(pers, event.getPerspective());
+  @Test(expected = NullPointerException.class)//
+  public void constructorThrowsExceptionIfPerspectiveIsNull() {
+    create(instant, duration, null);
   }
 
-  @Override
-  protected PerspectiveEvent createEvent(Interval interval) {
-    return new PerspectiveEvent(interval, PlatformUI.getWorkbench()
-        .getPerspectiveRegistry().getPerspectives()[1]);
+  @Test public void returnsThePerspective() {
+    assertThat(event.getPerspective(), is(perspective));
+  }
+
+  @Override protected PerspectiveEvent create(Instant instant, Duration duration) {
+    return create(instant, duration, perspective);
+  }
+
+  private PerspectiveEvent create(Instant instant, Duration duration,
+      IPerspectiveDescriptor perspective) {
+    return new PerspectiveEvent(instant, duration, perspective);
   }
 }

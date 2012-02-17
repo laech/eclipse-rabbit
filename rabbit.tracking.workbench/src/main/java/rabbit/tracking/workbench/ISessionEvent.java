@@ -18,6 +18,10 @@ package rabbit.tracking.workbench;
 
 import rabbit.tracking.ITimedEvent;
 
-// FIXME
+/**
+ * Event representing time spent using the workbench.
+ * 
+ * @since 2.0
+ */
 public interface ISessionEvent extends ITimedEvent {
 }

@@ -20,9 +20,18 @@ import org.eclipse.ui.IPerspectiveDescriptor;
 
 import rabbit.tracking.ITimedEvent;
 
-// FIXME
+/**
+ * Event representing time spent on a perspective.
+ * 
+ * @since 2.0
+ */
 public interface IPerspectiveEvent extends ITimedEvent {
 
+  /**
+   * Gets the perspective of this event.
+   * 
+   * @return the perspective, not null
+   */
   IPerspectiveDescriptor getPerspective();
 
 }

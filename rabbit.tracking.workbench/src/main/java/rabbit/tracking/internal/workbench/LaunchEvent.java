@@ -20,6 +20,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Set;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
@@ -33,6 +34,26 @@ import rabbit.tracking.workbench.ILaunchEvent;
 import com.google.common.collect.ImmutableSet;
 
 final class LaunchEvent extends TimedEvent implements ILaunchEvent {
+
+  /**
+   * Creates an event from the given launch.
+   * 
+   * @throws RuntimeException if cannot get launch configuration or
+   *         configuration type type from the launch
+   */
+  public static LaunchEvent fromLaunch(Instant instant, Duration duration,
+      Set<? extends IPath> filePaths, ILaunch launch) {
+
+    try {
+
+      ILaunchConfiguration config = launch.getLaunchConfiguration();
+      ILaunchConfigurationType type = config.getType();
+      return new LaunchEvent(instant, duration, filePaths, launch, config, type);
+
+    } catch (CoreException e) {
+      throw new RuntimeException(e);
+    }
+  }
 
   private final ILaunch launch;
   private final ILaunchConfiguration config;
@@ -49,10 +70,10 @@ final class LaunchEvent extends TimedEvent implements ILaunchEvent {
   LaunchEvent(
       Instant instant,
       Duration duration,
+      Set<? extends IPath> filePaths,
       ILaunch launch,
       ILaunchConfiguration config,
-      ILaunchConfigurationType type,
-      Set<IPath> filePaths) {
+      ILaunchConfigurationType type) {
     super(instant, duration);
     this.type = checkNotNull(type, "type");
     this.config = checkNotNull(config, "config");

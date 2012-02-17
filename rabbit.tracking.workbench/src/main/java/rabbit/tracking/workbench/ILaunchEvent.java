@@ -25,16 +25,41 @@ import org.eclipse.debug.core.ILaunchConfigurationType;
 
 import rabbit.tracking.ITimedEvent;
 
-
-// FIXME
+/**
+ * An event representing a debug session and/or one or more system processes.
+ * 
+ * @since 2.0
+ */
 public interface ILaunchEvent extends ITimedEvent {
 
+  /**
+   * Gets the set of files involved in this launch event. For example, if a
+   * launched process is suspended by a break point, the file of the break point
+   * will be recorded here.
+   * 
+   * @return the files, not null, may be empty, and unmodifiable
+   */
   Set<IPath> getFilePaths();
 
+  /**
+   * Gets the launch result.
+   * 
+   * @return the launch result, not null
+   */
   ILaunch getLaunch();
 
+  /**
+   * Gets the launch configuration type of this launch.
+   * 
+   * @return the launch configuration type, not null
+   */
   ILaunchConfigurationType getLaunchConfigurationType();
 
+  /**
+   * Gets the launch configuration of this launch.
+   * 
+   * @return the launch configuration, not null
+   */
   ILaunchConfiguration getLaunchConfiguration();
 
 }

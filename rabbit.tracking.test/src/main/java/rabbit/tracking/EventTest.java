@@ -25,7 +25,7 @@ import org.junit.Test;
 public class EventTest {
 
   @Test(expected = NullPointerException.class)//
-  public void constructThrowsExceptionIfInstantIsNull() {
+  public void constructorThrowsExceptionIfInstantIsNull() {
     create(null);
   }
 

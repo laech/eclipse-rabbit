@@ -15,18 +15,15 @@
  */
 package rabbit.tracking.internal.workbench;
 
-import rabbit.data.store.model.ContinuousEvent;
-import rabbit.data.store.model.SessionEvent;
+import org.joda.time.Duration;
+import org.joda.time.Instant;
 
-import org.joda.time.Interval;
+import rabbit.tracking.TimedEventTest;
 
-/**
- * @see SessionEvent
- */
-public class SessionEventTest extends ContinuousEventTest {
+public final class SessionEventTest extends TimedEventTest {
 
-  @Override
-  protected ContinuousEvent createEvent(Interval interval) {
-    return new SessionEvent(interval);
+  @Override protected SessionEvent create(Instant instant, Duration duration) {
+    return new SessionEvent(instant, duration);
   }
+
 }

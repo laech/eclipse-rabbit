@@ -15,41 +15,39 @@
  */
 package rabbit.tracking.internal.workbench;
 
-import rabbit.data.store.model.FileEvent;
-
-import static org.junit.Assert.assertEquals;
+import static org.eclipse.core.runtime.Path.fromPortableString;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.core.Is.is;
+import static org.joda.time.Duration.standardHours;
+import static org.joda.time.Instant.now;
 
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Path;
-import org.joda.time.Interval;
+import org.joda.time.Duration;
+import org.joda.time.Instant;
 import org.junit.Test;
 
-/**
- * @see FileEvent
- */
-public class FileEventTest extends ContinuousEventTest {
+import rabbit.tracking.TimedEventTest;
 
-  @Test(expected = NullPointerException.class)
-  public void testContructor_fileIdNull() {
-    createEvent(new Interval(0, 1), null);
+public final class FileEventTest extends TimedEventTest {
+
+  private final Instant instant = now();
+  private final Duration duration = standardHours(2);
+  private final IPath path = fromPortableString("/project/folder/file");
+
+  @Test(expected = NullPointerException.class)//
+  public void constructorThrowsExceptionIfFilePathIsNull() {
+    create(instant, duration, null);
   }
 
-  @Test
-  public void testGetFilePath() {
-    IPath path = Path.fromPortableString("/project/folder/me.txt");
-    FileEvent event = createEvent(new Interval(0, 1), path);
-    assertEquals(path, event.getFilePath());
+  @Test public void returnsTheFilePath() {
+    assertThat(create(instant, duration, path).getFilePath(), is(path));
   }
 
-  @Override
-  protected final FileEvent createEvent(Interval interval) {
-    return createEvent(interval, Path.fromPortableString("/p/f/a.txt"));
+  @Override protected final FileEvent create(Instant instant, Duration duration) {
+    return create(instant, duration, path);
   }
-  
-  /**
-   * @see FileEvent#FileEvent(Interval, IPath)
-   */
-  protected FileEvent createEvent(Interval interval, IPath filePath) {
-    return new FileEvent(interval, filePath);
+
+  private FileEvent create(Instant instant, Duration duration, IPath filePath) {
+    return new FileEvent(instant, duration, filePath);
   }
 }

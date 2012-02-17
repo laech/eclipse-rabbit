@@ -24,7 +24,6 @@ import rabbit.tracking.IEvent;
  * A command execution event.
  * 
  * @since 2.0
- * @noimplement this interface is not intended to be implemented by clients
  */
 public interface ICommandEvent extends IEvent {
 

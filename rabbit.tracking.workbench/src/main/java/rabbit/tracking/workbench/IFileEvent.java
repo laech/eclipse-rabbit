@@ -20,9 +20,19 @@ import org.eclipse.core.runtime.IPath;
 
 import rabbit.tracking.ITimedEvent;
 
-// FIXME
+/**
+ * Event represents time spent on a file.
+ * 
+ * @since 2.0
+ */
 public interface IFileEvent extends ITimedEvent {
 
+  /**
+   * Gets the path of the file. The path may represent a file in workspace, or
+   * an external file.
+   * 
+   * @return the path of the file, not null
+   */
   IPath getFilePath();
 
 }
