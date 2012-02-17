@@ -25,11 +25,11 @@ import org.junit.Test;
 public class EventTest {
 
   @Test(expected = NullPointerException.class)//
-  public void constructShouldThrowExceptionIfInstantIsNull() {
+  public void constructThrowsExceptionIfInstantIsNull() {
     create(null);
   }
 
-  @Test public void shouldReturnTheInstant() throws Exception {
+  @Test public void returnsTheInstant() throws Exception {
     Instant instant = new Instant();
     assertThat(create(instant).getInstant(), is(instant));
   }

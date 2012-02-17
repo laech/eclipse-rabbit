@@ -102,7 +102,7 @@ public final class UserMonitorServiceTest {
   }
 
   @Test(timeout = 1000)//
-  public void shouldNotifyObserversWhenUserReturnsToActiveByClickingTheMouse()
+  public void notifiesObserversWhenUserReturnsToActiveByClickingTheMouse()
       throws Exception {
 
     CountDownLatch active = new CountDownLatch(1);
@@ -131,7 +131,7 @@ public final class UserMonitorServiceTest {
   }
 
   @Test(timeout = 1000)//
-  public void shouldNotifyObserversWhenUserReturnsToActiveByPressingAKey()
+  public void notifiesObserversWhenUserReturnsToActiveByPressingAKey()
       throws Exception {
 
     CountDownLatch active = new CountDownLatch(1);
@@ -158,7 +158,7 @@ public final class UserMonitorServiceTest {
     assertThat(listener.inactiveCount.get(), is(1));
   }
 
-  @Test public void shouldNotNotifyObserversWhenUserIsActive() throws Exception {
+  @Test public void doesntNotifyObserversWhenUserIsActive() throws Exception {
 
     long timeout = 100;
     UserMonitorService service = create(timeout);
@@ -200,7 +200,7 @@ public final class UserMonitorServiceTest {
   }
 
   @Test(timeout = 1000)//
-  public void shouldDetectUserHasReturnedToActiveByClickingTheMouse()
+  public void detectsUserHasReturnedToActiveByClickingTheMouse()
       throws Exception {
 
     CountDownLatch inactive = new CountDownLatch(1);
@@ -220,7 +220,7 @@ public final class UserMonitorServiceTest {
   }
 
   @Test(timeout = 1000)//
-  public void shouldDetectUserHasReturnedToActiveByPressingAKey()
+  public void detectsUserHasReturnedToActiveByPressingAKey()
       throws Exception {
 
     CountDownLatch active = new CountDownLatch(1);
@@ -239,7 +239,7 @@ public final class UserMonitorServiceTest {
     assertThat(service.isUserActive(), is(true));
   }
 
-  @Test public void shouldDoNothingAfterTheDisplayHasBeenDisposed() {
+  @Test public void doesNothingAfterTheDisplayHasBeenDisposed() {
     Display display = mock(Display.class);
     given(display.isDisposed()).willReturn(false);
     given(display.isDisposed()).willReturn(true);
@@ -257,7 +257,7 @@ public final class UserMonitorServiceTest {
     }
   }
 
-  @Test public void shouldNotNotifyObserversIfNotEnabled() throws Exception {
+  @Test public void doesntNotifyObserversIfNotEnabled() throws Exception {
     long timeout = 10;
     UserMonitorService service = create(timeout);
     CountingListener listener = new CountingListener();
@@ -277,7 +277,7 @@ public final class UserMonitorServiceTest {
     assertThat(listener.activeCount.get(), is(0));
   }
 
-  @Test public void shouldTerminateWorkerThreadWhenDispose() throws Exception {
+  @Test public void terminatesWorkerThreadWhenDispose() throws Exception {
     UserMonitorService monitor = create(10);
     monitor.start();
     assertTrue(getWorker(monitor).isAlive());
@@ -287,31 +287,31 @@ public final class UserMonitorServiceTest {
   }
 
   @Test(expected = IllegalArgumentException.class)//
-  public void shouldThrowExceptionIfConstructedWithANegativeTimeout() {
+  public void throwsExceptionIfConstructedWithANegativeTimeout() {
     create(-1);
   }
 
   @Test(expected = NullPointerException.class)//
-  public void shouldThrowExceptionIfConstructedWithoutADisplay() {
+  public void throwsExceptionIfConstructedWithoutADisplay() {
     create(10, null);
   }
 
   @Test(expected = IllegalStateException.class)//
-  public void isUserActiveShouldThrowExceptionIfNotEnabled() {
+  public void isUserActiveThrowsExceptionIfNotEnabled() {
     assertTrue(create(10).isUserActive());
   }
 
   @Test(expected = NullPointerException.class)//
-  public void shouldThrowExceptionIfAddingNullListener() {
+  public void throwsExceptionIfAddingNullListener() {
     service.addListener(null);
   }
 
   @Test(expected = NullPointerException.class)//
-  public void shouldThrowExceptionIfRemovingNullListener() {
+  public void throwsExceptionIfRemovingNullListener() {
     service.removeListener(null);
   }
 
-  @Test public void shouldNotNotifyListenerIfRemoved() throws Exception {
+  @Test public void doesntNotifyListenerIfRemoved() throws Exception {
     long timeout = 10;
     UserMonitorService service = create(timeout);
     CountingListener listener = new CountingListener();
@@ -324,7 +324,7 @@ public final class UserMonitorServiceTest {
   }
 
   @Test(timeout = 1000)//
-  public void shouldIgnoreIdenticalListener() throws Exception {
+  public void ignoresIdenticalListener() throws Exception {
     CountDownLatch inactive = new CountDownLatch(1);
     CountingListener listener = new CountingListener(null, inactive);
     service.addListener(listener); // 1

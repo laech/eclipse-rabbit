@@ -38,26 +38,26 @@ public final class AbstractTrackerTest extends AbstractTrackerSpec {
   public AbstractTrackerTest() {
   }
 
-  @Test public void shouldCallOnEnableWhenEnabling() {
+  @Test public void callsOnEnableWhenEnabling() {
     tracker.setEnabled(false);
     tracker.setEnabled(true);
     assertThat(tracker.enableCount, is(1));
   }
 
-  @Test public void shouldCallOnEnableOnlyIfPreviouslyDisabled() {
+  @Test public void callsOnEnableOnlyIfPreviouslyDisabled() {
     tracker.setEnabled(false);
     tracker.setEnabled(true);
     tracker.setEnabled(true);
     assertThat(tracker.enableCount, is(1));
   }
 
-  @Test public void shouldCallOnDisableWhenDisabling() {
+  @Test public void callsOnDisableWhenDisabling() {
     tracker.setEnabled(true);
     tracker.setEnabled(false);
     assertThat(tracker.disableCount, is(1));
   }
 
-  @Test public void shouldCallOnDisableOnlyIfPreviouslyEnabled() {
+  @Test public void callsOnDisableOnlyIfPreviouslyEnabled() {
     tracker.setEnabled(true);
     tracker.setEnabled(false);
     tracker.setEnabled(false);

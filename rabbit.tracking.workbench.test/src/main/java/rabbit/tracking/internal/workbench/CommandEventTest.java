@@ -43,11 +43,11 @@ public final class CommandEventTest extends EventTest {
   }
 
   @Test(expected = NullPointerException.class)//
-  public void constructorShouldThrowExceptionIfExecutionEventIsNull() {
+  public void constructorThrowsExceptionIfExecutionEventIsNull() {
     create(now(), null);
   }
 
-  @Test public void shouldReturnTheExecutionEvent() {
+  @Test public void returnTheExecutionEvent() {
     assertThat(event.getExecutionEvent(), is(execution));
   }
 

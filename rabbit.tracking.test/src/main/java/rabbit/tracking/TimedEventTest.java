@@ -26,11 +26,11 @@ import org.junit.Test;
 public class TimedEventTest extends EventTest {
 
   @Test(expected = NullPointerException.class)//
-  public void constructorShouldThrowExceptionIfDurationIsNull() {
+  public void constructorThrowsExceptionIfDurationIsNull() {
     create(new Instant(), null);
   }
 
-  @Test public void shouldReturnTheDuration() throws Exception {
+  @Test public void returnsTheDuration() throws Exception {
     Duration duration = new Duration(10);
     assertThat(create(new Instant(), duration).getDuration(), is(duration));
   }
