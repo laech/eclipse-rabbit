@@ -16,13 +16,14 @@
 
 package rabbit.tracking.internal.workbench;
 
-import static java.util.Arrays.asList;
+import static com.google.common.collect.Lists.newArrayListWithCapacity;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.runtime.IConfigurationElement;
@@ -97,14 +98,12 @@ public final class WorkbenchPluginListenerTest {
   }
 
   @Parameters public static Collection<Object[]> data() {
-    return asList(new Object[][]{
-        {ListenerType.COMMAND},
-        {ListenerType.FILE},
-        {ListenerType.LAUNCH},
-        {ListenerType.PART},
-        {ListenerType.PERSPECTIVE},
-        {ListenerType.SESSION},
-    });
+    ListenerType[] values = ListenerType.values();
+    List<Object[]> data = newArrayListWithCapacity(values.length);
+    for (ListenerType value : values) {
+      data.add(new Object[]{value});
+    }
+    return data;
   }
 
   private final WorkbenchPlugin plugin;
