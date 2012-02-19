@@ -14,7 +14,7 @@
  * the License.
  */
 
-package rabbit.tracking.workbench;
+package rabbit.tracking;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
@@ -24,18 +24,18 @@ import org.junit.Test;
 public final class AbstractUserTrackerTest extends AbstractUserTrackerSpec {
 
   private static class AbstractUserTrackerTester extends AbstractUserTracker {
-    int activeCount;
-    int inactiveCount;
+    int onActiveCount;
+    int onInactiveCount;
 
     @Override public void saveData() {
     }
 
     @Override protected void onUserActive() {
-      activeCount++;
+      onActiveCount++;
     }
 
     @Override protected void onUserInactive() {
-      inactiveCount++;
+      onInactiveCount++;
     }
   }
 
@@ -43,7 +43,7 @@ public final class AbstractUserTrackerTest extends AbstractUserTrackerSpec {
 
   @Override public void setup() throws Exception {
     super.setup();
-    tracker = create();
+    tracker = create(getMockService());
   }
 
   @Override public void teardown() throws Exception {
@@ -54,18 +54,21 @@ public final class AbstractUserTrackerTest extends AbstractUserTrackerSpec {
   @Test public void notifiesWhenUserBecomesActive() {
     tracker.setEnabled(true);
     getMockService().notifyActive();
-    assertThat(tracker.activeCount, is(1));
-    assertThat(tracker.inactiveCount, is(0));
+    assertThat(tracker.onActiveCount, is(1));
+    assertThat(tracker.onInactiveCount, is(0));
   }
 
   @Test public void notifiesWhenUserBecomesInactive() {
     tracker.setEnabled(true);
     getMockService().notifyInactive();
-    assertThat(tracker.inactiveCount, is(1));
-    assertThat(tracker.activeCount, is(0));
+    assertThat(tracker.onInactiveCount, is(1));
+    assertThat(tracker.onActiveCount, is(0));
   }
 
-  @Override protected AbstractUserTrackerTester create() {
-    return new AbstractUserTrackerTester();
+  @Override protected AbstractUserTrackerTester create(
+      IUserMonitorService service) {
+    AbstractUserTrackerTester tracker = new AbstractUserTrackerTester();
+    tracker.setUserMonitorService(service);
+    return tracker;
   }
 }

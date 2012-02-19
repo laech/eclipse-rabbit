@@ -55,6 +55,7 @@ public interface ITracker {
    * 
    * @param enable true to enable this tracker, false to disable
    */
+  // TODO use explict enable & disable instead
   void setEnabled(boolean enable);
 
 }

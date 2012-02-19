@@ -35,6 +35,8 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.junit.Test;
 
+import rabbit.tracking.AbstractUserTrackerSpec;
+
 public final class AbstractPartTrackerTest extends AbstractUserTrackerSpec {
 
   private static class AbstractPartTrackerTester extends AbstractPartTracker {

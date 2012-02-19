@@ -14,7 +14,7 @@
  * the License.
  */
 
-package rabbit.tracking.workbench;
+package rabbit.tracking;
 
 import static com.google.common.collect.Sets.newHashSet;
 import static org.hamcrest.core.Is.is;
@@ -22,14 +22,7 @@ import static org.junit.Assert.assertThat;
 
 import java.util.Collection;
 
-import org.eclipse.ui.internal.Workbench;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
-
-import rabbit.tracking.AbstractTrackerSpec;
-import rabbit.tracking.IUserListener;
-import rabbit.tracking.IUserMonitorService;
 
 /**
  * Class for testing {@link AbstractUserTracker}, the workbench
@@ -50,6 +43,7 @@ public abstract class AbstractUserTrackerSpec extends AbstractTrackerSpec {
 
   protected static final class MockUserMonitorService
       implements IUserMonitorService {
+
     final Collection<IUserListener> listeners = newHashSet();
     boolean active;
     int addListenerCount;
@@ -84,13 +78,14 @@ public abstract class AbstractUserTrackerSpec extends AbstractTrackerSpec {
     }
   }
 
-  private IUserMonitorService originalService;
-  private MockUserMonitorService mockService;
+  private MockUserMonitorService service;
   private AbstractUserTracker tracker;
 
   @Override public void setup() throws Exception {
     super.setup();
-    tracker = create();
+    service = new MockUserMonitorService();
+    tracker = create(service);
+    tracker.setUserMonitorService(service);
   }
 
   @Override public void teardown() throws Exception {
@@ -98,42 +93,33 @@ public abstract class AbstractUserTrackerSpec extends AbstractTrackerSpec {
     tracker.setEnabled(false);
   }
 
-  @Before public void setupMockUserMonitorService() {
-    originalService = (IUserMonitorService)Workbench.getInstance()
-        .getServiceLocator().getService(IUserMonitorService.class);
-    mockService = new MockUserMonitorService();
-    Workbench.getInstance().getServiceLocator()
-        .registerService(IUserMonitorService.class, mockService);
-  }
-
-  @After public void restoreOriginalUserMonitorService() {
-    Workbench.getInstance().getServiceLocator()
-        .registerService(IUserMonitorService.class, originalService);
-  }
-
   @Test public void detactchesFromUserServiceWhenDisabling() {
     tracker.setEnabled(true);
-    assertThat(mockService.removeListenerCount, is(0));
+    assertThat(service.removeListenerCount, is(0));
     tracker.setEnabled(false);
-    mockService.addListenerCount = 0;
-    assertThat(mockService.listeners.size(), is(0));
-    assertThat(mockService.removeListenerCount, is(1));
-    assertThat(mockService.addListenerCount, is(0));
+    service.addListenerCount = 0;
+    assertThat(service.listeners.size(), is(0));
+    assertThat(service.removeListenerCount, is(1));
+    assertThat(service.addListenerCount, is(0));
   }
 
   @Test public void attatchesToUserServiceWhenEnabling() {
     tracker.setEnabled(true);
-    assertThat(mockService.listeners.size(), is(1));
-    assertThat(mockService.addListenerCount, is(1));
-    assertThat(mockService.removeListenerCount, is(0));
+    assertThat(service.listeners.size(), is(1));
+    assertThat(service.addListenerCount, is(1));
+    assertThat(service.removeListenerCount, is(0));
   }
 
   /**
-   * @return the mock user monitor service registered in the workbench
+   * @return the mock user monitor service
    */
   protected MockUserMonitorService getMockService() {
-    return mockService;
+    return service;
   }
 
-  @Override protected abstract AbstractUserTracker create();
+  @Override protected final AbstractUserTracker create() {
+    return create(getMockService());
+  }
+
+  protected abstract AbstractUserTracker create(IUserMonitorService service);
 }

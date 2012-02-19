@@ -11,6 +11,7 @@ Export-Package: rabbit.tracking;version="2.0.0",
 Import-Package: com.google.common.annotations;version="11.0.0",
  com.google.common.base;version="11.0.0",
  com.google.common.collect;version="11.0.0",
+ com.google.inject;version="1.2.0",
  org.joda.time;version="2.0.0"
 Require-Bundle: org.eclipse.ui;bundle-version="[3.5.2,4.0.0)",
  org.eclipse.core.runtime;bundle-version="[3.5.0,4.0.0)"

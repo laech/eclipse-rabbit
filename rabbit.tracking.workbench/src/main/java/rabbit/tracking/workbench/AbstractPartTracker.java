@@ -25,6 +25,7 @@ import org.eclipse.ui.IWindowListener;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 
+import rabbit.tracking.AbstractUserTracker;
 import rabbit.tracking.internal.workbench.util.PartListener;
 import rabbit.tracking.internal.workbench.util.WorkbenchUtil;
 

@@ -31,6 +31,8 @@ import org.joda.time.Instant;
 import org.junit.Before;
 import org.junit.Test;
 
+import rabbit.tracking.AbstractUserTrackerSpec;
+
 public final class AbstractRecordingPartTrackerTest
     extends AbstractUserTrackerSpec {
 

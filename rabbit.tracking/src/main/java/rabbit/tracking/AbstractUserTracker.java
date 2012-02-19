@@ -14,12 +14,11 @@
  * the License.
  */
 
-package rabbit.tracking.workbench;
+package rabbit.tracking;
 
 import static org.eclipse.ui.PlatformUI.getWorkbench;
-import rabbit.tracking.AbstractTracker;
-import rabbit.tracking.IUserListener;
-import rabbit.tracking.IUserMonitorService;
+
+import com.google.inject.Inject;
 
 /**
  * A tracker listening on an {@link IUserMonitorService} and notifies subclass
@@ -44,6 +43,8 @@ public abstract class AbstractUserTracker extends AbstractTracker {
       onUserInactive();
     }
   };
+
+  private volatile IUserMonitorService service;
 
   public AbstractUserTracker() {
     super();
@@ -77,7 +78,15 @@ public abstract class AbstractUserTracker extends AbstractTracker {
    * @return the service, not null
    */
   protected IUserMonitorService getUserMonitorService() {
-    return (IUserMonitorService)getWorkbench()
-        .getService(IUserMonitorService.class);
+    if (service != null) {
+      return service;
+    }
+    // Fall back to workbench way if not running with injection
+    return (IUserMonitorService)getWorkbench().getService(
+        IUserMonitorService.class);
+  }
+
+  @Inject void setUserMonitorService(IUserMonitorService service) {
+    this.service = service;
   }
 }
