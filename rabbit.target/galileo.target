@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <?pde version="3.6"?>
 
-<target name="Galileo" sequenceNumber="18">
+<target name="Galileo" sequenceNumber="21">
 <locations>
 <location includeAllPlatforms="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="org.eclipse.swtbot.forms.feature.group" version="2.0.4.20110304_0338-e5aff47-dev-e35"/>
@@ -19,31 +19,6 @@
 <unit id="org.eclipse.equinox.executable.feature.group" version="3.3.201.R35x_v20091211-7M-FngFELSU3Pqlv3JdZn"/>
 <unit id="org.eclipse.mylyn_feature.feature.group" version="3.2.3.v20100217-0100-e3x"/>
 <repository location="http://download.eclipse.org/releases/galileo"/>
-</location>
-<location includeAllPlatforms="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
-<unit id="com.google.guava.sdk.feature.feature.group" version="11.0.0"/>
-<repository location="http://guava-osgi.googlecode.com/svn/trunk/repository/"/>
-</location>
-<location includeAllPlatforms="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
-<unit id="org.aopalliance" version="1.0.0.v201105210816"/>
-<unit id="com.google.inject" version="2.0.0.v201105231817"/>
-<unit id="com.google.inject.source" version="2.0.0.v201105231817"/>
-<unit id="org.hamcrest.core" version="1.1.0.v20090501071000"/>
-<unit id="org.hamcrest.core.source" version="1.1.0.v20090501071000"/>
-<unit id="org.hamcrest.integration.source" version="1.1.0.v20090501071000"/>
-<unit id="org.hamcrest.integration" version="1.1.0.v20090501071000"/>
-<unit id="org.hamcrest.library" version="1.1.0.v20090501071000"/>
-<unit id="org.hamcrest.library.source" version="1.1.0.v20090501071000"/>
-<unit id="org.hamcrest" version="1.1.0.v20090501071000"/>
-<unit id="org.hamcrest.text" version="1.1.0.v20090501071000"/>
-<unit id="org.hamcrest.text.source" version="1.1.0.v20090501071000"/>
-<unit id="org.objenesis" version="1.0.0.v201105211943"/>
-<unit id="org.objenesis.source" version="1.0.0.v201105211943"/>
-<unit id="org.mockito" version="1.8.4.v201102171835"/>
-<unit id="org.mockito.source" version="1.8.4.v201102171835"/>
-<unit id="javax.annotation" version="1.1.0.v201105051105"/>
-<unit id="javax.annotation.source" version="1.1.0.v201105051105"/>
-<repository location="http://download.eclipse.org/tools/orbit/downloads/drops/R20120119162704/repository"/>
 </location>
 </locations>
 </target>
