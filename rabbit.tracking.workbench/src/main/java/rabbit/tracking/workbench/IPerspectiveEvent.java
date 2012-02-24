@@ -32,6 +32,6 @@ public interface IPerspectiveEvent extends ITimedEvent {
    * 
    * @return the perspective, not null
    */
-  IPerspectiveDescriptor getPerspective();
+  IPerspectiveDescriptor perspective();
 
 }

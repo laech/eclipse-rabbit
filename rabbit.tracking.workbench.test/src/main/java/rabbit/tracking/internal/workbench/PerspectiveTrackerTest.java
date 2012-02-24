@@ -83,7 +83,7 @@ public class PerspectiveTrackerTest extends
 
     assertThat(tracker.getData(), hasSize(1));
     PerspectiveEvent event = tracker.getData().iterator().next();
-    assertThat(event.getPerspective(), is(oldPers));
+    assertThat(event.perspective(), is(oldPers));
 
     long start = event.getInterval().getStartMillis();
     long end = event.getInterval().getEndMillis();
@@ -106,7 +106,7 @@ public class PerspectiveTrackerTest extends
 
     assertEquals(1, tracker.getData().size());
     PerspectiveEvent e = tracker.getData().iterator().next();
-    assertEquals(perspective, e.getPerspective());
+    assertEquals(perspective, e.perspective());
 
     long start = e.getInterval().getStartMillis();
     long end = e.getInterval().getEndMillis();
@@ -127,7 +127,7 @@ public class PerspectiveTrackerTest extends
 
     assertThat(tracker.getData(), hasSize(1));
     PerspectiveEvent e = tracker.getData().iterator().next();
-    assertThat(e.getPerspective(), is(perspective));
+    assertThat(e.perspective(), is(perspective));
 
     long start = e.getInterval().getStartMillis();
     long end = e.getInterval().getEndMillis();
@@ -187,7 +187,7 @@ public class PerspectiveTrackerTest extends
 
     assertEquals(1, tracker.getData().size());
     PerspectiveEvent e = tracker.getData().iterator().next();
-    assertThat(e.getPerspective(), is(notNullValue()));
+    assertThat(e.perspective(), is(notNullValue()));
 
     long start = e.getInterval().getStartMillis();
     long end = e.getInterval().getEndMillis();
@@ -210,7 +210,7 @@ public class PerspectiveTrackerTest extends
 
     assertThat(tracker.getData(), hasSize(1));
     PerspectiveEvent e = tracker.getData().iterator().next();
-    assertThat(e.getPerspective(), is(perspective));
+    assertThat(e.perspective(), is(perspective));
 
     long start = e.getInterval().getStartMillis();
     long end = e.getInterval().getEndMillis();
@@ -238,7 +238,7 @@ public class PerspectiveTrackerTest extends
 
       assertThat(tracker.getData(), hasSize(1));
       PerspectiveEvent event = tracker.getData().iterator().next();
-      assertThat(event.getPerspective(), is(persp));
+      assertThat(event.perspective(), is(persp));
 
       long start = event.getInterval().getStartMillis();
       long end = event.getInterval().getEndMillis();
@@ -281,7 +281,7 @@ public class PerspectiveTrackerTest extends
 
       assertThat(tracker.getData(), hasSize(1));
       PerspectiveEvent e = tracker.getData().iterator().next();
-      assertThat(e.getPerspective(), is(page.getPerspective()));
+      assertThat(e.perspective(), is(page.getPerspective()));
 
       long start = e.getInterval().getStartMillis();
       long end = e.getInterval().getEndMillis();

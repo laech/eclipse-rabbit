@@ -70,7 +70,7 @@ public final class LaunchEventTest extends TimedEventTest {
     paths = newHashSet(paths);
     event = create(instant, duration, paths, launch, config, type);
     paths.add(new Path("/Should/not/effect/the/collection/in/the/event"));
-    assertThat(event.getFilePaths(), not(equalTo(paths)));
+    assertThat(event.files(), not(equalTo(paths)));
   }
 
   @Test(expected = NullPointerException.class)//
@@ -119,24 +119,24 @@ public final class LaunchEventTest extends TimedEventTest {
   }
 
   @Test public void returnsTheLaunch() {
-    assertThat(event.getLaunch(), is(launch));
+    assertThat(event.launch(), is(launch));
   }
 
   @Test public void returnsTheLaunchConfiguration() {
-    assertThat(event.getLaunchConfiguration(), is(config));
+    assertThat(event.launchConfig(), is(config));
   }
 
   @Test public void returnsTheLaunchConfigurationType() {
-    assertThat(event.getLaunchConfigurationType(), is(type));
+    assertThat(event.launchConfigType(), is(type));
   }
 
   @Test public void returnsThePaths() {
-    assertThat(event.getFilePaths(), is(paths));
+    assertThat(event.files(), is(paths));
   }
 
   @Test(expected = UnsupportedOperationException.class)//
   public void returnsThePathsAsUnmodifiableCollection() {
-    event.getFilePaths().add(fromPortableString("/Should/throw/exception"));
+    event.files().add(fromPortableString("/Should/throw/exception"));
   }
 
   @Override protected final LaunchEvent create(Instant instant,

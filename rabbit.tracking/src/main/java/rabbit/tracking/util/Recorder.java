@@ -180,6 +180,7 @@ public final class Recorder<T> {
    * 
    * @param userData the user data to associate with this recording, may be null
    */
+  // TODO use @Nullable
   public void start(T userData) {
     boolean sameData = equal(this.data, userData);
     Instant now = now();

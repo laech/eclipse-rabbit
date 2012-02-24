@@ -31,12 +31,12 @@ public interface ITimedEvent extends IEvent {
    * <p/>
    * This represents the start time of an {@link ITimedEvent}.
    */
-  @Override Instant getInstant();
+  @Override Instant instant();
 
   /**
    * Gets the duration of this event.
    * 
    * @return the duration of this event, not null
    */
-  Duration getDuration();
+  Duration duration();
 }

@@ -42,7 +42,7 @@ public class Event implements IEvent {
     this.instant = checkNotNull(instant, "instant");
   }
 
-  @Override public final Instant getInstant() {
+  @Override public final Instant instant() {
     return instant;
   }
 
@@ -59,6 +59,6 @@ public class Event implements IEvent {
    */
   protected final ToStringHelper toStringHelper() {
     return Objects.toStringHelper(this)
-        .add("instant", getInstant());
+        .add("instant", instant());
   }
 }

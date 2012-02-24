@@ -32,5 +32,5 @@ public interface ICommandEvent extends IEvent {
    * 
    * @return the execution, not null
    */
-  ExecutionEvent getExecutionEvent();
+  ExecutionEvent execution();
 }

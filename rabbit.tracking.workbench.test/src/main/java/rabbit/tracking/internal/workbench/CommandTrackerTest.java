@@ -74,7 +74,7 @@ public class CommandTrackerTest extends AbstractTrackerTest<CommandEvent> {
 
     assertEquals(1, tracker.getData().size());
     CommandEvent e = tracker.getData().iterator().next();
-    assertEquals(command, e.getExecutionEvent().getCommand());
+    assertEquals(command, e.execution().getCommand());
     assertTrue(start <= e.getTime().getMillis());
     assertTrue(end >= e.getTime().getMillis());
   }

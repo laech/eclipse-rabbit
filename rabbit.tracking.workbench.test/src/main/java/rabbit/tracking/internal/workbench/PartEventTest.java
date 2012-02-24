@@ -50,7 +50,7 @@ public final class PartEventTest extends TimedEventTest {
   }
 
   @Test public void returnsTheWorkbenchPart() {
-    assertThat(event.getPart(), is(part));
+    assertThat(event.part(), is(part));
   }
 
   @Override protected PartEvent create(Instant instant, Duration duration) {

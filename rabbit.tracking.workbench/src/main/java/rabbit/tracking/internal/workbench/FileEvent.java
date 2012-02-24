@@ -34,11 +34,11 @@ final class FileEvent extends TimedEvent implements IFileEvent {
     this.filePath = checkNotNull(filePath, "filePath");
   }
 
-  @Override public final IPath getFilePath() {
+  @Override public final IPath file() {
     return filePath;
   }
 
   @Override public String toString() {
-    return toStringHelper().add("filePath", getFilePath()).toString();
+    return toStringHelper().add("filePath", file()).toString();
   }
 }

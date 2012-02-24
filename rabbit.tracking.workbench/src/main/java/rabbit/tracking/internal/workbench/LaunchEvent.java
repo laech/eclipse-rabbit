@@ -81,28 +81,28 @@ final class LaunchEvent extends TimedEvent implements ILaunchEvent {
     this.filePaths = ImmutableSet.copyOf(checkNotNull(filePaths, "filePaths"));
   }
 
-  @Override public final Set<IPath> getFilePaths() {
+  @Override public final Set<IPath> files() {
     return filePaths;
   }
 
-  @Override public final ILaunch getLaunch() {
+  @Override public final ILaunch launch() {
     return launch;
   }
 
-  @Override public final ILaunchConfigurationType getLaunchConfigurationType() {
+  @Override public final ILaunchConfigurationType launchConfigType() {
     return type;
   }
 
-  @Override public final ILaunchConfiguration getLaunchConfiguration() {
+  @Override public final ILaunchConfiguration launchConfig() {
     return config;
   }
 
   @Override public String toString() {
     return toStringHelper()
-        .add("launch", getLaunch())
-        .add("launchConfiguration", getLaunchConfiguration())
-        .add("launchConfigurationType", getLaunchConfigurationType())
-        .add("filePaths", getFilePaths())
+        .add("launch", launch())
+        .add("launchConfiguration", launchConfig())
+        .add("launchConfigurationType", launchConfigType())
+        .add("filePaths", files())
         .toString();
   }
 }

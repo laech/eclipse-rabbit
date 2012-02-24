@@ -33,13 +33,13 @@ final class CommandEvent extends Event implements ICommandEvent {
     this.event = checkNotNull(executionEvent, "executionEvent");
   }
 
-  @Override public final ExecutionEvent getExecutionEvent() {
+  @Override public final ExecutionEvent execution() {
     return event;
   }
 
   @Override public String toString() {
     return toStringHelper()
-        .add("executionEvent", getExecutionEvent())
+        .add("executionEvent", execution())
         .toString();
   }
 }

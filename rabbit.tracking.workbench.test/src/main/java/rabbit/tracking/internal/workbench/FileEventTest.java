@@ -40,7 +40,7 @@ public final class FileEventTest extends TimedEventTest {
   }
 
   @Test public void returnsTheFilePath() {
-    assertThat(create(instant, duration, path).getFilePath(), is(path));
+    assertThat(create(instant, duration, path).file(), is(path));
   }
 
   @Override protected final FileEvent create(Instant instant, Duration duration) {

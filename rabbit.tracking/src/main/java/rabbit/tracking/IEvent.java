@@ -30,5 +30,5 @@ public interface IEvent {
    * 
    * @return the time of this event, not null
    */
-  Instant getInstant();
+  Instant instant();
 }

@@ -42,12 +42,12 @@ public class TimedEvent extends Event implements ITimedEvent {
     this.duration = checkNotNull(duration, "duration");
   }
 
-  @Override public final Duration getDuration() {
+  @Override public final Duration duration() {
     return duration;
   }
 
   @Override public String toString() {
-    return toStringHelper().add("duration", getDuration()).toString();
+    return toStringHelper().add("duration", duration()).toString();
   }
 
 }

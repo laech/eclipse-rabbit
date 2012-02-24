@@ -35,11 +35,11 @@ final class PerspectiveEvent extends TimedEvent implements IPerspectiveEvent {
     this.perspective = checkNotNull(perspective, "perspective");
   }
 
-  @Override public final IPerspectiveDescriptor getPerspective() {
+  @Override public final IPerspectiveDescriptor perspective() {
     return perspective;
   }
 
   @Override public String toString() {
-    return toStringHelper().add("perspective", getPerspective()).toString();
+    return toStringHelper().add("perspective", perspective()).toString();
   }
 }

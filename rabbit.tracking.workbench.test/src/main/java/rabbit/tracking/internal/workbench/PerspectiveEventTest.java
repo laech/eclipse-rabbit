@@ -50,7 +50,7 @@ public final class PerspectiveEventTest extends TimedEventTest {
   }
 
   @Test public void returnsThePerspective() {
-    assertThat(event.getPerspective(), is(perspective));
+    assertThat(event.perspective(), is(perspective));
   }
 
   @Override protected PerspectiveEvent create(Instant instant, Duration duration) {

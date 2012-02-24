@@ -257,9 +257,9 @@ public class LaunchTrackerTest extends AbstractTrackerTest<LaunchEvent> {
     // Check the result:
     assertEquals(1, tracker.getData().size());
     LaunchEvent event = tracker.getData().iterator().next();
-    assertTrue(event.getFilePaths().isEmpty());
-    assertEquals(listener.getLaunch(configName), event.getLaunch());
-    assertEquals(config, event.getLaunchConfiguration());
+    assertTrue(event.files().isEmpty());
+    assertEquals(listener.getLaunch(configName), event.launch());
+    assertEquals(config, event.launchConfig());
     long preStart = listener.getProcessCreationTimeMillis(configName) - 10;
     long start = event.getInterval().getStartMillis();
     long postStart = listener.getProcessCreationTimeMillis(configName) + 10;
@@ -332,15 +332,15 @@ public class LaunchTrackerTest extends AbstractTrackerTest<LaunchEvent> {
     Iterator<LaunchEvent> it = tracker.getData().iterator();
     event1 = it.next();
     event2 = it.next();
-    if (event1.getLaunch().getLaunchConfiguration().getName().equals(config2)) {
+    if (event1.launch().getLaunchConfiguration().getName().equals(config2)) {
       LaunchEvent tmp = event1;
       event1 = event2;
       event2 = tmp;
     }
 
-    assertTrue(event1.getFilePaths().isEmpty());
-    assertEquals(listener.getLaunch(configName1), event1.getLaunch());
-    assertEquals(config1, event1.getLaunchConfiguration());
+    assertTrue(event1.files().isEmpty());
+    assertEquals(listener.getLaunch(configName1), event1.launch());
+    assertEquals(config1, event1.launchConfig());
     long preStart = listener.getProcessCreationTimeMillis(configName1) - 10;
     long start = event1.getInterval().getStartMillis();
     long postStart = listener.getProcessCreationTimeMillis(configName1) + 10;
@@ -349,9 +349,9 @@ public class LaunchTrackerTest extends AbstractTrackerTest<LaunchEvent> {
     long postEnd = listener.getProcessTerminationTimeMillis(configName1) + 10;
     checkTime(preStart, start, postStart, preEnd, end, postEnd);
 
-    assertTrue(event2.getFilePaths().isEmpty());
-    assertEquals(listener.getLaunch(configName2), event2.getLaunch());
-    assertEquals(config2, event2.getLaunchConfiguration());
+    assertTrue(event2.files().isEmpty());
+    assertEquals(listener.getLaunch(configName2), event2.launch());
+    assertEquals(config2, event2.launchConfig());
     preStart = listener.getProcessCreationTimeMillis(configName2) - 10;
     start = event2.getInterval().getStartMillis();
     postStart = listener.getProcessCreationTimeMillis(configName2) + 10;
@@ -416,10 +416,10 @@ public class LaunchTrackerTest extends AbstractTrackerTest<LaunchEvent> {
 
     assertEquals(1, tracker.getData().size());
     LaunchEvent event = tracker.getData().iterator().next();
-    assertEquals(listener.getLaunch(className), event.getLaunch());
-    assertEquals(config, event.getLaunchConfiguration());
-    assertEquals(1, event.getFilePaths().size());
-    assertTrue(event.getFilePaths().contains(unit.getResource().getFullPath()));
+    assertEquals(listener.getLaunch(className), event.launch());
+    assertEquals(config, event.launchConfig());
+    assertEquals(1, event.files().size());
+    assertTrue(event.files().contains(unit.getResource().getFullPath()));
     long preStart = listener.getProcessCreationTimeMillis(className) - 10;
     long start = event.getInterval().getStartMillis();
     long postStart = listener.getProcessCreationTimeMillis(className) + 10;
@@ -504,9 +504,9 @@ public class LaunchTrackerTest extends AbstractTrackerTest<LaunchEvent> {
 
     assertEquals(1, tracker.getData().size());
     LaunchEvent event = tracker.getData().iterator().next();
-    assertEquals(2, event.getFilePaths().size());
-    assertTrue(event.getFilePaths().contains(unit1.getResource().getFullPath()));
-    assertTrue(event.getFilePaths().contains(unit2.getResource().getFullPath()));
+    assertEquals(2, event.files().size());
+    assertTrue(event.files().contains(unit1.getResource().getFullPath()));
+    assertTrue(event.files().contains(unit2.getResource().getFullPath()));
   }
 
   @Override protected LaunchEvent createEvent() {

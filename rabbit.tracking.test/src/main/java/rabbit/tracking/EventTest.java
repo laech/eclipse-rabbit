@@ -31,7 +31,7 @@ public class EventTest {
 
   @Test public void returnsTheInstant() throws Exception {
     Instant instant = new Instant();
-    assertThat(create(instant).getInstant(), is(instant));
+    assertThat(create(instant).instant(), is(instant));
   }
 
   protected Event create(Instant instant) {

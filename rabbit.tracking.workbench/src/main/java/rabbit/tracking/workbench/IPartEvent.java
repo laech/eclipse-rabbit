@@ -32,6 +32,6 @@ public interface IPartEvent extends ITimedEvent {
    * 
    * @return the workbench part, not null
    */
-  IWorkbenchPart getPart();
+  IWorkbenchPart part();
 
 }

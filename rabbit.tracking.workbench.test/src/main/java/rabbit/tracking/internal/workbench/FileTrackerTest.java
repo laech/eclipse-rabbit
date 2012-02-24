@@ -90,7 +90,7 @@ public class FileTrackerTest extends AbstractPartTrackerTest<FileEvent> {
       IEditorPart editor = (IEditorPart) part;
       IFile file = (IFile) editor.getEditorInput().getAdapter(IFile.class);
       IPath path = file.getFullPath();
-      return event.getFilePath().equals(path);
+      return event.file().equals(path);
     } else {
       return false;
     }

@@ -33,6 +33,6 @@ public interface IFileEvent extends ITimedEvent {
    * 
    * @return the path of the file, not null
    */
-  IPath getFilePath();
+  IPath file();
 
 }

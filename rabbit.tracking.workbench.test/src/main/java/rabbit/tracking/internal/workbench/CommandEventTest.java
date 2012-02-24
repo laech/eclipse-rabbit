@@ -48,7 +48,7 @@ public final class CommandEventTest extends EventTest {
   }
 
   @Test public void returnTheExecutionEvent() {
-    assertThat(event.getExecutionEvent(), is(execution));
+    assertThat(event.execution(), is(execution));
   }
 
   @Override protected CommandEvent create(Instant instant) {

@@ -39,27 +39,27 @@ public interface ILaunchEvent extends ITimedEvent {
    * 
    * @return the files, not null, may be empty, and unmodifiable
    */
-  Set<IPath> getFilePaths();
+  Set<IPath> files();
 
   /**
    * Gets the launch result.
    * 
    * @return the launch result, not null
    */
-  ILaunch getLaunch();
+  ILaunch launch();
 
   /**
    * Gets the launch configuration type of this launch.
    * 
    * @return the launch configuration type, not null
    */
-  ILaunchConfigurationType getLaunchConfigurationType();
+  ILaunchConfigurationType launchConfigType();
 
   /**
    * Gets the launch configuration of this launch.
    * 
    * @return the launch configuration, not null
    */
-  ILaunchConfiguration getLaunchConfiguration();
+  ILaunchConfiguration launchConfig();
 
 }

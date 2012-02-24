@@ -32,7 +32,7 @@ public class TimedEventTest extends EventTest {
 
   @Test public void returnsTheDuration() throws Exception {
     Duration duration = new Duration(10);
-    assertThat(create(new Instant(), duration).getDuration(), is(duration));
+    assertThat(create(new Instant(), duration).duration(), is(duration));
   }
 
   @Override protected final Event create(Instant instant) {

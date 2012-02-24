@@ -34,11 +34,11 @@ final class PartEvent extends TimedEvent implements IPartEvent {
     this.workbenchPart = checkNotNull(part, "part");
   }
 
-  @Override public final IWorkbenchPart getPart() {
+  @Override public final IWorkbenchPart part() {
     return workbenchPart;
   }
 
   @Override public String toString() {
-    return toStringHelper().add("part", getPart()).toString();
+    return toStringHelper().add("part", part()).toString();
   }
 }
