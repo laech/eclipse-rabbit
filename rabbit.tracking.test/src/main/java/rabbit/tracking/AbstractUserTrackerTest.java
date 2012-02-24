@@ -16,8 +16,8 @@
 
 package rabbit.tracking;
 
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 
 import org.junit.Test;
 
@@ -26,6 +26,10 @@ public final class AbstractUserTrackerTest extends AbstractUserTrackerSpec {
   private static class AbstractUserTrackerTester extends AbstractUserTracker {
     int onActiveCount;
     int onInactiveCount;
+
+    AbstractUserTrackerTester(IUserMonitorService service) {
+      super(service);
+    }
 
     @Override public void saveData() {
     }
@@ -48,27 +52,30 @@ public final class AbstractUserTrackerTest extends AbstractUserTrackerSpec {
 
   @Override public void teardown() throws Exception {
     super.teardown();
-    tracker.setEnabled(false);
+    tracker.disable();
   }
 
   @Test public void notifiesWhenUserBecomesActive() {
-    tracker.setEnabled(true);
+    tracker.enable();
     getMockService().notifyActive();
     assertThat(tracker.onActiveCount, is(1));
     assertThat(tracker.onInactiveCount, is(0));
   }
 
   @Test public void notifiesWhenUserBecomesInactive() {
-    tracker.setEnabled(true);
+    tracker.enable();
     getMockService().notifyInactive();
     assertThat(tracker.onInactiveCount, is(1));
     assertThat(tracker.onActiveCount, is(0));
   }
 
+  @Test(expected = NullPointerException.class)//
+  public void constructorThrowsExceptionIfServiceIsNull() {
+    create(null);
+  }
+
   @Override protected AbstractUserTrackerTester create(
       IUserMonitorService service) {
-    AbstractUserTrackerTester tracker = new AbstractUserTrackerTester();
-    tracker.setUserMonitorService(service);
-    return tracker;
+    return new AbstractUserTrackerTester(service);
   }
 }

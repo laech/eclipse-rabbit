@@ -16,8 +16,8 @@
 
 package rabbit.tracking;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertThat;
 
 import org.junit.Test;
 
@@ -32,35 +32,35 @@ public final class AbstractTrackerTest extends AbstractTrackerSpec {
 
   @Override public void teardown() throws Exception {
     super.teardown();
-    tracker.setEnabled(false);
+    tracker.disable();
   }
 
   public AbstractTrackerTest() {
   }
 
   @Test public void callsOnEnableWhenEnabling() {
-    tracker.setEnabled(false);
-    tracker.setEnabled(true);
+    tracker.disable();
+    tracker.enable();
     assertThat(tracker.enableCount, is(1));
   }
 
   @Test public void callsOnEnableOnlyIfPreviouslyDisabled() {
-    tracker.setEnabled(false);
-    tracker.setEnabled(true);
-    tracker.setEnabled(true);
+    tracker.disable();
+    tracker.enable();
+    tracker.enable();
     assertThat(tracker.enableCount, is(1));
   }
 
   @Test public void callsOnDisableWhenDisabling() {
-    tracker.setEnabled(true);
-    tracker.setEnabled(false);
+    tracker.enable();
+    tracker.disable();
     assertThat(tracker.disableCount, is(1));
   }
 
   @Test public void callsOnDisableOnlyIfPreviouslyEnabled() {
-    tracker.setEnabled(true);
-    tracker.setEnabled(false);
-    tracker.setEnabled(false);
+    tracker.enable();
+    tracker.disable();
+    tracker.disable();
     assertThat(tracker.disableCount, is(1));
   }
 

@@ -17,8 +17,8 @@
 package rabbit.tracking;
 
 import static com.google.common.collect.Sets.newHashSet;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertThat;
 
 import java.util.Collection;
 
@@ -85,18 +85,17 @@ public abstract class AbstractUserTrackerSpec extends AbstractTrackerSpec {
     super.setup();
     service = new MockUserMonitorService();
     tracker = create(service);
-    tracker.setUserMonitorService(service);
   }
 
   @Override public void teardown() throws Exception {
     super.teardown();
-    tracker.setEnabled(false);
+    tracker.disable();
   }
 
   @Test public void detactchesFromUserServiceWhenDisabling() {
-    tracker.setEnabled(true);
+    tracker.enable();
     assertThat(service.removeListenerCount, is(0));
-    tracker.setEnabled(false);
+    tracker.disable();
     service.addListenerCount = 0;
     assertThat(service.listeners.size(), is(0));
     assertThat(service.removeListenerCount, is(1));
@@ -104,7 +103,7 @@ public abstract class AbstractUserTrackerSpec extends AbstractTrackerSpec {
   }
 
   @Test public void attatchesToUserServiceWhenEnabling() {
-    tracker.setEnabled(true);
+    tracker.enable();
     assertThat(service.listeners.size(), is(1));
     assertThat(service.addListenerCount, is(1));
     assertThat(service.removeListenerCount, is(0));
@@ -118,7 +117,7 @@ public abstract class AbstractUserTrackerSpec extends AbstractTrackerSpec {
   }
 
   @Override protected final AbstractUserTracker create() {
-    return create(getMockService());
+    return create(new MockUserMonitorService());
   }
 
   protected abstract AbstractUserTracker create(IUserMonitorService service);

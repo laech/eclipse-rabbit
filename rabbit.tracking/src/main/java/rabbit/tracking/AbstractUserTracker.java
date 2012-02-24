@@ -16,9 +16,8 @@
 
 package rabbit.tracking;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static org.eclipse.ui.PlatformUI.getWorkbench;
-
-import com.google.inject.Inject;
 
 /**
  * A tracker listening on an {@link IUserMonitorService} and notifies subclass
@@ -34,6 +33,11 @@ import com.google.inject.Inject;
  */
 public abstract class AbstractUserTracker extends AbstractTracker {
 
+  private static IUserMonitorService findUserMonitorService() {
+    return (IUserMonitorService)getWorkbench().getService(
+        IUserMonitorService.class);
+  }
+
   private final IUserListener userListener = new IUserListener() {
     @Override public void onActive() {
       onUserActive();
@@ -44,10 +48,23 @@ public abstract class AbstractUserTracker extends AbstractTracker {
     }
   };
 
-  private volatile IUserMonitorService service;
+  private final IUserMonitorService service;
 
+  /**
+   * Constructs a tracker using the default {@link IUserMonitorService}.
+   */
   public AbstractUserTracker() {
-    super();
+    this(findUserMonitorService());
+  }
+
+  /**
+   * Constructs a tracker using the given {@link IUserMonitorService}.
+   * 
+   * @param service the service, not null
+   * @throws NullPointerException if argument is null
+   */
+  public AbstractUserTracker(IUserMonitorService service) {
+    this.service = checkNotNull(service, "service");
   }
 
   @Override protected void onDisable() {
@@ -77,16 +94,7 @@ public abstract class AbstractUserTracker extends AbstractTracker {
    * 
    * @return the service, not null
    */
-  protected IUserMonitorService getUserMonitorService() {
-    if (service != null) {
-      return service;
-    }
-    // Fall back to workbench way if not running with injection
-    return (IUserMonitorService)getWorkbench().getService(
-        IUserMonitorService.class);
-  }
-
-  @Inject void setUserMonitorService(IUserMonitorService service) {
-    this.service = service;
+  protected final IUserMonitorService getUserMonitorService() {
+    return service;
   }
 }

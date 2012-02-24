@@ -18,9 +18,9 @@ package rabbit.tracking.internal;
 
 import static java.util.concurrent.TimeUnit.MINUTES;
 import static org.eclipse.ui.PlatformUI.getWorkbench;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNull.notNullValue;
-import static org.junit.Assert.assertThat;
 
 import org.junit.Test;
 

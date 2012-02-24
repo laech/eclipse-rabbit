@@ -20,6 +20,7 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.joda.time.Duration;
 import org.joda.time.Instant;
 
+import rabbit.tracking.IUserMonitorService;
 import rabbit.tracking.util.Recorder;
 import rabbit.tracking.util.Recorder.IRecorderListener;
 import rabbit.tracking.util.Recorder.Record;
@@ -39,13 +40,26 @@ public abstract class AbstractRecordingPartTracker extends AbstractPartTracker {
 
   private final Recorder<IWorkbenchPart> recorder = Recorder.create();
 
-  public AbstractRecordingPartTracker() {
-    super();
+  {
     recorder.addListener(new IRecorderListener<IWorkbenchPart>() {
       @Override public void onRecord(Record<IWorkbenchPart> record) {
         onPartEvent(record.getStart(), record.getDuration(), record.getData());
       }
     });
+  }
+
+  public AbstractRecordingPartTracker() {
+    super();
+  }
+
+  /**
+   * Constructs a tracker using the given {@link IUserMonitorService}.
+   * 
+   * @param service the service, not null
+   * @throws NullPointerException if argument is null
+   */
+  public AbstractRecordingPartTracker(IUserMonitorService service) {
+    super(service);
   }
 
   @Override protected void onDisable() {
@@ -79,5 +93,6 @@ public abstract class AbstractRecordingPartTracker extends AbstractPartTracker {
    * @param duration the duration of this event, not null
    * @param part the workbench part of this event, not null
    */
-  protected abstract void onPartEvent(Instant start, Duration duration, IWorkbenchPart part);
+  protected abstract void onPartEvent(Instant start, Duration duration,
+      IWorkbenchPart part);
 }

@@ -17,11 +17,11 @@ package rabbit.tracking.internal.workbench;
 
 import static java.lang.Thread.sleep;
 import static org.eclipse.ui.PlatformUI.getWorkbench;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsArrayWithSize.emptyArray;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -34,8 +34,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import rabbit.data.store.model.SessionEvent;
-import rabbit.tracking.internal.IdleDetector;
+import rabbit.tracking.AbstractTracker;
+import rabbit.tracking.AbstractTrackerTest;
 import rabbit.tracking.internal.TrackingPlugin;
 
 public class SessionTrackerTest extends AbstractTrackerTest<SessionEvent> {

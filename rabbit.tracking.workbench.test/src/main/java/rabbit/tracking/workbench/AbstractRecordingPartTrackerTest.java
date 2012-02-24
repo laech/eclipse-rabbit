@@ -19,8 +19,8 @@ package rabbit.tracking.workbench;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNull.nullValue;
-import static org.hamcrest.number.OrderingComparisons.greaterThanOrEqualTo;
-import static org.hamcrest.number.OrderingComparisons.lessThanOrEqualTo;
+import static org.hamcrest.number.OrderingComparison.greaterThanOrEqualTo;
+import static org.hamcrest.number.OrderingComparison.lessThanOrEqualTo;
 import static org.joda.time.Instant.now;
 import static rabbit.tracking.workbench.test.WorkbenchTestUtil.closeAllParts;
 import static rabbit.tracking.workbench.test.WorkbenchTestUtil.openRandomPart;
@@ -32,6 +32,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import rabbit.tracking.AbstractUserTrackerSpec;
+import rabbit.tracking.IUserMonitorService;
 
 public final class AbstractRecordingPartTrackerTest
     extends AbstractUserTrackerSpec {
@@ -42,6 +43,10 @@ public final class AbstractRecordingPartTrackerTest
     private Instant start;
     private Duration duration;
     private IWorkbenchPart part;
+
+    AbstractRecordingPartTrackerTester(IUserMonitorService service) {
+      super(service);
+    }
 
     @Override protected synchronized void onPartEvent(
         Instant start, Duration d, IWorkbenchPart part) {
@@ -68,10 +73,10 @@ public final class AbstractRecordingPartTrackerTest
 
   private AbstractRecordingPartTrackerTester tracker;
 
-  @Before public void setup() throws Exception {
+  @Override @Before public void setup() throws Exception {
     super.setup();
     closeAllParts();
-    tracker = create();
+    tracker = create(getMockService());
   }
 
   @Override public void teardown() throws Exception {
@@ -137,8 +142,9 @@ public final class AbstractRecordingPartTrackerTest
     verifyEvent(part, preStart, postStart, preEnd, postEnd);
   }
 
-  @Override protected AbstractRecordingPartTrackerTester create() {
-    return new AbstractRecordingPartTrackerTester();
+  @Override protected AbstractRecordingPartTrackerTester create(
+      IUserMonitorService service) {
+    return new AbstractRecordingPartTrackerTester(service);
   }
 
   private void verifyEvent(

@@ -51,11 +51,12 @@ public interface ITracker {
   boolean isEnabled();
 
   /**
-   * Sets whether this tracker should be enabled.
-   * 
-   * @param enable true to enable this tracker, false to disable
+   * Enables this tracker. Has no affect if already enabled.
    */
-  // TODO use explict enable & disable instead
-  void setEnabled(boolean enable);
+  void enable();
 
+  /**
+   * Disables this tracker. Has no affect if already disabled.
+   */
+  void disable();
 }

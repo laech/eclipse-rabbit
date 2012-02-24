@@ -15,8 +15,8 @@
  */
 package rabbit.tracking.internal;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.only;
 import static org.mockito.Mockito.verify;
@@ -53,7 +53,7 @@ public final class TrackingPluginTest {
     ITracker tracker = mock(ITracker.class);
     setTrackers(plugin, tracker);
     bundle.stop();
-    verify(tracker).setEnabled(false);
+    verify(tracker).disable();
     verify(tracker).saveData();
   }
 
@@ -61,7 +61,7 @@ public final class TrackingPluginTest {
     ITracker tracker = mock(ITracker.class);
     setTrackers(plugin, tracker);
     assertThat(plugin.preShutdown(null, false), is(true));
-    verify(tracker).setEnabled(false);
+    verify(tracker).disable();
     verify(tracker).saveData();
     verifyNoMoreInteractions(tracker);
   }

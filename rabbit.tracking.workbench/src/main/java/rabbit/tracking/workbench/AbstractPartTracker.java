@@ -26,6 +26,7 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 
 import rabbit.tracking.AbstractUserTracker;
+import rabbit.tracking.IUserMonitorService;
 import rabbit.tracking.internal.workbench.util.PartListener;
 import rabbit.tracking.internal.workbench.util.WorkbenchUtil;
 
@@ -92,6 +93,16 @@ public abstract class AbstractPartTracker extends AbstractUserTracker {
     super();
   }
 
+  /**
+   * Constructs a tracker using the given {@link IUserMonitorService}.
+   * 
+   * @param service the service, not null
+   * @throws NullPointerException if argument is null
+   */
+  public AbstractPartTracker(IUserMonitorService service) {
+    super(service);
+  }
+
   @Override protected void onDisable() {
     super.onDisable();
     getWorkbench().removeWindowListener(winListener);
@@ -118,7 +129,7 @@ public abstract class AbstractPartTracker extends AbstractUserTracker {
    * 
    * @return the focused part, or null if no part is focused
    */
-  protected IWorkbenchPart getFocusedPart() {
+  protected final IWorkbenchPart getFocusedPart() {
     return WorkbenchUtil.getFocusedPart();
   }
 

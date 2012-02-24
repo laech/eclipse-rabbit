@@ -17,7 +17,7 @@
 package rabbit.tracking;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import org.joda.time.Duration;
 import org.joda.time.Instant;

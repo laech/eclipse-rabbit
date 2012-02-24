@@ -18,11 +18,11 @@ package rabbit.tracking.workbench;
 
 import static java.lang.System.nanoTime;
 import static java.lang.Thread.sleep;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNull.nullValue;
-import static org.hamcrest.number.OrderingComparisons.greaterThan;
-import static org.hamcrest.number.OrderingComparisons.lessThan;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.number.OrderingComparison.greaterThan;
+import static org.hamcrest.number.OrderingComparison.lessThan;
 import static rabbit.tracking.workbench.test.WorkbenchTestUtil.activate;
 import static rabbit.tracking.workbench.test.WorkbenchTestUtil.close;
 import static rabbit.tracking.workbench.test.WorkbenchTestUtil.closeAllParts;
@@ -36,6 +36,7 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.junit.Test;
 
 import rabbit.tracking.AbstractUserTrackerSpec;
+import rabbit.tracking.IUserMonitorService;
 
 public final class AbstractPartTrackerTest extends AbstractUserTrackerSpec {
 
@@ -46,6 +47,10 @@ public final class AbstractPartTrackerTest extends AbstractUserTrackerSpec {
     long unfocusedTime;
     IWorkbenchPart focusedPart;
     IWorkbenchPart unfocusedPart;
+
+    AbstractPartTrackerTester(IUserMonitorService service) {
+      super(service);
+    }
 
     @Override protected synchronized void onPartFocused(IWorkbenchPart part) {
       focusedPart = part;
@@ -117,7 +122,7 @@ public final class AbstractPartTrackerTest extends AbstractUserTrackerSpec {
   @Override public void setup() throws Exception {
     super.setup();
     closeAllParts();
-    tracker = create();
+    tracker = create(getMockService());
   }
 
   @Override public void teardown() throws Exception {
@@ -251,7 +256,8 @@ public final class AbstractPartTrackerTest extends AbstractUserTrackerSpec {
     }
   }
 
-  @Override protected AbstractPartTrackerTester create() {
-    return new AbstractPartTrackerTester();
+  @Override protected AbstractPartTrackerTester create(
+      IUserMonitorService service) {
+    return new AbstractPartTrackerTester(service);
   }
 }

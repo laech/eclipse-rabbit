@@ -35,13 +35,15 @@ public abstract class AbstractTracker implements ITracker {
     return enabled.get();
   }
 
-  @Override public void setEnabled(boolean enable) {
-    if (enabled.compareAndSet(!enable, enable)) {
-      if (enable) {
-        onEnable();
-      } else {
-        onDisable();
-      }
+  @Override public void enable() {
+    if (enabled.compareAndSet(false, true)) {
+      onEnable();
+    }
+  }
+
+  @Override public void disable() {
+    if (enabled.compareAndSet(true, false)) {
+      onDisable();
     }
   }
 
@@ -49,8 +51,8 @@ public abstract class AbstractTracker implements ITracker {
    * Called when this tracker is being enabled.
    * <p/>
    * This method will only be called if the tracker was previously disabled.
-   * That means if the tracker is already enabled, calling
-   * {@code setEnabled(true)} again will not trigger this method to be called.
+   * That means if the tracker is already enabled, calling {@link #enable()}
+   * again will not trigger this method to be called.
    */
   protected abstract void onEnable();
 
@@ -58,8 +60,8 @@ public abstract class AbstractTracker implements ITracker {
    * Called when this tracker is being disabled.
    * <p/>
    * This method will only be called if the tracker was previously enabled. That
-   * means if the tracker is already disabled, calling {@code setEnabled(false)}
-   * again will not trigger this method to be called.
+   * means if the tracker is already disabled, calling {@link #disable()} again
+   * will not trigger this method to be called.
    */
   protected abstract void onDisable();
 }
