@@ -31,12 +31,13 @@ import org.eclipse.ui.views.IViewDescriptor;
 
 public class WorkbenchTestUtil {
 
-  public static void activate(final IWorkbenchPart part) {
+  public static IWorkbenchPart activate(final IWorkbenchPart part) {
     getWorkbench().getDisplay().syncExec(new Runnable() {
       @Override public void run() {
         part.getSite().getPage().activate(part);
       }
     });
+    return part;
   }
 
   public static void close(final IWorkbenchWindow window) {

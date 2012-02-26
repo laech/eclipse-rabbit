@@ -30,6 +30,12 @@
       <version>2.1</version>
     </dependency>
     <dependency>
+      <groupId>org.joda</groupId>
+      <artifactId>joda-convert</artifactId>
+      <version>1.2</version>
+      <!-- mandatory in Scala for joda-time -->
+    </dependency>
+    <dependency>
       <groupId>org.scala-lang</groupId>
       <artifactId>scala-library</artifactId>
       <version>2.9.1</version>

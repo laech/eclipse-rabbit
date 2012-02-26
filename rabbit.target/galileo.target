@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <?pde version="3.6"?>
 
-<target name="Galileo" sequenceNumber="21">
+<target name="Galileo" sequenceNumber="26">
 <locations>
 <location includeAllPlatforms="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="org.eclipse.swtbot.forms.feature.group" version="2.0.4.20110304_0338-e5aff47-dev-e35"/>
@@ -19,6 +19,10 @@
 <unit id="org.eclipse.equinox.executable.feature.group" version="3.3.201.R35x_v20091211-7M-FngFELSU3Pqlv3JdZn"/>
 <unit id="org.eclipse.mylyn_feature.feature.group" version="3.2.3.v20100217-0100-e3x"/>
 <repository location="http://download.eclipse.org/releases/galileo"/>
+</location>
+<location includeAllPlatforms="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
+<unit id="deps.feature.feature.group" version="2.0.0.201202251559"/>
+<repository location="file:/Volumes/A/workspaces/rabbit/deps.repository/"/>
 </location>
 </locations>
 </target>
