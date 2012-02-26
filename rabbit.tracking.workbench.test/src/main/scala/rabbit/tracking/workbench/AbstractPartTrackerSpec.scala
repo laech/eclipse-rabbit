@@ -78,7 +78,6 @@ final class AbstractPartTrackerSpec extends AbstractUserTrackerSpecBase {
 
     override protected def onUserActive() {}
     override protected def onUserInactive() {}
-    override protected def saveData() {}
   }
 
   private[this] var window: IWorkbenchWindow = _

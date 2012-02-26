@@ -47,8 +47,6 @@ final class AbstractRecordingPartTrackerSpec extends AbstractUserTrackerSpecBase
         _part = part
       }
     }
-
-    override def saveData() {}
   }
 
   type Tracker = Tester

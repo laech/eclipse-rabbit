@@ -17,32 +17,15 @@
 package rabbit.tracking;
 
 /**
- * A listener for listening to events of a tracker.
+ * Represents an object that can be saved or object holding data that can be
+ * saved.
  * 
- * @param <E> the event type
  * @since 2.0
  */
-public interface ITrackerEventListener<E> {
+public interface IPersistable {
 
   /**
-   * Called when a new event is captured.
-   * 
-   * @param event the new event captured, not null
+   * Saves the data of this object.
    */
-  void onEvent(E event);
-
-  /**
-   * Called after the tracker is enabled.
-   */
-  void onEnabled();
-
-  /**
-   * Called after the tracker is disabled.
-   */
-  void onDisabled();
-
-  /**
-   * Called when the tracker is being asked to save its data.
-   */
-  void onSaveData();
+  void save();
 }

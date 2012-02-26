@@ -14,11 +14,20 @@
  * the License.
  */
 
-package rabbit.tracking.workbench;
+package rabbit.tracking;
 
-import rabbit.tracking.IPersistableEventListener;
+/**
+ * Listens to events.
+ * 
+ * @param <E> the event type
+ * @since 2.0
+ */
+public interface IEventListener<E> {
 
-// FIXME
-public interface ICommandEventListener
-    extends IPersistableEventListener<ICommandEvent> {
+  /**
+   * Notifies this listener a new event has been captured.
+   * 
+   * @param event the new event captured, not null
+   */
+  void onEvent(E event);
 }

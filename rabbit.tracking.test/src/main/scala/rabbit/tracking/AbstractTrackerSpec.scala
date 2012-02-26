@@ -34,7 +34,6 @@ final class AbstractTrackerSpec extends AbstractTrackerSpecBase {
 
     override def onEnable() { _enableCount.incrementAndGet() }
     override def onDisable() { _disableCount.incrementAndGet() }
-    override def saveData() {}
   }
 
   protected type Tracker = Tester

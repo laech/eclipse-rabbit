@@ -16,45 +16,25 @@
 
 package rabbit.tracking.util;
 
-import java.util.Collection;
-
-import rabbit.tracking.ITrackerEventListener;
+import rabbit.tracking.IPersistableEventListener;
 
 /**
  * Helper class for sending notifications to a collection of
- * {@link ITrackerEventListener}s.
+ * {@link IPersistableEventListener}s.
  * 
  * @since 2.0
  */
-public abstract class TrackerEventListenerSupport<E> {
+public abstract class PersistableEventListenerSupport<E> {
 
-  public TrackerEventListenerSupport() {
+  public PersistableEventListenerSupport() {
   }
 
   /**
    * Notifies the listeners that the tracker has been requested to save data.
    */
-  public final void notifyOnSaveData() {
-    for (ITrackerEventListener<? super E> listener : getListeners()) {
-      listener.onSaveData();
-    }
-  }
-
-  /**
-   * Notifies the listeners that the tracker is enabled.
-   */
-  public final void notifyOnEnabled() {
-    for (ITrackerEventListener<? super E> listener : getListeners()) {
-      listener.onEnabled();
-    }
-  }
-
-  /**
-   * Notifies the listeners that the tracker is disabled.
-   */
-  public final void notifyOnDisabled() {
-    for (ITrackerEventListener<? super E> listener : getListeners()) {
-      listener.onDisabled();
+  public final void notifyOnSave() {
+    for (IPersistableEventListener<? super E> listener : getListeners()) {
+      listener.onSave();
     }
   }
 
@@ -64,7 +44,7 @@ public abstract class TrackerEventListenerSupport<E> {
    * @param event the event, not null
    */
   public final void notifyOnEvent(E event) {
-    for (ITrackerEventListener<? super E> listener : getListeners()) {
+    for (IPersistableEventListener<? super E> listener : getListeners()) {
       listener.onEvent(event);
     }
   }
@@ -74,5 +54,5 @@ public abstract class TrackerEventListenerSupport<E> {
    * 
    * @return the listeners, or an empty collection if none
    */
-  protected abstract Collection<? extends ITrackerEventListener<? super E>> getListeners();
+  protected abstract Iterable<? extends IPersistableEventListener<? super E>> getListeners();
 }

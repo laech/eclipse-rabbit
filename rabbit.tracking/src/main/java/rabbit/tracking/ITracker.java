@@ -19,29 +19,26 @@ package rabbit.tracking;
 /**
  * Represents a tracker that tracks events within the workbench.
  * <p/>
- * This interface is for plug-in who wishes to extend the
+ * This interface is also used for plug-in who wishes to extend the
  * {@code rabbit.tracking.trackers} extension point.
  * <p/>
  * TODO check whether plug-in is stopped prior to workbench shutdown
  * 
- * <h3>Lifecycle</h3>
+ * <h3>Extension Lifecycle</h3>
  * <p/>
  * A tracker by default should be disabled, it will be enabled after it is
  * loaded from the extension point, and will be disabled prior to workbench
  * shutdown so that it may perform clean up operations if need to.
  * <p/>
- * {@link #saveData()} will be called when the tracker's data should be saved,
- * it will also be called after a tracker is permanently disabled (for example,
- * prior to workbench shutdown).
+ * If this tracker also implements {@link IPersistable}, then
+ * {@link IPersistable#save()} will be called when the tracker's data should be
+ * saved, it will also be called after a tracker is permanently disabled (for
+ * example, prior to workbench shutdown).
  * 
+ * @see IPersistable
  * @since 2.0
  */
 public interface ITracker {
-
-  /**
-   * Hints the tracker that this is a good time to save the data.
-   */
-  void saveData();
 
   /**
    * Checks whether this tracker is currently enabled.

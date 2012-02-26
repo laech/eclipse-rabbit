@@ -33,7 +33,6 @@ final class AbstractUserTrackerSpec extends AbstractUserTrackerSpecBase {
 
     override def onUserActive() { _onActiveCount.incrementAndGet() }
     override def onUserInactive() { _onInactiveCount.incrementAndGet() }
-    override def saveData() {}
   }
 
   type Tracker = Tester

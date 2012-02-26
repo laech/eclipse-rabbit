@@ -30,11 +30,15 @@ import org.junit.Before;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
 
+import rabbit.tracking.IPersistable;
 import rabbit.tracking.ITracker;
 
 import com.google.common.collect.Sets;
 
 public final class TrackingPluginTest {
+
+  public static interface IPersistableTracker extends ITracker, IPersistable {
+  }
 
   private static final Bundle bundle = TrackingPlugin.getDefault().getBundle();
 
@@ -50,27 +54,27 @@ public final class TrackingPluginTest {
   }
 
   @Test public void disablesTrackerOnStop() throws Exception {
-    ITracker tracker = mock(ITracker.class);
+    IPersistableTracker tracker = mock(IPersistableTracker.class);
     setTrackers(plugin, tracker);
     bundle.stop();
     verify(tracker).disable();
-    verify(tracker).saveData();
+    verify(tracker).save();
   }
 
   @Test public void disablesTrackersOnShutdown() throws Exception {
-    ITracker tracker = mock(ITracker.class);
+    IPersistableTracker tracker = mock(IPersistableTracker.class);
     setTrackers(plugin, tracker);
     assertThat(plugin.preShutdown(null, false), is(true));
     verify(tracker).disable();
-    verify(tracker).saveData();
+    verify(tracker).save();
     verifyNoMoreInteractions(tracker);
   }
 
   @Test public void savesCurrentDataOnRequest() throws Exception {
-    ITracker tracker = mock(ITracker.class);
+    IPersistableTracker tracker = mock(IPersistableTracker.class);
     setTrackers(plugin, tracker);
     plugin.saveCurrentData();
-    verify(tracker, only()).saveData();
+    verify(tracker, only()).save();
   }
 
   private void setTrackers(TrackingPlugin plugin, ITracker... trackers) {

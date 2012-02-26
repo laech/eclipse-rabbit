@@ -14,11 +14,16 @@
  * the License.
  */
 
-package rabbit.tracking.workbench;
+package rabbit.tracking;
 
-import rabbit.tracking.IPersistableEventListener;
+/**
+ * Listener for {@link IPersistable}s that can be listened on.
+ */
+public interface IPersistableListener {
 
-// FIXME
-public interface ICommandEventListener
-    extends IPersistableEventListener<ICommandEvent> {
+  /**
+   * Notifies this listener {@link IPersistable#save()} has be invoked on the
+   * target.
+   */
+  void onSave();
 }

@@ -23,8 +23,6 @@ import java.util.Set;
 
 import org.eclipse.core.runtime.IConfigurationElement;
 
-import rabbit.tracking.ITrackerEventListener;
-
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableSet;
 
@@ -42,8 +40,7 @@ final class ListenerExtension<T> {
    * @return a new instance, not null
    * @throws NullPointerException if any argument is null
    */
-  public static <T extends ITrackerEventListener<?>> ListenerExtension<T> extension(
-      String tag, Class<T> clazz) {
+  public static <T> ListenerExtension<T> extension(String tag, Class<T> clazz) {
     return new ListenerExtension<T>(tag, clazz);
   }
 

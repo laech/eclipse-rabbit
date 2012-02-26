@@ -14,11 +14,10 @@
  * the License.
  */
 
-package rabbit.tracking.workbench;
+package rabbit.tracking;
 
-import rabbit.tracking.IPersistableEventListener;
+// TODO
+public interface IPersistableEventListener<E>
+    extends IPersistableListener, IEventListener<E> {
 
-// FIXME
-public interface ICommandEventListener
-    extends IPersistableEventListener<ICommandEvent> {
 }

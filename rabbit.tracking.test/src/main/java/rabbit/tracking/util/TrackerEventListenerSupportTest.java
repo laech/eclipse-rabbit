@@ -21,26 +21,25 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.only;
 import static org.mockito.Mockito.verify;
 
-import java.util.Collection;
-
 import org.junit.Before;
 import org.junit.Test;
 
-import rabbit.tracking.ITrackerEventListener;
+import rabbit.tracking.IPersistableEventListener;
 
 public final class TrackerEventListenerSupportTest {
 
-  private static class TrackerListenerSupportTester extends TrackerEventListenerSupport<Object> {
+  private static class TrackerListenerSupportTester
+      extends PersistableEventListenerSupport<Object> {
 
-    ITrackerEventListener<Object> listener;
+    IPersistableEventListener<Object> listener;
 
     @SuppressWarnings("unchecked")//
     TrackerListenerSupportTester() {
-      listener = mock(ITrackerEventListener.class);
+      listener = mock(IPersistableEventListener.class);
     }
 
     @SuppressWarnings("unchecked")//
-    @Override protected Collection<ITrackerEventListener<Object>> getListeners() {
+    @Override protected Iterable<IPersistableEventListener<Object>> getListeners() {
       return asList(listener);
     }
   }
@@ -52,18 +51,8 @@ public final class TrackerEventListenerSupportTest {
   }
 
   @Test public void notifiesOnSave() {
-    support.notifyOnSaveData();
-    verify(support.listener, only()).onSaveData();
-  }
-
-  @Test public void notifiesOnEnabled() {
-    support.notifyOnEnabled();
-    verify(support.listener, only()).onEnabled();
-  }
-
-  @Test public void notifiesOnDisabled() {
-    support.notifyOnDisabled();
-    verify(support.listener, only()).onDisabled();
+    support.notifyOnSave();
+    verify(support.listener, only()).onSave();
   }
 
   @Test public void notifiesOnEvent() {

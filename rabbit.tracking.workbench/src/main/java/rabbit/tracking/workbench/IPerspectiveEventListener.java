@@ -16,9 +16,10 @@
 
 package rabbit.tracking.workbench;
 
-import rabbit.tracking.ITrackerEventListener;
+import rabbit.tracking.IPersistableEventListener;
 
 // FIXME 
-public interface IPerspectiveEventListener extends ITrackerEventListener<IPerspectiveEvent> {
+public interface IPerspectiveEventListener
+    extends IPersistableEventListener<IPerspectiveEvent> {
 
 }

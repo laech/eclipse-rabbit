@@ -29,6 +29,7 @@ import org.eclipse.ui.IWorkbenchListener;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
+import rabbit.tracking.IPersistable;
 import rabbit.tracking.ITracker;
 
 import com.google.common.collect.ImmutableSet;
@@ -64,7 +65,9 @@ public final class TrackingPlugin extends AbstractUIPlugin
    */
   public void saveCurrentData() {
     for (ITracker tracker : trackers) {
-      tracker.saveData();
+      if (tracker instanceof IPersistable) {
+        ((IPersistable)tracker).save();
+      }
     }
   }
 
