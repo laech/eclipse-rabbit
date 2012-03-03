@@ -17,10 +17,12 @@
 package rabbit.tracking.workbench;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Lists.newArrayList;
 import static org.eclipse.ui.PlatformUI.getWorkbench;
 import static rabbit.tracking.internal.workbench.util.WorkbenchUtil.getFocusedPart;
 import static rabbit.tracking.internal.workbench.util.WorkbenchUtil.getPartServices;
 
+import java.util.Arrays;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
@@ -80,6 +82,26 @@ public final class PartTracker extends AbstractTracker {
     void onPartUnfocused(IWorkbenchPart part);
   }
 
+  /**
+   * Gets a tracker.
+   * 
+   * @return a tracker, not null
+   */
+  public static PartTracker get() {
+    return new PartTracker();
+  }
+
+  /**
+   * Gets a tracker with listeners attached.
+   * 
+   * @param listeners the listeners to be attached
+   * @return a tracker, not null
+   * @throws NullPointerException if listeners contain null
+   */
+  public static PartTracker withListeners(IListener... listeners) {
+    return new PartTracker(listeners);
+  }
+
   private final IPartListener partListener = new PartListener() {
     @Override public void partActivated(IWorkbenchPart part) {
       super.partActivated(part);
@@ -118,9 +140,18 @@ public final class PartTracker extends AbstractTracker {
 
   private final Set<IListener> listeners;
 
-  // TODO static get?
-  PartTracker() {
-    listeners = new CopyOnWriteArraySet<IListener>();
+  private PartTracker(IListener... listeners) {
+    check(listeners);
+    this.listeners = new CopyOnWriteArraySet<IListener>(newArrayList(listeners));
+  }
+
+  private void check(IListener... listeners) {
+    if (listeners.length > 0) {
+      String errorMessage = "null contained in " + Arrays.toString(listeners);
+      for (IListener listener : listeners) {
+        checkNotNull(listener, errorMessage);
+      }
+    }
   }
 
   /**

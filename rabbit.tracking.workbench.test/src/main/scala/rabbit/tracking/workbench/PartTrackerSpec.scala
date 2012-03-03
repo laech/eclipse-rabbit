@@ -30,11 +30,14 @@ import rabbit.tracking.AbstractTrackerSpecBase
 @RunWith(classOf[JUnitRunner])
 final class PartTrackerSpec extends AbstractTrackerSpecBase {
 
-  private[this] var window: IWorkbenchWindow = _
+  type Tracker = PartTracker
+
+  private var window: IWorkbenchWindow = _
+  private var listener: IListener = _
 
   override def beforeEach() {
     super.beforeEach()
-    listener = mock[IListener]
+    listener = mockListener()
     tracker.addListener(listener)
     closeAllParts();
   }
@@ -46,10 +49,6 @@ final class PartTrackerSpec extends AbstractTrackerSpecBase {
       window = null
     }
   }
-
-  type Tracker = PartTracker
-
-  private var listener: IListener = _
 
   behavior of "PartTracker"
 
@@ -115,7 +114,7 @@ final class PartTrackerSpec extends AbstractTrackerSpecBase {
     try {
       part = openRandomPart(window)
       tracker.enable()
-      verify(listener, never).onPartUnfocused(any[IWorkbenchPart])
+      verify(listener, never).onPartUnfocused(whatever)
     } finally {
       close(window)
     }
@@ -128,8 +127,8 @@ final class PartTrackerSpec extends AbstractTrackerSpecBase {
     openRandomPart()
 
     val order = inOrder(listener)
-    order.verify(listener).onPartUnfocused(any[IWorkbenchPart])
-    order.verify(listener).onPartFocused(any[IWorkbenchPart])
+    order.verify(listener).onPartUnfocused(whatever)
+    order.verify(listener).onPartFocused(whatever)
     order.verifyNoMoreInteractions()
   }
 
@@ -144,21 +143,21 @@ final class PartTrackerSpec extends AbstractTrackerSpecBase {
     tracker.enable()
     window = openWindow()
     openRandomPart(window)
-    verify(listener, atLeastOnce).onPartFocused(any[IWorkbenchPart])
+    verify(listener, atLeastOnce).onPartFocused(whatever)
   }
 
   it must "add listener when asked" in {
     tracker.enable()
-    val listener = mock[IListener]
+    val listener = mockListener()
     tracker.addListener(listener)
     openRandomPart()
-    verify(listener).onPartFocused(any[IWorkbenchPart])
+    verify(listener).onPartFocused(whatever)
   }
 
   it must "remove listener when asked" in {
     tracker.enable()
     closeAllParts()
-    val listener = mock[IListener]
+    val listener = mockListener()
     tracker.addListener(listener)
 
     tracker.removeListener(listener)
@@ -178,5 +177,25 @@ final class PartTrackerSpec extends AbstractTrackerSpecBase {
     }
   }
 
-  override protected def create() = new PartTracker
+  it must "throw NullPointerException if creating with null listener" in {
+    intercept[NullPointerException] {
+      create(mockListener(), null)
+    }
+  }
+
+  it must "add listeners to be notified when creating with listeners" in {
+    val listener = mockListener()
+    tracker = create(listener)
+    tracker.enable()
+    openRandomPart()
+    verify(listener).onPartFocused(whatever)
+  }
+
+  override protected def create() = PartTracker.get()
+
+  private def create(listeners: IListener*) = PartTracker.withListeners(listeners: _*)
+
+  private def whatever = any[IWorkbenchPart]
+
+  private def mockListener() = mock[IListener]
 }

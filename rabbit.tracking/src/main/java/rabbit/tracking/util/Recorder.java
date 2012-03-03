@@ -19,10 +19,12 @@ package rabbit.tracking.util;
 import static com.google.common.base.Objects.equal;
 import static com.google.common.base.Objects.toStringHelper;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Lists.newArrayList;
 import static java.lang.System.currentTimeMillis;
 import static org.joda.time.Duration.millis;
 import static org.joda.time.Instant.now;
 
+import java.util.Arrays;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
@@ -37,27 +39,27 @@ import org.joda.time.Instant;
  * <p/>
  * This class is thread safe.
  * 
- * @param <T> the type of data this recorder can associate with a recording
  * @see #create()
- * @see IRecorderListener
+ * @see #withListeners(IListener...)
+ * @see IListener
  * @see Record
  * @since 2.0
  */
-public final class Recorder<T> {
+public final class Recorder {
 
   /**
    * Listener to be notified of recording events.
    * 
    * @since 2.0
    */
-  public static interface IRecorderListener<T> {
+  public static interface IListener {
 
     /**
      * Called when a new record is available.
      * 
      * @param record the new record, not null
      */
-    void onRecord(Record<T> record);
+    void onRecord(Record record);
   }
 
   /**
@@ -65,31 +67,28 @@ public final class Recorder<T> {
    * 
    * @since 2.0
    */
-  public static final class Record<T> {
-
-    /**
-     * Creates a new record.
-     * 
-     * @param start the start time of this record
-     * @param duration the duration of this record
-     * @param data the associated user data of this record
-     * @throws NullPointerException if start time or duration is null
-     */
-    static <T> Record<T> create(Instant start, Duration duration, T data) {
-      return new Record<T>(
-          checkNotNull(start, "start"),
-          checkNotNull(duration, "duration"),
-          data);
-    }
+  public static final class Record {
 
     private final Instant start;
     private final Duration duration;
+    private final Object data;
 
-    private final T data;
+    /**
+     * Creates a record with the given data.
+     * 
+     * @param start the start time of this recording
+     * @param duration the duration of this recording
+     * @param data the user data of this recording
+     * @return a record
+     * @throws NullPointerException if start is null, or duration is null
+     */
+    static Record create(Instant start, Duration duration, Object data) {
+      return new Record(start, duration, data);
+    }
 
-    private Record(Instant start, Duration duration, T data) {
-      this.start = start;
-      this.duration = duration;
+    private Record(Instant start, Duration duration, Object data) {
+      this.start = checkNotNull(start, "start");
+      this.duration = checkNotNull(duration, "duration");
       this.data = data;
     }
 
@@ -99,7 +98,7 @@ public final class Recorder<T> {
      * @return the user data, or null if there was no data associated with this
      *         recording
      */
-    public T getData() {
+    public Object getData() {
       return data;
     }
 
@@ -131,21 +130,35 @@ public final class Recorder<T> {
   }
 
   /**
-   * Creates a new recorder.
+   * Creates a recorder.
    * 
-   * @return a new recorder
+   * @return a recorder
    */
-  public static <T> Recorder<T> create() {
-    return new Recorder<T>();
+  public static Recorder create() {
+    return new Recorder();
   }
 
-  private Instant start;
-  private T data;
-  private boolean recording;
-  private final Set<IRecorderListener<T>> listeners;
+  /**
+   * Creates a recorder with some listeners.
+   * 
+   * @param listeners the listeners
+   * @return a new recorder with the specified listeners attached
+   * @throws NullPointerException if any listener is null
+   */
+  public static Recorder withListeners(IListener... listeners) {
+    return new Recorder(listeners);
+  }
 
-  private Recorder() {
-    listeners = new CopyOnWriteArraySet<IRecorderListener<T>>();
+  private final Set<IListener> listeners;
+
+  private Instant start;
+  private Object data;
+  private boolean recording;
+
+  private Recorder(IListener... listeners) {
+    check(listeners);
+    this.listeners = new CopyOnWriteArraySet<IListener>(
+        newArrayList(listeners));
   }
 
   /**
@@ -155,7 +168,7 @@ public final class Recorder<T> {
    * @param listener the listener to be added
    * @throws NullPointerException if the listener is null
    */
-  public void addListener(IRecorderListener<T> listener) {
+  public void addListener(IListener listener) {
     listeners.add(checkNotNull(listener, "listener"));
   }
 
@@ -165,7 +178,7 @@ public final class Recorder<T> {
    * @param listener the listener to be removed
    * @throws NullPointerException if the listener is null
    */
-  public void removeListener(IRecorderListener<T> listener) {
+  public void removeListener(IListener listener) {
     listeners.remove(checkNotNull(listener, "listener"));
   }
 
@@ -180,16 +193,15 @@ public final class Recorder<T> {
    * 
    * @param userData the user data to associate with this recording, may be null
    */
-  // TODO use @Nullable
-  public void start(T userData) {
+  public void start(Object userData) {
     boolean sameData = equal(this.data, userData);
     Instant now = now();
 
-    T data;
+    Object data;
     Instant start;
     boolean wasRecording = false;
     synchronized (this) {
-      if (recording && sameData) {
+      if (this.recording && sameData) {
         return;
       }
       data = this.data;
@@ -203,8 +215,7 @@ public final class Recorder<T> {
 
     if (wasRecording) {
       Duration duration = new Duration(start, now);
-      Record<T> record = Record.create(start, duration, data);
-      notifyListeners(record);
+      notifyListeners(new Record(start, duration, data));
     }
   }
 
@@ -215,7 +226,7 @@ public final class Recorder<T> {
    * stopped and listeners will be notified.
    */
   public void stop() {
-    T data;
+    Object data;
     Instant start;
     synchronized (this) {
       if (!recording) {
@@ -229,14 +240,22 @@ public final class Recorder<T> {
       this.start = null;
     }
 
-    Duration dur = millis(currentTimeMillis() - start.getMillis());
-    Record<T> record = Record.create(start, dur, data);
-    notifyListeners(record);
+    Duration duration = millis(currentTimeMillis() - start.getMillis());
+    notifyListeners(new Record(start, duration, data));
   }
 
-  private void notifyListeners(Record<T> record) {
-    for (IRecorderListener<T> listener : listeners) {
+  private void notifyListeners(Record record) {
+    for (IListener listener : listeners) {
       listener.onRecord(record);
+    }
+  }
+
+  private void check(IListener... listeners) {
+    if (listeners.length > 0) {
+      String errorMessage = "null contained in " + Arrays.toString(listeners);
+      for (IListener listener : listeners) {
+        checkNotNull(listener, errorMessage);
+      }
     }
   }
 
