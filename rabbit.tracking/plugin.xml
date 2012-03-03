@@ -11,9 +11,9 @@
    <extension
          point="org.eclipse.ui.services">
       <serviceFactory
-            factoryClass="rabbit.tracking.internal.UserMonitorServiceFactory">
+            factoryClass="rabbit.tracking.internal.UserMonitorFactory">
          <service
-               serviceClass="rabbit.tracking.IUserMonitorService"></service>
+               serviceClass="rabbit.tracking.IUserMonitor"></service>
       </serviceFactory>
    </extension>
 

@@ -33,13 +33,11 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.ui.services.IDisposable;
 
+import rabbit.tracking.IUserMonitor;
+
 import com.google.common.annotations.VisibleForTesting;
 
-import rabbit.tracking.IUserListener;
-import rabbit.tracking.IUserMonitorService;
-
-public final class UserMonitorService
-    implements IUserMonitorService, IDisposable {
+public final class UserMonitor implements IUserMonitor, IDisposable {
 
   /** The type of events we are filtering on */
   private static final int[] FILTER_EVENTS = {KeyDown, MouseDown};
@@ -54,9 +52,9 @@ public final class UserMonitorService
    * @throws NullPointerException if any argument is null
    * @throws IllegalArgumentException if timeout is negative
    */
-  public static UserMonitorService start(Display display, long timeout,
+  public static UserMonitor start(Display display, long timeout,
       TimeUnit unit) {
-    UserMonitorService monitor = new UserMonitorService(display, timeout, unit);
+    UserMonitor monitor = new UserMonitor(display, timeout, unit);
     monitor.start();
     return monitor;
   }
@@ -114,7 +112,7 @@ public final class UserMonitorService
   private final long timeout;
   private final Display display;
   private final Listener eventListener;
-  private final Set<IUserListener> listeners;
+  private final Set<IListener> listeners;
 
   private final AtomicLong lastEventNanos;
   private final AtomicBoolean active;
@@ -122,12 +120,12 @@ public final class UserMonitorService
   private final WorkerThread worker;
 
   @VisibleForTesting//
-  UserMonitorService(Display display, long timeout, TimeUnit unit) {
+  UserMonitor(Display display, long timeout, TimeUnit unit) {
     checkArgument(timeout >= 0, "timeout = " + timeout);
     this.display = checkNotNull(display, "display");
     this.timeout = checkNotNull(unit, "unit").toMillis(timeout);
     this.eventListener = new EventListener();
-    this.listeners = new CopyOnWriteArraySet<IUserListener>();
+    this.listeners = new CopyOnWriteArraySet<IListener>();
     this.active = new AtomicBoolean(true);
     this.started = new AtomicBoolean();
     this.lastEventNanos = new AtomicLong();
@@ -155,11 +153,11 @@ public final class UserMonitorService
     return timeout;
   }
 
-  @Override public void addListener(IUserListener listener) {
+  @Override public void addListener(IListener listener) {
     listeners.add(checkNotNull(listener, "listener"));
   }
 
-  @Override public void removeListener(IUserListener listener) {
+  @Override public void removeListener(IListener listener) {
     listeners.remove(checkNotNull(listener, "listener"));
   }
 
@@ -169,13 +167,13 @@ public final class UserMonitorService
     }
     return active.get();
   }
-  
+
   public boolean isStarted() {
     return started.get();
   }
 
   private void onActive() {
-    for (IUserListener listener : listeners) {
+    for (IListener listener : listeners) {
       listener.onActive();
     }
 
@@ -184,7 +182,7 @@ public final class UserMonitorService
   }
 
   private void onInactive() {
-    for (IUserListener listener : listeners) {
+    for (IListener listener : listeners) {
       listener.onInactive();
     }
 

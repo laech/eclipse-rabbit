@@ -14,23 +14,24 @@
  * the License.
  */
 
-package rabbit.tracking;
+package rabbit.tracking.internal;
 
-/**
- * Listener to listen to user state events.
- * 
- * @since 2.0
- */
-public interface IUserListener {
+import static java.util.concurrent.TimeUnit.MINUTES;
 
-  /**
-   * Called when user's state changes to active.
-   */
-  void onActive();
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.services.AbstractServiceFactory;
+import org.eclipse.ui.services.IServiceLocator;
 
-  /**
-   * Called when user's state changes to inactive.
-   */
-  void onInactive();
+public final class UserMonitorFactory extends AbstractServiceFactory {
 
+  public UserMonitorFactory() {
+  }
+
+  @SuppressWarnings("rawtypes")//
+  @Override public Object create(
+      Class serviceInterface,
+      IServiceLocator parentLocator,
+      IServiceLocator locator) {
+    return UserMonitor.start(PlatformUI.getWorkbench().getDisplay(), 1, MINUTES);
+  }
 }
