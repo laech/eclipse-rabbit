@@ -155,7 +155,8 @@ public final class PartTracker extends AbstractTracker {
   }
 
   /**
-   * Adds a listener to listen to part focus events.
+   * Adds a listener to listen to part focus events. Has no affect if an
+   * identical listener has already been added.
    * 
    * @param listener the listener to add, not null
    * @throws NullPointerException if listener is null

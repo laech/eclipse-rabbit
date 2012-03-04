@@ -46,7 +46,7 @@ public final class PartEventTest extends TimedEventTest {
 
   @Test(expected = NullPointerException.class)//
   public void constructorThrowsExceptionIfPartisNull() {
-    create(instant, duration, part);
+    create(instant, duration, null);
   }
 
   @Test public void returnsTheWorkbenchPart() {

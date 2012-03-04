@@ -20,6 +20,7 @@ import org.eclipse.ui.{ IWorkbenchWindow, IWorkbenchPart }
 import org.junit.runner.RunWith
 import org.mockito.Matchers.any
 import org.mockito.Mockito.{ verifyZeroInteractions, verify, only, never, inOrder, atLeastOnce }
+import org.mockito.BDDMockito.given
 import org.scalatest.mock.MockitoSugar.mock
 import org.scalatest.junit.JUnitRunner
 
@@ -44,7 +45,7 @@ final class PartTrackerSpec extends AbstractTrackerSpecBase {
 
   override def afterEach() {
     super.afterEach()
-    if (window != null) {
+    if (window != null && window.getShell != null) {
       close(window)
       window = null
     }
@@ -109,15 +110,12 @@ final class PartTrackerSpec extends AbstractTrackerSpecBase {
   }
 
   it must "notify part unfocused due to window closed" in {
-    val window = openWindow()
-    var part: IWorkbenchPart = null
-    try {
-      part = openRandomPart(window)
-      tracker.enable()
-      verify(listener, never).onPartUnfocused(whatever)
-    } finally {
-      close(window)
-    }
+    window = openWindow()
+    var part = openRandomPart(window)
+    tracker.enable()
+    verify(listener, never).onPartUnfocused(whatever)
+
+    close(window)
     verify(listener).onPartUnfocused(part)
   }
 
@@ -155,11 +153,8 @@ final class PartTrackerSpec extends AbstractTrackerSpecBase {
   }
 
   it must "remove listener when asked" in {
-    tracker.enable()
     closeAllParts()
-    val listener = mockListener()
-    tracker.addListener(listener)
-
+    tracker.enable()
     tracker.removeListener(listener)
     openRandomPart()
     verifyZeroInteractions(listener)
@@ -184,11 +179,24 @@ final class PartTrackerSpec extends AbstractTrackerSpecBase {
   }
 
   it must "add listeners to be notified when creating with listeners" in {
-    val listener = mockListener()
     tracker = create(listener)
     tracker.enable()
     openRandomPart()
     verify(listener).onPartFocused(whatever)
+  }
+
+  it must "ignore identical listeners if one already added" in {
+    val listener1 = equalsToEveryThingListener()
+    val listener2 = equalsToEveryThingListener()
+
+    tracker.enable()
+    tracker.removeListener(listener)
+    tracker.addListener(listener1)
+    tracker.addListener(listener2)
+    openRandomPart()
+
+    listener1.called must be(true)
+    listener2.called must be(false)
   }
 
   override protected def create() = PartTracker.get()
@@ -198,4 +206,12 @@ final class PartTrackerSpec extends AbstractTrackerSpecBase {
   private def whatever = any[IWorkbenchPart]
 
   private def mockListener() = mock[IListener]
+
+  private def equalsToEveryThingListener() = new IListener {
+    var called = false
+    override def onPartFocused(part: IWorkbenchPart) { called = true }
+    override def onPartUnfocused(part: IWorkbenchPart) { called = true }
+    override def hashCode = 0
+    override def equals(a: Any) = true
+  }
 }

@@ -40,11 +40,11 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import rabbit.tracking.IUserListener;
+import rabbit.tracking.IUserMonitor.IListener;
 
-public final class UserMonitorServiceTest {
+public final class UserMonitorTest {
 
-  private static class CountingListener implements IUserListener {
+  private static class CountingListener implements IListener {
     private final CountDownLatch activeLatch;
     private final CountDownLatch inactiveLatch;
     private final AtomicInteger activeCount;
@@ -78,7 +78,7 @@ public final class UserMonitorServiceTest {
 
   private Display display;
   private Shell shell;
-  private UserMonitorService service;
+  private UserMonitor service;
 
   @After public void after() {
     if (service.isStarted()) {
@@ -161,7 +161,7 @@ public final class UserMonitorServiceTest {
   @Test public void doesntNotifyObserversWhenUserIsActive() throws Exception {
 
     long timeout = 100;
-    UserMonitorService service = create(timeout);
+    UserMonitor service = create(timeout);
     CountingListener listener = new CountingListener();
     service.addListener(listener);
     service.start();
@@ -243,7 +243,7 @@ public final class UserMonitorServiceTest {
     Display display = mock(Display.class);
     given(display.isDisposed()).willReturn(false);
     given(display.isDisposed()).willReturn(true);
-    UserMonitorService service = create(10, display);
+    UserMonitor service = create(10, display);
     try {
       service.start();
     } catch (Exception e) {
@@ -259,7 +259,7 @@ public final class UserMonitorServiceTest {
 
   @Test public void doesntNotifyObserversIfNotEnabled() throws Exception {
     long timeout = 10;
-    UserMonitorService service = create(timeout);
+    UserMonitor service = create(timeout);
     CountingListener listener = new CountingListener();
     service.addListener(listener);
 
@@ -278,7 +278,7 @@ public final class UserMonitorServiceTest {
   }
 
   @Test public void terminatesWorkerThreadWhenDispose() throws Exception {
-    UserMonitorService monitor = create(10);
+    UserMonitor monitor = create(10);
     monitor.start();
     assertTrue(getWorker(monitor).isAlive());
     monitor.dispose();
@@ -313,7 +313,7 @@ public final class UserMonitorServiceTest {
 
   @Test public void doesntNotifyListenerIfRemoved() throws Exception {
     long timeout = 10;
-    UserMonitorService service = create(timeout);
+    UserMonitor service = create(timeout);
     CountingListener listener = new CountingListener();
     service.addListener(listener);
     service.start();
@@ -336,15 +336,15 @@ public final class UserMonitorServiceTest {
     assertThat(listener.inactiveCount.get(), is(1));
   }
 
-  private UserMonitorService create(long timeout) {
+  private UserMonitor create(long timeout) {
     return create(timeout, display);
   }
 
-  private UserMonitorService create(long timeout, Display display) {
-    return new UserMonitorService(display, timeout, MILLISECONDS);
+  private UserMonitor create(long timeout, Display display) {
+    return new UserMonitor(display, timeout, MILLISECONDS);
   }
 
-  private Thread getWorker(UserMonitorService monitor) throws Exception {
+  private Thread getWorker(UserMonitor monitor) throws Exception {
     Field field = monitor.getClass().getDeclaredField("worker");
     field.setAccessible(true);
     return (Thread)field.get(monitor);

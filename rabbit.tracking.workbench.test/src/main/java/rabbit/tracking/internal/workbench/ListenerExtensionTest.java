@@ -31,7 +31,7 @@ import org.eclipse.core.runtime.IConfigurationElement;
 import org.junit.Before;
 import org.junit.Test;
 
-import rabbit.tracking.ITrackerEventListener;
+import rabbit.tracking.IPersistableEventListener;
 import rabbit.tracking.workbench.ICommandEventListener;
 import rabbit.tracking.workbench.IFileEventListener;
 
@@ -64,7 +64,7 @@ public final class ListenerExtensionTest {
 
   @Test(expected = NullPointerException.class)//
   public void constructorThrowsExceptionIfTagIsNull() {
-    create(null, ITrackerEventListener.class);
+    create(null, IPersistableEventListener.class);
   }
 
   @Test(expected = NullPointerException.class)//
@@ -128,7 +128,7 @@ public final class ListenerExtensionTest {
     assertThat(errorsBucket.size(), is(0)); // Failed tag filter is not an error
   }
 
-  private <T extends ITrackerEventListener<?>> ListenerExtension<T> create(
+  private <T extends IPersistableEventListener<?>> ListenerExtension<T> create(
       String tag, Class<T> clazz) {
     return extension(tag, clazz);
   }

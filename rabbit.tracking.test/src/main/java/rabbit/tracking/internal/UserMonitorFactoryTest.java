@@ -24,13 +24,13 @@ import static org.hamcrest.core.IsNull.notNullValue;
 
 import org.junit.Test;
 
-import rabbit.tracking.IUserMonitorService;
+import rabbit.tracking.IUserMonitor;
 
-public final class UserMonitorServiceFactoryTest {
+public final class UserMonitorFactoryTest {
 
   @Test public void createsService() throws Exception {
-    UserMonitorService service = (UserMonitorService)getWorkbench().getService(
-        IUserMonitorService.class);
+    UserMonitor service = (UserMonitor)getWorkbench().getService(
+        IUserMonitor.class);
     assertThat(service, is(notNullValue()));
     assertThat(service.getTimeout(), is(MINUTES.toMillis(1)));
     assertThat(service.isStarted(), is(true));

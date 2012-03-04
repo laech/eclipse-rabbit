@@ -33,7 +33,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
-import rabbit.tracking.ITrackerEventListener;
+import rabbit.tracking.IPersistableEventListener;
 import rabbit.tracking.workbench.ICommandEventListener;
 import rabbit.tracking.workbench.IFileEventListener;
 import rabbit.tracking.workbench.ILaunchEventListener;
@@ -93,7 +93,7 @@ public final class WorkbenchPluginListenerTest {
       return listenerClass;
     }
 
-    abstract Set<? extends ITrackerEventListener<?>> getListener(
+    abstract Set<? extends IPersistableEventListener<?>> getListener(
         WorkbenchPlugin plugin);
   }
 
