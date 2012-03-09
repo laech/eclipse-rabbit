@@ -40,11 +40,11 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import rabbit.tracking.IUserMonitor.IListener;
+import rabbit.tracking.IUserMonitor.IUserListener;
 
 public final class UserMonitorTest {
 
-  private static class CountingListener implements IListener {
+  private static class CountingListener implements IUserListener {
     private final CountDownLatch activeLatch;
     private final CountDownLatch inactiveLatch;
     private final AtomicInteger activeCount;

@@ -32,8 +32,11 @@ import org.joda.time.Instant;
 import rabbit.tracking.AbstractTracker;
 import rabbit.tracking.ITracker;
 import rabbit.tracking.IUserMonitor;
+import rabbit.tracking.IUserMonitor.IUserListener;
 import rabbit.tracking.util.Recorder;
+import rabbit.tracking.util.Recorder.IRecordListener;
 import rabbit.tracking.util.Recorder.Record;
+import rabbit.tracking.workbench.PartTracker.IPartFocusListener;
 
 /**
  * Tracks how long a workbench part has been in focus, can take into account the
@@ -41,10 +44,10 @@ import rabbit.tracking.util.Recorder.Record;
  * <p/>
  * If a part is focused, then when it becomes unfocused (or the user becomes
  * inactive if the {@link IUserMonitor} is configured),
- * {@link IListener#onPartEvent(Instant, Duration, IWorkbenchPart)} will be
- * called with the captured event. When a part becomes focused (or when the user
- * becomes active again if the {@link IUserMonitor} is configured), a new
- * tracking session will be started if appropriate.
+ * {@link IPartRecordListener#onPartEvent(Instant, Duration, IWorkbenchPart)}
+ * will be called with the captured event. When a part becomes focused (or when
+ * the user becomes active again if the {@link IUserMonitor} is configured), a
+ * new tracking session will be started if appropriate.
  * <p/>
  * A part is consider focused if it's the active part and its parent window has
  * the focus.
@@ -58,7 +61,7 @@ public final class RecordingPartTracker extends AbstractTracker {
    * 
    * @since 2.0
    */
-  public static interface IListener {
+  public static interface IPartRecordListener {
 
     /**
      * Called when a new event is captured.
@@ -87,7 +90,8 @@ public final class RecordingPartTracker extends AbstractTracker {
    * @return a tracker, not null
    * @throws NullPointerException if any listener is null
    */
-  public static RecordingPartTracker withListeners(IListener... listeners) {
+  public static RecordingPartTracker withListeners(
+      IPartRecordListener... listeners) {
     return withMonitor(workbenchUserMonitor(), listeners);
   }
 
@@ -100,7 +104,7 @@ public final class RecordingPartTracker extends AbstractTracker {
    * @throws NullPointerException if any listener is null
    */
   public static RecordingPartTracker withMonitor(
-      IUserMonitor monitor, IListener... listeners) {
+      IUserMonitor monitor, IPartRecordListener... listeners) {
     return new RecordingPartTracker(monitor, listeners);
   }
 
@@ -109,7 +113,7 @@ public final class RecordingPartTracker extends AbstractTracker {
   }
 
   private final Recorder recorder = Recorder.withListeners(
-      new Recorder.IListener() {
+      new IRecordListener() {
         @Override public void onRecord(Record record) {
           onPartEvent(
               record.getStart(),
@@ -119,7 +123,7 @@ public final class RecordingPartTracker extends AbstractTracker {
       });
 
   private final ITracker partTracker = PartTracker.withListeners(
-      new PartTracker.IListener() {
+      new IPartFocusListener() {
         @Override public void onPartFocused(IWorkbenchPart part) {
           recorder.start(part);
         }
@@ -129,17 +133,18 @@ public final class RecordingPartTracker extends AbstractTracker {
         }
       });
 
-  private final Set<IListener> listeners;
+  private final Set<IPartRecordListener> listeners;
   private final IUserMonitor monitor;
-  private final IUserMonitor.IListener monitorListener;
+  private final IUserListener monitorListener;
 
-  private RecordingPartTracker(IUserMonitor monitor, IListener... listeners) {
+  private RecordingPartTracker(
+      IUserMonitor monitor, IPartRecordListener... listeners) {
     checkListeners(listeners);
-    this.listeners = new CopyOnWriteArraySet<IListener>(newArrayList(listeners));
+    this.listeners = copy(listeners);
     this.monitor = monitor;
 
     if (monitor != null) {
-      monitorListener = new IUserMonitor.IListener() {
+      monitorListener = new IUserListener() {
         @Override public void onInactive() {
           recorder.stop();
         }
@@ -163,7 +168,7 @@ public final class RecordingPartTracker extends AbstractTracker {
    * @param listener the listener to add
    * @throws NullPointerException if listener is null
    */
-  public void addListener(IListener listener) {
+  public void addListener(IPartRecordListener listener) {
     listeners.add(checkNotNull(listener, "listener"));
   }
 
@@ -173,7 +178,7 @@ public final class RecordingPartTracker extends AbstractTracker {
    * @param listener the listener to be removed
    * @throws NullPointerException if listener is null
    */
-  public void removeListener(IListener listener) {
+  public void removeListener(IPartRecordListener listener) {
     listeners.remove(checkNotNull(listener, "listener"));
   }
 
@@ -193,17 +198,22 @@ public final class RecordingPartTracker extends AbstractTracker {
   }
 
   private void onPartEvent(Instant start, Duration duration, IWorkbenchPart part) {
-    for (IListener listener : listeners) {
+    for (IPartRecordListener listener : listeners) {
       listener.onPartEvent(start, duration, part);
     }
   }
 
-  private void checkListeners(IListener... listeners) {
+  private void checkListeners(IPartRecordListener... listeners) {
     if (listeners.length > 0) {
       String errorMessage = "null contained in " + Arrays.toString(listeners);
-      for (IListener listener : listeners) {
+      for (IPartRecordListener listener : listeners) {
         checkNotNull(listener, errorMessage);
       }
     }
+  }
+
+  private CopyOnWriteArraySet<IPartRecordListener> copy(
+      IPartRecordListener... listeners) {
+    return new CopyOnWriteArraySet<IPartRecordListener>(newArrayList(listeners));
   }
 }

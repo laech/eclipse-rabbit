@@ -46,14 +46,15 @@ import rabbit.tracking.internal.workbench.util.PartListener;
  * therefore there will be at most one focused part at any time regardless of
  * how many workbench windows are opened.
  * <p/>
- * {@link IListener#onPartFocused(IWorkbenchPart)} will be called when a part
- * becomes focused, and when a new part becomes focused,
- * {@link IListener#onPartUnfocused(IWorkbenchPart)} will be called with the old
- * part before the new part is called with
- * {@link IListener#onPartFocused(IWorkbenchPart)}.
+ * {@link IPartFocusListener#onPartFocused(IWorkbenchPart)} will be called when
+ * a part becomes focused, and when a new part becomes focused,
+ * {@link IPartFocusListener#onPartUnfocused(IWorkbenchPart)} will be called
+ * with the old part before the new part is called with
+ * {@link IPartFocusListener#onPartFocused(IWorkbenchPart)}.
  * <p/>
  * When this tracker is enabled, if there is a currently focused part,
- * {@link IListener#onPartFocused(IWorkbenchPart)} will be notify immediately.
+ * {@link IPartFocusListener#onPartFocused(IWorkbenchPart)} will be notify
+ * immediately.
  * 
  * @since 2.0
  */
@@ -64,7 +65,7 @@ public final class PartTracker extends AbstractTracker {
    * 
    * @since 2.0
    */
-  public static interface IListener {
+  public static interface IPartFocusListener {
 
     /**
      * Called when a workbench part became focused.
@@ -98,7 +99,7 @@ public final class PartTracker extends AbstractTracker {
    * @return a tracker, not null
    * @throws NullPointerException if listeners contain null
    */
-  public static PartTracker withListeners(IListener... listeners) {
+  public static PartTracker withListeners(IPartFocusListener... listeners) {
     return new PartTracker(listeners);
   }
 
@@ -138,17 +139,18 @@ public final class PartTracker extends AbstractTracker {
     }
   };
 
-  private final Set<IListener> listeners;
+  private final Set<IPartFocusListener> listeners;
 
-  private PartTracker(IListener... listeners) {
+  private PartTracker(IPartFocusListener... listeners) {
     check(listeners);
-    this.listeners = new CopyOnWriteArraySet<IListener>(newArrayList(listeners));
+    this.listeners = new CopyOnWriteArraySet<IPartFocusListener>(
+        newArrayList(listeners));
   }
 
-  private void check(IListener... listeners) {
+  private void check(IPartFocusListener... listeners) {
     if (listeners.length > 0) {
       String errorMessage = "null contained in " + Arrays.toString(listeners);
-      for (IListener listener : listeners) {
+      for (IPartFocusListener listener : listeners) {
         checkNotNull(listener, errorMessage);
       }
     }
@@ -161,7 +163,7 @@ public final class PartTracker extends AbstractTracker {
    * @param listener the listener to add, not null
    * @throws NullPointerException if listener is null
    */
-  public void addListener(IListener listener) {
+  public void addListener(IPartFocusListener listener) {
     listeners.add(checkNotNull(listener, "listener"));
   }
 
@@ -171,7 +173,7 @@ public final class PartTracker extends AbstractTracker {
    * @param listener the listener to remove, not null
    * @throws NullPointerException if listener is null
    */
-  public void removeListener(IListener listener) {
+  public void removeListener(IPartFocusListener listener) {
     listeners.remove(checkNotNull(listener, "listener"));
   }
 
@@ -195,13 +197,13 @@ public final class PartTracker extends AbstractTracker {
   }
 
   private void onPartFocused(IWorkbenchPart part) {
-    for (IListener listener : listeners) {
+    for (IPartFocusListener listener : listeners) {
       listener.onPartFocused(part);
     }
   }
 
   private void onPartUnfocused(IWorkbenchPart part) {
-    for (IListener listener : listeners) {
+    for (IPartFocusListener listener : listeners) {
       listener.onPartUnfocused(part);
     }
   }

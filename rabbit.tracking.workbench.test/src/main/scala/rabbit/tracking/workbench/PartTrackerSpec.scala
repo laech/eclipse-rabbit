@@ -24,7 +24,7 @@ import org.mockito.BDDMockito.given
 import org.scalatest.mock.MockitoSugar.mock
 import org.scalatest.junit.JUnitRunner
 
-import rabbit.tracking.workbench.PartTracker.IListener
+import rabbit.tracking.workbench.PartTracker.IPartFocusListener
 import rabbit.tracking.workbench.test.WorkbenchTestUtil.{ openWindow, openRandomPart, hide, closeAllParts, close, activate }
 import rabbit.tracking.AbstractTrackerSpecBase
 
@@ -34,7 +34,7 @@ final class PartTrackerSpec extends AbstractTrackerSpecBase {
   type Tracker = PartTracker
 
   private var window: IWorkbenchWindow = _
-  private var listener: IListener = _
+  private var listener: IPartFocusListener = _
 
   override def beforeEach() {
     super.beforeEach()
@@ -201,13 +201,13 @@ final class PartTrackerSpec extends AbstractTrackerSpecBase {
 
   override protected def create() = PartTracker.get()
 
-  private def create(listeners: IListener*) = PartTracker.withListeners(listeners: _*)
+  private def create(listeners: IPartFocusListener*) = PartTracker.withListeners(listeners: _*)
 
   private def whatever = any[IWorkbenchPart]
 
-  private def mockListener() = mock[IListener]
+  private def mockListener() = mock[IPartFocusListener]
 
-  private def equalsToEveryThingListener() = new IListener {
+  private def equalsToEveryThingListener() = new IPartFocusListener {
     var called = false
     override def onPartFocused(part: IWorkbenchPart) { called = true }
     override def onPartUnfocused(part: IWorkbenchPart) { called = true }

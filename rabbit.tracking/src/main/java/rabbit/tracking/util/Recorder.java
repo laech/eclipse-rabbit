@@ -40,8 +40,8 @@ import org.joda.time.Instant;
  * This class is thread safe.
  * 
  * @see #create()
- * @see #withListeners(IListener...)
- * @see IListener
+ * @see #withListeners(IRecordListener...)
+ * @see IRecordListener
  * @see Record
  * @since 2.0
  */
@@ -52,7 +52,7 @@ public final class Recorder {
    * 
    * @since 2.0
    */
-  public static interface IListener {
+  public static interface IRecordListener {
 
     /**
      * Called when a new record is available.
@@ -145,19 +145,19 @@ public final class Recorder {
    * @return a new recorder with the specified listeners attached
    * @throws NullPointerException if any listener is null
    */
-  public static Recorder withListeners(IListener... listeners) {
+  public static Recorder withListeners(IRecordListener... listeners) {
     return new Recorder(listeners);
   }
 
-  private final Set<IListener> listeners;
+  private final Set<IRecordListener> listeners;
 
   private Instant start;
   private Object data;
   private boolean recording;
 
-  private Recorder(IListener... listeners) {
+  private Recorder(IRecordListener... listeners) {
     check(listeners);
-    this.listeners = new CopyOnWriteArraySet<IListener>(
+    this.listeners = new CopyOnWriteArraySet<IRecordListener>(
         newArrayList(listeners));
   }
 
@@ -168,7 +168,7 @@ public final class Recorder {
    * @param listener the listener to be added
    * @throws NullPointerException if the listener is null
    */
-  public void addListener(IListener listener) {
+  public void addListener(IRecordListener listener) {
     listeners.add(checkNotNull(listener, "listener"));
   }
 
@@ -178,7 +178,7 @@ public final class Recorder {
    * @param listener the listener to be removed
    * @throws NullPointerException if the listener is null
    */
-  public void removeListener(IListener listener) {
+  public void removeListener(IRecordListener listener) {
     listeners.remove(checkNotNull(listener, "listener"));
   }
 
@@ -245,15 +245,15 @@ public final class Recorder {
   }
 
   private void notifyListeners(Record record) {
-    for (IListener listener : listeners) {
+    for (IRecordListener listener : listeners) {
       listener.onRecord(record);
     }
   }
 
-  private void check(IListener... listeners) {
+  private void check(IRecordListener... listeners) {
     if (listeners.length > 0) {
       String errorMessage = "null contained in " + Arrays.toString(listeners);
-      for (IListener listener : listeners) {
+      for (IRecordListener listener : listeners) {
         checkNotNull(listener, errorMessage);
       }
     }

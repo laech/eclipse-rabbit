@@ -31,17 +31,17 @@ public abstract class AbstractTracker implements ITracker {
     enabled = new AtomicBoolean(false);
   }
 
-  @Override public boolean isEnabled() {
+  @Override public final boolean isEnabled() {
     return enabled.get();
   }
 
-  @Override public void enable() {
+  @Override public final void enable() {
     if (enabled.compareAndSet(false, true)) {
       onEnable();
     }
   }
 
-  @Override public void disable() {
+  @Override public final void disable() {
     if (enabled.compareAndSet(true, false)) {
       onDisable();
     }

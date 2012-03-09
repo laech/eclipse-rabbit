@@ -112,7 +112,7 @@ public final class UserMonitor implements IUserMonitor, IDisposable {
   private final long timeout;
   private final Display display;
   private final Listener eventListener;
-  private final Set<IListener> listeners;
+  private final Set<IUserListener> listeners;
 
   private final AtomicLong lastEventNanos;
   private final AtomicBoolean active;
@@ -125,7 +125,7 @@ public final class UserMonitor implements IUserMonitor, IDisposable {
     this.display = checkNotNull(display, "display");
     this.timeout = checkNotNull(unit, "unit").toMillis(timeout);
     this.eventListener = new EventListener();
-    this.listeners = new CopyOnWriteArraySet<IListener>();
+    this.listeners = new CopyOnWriteArraySet<IUserListener>();
     this.active = new AtomicBoolean(true);
     this.started = new AtomicBoolean();
     this.lastEventNanos = new AtomicLong();
@@ -153,11 +153,11 @@ public final class UserMonitor implements IUserMonitor, IDisposable {
     return timeout;
   }
 
-  @Override public void addListener(IListener listener) {
+  @Override public void addListener(IUserListener listener) {
     listeners.add(checkNotNull(listener, "listener"));
   }
 
-  @Override public void removeListener(IListener listener) {
+  @Override public void removeListener(IUserListener listener) {
     listeners.remove(checkNotNull(listener, "listener"));
   }
 
@@ -173,7 +173,7 @@ public final class UserMonitor implements IUserMonitor, IDisposable {
   }
 
   private void onActive() {
-    for (IListener listener : listeners) {
+    for (IUserListener listener : listeners) {
       listener.onActive();
     }
 
@@ -182,7 +182,7 @@ public final class UserMonitor implements IUserMonitor, IDisposable {
   }
 
   private void onInactive() {
-    for (IListener listener : listeners) {
+    for (IUserListener listener : listeners) {
       listener.onInactive();
     }
 

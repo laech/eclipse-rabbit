@@ -30,8 +30,7 @@ import org.scalatest.matchers.MustMatchers
 import org.scalatest.mock.MockitoSugar.mock
 import org.scalatest.{ FlatSpec, BeforeAndAfter }
 
-import rabbit.tracking.util.Recorder.Record
-import rabbit.tracking.util.Recorder.IListener
+import rabbit.tracking.util.Recorder.{ Record, IRecordListener }
 
 @RunWith(classOf[JUnitRunner])
 final class RecorderSpec extends FlatSpec with MustMatchers with BeforeAndAfter {
@@ -164,7 +163,7 @@ final class RecorderSpec extends FlatSpec with MustMatchers with BeforeAndAfter 
 
   private def whatever() = any[Record]
 
-  private def mockListener() = mock[IListener]
+  private def mockListener() = mock[IRecordListener]
 
   private def check(record: Record, preStart: Long, postEnd: Long, data: Any) {
     record must not be (null)

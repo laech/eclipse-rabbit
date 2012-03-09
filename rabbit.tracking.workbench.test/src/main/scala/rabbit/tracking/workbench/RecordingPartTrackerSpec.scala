@@ -24,15 +24,15 @@ import org.eclipse.ui.IWorkbenchPart
 import org.joda.time.Instant.now
 import org.joda.time.{ Instant, Duration }
 import org.junit.runner.RunWith
-import org.mockito.BDDMockito.given
+import org.scalatest.junit.JUnitRunner
 import org.mockito.Matchers.{ notNull, any }
 import org.mockito.Mockito.{ verifyZeroInteractions, verify, doAnswer }
 import org.mockito.invocation.InvocationOnMock
 import org.mockito.stubbing.Answer
-import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar.mock
 
-import rabbit.tracking.workbench.RecordingPartTracker.IListener
+import rabbit.tracking.IUserMonitor.IUserListener
+import rabbit.tracking.workbench.RecordingPartTracker.IPartRecordListener
 import rabbit.tracking.workbench.test.WorkbenchTestUtil.{ openRandomPart, closeAllParts }
 import rabbit.tracking.{ IUserMonitor, AbstractTrackerSpecBase }
 
@@ -56,23 +56,23 @@ final class RecordingPartTrackerSpec extends AbstractTrackerSpecBase {
   type Tracker = RecordingPartTracker
 
   private var monitor: IUserMonitor = _
-  private var monitorListeners: Set[IUserMonitor.IListener] = _
+  private var monitorListeners: Set[IUserListener] = _
 
   private var actual: Actual = _
-  private var listener: IListener = _
+  private var listener: IPartRecordListener = _
 
   override def beforeEach() {
     // Initialize monitor before super, create() depends on this
     monitorListeners = Set.empty
     monitor = mock[IUserMonitor]
     doAnswer((invocation: InvocationOnMock) => {
-      monitorListeners += invocation.getArguments()(0).asInstanceOf[IUserMonitor.IListener]
-    }).when(monitor).addListener(any[IUserMonitor.IListener])
+      monitorListeners += invocation.getArguments()(0).asInstanceOf[IUserListener]
+    }).when(monitor).addListener(any[IUserListener])
 
     super.beforeEach()
 
     actual = new Actual
-    listener = mock[IListener]
+    listener = mock[IPartRecordListener]
     tracker.addListener(listener)
     doAnswer((invocation: InvocationOnMock) => {
       val args = invocation.getArguments
@@ -228,10 +228,10 @@ final class RecordingPartTrackerSpec extends AbstractTrackerSpecBase {
 
   override protected def create() = RecordingPartTracker.withMonitor(monitor)
 
-  private def withListeners(listeners: IListener*) =
+  private def withListeners(listeners: IPartRecordListener*) =
     RecordingPartTracker.withListeners(listeners: _*)
 
-  private def withMonitor(monitor: IUserMonitor, listeners: IListener*) =
+  private def withMonitor(monitor: IUserMonitor, listeners: IPartRecordListener*) =
     RecordingPartTracker.withMonitor(monitor, listeners: _*)
 
   private def verifyEvent(expected: Expected) {
@@ -246,7 +246,7 @@ final class RecordingPartTrackerSpec extends AbstractTrackerSpecBase {
     end must be <= expected.postEnd.getMillis
   }
 
-  private def equalsToEveryThingListener = new IListener {
+  private def equalsToEveryThingListener = new IPartRecordListener {
     var called = false
     override def onPartEvent(start: Instant, duration: Duration, part: IWorkbenchPart) {
       called = true
@@ -256,7 +256,7 @@ final class RecordingPartTrackerSpec extends AbstractTrackerSpecBase {
     override def hashCode() = 0
   }
 
-  private def notNullUserMonitorListener = notNull(classOf[IUserMonitor.IListener])
+  private def notNullUserMonitorListener = notNull(classOf[IUserListener])
 
   private implicit def funToAnswer(f: (InvocationOnMock) => Unit): Answer[Unit] =
     new Answer[Unit] {
