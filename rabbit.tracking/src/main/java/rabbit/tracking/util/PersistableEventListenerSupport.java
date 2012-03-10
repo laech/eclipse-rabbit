@@ -24,26 +24,19 @@ import rabbit.tracking.IPersistableEventListener;
  * 
  * @since 2.0
  */
-public abstract class PersistableEventListenerSupport<E> {
+public abstract class PersistableEventListenerSupport<E>
+    implements IPersistableEventListenerSupport<E> {
 
   public PersistableEventListenerSupport() {
   }
 
-  /**
-   * Notifies the listeners that the tracker has been requested to save data.
-   */
-  public final void notifyOnSave() {
+  @Override public final void notifyOnSave() {
     for (IPersistableEventListener<? super E> listener : getListeners()) {
       listener.onSave();
     }
   }
 
-  /**
-   * Notifies the listeners with the given event.
-   * 
-   * @param event the event, not null
-   */
-  public final void notifyOnEvent(E event) {
+  @Override public final void notifyOnEvent(E event) {
     for (IPersistableEventListener<? super E> listener : getListeners()) {
       listener.onEvent(event);
     }

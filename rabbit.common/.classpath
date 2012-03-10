@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry exported="true" kind="lib" path="libs/aopalliance-1.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="libs/guava-11.0.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/guava-11.0.2.jar" sourcepath="/Users/o-o/.m2/repository/com/google/guava/guava/11.0.2/guava-11.0.2-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="libs/guice-3.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="libs/javax.inject-1.jar"/>
 	<classpathentry exported="true" kind="lib" path="libs/jsr305-2.0.0.jar"/>
