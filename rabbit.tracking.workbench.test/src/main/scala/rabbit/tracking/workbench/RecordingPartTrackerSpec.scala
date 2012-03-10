@@ -32,6 +32,7 @@ import org.mockito.stubbing.Answer
 import org.scalatest.mock.MockitoSugar.mock
 
 import rabbit.tracking.IUserMonitor.IUserListener
+import rabbit.tracking.test.Tests.funToAnswer
 import rabbit.tracking.workbench.RecordingPartTracker.IPartRecordListener
 import rabbit.tracking.workbench.test.WorkbenchTestUtil.{ openRandomPart, closeAllParts }
 import rabbit.tracking.{ IUserMonitor, AbstractTrackerSpecBase }
@@ -257,9 +258,4 @@ final class RecordingPartTrackerSpec extends AbstractTrackerSpecBase {
   }
 
   private def notNullUserMonitorListener = notNull(classOf[IUserListener])
-
-  private implicit def funToAnswer(f: (InvocationOnMock) => Unit): Answer[Unit] =
-    new Answer[Unit] {
-      override def answer(invocation: InvocationOnMock) = f(invocation)
-    }
 }

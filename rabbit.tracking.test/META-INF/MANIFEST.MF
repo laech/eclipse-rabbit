@@ -42,4 +42,5 @@ Import-Package: org.hamcrest;version="1.2.1",
  scala.xml;version="2.9.1"
 Export-Package: rabbit.tracking;version="2.0.0",
  rabbit.tracking.internal;version="2.0.0",
+ rabbit.tracking.test;version="2.0.0",
  rabbit.tracking.util;version="2.0.0"

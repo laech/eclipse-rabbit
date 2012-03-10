@@ -15,6 +15,7 @@
  */
 
 package rabbit.tracking.util
+
 import java.lang.System.currentTimeMillis
 import java.lang.Thread.sleep
 
@@ -30,6 +31,7 @@ import org.scalatest.matchers.MustMatchers
 import org.scalatest.mock.MockitoSugar.mock
 import org.scalatest.{ FlatSpec, BeforeAndAfter }
 
+import rabbit.tracking.test.Tests.funToAnswer
 import rabbit.tracking.util.Recorder.{ Record, IRecordListener }
 
 @RunWith(classOf[JUnitRunner])
@@ -92,7 +94,7 @@ final class RecorderSpec extends FlatSpec with MustMatchers with BeforeAndAfter 
     var record: Record = null
     val listener = mockListener()
     recorder.addListener(listener)
-    doAnswer((invocation: InvocationOnMock) => {
+    doAnswer({ invocation: InvocationOnMock =>
       record = invocation.getArguments()(0).asInstanceOf[Record]
     }).when(listener).onRecord(whatever)
 
@@ -173,9 +175,4 @@ final class RecorderSpec extends FlatSpec with MustMatchers with BeforeAndAfter 
     start must be >= preStart
     end must be <= postEnd
   }
-
-  private implicit def funToAnswer(f: (InvocationOnMock) => Unit): Answer[Unit] =
-    new Answer[Unit] {
-      override def answer(invocation: InvocationOnMock) = f(invocation)
-    }
 }
