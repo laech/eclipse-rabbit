@@ -17,20 +17,22 @@
 package rabbit.tracking
 
 import java.lang.Thread.sleep
+
 import scala.collection.immutable.Set
+
 import org.eclipse.ui.IWorkbenchPart
 import org.joda.time.Instant.now
 import org.joda.time.{ Instant, Duration }
 import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
 import org.mockito.Matchers.{ notNull, any }
 import org.mockito.Mockito.{ verifyZeroInteractions, verify, doAnswer }
 import org.mockito.invocation.InvocationOnMock
-import org.mockito.stubbing.Answer
+import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar.mock
+
 import rabbit.tracking.IUserMonitor.IUserListener
-import rabbit.tracking.tests.Tests.funToAnswer
 import rabbit.tracking.RecordingPartTracker.IPartRecordListener
+import rabbit.tracking.tests.Tests.funToAnswer
 import rabbit.tracking.tests.WorkbenchTestUtil.{ openRandomPart, closeAllParts }
 
 @RunWith(classOf[JUnitRunner])
