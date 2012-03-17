@@ -32,7 +32,7 @@ import org.scalatest.mock.MockitoSugar.mock
 
 import rabbit.tracking.IUserMonitor.IUserListener
 import rabbit.tracking.RecordingPartTracker.IPartRecordListener
-import rabbit.tracking.tests.Tests.funToAnswer
+import rabbit.tracking.tests.TestImplicits.funToAnswer
 import rabbit.tracking.tests.WorkbenchTestUtil.{ openRandomPart, closeAllParts }
 
 @RunWith(classOf[JUnitRunner])

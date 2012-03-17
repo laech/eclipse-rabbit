@@ -17,13 +17,12 @@
 package rabbit.tracking;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.Lists.newArrayList;
 import static org.eclipse.ui.PlatformUI.getWorkbench;
-import static rabbit.tracking.internal.util.WorkbenchUtil.getFocusedPart;
+import static rabbit.tracking.internal.util.Arrays.checkedCopyAsList;
+import static rabbit.tracking.internal.util.Sets.newCopyOnWriteSet;
+import static rabbit.tracking.internal.util.Workbenches.getFocusedPart;
 
-import java.util.Arrays;
 import java.util.Set;
-import java.util.concurrent.CopyOnWriteArraySet;
 
 import org.eclipse.ui.IWorkbenchPart;
 import org.joda.time.Duration;
@@ -136,8 +135,7 @@ public final class RecordingPartTracker extends AbstractTracker {
 
   private RecordingPartTracker(
       IUserMonitor monitor, IPartRecordListener... listeners) {
-    checkListeners(listeners);
-    this.listeners = copy(listeners);
+    this.listeners = newCopyOnWriteSet(checkedCopyAsList(listeners));
     this.monitor = monitor;
 
     if (monitor != null) {
@@ -198,19 +196,5 @@ public final class RecordingPartTracker extends AbstractTracker {
     for (IPartRecordListener listener : listeners) {
       listener.onPartEvent(start, duration, part);
     }
-  }
-
-  private void checkListeners(IPartRecordListener... listeners) {
-    if (listeners.length > 0) {
-      String errorMessage = "null contained in " + Arrays.toString(listeners);
-      for (IPartRecordListener listener : listeners) {
-        checkNotNull(listener, errorMessage);
-      }
-    }
-  }
-
-  private CopyOnWriteArraySet<IPartRecordListener> copy(
-      IPartRecordListener... listeners) {
-    return new CopyOnWriteArraySet<IPartRecordListener>(newArrayList(listeners));
   }
 }

@@ -19,10 +19,13 @@ package rabbit.tracking.tests
 import org.mockito.invocation.InvocationOnMock
 import org.mockito.stubbing.Answer
 
-object Tests {
+object TestImplicits {
 
-  implicit def funToAnswer(f: (InvocationOnMock) => Unit): Answer[Unit] =
-    new Answer[Unit] {
-      override def answer(invocation: InvocationOnMock) = f(invocation)
-    }
+  implicit def funToAnswer(f: InvocationOnMock => Unit): Answer[Unit] = new Answer[Unit] {
+    override def answer(invocation: InvocationOnMock) = f(invocation)
+  }
+
+  implicit def funToRunnable(f: () => Any): Runnable = new Runnable {
+    override def run = f()
+  }
 }

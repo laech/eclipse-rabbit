@@ -31,7 +31,7 @@ import org.mockito.invocation.InvocationOnMock
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar.mock
 
-import rabbit.tracking.tests.Tests.funToAnswer
+import rabbit.tracking.tests.TestImplicits.funToAnswer
 import rabbit.tracking.util.IPersistableEventListenerSupport
 import rabbit.tracking.AbstractTrackerSpecBase
 

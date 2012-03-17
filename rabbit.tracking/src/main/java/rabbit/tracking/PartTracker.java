@@ -17,14 +17,13 @@
 package rabbit.tracking;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.Lists.newArrayList;
 import static org.eclipse.ui.PlatformUI.getWorkbench;
-import static rabbit.tracking.internal.util.WorkbenchUtil.getFocusedPart;
-import static rabbit.tracking.internal.util.WorkbenchUtil.getPartServices;
+import static rabbit.tracking.internal.util.Arrays.checkedCopyAsList;
+import static rabbit.tracking.internal.util.Sets.newCopyOnWriteSet;
+import static rabbit.tracking.internal.util.Workbenches.getFocusedPart;
+import static rabbit.tracking.internal.util.Workbenches.getPartServices;
 
-import java.util.Arrays;
 import java.util.Set;
-import java.util.concurrent.CopyOnWriteArraySet;
 
 import org.eclipse.ui.IPartListener;
 import org.eclipse.ui.IPartService;
@@ -45,15 +44,8 @@ import rabbit.tracking.internal.util.PartListener;
  * therefore there will be at most one focused part at any time regardless of
  * how many workbench windows are opened.
  * <p/>
- * {@link IPartFocusListener#onPartFocused(IWorkbenchPart)} will be called when
- * a part becomes focused, and when a new part becomes focused,
- * {@link IPartFocusListener#onPartUnfocused(IWorkbenchPart)} will be called
- * with the old part before the new part is called with
- * {@link IPartFocusListener#onPartFocused(IWorkbenchPart)}.
- * <p/>
- * When this tracker is enabled, if there is a currently focused part,
- * {@link IPartFocusListener#onPartFocused(IWorkbenchPart)} will be notify
- * immediately.
+ * When this tracker is enabled, if there is a currently focused part, the
+ * listeners will be notify immediately.
  * 
  * @since 2.0
  */
@@ -105,11 +97,13 @@ public final class PartTracker extends AbstractTracker {
   private final IPartListener partListener = new PartListener() {
     @Override public void partActivated(IWorkbenchPart part) {
       super.partActivated(part);
+      // TODO check focus
       onPartFocused(part);
     }
 
     @Override public void partDeactivated(IWorkbenchPart part) {
       super.partDeactivated(part);
+      // TODO check focus
       onPartUnfocused(part);
     }
   };
@@ -141,18 +135,7 @@ public final class PartTracker extends AbstractTracker {
   private final Set<IPartFocusListener> listeners;
 
   private PartTracker(IPartFocusListener... listeners) {
-    check(listeners);
-    this.listeners = new CopyOnWriteArraySet<IPartFocusListener>(
-        newArrayList(listeners));
-  }
-
-  private void check(IPartFocusListener... listeners) {
-    if (listeners.length > 0) {
-      String errorMessage = "null contained in " + Arrays.toString(listeners);
-      for (IPartFocusListener listener : listeners) {
-        checkNotNull(listener, errorMessage);
-      }
-    }
+    this.listeners = newCopyOnWriteSet(checkedCopyAsList(listeners));
   }
 
   /**

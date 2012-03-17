@@ -19,14 +19,13 @@ package rabbit.tracking.util;
 import static com.google.common.base.Objects.equal;
 import static com.google.common.base.Objects.toStringHelper;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.Lists.newArrayList;
 import static java.lang.System.currentTimeMillis;
 import static org.joda.time.Duration.millis;
 import static org.joda.time.Instant.now;
+import static rabbit.tracking.internal.util.Arrays.checkedCopyAsList;
+import static rabbit.tracking.internal.util.Sets.newCopyOnWriteSet;
 
-import java.util.Arrays;
 import java.util.Set;
-import java.util.concurrent.CopyOnWriteArraySet;
 
 import org.joda.time.Duration;
 import org.joda.time.Instant;
@@ -156,9 +155,7 @@ public final class Recorder {
   private boolean recording;
 
   private Recorder(IRecordListener... listeners) {
-    check(listeners);
-    this.listeners = new CopyOnWriteArraySet<IRecordListener>(
-        newArrayList(listeners));
+    this.listeners = newCopyOnWriteSet(checkedCopyAsList(listeners));
   }
 
   /**
@@ -249,14 +246,4 @@ public final class Recorder {
       listener.onRecord(record);
     }
   }
-
-  private void check(IRecordListener... listeners) {
-    if (listeners.length > 0) {
-      String errorMessage = "null contained in " + Arrays.toString(listeners);
-      for (IRecordListener listener : listeners) {
-        checkNotNull(listener, errorMessage);
-      }
-    }
-  }
-
 }

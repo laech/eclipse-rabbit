@@ -131,6 +131,7 @@ final class PartTrackerSpec extends AbstractTrackerSpecBase {
 
   it must "not notify when disabled" in {
     tracker.disable()
+    window = openWindow()
     openRandomPart()
     openRandomPart()
     verifyZeroInteractions(listener)
@@ -139,8 +140,8 @@ final class PartTrackerSpec extends AbstractTrackerSpecBase {
   it must "track newly opened window" in {
     tracker.enable()
     window = openWindow()
-    openRandomPart(window)
-    verify(listener, atLeastOnce).onPartFocused(whatever)
+    val part = openRandomPart(window)
+    verify(listener).onPartFocused(part)
   }
 
   it must "add listener when asked" in {

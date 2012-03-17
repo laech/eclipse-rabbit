@@ -31,7 +31,7 @@ import org.scalatest.matchers.MustMatchers
 import org.scalatest.mock.MockitoSugar.mock
 import org.scalatest.{ FlatSpec, BeforeAndAfter }
 
-import rabbit.tracking.tests.Tests.funToAnswer
+import rabbit.tracking.tests.TestImplicits.funToAnswer
 import rabbit.tracking.util.Recorder.{ Record, IRecordListener }
 
 @RunWith(classOf[JUnitRunner])
