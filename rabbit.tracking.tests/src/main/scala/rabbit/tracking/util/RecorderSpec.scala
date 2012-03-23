@@ -43,21 +43,27 @@ final class RecorderSpec extends FlatSpec with MustMatchers with BeforeAndAfter 
   private class RecorderTester(recorder: Recorder) {
 
     def startInNewThread(data: Any = null) {
-      val latch = new CountDownLatch(1)
-      new Thread({ () =>
+      doInNewThread({ () =>
         recorder.start(data)
-        latch.countDown()
-      }).start()
-      latch.await()
+      })
     }
 
     def stopInNewThread() {
-      val latch = new CountDownLatch(1)
-      new Thread({ () =>
+      doInNewThread(() => {
         recorder.stop()
-        latch.countDown()
+      })
+    }
+
+    private def doInNewThread(f: () => Unit) {
+      val startSignal = new CountDownLatch(1)
+      val doneSignal = new CountDownLatch(1)
+      new Thread({ () =>
+        startSignal.await()
+        f()
+        doneSignal.countDown()
       }).start()
-      latch.await()
+      startSignal.countDown()
+      doneSignal.await()
     }
   }
 
