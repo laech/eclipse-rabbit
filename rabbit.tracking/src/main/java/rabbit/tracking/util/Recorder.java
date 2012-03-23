@@ -17,11 +17,7 @@
 package rabbit.tracking.util;
 
 import static com.google.common.base.Objects.equal;
-import static com.google.common.base.Objects.toStringHelper;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static java.lang.System.currentTimeMillis;
-import static org.joda.time.Duration.millis;
-import static org.joda.time.Instant.now;
 import static rabbit.tracking.internal.util.Arrays.checkedCopyAsList;
 import static rabbit.tracking.internal.util.Sets.newCopyOnWriteSet;
 
@@ -29,6 +25,10 @@ import java.util.Set;
 
 import org.joda.time.Duration;
 import org.joda.time.Instant;
+
+import rabbit.tracking.TimedEvent;
+import rabbit.tracking.internal.util.IClock;
+import rabbit.tracking.internal.util.SystemClock;
 
 /**
  * A helper class for recording durations with associated data.
@@ -66,65 +66,40 @@ public final class Recorder {
    * 
    * @since 2.0
    */
-  public static final class Record {
+  public static final class Record extends TimedEvent {
 
-    private final Instant start;
-    private final Duration duration;
     private final Object data;
 
     /**
      * Creates a record with the given data.
      * 
-     * @param start the start time of this recording
+     * @param instant the start time of this recording
      * @param duration the duration of this recording
      * @param data the user data of this recording
      * @return a record
      * @throws NullPointerException if start is null, or duration is null
      */
-    static Record create(Instant start, Duration duration, Object data) {
-      return new Record(start, duration, data);
+    static Record create(Instant instant, Duration duration, Object data) {
+      return new Record(instant, duration, data);
     }
 
-    private Record(Instant start, Duration duration, Object data) {
-      this.start = checkNotNull(start, "start");
-      this.duration = checkNotNull(duration, "duration");
+    private Record(Instant instant, Duration duration, Object data) {
+      super(instant, duration);
       this.data = data;
     }
 
     /**
-     * Gets the data that was associated with this recording.
+     * The data that was associated with this recording.
      * 
      * @return the user data, or null if there was no data associated with this
      *         recording
      */
-    public Object getData() {
+    public Object data() {
       return data;
     }
 
-    /**
-     * Gets the duration of this recording.
-     * 
-     * @return the duration, not null
-     */
-    public Duration getDuration() {
-      return duration;
-    }
-
-    /**
-     * Gets the start time of this recording.
-     * 
-     * @return the start time, not null
-     */
-    public Instant getStart() {
-      return start;
-    }
-
     @Override public String toString() {
-      return toStringHelper(this)
-          .add("data", getData())
-          .add("start", getStart())
-          .add("duration", getDuration())
-          .toString();
+      return toStringHelper().add("data", data()).toString();
     }
   }
 
@@ -134,7 +109,7 @@ public final class Recorder {
    * @return a recorder
    */
   public static Recorder create() {
-    return new Recorder();
+    return withListeners();
   }
 
   /**
@@ -145,16 +120,29 @@ public final class Recorder {
    * @throws NullPointerException if any listener is null
    */
   public static Recorder withListeners(IRecordListener... listeners) {
-    return new Recorder(listeners);
+    return withClock(SystemClock.INSTANCE, listeners);
   }
 
+  /**
+   * Creates a recorder with a specific clock.
+   * 
+   * @param clock the clock to use
+   * @param listeners the listeners
+   * @throws NullPointerException if clock is null, or any listener is null
+   */
+  static Recorder withClock(IClock clock, IRecordListener... listeners) {
+    return new Recorder(clock, listeners);
+  }
+
+  private final IClock clock;
   private final Set<IRecordListener> listeners;
 
   private Instant start;
   private Object data;
   private boolean recording;
 
-  private Recorder(IRecordListener... listeners) {
+  private Recorder(IClock clock, IRecordListener... listeners) {
+    this.clock = checkNotNull(clock, "clock");
     this.listeners = newCopyOnWriteSet(checkedCopyAsList(listeners));
   }
 
@@ -192,7 +180,7 @@ public final class Recorder {
    */
   public void start(Object userData) {
     boolean sameData = equal(this.data, userData);
-    Instant now = now();
+    Instant now = clock.now();
 
     Object data;
     Instant start;
@@ -237,7 +225,7 @@ public final class Recorder {
       this.start = null;
     }
 
-    Duration duration = millis(currentTimeMillis() - start.getMillis());
+    Duration duration = new Duration(start, clock.now());
     notifyListeners(new Record(start, duration, data));
   }
 

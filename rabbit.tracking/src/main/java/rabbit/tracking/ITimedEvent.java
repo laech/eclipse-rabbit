@@ -34,7 +34,7 @@ public interface ITimedEvent extends IEvent {
   @Override Instant instant();
 
   /**
-   * Gets the duration of this event.
+   * The duration of this event.
    * 
    * @return the duration of this event, not null
    */

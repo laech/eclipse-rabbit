@@ -16,31 +16,70 @@
 
 package rabbit.tracking.util
 
-import java.lang.System.currentTimeMillis
 import java.lang.Thread.sleep
+import java.util.Arrays.asList
+import java.util.concurrent.{ CountDownLatch, ConcurrentLinkedQueue }
 
+import org.joda.time.Duration.millis
 import org.joda.time.Instant.now
-import org.joda.time.Duration
+import org.joda.time.{ Instant, Duration }
 import org.junit.runner.RunWith
 import org.mockito.Matchers.any
 import org.mockito.Mockito.{ verifyZeroInteractions, verify, times, only, doAnswer }
 import org.mockito.invocation.InvocationOnMock
-import org.mockito.stubbing.Answer
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.matchers.MustMatchers
 import org.scalatest.mock.MockitoSugar.mock
+
+import rabbit.tracking.internal.util.IClock;
 import org.scalatest.{ FlatSpec, BeforeAndAfter }
 
-import rabbit.tracking.tests.TestImplicits.funToAnswer
+import rabbit.tracking.tests.TestImplicits.{ funToRunnable, funToAnswer }
 import rabbit.tracking.util.Recorder.{ Record, IRecordListener }
 
 @RunWith(classOf[JUnitRunner])
 final class RecorderSpec extends FlatSpec with MustMatchers with BeforeAndAfter {
 
+  private class RecorderTester(recorder: Recorder) {
+
+    def startInNewThread(data: Any = null) {
+      val latch = new CountDownLatch(1)
+      new Thread({ () =>
+        recorder.start(data)
+        latch.countDown()
+      }).start()
+      latch.await()
+    }
+
+    def stopInNewThread() {
+      val latch = new CountDownLatch(1)
+      new Thread({ () =>
+        recorder.stop()
+        latch.countDown()
+      }).start()
+      latch.await()
+    }
+  }
+
+  private class MockClock(instant: Instant, duration: Duration) extends IClock {
+    private var _returnStartInstant: Boolean = true
+    def returnStartInstant = synchronized { _returnStartInstant }
+    def returnStartInstant_=(flag: Boolean) = synchronized { _returnStartInstant = flag }
+
+    override def now = if (returnStartInstant) instant else instant.plus(duration)
+  }
+
   private var recorder: Recorder = _
 
+  private var clock: MockClock = _
+  private var instant: Instant = _
+  private var duration: Duration = _
+
   before {
-    recorder = Recorder.create()
+    instant = now
+    duration = millis(1001)
+    clock = new MockClock(instant, duration)
+    recorder = Recorder.withClock(clock)
   }
 
   behavior of "Recorder"
@@ -76,6 +115,7 @@ final class RecorderSpec extends FlatSpec with MustMatchers with BeforeAndAfter 
     recorder.start(1)
     recorder.start(1)
     recorder.start(1)
+    clock.returnStartInstant = false
     recorder.stop()
 
     verify(listener, only).onRecord(whatever)
@@ -98,14 +138,13 @@ final class RecorderSpec extends FlatSpec with MustMatchers with BeforeAndAfter 
       record = invocation.getArguments()(0).asInstanceOf[Record]
     }).when(listener).onRecord(whatever)
 
-    val preStart = currentTimeMillis()
     recorder.start("mydata")
     sleep(5)
-    recorder.stop()
-    val postEnd = currentTimeMillis()
+    clock.returnStartInstant = false
+    recorder.stopInNewThread()
 
     verify(listener, only).onRecord(record)
-    check(record, preStart, postEnd, "mydata")
+    check(record, "mydata")
   }
 
   it must "accept start argument as optional" in {
@@ -115,9 +154,9 @@ final class RecorderSpec extends FlatSpec with MustMatchers with BeforeAndAfter 
   it must "ignore subsequent calls to stop" in {
     val listener = mockListener()
     recorder.addListener(listener)
-    recorder.start("abc")
+    recorder.startInNewThread("abc")
     recorder.stop()
-    recorder.stop()
+    recorder.stopInNewThread()
     recorder.stop()
     verify(listener, only).onRecord(whatever)
   }
@@ -151,6 +190,8 @@ final class RecorderSpec extends FlatSpec with MustMatchers with BeforeAndAfter 
     verify(listener2).onRecord(whatever)
   }
 
+  behavior of "Recorder.withListeners"
+
   it must "throw NullPointerException if creating with null listeners" in {
     intercept[NullPointerException] {
       Recorder.withListeners(null)
@@ -163,16 +204,37 @@ final class RecorderSpec extends FlatSpec with MustMatchers with BeforeAndAfter 
     }
   }
 
+  behavior of "Recorder.withClock"
+
+  it must "throw NullPointerException if creating with null listeners" in {
+    intercept[NullPointerException] {
+      Recorder.withClock(clock, null)
+    }
+  }
+
+  it must "throw NullPointerException if creating with listener list that contains null" in {
+    intercept[NullPointerException] {
+      Recorder.withClock(clock, mockListener, null)
+    }
+  }
+
+  it must "throw NullPointerException if creating with null clock" in {
+    intercept[NullPointerException] {
+      Recorder.withClock(null)
+    }
+  }
+
   private def whatever() = any[Record]
 
   private def mockListener() = mock[IRecordListener]
 
-  private def check(record: Record, preStart: Long, postEnd: Long, data: Any) {
+  private def check(record: Record, data: Any) {
     record must not be (null)
-    record.getData must be(data)
-    val start = record.getStart.getMillis;
-    val end = start + record.getDuration.getMillis;
-    start must be >= preStart
-    end must be <= postEnd
+    record.data must be(data)
+    record.instant must be(instant)
+    record.duration.getMillis must be(duration.getMillis)
   }
+
+  private implicit def recorderToMyRecorder(recorder: Recorder): RecorderTester =
+    new RecorderTester(recorder)
 }
