@@ -21,6 +21,10 @@ import org.scalatest.junit.JUnitRunner
 import org.scalatest.matchers.MustMatchers
 import org.scalatest.{ FunSpec, BeforeAndAfter }
 import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.CountDownLatch
+import rabbit.tracking.tests.TestImplicits.funToRunnable
+import rabbit.tracking.tests.TestImplicits.nTimes
+import rabbit.tracking.tests.TestUtils.doInNewThreads
 
 @RunWith(classOf[JUnitRunner])
 final class AbstractTrackerSpec extends AbstractTrackerSpecBase {
@@ -64,6 +68,48 @@ final class AbstractTrackerSpec extends AbstractTrackerSpecBase {
     tracker.disable()
     tracker.disable()
     tracker.disableCount must be(1)
+  }
+
+  it must "behave correctly when enabling from multiple threads" in {
+    100 times {
+      val tracker = create()
+      tracker.disable()
+      doInNewThreads(20, () => {
+        100 times tracker.enable()
+      })
+
+      tracker.enableCount must be(1)
+      tracker.isEnabled must be(true)
+    }
+  }
+
+  it must "behave correctly when disabling from multiple threads" in {
+    100 times {
+      val tracker = create()
+      tracker.enable()
+      doInNewThreads(20, () => {
+        100 times tracker.disable()
+      })
+
+      tracker.disableCount must be(1)
+      tracker.isEnabled must be(false)
+    }
+  }
+
+  it must "behave correctly when enabling/disabling from multiple threads" in {
+    100 times {
+      val tracker = create()
+      doInNewThreads(20, () => {
+        100 times {
+          tracker.enable()
+          tracker.disable()
+        }
+      })
+
+      val diff = tracker.enableCount - tracker.disableCount
+      diff must be(0 plusOrMinus 1)
+      tracker.isEnabled must be(diff > 0)
+    }
   }
 
   override protected def create() = new Tester
