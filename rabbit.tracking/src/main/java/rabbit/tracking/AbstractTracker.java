@@ -20,6 +20,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Implements common tracker behaviors.
+ * <p/>
+ * This implementation is thread safe.
  * 
  * @since 2.0
  */
@@ -27,7 +29,7 @@ public abstract class AbstractTracker implements ITracker {
 
   private final AtomicBoolean enabled;
 
-  public AbstractTracker() {
+  protected AbstractTracker() {
     enabled = new AtomicBoolean(false);
   }
 

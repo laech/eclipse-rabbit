@@ -14,24 +14,13 @@
  * the License.
  */
 
-package rabbit.tracking.tests
+package rabbit.tracking;
 
-import org.mockito.invocation.InvocationOnMock
-import org.mockito.stubbing.Answer
-
-object TestImplicits {
-
-  implicit def funToAnswer(f: InvocationOnMock => Unit): Answer[Unit] = new Answer[Unit] {
-    override def answer(invocation: InvocationOnMock) = f(invocation)
-  }
-
-  implicit def funToRunnable(f: () => Any): Runnable = new Runnable {
-    override def run = f()
-  }
-
-  implicit def nTimes(n: Int) = new {
-    def times(f: => Unit) {
-      for (_ <- 0 until n) f
-    }
-  }
+/**
+ * A tracker that can have listeners attached for receiving events.
+ * 
+ * @param <T> the type of listeners that can be attached to this tracker
+ * @since 2.0
+ */
+public interface IListenableTracker<T> extends IListenable<T>, ITracker {
 }

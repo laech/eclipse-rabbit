@@ -16,22 +16,30 @@
 
 package rabbit.tracking.tests
 
-import org.mockito.invocation.InvocationOnMock
-import org.mockito.stubbing.Answer
+import java.util.concurrent.CountDownLatch
 
-object TestImplicits {
+import rabbit.tracking.tests.TestImplicits.funToRunnable
 
-  implicit def funToAnswer(f: InvocationOnMock => Unit): Answer[Unit] = new Answer[Unit] {
-    override def answer(invocation: InvocationOnMock) = f(invocation)
-  }
+object TestUtils {
 
-  implicit def funToRunnable(f: () => Any): Runnable = new Runnable {
-    override def run = f()
-  }
-
-  implicit def nTimes(n: Int) = new {
-    def times(f: => Unit) {
-      for (_ <- 0 until n) f
+  /**
+   * Performs actual in new threads and wait for all of them to finish before
+   * returning.
+   *
+   * @param n the number of threads to use
+   * @param f the code to execute in new thread
+   */
+  def doInNewThreads(n: Int, f: => Unit) {
+    val startSignal = new CountDownLatch(1)
+    val doneSignal = new CountDownLatch(n)
+    (0 until n) foreach { _ =>
+      new Thread(() => {
+        startSignal.await()
+        f
+        doneSignal.countDown()
+      }).start()
     }
+    startSignal.countDown()
+    doneSignal.await()
   }
 }
