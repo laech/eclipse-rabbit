@@ -19,7 +19,6 @@ package rabbit.tracking.util
 import java.lang.Thread.sleep
 import java.util.Arrays.asList
 import java.util.concurrent.{ CountDownLatch, ConcurrentLinkedQueue }
-
 import org.joda.time.Duration.millis
 import org.joda.time.Instant.now
 import org.joda.time.{ Instant, Duration }
@@ -30,42 +29,15 @@ import org.mockito.invocation.InvocationOnMock
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.matchers.MustMatchers
 import org.scalatest.mock.MockitoSugar.mock
-
-import rabbit.tracking.internal.util.IClock;
 import org.scalatest.{ FlatSpec, BeforeAndAfter }
-
 import rabbit.tracking.tests.TestImplicits.{ funToRunnable, funToAnswer }
-import rabbit.tracking.util.Recorder.{ Record, IRecordListener }
+import rabbit.tracking.ListenableSpecBase
+import rabbit.tracking.tests.TestUtils.doInNewThreads
+import rabbit.tracking.tests.TestImplicits.nTimes
+import java.util.concurrent.atomic.AtomicInteger
 
 @RunWith(classOf[JUnitRunner])
-final class RecorderSpec extends FlatSpec with MustMatchers with BeforeAndAfter {
-
-  private class RecorderTester(recorder: Recorder) {
-
-    def startInNewThread(data: Any = null) {
-      doInNewThread({ () =>
-        recorder.start(data)
-      })
-    }
-
-    def stopInNewThread() {
-      doInNewThread(() => {
-        recorder.stop()
-      })
-    }
-
-    private def doInNewThread(f: () => Unit) {
-      val startSignal = new CountDownLatch(1)
-      val doneSignal = new CountDownLatch(1)
-      new Thread({ () =>
-        startSignal.await()
-        f()
-        doneSignal.countDown()
-      }).start()
-      startSignal.countDown()
-      doneSignal.await()
-    }
-  }
+final class RecorderSpec extends ListenableSpecBase[IRecordListener, Recorder] {
 
   private class MockClock(instant: Instant, duration: Duration) extends IClock {
     private var _returnStartInstant: Boolean = true
@@ -81,7 +53,8 @@ final class RecorderSpec extends FlatSpec with MustMatchers with BeforeAndAfter 
   private var instant: Instant = _
   private var duration: Duration = _
 
-  before {
+  override def beforeEach() {
+    super.beforeEach()
     instant = now
     duration = millis(1001)
     clock = new MockClock(instant, duration)
@@ -89,22 +62,6 @@ final class RecorderSpec extends FlatSpec with MustMatchers with BeforeAndAfter 
   }
 
   behavior of "Recorder"
-
-  it must "throw NullPointerException if tried to construct a record without a duration" in {
-    intercept[NullPointerException] {
-      Record.create(now, null, "data");
-    }
-  }
-
-  it must "throw NullPointerException if tried to construct a record without a start time" in {
-    intercept[NullPointerException] {
-      Record.create(null, Duration.ZERO, "data");
-    }
-  }
-
-  it must "not throw exception if tried to construct a record without user data" in {
-    Record.create(now, Duration.ZERO, null)
-  }
 
   it must "not notify listener that has been removed" in {
     val listener = mockListener()
@@ -147,7 +104,7 @@ final class RecorderSpec extends FlatSpec with MustMatchers with BeforeAndAfter 
     recorder.start("mydata")
     sleep(5)
     clock.returnStartInstant = false
-    recorder.stopInNewThread()
+    recorder.stop()
 
     verify(listener, only).onRecord(record)
     check(record, "mydata")
@@ -160,23 +117,11 @@ final class RecorderSpec extends FlatSpec with MustMatchers with BeforeAndAfter 
   it must "ignore subsequent calls to stop" in {
     val listener = mockListener()
     recorder.addListener(listener)
-    recorder.startInNewThread("abc")
+    recorder.start("abc")
     recorder.stop()
-    recorder.stopInNewThread()
+    recorder.stop()
     recorder.stop()
     verify(listener, only).onRecord(whatever)
-  }
-
-  it must "throw NullPointerException if adding a null listener" in {
-    intercept[NullPointerException] {
-      recorder.addListener(null)
-    }
-  }
-
-  it must "throw NullPointerException if removing a null listener" in {
-    intercept[NullPointerException] {
-      recorder.removeListener(null)
-    }
   }
 
   it must "do nothing if stop is called but start wasn't" in {
@@ -186,30 +131,40 @@ final class RecorderSpec extends FlatSpec with MustMatchers with BeforeAndAfter 
     verifyZeroInteractions(listener)
   }
 
-  it must "add listeners to be notified when creating with listeners" in {
-    val listener1 = mockListener()
-    val listener2 = mockListener()
-    recorder = Recorder.withListeners(listener1, listener2)
-    recorder.start("data")
-    recorder.stop()
-    verify(listener1).onRecord(whatever)
-    verify(listener2).onRecord(whatever)
-  }
-
-  behavior of "Recorder.withListeners"
-
-  it must "throw NullPointerException if creating with null listeners" in {
-    intercept[NullPointerException] {
-      Recorder.withListeners(null)
+  it must "be able to start correctly concurrently with different user data" in {
+    10 times {
+      val counter = new AtomicInteger
+      val listener = listenerWithDataCollection()
+      val recorder = createWithListeners(listener)
+      doInNewThreads(20, 10 times recorder.start(counter.getAndIncrement()))
+      listener.data.size must be(counter.get - 1)
     }
   }
 
-  it must "throw NullPointerException if creating with listener list that contains null" in {
-    intercept[NullPointerException] {
-      Recorder.withListeners(mockListener, null)
+  it must "be able to start correctly concurrently with same user data" in {
+    10 times {
+      val listener = listenerWithCounter()
+      val recorder = createWithListeners(listener)
+      doInNewThreads(20, 10 times recorder.start())
+      recorder.stop()
+      listener.counter.get must be(1)
     }
   }
 
+  it must "be able to stop correctly concurrently" in {
+    10 times {
+      val listener = listenerWithCounter()
+      val recorder = createWithListeners(listener)
+      recorder.start()
+      doInNewThreads(20, 10 times recorder.stop())
+      listener.counter.get must be(1)
+    }
+  }
+
+  /*
+   * Similar tests for "Recorder.create" has been performed by 
+   * ListenableSpecBase since we return Recorder.create in createWithListeners
+   */
   behavior of "Recorder.withClock"
 
   it must "throw NullPointerException if creating with null listeners" in {
@@ -234,6 +189,17 @@ final class RecorderSpec extends FlatSpec with MustMatchers with BeforeAndAfter 
 
   private def mockListener() = mock[IRecordListener]
 
+  private def listenerWithCounter() = new IRecordListener {
+    val counter = new AtomicInteger
+    override def onRecord(record: Record) { counter.incrementAndGet() }
+  }
+
+  private def listenerWithDataCollection() = new IRecordListener {
+    private val _data = new java.util.concurrent.ConcurrentHashMap[Any, Any]
+    override def onRecord(record: Record) { _data.put(record.data, record.data) }
+    def data = _data.keySet()
+  }
+
   private def check(record: Record, data: Any) {
     record must not be (null)
     record.data must be(data)
@@ -241,6 +207,17 @@ final class RecorderSpec extends FlatSpec with MustMatchers with BeforeAndAfter 
     record.duration.getMillis must be(duration.getMillis)
   }
 
-  private implicit def recorderToMyRecorder(recorder: Recorder): RecorderTester =
-    new RecorderTester(recorder)
+  protected override val supportsCreateWithListeners = true
+
+  protected override def newUniqueListener() = new IRecordListener {
+    override def onRecord(record: Record) {}
+  }
+
+  protected override def getListeners(listenable: Recorder) =
+    listenable.getListeners()
+
+  protected override def create() = createWithListeners()
+
+  protected override def createWithListeners(listeners: IRecordListener*) =
+    Recorder.create(listeners: _*)
 }

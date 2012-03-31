@@ -17,8 +17,8 @@
 package rabbit.tracking.tests
 
 import java.util.concurrent.CountDownLatch
-
 import rabbit.tracking.tests.TestImplicits.funToRunnable
+import java.util.concurrent.atomic.AtomicReference
 
 object TestUtils {
 
@@ -30,16 +30,24 @@ object TestUtils {
    * @param f the code to execute in new thread
    */
   def doInNewThreads(n: Int, f: => Unit) {
+    val error = new AtomicReference[Throwable]
     val startSignal = new CountDownLatch(1)
     val doneSignal = new CountDownLatch(n)
     (0 until n) foreach { _ =>
       new Thread(() => {
         startSignal.await()
-        f
+        try {
+          f
+        } catch {
+          case t: Throwable => error.set(t)
+        }
         doneSignal.countDown()
       }).start()
     }
     startSignal.countDown()
     doneSignal.await()
+    if (error.get != null) {
+      throw error.get
+    }
   }
 }

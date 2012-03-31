@@ -14,19 +14,21 @@
  * the License.
  */
 
-package rabbit.tracking.internal.util;
-
-import org.joda.time.Instant;
+package rabbit.tracking.util;
 
 /**
- * Clocking using the system time.
+ * Listener to be notified of recording events.
+ * 
+ * @see Recorder
+ * @see Record
+ * @since 2.0
  */
-public enum SystemClock implements IClock {
+public interface IRecordListener {
 
-  INSTANCE;
-
-  @Override public Instant now() {
-    return Instant.now();
-  }
-
+  /**
+   * Called when a new record is available.
+   * 
+   * @param record the new record, not null
+   */
+  void onRecord(Record record);
 }

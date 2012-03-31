@@ -18,17 +18,16 @@ package rabbit.tracking.util;
 
 import static com.google.common.base.Objects.equal;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static rabbit.tracking.internal.util.Arrays.checkedCopyAsList;
-import static rabbit.tracking.internal.util.Sets.newCopyOnWriteSet;
 
 import java.util.Set;
 
 import org.joda.time.Duration;
 import org.joda.time.Instant;
 
-import rabbit.tracking.TimedEvent;
-import rabbit.tracking.internal.util.IClock;
-import rabbit.tracking.internal.util.SystemClock;
+import rabbit.tracking.IListenable;
+import rabbit.tracking.internal.util.ListenableSupport;
+
+import com.google.common.annotations.VisibleForTesting;
 
 /**
  * A helper class for recording durations with associated data.
@@ -38,88 +37,22 @@ import rabbit.tracking.internal.util.SystemClock;
  * <p/>
  * This class is thread safe.
  * 
- * @see #create()
- * @see #withListeners(IRecordListener...)
+ * @see #create(IRecordListener...)
+ * @see #withClock(IClock, IRecordListener...)
  * @see IRecordListener
  * @see Record
  * @since 2.0
  */
-public final class Recorder {
-
-  /**
-   * Listener to be notified of recording events.
-   * 
-   * @since 2.0
-   */
-  public static interface IRecordListener {
-
-    /**
-     * Called when a new record is available.
-     * 
-     * @param record the new record, not null
-     */
-    void onRecord(Record record);
-  }
-
-  /**
-   * Represents the result of a recording.
-   * 
-   * @since 2.0
-   */
-  public static final class Record extends TimedEvent {
-
-    private final Object data;
-
-    /**
-     * Creates a record with the given data.
-     * 
-     * @param instant the start time of this recording
-     * @param duration the duration of this recording
-     * @param data the user data of this recording
-     * @return a record
-     * @throws NullPointerException if start is null, or duration is null
-     */
-    static Record create(Instant instant, Duration duration, Object data) {
-      return new Record(instant, duration, data);
-    }
-
-    private Record(Instant instant, Duration duration, Object data) {
-      super(instant, duration);
-      this.data = data;
-    }
-
-    /**
-     * The data that was associated with this recording.
-     * 
-     * @return the user data, or null if there was no data associated with this
-     *         recording
-     */
-    public Object data() {
-      return data;
-    }
-
-    @Override public String toString() {
-      return toStringHelper().add("data", data()).toString();
-    }
-  }
+public final class Recorder implements IListenable<IRecordListener> {
 
   /**
    * Creates a recorder.
-   * 
-   * @return a recorder
-   */
-  public static Recorder create() {
-    return withListeners();
-  }
-
-  /**
-   * Creates a recorder with some listeners.
    * 
    * @param listeners the listeners
    * @return a new recorder with the specified listeners attached
    * @throws NullPointerException if any listener is null
    */
-  public static Recorder withListeners(IRecordListener... listeners) {
+  public static Recorder create(IRecordListener... listeners) {
     return withClock(SystemClock.INSTANCE, listeners);
   }
 
@@ -130,12 +63,12 @@ public final class Recorder {
    * @param listeners the listeners
    * @throws NullPointerException if clock is null, or any listener is null
    */
-  static Recorder withClock(IClock clock, IRecordListener... listeners) {
+  public static Recorder withClock(IClock clock, IRecordListener... listeners) {
     return new Recorder(clock, listeners);
   }
 
   private final IClock clock;
-  private final Set<IRecordListener> listeners;
+  private final ListenableSupport<IRecordListener> listenable;
 
   private Instant start;
   private Object data;
@@ -143,28 +76,15 @@ public final class Recorder {
 
   private Recorder(IClock clock, IRecordListener... listeners) {
     this.clock = checkNotNull(clock, "clock");
-    this.listeners = newCopyOnWriteSet(checkedCopyAsList(listeners));
+    this.listenable = ListenableSupport.create(listeners);
   }
 
-  /**
-   * Adds a new listener to listen to events. Has no affect if an identical
-   * listener is already registered.
-   * 
-   * @param listener the listener to be added
-   * @throws NullPointerException if the listener is null
-   */
-  public void addListener(IRecordListener listener) {
-    listeners.add(checkNotNull(listener, "listener"));
+  @Override public void addListener(IRecordListener listener) {
+    listenable.addListener(listener);
   }
 
-  /**
-   * Removes a listener from listening to events.
-   * 
-   * @param listener the listener to be removed
-   * @throws NullPointerException if the listener is null
-   */
-  public void removeListener(IRecordListener listener) {
-    listeners.remove(checkNotNull(listener, "listener"));
+  @Override public void removeListener(IRecordListener listener) {
+    listenable.removeListener(listener);
   }
 
   /**
@@ -179,28 +99,46 @@ public final class Recorder {
    * @param userData the user data to associate with this recording, may be null
    */
   public void start(Object userData) {
-    boolean sameData = equal(this.data, userData);
-    Instant now = clock.now();
-
-    Object data;
-    Instant start;
-    boolean wasRecording = false;
+    Object dataSnapshot;
     synchronized (this) {
-      if (this.recording && sameData) {
-        return;
-      }
-      data = this.data;
-      start = this.start;
-      wasRecording = this.recording;
-
-      this.data = userData;
-      this.start = now;
-      this.recording = true;
+      dataSnapshot = data;
     }
 
-    if (wasRecording) {
-      Duration duration = new Duration(start, now);
-      notifyListeners(new Record(start, duration, data));
+    boolean notify = false;
+    boolean sameData = equal(dataSnapshot, userData);
+    Instant now = clock.now();
+    Object myData;
+    Instant myStart;
+    Duration myDuration = null;
+
+    synchronized (this) {
+      if (dataSnapshot != data) {
+        // If data is already changed by the time we got here, then the duration
+        // will be zero as we didn't actually start recording with the userData,
+        // but we still need to notify as the result of someone calling start()
+        myData = userData;
+        myStart = now;
+        myDuration = Duration.ZERO;
+        notify = true;
+
+      } else {
+        if (recording && sameData) {
+          return;
+        }
+        myData = data;
+        myStart = start;
+        notify = recording;
+        data = userData;
+        start = now;
+        recording = true;
+      }
+    }
+
+    if (notify) {
+      if (myDuration == null) {
+        myDuration = new Duration(myStart, now);
+      }
+      notifyListeners(new Record(myStart, myDuration, myData));
     }
   }
 
@@ -211,26 +149,30 @@ public final class Recorder {
    * stopped and listeners will be notified.
    */
   public void stop() {
-    Object data;
-    Instant start;
+    Object myData;
+    Instant myStart;
     synchronized (this) {
       if (!recording) {
         return;
       }
-      data = this.data;
-      start = this.start;
+      myData = data;
+      myStart = start;
 
-      this.recording = false;
-      this.data = null;
-      this.start = null;
+      recording = false;
+      data = null;
+      start = null;
     }
 
-    Duration duration = new Duration(start, clock.now());
-    notifyListeners(new Record(start, duration, data));
+    Duration duration = new Duration(myStart, clock.now());
+    notifyListeners(new Record(myStart, duration, myData));
+  }
+
+  @VisibleForTesting Set<IRecordListener> getListeners() {
+    return listenable.getListeners();
   }
 
   private void notifyListeners(Record record) {
-    for (IRecordListener listener : listeners) {
+    for (IRecordListener listener : listenable.getListeners()) {
       listener.onRecord(record);
     }
   }

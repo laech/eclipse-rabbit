@@ -16,16 +16,12 @@
 
 package rabbit.tracking;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static java.util.Collections.unmodifiableSet;
-import static rabbit.tracking.internal.util.Arrays.checkedCopyAsList;
-import static rabbit.tracking.internal.util.Sets.newCopyOnWriteSet;
-
 import java.util.Set;
 
+import rabbit.tracking.internal.util.ListenableSupport;
+
 /**
- * Implements common behaviors of a listenable tracker (adding/removing of
- * listeners).
+ * Implements common behaviors of a listenable tracker.
  * <p/>
  * This implementation is thread safe.
  * 
@@ -34,7 +30,7 @@ import java.util.Set;
 public abstract class AbstractListenableTracker<T>
     extends AbstractTracker implements IListenableTracker<T> {
 
-  private final Set<T> listeners;
+  private final ListenableSupport<T> listenable;
 
   /**
    * Constructs a tracker with default listeners.
@@ -43,15 +39,15 @@ public abstract class AbstractListenableTracker<T>
    * @throws NullPointerException if listeners contain null
    */
   protected AbstractListenableTracker(T... listeners) {
-    this.listeners = newCopyOnWriteSet(checkedCopyAsList(listeners));
+    this.listenable = ListenableSupport.create(listeners);
   }
 
   @Override public final void addListener(T listener) {
-    listeners.add(checkNotNull(listener, "listener"));
+    listenable.addListener(listener);
   }
 
   @Override public final void removeListener(T listener) {
-    listeners.remove(checkNotNull(listener, "listener"));
+    listenable.removeListener(listener);
   }
 
   /**
@@ -61,6 +57,6 @@ public abstract class AbstractListenableTracker<T>
    *         modifiable
    */
   protected final Set<T> getListeners() {
-    return unmodifiableSet(listeners);
+    return listenable.getListeners();
   }
 }

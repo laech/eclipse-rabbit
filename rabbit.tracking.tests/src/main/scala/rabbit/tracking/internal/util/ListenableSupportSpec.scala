@@ -14,33 +14,30 @@
  * the License.
  */
 
-package rabbit.tracking
+package rabbit.tracking.internal.util
 
 import java.util.concurrent.atomic.AtomicInteger
 
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 
+import rabbit.tracking.ListenableSpecBase
+
 @RunWith(classOf[JUnitRunner])
-final class AbstractListenableTrackerSpec extends AbstractTrackerSpecBase
-  with ListenableSpecBase[String, AbstractListenableTracker[String]] {
+final class ListenableSupportSpec
+  extends ListenableSpecBase[String, ListenableSupport[String]] {
 
   private val listenerCount = new AtomicInteger
-
-  protected override type Tracker = AbstractListenableTracker[String]
 
   protected override val supportsCreateWithListeners = true
 
   protected override def newUniqueListener() = "listener #" + listenerCount.getAndIncrement()
 
-  protected override def getListeners(listenable: AbstractListenableTracker[String]) =
+  protected override def getListeners(listenable: ListenableSupport[String]) =
     listenable.getListeners()
 
   protected override def create() = createWithListeners()
 
   protected override def createWithListeners(listeners: String*) =
-    new AbstractListenableTracker(listeners: _*) {
-      override protected def onEnable() {}
-      override protected def onDisable() {}
-    }
+    ListenableSupport.create(listeners: _*)
 }

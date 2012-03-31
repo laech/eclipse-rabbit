@@ -14,19 +14,21 @@
  * the License.
  */
 
-package rabbit.tracking.internal.util;
+package rabbit.tracking.util;
 
 import org.joda.time.Instant;
 
 /**
- * Provides current time.
+ * Clocking using the default system time.
+ * 
+ * @since 2.0
  */
-public interface IClock {
+public enum SystemClock implements IClock {
 
-  /**
-   * The current time.
-   * 
-   * @return the current time, not null
-   */
-  Instant now();
+  INSTANCE;
+
+  @Override public Instant now() {
+    return Instant.now();
+  }
+
 }

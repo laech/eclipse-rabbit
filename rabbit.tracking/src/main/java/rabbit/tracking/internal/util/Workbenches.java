@@ -16,9 +16,9 @@
 
 package rabbit.tracking.internal.util;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Sets.newHashSetWithExpectedSize;
 import static java.util.Collections.unmodifiableSet;
-import static org.eclipse.ui.PlatformUI.getWorkbench;
 
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
@@ -26,6 +26,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IPartService;
+import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 
@@ -34,19 +35,26 @@ public final class Workbenches {
   /**
    * Gets the current workbench window in focus.
    * 
+   * @param workbench the workbench to get the focused window for
    * @return the currently focused window, or null if none
+   * @throws NullPointerException if workbench is null
    */
-  public static IWorkbenchWindow getFocusedWindow() {
+  public static IWorkbenchWindow getFocusedWindow(final IWorkbench workbench) {
+    check(workbench);
+
     if (Display.getCurrent() != null) {
-      IWorkbenchWindow window = getWorkbench().getActiveWorkbenchWindow();
+      IWorkbenchWindow window = workbench.getActiveWorkbenchWindow();
+      if (window == null) {
+        return null;
+      }
       return isFocused(window) ? window : null;
     }
 
     final AtomicReference<IWorkbenchWindow> result = newAtomicReference();
-    syncExec(new Runnable() {
+    workbench.getDisplay().syncExec(new Runnable() {
       @Override public void run() {
-        IWorkbenchWindow window = getWorkbench().getActiveWorkbenchWindow();
-        if (isFocused(window)) {
+        IWorkbenchWindow window = workbench.getActiveWorkbenchWindow();
+        if (window != null && isFocused(window)) {
           result.set(window);
         }
       }
@@ -57,21 +65,25 @@ public final class Workbenches {
   /**
    * Gets the current workbench part in focus.
    * 
+   * @param workbench the workbench to get the focused part for
    * @return the currently focused workbench part, or null if none
+   * @throws NullPointerException if workbench is null
    */
-  public static IWorkbenchPart getFocusedPart() {
-    IWorkbenchWindow window = getFocusedWindow();
+  public static IWorkbenchPart getFocusedPart(IWorkbench workbench) {
+    IWorkbenchWindow window = getFocusedWindow(check(workbench));
     return window != null ? window.getPartService().getActivePart() : null;
   }
 
   /**
    * Gets all the {@link IPartService}s from the currently opened windows.
    * 
+   * @param workbench the workbench to get all the part service for
    * @return a set of all {@link IPartService}s, not null, may be empty,
    *         unmodifiable
+   * @throws NullPointerException if workbench is null
    */
-  public static Set<IPartService> getPartServices() {
-    IWorkbenchWindow[] windows = getWorkbench().getWorkbenchWindows();
+  public static Set<IPartService> getPartServices(IWorkbench workbench) {
+    IWorkbenchWindow[] windows = check(workbench).getWorkbenchWindows();
     Set<IPartService> services = newHashSetWithExpectedSize(windows.length);
     for (IWorkbenchWindow window : windows) {
       services.add(window.getPartService());
@@ -85,12 +97,12 @@ public final class Workbenches {
         && !shell.getMinimized();
   }
 
-  private static void syncExec(Runnable runnable) {
-    getWorkbench().getDisplay().syncExec(runnable);
-  }
-
   private static <T> AtomicReference<T> newAtomicReference() {
     return new AtomicReference<T>();
+  }
+
+  private static IWorkbench check(IWorkbench workbench) {
+    return checkNotNull(workbench, "workbench");
   }
 
   private Workbenches() {

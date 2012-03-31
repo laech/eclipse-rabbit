@@ -16,6 +16,8 @@
 
 package rabbit.tracking.internal.util
 
+import java.util.concurrent.atomic.AtomicReference
+
 import scala.collection.JavaConversions.asScalaSet
 
 import org.eclipse.swt.widgets.{ Shell, Display }
@@ -42,62 +44,93 @@ final class WorkbenchesSpec extends FlatSpec with MustMatchers with BeforeAndAft
 
   behavior of "Workbenches.getFocusedWindow"
 
-  it must "return the window in focus" in {
-    val window = Workbenches.getFocusedWindow
-    window must not be (null)
-    window must be(currentWindow)
+  it must "throw NullPointerException if workbench is null" in {
+    intercept[NullPointerException] {
+      Workbenches.getFocusedWindow(null)
+    }
+  }
+
+  it must "be able to return the focused window from the UI thread" in {
+    val actual = new AtomicReference[IWorkbenchWindow]
+    display.syncExec(() => {
+      actual set Workbenches.getFocusedWindow(workbench)
+    })
+    actual.get must not be (null)
+    actual.get must be(currentWindow)
+  }
+
+  it must "be able to return the focused window from a non-UI thread" in {
+    val actual = new AtomicReference[IWorkbenchWindow]
+    new Thread(() => {
+      actual set Workbenches.getFocusedWindow(workbench)
+    }).start
+    actual.get must not be (null)
+    actual.get must be(currentWindow)
   }
 
   it must "return null if there are no window in focus" in {
-    var window: IWorkbenchWindow = null
+    var actual = new AtomicReference[IWorkbenchWindow]
     display.syncExec(() => {
       val dialog = openDialog()
-      window = Workbenches.getFocusedWindow
+      actual set Workbenches.getFocusedWindow(workbench)
       dialog.close()
     })
-    window must be(null)
+    actual.get must be(null)
   }
 
   behavior of "Workbenches.getFocusedPart"
 
+  it must "throw NullPointerException if workbench is null" in {
+    intercept[NullPointerException] {
+      Workbenches.getFocusedPart(null)
+    }
+  }
+
   it must "return the part in focus" in {
     val expected = openRandomPart
-    val actual = Workbenches.getFocusedPart
+    val actual = Workbenches.getFocusedPart(workbench)
     actual must be(expected)
   }
 
-  it must "return nll if there are no part in focus" in {
+  it must "return null if there are no part in focus" in {
     openRandomPart
-    var part: IWorkbenchPart = null
+    var actual = new AtomicReference[IWorkbenchPart]
     display.syncExec(() => {
       val dialog = openDialog()
-      part = Workbenches.getFocusedPart
+      actual set Workbenches.getFocusedPart(workbench)
       dialog.close()
     })
-    part must be(null)
+    actual.get must be(null)
   }
 
   behavior of "Workbenches.getPartServices"
 
+  it must "throw NullPointerException if workbench is null" in {
+    intercept[NullPointerException] {
+      Workbenches.getPartServices(null)
+    }
+  }
+
   it must "return all the part services of all windows" in {
-    val windows = Seq(currentWindow, openWindow, openWindow)
+    val current = currentWindow
+    val windows = Seq(current, openWindow, openWindow)
     try {
       val expected = windows.map(_.getPartService).toSet
-      val actual: collection.mutable.Set[IPartService] = Workbenches.getPartServices
+      val actual: collection.mutable.Set[IPartService] = Workbenches.getPartServices(workbench)
       actual must be(expected)
     } finally {
       display.syncExec(() => {
-        windows.foreach(_.close)
+        windows.filter(_ != current).foreach(_.close)
       })
     }
   }
 
   private def currentWindow = {
-    var window: IWorkbenchWindow = null
+    var ref = new AtomicReference[IWorkbenchWindow]
     display.syncExec(() => {
-      window = workbench.getActiveWorkbenchWindow
+      ref set workbench.getActiveWorkbenchWindow
     })
-    window
+    ref.get
   }
 
   private def openDialog() = {

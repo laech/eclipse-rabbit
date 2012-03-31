@@ -14,24 +14,21 @@
  * the License.
  */
 
-package rabbit.tracking.internal.util
+package rabbit.tracking.util;
 
-import org.joda.time.Instant
-import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
-import org.scalatest.matchers.MustMatchers
-import org.scalatest.FlatSpec
+import org.joda.time.Instant;
 
-@RunWith(classOf[JUnitRunner])
-final class SystemClockSpec extends FlatSpec with MustMatchers {
+/**
+ * Clock provides the current time.
+ * 
+ * @since 2.0
+ */
+public interface IClock {
 
-  behavior of "SystemClock"
-
-  it must "return the system time" in {
-    val pre = Instant.now
-    val actual = SystemClock.INSTANCE.now
-    val post = Instant.now
-    actual.getMillis must be >= pre.getMillis
-    actual.getMillis must be <= post.getMillis
-  }
+  /**
+   * The current time.
+   * 
+   * @return the current time, not null
+   */
+  Instant now();
 }
