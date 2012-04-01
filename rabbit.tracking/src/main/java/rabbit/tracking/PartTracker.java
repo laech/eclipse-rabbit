@@ -17,21 +17,20 @@
 package rabbit.tracking;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.eclipse.ui.PlatformUI.getWorkbench;
-import static rabbit.tracking.internal.util.Arrays.checkedCopyAsList;
-import static rabbit.tracking.internal.util.Sets.newCopyOnWriteSet;
 import static rabbit.tracking.internal.util.Workbenches.getFocusedPart;
+import static rabbit.tracking.internal.util.Workbenches.getFocusedWindow;
 import static rabbit.tracking.internal.util.Workbenches.getPartServices;
-
-import java.util.Set;
 
 import org.eclipse.ui.IPartListener;
 import org.eclipse.ui.IPartService;
 import org.eclipse.ui.IWindowListener;
+import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 
 import rabbit.tracking.internal.util.PartListener;
+
+import com.google.inject.Inject;
 
 /**
  * Tracks the currently focused workbench part in the workbench, across multiple
@@ -46,69 +45,26 @@ import rabbit.tracking.internal.util.PartListener;
  * <p/>
  * When this tracker is enabled, if there is a currently focused part, the
  * listeners will be notify immediately.
- * 
- * @since 2.0
  */
-public final class PartTracker extends AbstractTracker {
+final class PartTracker extends AbstractListenableTracker<IPartFocusListener> {
 
-  /**
-   * Listener to listen to part focus events.
-   * 
-   * @since 2.0
-   */
-  public static interface IPartFocusListener {
-
-    /**
-     * Called when a workbench part became focused.
-     * 
-     * @param part the workbench part in focus, not null
-     */
-    void onPartFocused(IWorkbenchPart part);
-
-    /**
-     * Called when the previously focused workbench part no longer has the
-     * focus.
-     * 
-     * @param part the part that lost focus, not null
-     */
-    void onPartUnfocused(IWorkbenchPart part);
-  }
-
-  /**
-   * Gets a tracker.
-   * 
-   * @return a tracker, not null
-   */
-  public static PartTracker get() {
-    return new PartTracker();
-  }
-
-  /**
-   * Gets a tracker with listeners attached.
-   * 
-   * @param listeners the listeners to be attached
-   * @return a tracker, not null
-   * @throws NullPointerException if listeners contain null
-   */
-  public static PartTracker withListeners(IPartFocusListener... listeners) {
-    return new PartTracker(listeners);
-  }
-
-  private final IPartListener partListener = new PartListener() {
+  private class MyPartListener extends PartListener {
     @Override public void partActivated(IWorkbenchPart part) {
       super.partActivated(part);
-      // TODO check focus
-      onPartFocused(part);
+      if (part.getSite().getWorkbenchWindow() == getFocusedWindow(workbench)) {
+        onPartFocused(part);
+      }
     }
 
     @Override public void partDeactivated(IWorkbenchPart part) {
       super.partDeactivated(part);
-      // TODO check focus
-      onPartUnfocused(part);
+      if (part.getSite().getWorkbenchWindow() == getFocusedWindow(workbench)) {
+        onPartUnfocused(part);
+      }
     }
-  };
+  }
 
-  private final IWindowListener windowListener = new IWindowListener() {
+  private class MyWindowListener implements IWindowListener {
     @Override public void windowActivated(IWorkbenchWindow window) {
       IWorkbenchPart part = window.getPartService().getActivePart();
       if (part != null) {
@@ -130,62 +86,54 @@ public final class PartTracker extends AbstractTracker {
     @Override public void windowOpened(IWorkbenchWindow window) {
       window.getPartService().addPartListener(partListener);
     }
-  };
-
-  private final Set<IPartFocusListener> listeners;
-
-  private PartTracker(IPartFocusListener... listeners) {
-    this.listeners = newCopyOnWriteSet(checkedCopyAsList(listeners));
   }
 
-  /**
-   * Adds a listener to listen to part focus events. Has no affect if an
-   * identical listener has already been added.
-   * 
-   * @param listener the listener to add, not null
-   * @throws NullPointerException if listener is null
-   */
-  public void addListener(IPartFocusListener listener) {
-    listeners.add(checkNotNull(listener, "listener"));
-  }
+  private final IWorkbench workbench;
+  private final IPartListener partListener;
+  private final IWindowListener windowListener;
 
   /**
-   * Removes the given listener from listening to part focus events.
+   * Creates a tracker.
    * 
-   * @param listener the listener to remove, not null
-   * @throws NullPointerException if listener is null
+   * @param workbench the workbench to track, not null
+   * @param listeners the listeners to be attached
+   * @throws NullPointerException if workbench is null, or listeners contain
+   *         null
    */
-  public void removeListener(IPartFocusListener listener) {
-    listeners.remove(checkNotNull(listener, "listener"));
+  @Inject PartTracker(IWorkbench workbench, IPartFocusListener... listeners) {
+    super(listeners);
+    this.workbench = checkNotNull(workbench, "workbench");
+    this.partListener = new MyPartListener();
+    this.windowListener = new MyWindowListener();
   }
 
   @Override protected void onDisable() {
-    getWorkbench().removeWindowListener(windowListener);
-    for (IPartService service : getPartServices()) {
+    workbench.removeWindowListener(windowListener);
+    for (IPartService service : getPartServices(workbench)) {
       service.removePartListener(partListener);
     }
   }
 
   @Override protected void onEnable() {
-    getWorkbench().addWindowListener(windowListener);
-    for (IPartService service : getPartServices()) {
+    workbench.addWindowListener(windowListener);
+    for (IPartService service : getPartServices(workbench)) {
       service.addPartListener(partListener);
     }
 
-    IWorkbenchPart part = getFocusedPart();
+    IWorkbenchPart part = getFocusedPart(workbench);
     if (part != null) {
       onPartFocused(part);
     }
   }
 
   private void onPartFocused(IWorkbenchPart part) {
-    for (IPartFocusListener listener : listeners) {
+    for (IPartFocusListener listener : getListeners()) {
       listener.onPartFocused(part);
     }
   }
 
   private void onPartUnfocused(IWorkbenchPart part) {
-    for (IPartFocusListener listener : listeners) {
+    for (IPartFocusListener listener : getListeners()) {
       listener.onPartUnfocused(part);
     }
   }

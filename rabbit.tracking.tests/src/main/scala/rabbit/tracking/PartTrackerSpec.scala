@@ -16,23 +16,25 @@
 
 package rabbit.tracking
 
-import org.eclipse.ui.{ IWorkbenchWindow, IWorkbenchPart }
+import org.eclipse.ui.PlatformUI.getWorkbench
+import org.eclipse.ui.{ IWorkbenchWindow, IWorkbenchPart, IWorkbench, IWindowListener, IPartService, IPartListener }
 import org.junit.runner.RunWith
-import org.mockito.Matchers.any
-import org.mockito.Mockito.{ verifyZeroInteractions, verify, only, never, inOrder, atLeastOnce }
 import org.mockito.BDDMockito.given
-import org.scalatest.mock.MockitoSugar.mock
+import org.mockito.Matchers.any
+import org.mockito.Mockito.{ verifyZeroInteractions, verify, only, never, inOrder }
 import org.scalatest.junit.JUnitRunner
+import org.scalatest.mock.MockitoSugar.mock
 
-import rabbit.tracking.PartTracker.IPartFocusListener
-import rabbit.tracking.tests.WorkbenchTestUtil.{ openWindow, openRandomPart, hide, closeAllParts, close, activate }
+import rabbit.tracking.internal.util.Workbenches
+import rabbit.tracking.tests.WorkbenchTestUtil.{ openRandomPart, hide, closeAllParts, close, activate }
+import rabbit.tracking.tests.WorkbenchTestUtil
 
 @RunWith(classOf[JUnitRunner])
 final class PartTrackerSpec extends AbstractTrackerSpecBase {
 
-  type Tracker = PartTracker
+  override protected type Tracker = PartTracker
 
-  private var window: IWorkbenchWindow = _
+  private var windowsToClose: Seq[IWorkbenchWindow] = _
   private var listener: IPartFocusListener = _
 
   override def beforeEach() {
@@ -40,17 +42,58 @@ final class PartTrackerSpec extends AbstractTrackerSpecBase {
     listener = mockListener()
     tracker.addListener(listener)
     closeAllParts();
+    windowsToClose = Seq.empty
   }
 
   override def afterEach() {
     super.afterEach()
-    if (window != null && window.getShell != null) {
-      close(window)
-      window = null
-    }
+    windowsToClose foreach (close(_))
   }
 
   behavior of "PartTracker"
+
+  it must "attach listener to workbench when enabling" in {
+    val workbench = mockWorkbenchWithNoWindow()
+
+    tracker = create(workbench)
+    tracker.enable()
+
+    verify(workbench).addWindowListener(any[IWindowListener])
+    verify(workbench, never).removeWindowListener(any[IWindowListener])
+  }
+
+  it must "dettach listener from workbench when disabling" in {
+    val workbench = mockWorkbenchWithNoWindow()
+
+    tracker = create(workbench)
+    tracker.enable()
+    tracker.disable()
+
+    val order = inOrder(workbench)
+    order.verify(workbench).addWindowListener(any[IWindowListener])
+    order.verify(workbench).removeWindowListener(any[IWindowListener])
+  }
+
+  it must "attach listener to part service when enabling" in {
+    val (workbench, service) = mockPartService
+
+    tracker = create(workbench)
+    tracker.enable()
+
+    verify(service, only).addPartListener(any[IPartListener])
+  }
+
+  it must "dettach listener from part service when disabling" in {
+    val (workbench, service) = mockPartService
+
+    tracker = create(workbench)
+    tracker.enable()
+    tracker.disable()
+
+    val order = inOrder(service)
+    order.verify(service).removePartListener(any[IPartListener])
+    order.verifyNoMoreInteractions()
+  }
 
   it must "notify part focused when a part is already focused when enabled" in {
     val part = activate(openRandomPart())
@@ -96,7 +139,7 @@ final class PartTrackerSpec extends AbstractTrackerSpecBase {
     tracker.enable()
     val part = openRandomPart()
 
-    window = openWindow()
+    openWindow()
     verify(listener).onPartUnfocused(part)
   }
 
@@ -109,7 +152,7 @@ final class PartTrackerSpec extends AbstractTrackerSpecBase {
   }
 
   it must "notify part unfocused due to window closed" in {
-    window = openWindow()
+    val window = openWindow()
     var part = openRandomPart(window)
     tracker.enable()
     verify(listener, never).onPartUnfocused(whatever)
@@ -131,7 +174,7 @@ final class PartTrackerSpec extends AbstractTrackerSpecBase {
 
   it must "not notify when disabled" in {
     tracker.disable()
-    window = openWindow()
+    openWindow()
     openRandomPart()
     openRandomPart()
     verifyZeroInteractions(listener)
@@ -139,79 +182,69 @@ final class PartTrackerSpec extends AbstractTrackerSpecBase {
 
   it must "track newly opened window" in {
     tracker.enable()
-    window = openWindow()
+    val window = openWindow()
     val part = openRandomPart(window)
     verify(listener).onPartFocused(part)
   }
 
-  it must "add listener when asked" in {
-    tracker.enable()
-    val listener = mockListener()
-    tracker.addListener(listener)
-    openRandomPart()
-    verify(listener).onPartFocused(whatever)
-  }
-
-  it must "remove listener when asked" in {
-    closeAllParts()
-    tracker.enable()
-    tracker.removeListener(listener)
-    openRandomPart()
-    verifyZeroInteractions(listener)
-  }
-
-  it must "throw NullPointerException if listener to add is null" in {
-    intercept[NullPointerException] {
-      tracker.addListener(null)
-    }
-  }
-
-  it must "throw NullPointerException if listener to remove is null" in {
-    intercept[NullPointerException] {
-      tracker.removeListener(null)
-    }
-  }
-
-  it must "throw NullPointerException if creating with null listener" in {
-    intercept[NullPointerException] {
-      create(mockListener(), null)
-    }
-  }
-
   it must "add listeners to be notified when creating with listeners" in {
-    tracker = create(listener)
+    tracker = create(getWorkbench, listener)
     tracker.enable()
     openRandomPart()
     verify(listener).onPartFocused(whatever)
   }
 
-  it must "ignore identical listeners if one already added" in {
-    val listener1 = equalsToEveryThingListener()
-    val listener2 = equalsToEveryThingListener()
+  behavior of "WorkbenchWindow"
 
-    tracker.enable()
-    tracker.removeListener(listener)
-    tracker.addListener(listener1)
-    tracker.addListener(listener2)
-    openRandomPart()
+  it must "gain focus if a part is activated" in {
 
-    listener1.called must be(true)
-    listener2.called must be(false)
+    /*
+     * Current behavior of a window - if a part is activated programmatically in
+     * a background window, it will bring that window into focus. We put it here
+     * as a test case so that we know if this behavior changes and do something
+     * about it.
+     */
+
+    val background = openWindow()
+    val part1 = openRandomPart(background)
+    val part2 = openRandomPart(background)
+    openWindow()
+    Workbenches.getFocusedWindow(getWorkbench) must not be background
+
+    activate(part1)
+    activate(part2)
+    Workbenches.getFocusedWindow(getWorkbench) must be(background)
   }
 
-  override protected def create() = PartTracker.get()
+  override protected def create() = new PartTracker(getWorkbench)
 
-  private def create(listeners: IPartFocusListener*) = PartTracker.withListeners(listeners: _*)
+  private def create(workbench: IWorkbench, listeners: IPartFocusListener*) =
+    new PartTracker(workbench, listeners: _*)
 
   private def whatever = any[IWorkbenchPart]
 
   private def mockListener() = mock[IPartFocusListener]
 
-  private def equalsToEveryThingListener() = new IPartFocusListener {
-    var called = false
-    override def onPartFocused(part: IWorkbenchPart) { called = true }
-    override def onPartUnfocused(part: IWorkbenchPart) { called = true }
-    override def hashCode = 0
-    override def equals(a: Any) = true
+  private def mockWorkbenchWithNoWindow() = {
+    val workbench = mock[IWorkbench]
+    given(workbench.getWorkbenchWindows).willReturn(Array.empty[IWorkbenchWindow])
+    given(workbench.getDisplay).willReturn(getWorkbench.getDisplay())
+    workbench
+  }
+
+  private def mockPartService() = {
+    val service = mock[IPartService]
+    val window = mock[IWorkbenchWindow]
+    val workbench = mock[IWorkbench]
+    given(workbench.getDisplay).willReturn(getWorkbench.getDisplay())
+    given(window.getPartService).willReturn(service)
+    given(workbench.getWorkbenchWindows).willReturn(Array(window))
+    (workbench, service)
+  }
+
+  private def openWindow() = {
+    val window = WorkbenchTestUtil.openWindow()
+    windowsToClose = windowsToClose :+ window
+    window
   }
 }
