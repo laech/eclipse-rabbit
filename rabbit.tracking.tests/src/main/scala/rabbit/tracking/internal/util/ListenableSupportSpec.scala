@@ -29,15 +29,10 @@ final class ListenableSupportSpec
 
   private val listenerCount = new AtomicInteger
 
-  protected override val supportsCreateWithListeners = true
+  override protected def newUniqueListener() = "listener #" + listenerCount.getAndIncrement()
 
-  protected override def newUniqueListener() = "listener #" + listenerCount.getAndIncrement()
-
-  protected override def getListeners(listenable: ListenableSupport[String]) =
+  override protected def getListeners(listenable: ListenableSupport[String]) =
     listenable.getListeners()
 
-  protected override def create() = createWithListeners()
-
-  protected override def createWithListeners(listeners: String*) =
-    ListenableSupport.create(listeners: _*)
+  override protected def create() = ListenableSupport.create()
 }

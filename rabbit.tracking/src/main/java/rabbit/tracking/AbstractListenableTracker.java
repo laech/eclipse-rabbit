@@ -32,14 +32,8 @@ public abstract class AbstractListenableTracker<T>
 
   private final ListenableSupport<T> listenable;
 
-  /**
-   * Constructs a tracker with default listeners.
-   * 
-   * @param listeners the default listeners to be attached.
-   * @throws NullPointerException if listeners contain null
-   */
-  protected AbstractListenableTracker(T... listeners) {
-    this.listenable = ListenableSupport.create(listeners);
+  protected AbstractListenableTracker() {
+    this.listenable = ListenableSupport.create();
   }
 
   @Override public final void addListener(T listener) {

@@ -207,8 +207,6 @@ final class RecorderSpec extends ListenableSpecBase[IRecordListener, Recorder] {
     record.duration.getMillis must be(duration.getMillis)
   }
 
-  protected override val supportsCreateWithListeners = true
-
   protected override def newUniqueListener() = new IRecordListener {
     override def onRecord(record: Record) {}
   }
@@ -218,6 +216,6 @@ final class RecorderSpec extends ListenableSpecBase[IRecordListener, Recorder] {
 
   protected override def create() = createWithListeners()
 
-  protected override def createWithListeners(listeners: IRecordListener*) =
+  private def createWithListeners(listeners: IRecordListener*) =
     Recorder.create(listeners: _*)
 }

@@ -18,6 +18,7 @@ package rabbit.tracking.util;
 
 import static com.google.common.base.Objects.equal;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static rabbit.tracking.internal.util.Arrays.checkedCopy;
 
 import java.util.Set;
 
@@ -64,7 +65,11 @@ public final class Recorder implements IListenable<IRecordListener> {
    * @throws NullPointerException if clock is null, or any listener is null
    */
   public static Recorder withClock(IClock clock, IRecordListener... listeners) {
-    return new Recorder(clock, listeners);
+    Recorder recorder = new Recorder(clock);
+    for (IRecordListener listener : checkedCopy(listeners)) {
+      recorder.addListener(listener);
+    }
+    return recorder;
   }
 
   private final IClock clock;
@@ -74,9 +79,9 @@ public final class Recorder implements IListenable<IRecordListener> {
   private Object data;
   private boolean recording;
 
-  private Recorder(IClock clock, IRecordListener... listeners) {
+  private Recorder(IClock clock) {
     this.clock = checkNotNull(clock, "clock");
-    this.listenable = ListenableSupport.create(listeners);
+    this.listenable = ListenableSupport.create();
   }
 
   @Override public void addListener(IRecordListener listener) {

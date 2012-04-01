@@ -135,40 +135,11 @@ trait ListenableSpecBase[A, B <: IListenable[A]] extends FlatSpec with MustMatch
     error.get must be(null)
   }
 
-  if (supportsCreateWithListeners) {
-    it must "throw NullPointerException if creating with null listener" in {
-      intercept[NullPointerException] {
-        createWithListeners(newUniqueListener(), null.asInstanceOf[A])
-      }
-    }
-
-    it must "add listeners when creating with listeners" in {
-      val listener = new Object
-      listenable = createWithListeners(newUniqueListener())
-      getListeners(listenable) must be(set(listener))
-    }
-  }
-
   private def set[E](a: E*): java.util.Set[E] = {
     val set = new java.util.HashSet[E]
     a.foreach(e => set.add(e))
     set
   }
-
-  /**
-   * Boolean to indicate whether the listenable class under test supports
-   * constructing with listeners initially. If true, you need to override
-   * `createWithListeners` to create a listenable that way for additional tests.
-   */
-  protected val supportsCreateWithListeners: Boolean
-
-  /**
-   * Creates a listenable with default listeners. Override this if
-   * `supportsCreateWithListeners` if true.
-   */
-  protected def createWithListeners(listeners: A*): B =
-    throw new UnsupportedOperationException(
-      "You need to override this if supportsCreateWithListeners = true")
 
   /**
    * Creates a listener that can be added to the listenable under test.

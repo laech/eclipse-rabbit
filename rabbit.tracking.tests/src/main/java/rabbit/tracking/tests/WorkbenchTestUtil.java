@@ -43,7 +43,9 @@ public class WorkbenchTestUtil {
   public static void close(final IWorkbenchWindow window) {
     getWorkbench().getDisplay().syncExec(new Runnable() {
       @Override public void run() {
-        window.close();
+        if (window.getShell() != null) {
+          window.close();
+        }
       }
     });
   }

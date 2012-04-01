@@ -100,8 +100,7 @@ final class PartTracker extends AbstractListenableTracker<IPartFocusListener> {
    * @throws NullPointerException if workbench is null, or listeners contain
    *         null
    */
-  @Inject PartTracker(IWorkbench workbench, IPartFocusListener... listeners) {
-    super(listeners);
+  @Inject PartTracker(IWorkbench workbench) {
     this.workbench = checkNotNull(workbench, "workbench");
     this.partListener = new MyPartListener();
     this.windowListener = new MyWindowListener();

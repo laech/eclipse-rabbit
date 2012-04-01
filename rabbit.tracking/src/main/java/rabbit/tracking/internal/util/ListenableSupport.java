@@ -18,10 +18,9 @@ package rabbit.tracking.internal.util;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.Collections.unmodifiableSet;
-import static rabbit.tracking.internal.util.Arrays.checkedCopyAsList;
-import static rabbit.tracking.internal.util.Sets.newCopyOnWriteSet;
 
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 import rabbit.tracking.IListenable;
 
@@ -36,19 +35,16 @@ import rabbit.tracking.IListenable;
 public final class ListenableSupport<T> implements IListenable<T> {
 
   /**
-   * Creates an instance with default listeners.
-   * 
-   * @param listeners the default listeners to be added
-   * @throws NullPointerException if listeners contain null
+   * Creates an instance.
    */
-  public static <T> ListenableSupport<T> create(T... listeners) {
-    return new ListenableSupport<T>(listeners);
+  public static <T> ListenableSupport<T> create() {
+    return new ListenableSupport<T>();
   }
 
   private final Set<T> listeners;
 
-  private ListenableSupport(T... listeners) {
-    this.listeners = newCopyOnWriteSet(checkedCopyAsList(listeners));
+  private ListenableSupport() {
+    this.listeners = new CopyOnWriteArraySet<T>();
   }
 
   @Override public final void addListener(T listener) {

@@ -187,13 +187,6 @@ final class PartTrackerSpec extends AbstractTrackerSpecBase {
     verify(listener).onPartFocused(part)
   }
 
-  it must "add listeners to be notified when creating with listeners" in {
-    tracker = create(getWorkbench, listener)
-    tracker.enable()
-    openRandomPart()
-    verify(listener).onPartFocused(whatever)
-  }
-
   behavior of "WorkbenchWindow"
 
   it must "gain focus if a part is activated" in {
@@ -218,8 +211,7 @@ final class PartTrackerSpec extends AbstractTrackerSpecBase {
 
   override protected def create() = new PartTracker(getWorkbench)
 
-  private def create(workbench: IWorkbench, listeners: IPartFocusListener*) =
-    new PartTracker(workbench, listeners: _*)
+  private def create(workbench: IWorkbench) = new PartTracker(workbench)
 
   private def whatever = any[IWorkbenchPart]
 

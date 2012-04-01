@@ -27,20 +27,15 @@ final class AbstractListenableTrackerSpec extends AbstractTrackerSpecBase
 
   private val listenerCount = new AtomicInteger
 
-  protected override type Tracker = AbstractListenableTracker[String]
+  override protected type Tracker = AbstractListenableTracker[String]
 
-  protected override val supportsCreateWithListeners = true
+  override protected def newUniqueListener() = "listener #" + listenerCount.getAndIncrement()
 
-  protected override def newUniqueListener() = "listener #" + listenerCount.getAndIncrement()
-
-  protected override def getListeners(listenable: AbstractListenableTracker[String]) =
+  override protected def getListeners(listenable: AbstractListenableTracker[String]) =
     listenable.getListeners()
 
-  protected override def create() = createWithListeners()
-
-  protected override def createWithListeners(listeners: String*) =
-    new AbstractListenableTracker(listeners: _*) {
-      override protected def onEnable() {}
-      override protected def onDisable() {}
-    }
+  override protected def create() = new AbstractListenableTracker[String] {
+    override protected def onEnable() {}
+    override protected def onDisable() {}
+  }
 }
