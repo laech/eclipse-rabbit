@@ -34,19 +34,11 @@ import com.google.inject.Inject;
 
 /**
  * Tracks the currently focused workbench part in the workbench, across multiple
- * workbench windows. A part is consider focused if all of the followings are
- * true:
- * <ul>
- * <li>it's the active part in the parent window</li>
- * <li>its parent window is focused</li>
- * </ul>
- * therefore there will be at most one focused part at any time regardless of
- * how many workbench windows are opened.
+ * workbench windows.
  * <p/>
- * When this tracker is enabled, if there is a currently focused part, the
- * listeners will be notify immediately.
+ * See {@link IPartFocusListener} for the behaviors of this tracker.
  */
-final class PartTracker extends AbstractListenableTracker<IPartFocusListener> {
+final class PartFocusTracker extends AbstractListenableTracker<IPartFocusListener> {
 
   private class MyPartListener extends PartListener {
     @Override public void partActivated(IWorkbenchPart part) {
@@ -100,7 +92,7 @@ final class PartTracker extends AbstractListenableTracker<IPartFocusListener> {
    * @throws NullPointerException if workbench is null, or listeners contain
    *         null
    */
-  @Inject PartTracker(IWorkbench workbench) {
+  @Inject PartFocusTracker(IWorkbench workbench) {
     this.workbench = checkNotNull(workbench, "workbench");
     this.partListener = new MyPartListener();
     this.windowListener = new MyWindowListener();

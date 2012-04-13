@@ -30,6 +30,8 @@ import com.google.common.base.Objects.ToStringHelper;
  */
 public class Event implements IEvent {
 
+  // TODO hash code & equals & subclasses
+
   private final Instant instant;
 
   /**

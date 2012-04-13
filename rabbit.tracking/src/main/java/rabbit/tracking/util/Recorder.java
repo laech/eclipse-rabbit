@@ -25,10 +25,10 @@ import java.util.Set;
 import org.joda.time.Duration;
 import org.joda.time.Instant;
 
-import rabbit.tracking.IListenable;
 import rabbit.tracking.internal.util.ListenableSupport;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.inject.Inject;
 
 /**
  * A helper class for recording durations with associated data.
@@ -44,7 +44,9 @@ import com.google.common.annotations.VisibleForTesting;
  * @see Record
  * @since 2.0
  */
-public final class Recorder implements IListenable<IRecordListener> {
+public final class Recorder implements IRecorder {
+
+  // TODO review static factory methods and constructor
 
   /**
    * Creates a recorder.
@@ -79,7 +81,7 @@ public final class Recorder implements IListenable<IRecordListener> {
   private Object data;
   private boolean recording;
 
-  private Recorder(IClock clock) {
+  @Inject Recorder(IClock clock) {
     this.clock = checkNotNull(clock, "clock");
     this.listenable = ListenableSupport.create();
   }
@@ -92,18 +94,7 @@ public final class Recorder implements IListenable<IRecordListener> {
     listenable.removeListener(listener);
   }
 
-  /**
-   * Starts a recording with the given user data.
-   * <p/>
-   * If there is currently a recording in progress with an equivalent user data
-   * then this call will be ignored and the recording in progress will not be
-   * affected. Otherwise if the currently running recording has a different user
-   * data, then the recording will be stopped, listeners will be notified, and a
-   * new recording will be started with the new user data.
-   * 
-   * @param userData the user data to associate with this recording, may be null
-   */
-  public void start(Object userData) {
+  @Override public void start(Object userData) {
     Object dataSnapshot;
     synchronized (this) {
       dataSnapshot = data;
@@ -147,13 +138,7 @@ public final class Recorder implements IListenable<IRecordListener> {
     }
   }
 
-  /**
-   * Stops recording.
-   * <p/>
-   * Has no affect if there is no recording running, otherwise recording will be
-   * stopped and listeners will be notified.
-   */
-  public void stop() {
+  @Override public void stop() {
     Object myData;
     Instant myStart;
     synchronized (this) {

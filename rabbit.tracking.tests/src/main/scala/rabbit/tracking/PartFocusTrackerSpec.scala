@@ -30,9 +30,9 @@ import rabbit.tracking.tests.WorkbenchTestUtil.{ openRandomPart, hide, closeAllP
 import rabbit.tracking.tests.WorkbenchTestUtil
 
 @RunWith(classOf[JUnitRunner])
-final class PartTrackerSpec extends AbstractTrackerSpecBase {
+final class PartFocusTrackerSpec extends AbstractTrackerSpecBase {
 
-  override protected type Tracker = PartTracker
+  override protected type Tracker = PartFocusTracker
 
   private var windowsToClose: Seq[IWorkbenchWindow] = _
   private var listener: IPartFocusListener = _
@@ -209,9 +209,9 @@ final class PartTrackerSpec extends AbstractTrackerSpecBase {
     Workbenches.getFocusedWindow(getWorkbench) must be(background)
   }
 
-  override protected def create() = new PartTracker(getWorkbench)
+  override protected def create() = new PartFocusTracker(getWorkbench)
 
-  private def create(workbench: IWorkbench) = new PartTracker(workbench)
+  private def create(workbench: IWorkbench) = new PartFocusTracker(workbench)
 
   private def whatever = any[IWorkbenchPart]
 

@@ -41,7 +41,7 @@ public final class Record extends TimedEvent {
    * @return a record
    * @throws NullPointerException if start is null, or duration is null
    */
-  Record(Instant instant, Duration duration, Object data) {
+  public Record(Instant instant, Duration duration, Object data) {
     super(instant, duration);
     this.data = data;
   }

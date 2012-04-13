@@ -40,7 +40,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import rabbit.tracking.IUserMonitor.IUserListener;
+import rabbit.tracking.IUserListener;
 
 public final class UserMonitorTest {
 

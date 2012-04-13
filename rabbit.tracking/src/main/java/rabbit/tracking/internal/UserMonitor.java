@@ -33,6 +33,7 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.ui.services.IDisposable;
 
+import rabbit.tracking.IUserListener;
 import rabbit.tracking.IUserMonitor;
 
 import com.google.common.annotations.VisibleForTesting;

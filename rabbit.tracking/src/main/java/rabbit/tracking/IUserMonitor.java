@@ -27,42 +27,7 @@ import org.eclipse.ui.services.IServiceLocator;
  * @see IUserListener
  * @since 2.0
  */
-public interface IUserMonitor {
-
-  /**
-   * Listener to listen to user state events.
-   * 
-   * @since 2.0
-   */
-  public static interface IUserListener {
-
-    /**
-     * Called when user's state changes to active.
-     */
-    void onActive();
-
-    /**
-     * Called when user's state changes to inactive.
-     */
-    void onInactive();
-  }
-
-  /**
-   * Adds the listener to be notified of user state changes. Has no effect if an
-   * identical listener has already been added.
-   * 
-   * @param listener the listener to be notified
-   * @throws NullPointerException if listener is null
-   */
-  void addListener(IUserListener listener);
-
-  /**
-   * Removes the listener from listening to user state change events.
-   * 
-   * @param listener the listener to be removed
-   * @throws NullPointerException if listener is null
-   */
-  void removeListener(IUserListener listener);
+public interface IUserMonitor extends IListenable<IUserListener> {
 
   /**
    * Checks whether the user is currently considered as active.
