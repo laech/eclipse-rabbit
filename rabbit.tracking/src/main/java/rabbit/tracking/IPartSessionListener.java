@@ -24,16 +24,11 @@ import org.joda.time.Instant;
  * Listens to part focused duration events.
  * <p/>
  * If a part is focused, then when it becomes unfocused (or by some other means
- * such as the user becomes inactive), this listener will be notified with the
- * captured event.
+ * such as the user becomes inactive, or the track gets disabled), this listener
+ * will be notified with the captured session.
  * <p/>
  * A part is consider focused if it's the active part and its parent window has
  * the focus.
- * <p/>
- * When the implementing tracker is enabled, if there is a currently focused
- * part, it will be tracked immediately. When the tracker is disabled, if there
- * is a currently tracked session, the session will be ended and this listener
- * will be notified of the event.
  * 
  * @since 2.0
  */

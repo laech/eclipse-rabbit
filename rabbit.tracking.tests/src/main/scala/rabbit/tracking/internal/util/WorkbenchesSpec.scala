@@ -17,9 +17,7 @@
 package rabbit.tracking.internal.util
 
 import java.util.concurrent.atomic.AtomicReference
-
 import scala.collection.JavaConversions.asScalaSet
-
 import org.eclipse.swt.widgets.{ Shell, Display }
 import org.eclipse.ui.PlatformUI.getWorkbench
 import org.eclipse.ui.{ IWorkbenchWindow, IWorkbenchPart, IWorkbench, IPartService }
@@ -27,9 +25,9 @@ import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.matchers.MustMatchers
 import org.scalatest.{ FlatSpec, BeforeAndAfter }
-
 import rabbit.tracking.tests.TestImplicits.funToRunnable
-import rabbit.tracking.tests.Workbenches.{ openWindow, openRandomPart }
+import rabbit.tracking.tests.Workbenches.{ openWindow, openRandomPart, openRandomPerspective }
+import org.eclipse.ui.IPerspectiveDescriptor
 
 @RunWith(classOf[JUnitRunner])
 final class WorkbenchesSpec extends FlatSpec with MustMatchers with BeforeAndAfter {
@@ -61,9 +59,11 @@ final class WorkbenchesSpec extends FlatSpec with MustMatchers with BeforeAndAft
 
   it must "be able to return the focused window from a non-UI thread" in {
     val actual = new AtomicReference[IWorkbenchWindow]
-    new Thread(() => {
+    val thread = new Thread(() => {
       actual set Workbenches.getFocusedWindow(workbench)
-    }).start
+    })
+    thread.start()
+    thread.join()
     actual.get must not be (null)
     actual.get must be(currentWindow)
   }
@@ -92,12 +92,37 @@ final class WorkbenchesSpec extends FlatSpec with MustMatchers with BeforeAndAft
     actual must be(expected)
   }
 
-  it must "return null if there are no part in focus" in {
+  it must "return null if there is no part in focus" in {
     openRandomPart
     var actual = new AtomicReference[IWorkbenchPart]
     display.syncExec(() => {
       val dialog = openDialog()
       actual set Workbenches.getFocusedPart(workbench)
+      dialog.close()
+    })
+    actual.get must be(null)
+  }
+
+  behavior of "Workbenches.getFocusedPerspective"
+
+  it must "return null if there is no perspective in focus" in {
+    intercept[NullPointerException] {
+      Workbenches.getFocusedPerspective(null)
+    }
+  }
+
+  it must "return the perspective in focus" in {
+    val expected = openRandomPerspective()
+    val actual = Workbenches.getFocusedPerspective(workbench)
+    actual must be(expected)
+  }
+
+  it must "throw NullPointerException if workbench is null" in {
+    openRandomPerspective()
+    var actual = new AtomicReference[IPerspectiveDescriptor]
+    display.syncExec(() => {
+      val dialog = openDialog()
+      actual set Workbenches.getFocusedPerspective(workbench)
       dialog.close()
     })
     actual.get must be(null)

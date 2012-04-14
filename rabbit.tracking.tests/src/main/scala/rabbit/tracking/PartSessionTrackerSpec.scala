@@ -29,8 +29,7 @@ import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar.mock
 
 import rabbit.tracking.tests.TestImplicits.funToAnswer
-import rabbit.tracking.util.IRecordListener
-import rabbit.tracking.util.{ Record, IRecorder }
+import rabbit.tracking.util.{ Record, IRecorder, IRecordListener }
 
 /* 
  * Unit tests for PartSessionTracker, see PartSessionTrackerIntegrationSpec

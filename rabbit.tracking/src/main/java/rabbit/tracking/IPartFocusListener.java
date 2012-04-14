@@ -27,9 +27,6 @@ import org.eclipse.ui.IWorkbenchPart;
  * </ul>
  * therefore there will be at most one focused part at any time regardless of
  * how many workbench windows are opened.
- * <p/>
- * When the implementing tracker is enabled, if there is a currently focused
- * part, this listener will be notify immediately.
  * 
  * @since 2.0
  */

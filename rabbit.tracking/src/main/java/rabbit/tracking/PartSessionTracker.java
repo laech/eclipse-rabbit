@@ -58,6 +58,7 @@ final class PartSessionTracker
   private final ITracker partTracker;
   private final IUserMonitor monitor;
   private final IUserListener monitorListener;
+  private final IWorkbench workbench;
 
   /**
    * Constructs a new tracker.
@@ -66,7 +67,7 @@ final class PartSessionTracker
    * recorder passed in here and they should not be shared/interacted with
    * outside of this tracker, otherwise errors will occur.
    * 
-   * @param wb the workbench to track for
+   * @param workbench the workbench to track for
    * @param partTracker the part track to use for tracking part focus events
    * @param recorder the recorder to use for calculating elapsed time
    * @param monitor the optional user monitor for taking into account the user's
@@ -74,15 +75,16 @@ final class PartSessionTracker
    * @throws NullPointerException if workbench, partTracker, or recorder is null
    */
   @Inject PartSessionTracker(
-      IWorkbench wb,
+      IWorkbench workbench,
       IListenableTracker<IPartFocusListener> partTracker,
       IRecorder recorder,
       IUserMonitor monitor) {
 
+    this.workbench = checkNotNull(workbench, "workbench");
     this.recorder = config(checkNotNull(recorder, "recorder"));
     this.partTracker = config(checkNotNull(partTracker, "partTracker"));
     this.monitor = monitor != null ? monitor : NoMonitor.INSTANCE;
-    this.monitorListener = createUserListener(checkNotNull(wb, "workbench"));
+    this.monitorListener = createUserListener();
   }
 
   private IRecorder config(IRecorder recorder) {
@@ -109,17 +111,14 @@ final class PartSessionTracker
     return tracker;
   }
 
-  private IUserListener createUserListener(final IWorkbench workbench) {
+  private IUserListener createUserListener() {
     return new IUserListener() {
       @Override public void onInactive() {
         recorder.stop();
       }
 
       @Override public void onActive() {
-        IWorkbenchPart part = getFocusedPart(workbench);
-        if (part != null) {
-          recorder.start(part);
-        }
+        startRecorderIfFocusedPartExists();
       }
     };
   }
@@ -127,6 +126,8 @@ final class PartSessionTracker
   @Override protected void onEnable() {
     partTracker.enable();
     monitor.addListener(monitorListener);
+
+    startRecorderIfFocusedPartExists();
   }
 
   @Override protected void onDisable() {
@@ -138,6 +139,13 @@ final class PartSessionTracker
   private void onPartEvent(Instant start, Duration duration, IWorkbenchPart part) {
     for (IPartSessionListener listener : getListeners()) {
       listener.onPartSession(start, duration, part);
+    }
+  }
+
+  private void startRecorderIfFocusedPartExists() {
+    IWorkbenchPart focusedPart = getFocusedPart(workbench);
+    if (focusedPart != null) {
+      recorder.start(focusedPart);
     }
   }
 }

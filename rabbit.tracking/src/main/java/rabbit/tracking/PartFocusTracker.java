@@ -17,7 +17,6 @@
 package rabbit.tracking;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static rabbit.tracking.internal.util.Workbenches.getFocusedPart;
 import static rabbit.tracking.internal.util.Workbenches.getFocusedWindow;
 import static rabbit.tracking.internal.util.Workbenches.getPartServices;
 
@@ -38,7 +37,8 @@ import com.google.inject.Inject;
  * <p/>
  * See {@link IPartFocusListener} for the behaviors of this tracker.
  */
-final class PartFocusTracker extends AbstractListenableTracker<IPartFocusListener> {
+final class PartFocusTracker extends
+    AbstractListenableTracker<IPartFocusListener> {
 
   private class MyPartListener extends PartListener {
     @Override public void partActivated(IWorkbenchPart part) {
@@ -109,11 +109,6 @@ final class PartFocusTracker extends AbstractListenableTracker<IPartFocusListene
     workbench.addWindowListener(windowListener);
     for (IPartService service : getPartServices(workbench)) {
       service.addPartListener(partListener);
-    }
-
-    IWorkbenchPart part = getFocusedPart(workbench);
-    if (part != null) {
-      onPartFocused(part);
     }
   }
 

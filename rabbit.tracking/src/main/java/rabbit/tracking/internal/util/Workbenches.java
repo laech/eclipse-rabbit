@@ -26,7 +26,9 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IPartService;
+import org.eclipse.ui.IPerspectiveDescriptor;
 import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 
@@ -72,6 +74,23 @@ public final class Workbenches {
   public static IWorkbenchPart getFocusedPart(IWorkbench workbench) {
     IWorkbenchWindow window = getFocusedWindow(check(workbench));
     return window != null ? window.getPartService().getActivePart() : null;
+  }
+
+  /**
+   * Gets the current perspective in focus.
+   * 
+   * @param workbench the workbench to get the focused perspective for
+   * @return the current focused perspective, or null if none
+   * @throws NullPointerException if workbench is null
+   */
+  public static IPerspectiveDescriptor getFocusedPerspective(
+      IWorkbench workbench) {
+    IWorkbenchWindow window = getFocusedWindow(workbench);
+    if (window == null) {
+      return null;
+    }
+    IWorkbenchPage page = window.getActivePage();
+    return page == null ? null : page.getPerspective();
   }
 
   /**

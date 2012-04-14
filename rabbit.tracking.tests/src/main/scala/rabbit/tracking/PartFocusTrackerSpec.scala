@@ -26,8 +26,8 @@ import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar.mock
 
 import rabbit.tracking.internal.util.Workbenches
-import rabbit.tracking.tests.WorkbenchTestUtil.{ openRandomPart, hide, closeAllParts, close, activate }
-import rabbit.tracking.tests.WorkbenchTestUtil
+import rabbit.tracking.tests.Workbenches.{ openRandomPart, hide, closeAllParts, close, activate }
+import rabbit.tracking.tests.{ Workbenches => testutil }
 
 @RunWith(classOf[JUnitRunner])
 final class PartFocusTrackerSpec extends AbstractTrackerSpecBase {
@@ -37,37 +37,37 @@ final class PartFocusTrackerSpec extends AbstractTrackerSpecBase {
   private var windowsToClose: Seq[IWorkbenchWindow] = _
   private var listener: IPartFocusListener = _
 
-  override def beforeEach() {
-    super.beforeEach()
-    listener = mockListener()
+  override def beforeEach {
+    super.beforeEach
+    listener = mockListener
     tracker.addListener(listener)
-    closeAllParts();
+    closeAllParts;
     windowsToClose = Seq.empty
   }
 
-  override def afterEach() {
-    super.afterEach()
+  override def afterEach {
+    super.afterEach
     windowsToClose foreach (close(_))
   }
 
   behavior of "PartTracker"
 
   it must "attach listener to workbench when enabling" in {
-    val workbench = mockWorkbenchWithNoWindow()
+    val workbench = mockWorkbenchWithNoWindow
 
     tracker = create(workbench)
-    tracker.enable()
+    tracker.enable
 
     verify(workbench).addWindowListener(any[IWindowListener])
     verify(workbench, never).removeWindowListener(any[IWindowListener])
   }
 
   it must "dettach listener from workbench when disabling" in {
-    val workbench = mockWorkbenchWithNoWindow()
+    val workbench = mockWorkbenchWithNoWindow
 
     tracker = create(workbench)
-    tracker.enable()
-    tracker.disable()
+    tracker.enable
+    tracker.disable
 
     val order = inOrder(workbench)
     order.verify(workbench).addWindowListener(any[IWindowListener])
@@ -78,7 +78,7 @@ final class PartFocusTrackerSpec extends AbstractTrackerSpecBase {
     val (workbench, service) = mockPartService
 
     tracker = create(workbench)
-    tracker.enable()
+    tracker.enable
 
     verify(service, only).addPartListener(any[IPartListener])
   }
@@ -87,102 +87,109 @@ final class PartFocusTrackerSpec extends AbstractTrackerSpecBase {
     val (workbench, service) = mockPartService
 
     tracker = create(workbench)
-    tracker.enable()
-    tracker.disable()
+    tracker.enable
+    tracker.disable
 
     val order = inOrder(service)
     order.verify(service).removePartListener(any[IPartListener])
-    order.verifyNoMoreInteractions()
-  }
-
-  it must "notify part focused when a part is already focused when enabled" in {
-    val part = activate(openRandomPart())
-    tracker.enable()
-    verify(listener, only).onPartFocused(part)
+    order.verifyNoMoreInteractions
   }
 
   it must "notify part focused due to part opened" in {
-    tracker.enable()
-    val part = openRandomPart()
+    tracker.enable
+    val part = openRandomPart
     verify(listener).onPartFocused(part)
   }
 
   it must "notify part focused due to part selected" in {
-    val part1 = openRandomPart()
-    val part2 = openRandomPart()
+    val part1 = openRandomPart
+    val part2 = openRandomPart
     activate(part1)
-    tracker.enable()
+    tracker.enable
 
     activate(part2)
     verify(listener).onPartFocused(part2)
   }
 
   it must "notify part unfocused due to new part selected" in {
-    val part1 = openRandomPart()
-    val part2 = openRandomPart()
+    val part1 = openRandomPart
+    val part2 = openRandomPart
     activate(part1)
-    tracker.enable()
+    tracker.enable
 
     activate(part2)
     verify(listener).onPartUnfocused(part1)
   }
 
   it must "notify part unfocused due to new part opened" in {
-    tracker.enable()
-    val part = openRandomPart()
+    tracker.enable
+    val part = openRandomPart
 
-    openRandomPart()
+    openRandomPart
     verify(listener).onPartUnfocused(part)
   }
 
   it must "notify part unfocused due to window unfocused" in {
-    tracker.enable()
-    val part = openRandomPart()
+    tracker.enable
+    val part = openRandomPart
 
-    openWindow()
+    openWindow
     verify(listener).onPartUnfocused(part)
   }
 
   it must "notify part unfocused due to part closed" in {
-    val part = openRandomPart();
-    tracker.enable()
+    val part = openRandomPart;
+    tracker.enable
 
     hide(part)
     verify(listener).onPartUnfocused(part)
   }
 
-  it must "notify part unfocused due to window closed" in {
-    val window = openWindow()
+  it must "notify part unfocused due to foreground window being closed" in {
+    val window = openWindow
     var part = openRandomPart(window)
-    tracker.enable()
+    tracker.enable
     verify(listener, never).onPartUnfocused(whatever)
 
     close(window)
     verify(listener).onPartUnfocused(part)
   }
 
+  it must "not notify part unfocused due to background window being closed" in {
+    val background = openWindow
+    openRandomPart(background)
+    val foreground = openWindow
+    closeAllParts(foreground)
+
+    tracker.enable
+
+    close(background)
+    verifyZeroInteractions(listener)
+  }
+
   it must "notify part unforcused on old part before notifying part focused on new part" in {
-    tracker.enable()
-    openRandomPart()
-    openRandomPart()
+    tracker.enable
+    openRandomPart
+    openRandomPart
 
     val order = inOrder(listener)
     order.verify(listener).onPartUnfocused(whatever)
     order.verify(listener).onPartFocused(whatever)
-    order.verifyNoMoreInteractions()
+    order.verifyNoMoreInteractions
   }
 
   it must "not notify when disabled" in {
-    tracker.disable()
-    openWindow()
-    openRandomPart()
-    openRandomPart()
+    tracker.enable
+    tracker.disable
+    openWindow
+    openRandomPart
+    openRandomPart
     verifyZeroInteractions(listener)
   }
 
   it must "track newly opened window" in {
-    tracker.enable()
-    val window = openWindow()
+    tracker.enable
+    val window = openWindow
     val part = openRandomPart(window)
     verify(listener).onPartFocused(part)
   }
@@ -198,10 +205,10 @@ final class PartFocusTrackerSpec extends AbstractTrackerSpecBase {
      * about it.
      */
 
-    val background = openWindow()
+    val background = openWindow
     val part1 = openRandomPart(background)
     val part2 = openRandomPart(background)
-    openWindow()
+    openWindow
     Workbenches.getFocusedWindow(getWorkbench) must not be background
 
     activate(part1)
@@ -209,33 +216,33 @@ final class PartFocusTrackerSpec extends AbstractTrackerSpecBase {
     Workbenches.getFocusedWindow(getWorkbench) must be(background)
   }
 
-  override protected def create() = new PartFocusTracker(getWorkbench)
+  override protected def create = new PartFocusTracker(getWorkbench)
 
   private def create(workbench: IWorkbench) = new PartFocusTracker(workbench)
 
   private def whatever = any[IWorkbenchPart]
 
-  private def mockListener() = mock[IPartFocusListener]
+  private def mockListener = mock[IPartFocusListener]
 
-  private def mockWorkbenchWithNoWindow() = {
+  private def mockWorkbenchWithNoWindow = {
     val workbench = mock[IWorkbench]
     given(workbench.getWorkbenchWindows).willReturn(Array.empty[IWorkbenchWindow])
-    given(workbench.getDisplay).willReturn(getWorkbench.getDisplay())
+    given(workbench.getDisplay).willReturn(getWorkbench.getDisplay)
     workbench
   }
 
-  private def mockPartService() = {
+  private def mockPartService = {
     val service = mock[IPartService]
     val window = mock[IWorkbenchWindow]
     val workbench = mock[IWorkbench]
-    given(workbench.getDisplay).willReturn(getWorkbench.getDisplay())
+    given(workbench.getDisplay).willReturn(getWorkbench.getDisplay)
     given(window.getPartService).willReturn(service)
     given(workbench.getWorkbenchWindows).willReturn(Array(window))
     (workbench, service)
   }
 
-  private def openWindow() = {
-    val window = WorkbenchTestUtil.openWindow()
+  private def openWindow = {
+    val window = testutil.openWindow
     windowsToClose = windowsToClose :+ window
     window
   }
