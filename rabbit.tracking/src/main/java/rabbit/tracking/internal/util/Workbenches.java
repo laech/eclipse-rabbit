@@ -21,7 +21,6 @@ import static com.google.common.collect.Sets.newHashSetWithExpectedSize;
 import static java.util.Collections.unmodifiableSet;
 
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicReference;
 
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
@@ -52,16 +51,16 @@ public final class Workbenches {
       return isFocused(window) ? window : null;
     }
 
-    final AtomicReference<IWorkbenchWindow> result = newAtomicReference();
+    final IWorkbenchWindow[] result = {null};
     workbench.getDisplay().syncExec(new Runnable() {
       @Override public void run() {
         IWorkbenchWindow window = workbench.getActiveWorkbenchWindow();
         if (window != null && isFocused(window)) {
-          result.set(window);
+          result[0] = window;
         }
       }
     });
-    return result.get();
+    return result[0];
   }
 
   /**
@@ -114,10 +113,6 @@ public final class Workbenches {
     Shell shell = window.getShell();
     return shell.getDisplay().getActiveShell() == shell
         && !shell.getMinimized();
-  }
-
-  private static <T> AtomicReference<T> newAtomicReference() {
-    return new AtomicReference<T>();
   }
 
   private static IWorkbench check(IWorkbench workbench) {

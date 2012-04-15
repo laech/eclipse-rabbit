@@ -16,18 +16,18 @@
 
 package rabbit.tracking.internal.util
 
-import java.util.concurrent.atomic.AtomicReference
 import scala.collection.JavaConversions.asScalaSet
+
 import org.eclipse.swt.widgets.{ Shell, Display }
 import org.eclipse.ui.PlatformUI.getWorkbench
-import org.eclipse.ui.{ IWorkbenchWindow, IWorkbenchPart, IWorkbench, IPartService }
+import org.eclipse.ui.{ IWorkbenchWindow, IWorkbenchPart, IWorkbench, IPerspectiveDescriptor, IPartService }
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.matchers.MustMatchers
 import org.scalatest.{ FlatSpec, BeforeAndAfter }
+
 import rabbit.tracking.tests.TestImplicits.funToRunnable
-import rabbit.tracking.tests.Workbenches.{ openWindow, openRandomPart, openRandomPerspective }
-import org.eclipse.ui.IPerspectiveDescriptor
+import rabbit.tracking.tests.Workbenches.{ openWindow, openRandomPerspective, openRandomPart }
 
 @RunWith(classOf[JUnitRunner])
 final class WorkbenchesSpec extends FlatSpec with MustMatchers with BeforeAndAfter {
@@ -49,33 +49,33 @@ final class WorkbenchesSpec extends FlatSpec with MustMatchers with BeforeAndAft
   }
 
   it must "be able to return the focused window from the UI thread" in {
-    val actual = new AtomicReference[IWorkbenchWindow]
+    var actual: IWorkbenchWindow = null
     display.syncExec(() => {
-      actual set Workbenches.getFocusedWindow(workbench)
+      actual = Workbenches.getFocusedWindow(workbench)
     })
-    actual.get must not be (null)
-    actual.get must be(currentWindow)
+    actual must not be (null)
+    actual must be(currentWindow)
   }
 
   it must "be able to return the focused window from a non-UI thread" in {
-    val actual = new AtomicReference[IWorkbenchWindow]
+    var actual: IWorkbenchWindow = null
     val thread = new Thread(() => {
-      actual set Workbenches.getFocusedWindow(workbench)
+      actual = Workbenches.getFocusedWindow(workbench)
     })
-    thread.start()
-    thread.join()
-    actual.get must not be (null)
-    actual.get must be(currentWindow)
+    thread.start
+    thread.join
+    actual must not be (null)
+    actual must be(currentWindow)
   }
 
   it must "return null if there are no window in focus" in {
-    var actual = new AtomicReference[IWorkbenchWindow]
+    var actual: IWorkbenchWindow = null
     display.syncExec(() => {
-      val dialog = openDialog()
-      actual set Workbenches.getFocusedWindow(workbench)
-      dialog.close()
+      val dialog = openDialog
+      actual = Workbenches.getFocusedWindow(workbench)
+      dialog.close
     })
-    actual.get must be(null)
+    actual must be(null)
   }
 
   behavior of "Workbenches.getFocusedPart"
@@ -94,13 +94,13 @@ final class WorkbenchesSpec extends FlatSpec with MustMatchers with BeforeAndAft
 
   it must "return null if there is no part in focus" in {
     openRandomPart
-    var actual = new AtomicReference[IWorkbenchPart]
+    var actual: IWorkbenchPart = null
     display.syncExec(() => {
-      val dialog = openDialog()
-      actual set Workbenches.getFocusedPart(workbench)
-      dialog.close()
+      val dialog = openDialog
+      actual = Workbenches.getFocusedPart(workbench)
+      dialog.close
     })
-    actual.get must be(null)
+    actual must be(null)
   }
 
   behavior of "Workbenches.getFocusedPerspective"
@@ -112,20 +112,20 @@ final class WorkbenchesSpec extends FlatSpec with MustMatchers with BeforeAndAft
   }
 
   it must "return the perspective in focus" in {
-    val expected = openRandomPerspective()
+    val expected = openRandomPerspective
     val actual = Workbenches.getFocusedPerspective(workbench)
     actual must be(expected)
   }
 
   it must "throw NullPointerException if workbench is null" in {
-    openRandomPerspective()
-    var actual = new AtomicReference[IPerspectiveDescriptor]
+    openRandomPerspective
+    var actual: IPerspectiveDescriptor = null
     display.syncExec(() => {
-      val dialog = openDialog()
-      actual set Workbenches.getFocusedPerspective(workbench)
-      dialog.close()
+      val dialog = openDialog
+      actual = Workbenches.getFocusedPerspective(workbench)
+      dialog.close
     })
-    actual.get must be(null)
+    actual must be(null)
   }
 
   behavior of "Workbenches.getPartServices"
@@ -151,18 +151,18 @@ final class WorkbenchesSpec extends FlatSpec with MustMatchers with BeforeAndAft
   }
 
   private def currentWindow = {
-    var ref = new AtomicReference[IWorkbenchWindow]
+    var window: IWorkbenchWindow = null
     display.syncExec(() => {
-      ref set workbench.getActiveWorkbenchWindow
+      window = workbench.getActiveWorkbenchWindow
     })
-    ref.get
+    window
   }
 
-  private def openDialog() = {
+  private def openDialog = {
     val shell = currentWindow.getShell
     val dialog = new Shell(shell)
     dialog.setSize(100, 100)
-    dialog.open()
+    dialog.open
     dialog
   }
 }

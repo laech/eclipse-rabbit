@@ -17,13 +17,12 @@
 package rabbit.tracking
 
 import java.util.Collections.emptySet
-import java.util.concurrent.atomic.AtomicReference
 import java.util.concurrent.CountDownLatch
 
 import org.scalatest.matchers.MustMatchers
-import org.scalatest.{ FlatSpec, BeforeAndAfterEach }
+import org.scalatest.{FlatSpec, BeforeAndAfterEach}
 
-import rabbit.tracking.tests.TestImplicits.{ nTimes, funToRunnable }
+import rabbit.tracking.tests.TestImplicits.{nTimes, funToRunnable}
 import rabbit.tracking.tests.TestUtils.doInNewThreads
 
 /**
@@ -105,7 +104,7 @@ trait ListenableSpecBase[A, B <: IListenable[A]] extends FlatSpec with MustMatch
   }
 
   it must "return listener collection that is safe to iterate concurrectly" in {
-    val error = new AtomicReference[Exception]
+    var error: Exception = null
 
     val startSignal = new CountDownLatch(1)
     val doneSignal = new CountDownLatch(2)
@@ -123,7 +122,7 @@ trait ListenableSpecBase[A, B <: IListenable[A]] extends FlatSpec with MustMatch
           val iterator = getListeners(listenable).iterator
           while (iterator.hasNext) iterator.next()
         } catch {
-          case e: Exception => error.set(e); doneSignal.countDown()
+          case e: Exception => error = e; doneSignal.countDown()
         }
       }
       doneSignal.countDown()
@@ -132,7 +131,7 @@ trait ListenableSpecBase[A, B <: IListenable[A]] extends FlatSpec with MustMatch
     startSignal.countDown()
     doneSignal.await()
 
-    error.get must be(null)
+    error must be(null)
   }
 
   private def set[E](a: E*): java.util.Set[E] = {

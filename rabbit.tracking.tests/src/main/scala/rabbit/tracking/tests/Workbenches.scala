@@ -16,12 +16,10 @@
 
 package rabbit.tracking.tests
 
-import java.util.Random
 import org.eclipse.ui.PlatformUI.getWorkbench
-import org.eclipse.ui.{ IWorkbenchWindow, IWorkbenchPart, IViewPart }
+import org.eclipse.ui.{IWorkbenchWindow, IWorkbenchPart, IViewPart, IPerspectiveDescriptor}
+
 import rabbit.tracking.tests.TestImplicits.funToRunnable
-import org.eclipse.ui.IPerspectiveDescriptor
-import java.util.concurrent.atomic.AtomicReference
 
 object Workbenches {
 
@@ -34,7 +32,7 @@ object Workbenches {
 
   def close(window: IWorkbenchWindow) = display.syncExec(() => {
     if (window.getShell != null) {
-      window.close()
+      window.close
     }
   })
 
@@ -62,7 +60,7 @@ object Workbenches {
     openRandomPerspective(currentWindow)
 
   def openRandomPerspective(window: IWorkbenchWindow) = {
-    var perspective = new AtomicReference[IPerspectiveDescriptor]()
+    var perspective: IPerspectiveDescriptor = null
     display.syncExec(() => {
       val current = window.getActivePage.getPerspective
       val currentId = if (current != null) current.getId else null
@@ -72,44 +70,43 @@ object Workbenches {
         case Some(_@ perspective) => page.setPerspective(perspective)
         case None => throw new RuntimeException("Don't have more perspective to show")
       }
-      perspective set page.getPerspective
+      perspective = page.getPerspective
     })
-    perspective.get
+    perspective
   }
 
-  def openRandomPart(): IViewPart =
-    openRandomPart(currentWindow)
+  def openRandomPart(): IViewPart = openRandomPart(currentWindow)
 
   def openRandomPart(window: IWorkbenchWindow) = {
-    var view = new AtomicReference[IViewPart]()
+    var view: IViewPart = null
     display.syncExec(() => {
       val current = window.getActivePage.getActivePart
       val currentId = if (current != null) current.getSite.getId else null
       val views = window.getWorkbench.getViewRegistry.getViews
       val page = window.getActivePage
       views.find(_.getId != currentId) match {
-        case Some(v) => view set window.getActivePage.showView(v.getId)
+        case Some(v) => view = window.getActivePage.showView(v.getId)
         case None => throw new RuntimeException("Don't have more view to show")
       }
     })
-    view.get
+    view
   }
 
   def openWindow() = {
-    var window = new AtomicReference[IWorkbenchWindow]()
+    var window: IWorkbenchWindow = null
     display.syncExec(() => {
-      window set getWorkbench.openWorkbenchWindow(null)
-      window.get.getShell.setActive
+      window = getWorkbench.openWorkbenchWindow(null)
+      window.getShell.setActive
     })
-    window.get
+    window
   }
 
-  def currentWindow = {
-    var window = new AtomicReference[IWorkbenchWindow]()
+  def currentWindow() = {
+    var window: IWorkbenchWindow = null
     display.syncExec(() => {
-      window set getWorkbench.getActiveWorkbenchWindow
+      window = getWorkbench.getActiveWorkbenchWindow
     })
-    window.get
+    window
   }
 
   private def display = getWorkbench.getDisplay

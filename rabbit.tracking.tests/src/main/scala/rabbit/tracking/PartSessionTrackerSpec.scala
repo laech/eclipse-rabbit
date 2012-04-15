@@ -38,6 +38,8 @@ import rabbit.tracking.util.{ Record, IRecorder, IRecordListener }
 @RunWith(classOf[JUnitRunner])
 final class PartSessionTrackerSpec extends AbstractTrackerSpecBase {
 
+  // TODO simplify
+
   private case class Result(val instant: Instant, val duration: Duration, val part: IWorkbenchPart)
 
   private var workbench: IWorkbench = _
