@@ -16,9 +16,12 @@
 
 package rabbit.tracking
 
+import java.lang.Thread.sleep
+
 import scala.collection.immutable.Set
 
-import org.eclipse.ui.{ PlatformUI, IWorkbenchPart, IWorkbench }
+import org.eclipse.ui.PlatformUI.getWorkbench
+import org.eclipse.ui.{ IWorkbenchPart, IWorkbench }
 import org.joda.time.Instant.now
 import org.joda.time.{ Instant, Duration }
 import org.junit.runner.RunWith
@@ -29,100 +32,217 @@ import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar.mock
 
 import rabbit.tracking.tests.TestImplicits.funToAnswer
-import rabbit.tracking.util.{ Record, IRecorder, IRecordListener }
+import rabbit.tracking.tests.Workbenches.{ openRandomPart, closeAllParts }
+import rabbit.tracking.util.{ Recorder, IRecorder }
 
-/* 
- * Unit tests for PartSessionTracker, see PartSessionTrackerIntegrationSpec
- * for some integration tests
- */
 @RunWith(classOf[JUnitRunner])
 final class PartSessionTrackerSpec extends AbstractTrackerSpecBase {
 
-  // TODO simplify
+  private class Expected {
+    var preStart: Instant = _
+    var postStart: Instant = _
+    var preEnd: Instant = _
+    var postEnd: Instant = _
+    var part: IWorkbenchPart = _
+  }
 
-  private case class Result(val instant: Instant, val duration: Duration, val part: IWorkbenchPart)
+  private class Actual {
+    var start: Instant = _
+    var duration: Duration = _
+    var part: IWorkbenchPart = _
+  }
 
   private var workbench: IWorkbench = _
   private var partTracker: IListenableTracker[IPartFocusListener] = _
-
   private var recorder: IRecorder = _
-  private var recorderListeners: Set[IRecordListener] = _
-
   private var monitor: IUserMonitor = _
   private var monitorListeners: Set[IUserListener] = _
 
-  private var actual: Result = _
-  private var listener: IPartSessionListener = _
-
-  override def beforeEach() {
-    // Initialize monitor before super, create() depends on this
-    recorderListeners = Set.empty
-    recorder = mock[IRecorder]
-    doAnswer({ invocation: InvocationOnMock =>
-      recorderListeners += invocation.getArguments()(0).asInstanceOf[IRecordListener]
-    }).when(recorder).addListener(any[IRecordListener])
-
-    partTracker = mock[IListenableTracker[IPartFocusListener]]
-
-    workbench = PlatformUI.getWorkbench
-
+  override def beforeEach {
+    // Initialize monitor before super, create depends on this
+    workbench = getWorkbench
+    partTracker = new PartFocusTracker(workbench)
+    recorder = Recorder.create()
     monitorListeners = Set.empty
     monitor = mock[IUserMonitor]
     doAnswer({ invocation: InvocationOnMock =>
       monitorListeners += invocation.getArguments()(0).asInstanceOf[IUserListener]
     }).when(monitor).addListener(any[IUserListener])
 
-    super.beforeEach()
-
-    listener = mock[IPartSessionListener]
-    tracker.addListener(listener)
-    doAnswer({ invocation: InvocationOnMock =>
-      val args = invocation.getArguments
-      val start = args(0).asInstanceOf[Instant]
-      val duration = args(1).asInstanceOf[Duration]
-      val part = args(2).asInstanceOf[IWorkbenchPart]
-      actual = Result(start, duration, part)
-    }).when(listener).onPartSession(any[Instant], any[Duration], any[IWorkbenchPart])
+    super.beforeEach
   }
 
   behavior of "RecordingPartTracker"
 
+  it must "be able to record without a user monitor" in {
+    val (listener, actual) = mockListenerWithResult
+    val tracker = create(monitor = null)
+    tracker.enable;
+    tracker.addListener(listener)
+
+    val expected = openRandomPart
+    tracker.disable
+
+    actual.part must be(expected)
+  }
+
+  it must "not notify if disabled" in {
+    val (listener, _) = mockListenerWithResult
+    tracker.addListener(listener)
+    tracker.disable
+    openRandomPart
+    openRandomPart
+    tracker.disable
+    verifyZeroInteractions(listener)
+  }
+
+  it must "not notify removed listeners" in {
+    val (listener, _) = mockListenerWithResult
+    tracker.enable
+    tracker.addListener(listener)
+    tracker.removeListener(listener)
+    openRandomPart
+    tracker.disable
+    verifyZeroInteractions(listener)
+  }
+
+  it must "record part focused duration" in {
+    val (listener, actual) = mockListenerWithResult
+    tracker.addListener(listener)
+    tracker.enable
+
+    val expected = new Expected
+    expected.preStart = now
+    expected.part = openRandomPart
+    expected.postStart = now
+
+    sleep(2)
+
+    expected.preEnd = now
+    openRandomPart
+    expected.postEnd = now
+
+    verifyEvent(actual, expected)
+  }
+
+  it must "stop recording on user inactive" in {
+    val (listener, actual) = mockListenerWithResult
+    tracker.addListener(listener)
+    tracker.enable
+
+    val expected = new Expected
+    expected.preStart = now
+    expected.part = openRandomPart
+    expected.postStart = now
+
+    sleep(2)
+
+    expected.preEnd = now
+    monitorListeners.foreach(_.onInactive)
+    expected.postEnd = now
+
+    verifyEvent(actual, expected)
+  }
+
+  it must "start recording if there is an active part on user active" in {
+    val expected = openRandomPart
+    val (listener, actual) = mockListenerWithResult
+    tracker.addListener(listener)
+    tracker.enable
+    sleep(2)
+    tracker.disable
+    actual.part must be(expected)
+  }
+
+  it must "not start recording if there is no active part on user active" in {
+    val (listener, actual) = mockListenerWithResult
+    tracker.addListener(listener)
+    closeAllParts
+
+    tracker.enable
+    sleep(2)
+    tracker.disable
+
+    actual.part must be(null)
+  }
+
+  it must "stop recording on disable" in {
+    val (listener, actual) = mockListenerWithResult
+    tracker.addListener(listener)
+    tracker.enable
+
+    val expected = new Expected
+    expected.preStart = now
+    expected.part = openRandomPart
+    expected.postStart = now
+
+    sleep(2)
+
+    expected.preEnd = now
+    tracker.disable
+    expected.postEnd = now
+
+    verifyEvent(actual, expected)
+  }
+
+  it must "start recording on enable if there is a focused part" in {
+    val (listener, actual) = mockListenerWithResult
+    tracker.addListener(listener)
+
+    val expected = new Expected
+    expected.part = openRandomPart
+
+    expected.preStart = now
+    tracker.enable
+    expected.postStart = now
+
+    sleep(2)
+
+    expected.preEnd = now
+    openRandomPart
+    expected.postEnd = now
+
+    verifyEvent(actual, expected)
+  }
+
   it must "detactch listener from user monitor when disabling" in {
-    tracker.enable()
-    tracker.disable()
+    val monitor = mock[IUserMonitor]
+    val tracker = create(monitor = monitor)
+    tracker.enable
+    tracker.disable
     verify(monitor).removeListener(notNull(classOf[IUserListener]))
   }
 
   it must "attatch listener to user monitor when enabling" in {
-    tracker.enable()
+    val monitor = mock[IUserMonitor]
+    val tracker = create(monitor = monitor)
+    tracker.enable
     verify(monitor).addListener(notNull(classOf[IUserListener]))
   }
 
   it must "enable part tracker when enabling" in {
-    tracker.enable()
-    verify(partTracker).enable()
+    val partTracker = mock[IListenableTracker[IPartFocusListener]]
+    val tracker = create(partTracker = partTracker)
+    tracker.enable
+    verify(partTracker).enable
   }
 
   it must "disable part tracker when disabling" in {
-    tracker.enable()
-    tracker.disable()
-    verify(partTracker).disable()
-  }
-
-  it must "attach listener to part tracker for tracking part events" in {
-    verify(partTracker).addListener(notNull(classOf[IPartFocusListener]))
-  }
-
-  it must "attach listener to recorder for recording elapsed time" in {
-    verify(recorder).addListener(notNull(classOf[IRecordListener]))
+    val partTracker = mock[IListenableTracker[IPartFocusListener]]
+    val tracker = create(partTracker = partTracker)
+    tracker.enable
+    tracker.disable
+    verify(partTracker).disable
   }
 
   it must "stop recorder when disabling" in {
-    tracker.enable()
-    tracker.disable()
+    val recorder = mock[IRecorder]
+    val tracker = create(recorder = recorder)
+    tracker.enable
+    tracker.disable
     val order = inOrder(recorder)
-    order.verify(recorder).stop()
-    order.verifyNoMoreInteractions()
+    order.verify(recorder).stop
+    order.verifyNoMoreInteractions
   }
 
   it must "throw NullPointerException if constructing without a workbench" in {
@@ -147,55 +267,41 @@ final class PartSessionTrackerSpec extends AbstractTrackerSpecBase {
     create(workbench, partTracker, recorder, null)
   }
 
-  it must "be able to record without a user monitor" in {
-    tracker = create(workbench, partTracker, recorder, null)
-    tracker.enable();
-    tracker.addListener(listener)
+  override protected def create() =
+    new PartSessionTracker(workbench, partTracker, recorder, monitor)
 
-    val part = mock[IWorkbenchPart]
-    recorderListeners.foreach(_.onRecord(new Record(now, new Duration(10), part)))
+  private def create(
+    workbench: IWorkbench = workbench,
+    partTracker: IListenableTracker[IPartFocusListener] = partTracker,
+    recorder: IRecorder = recorder,
+    monitor: IUserMonitor = monitor) =
+    new PartSessionTracker(workbench, partTracker, recorder, monitor)
 
-    actual.part must be(part)
+  private def verifyEvent(actual: Actual, expected: Expected) {
+    actual.part must be(expected.part)
+
+    val start = actual.start.getMillis
+    start must be >= expected.preStart.getMillis
+    start must be <= expected.postStart.getMillis
+
+    val end = start + actual.duration.getMillis
+    end must be >= expected.preEnd.getMillis
+    end must be <= expected.postEnd.getMillis
   }
 
-  it must "not notify removed listeners" in {
-    tracker.enable()
-    tracker.addListener(listener)
-    tracker.removeListener(listener)
+  private def notNullUserMonitorListener = notNull(classOf[IUserListener])
 
-    recorderListeners.foreach(_.onRecord(new Record(now, new Duration(10), mock[IWorkbenchPart])))
-
-    tracker.disable()
-    verifyZeroInteractions(listener)
-  }
-
-  it must "record part focused duration" in {
-    tracker.enable()
-
-    val instant = now
-    val duration = new Duration(100)
-    val part = mock[IWorkbenchPart]
-    val expected = Result(instant, duration, part)
-
-    recorderListeners.foreach(_.onRecord(new Record(instant, duration, part)))
-
-    actual must be(expected)
-  }
-
-  it must "stop recording on user inactive" in {
-    tracker.enable()
-    monitorListeners.foreach(_.onInactive())
-    verify(recorder).stop()
+  private def mockListenerWithResult() = {
+    val listener = mock[IPartSessionListener]
+    val actual = new Actual
+    doAnswer({ invocation: InvocationOnMock =>
+      val args = invocation.getArguments
+      actual.start = args(0).asInstanceOf[Instant]
+      actual.duration = args(1).asInstanceOf[Duration]
+      actual.part = args(2).asInstanceOf[IWorkbenchPart]
+    }).when(listener).onPartSession(any[Instant], any[Duration], any[IWorkbenchPart])
+    (listener, actual)
   }
 
   override protected type Tracker = PartSessionTracker
-
-  override protected def create() = create(workbench, partTracker, recorder, monitor)
-
-  private def create(
-    workbench: IWorkbench,
-    partTracker: IListenableTracker[IPartFocusListener],
-    recorder: IRecorder,
-    monitor: IUserMonitor) =
-    new PartSessionTracker(workbench, partTracker, recorder, monitor)
 }
