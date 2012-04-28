@@ -24,40 +24,18 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.joda.time.Duration;
 import org.joda.time.Instant;
 
-import rabbit.tracking.util.IRecordListener;
 import rabbit.tracking.util.IRecorder;
-import rabbit.tracking.util.Record;
 
 import com.google.inject.Inject;
 
 /**
- * Tracks how long a workbench part has been in focus, can take into account the
- * user's state using a {@link IUserMonitor}. See {@link IPartSessionListener}
- * for the behaviors of this tracker.
+ * Tracks how long a workbench part has been in focus. See
+ * {@link IPartSessionListener} for the behaviors of this tracker.
  */
 final class PartSessionTracker
-    extends AbstractListenableTracker<IPartSessionListener> {
+    extends AbstractSessionTracker<IWorkbenchPart, IPartSessionListener> {
 
-  private static enum NoMonitor implements IUserMonitor {
-    INSTANCE;
-
-    @Override public void addListener(IUserListener listener) {
-      // Do nothing
-    }
-
-    @Override public void removeListener(IUserListener listener) {
-      // Do nothing
-    }
-
-    @Override public boolean isUserActive() {
-      throw new UnsupportedOperationException("How did this get called?");
-    }
-  }
-
-  private final IRecorder recorder;
-  private final ITracker partTracker;
-  private final IUserMonitor monitor;
-  private final IUserListener monitorListener;
+  private final ITracker tracker;
   private final IWorkbench workbench;
 
   /**
@@ -75,25 +53,35 @@ final class PartSessionTracker
    * @throws NullPointerException if workbench, partTracker, or recorder is null
    */
   @Inject PartSessionTracker(
+      IRecorder<IWorkbenchPart> recorder,
+      IUserMonitor monitor,
       IWorkbench workbench,
-      IListenableTracker<IPartFocusListener> partTracker,
-      IRecorder recorder,
-      IUserMonitor monitor) {
+      IListenableTracker<IPartFocusListener> partTracker) {
+    super(recorder, monitor);
 
     this.workbench = checkNotNull(workbench, "workbench");
-    this.recorder = config(checkNotNull(recorder, "recorder"));
-    this.partTracker = config(checkNotNull(partTracker, "partTracker"));
-    this.monitor = monitor != null ? monitor : NoMonitor.INSTANCE;
-    this.monitorListener = createUserListener();
+    this.tracker = config(checkNotNull(partTracker, "partTracker"));
   }
 
-  private IRecorder config(IRecorder recorder) {
-    recorder.addListener(new IRecordListener() {
-      @Override public void onRecord(Record r) {
-        onPartEvent(r.instant(), r.duration(), (IWorkbenchPart)r.data());
-      }
-    });
-    return recorder;
+  @Override protected IWorkbenchPart findTarget() {
+    return getFocusedPart(workbench);
+  }
+
+  @Override protected void onDisable() {
+    super.onDisable();
+    tracker.disable();
+  }
+
+  @Override protected void onEnable() {
+    super.onEnable();
+    tracker.enable();
+  }
+
+  @Override protected void onSession(
+      Instant instant, Duration duration, IWorkbenchPart part) {
+    for (IPartSessionListener listener : getListeners()) {
+      listener.onPartSession(instant, duration, part);
+    }
   }
 
   private IListenableTracker<IPartFocusListener> config(
@@ -101,51 +89,13 @@ final class PartSessionTracker
 
     tracker.addListener(new IPartFocusListener() {
       @Override public void onPartFocused(IWorkbenchPart part) {
-        recorder.start(part);
+        recorder().start(part);
       }
 
       @Override public void onPartUnfocused(IWorkbenchPart part) {
-        recorder.stop();
+        recorder().stop();
       }
     });
     return tracker;
-  }
-
-  private IUserListener createUserListener() {
-    return new IUserListener() {
-      @Override public void onInactive() {
-        recorder.stop();
-      }
-
-      @Override public void onActive() {
-        startRecorderIfFocusedPartExists();
-      }
-    };
-  }
-
-  @Override protected void onEnable() {
-    partTracker.enable();
-    monitor.addListener(monitorListener);
-
-    startRecorderIfFocusedPartExists();
-  }
-
-  @Override protected void onDisable() {
-    monitor.removeListener(monitorListener);
-    partTracker.disable();
-    recorder.stop();
-  }
-
-  private void onPartEvent(Instant start, Duration duration, IWorkbenchPart part) {
-    for (IPartSessionListener listener : getListeners()) {
-      listener.onPartSession(start, duration, part);
-    }
-  }
-
-  private void startRecorderIfFocusedPartExists() {
-    IWorkbenchPart focusedPart = getFocusedPart(workbench);
-    if (focusedPart != null) {
-      recorder.start(focusedPart);
-    }
   }
 }

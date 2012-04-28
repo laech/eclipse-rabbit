@@ -38,15 +38,14 @@ import com.google.inject.Inject;
  * <p/>
  * This class is thread safe.
  * 
+ * @param <T> the type of data this record tracks
  * @see #create(IRecordListener...)
  * @see #withClock(IClock, IRecordListener...)
  * @see IRecordListener
  * @see Record
  * @since 2.0
  */
-public final class Recorder implements IRecorder {
-
-  // TODO review static factory methods and constructor
+public final class Recorder<T> implements IRecorder<T> {
 
   /**
    * Creates a recorder.
@@ -55,7 +54,7 @@ public final class Recorder implements IRecorder {
    * @return a new recorder with the specified listeners attached
    * @throws NullPointerException if any listener is null
    */
-  public static Recorder create(IRecordListener... listeners) {
+  public static <T> Recorder<T> create(IRecordListener<T>... listeners) {
     return withClock(SystemClock.INSTANCE, listeners);
   }
 
@@ -66,19 +65,20 @@ public final class Recorder implements IRecorder {
    * @param listeners the listeners
    * @throws NullPointerException if clock is null, or any listener is null
    */
-  public static Recorder withClock(IClock clock, IRecordListener... listeners) {
-    Recorder recorder = new Recorder(clock);
-    for (IRecordListener listener : checkedCopy(listeners)) {
+  public static <T> Recorder<T> withClock(IClock clock,
+      IRecordListener<T>... listeners) {
+    Recorder<T> recorder = new Recorder<T>(clock);
+    for (IRecordListener<T> listener : checkedCopy(listeners)) {
       recorder.addListener(listener);
     }
     return recorder;
   }
 
   private final IClock clock;
-  private final ListenableSupport<IRecordListener> listenable;
+  private final ListenableSupport<IRecordListener<T>> listenable;
 
   private Instant start;
-  private Object data;
+  private T data;
   private boolean recording;
 
   @Inject Recorder(IClock clock) {
@@ -86,16 +86,16 @@ public final class Recorder implements IRecorder {
     this.listenable = ListenableSupport.create();
   }
 
-  @Override public void addListener(IRecordListener listener) {
+  @Override public void addListener(IRecordListener<T> listener) {
     listenable.addListener(listener);
   }
 
-  @Override public void removeListener(IRecordListener listener) {
+  @Override public void removeListener(IRecordListener<T> listener) {
     listenable.removeListener(listener);
   }
 
-  @Override public void start(Object userData) {
-    Object dataSnapshot;
+  @Override public void start(T userData) {
+    T dataSnapshot;
     synchronized (this) {
       dataSnapshot = data;
     }
@@ -103,7 +103,7 @@ public final class Recorder implements IRecorder {
     boolean notify = false;
     boolean sameData = equal(dataSnapshot, userData);
     Instant now = clock.now();
-    Object myData;
+    T myData;
     Instant myStart;
     Duration myDuration = null;
 
@@ -134,12 +134,12 @@ public final class Recorder implements IRecorder {
       if (myDuration == null) {
         myDuration = new Duration(myStart, now);
       }
-      notifyListeners(new Record(myStart, myDuration, myData));
+      notifyListeners(Record.create(myStart, myDuration, myData));
     }
   }
 
   @Override public void stop() {
-    Object myData;
+    T myData;
     Instant myStart;
     synchronized (this) {
       if (!recording) {
@@ -154,15 +154,15 @@ public final class Recorder implements IRecorder {
     }
 
     Duration duration = new Duration(myStart, clock.now());
-    notifyListeners(new Record(myStart, duration, myData));
+    notifyListeners(Record.create(myStart, duration, myData));
   }
 
-  @VisibleForTesting Set<IRecordListener> getListeners() {
+  @VisibleForTesting Set<IRecordListener<T>> getListeners() {
     return listenable.getListeners();
   }
 
-  private void notifyListeners(Record record) {
-    for (IRecordListener listener : listenable.getListeners()) {
+  private void notifyListeners(Record<T> record) {
+    for (IRecordListener<T> listener : listenable.getListeners()) {
       listener.onRecord(record);
     }
   }

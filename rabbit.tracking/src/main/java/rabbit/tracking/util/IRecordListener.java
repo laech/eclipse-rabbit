@@ -19,16 +19,17 @@ package rabbit.tracking.util;
 /**
  * Listener to be notified of recording events.
  * 
+ * @param <T> the type of data the records will hold
  * @see Recorder
  * @see Record
  * @since 2.0
  */
-public interface IRecordListener {
+public interface IRecordListener<T> {
 
   /**
    * Called when a new record is available.
    * 
    * @param record the new record, not null
    */
-  void onRecord(Record record);
+  void onRecord(Record<T> record);
 }

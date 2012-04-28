@@ -17,7 +17,7 @@
 package rabbit.tracking.tests
 
 import org.eclipse.ui.PlatformUI.getWorkbench
-import org.eclipse.ui.{IWorkbenchWindow, IWorkbenchPart, IViewPart, IPerspectiveDescriptor}
+import org.eclipse.ui.{ IWorkbenchWindow, IWorkbenchPart, IViewPart, IPerspectiveDescriptor }
 
 import rabbit.tracking.tests.TestImplicits.funToRunnable
 

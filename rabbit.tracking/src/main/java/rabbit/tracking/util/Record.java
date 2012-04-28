@@ -24,13 +24,12 @@ import rabbit.tracking.TimedEvent;
 /**
  * Represents the result of a recording.
  * 
+ * @param <T> the type of data this record holds
  * @see Recorder
  * @see IRecordListener
  * @since 2.0
  */
-public final class Record extends TimedEvent {
-
-  private final Object data;
+public final class Record<T> extends TimedEvent {
 
   /**
    * Creates a record with the given data.
@@ -41,7 +40,13 @@ public final class Record extends TimedEvent {
    * @return a record
    * @throws NullPointerException if start is null, or duration is null
    */
-  public Record(Instant instant, Duration duration, Object data) {
+  public static <T> Record<T> create(Instant instant, Duration duration, T data) {
+    return new Record<T>(instant, duration, data);
+  }
+
+  private final T data;
+
+  private Record(Instant instant, Duration duration, T data) {
     super(instant, duration);
     this.data = data;
   }
@@ -52,7 +57,7 @@ public final class Record extends TimedEvent {
    * @return the user data, or null if there was no data associated with this
    *         recording
    */
-  public Object data() {
+  public T data() {
     return data;
   }
 

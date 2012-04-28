@@ -53,7 +53,7 @@ final class PerspectiveFocusTrackerSpec extends AbstractTrackerSpecBase {
     openRandomPerspective
   }
 
-  behavior of "PerspectiveTracker"
+  behavior of classOf[PerspectiveFocusTracker].getSimpleName
 
   it must "notify perspective focused due to perspective switched" in {
     tracker.enable

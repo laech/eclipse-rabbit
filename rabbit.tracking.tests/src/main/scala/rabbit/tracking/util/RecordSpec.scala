@@ -41,32 +41,32 @@ final class RecordSpec extends FlatSpec with MustMatchers {
 
   it must "throw NullPointerException if tried to construct without a duration" in {
     intercept[NullPointerException] {
-      new Record(now, null, "data");
+      Record.create(now, null, "data");
     }
   }
 
   it must "throw NullPointerException if tried to construct without a start time" in {
     intercept[NullPointerException] {
-      new Record(null, Duration.ZERO, "data");
+      Record.create(null, Duration.ZERO, "data");
     }
   }
 
   it must "not throw exception if tried to construct without user data" in {
-    new Record(now, Duration.ZERO, null)
+    Record.create(now, Duration.ZERO, null)
   }
 
   it must "return the instant" in {
     val instant = now
-    new Record(instant, Duration.ZERO, "data").instant must be(instant)
+    Record.create(instant, Duration.ZERO, "data").instant must be(instant)
   }
 
   it must "return the duration" in {
     val duration = new Duration(10)
-    new Record(now, duration, "data").duration must be(duration)
+    Record.create(now, duration, "data").duration must be(duration)
   }
 
   it must "return the data" in {
     val data = "data"
-    new Record(now, Duration.ZERO, data).data must be(data)
+    Record.create(now, Duration.ZERO, data).data must be(data)
   }
 }

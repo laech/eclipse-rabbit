@@ -18,8 +18,8 @@ package rabbit.tracking.util;
 
 import rabbit.tracking.IListenable;
 
-// TODO
-public interface IRecorder extends IListenable<IRecordListener> {
+// TODO 
+public interface IRecorder<T> extends IListenable<IRecordListener<T>> {
 
   /**
    * Starts a recording with the given user data.
@@ -32,7 +32,7 @@ public interface IRecorder extends IListenable<IRecordListener> {
    * 
    * @param userData the user data to associate with this recording, may be null
    */
-  void start(Object userData);
+  void start(T userData);
 
   /**
    * Stops recording.

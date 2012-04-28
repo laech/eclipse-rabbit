@@ -50,7 +50,7 @@ final class PartFocusTrackerSpec extends AbstractTrackerSpecBase {
     windowsToClose foreach (close(_))
   }
 
-  behavior of "PartTracker"
+  behavior of classOf[PartFocusTracker].getSimpleName
 
   it must "attach listener to workbench when enabling" in {
     val workbench = mockWorkbenchWithNoWindow

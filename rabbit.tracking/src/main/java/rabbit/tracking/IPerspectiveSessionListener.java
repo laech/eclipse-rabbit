@@ -16,30 +16,30 @@
 
 package rabbit.tracking;
 
-import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.IPerspectiveDescriptor;
 import org.joda.time.Duration;
 import org.joda.time.Instant;
 
 /**
- * Listens to part focused duration events.
+ * Listens to perspective focused duration events.
  * <p/>
- * If a part is focused, then when it becomes unfocused (or by some other means
- * such as the user becomes inactive, or the track gets disabled), this listener
- * will be notified with the captured session.
+ * If a perspective is focused, then when it becomes deactivated (or by some
+ * other means such as the user becomes inactive, or the track gets disabled),
+ * this listener will be notified with the captured session.
  * <p/>
- * A part is consider focused if it's the active part and its parent window has
- * the focus.
+ * A perspective is consider focused if its parent window has the focus.
  * 
  * @since 2.0
  */
-public interface IPartSessionListener {
+public interface IPerspectiveSessionListener {
 
   /**
    * Called when a new session is captured.
    * 
    * @param start the start time of this event, not null
    * @param duration the duration of this event, not null
-   * @param part the workbench part of this session, not null
+   * @param perspective the perspective of this session, not null
    */
-  void onPartSession(Instant start, Duration duration, IWorkbenchPart part);
+  void onPerspectiveSession(
+      Instant start, Duration duration, IPerspectiveDescriptor perspective);
 }

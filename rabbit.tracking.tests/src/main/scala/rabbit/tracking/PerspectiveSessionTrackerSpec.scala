@@ -18,10 +18,8 @@ package rabbit.tracking
 
 import java.lang.Thread.sleep
 
-import scala.collection.immutable.Set
-
 import org.eclipse.ui.PlatformUI.getWorkbench
-import org.eclipse.ui.{ IWorkbenchPart, IWorkbench }
+import org.eclipse.ui.{ IWorkbench, IPerspectiveDescriptor }
 import org.joda.time.Instant.now
 import org.joda.time.{ Instant, Duration }
 import org.junit.runner.RunWith
@@ -32,50 +30,51 @@ import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar.mock
 
 import rabbit.tracking.tests.TestImplicits.funToAnswer
-import rabbit.tracking.tests.Workbenches.{ openRandomPart, closeAllParts }
+import rabbit.tracking.tests.Workbenches.{ openRandomPerspective, closeAllPerspectives, closeAllParts }
 import rabbit.tracking.util.{ Recorder, IRecorder }
 
 /*
- * Also see PerspectiveSessionTrackerSpec, which has similar test requirements.
+ * Also see PartSessionTrackerSpec, which has similar test requirements.
  */
 @RunWith(classOf[JUnitRunner])
-final class PartSessionTrackerSpec extends AbstractTrackerSpecBase {
+final class PerspectiveSessionTrackerSpec extends AbstractTrackerSpecBase {
 
   private class Expected {
     var preStart: Instant = _
     var postStart: Instant = _
     var preEnd: Instant = _
     var postEnd: Instant = _
-    var part: IWorkbenchPart = _
+    var perspective: IPerspectiveDescriptor = _
   }
 
   private class Actual {
     var start: Instant = _
     var duration: Duration = _
-    var part: IWorkbenchPart = _
+    var perspective: IPerspectiveDescriptor = _
   }
 
   private var workbench: IWorkbench = _
-  private var partTracker: IListenableTracker[IPartFocusListener] = _
-  private var recorder: IRecorder[IWorkbenchPart] = _
+  private var perspectiveTracker: IListenableTracker[IPerspectiveFocusListener] = _
+  private var recorder: IRecorder[IPerspectiveDescriptor] = _
   private var monitor: IUserMonitor = _
-  private var monitorListeners: Set[IUserListener] = _
+  private var monitorListeners: Seq[IUserListener] = _
 
   override def beforeEach {
-    // Initialize monitor before super, create depends on this
     workbench = getWorkbench
-    partTracker = new PartFocusTracker(workbench)
+    perspectiveTracker = new PerspectiveFocusTracker(workbench)
     recorder = Recorder.create()
-    monitorListeners = Set.empty
     monitor = mock[IUserMonitor]
-    doAnswer({ invocation: InvocationOnMock =>
-      monitorListeners += invocation.getArguments()(0).asInstanceOf[IUserListener]
-    }).when(monitor).addListener(any[IUserListener])
+    monitorListeners = Seq.empty
+    doAnswer { i: InvocationOnMock =>
+      monitorListeners :+= i.getArguments()(0).asInstanceOf[IUserListener]
+    } when monitor addListener any[IUserListener]
 
     super.beforeEach
+
+    closeAllParts
   }
 
-  behavior of classOf[PartSessionTracker].getSimpleName
+  behavior of classOf[PerspectiveSessionTracker].getSimpleName
 
   it must "be able to record without a user monitor" in {
     val (listener, actual) = mockListenerWithResult
@@ -83,18 +82,18 @@ final class PartSessionTrackerSpec extends AbstractTrackerSpecBase {
     tracker.enable;
     tracker.addListener(listener)
 
-    val expected = openRandomPart
+    val expected = openRandomPerspective
     tracker.disable
 
-    actual.part must be(expected)
+    actual.perspective must be(expected)
   }
 
   it must "not notify if disabled" in {
     val (listener, _) = mockListenerWithResult
     tracker.addListener(listener)
     tracker.disable
-    openRandomPart
-    openRandomPart
+    openRandomPerspective
+    openRandomPerspective
     tracker.disable
     verifyZeroInteractions(listener)
   }
@@ -104,25 +103,25 @@ final class PartSessionTrackerSpec extends AbstractTrackerSpecBase {
     tracker.enable
     tracker.addListener(listener)
     tracker.removeListener(listener)
-    openRandomPart
+    openRandomPerspective
     tracker.disable
     verifyZeroInteractions(listener)
   }
 
-  it must "record part focused duration" in {
+  it must "record perspective focused duration" in {
     val (listener, actual) = mockListenerWithResult
     tracker.addListener(listener)
     tracker.enable
 
     val expected = new Expected
     expected.preStart = now
-    expected.part = openRandomPart
+    expected.perspective = openRandomPerspective
     expected.postStart = now
 
     sleep(2)
 
     expected.preEnd = now
-    openRandomPart
+    openRandomPerspective
     expected.postEnd = now
 
     verifyEvent(actual, expected)
@@ -135,7 +134,7 @@ final class PartSessionTrackerSpec extends AbstractTrackerSpecBase {
 
     val expected = new Expected
     expected.preStart = now
-    expected.part = openRandomPart
+    expected.perspective = openRandomPerspective
     expected.postStart = now
 
     sleep(2)
@@ -147,26 +146,26 @@ final class PartSessionTrackerSpec extends AbstractTrackerSpecBase {
     verifyEvent(actual, expected)
   }
 
-  it must "start recording if there is an active part on user active" in {
-    val expected = openRandomPart
+  it must "start recording if there is an active perspective on user active" in {
+    val expected = openRandomPerspective
     val (listener, actual) = mockListenerWithResult
     tracker.addListener(listener)
     tracker.enable
     sleep(2)
     tracker.disable
-    actual.part must be(expected)
+    actual.perspective must be(expected)
   }
 
-  it must "not start recording if there is no active part on user active" in {
+  it must "not start recording if there is no active perspective on user active" in {
     val (listener, actual) = mockListenerWithResult
     tracker.addListener(listener)
-    closeAllParts
+    closeAllPerspectives
 
     tracker.enable
     sleep(2)
     tracker.disable
 
-    actual.part must be(null)
+    actual.perspective must be(null)
   }
 
   it must "stop recording on disable" in {
@@ -176,7 +175,7 @@ final class PartSessionTrackerSpec extends AbstractTrackerSpecBase {
 
     val expected = new Expected
     expected.preStart = now
-    expected.part = openRandomPart
+    expected.perspective = openRandomPerspective
     expected.postStart = now
 
     sleep(2)
@@ -188,12 +187,12 @@ final class PartSessionTrackerSpec extends AbstractTrackerSpecBase {
     verifyEvent(actual, expected)
   }
 
-  it must "start recording on enable if there is a focused part" in {
+  it must "start recording on enable if there is a focused perspective" in {
     val (listener, actual) = mockListenerWithResult
     tracker.addListener(listener)
 
     val expected = new Expected
-    expected.part = openRandomPart
+    expected.perspective = openRandomPerspective
 
     expected.preStart = now
     tracker.enable
@@ -202,7 +201,7 @@ final class PartSessionTrackerSpec extends AbstractTrackerSpecBase {
     sleep(2)
 
     expected.preEnd = now
-    openRandomPart
+    openRandomPerspective
     expected.postEnd = now
 
     verifyEvent(actual, expected)
@@ -223,23 +222,23 @@ final class PartSessionTrackerSpec extends AbstractTrackerSpecBase {
     verify(monitor).addListener(notNull(classOf[IUserListener]))
   }
 
-  it must "enable part tracker when enabling" in {
-    val partTracker = mock[IListenableTracker[IPartFocusListener]]
-    val tracker = create(partTracker = partTracker)
+  it must "enable perspective tracker when enabling" in {
+    val perspectiveTracker = mock[IListenableTracker[IPerspectiveFocusListener]]
+    val tracker = create(perspectiveTracker = perspectiveTracker)
     tracker.enable
-    verify(partTracker).enable
+    verify(perspectiveTracker).enable
   }
 
-  it must "disable part tracker when disabling" in {
-    val partTracker = mock[IListenableTracker[IPartFocusListener]]
-    val tracker = create(partTracker = partTracker)
+  it must "disable perspective tracker when disabling" in {
+    val perspectiveTracker = mock[IListenableTracker[IPerspectiveFocusListener]]
+    val tracker = create(perspectiveTracker = perspectiveTracker)
     tracker.enable
     tracker.disable
-    verify(partTracker).disable
+    verify(perspectiveTracker).disable
   }
 
   it must "stop recorder when disabling" in {
-    val recorder = mock[IRecorder[IWorkbenchPart]]
+    val recorder = mock[IRecorder[IPerspectiveDescriptor]]
     val tracker = create(recorder = recorder)
     tracker.enable
     tracker.disable
@@ -254,9 +253,9 @@ final class PartSessionTrackerSpec extends AbstractTrackerSpecBase {
     }
   }
 
-  it must "throw NullPointerException if constructing without a part tracker" in {
+  it must "throw NullPointerException if constructing without a perspective tracker" in {
     intercept[NullPointerException] {
-      create(partTracker = null)
+      create(perspectiveTracker = null)
     }
   }
 
@@ -270,18 +269,33 @@ final class PartSessionTrackerSpec extends AbstractTrackerSpecBase {
     create(monitor = null)
   }
 
-  override protected def create() =
-    new PartSessionTracker(recorder, monitor, workbench, partTracker)
+  override protected type Tracker = PerspectiveSessionTracker
+
+  override protected def create() = create(recorder, monitor, workbench, perspectiveTracker)
 
   private def create(
-    recorder: IRecorder[IWorkbenchPart] = recorder,
+    recorder: IRecorder[IPerspectiveDescriptor] = recorder,
     monitor: IUserMonitor = monitor,
     workbench: IWorkbench = workbench,
-    partTracker: IListenableTracker[IPartFocusListener] = partTracker) =
-    new PartSessionTracker(recorder, monitor, workbench, partTracker)
+    perspectiveTracker: IListenableTracker[IPerspectiveFocusListener] = perspectiveTracker) = {
+    new PerspectiveSessionTracker(recorder, monitor, workbench, perspectiveTracker)
+  }
+
+  private def mockListenerWithResult() = {
+    val listener = mock[IPerspectiveSessionListener]
+    val actual = new Actual
+    doAnswer { i: InvocationOnMock =>
+      val args = i.getArguments
+      actual.start = args(0).asInstanceOf[Instant]
+      actual.duration = args(1).asInstanceOf[Duration]
+      actual.perspective = args(2).asInstanceOf[IPerspectiveDescriptor]
+    } when listener onPerspectiveSession (anyInstant, anyDuration, anyPerspective)
+
+    (listener, actual)
+  }
 
   private def verifyEvent(actual: Actual, expected: Expected) {
-    actual.part must be(expected.part)
+    actual.perspective must be(expected.perspective)
 
     val start = actual.start.getMillis
     start must be >= expected.preStart.getMillis
@@ -292,19 +306,7 @@ final class PartSessionTrackerSpec extends AbstractTrackerSpecBase {
     end must be <= expected.postEnd.getMillis
   }
 
-  private def notNullUserMonitorListener = notNull(classOf[IUserListener])
-
-  private def mockListenerWithResult() = {
-    val listener = mock[IPartSessionListener]
-    val actual = new Actual
-    doAnswer({ invocation: InvocationOnMock =>
-      val args = invocation.getArguments
-      actual.start = args(0).asInstanceOf[Instant]
-      actual.duration = args(1).asInstanceOf[Duration]
-      actual.part = args(2).asInstanceOf[IWorkbenchPart]
-    }).when(listener).onPartSession(any[Instant], any[Duration], any[IWorkbenchPart])
-    (listener, actual)
-  }
-
-  override protected type Tracker = PartSessionTracker
+  private def anyInstant = any[Instant]
+  private def anyDuration = any[Duration]
+  private def anyPerspective = any[IPerspectiveDescriptor]
 }
