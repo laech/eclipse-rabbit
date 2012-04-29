@@ -35,16 +35,11 @@ import com.google.inject.Inject;
 final class PartSessionTracker
     extends AbstractSessionTracker<IWorkbenchPart, IPartSessionListener> {
 
-  private final ITracker tracker;
+  private final IListenableTracker<IPartFocusListener> tracker;
+  private final IPartFocusListener listener;
   private final IWorkbench workbench;
 
   /**
-   * Constructs a new tracker.
-   * <p/>
-   * This tracker is considered the owner or controller of the partTracker and
-   * recorder passed in here and they should not be shared/interacted with
-   * outside of this tracker, otherwise errors will occur.
-   * 
    * @param workbench the workbench to track for
    * @param partTracker the part track to use for tracking part focus events
    * @param recorder the recorder to use for calculating elapsed time
@@ -60,7 +55,8 @@ final class PartSessionTracker
     super(recorder, monitor);
 
     this.workbench = checkNotNull(workbench, "workbench");
-    this.tracker = config(checkNotNull(partTracker, "partTracker"));
+    this.tracker = checkNotNull(partTracker, "partTracker");
+    this.listener = createPartFocusListener();
   }
 
   @Override protected IWorkbenchPart findTarget() {
@@ -70,10 +66,12 @@ final class PartSessionTracker
   @Override protected void onDisable() {
     super.onDisable();
     tracker.disable();
+    tracker.removeListener(listener);
   }
 
   @Override protected void onEnable() {
     super.onEnable();
+    tracker.addListener(listener);
     tracker.enable();
   }
 
@@ -84,10 +82,8 @@ final class PartSessionTracker
     }
   }
 
-  private IListenableTracker<IPartFocusListener> config(
-      IListenableTracker<IPartFocusListener> tracker) {
-
-    tracker.addListener(new IPartFocusListener() {
+  private IPartFocusListener createPartFocusListener() {
+    return new IPartFocusListener() {
       @Override public void onPartFocused(IWorkbenchPart part) {
         recorder().start(part);
       }
@@ -95,7 +91,6 @@ final class PartSessionTracker
       @Override public void onPartUnfocused(IWorkbenchPart part) {
         recorder().stop();
       }
-    });
-    return tracker;
+    };
   }
 }

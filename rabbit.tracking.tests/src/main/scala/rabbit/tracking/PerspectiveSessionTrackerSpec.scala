@@ -52,25 +52,6 @@ final class PerspectiveSessionTrackerSpec
 
   behavior of classOf[PerspectiveSessionTracker].getSimpleName
 
-  it must "record perspective focused duration" in {
-    val (listener, actual) = mockListenerWithResult
-    tracker.addListener(listener)
-    tracker.enable
-
-    val expected = new Expected
-    expected.preStart = now
-    expected.target = changeTarget
-    expected.postStart = now
-
-    sleep(2)
-
-    expected.preEnd = now
-    changeTarget
-    expected.postEnd = now
-
-    verifyEvent(actual, expected)
-  }
-
   it must "enable perspective tracker when enabling" in {
     val perspectiveTracker = mock[IListenableTracker[IPerspectiveFocusListener]]
     val tracker = createTracker(perspectiveTracker = perspectiveTracker)

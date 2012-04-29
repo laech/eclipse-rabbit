@@ -38,9 +38,12 @@ import rabbit.tracking.util.Record;
  * Subclasses can start/stop the recorder when appropriate, for example, start
  * the recorder when a workbench part becomes focused, and stop it when the part
  * becomes unfocused.
+ * 
+ * @param <E> the type of target this tracker will track
+ * @param <T> the type of listeners for this {@link IListenableTracker}
  */
-abstract class AbstractSessionTracker<T, L>
-    extends AbstractListenableTracker<L> {
+abstract class AbstractSessionTracker<E, T>
+    extends AbstractListenableTracker<T> {
 
   private static enum NoMonitor implements IUserMonitor {
     INSTANCE;
@@ -58,51 +61,62 @@ abstract class AbstractSessionTracker<T, L>
     }
   }
 
-  private final IRecorder<T> recorder;
+  private final IRecorder<E> recorder;
+  private final IRecordListener<E> recordListener;
   private final IUserMonitor monitor;
   private final IUserListener monitorListener;
 
-  AbstractSessionTracker(IRecorder<T> recorder, IUserMonitor monitor) {
-    this.recorder = config(checkNotNull(recorder, "recorder"));
+  /**
+   * @param recorder the recorder to use for elapsed time
+   * @param monitor the optional monitor to use for user activeness
+   * @throws NullPointerException if recorder is null
+   */
+  AbstractSessionTracker(IRecorder<E> recorder, IUserMonitor monitor) {
+    this.recorder = checkNotNull(recorder, "recorder");
     this.monitor = monitor != null ? monitor : NoMonitor.INSTANCE;
     this.monitorListener = createUserListener();
+    this.recordListener = createRecordListener();
   }
 
   /**
    * Finds the current target that is suitable to start tracking on. Or null if
    * none.
    */
-  protected abstract T findTarget();
+  protected abstract E findTarget();
 
   @Override protected void onDisable() {
     monitor.removeListener(monitorListener);
+
+    // Stop recorder before removing listener so that the last event will be
+    // notified
     recorder.stop();
+    recorder.removeListener(recordListener);
   }
 
   @Override protected void onEnable() {
     monitor.addListener(monitorListener);
+    recorder.addListener(recordListener);
     startRecordingIfTargetExists();
   }
 
   /**
    * Called when a new event is captured.
    */
-  protected abstract void onSession(Instant instant, Duration duration, T data);
+  protected abstract void onSession(Instant instant, Duration duration, E data);
 
   /**
    * The recorder used to record durations.
    */
-  protected final IRecorder<T> recorder() {
+  protected final IRecorder<E> recorder() {
     return recorder;
   }
 
-  private IRecorder<T> config(IRecorder<T> recorder) {
-    recorder.addListener(new IRecordListener<T>() {
-      @Override public void onRecord(Record<T> r) {
-        onSession(r.instant(), r.duration(), r.data());
+  private IRecordListener<E> createRecordListener() {
+    return new IRecordListener<E>() {
+      @Override public void onRecord(Record<E> record) {
+        onSession(record.instant(), record.duration(), record.data());
       }
-    });
-    return recorder;
+    };
   }
 
   private IUserListener createUserListener() {
@@ -118,7 +132,7 @@ abstract class AbstractSessionTracker<T, L>
   }
 
   private void startRecordingIfTargetExists() {
-    T target = findTarget();
+    E target = findTarget();
     if (target != null) {
       recorder().start(target);
     }

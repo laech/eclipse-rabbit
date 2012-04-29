@@ -36,7 +36,8 @@ final class PerspectiveSessionTracker extends
     AbstractSessionTracker<IPerspectiveDescriptor, IPerspectiveSessionListener> {
 
   private final IWorkbench workbench;
-  private final ITracker tracker;
+  private final IListenableTracker<IPerspectiveFocusListener> tracker;
+  private final IPerspectiveFocusListener listener;
 
   @Inject PerspectiveSessionTracker(
       IRecorder<IPerspectiveDescriptor> recorder,
@@ -45,7 +46,8 @@ final class PerspectiveSessionTracker extends
       IListenableTracker<IPerspectiveFocusListener> perspectiveTracker) {
     super(recorder, monitor);
     this.workbench = checkNotNull(workbench, "workbench");
-    this.tracker = config(checkNotNull(perspectiveTracker, "perspectiveTracker"));
+    this.tracker = checkNotNull(perspectiveTracker, "perspectiveTracker");
+    this.listener = createPerspectiveFocusListener();
   }
 
   @Override protected IPerspectiveDescriptor findTarget() {
@@ -55,10 +57,12 @@ final class PerspectiveSessionTracker extends
   @Override protected void onDisable() {
     super.onDisable();
     tracker.disable();
+    tracker.removeListener(listener);
   }
 
   @Override protected void onEnable() {
     super.onEnable();
+    tracker.addListener(listener);
     tracker.enable();
   }
 
@@ -69,8 +73,8 @@ final class PerspectiveSessionTracker extends
     }
   }
 
-  private ITracker config(IListenableTracker<IPerspectiveFocusListener> tracker) {
-    tracker.addListener(new IPerspectiveFocusListener() {
+  private IPerspectiveFocusListener createPerspectiveFocusListener() {
+    return new IPerspectiveFocusListener() {
       @Override public void onPerspectiveFocused(IPerspectiveDescriptor p) {
         recorder().start(p);
       }
@@ -78,7 +82,6 @@ final class PerspectiveSessionTracker extends
       @Override public void onPerspectiveUnfocused(IPerspectiveDescriptor p) {
         recorder().stop();
       }
-    });
-    return tracker;
+    };
   }
 }

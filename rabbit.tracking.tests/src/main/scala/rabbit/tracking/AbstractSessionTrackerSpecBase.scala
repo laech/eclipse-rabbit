@@ -22,7 +22,7 @@ import org.joda.time.Instant.now
 import org.joda.time.{ Instant, Duration }
 import org.junit.runner.RunWith
 import org.mockito.Matchers.{ notNull, any }
-import org.mockito.Mockito.{ verifyZeroInteractions, verify, inOrder, doAnswer }
+import org.mockito.Mockito.{ verifyZeroInteractions, verify, inOrder, doAnswer, never }
 import org.mockito.invocation.InvocationOnMock
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar.mock
@@ -68,6 +68,44 @@ abstract class AbstractSessionTrackerSpecBase[T: Manifest, L <: AnyRef]
   }
 
   behavior of classOf[AbstractSessionTracker[_, _]].getSimpleName
+
+  it must "record target focused duration on target change" in {
+    val (listener, actual) = mockListenerWithResult
+    tracker.addListener(listener)
+    tracker.enable
+
+    val expected = new Expected
+    expected.preStart = now
+    expected.target = changeTarget
+    expected.postStart = now
+
+    sleep(2)
+
+    expected.preEnd = now
+    changeTarget
+    expected.postEnd = now
+
+    verifyEvent(actual, expected)
+  }
+
+  it must "record target focused duration on disable" in {
+    val (listener, actual) = mockListenerWithResult
+    tracker.addListener(listener)
+    tracker.enable
+
+    val expected = new Expected
+    expected.preStart = now
+    expected.target = changeTarget
+    expected.postStart = now
+
+    sleep(2)
+
+    expected.preEnd = now
+    tracker.disable
+    expected.postEnd = now
+
+    verifyEvent(actual, expected)
+  }
 
   it must "be able to record without a user monitor" in {
     val (listener, actual) = mockListenerWithResult
@@ -203,7 +241,7 @@ abstract class AbstractSessionTrackerSpecBase[T: Manifest, L <: AnyRef]
     tracker.disable
     val order = inOrder(recorder)
     order.verify(recorder).stop
-    order.verifyNoMoreInteractions
+    order.verify(recorder, never).start(any[T])
   }
 
   it must "throw NullPointerException if constructing without a recorder" in {

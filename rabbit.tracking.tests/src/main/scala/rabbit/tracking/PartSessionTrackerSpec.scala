@@ -51,25 +51,6 @@ final class PartSessionTrackerSpec
 
   behavior of classOf[PartSessionTracker].getSimpleName
 
-  it must "record part focused duration" in {
-    val (listener, actual) = mockListenerWithResult
-    tracker.addListener(listener)
-    tracker.enable
-
-    val expected = new Expected
-    expected.preStart = now
-    expected.target = changeTarget
-    expected.postStart = now
-
-    sleep(2)
-
-    expected.preEnd = now
-    changeTarget
-    expected.postEnd = now
-
-    verifyEvent(actual, expected)
-  }
-
   it must "enable part tracker when enabling" in {
     val partTracker = mock[IListenableTracker[IPartFocusListener]]
     val tracker = createTracker(partTracker = partTracker)
