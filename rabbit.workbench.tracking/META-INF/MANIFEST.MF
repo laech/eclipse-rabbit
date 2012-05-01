@@ -16,4 +16,3 @@ Import-Package: com.google.common.base;version="11.0.0",
  rabbit.tracking;version="[2.0.0,3.0.0)",
  rabbit.tracking.util;version="[2.0.0,3.0.0)"
 Bundle-ActivationPolicy: lazy
-Bundle-Activator: rabbit.workbench.internal.tracking.WorkbenchPlugin
