@@ -22,6 +22,7 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.joda.time.Duration;
 import org.joda.time.Instant;
 
+import rabbit.tracking.AbstractTracker;
 import rabbit.tracking.IListenableTracker;
 import rabbit.tracking.IPartSessionListener;
 import rabbit.tracking.IPersistable;
@@ -29,10 +30,11 @@ import rabbit.tracking.util.IPersistableEventListenerSupport;
 
 import com.google.inject.Inject;
 
-public final class PartTracker extends AbstractPartTracker
-    implements IPersistable {
+public final class PartTracker extends AbstractTracker implements IPersistable {
 
   private final IPersistableEventListenerSupport<IPartEvent> support;
+  private final IListenableTracker<IPartSessionListener> tracker;
+  private final IPartSessionListener listener;
 
   /**
    * @param tracker the tracker to use for listening to part session events
@@ -42,17 +44,31 @@ public final class PartTracker extends AbstractPartTracker
   @Inject public PartTracker(
       IListenableTracker<IPartSessionListener> tracker,
       IPersistableEventListenerSupport<IPartEvent> support) {
-    super(tracker);
     this.support = checkNotNull(support, "support");
-  }
-
-  @Override protected void onPartSession(
-      Instant start, Duration duration, IWorkbenchPart part) {
-    support.notifyOnEvent(new PartEvent(start, duration, part));
+    this.tracker = checkNotNull(tracker, "tracker");
+    this.listener = createListener();
   }
 
   @Override public void save() {
     support.notifyOnSave();
   }
 
+  private IPartSessionListener createListener() {
+    return new IPartSessionListener() {
+      @Override public void onPartSession(
+          Instant start, Duration duration, IWorkbenchPart part) {
+        support.notifyOnEvent(new PartEvent(start, duration, part));
+      }
+    };
+  }
+
+  @Override protected void onEnable() {
+    tracker.addListener(listener);
+    tracker.enable();
+  }
+
+  @Override protected void onDisable() {
+    tracker.disable();
+    tracker.removeListener(listener);
+  }
 }
