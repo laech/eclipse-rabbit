@@ -17,7 +17,6 @@
 package rabbit.workbench.internal.tracking
 
 import java.lang.System.{ nanoTime, currentTimeMillis }
-
 import org.eclipse.core.commands.common.CommandException
 import org.eclipse.core.commands.IExecutionListener
 import org.eclipse.core.commands.{ ExecutionEvent, AbstractHandler }
@@ -30,7 +29,6 @@ import org.mockito.Mockito.{ verifyZeroInteractions, verifyNoMoreInteractions, v
 import org.mockito.invocation.InvocationOnMock
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar.mock
-
 import rabbit.tracking.tests.TestImplicits.funToAnswer
 import rabbit.tracking.util.IPersistableEventListenerSupport
 import rabbit.tracking.AbstractTrackerSpecBase

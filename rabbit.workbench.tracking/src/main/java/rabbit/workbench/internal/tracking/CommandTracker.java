@@ -28,6 +28,8 @@ import rabbit.tracking.AbstractTracker;
 import rabbit.tracking.IPersistable;
 import rabbit.tracking.util.IPersistableEventListenerSupport;
 
+import com.google.inject.Inject;
+
 public final class CommandTracker
     extends AbstractTracker implements IPersistable {
 
@@ -93,7 +95,7 @@ public final class CommandTracker
    * @param support the object to receive notifications of this tracker
    * @throws NullPointerException if any argument is null
    */
-  public CommandTracker(
+  @Inject public CommandTracker(
       ICommandService service,
       IPersistableEventListenerSupport<ICommandEvent> support) {
     this.service = checkNotNull(service, "service");
