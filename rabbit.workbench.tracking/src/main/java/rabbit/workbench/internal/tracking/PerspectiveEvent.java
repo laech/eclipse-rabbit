@@ -28,9 +28,9 @@ final class PerspectiveEvent extends TimedEvent implements IPerspectiveEvent {
 
   private final IPerspectiveDescriptor perspective;
 
-  PerspectiveEvent(Instant instant, Duration duraion,
+  PerspectiveEvent(Instant instant, Duration duration,
       IPerspectiveDescriptor perspective) {
-    super(instant, duraion);
+    super(instant, duration);
     this.perspective = checkNotNull(perspective, "perspective");
   }
 

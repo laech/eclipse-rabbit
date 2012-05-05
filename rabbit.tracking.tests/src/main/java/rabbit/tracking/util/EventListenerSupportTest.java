@@ -24,40 +24,34 @@ import static org.mockito.Mockito.verify;
 import org.junit.Before;
 import org.junit.Test;
 
-import rabbit.tracking.IPersistableEventListener;
+import rabbit.tracking.IEventListener;
 
-public final class TrackerEventListenerSupportTest {
+public final class EventListenerSupportTest {
 
-  private static class TrackerListenerSupportTester
-      extends PersistableEventListenerSupport<Object> {
+  private static class Tester extends EventListenerSupport<Object> {
 
-    IPersistableEventListener<Object> listener;
+    IEventListener<Object> listener;
 
     @SuppressWarnings("unchecked")//
-    TrackerListenerSupportTester() {
-      listener = mock(IPersistableEventListener.class);
+    Tester() {
+      listener = mock(IEventListener.class);
     }
 
     @SuppressWarnings("unchecked")//
-    @Override protected Iterable<IPersistableEventListener<Object>> getListeners() {
+    @Override protected Iterable<IEventListener<Object>> getListeners() {
       return asList(listener);
     }
   }
 
-  private TrackerListenerSupportTester support;
+  private Tester support;
 
   @Before public void setup() {
-    support = new TrackerListenerSupportTester();
-  }
-
-  @Test public void notifiesOnSave() {
-    support.notifyOnSave();
-    verify(support.listener, only()).onSave();
+    support = new Tester();
   }
 
   @Test public void notifiesOnEvent() {
     Object event = new Object();
-    support.notifyOnEvent(event);
+    support.onEvent(event);
     verify(support.listener, only()).onEvent(event);
   }
 }

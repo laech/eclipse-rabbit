@@ -23,52 +23,47 @@ import org.joda.time.Duration;
 import org.joda.time.Instant;
 
 import rabbit.tracking.AbstractTracker;
+import rabbit.tracking.IEventListener;
 import rabbit.tracking.IListenableTracker;
 import rabbit.tracking.IPartSessionListener;
-import rabbit.tracking.IPersistable;
-import rabbit.tracking.util.IPersistableEventListenerSupport;
 
 import com.google.inject.Inject;
 
-public final class PartTracker extends AbstractTracker implements IPersistable {
+public final class PartTracker extends AbstractTracker {
 
-  private final IPersistableEventListenerSupport<IPartEvent> support;
+  private final IEventListener<IPartEvent> eventListener;
   private final IListenableTracker<IPartSessionListener> tracker;
-  private final IPartSessionListener listener;
+  private final IPartSessionListener partListener;
 
   /**
    * @param tracker the tracker to use for listening to part session events
-   * @param support the listener support for sending events
+   * @param listener the listener to receive events
    * @throws NullPointerException if any argument is null
    */
   @Inject public PartTracker(
       IListenableTracker<IPartSessionListener> tracker,
-      IPersistableEventListenerSupport<IPartEvent> support) {
-    this.support = checkNotNull(support, "support");
+      IEventListener<IPartEvent> listener) {
+    this.eventListener = checkNotNull(listener, "listener");
     this.tracker = checkNotNull(tracker, "tracker");
-    this.listener = createListener();
-  }
-
-  @Override public void save() {
-    support.notifyOnSave();
+    this.partListener = createListener();
   }
 
   private IPartSessionListener createListener() {
     return new IPartSessionListener() {
       @Override public void onPartSession(
           Instant start, Duration duration, IWorkbenchPart part) {
-        support.notifyOnEvent(new PartEvent(start, duration, part));
+        eventListener.onEvent(new PartEvent(start, duration, part));
       }
     };
   }
 
   @Override protected void onEnable() {
-    tracker.addListener(listener);
+    tracker.addListener(partListener);
     tracker.enable();
   }
 
   @Override protected void onDisable() {
     tracker.disable();
-    tracker.removeListener(listener);
+    tracker.removeListener(partListener);
   }
 }

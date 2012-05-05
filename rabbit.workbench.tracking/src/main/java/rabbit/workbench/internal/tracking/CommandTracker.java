@@ -25,13 +25,11 @@ import org.eclipse.core.commands.IExecutionListener;
 import org.eclipse.ui.commands.ICommandService;
 
 import rabbit.tracking.AbstractTracker;
-import rabbit.tracking.IPersistable;
-import rabbit.tracking.util.IPersistableEventListenerSupport;
+import rabbit.tracking.IEventListener;
 
 import com.google.inject.Inject;
 
-public final class CommandTracker
-    extends AbstractTracker implements IPersistable {
+public final class CommandTracker extends AbstractTracker {
 
   /*
    * We only record commands that have been successfully executed, therefore we
@@ -66,7 +64,7 @@ public final class CommandTracker
       if (execution != null) {
         Command cmd = execution.getCommand();
         if (cmd != null && equal(cmdId, cmd.getId())) {
-          support.notifyOnEvent(new CommandEvent(now(), execution));
+          eventListener.onEvent(new CommandEvent(now(), execution));
         }
       }
     }
@@ -87,19 +85,19 @@ public final class CommandTracker
     }
   };
 
-  private final IPersistableEventListenerSupport<ICommandEvent> support;
+  private final IEventListener<ICommandEvent> eventListener;
   private final ICommandService service;
 
   /**
    * @param service the command service to listener on
-   * @param support the object to receive notifications of this tracker
+   * @param listener the object to receive event notifications
    * @throws NullPointerException if any argument is null
    */
   @Inject public CommandTracker(
       ICommandService service,
-      IPersistableEventListenerSupport<ICommandEvent> support) {
+      IEventListener<ICommandEvent> listener) {
     this.service = checkNotNull(service, "service");
-    this.support = checkNotNull(support, "support");
+    this.eventListener = checkNotNull(listener, "listener");
   }
 
   @Override protected void onDisable() {
@@ -108,9 +106,5 @@ public final class CommandTracker
 
   @Override protected void onEnable() {
     service.addExecutionListener(executionListener);
-  }
-
-  @Override public void save() {
-    support.notifyOnSave();
   }
 }

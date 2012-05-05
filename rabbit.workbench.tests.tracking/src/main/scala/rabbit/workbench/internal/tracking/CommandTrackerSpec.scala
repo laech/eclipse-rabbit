@@ -17,9 +17,9 @@
 package rabbit.workbench.internal.tracking
 
 import java.lang.System.{ nanoTime, currentTimeMillis }
+
 import org.eclipse.core.commands.common.CommandException
-import org.eclipse.core.commands.IExecutionListener
-import org.eclipse.core.commands.{ ExecutionEvent, AbstractHandler }
+import org.eclipse.core.commands.{ ExecutionEvent, AbstractHandler, IExecutionListener }
 import org.eclipse.ui.PlatformUI.getWorkbench
 import org.eclipse.ui.commands.ICommandService
 import org.eclipse.ui.handlers.IHandlerService
@@ -29,24 +29,24 @@ import org.mockito.Mockito.{ verifyZeroInteractions, verifyNoMoreInteractions, v
 import org.mockito.invocation.InvocationOnMock
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar.mock
+
 import rabbit.tracking.tests.TestImplicits.funToAnswer
-import rabbit.tracking.util.IPersistableEventListenerSupport
-import rabbit.tracking.AbstractTrackerSpecBase
+import rabbit.tracking.{ IEventListener, AbstractTrackerSpecBase }
 
 @RunWith(classOf[JUnitRunner])
 final class CommandTrackerSpec extends AbstractTrackerSpecBase {
 
   type Tracker = CommandTracker
 
-  private var support: IPersistableEventListenerSupport[ICommandEvent] = _
+  private var listener: IEventListener[ICommandEvent] = _
   private var event: ICommandEvent = _
 
   override def beforeEach() {
     // Initialize before super to resolve dependencies of create()
-    support = mock[IPersistableEventListenerSupport[ICommandEvent]]
+    listener = mock[IEventListener[ICommandEvent]]
     doAnswer({ invocation: InvocationOnMock =>
       event = invocation.getArguments()(0).asInstanceOf[ICommandEvent]
-    }).when(support).notifyOnEvent(any[ICommandEvent])
+    }).when(listener).onEvent(any[ICommandEvent])
 
     super.beforeEach()
   }
@@ -69,18 +69,12 @@ final class CommandTrackerSpec extends AbstractTrackerSpecBase {
     order.verifyNoMoreInteractions()
   }
 
-  it must "notify on save" in {
-    tracker.save()
-    verify(support).notifyOnSave()
-    verifyNoMoreInteractions(support)
-  }
-
   behavior of "CommandTracker when disabled"
 
   it must "not track command executions" in {
     tracker.disable()
     executeCommand()
-    verifyZeroInteractions(support)
+    verifyZeroInteractions(listener)
   }
 
   behavior of "CommandTracker when enabled"
@@ -92,7 +86,7 @@ final class CommandTrackerSpec extends AbstractTrackerSpecBase {
     val command = executeCommand()
     val end = currentTimeMillis
 
-    verify(support).notifyOnEvent(event)
+    verify(listener).onEvent(event)
     event.execution.getCommand must be(command)
     event.instant.getMillis must be >= start
     event.instant.getMillis must be <= end
@@ -107,22 +101,20 @@ final class CommandTrackerSpec extends AbstractTrackerSpecBase {
       case e: CommandException =>
     }
 
-    verifyZeroInteractions(support)
+    verifyZeroInteractions(listener)
   }
 
   // Create with real command service by default
-  override protected def create() = new CommandTracker(commandService, support)
+  override protected def create() = new CommandTracker(commandService, listener)
 
   private def createWithMockService() = {
     val service = mock[ICommandService]
-    val tracker = create(service, support)
+    val tracker = create(service, listener)
     (tracker, service)
   }
 
-  private def create(
-    service: ICommandService,
-    support: IPersistableEventListenerSupport[ICommandEvent]) =
-    new CommandTracker(service, support)
+  private def create(service: ICommandService, listener: IEventListener[ICommandEvent]) =
+    new CommandTracker(service, listener)
 
   private def executeCommand() = {
     val commandId = "test." + nanoTime

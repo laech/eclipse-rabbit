@@ -27,18 +27,17 @@ import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar.mock
 
 import rabbit.tracking.tests.TestImplicits.funToAnswer
-import rabbit.tracking.util.IPersistableEventListenerSupport
-import rabbit.tracking.{ IPartSessionListener, IListenableTracker, AbstractTrackerSpecBase }
+import rabbit.tracking.{ IPartSessionListener, IListenableTracker, IEventListener, AbstractTrackerSpecBase }
 
 @RunWith(classOf[JUnitRunner])
 final class PartTrackerSpec extends AbstractTrackerSpecBase {
 
-  private var support: IPersistableEventListenerSupport[IPartEvent] = _
+  private var listener: IEventListener[IPartEvent] = _
   private var partTracker: IListenableTracker[IPartSessionListener] = _
   private var partTrackerListeners: List[IPartSessionListener] = _
 
   override def beforeEach {
-    support = mock[IPersistableEventListenerSupport[IPartEvent]]
+    listener = mock[IEventListener[IPartEvent]]
     partTracker = mock[IListenableTracker[IPartSessionListener]]
     partTrackerListeners = List.empty
 
@@ -53,7 +52,7 @@ final class PartTrackerSpec extends AbstractTrackerSpecBase {
     super.beforeEach
   }
 
-  behavior of classOf[PartTrackerSpec].getSimpleName
+  behavior of classOf[PartTracker].getSimpleName
 
   it must "notify of captured event" in {
     tracker.enable
@@ -66,16 +65,11 @@ final class PartTrackerSpec extends AbstractTrackerSpecBase {
       event.instant must be(instant)
       event.duration must be(duration)
       event.part must be(part)
-    }).when(support).notifyOnEvent(any[IPartEvent])
+    }).when(listener).onEvent(any[IPartEvent])
 
     partTrackerListeners foreach (_.onPartSession(instant, duration, part))
 
-    verify(support, only).notifyOnEvent(any[IPartEvent])
-  }
-
-  it must "notify support on save" in {
-    tracker.save
-    verify(support, only).notifyOnSave
+    verify(listener, only).onEvent(any[IPartEvent])
   }
 
   it must "enable part tracker on enable" in {
@@ -97,14 +91,14 @@ final class PartTrackerSpec extends AbstractTrackerSpecBase {
     }).when(partTracker).disable
 
     tracker.disable
-    verify(support).notifyOnEvent(notNull(classOf[IPartEvent]))
+    verify(listener).onEvent(notNull(classOf[IPartEvent]))
   }
 
   it must "not notify event if disabled" in {
     tracker.enable
     tracker.disable
     partTrackerListeners foreach (_.onPartSession(now, ZERO, mock[IWorkbenchPart]))
-    verifyZeroInteractions(support)
+    verifyZeroInteractions(listener)
   }
 
   it must "throw NullPointerException if constructing without a part tracker" in {
@@ -115,15 +109,15 @@ final class PartTrackerSpec extends AbstractTrackerSpecBase {
 
   it must "throw NullPointerException if constructing without a support" in {
     intercept[NullPointerException] {
-      create(support = null)
+      create(listener = null)
     }
   }
 
   override protected type Tracker = PartTracker
 
-  override def create() = create(partTracker, support)
+  override def create() = create(partTracker, listener)
 
   private def create(
     partTracker: IListenableTracker[IPartSessionListener] = partTracker,
-    support: IPersistableEventListenerSupport[IPartEvent] = support) = new PartTracker(partTracker, support)
+    listener: IEventListener[IPartEvent] = listener) = new PartTracker(partTracker, listener)
 }

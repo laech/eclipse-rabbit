@@ -29,7 +29,6 @@ import org.eclipse.ui.IWorkbenchListener;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 
-import rabbit.tracking.IPersistable;
 import rabbit.tracking.ITracker;
 
 import com.google.common.collect.ImmutableSet;
@@ -56,20 +55,22 @@ public final class TrackingPlugin extends AbstractUIPlugin
 
   @Override public boolean preShutdown(IWorkbench workbench, boolean forced) {
     setEnable(trackers, false);
-    saveCurrentData();
+    // saveCurrentData();
     return true;
   }
 
-  /**
-   * Call this method to saves all current data collected by the trackers now.
-   */
-  public void saveCurrentData() {
-    for (ITracker tracker : trackers) {
-      if (tracker instanceof IPersistable) {
-        ((IPersistable)tracker).save();
-      }
-    }
-  }
+  // TODO implement save with pub/sub style
+
+  // /**
+  // * Call this method to saves all current data collected by the trackers now.
+  // */
+  // public void saveCurrentData() {
+  // for (ITracker tracker : trackers) {
+  // if (tracker instanceof IPersistable) {
+  // ((IPersistable)tracker).save();
+  // }
+  // }
+  // }
 
   @Override public void start(BundleContext context) throws Exception {
     super.start(context);
@@ -83,7 +84,7 @@ public final class TrackingPlugin extends AbstractUIPlugin
     try {
       getWorkbench().removeWorkbenchListener(this);
       setEnable(trackers, false);
-      saveCurrentData();
+      // saveCurrentData();
       trackers = emptySet();
       plugin = null;
     } finally {

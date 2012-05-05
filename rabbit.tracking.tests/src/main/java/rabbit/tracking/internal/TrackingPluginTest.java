@@ -18,7 +18,6 @@ package rabbit.tracking.internal;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.only;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
@@ -30,15 +29,11 @@ import org.junit.Before;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
 
-import rabbit.tracking.IPersistable;
 import rabbit.tracking.ITracker;
 
 import com.google.common.collect.Sets;
 
 public final class TrackingPluginTest {
-
-  public static interface IPersistableTracker extends ITracker, IPersistable {
-  }
 
   private static final Bundle bundle = TrackingPlugin.getDefault().getBundle();
 
@@ -54,27 +49,18 @@ public final class TrackingPluginTest {
   }
 
   @Test public void disablesTrackerOnStop() throws Exception {
-    IPersistableTracker tracker = mock(IPersistableTracker.class);
+    ITracker tracker = mock(ITracker.class);
     setTrackers(plugin, tracker);
     bundle.stop();
     verify(tracker).disable();
-    verify(tracker).save();
   }
 
   @Test public void disablesTrackersOnShutdown() throws Exception {
-    IPersistableTracker tracker = mock(IPersistableTracker.class);
+    ITracker tracker = mock(ITracker.class);
     setTrackers(plugin, tracker);
     assertThat(plugin.preShutdown(null, false), is(true));
     verify(tracker).disable();
-    verify(tracker).save();
     verifyNoMoreInteractions(tracker);
-  }
-
-  @Test public void savesCurrentDataOnRequest() throws Exception {
-    IPersistableTracker tracker = mock(IPersistableTracker.class);
-    setTrackers(plugin, tracker);
-    plugin.saveCurrentData();
-    verify(tracker, only()).save();
   }
 
   private void setTrackers(TrackingPlugin plugin, ITracker... trackers) {

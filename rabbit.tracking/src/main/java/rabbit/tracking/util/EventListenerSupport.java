@@ -16,28 +16,21 @@
 
 package rabbit.tracking.util;
 
-import rabbit.tracking.IPersistableEventListener;
+import rabbit.tracking.IEventListener;
 
 /**
  * Helper class for sending notifications to a collection of
- * {@link IPersistableEventListener}s.
+ * {@link IEventListener}s.
  * 
  * @since 2.0
  */
-public abstract class PersistableEventListenerSupport<E>
-    implements IPersistableEventListenerSupport<E> {
+public abstract class EventListenerSupport<E> implements IEventListener<E> {
 
-  public PersistableEventListenerSupport() {
+  protected EventListenerSupport() {
   }
 
-  @Override public final void notifyOnSave() {
-    for (IPersistableEventListener<? super E> listener : getListeners()) {
-      listener.onSave();
-    }
-  }
-
-  @Override public final void notifyOnEvent(E event) {
-    for (IPersistableEventListener<? super E> listener : getListeners()) {
+  @Override public final void onEvent(E event) {
+    for (IEventListener<? super E> listener : getListeners()) {
       listener.onEvent(event);
     }
   }
@@ -47,5 +40,5 @@ public abstract class PersistableEventListenerSupport<E>
    * 
    * @return the listeners, or an empty collection if none
    */
-  protected abstract Iterable<? extends IPersistableEventListener<? super E>> getListeners();
+  protected abstract Iterable<? extends IEventListener<? super E>> getListeners();
 }
