@@ -24,6 +24,8 @@ import org.joda.time.Instant;
 
 import rabbit.tracking.TimedEvent;
 
+import com.google.common.base.Objects.ToStringHelper;
+
 final class PartEvent extends TimedEvent implements IPartEvent {
 
   private final IWorkbenchPart workbenchPart;
@@ -37,7 +39,7 @@ final class PartEvent extends TimedEvent implements IPartEvent {
     return workbenchPart;
   }
 
-  @Override public String toString() {
-    return toStringHelper().add("part", part()).toString();
+  @Override protected ToStringHelper toStringHelper() {
+    return super.toStringHelper().add("part", part());
   }
 }

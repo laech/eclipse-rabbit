@@ -21,6 +21,8 @@ import org.joda.time.Instant;
 
 import rabbit.tracking.TimedEvent;
 
+import com.google.common.base.Objects.ToStringHelper;
+
 /**
  * Represents the result of a recording.
  * 
@@ -61,7 +63,7 @@ public final class Record<T> extends TimedEvent {
     return data;
   }
 
-  @Override public String toString() {
-    return toStringHelper().add("data", data()).toString();
+  @Override protected ToStringHelper toStringHelper() {
+    return super.toStringHelper().add("data", data());
   }
 }

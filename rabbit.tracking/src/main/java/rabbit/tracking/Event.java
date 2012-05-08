@@ -30,8 +30,6 @@ import com.google.common.base.Objects.ToStringHelper;
  */
 public class Event implements IEvent {
 
-  // TODO hash code & equals & subclasses
-
   private final Instant instant;
 
   /**
@@ -54,12 +52,14 @@ public class Event implements IEvent {
 
   /**
    * Helper method returning a {@link ToStringHelper} already containing known
-   * properties of this event.
+   * properties of this event. {@code toString()} by default calls this method,
+   * subclass can override this to add more properties if wish to customize the
+   * default output.
    * 
    * @return a {@link ToStringHelper} for constructing a string representation
    *         of this event
    */
-  protected final ToStringHelper toStringHelper() {
+  protected ToStringHelper toStringHelper() {
     return Objects.toStringHelper(this)
         .add("instant", instant());
   }

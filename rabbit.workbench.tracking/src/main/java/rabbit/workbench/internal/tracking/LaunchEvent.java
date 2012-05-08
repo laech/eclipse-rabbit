@@ -30,6 +30,7 @@ import org.joda.time.Instant;
 
 import rabbit.tracking.TimedEvent;
 
+import com.google.common.base.Objects.ToStringHelper;
 import com.google.common.collect.ImmutableSet;
 
 final class LaunchEvent extends TimedEvent implements ILaunchEvent {
@@ -96,12 +97,11 @@ final class LaunchEvent extends TimedEvent implements ILaunchEvent {
     return config;
   }
 
-  @Override public String toString() {
-    return toStringHelper()
+  @Override protected ToStringHelper toStringHelper() {
+    return super.toStringHelper()
         .add("launch", launch())
         .add("launchConfiguration", launchConfig())
         .add("launchConfigurationType", launchConfigType())
-        .add("filePaths", files())
-        .toString();
+        .add("filePaths", files());
   }
 }

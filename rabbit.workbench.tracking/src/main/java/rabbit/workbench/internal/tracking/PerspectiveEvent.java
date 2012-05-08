@@ -24,6 +24,8 @@ import org.joda.time.Instant;
 
 import rabbit.tracking.TimedEvent;
 
+import com.google.common.base.Objects.ToStringHelper;
+
 final class PerspectiveEvent extends TimedEvent implements IPerspectiveEvent {
 
   private final IPerspectiveDescriptor perspective;
@@ -38,7 +40,7 @@ final class PerspectiveEvent extends TimedEvent implements IPerspectiveEvent {
     return perspective;
   }
 
-  @Override public String toString() {
-    return toStringHelper().add("perspective", perspective()).toString();
+  @Override protected ToStringHelper toStringHelper() {
+    return super.toStringHelper().add("perspective", perspective());
   }
 }

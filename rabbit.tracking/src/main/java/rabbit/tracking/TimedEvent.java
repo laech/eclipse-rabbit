@@ -21,6 +21,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import org.joda.time.Duration;
 import org.joda.time.Instant;
 
+import com.google.common.base.Objects.ToStringHelper;
+
 /**
  * Default implementation of a timed event.
  * 
@@ -46,8 +48,7 @@ public class TimedEvent extends Event implements ITimedEvent {
     return duration;
   }
 
-  @Override public String toString() {
-    return toStringHelper().add("duration", duration()).toString();
+  @Override protected ToStringHelper toStringHelper() {
+    return super.toStringHelper().add("duration", duration());
   }
-
 }
