@@ -33,37 +33,37 @@ public abstract class AbstractTracker implements ITracker {
     enabled = new AtomicBoolean(false);
   }
 
-  @Override public final boolean isEnabled() {
+  @Override public final boolean isStarted() {
     return enabled.get();
   }
 
-  @Override public final void enable() {
+  @Override public final void start() {
     if (enabled.compareAndSet(false, true)) {
-      onEnable();
+      onStart();
     }
   }
 
-  @Override public final void disable() {
+  @Override public final void stop() {
     if (enabled.compareAndSet(true, false)) {
-      onDisable();
+      onStop();
     }
   }
 
   /**
-   * Called when this tracker is being enabled.
+   * Called when this tracker is being started.
    * <p/>
-   * This method will only be called if the tracker was previously disabled.
-   * That means if the tracker is already enabled, calling {@link #enable()}
-   * again will not trigger this method to be called.
-   */
-  protected abstract void onEnable();
-
-  /**
-   * Called when this tracker is being disabled.
-   * <p/>
-   * This method will only be called if the tracker was previously enabled. That
-   * means if the tracker is already disabled, calling {@link #disable()} again
+   * This method will only be called if the tracker was previously stopped. That
+   * means if the tracker is already started, calling {@link #start()} again
    * will not trigger this method to be called.
    */
-  protected abstract void onDisable();
+  protected abstract void onStart();
+
+  /**
+   * Called when this tracker is being stopped.
+   * <p/>
+   * This method will only be called if the tracker was previously started. That
+   * means if the tracker is already stopped, calling {@link #stop()} again will
+   * not trigger this method to be called.
+   */
+  protected abstract void onStop();
 }

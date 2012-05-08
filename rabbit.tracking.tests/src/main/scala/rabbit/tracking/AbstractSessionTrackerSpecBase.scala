@@ -47,7 +47,7 @@ abstract class AbstractSessionTrackerSpecBase[T: Manifest, L <: AnyRef]
   }
 
   protected final class Actual {
-    var start: Instant = _
+    var instant: Instant = _
     var duration: Duration = _
     var target: T = _
   }
@@ -72,7 +72,7 @@ abstract class AbstractSessionTrackerSpecBase[T: Manifest, L <: AnyRef]
   it must "record target focused duration on target change" in {
     val (listener, actual) = mockListenerWithResult
     tracker.addListener(listener)
-    tracker.enable
+    tracker.start
 
     val expected = new Expected
     expected.preStart = now
@@ -88,10 +88,10 @@ abstract class AbstractSessionTrackerSpecBase[T: Manifest, L <: AnyRef]
     verifyEvent(actual, expected)
   }
 
-  it must "record target focused duration on disable" in {
+  it must "record target focused duration on stop" in {
     val (listener, actual) = mockListenerWithResult
     tracker.addListener(listener)
-    tracker.enable
+    tracker.start
 
     val expected = new Expected
     expected.preStart = now
@@ -101,7 +101,7 @@ abstract class AbstractSessionTrackerSpecBase[T: Manifest, L <: AnyRef]
     sleep(2)
 
     expected.preEnd = now
-    tracker.disable
+    tracker.stop
     expected.postEnd = now
 
     verifyEvent(actual, expected)
@@ -110,36 +110,36 @@ abstract class AbstractSessionTrackerSpecBase[T: Manifest, L <: AnyRef]
   it must "be able to record without a user monitor" in {
     val (listener, actual) = mockListenerWithResult
     val tracker = create(monitor = null)
-    tracker.enable;
+    tracker.start
     tracker.addListener(listener)
 
     val expected = changeTarget
-    tracker.disable
+    tracker.stop
 
     actual.target must be(expected)
   }
 
-  it must "not notify if disabled" in {
+  it must "not notify if stopped" in {
     val (listener, _) = mockListenerWithResult
     tracker.addListener(listener)
-    tracker.disable
+    tracker.stop
     changeTarget
     changeTarget
-    tracker.disable
+    tracker.stop
     verifyZeroInteractions(listener)
   }
 
   it must "not notify removed listeners" in {
     val (listener, _) = mockListenerWithResult
-    tracker.enable
+    tracker.start
     tracker.addListener(listener)
     tracker.removeListener(listener)
     changeTarget
-    tracker.disable
+    tracker.stop
     verifyZeroInteractions(listener)
   }
 
-  it must "start recording on enable if there is a target" in {
+  it must "start recording on start if there is a target" in {
     val (listener, actual) = mockListenerWithResult
     tracker.addListener(listener)
 
@@ -147,7 +147,7 @@ abstract class AbstractSessionTrackerSpecBase[T: Manifest, L <: AnyRef]
     expected.target = changeTarget
 
     expected.preStart = now
-    tracker.enable
+    tracker.start
     expected.postStart = now
 
     sleep(2)
@@ -163,9 +163,9 @@ abstract class AbstractSessionTrackerSpecBase[T: Manifest, L <: AnyRef]
     val expected = changeTarget
     val (listener, actual) = mockListenerWithResult
     tracker.addListener(listener)
-    tracker.enable
+    tracker.start
     sleep(2)
-    tracker.disable
+    tracker.stop
     actual.target must be(expected)
   }
 
@@ -174,9 +174,9 @@ abstract class AbstractSessionTrackerSpecBase[T: Manifest, L <: AnyRef]
     tracker.addListener(listener)
     removeAllTargets
 
-    tracker.enable
+    tracker.start
     sleep(2)
-    tracker.disable
+    tracker.stop
 
     actual.target.asInstanceOf[AnyRef] must be(null)
   }
@@ -184,7 +184,7 @@ abstract class AbstractSessionTrackerSpecBase[T: Manifest, L <: AnyRef]
   it must "stop recording on user inactive" in {
     val (listener, actual) = mockListenerWithResult
     tracker.addListener(listener)
-    tracker.enable
+    tracker.start
 
     val expected = new Expected
     expected.preStart = now
@@ -200,10 +200,10 @@ abstract class AbstractSessionTrackerSpecBase[T: Manifest, L <: AnyRef]
     verifyEvent(actual, expected)
   }
 
-  it must "stop recording on disable" in {
+  it must "stop recording on stop" in {
     val (listener, actual) = mockListenerWithResult
     tracker.addListener(listener)
-    tracker.enable
+    tracker.start
 
     val expected = new Expected
     expected.preStart = now
@@ -213,32 +213,32 @@ abstract class AbstractSessionTrackerSpecBase[T: Manifest, L <: AnyRef]
     sleep(2)
 
     expected.preEnd = now
-    tracker.disable
+    tracker.stop
     expected.postEnd = now
 
     verifyEvent(actual, expected)
   }
 
-  it must "detactch listener from user monitor when disabling" in {
+  it must "detactch listener from user monitor when stopping" in {
     val monitor = mock[IUserMonitor]
     val tracker = create(monitor = monitor)
-    tracker.enable
-    tracker.disable
+    tracker.start
+    tracker.stop
     verify(monitor).removeListener(notNull(classOf[IUserListener]))
   }
 
-  it must "attatch listener to user monitor when enabling" in {
+  it must "attatch listener to user monitor when starting" in {
     val monitor = mock[IUserMonitor]
     val tracker = create(monitor = monitor)
-    tracker.enable
+    tracker.start
     verify(monitor).addListener(notNull(classOf[IUserListener]))
   }
 
-  it must "stop recorder when disabling" in {
+  it must "stop recorder when stopping" in {
     val recorder = mock[IRecorder[T]]
     val tracker = create(recorder = recorder)
-    tracker.enable
-    tracker.disable
+    tracker.start
+    tracker.stop
     val order = inOrder(recorder)
     order.verify(recorder).stop
     order.verify(recorder, never).start(any[T])
@@ -265,7 +265,7 @@ abstract class AbstractSessionTrackerSpecBase[T: Manifest, L <: AnyRef]
   protected final def verifyEvent(actual: Actual, expected: Expected) {
     actual.target must be(expected.target)
 
-    val start = actual.start.getMillis
+    val start = actual.instant.getMillis
     start must be >= expected.preStart.getMillis
     start must be <= expected.postStart.getMillis
 

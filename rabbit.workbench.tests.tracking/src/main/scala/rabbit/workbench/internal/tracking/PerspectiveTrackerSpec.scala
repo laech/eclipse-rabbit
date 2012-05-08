@@ -55,7 +55,7 @@ final class PerspectiveTrackerSpec extends AbstractTrackerSpecBase {
   behavior of classOf[PerspectiveTracker].getSimpleName
 
   it must "notify of captured event" in {
-    tracker.enable
+    tracker.start
     val instant = now
     val duration = ZERO
     val perspective = mock[IPerspectiveDescriptor]
@@ -72,31 +72,31 @@ final class PerspectiveTrackerSpec extends AbstractTrackerSpecBase {
     verify(listener, only) onEvent any[IPerspectiveEvent]
   }
 
-  it must "enable perspective tracker on enable" in {
-    tracker.enable
-    verify(perspTracker).enable
-    verify(perspTracker, never).disable
+  it must "start perspective tracker on start" in {
+    tracker.start
+    verify(perspTracker).start
+    verify(perspTracker, never).stop
   }
 
-  it must "disable perspective tracker on disable" in {
-    tracker.enable
-    tracker.disable
-    verify(perspTracker).disable
+  it must "stop perspective tracker on stop" in {
+    tracker.start
+    tracker.stop
+    verify(perspTracker).stop
   }
 
-  it must "notify of captured events on disable" in {
-    tracker.enable
+  it must "notify of captured events on stop" in {
+    tracker.start
     doAnswer { i: InvocationOnMock =>
       perspListeners foreach (_.onPerspectiveSession(now, ZERO, mock[IPerspectiveDescriptor]))
-    } when perspTracker disable
+    } when perspTracker stop
 
-    tracker.disable
+    tracker.stop
     verify(listener) onEvent notNull(classOf[IPerspectiveEvent])
   }
 
-  it must "not notify event if disabled" in {
-    tracker.enable
-    tracker.disable
+  it must "not notify event if stopped" in {
+    tracker.start
+    tracker.stop
     perspListeners foreach (_.onPerspectiveSession(now, ZERO, mock[IPerspectiveDescriptor]))
     verifyZeroInteractions(listener)
   }

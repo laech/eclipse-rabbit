@@ -55,7 +55,7 @@ final class PartTrackerSpec extends AbstractTrackerSpecBase {
   behavior of classOf[PartTracker].getSimpleName
 
   it must "notify of captured event" in {
-    tracker.enable
+    tracker.start
     val instant = now
     val duration = ZERO
     val part = mock[IWorkbenchPart]
@@ -73,30 +73,30 @@ final class PartTrackerSpec extends AbstractTrackerSpecBase {
   }
 
   it must "enable part tracker on enable" in {
-    tracker.enable
-    verify(partTracker).enable
-    verify(partTracker, never).disable
+    tracker.start
+    verify(partTracker).start
+    verify(partTracker, never).stop
   }
 
   it must "disable part tracker on disable" in {
-    tracker.enable
-    tracker.disable
-    verify(partTracker).disable
+    tracker.start
+    tracker.stop
+    verify(partTracker).stop
   }
 
   it must "notify of captured events on disable" in {
-    tracker.enable
+    tracker.start
     doAnswer({ i: InvocationOnMock =>
       partTrackerListeners foreach (_.onPartSession(now, ZERO, mock[IWorkbenchPart]))
-    }).when(partTracker).disable
+    }).when(partTracker).stop
 
-    tracker.disable
+    tracker.stop
     verify(listener).onEvent(notNull(classOf[IPartEvent]))
   }
 
   it must "not notify event if disabled" in {
-    tracker.enable
-    tracker.disable
+    tracker.start
+    tracker.stop
     partTrackerListeners foreach (_.onPartSession(now, ZERO, mock[IWorkbenchPart]))
     verifyZeroInteractions(listener)
   }

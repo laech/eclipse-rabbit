@@ -103,14 +103,14 @@ final class PerspectiveFocusTracker
     this.perspectiveListener = new MyPerspectiveListener();
   }
 
-  @Override protected void onEnable() {
+  @Override protected void onStart() {
     workbench.addWindowListener(windowListener);
     for (IWorkbenchWindow window : workbench.getWorkbenchWindows()) {
       window.addPerspectiveListener(perspectiveListener);
     }
   }
 
-  @Override protected void onDisable() {
+  @Override protected void onStop() {
     workbench.removeWindowListener(windowListener);
     for (IWorkbenchWindow window : workbench.getWorkbenchWindows()) {
       window.removePerspectiveListener(perspectiveListener);

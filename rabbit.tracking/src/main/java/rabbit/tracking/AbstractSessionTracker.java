@@ -29,9 +29,9 @@ import rabbit.tracking.util.Record;
  * Base tracker for tracking elapsed time on a target, can take into account the
  * user's state using a {@link IUserMonitor}.
  * <p/>
- * Default implementation starts the recorder {@link #onEnable()} if
+ * Default implementation starts the recorder {@link #onStart()} if
  * {@link #findTarget()} returns none null, and stops the recorder
- * {@link #onDisable()}. If an {@link IUserMonitor} is supplied, the recorder is
+ * {@link #onStop()}. If an {@link IUserMonitor} is supplied, the recorder is
  * also started if the user becomes active and {@link #findTarget()} returns
  * none null, and the recorder will be stopped when the user becomes inactive.
  * <p/>
@@ -84,7 +84,7 @@ abstract class AbstractSessionTracker<E, T>
    */
   protected abstract E findTarget();
 
-  @Override protected void onDisable() {
+  @Override protected void onStop() {
     monitor.removeListener(monitorListener);
 
     // Stop recorder before removing listener so that the last event will be
@@ -93,7 +93,7 @@ abstract class AbstractSessionTracker<E, T>
     recorder.removeListener(recordListener);
   }
 
-  @Override protected void onEnable() {
+  @Override protected void onStart() {
     monitor.addListener(monitorListener);
     recorder.addListener(recordListener);
     startRecordingIfTargetExists();

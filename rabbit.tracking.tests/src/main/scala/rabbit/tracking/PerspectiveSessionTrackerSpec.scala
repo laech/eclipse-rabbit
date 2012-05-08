@@ -52,19 +52,19 @@ final class PerspectiveSessionTrackerSpec
 
   behavior of classOf[PerspectiveSessionTracker].getSimpleName
 
-  it must "enable perspective tracker when enabling" in {
+  it must "start perspective tracker when starting" in {
     val perspectiveTracker = mock[IListenableTracker[IPerspectiveFocusListener]]
     val tracker = createTracker(perspectiveTracker = perspectiveTracker)
-    tracker.enable
-    verify(perspectiveTracker).enable
+    tracker.start
+    verify(perspectiveTracker).start
   }
 
-  it must "disable perspective tracker when disabling" in {
+  it must "stop perspective tracker when stopping" in {
     val perspectiveTracker = mock[IListenableTracker[IPerspectiveFocusListener]]
     val tracker = createTracker(perspectiveTracker = perspectiveTracker)
-    tracker.enable
-    tracker.disable
-    verify(perspectiveTracker).disable
+    tracker.start
+    tracker.stop
+    verify(perspectiveTracker).stop
   }
 
   it must "throw NullPointerException if constructing without a workbench" in {
@@ -97,7 +97,7 @@ final class PerspectiveSessionTrackerSpec
     val actual = new Actual
     doAnswer { i: InvocationOnMock =>
       val args = i.getArguments
-      actual.start = args(0).asInstanceOf[Instant]
+      actual.instant = args(0).asInstanceOf[Instant]
       actual.duration = args(1).asInstanceOf[Duration]
       actual.target = args(2).asInstanceOf[IPerspectiveDescriptor]
     } when listener onPerspectiveSession (anyInstant, anyDuration, anyPerspective)

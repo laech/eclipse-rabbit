@@ -100,11 +100,11 @@ public final class CommandTracker extends AbstractTracker {
     this.eventListener = checkNotNull(listener, "listener");
   }
 
-  @Override protected void onDisable() {
+  @Override protected void onStop() {
     service.removeExecutionListener(executionListener);
   }
 
-  @Override protected void onEnable() {
+  @Override protected void onStart() {
     service.addExecutionListener(executionListener);
   }
 }

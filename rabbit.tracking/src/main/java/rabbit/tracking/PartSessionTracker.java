@@ -63,16 +63,16 @@ final class PartSessionTracker
     return getFocusedPart(workbench);
   }
 
-  @Override protected void onDisable() {
-    super.onDisable();
-    tracker.disable();
+  @Override protected void onStop() {
+    super.onStop();
+    tracker.stop();
     tracker.removeListener(listener);
   }
 
-  @Override protected void onEnable() {
-    super.onEnable();
+  @Override protected void onStart() {
+    super.onStart();
     tracker.addListener(listener);
-    tracker.enable();
+    tracker.start();
   }
 
   @Override protected void onSession(

@@ -52,14 +52,14 @@ public final class TrackingPluginTest {
     ITracker tracker = mock(ITracker.class);
     setTrackers(plugin, tracker);
     bundle.stop();
-    verify(tracker).disable();
+    verify(tracker).stop();
   }
 
   @Test public void disablesTrackersOnShutdown() throws Exception {
     ITracker tracker = mock(ITracker.class);
     setTrackers(plugin, tracker);
     assertThat(plugin.preShutdown(null, false), is(true));
-    verify(tracker).disable();
+    verify(tracker).stop();
     verifyNoMoreInteractions(tracker);
   }
 

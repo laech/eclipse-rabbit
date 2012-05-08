@@ -57,13 +57,13 @@ public final class PartTracker extends AbstractTracker {
     };
   }
 
-  @Override protected void onEnable() {
+  @Override protected void onStart() {
     tracker.addListener(partListener);
-    tracker.enable();
+    tracker.start();
   }
 
-  @Override protected void onDisable() {
-    tracker.disable();
+  @Override protected void onStop() {
+    tracker.stop();
     tracker.removeListener(partListener);
   }
 }

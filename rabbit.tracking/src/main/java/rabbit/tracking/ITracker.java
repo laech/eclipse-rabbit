@@ -25,28 +25,28 @@ package rabbit.tracking;
  * 
  * <h3>Extension Lifecycle</h3>
  * <p/>
- * A tracker by default should be disabled, it will be enabled after it is
- * loaded from the extension point, and will be disabled prior to workbench
- * shutdown so that it may perform clean up operations if need to.
+ * A tracker by default is stopped, it will be started after it is loaded from
+ * the extension point, and will be stopped prior to workbench shutdown so that
+ * it may perform clean up operations if need to.
  * 
  * @since 2.0
  */
 public interface ITracker {
 
   /**
-   * Checks whether this tracker is currently enabled.
+   * Checks whether this tracker is currently started.
    * 
-   * @return true if this tracker is enabled, false otherwise
+   * @return true if this tracker is started, false otherwise
    */
-  boolean isEnabled();
+  boolean isStarted();
 
   /**
-   * Enables this tracker. Has no affect if already enabled.
+   * Starts this tracker. Has no affect if already started.
    */
-  void enable();
+  void start();
 
   /**
-   * Disables this tracker. Has no affect if already disabled.
+   * Stops this tracker. Has no affect if already stopped.
    */
-  void disable();
+  void stop();
 }

@@ -49,13 +49,13 @@ public final class PerspectiveTracker extends AbstractTracker {
     this.perspectiveListener = createPerspectiveSessionListener();
   }
 
-  @Override protected void onEnable() {
+  @Override protected void onStart() {
     tracker.addListener(perspectiveListener);
-    tracker.enable();
+    tracker.start();
   }
 
-  @Override protected void onDisable() {
-    tracker.disable();
+  @Override protected void onStop() {
+    tracker.stop();
     tracker.removeListener(perspectiveListener);
   }
 

@@ -35,7 +35,7 @@ final class AbstractListenableTrackerSpec extends AbstractTrackerSpecBase
     listenable.getListeners()
 
   override protected def create() = new AbstractListenableTracker[String] {
-    override protected def onEnable() {}
-    override protected def onDisable() {}
+    override protected def onStart() {}
+    override protected def onStop() {}
   }
 }

@@ -98,14 +98,14 @@ final class PartFocusTracker extends
     this.windowListener = new MyWindowListener();
   }
 
-  @Override protected void onDisable() {
+  @Override protected void onStop() {
     workbench.removeWindowListener(windowListener);
     for (IPartService service : getPartServices(workbench)) {
       service.removePartListener(partListener);
     }
   }
 
-  @Override protected void onEnable() {
+  @Override protected void onStart() {
     workbench.addWindowListener(windowListener);
     for (IPartService service : getPartServices(workbench)) {
       service.addPartListener(partListener);

@@ -16,10 +16,10 @@
 
 package rabbit.tracking.util;
 
-import rabbit.tracking.IListenable;
+import rabbit.tracking.IListenableTracker;
 
 // TODO 
-public interface IRecorder<T> extends IListenable<IRecordListener<T>> {
+public interface IRecorder<T> extends IListenableTracker<IRecordListener<T>> {
 
   /**
    * Starts a recording with the given user data.
@@ -35,11 +35,16 @@ public interface IRecorder<T> extends IListenable<IRecordListener<T>> {
   void start(T userData);
 
   /**
+   * Calling this method has the same effect as {@code start(null)}.
+   */
+  @Override void start();
+
+  /**
    * Stops recording.
    * <p/>
    * Has no affect if there is no recording running, otherwise recording will be
    * stopped and listeners will be notified.
    */
-  void stop();
+  @Override void stop();
 
 }

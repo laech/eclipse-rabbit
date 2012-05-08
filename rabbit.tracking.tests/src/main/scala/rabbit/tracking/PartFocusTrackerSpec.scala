@@ -52,43 +52,43 @@ final class PartFocusTrackerSpec extends AbstractTrackerSpecBase {
 
   behavior of classOf[PartFocusTracker].getSimpleName
 
-  it must "attach listener to workbench when enabling" in {
+  it must "attach listener to workbench when starting" in {
     val workbench = mockWorkbenchWithNoWindow
 
     tracker = create(workbench)
-    tracker.enable
+    tracker.start
 
     verify(workbench).addWindowListener(any[IWindowListener])
     verify(workbench, never).removeWindowListener(any[IWindowListener])
   }
 
-  it must "dettach listener from workbench when disabling" in {
+  it must "dettach listener from workbench when stopping" in {
     val workbench = mockWorkbenchWithNoWindow
 
     tracker = create(workbench)
-    tracker.enable
-    tracker.disable
+    tracker.start
+    tracker.stop
 
     val order = inOrder(workbench)
     order.verify(workbench).addWindowListener(any[IWindowListener])
     order.verify(workbench).removeWindowListener(any[IWindowListener])
   }
 
-  it must "attach listener to part service when enabling" in {
+  it must "attach listener to part service when starting" in {
     val (workbench, service) = mockPartService
 
     tracker = create(workbench)
-    tracker.enable
+    tracker.start
 
     verify(service, only).addPartListener(any[IPartListener])
   }
 
-  it must "dettach listener from part service when disabling" in {
+  it must "dettach listener from part service when stopping" in {
     val (workbench, service) = mockPartService
 
     tracker = create(workbench)
-    tracker.enable
-    tracker.disable
+    tracker.start
+    tracker.stop
 
     val order = inOrder(service)
     order.verify(service).removePartListener(any[IPartListener])
@@ -96,7 +96,7 @@ final class PartFocusTrackerSpec extends AbstractTrackerSpecBase {
   }
 
   it must "notify part focused due to part opened" in {
-    tracker.enable
+    tracker.start
     val part = openRandomPart
     verify(listener).onPartFocused(part)
   }
@@ -105,7 +105,7 @@ final class PartFocusTrackerSpec extends AbstractTrackerSpecBase {
     val part1 = openRandomPart
     val part2 = openRandomPart
     activate(part1)
-    tracker.enable
+    tracker.start
 
     activate(part2)
     verify(listener).onPartFocused(part2)
@@ -115,14 +115,14 @@ final class PartFocusTrackerSpec extends AbstractTrackerSpecBase {
     val part1 = openRandomPart
     val part2 = openRandomPart
     activate(part1)
-    tracker.enable
+    tracker.start
 
     activate(part2)
     verify(listener).onPartUnfocused(part1)
   }
 
   it must "notify part unfocused due to new part opened" in {
-    tracker.enable
+    tracker.start
     val part = openRandomPart
 
     openRandomPart
@@ -130,7 +130,7 @@ final class PartFocusTrackerSpec extends AbstractTrackerSpecBase {
   }
 
   it must "notify part unfocused due to window unfocused" in {
-    tracker.enable
+    tracker.start
     val part = openRandomPart
 
     openWindow
@@ -139,7 +139,7 @@ final class PartFocusTrackerSpec extends AbstractTrackerSpecBase {
 
   it must "notify part unfocused due to part closed" in {
     val part = openRandomPart;
-    tracker.enable
+    tracker.start
 
     hide(part)
     verify(listener).onPartUnfocused(part)
@@ -148,7 +148,7 @@ final class PartFocusTrackerSpec extends AbstractTrackerSpecBase {
   it must "notify part unfocused due to foreground window being closed" in {
     val window = openWindow
     var part = openRandomPart(window)
-    tracker.enable
+    tracker.start
     verify(listener, never).onPartUnfocused(whatever)
 
     close(window)
@@ -161,14 +161,14 @@ final class PartFocusTrackerSpec extends AbstractTrackerSpecBase {
     val foreground = openWindow
     closeAllParts(foreground)
 
-    tracker.enable
+    tracker.start
 
     close(background)
     verifyZeroInteractions(listener)
   }
 
   it must "notify part unforcused on old part before notifying part focused on new part" in {
-    tracker.enable
+    tracker.start
     openRandomPart
     openRandomPart
 
@@ -178,9 +178,9 @@ final class PartFocusTrackerSpec extends AbstractTrackerSpecBase {
     order.verifyNoMoreInteractions
   }
 
-  it must "not notify when disabled" in {
-    tracker.enable
-    tracker.disable
+  it must "not notify when stopped" in {
+    tracker.start
+    tracker.stop
     openWindow
     openRandomPart
     openRandomPart
@@ -188,7 +188,7 @@ final class PartFocusTrackerSpec extends AbstractTrackerSpecBase {
   }
 
   it must "track newly opened window" in {
-    tracker.enable
+    tracker.start
     val window = openWindow
     val part = openRandomPart(window)
     verify(listener).onPartFocused(part)

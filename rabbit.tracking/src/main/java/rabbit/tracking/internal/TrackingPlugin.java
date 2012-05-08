@@ -115,9 +115,9 @@ public final class TrackingPlugin extends AbstractUIPlugin
   private void setEnable(Collection<ITracker> trackers, boolean enable) {
     for (ITracker tracker : trackers) {
       if (enable) {
-        tracker.enable();
+        tracker.start();
       } else {
-        tracker.disable();
+        tracker.stop();
       }
     }
   }

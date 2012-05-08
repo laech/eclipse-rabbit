@@ -56,43 +56,39 @@ final class PerspectiveFocusTrackerSpec extends AbstractTrackerSpecBase {
   behavior of classOf[PerspectiveFocusTracker].getSimpleName
 
   it must "notify perspective focused due to perspective switched" in {
-    tracker.enable
+    tracker.start
     val perspective = openRandomPerspective
     verify(listener).onPerspectiveFocused(perspective)
   }
 
   it must "notify perspective unfocused due to perspective switched" in {
     val perspective = openRandomPerspective
-    tracker.enable
+    tracker.start
     openRandomPerspective
     verify(listener).onPerspectiveUnfocused(perspective)
   }
 
   it must "notify perspective unfocused due to window unfocused" in {
     val perspective = openRandomPerspective
-    tracker.enable
+    tracker.start
     openWindow
     verify(listener).onPerspectiveUnfocused(perspective)
   }
 
   it must "notify perspective unfocused due to perspective closed" in {
     val perspective = openRandomPerspective
-    tracker.enable
+    tracker.start
     closeAllPerspectives
     verify(listener).onPerspectiveUnfocused(perspective)
   }
 
   it must "notify perspective unfocused due to foreground window being closed" in {
-    println("START")
-    try {
-      val window = openWindow
-      val perspective = openRandomPerspective(window)
-      tracker.enable
+    val window = openWindow
+    val perspective = openRandomPerspective(window)
+    tracker.start
 
-      close(window)
-      verify(listener).onPerspectiveUnfocused(perspective)
-
-    } finally { println("END") }
+    close(window)
+    verify(listener).onPerspectiveUnfocused(perspective)
   }
 
   it must "not notify perspective unfocused due to background window being closed" in {
@@ -101,7 +97,7 @@ final class PerspectiveFocusTrackerSpec extends AbstractTrackerSpecBase {
     val foreground = openWindow
     closeAllPerspectives(foreground)
 
-    tracker.enable
+    tracker.start
 
     close(background)
     verifyZeroInteractions(listener)
@@ -111,7 +107,7 @@ final class PerspectiveFocusTrackerSpec extends AbstractTrackerSpecBase {
     val window = getFocusedWindow(getWorkbench)
     val background = openRandomPerspective(window)
     val foreground = openRandomPerspective(window)
-    tracker.enable
+    tracker.start
 
     window.getShell.getDisplay.syncExec(() => {
       window.getActivePage.closePerspective(background, false, false)
@@ -122,7 +118,7 @@ final class PerspectiveFocusTrackerSpec extends AbstractTrackerSpecBase {
 
   it must "notify perspective unfocused on old perspective before notifying perspective focused on new perspective" in {
     closeAllPerspectives
-    tracker.enable
+    tracker.start
     openRandomPerspective
     openRandomPerspective
 
@@ -132,15 +128,15 @@ final class PerspectiveFocusTrackerSpec extends AbstractTrackerSpecBase {
     order.verifyNoMoreInteractions
   }
 
-  it must "not notify when disable" in {
-    tracker.enable;
-    tracker.disable
+  it must "not notify when stopped" in {
+    tracker.start
+    tracker.stop
     openRandomPerspective
     verifyZeroInteractions(listener)
   }
 
   it must "track newly opened window" in {
-    tracker.enable
+    tracker.start
     val window = openWindow
     val perspective = openRandomPerspective(window)
     verify(listener).onPerspectiveFocused(perspective)

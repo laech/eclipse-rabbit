@@ -94,6 +94,16 @@ public final class Recorder<T> implements IRecorder<T> {
     listenable.removeListener(listener);
   }
 
+  @Override public boolean isStarted() {
+    synchronized (this) {
+      return recording;
+    }
+  }
+
+  @Override public void start() {
+    start(null);
+  }
+
   @Override public void start(T userData) {
     T dataSnapshot;
     synchronized (this) {

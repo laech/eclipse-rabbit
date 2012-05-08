@@ -51,19 +51,19 @@ final class PartSessionTrackerSpec
 
   behavior of classOf[PartSessionTracker].getSimpleName
 
-  it must "enable part tracker when enabling" in {
+  it must "start part tracker when starting" in {
     val partTracker = mock[IListenableTracker[IPartFocusListener]]
     val tracker = createTracker(partTracker = partTracker)
-    tracker.enable
-    verify(partTracker).enable
+    tracker.start
+    verify(partTracker).start
   }
 
-  it must "disable part tracker when disabling" in {
+  it must "stop part tracker when stopping" in {
     val partTracker = mock[IListenableTracker[IPartFocusListener]]
     val tracker = createTracker(partTracker = partTracker)
-    tracker.enable
-    tracker.disable
-    verify(partTracker).disable
+    tracker.start
+    tracker.stop
+    verify(partTracker).stop
   }
 
   it must "throw NullPointerException if constructing without a workbench" in {
@@ -97,7 +97,7 @@ final class PartSessionTrackerSpec
     val actual = new Actual
     doAnswer({ invocation: InvocationOnMock =>
       val args = invocation.getArguments
-      actual.start = args(0).asInstanceOf[Instant]
+      actual.instant = args(0).asInstanceOf[Instant]
       actual.duration = args(1).asInstanceOf[Duration]
       actual.target = args(2).asInstanceOf[IWorkbenchPart]
     }).when(listener).onPartSession(any[Instant], any[Duration], any[IWorkbenchPart])

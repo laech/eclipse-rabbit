@@ -32,24 +32,24 @@ trait AbstractTrackerSpecBase extends FlatSpec with MustMatchers with BeforeAndA
   }
 
   override def afterEach() {
-    tracker.disable()
+    tracker.stop
   }
 
   protected def create(): Tracker
 
   behavior of "AbstractTracker"
 
-  it must "be disabled by default" in {
-    tracker.isEnabled must be(false)
+  it must "be stopped by default" in {
+    tracker.isStarted must be(false)
   }
 
-  it must "be enabled when set to enable" in {
-    tracker.enable()
-    tracker.isEnabled must be(true)
+  it must "be started when set to enable" in {
+    tracker.start
+    tracker.isStarted must be(true)
   }
 
-  it must "be disabled when set to disable" in {
-    tracker.disable()
-    tracker.isEnabled must be(false)
+  it must "be stopped when set to disable" in {
+    tracker.stop
+    tracker.isStarted must be(false)
   }
 }

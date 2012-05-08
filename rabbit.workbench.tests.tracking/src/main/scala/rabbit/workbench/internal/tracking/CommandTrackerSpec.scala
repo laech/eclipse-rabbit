@@ -48,39 +48,39 @@ final class CommandTrackerSpec extends AbstractTrackerSpecBase {
       event = invocation.getArguments()(0).asInstanceOf[ICommandEvent]
     }).when(listener).onEvent(any[ICommandEvent])
 
-    super.beforeEach()
+    super.beforeEach
   }
 
   behavior of "CommandTracker"
 
-  it must "attach to command service when enabling" in {
+  it must "attach to command service when starting" in {
     val (tracker, service) = createWithMockService()
-    tracker.enable()
+    tracker.start
     verify(service).addExecutionListener(notNull(classOf[IExecutionListener]))
     verifyNoMoreInteractions(service)
   }
 
-  it must "detach from command service when disabling" in {
+  it must "detach from command service when stopping" in {
     val (tracker, service) = createWithMockService()
-    tracker.enable()
-    tracker.disable()
+    tracker.start
+    tracker.stop
     val order = inOrder(service)
     order.verify(service).removeExecutionListener(notNull(classOf[IExecutionListener]))
     order.verifyNoMoreInteractions()
   }
 
-  behavior of "CommandTracker when disabled"
+  behavior of "CommandTracker when stopped"
 
   it must "not track command executions" in {
-    tracker.disable()
+    tracker.stop
     executeCommand()
     verifyZeroInteractions(listener)
   }
 
-  behavior of "CommandTracker when enabled"
+  behavior of "CommandTracker when started"
 
   it must "track successful command executions" in {
-    tracker.enable()
+    tracker.start
 
     val start = currentTimeMillis
     val command = executeCommand()
@@ -93,7 +93,7 @@ final class CommandTrackerSpec extends AbstractTrackerSpecBase {
   }
 
   it must "not track failed command executions" in {
-    tracker.enable()
+    tracker.start
 
     try {
       handlerService.executeCommand("noSuchCommand", null)

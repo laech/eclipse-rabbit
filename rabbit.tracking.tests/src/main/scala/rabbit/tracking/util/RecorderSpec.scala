@@ -18,7 +18,6 @@ package rabbit.tracking.util
 
 import java.lang.Thread.sleep
 import java.util.concurrent.atomic.AtomicInteger
-
 import org.joda.time.Duration.millis
 import org.joda.time.Instant.now
 import org.joda.time.{ Instant, Duration }
@@ -28,10 +27,10 @@ import org.mockito.Mockito.{ verifyZeroInteractions, verify, times, only, doAnsw
 import org.mockito.invocation.InvocationOnMock
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar.mock
-
 import rabbit.tracking.tests.TestImplicits.{ nTimes, funToAnswer }
 import rabbit.tracking.tests.TestUtils.doInNewThreads
 import rabbit.tracking.ListenableSpecBase
+import rabbit.tracking.AbstractTrackerSpecBase
 
 @RunWith(classOf[JUnitRunner])
 final class RecorderSpec extends ListenableSpecBase[IRecordListener[Any], Recorder[Any]] {
@@ -182,6 +181,18 @@ final class RecorderSpec extends ListenableSpecBase[IRecordListener[Any], Record
     }
   }
 
+  override protected def newUniqueListener() = new IRecordListener[Any] {
+    override def onRecord(record: Record[Any]) {}
+  }
+
+  override protected def getListeners(listenable: Recorder[Any]) =
+    listenable.getListeners
+
+  override protected def create() = createWithListeners()
+
+  private def createWithListeners(listeners: IRecordListener[Any]*): Recorder[Any] =
+    Recorder.create(listeners: _*)
+
   private def whatever() = any[Record[Any]]
 
   private def mockListener() = mock[IRecordListener[Any]]
@@ -203,16 +214,4 @@ final class RecorderSpec extends ListenableSpecBase[IRecordListener[Any], Record
     record.instant must be(instant)
     record.duration.getMillis must be(duration.getMillis)
   }
-
-  protected override def newUniqueListener() = new IRecordListener[Any] {
-    override def onRecord(record: Record[Any]) {}
-  }
-
-  protected override def getListeners(listenable: Recorder[Any]) =
-    listenable.getListeners
-
-  protected override def create() = createWithListeners()
-
-  private def createWithListeners(listeners: IRecordListener[Any]*): Recorder[Any] =
-    Recorder.create(listeners: _*)
 }

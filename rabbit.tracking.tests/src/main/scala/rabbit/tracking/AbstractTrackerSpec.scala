@@ -30,85 +30,77 @@ import rabbit.tracking.tests.TestUtils.doInNewThreads
 final class AbstractTrackerSpec extends AbstractTrackerSpecBase {
 
   private[AbstractTrackerSpec] class Tester extends AbstractTracker {
-    private var _enableCount = new AtomicInteger
-    private var _disableCount = new AtomicInteger
+    private var _startCount = new AtomicInteger
+    private var _stopCount = new AtomicInteger
 
-    def enableCount = _enableCount.get()
-    def disableCount = _disableCount.get()
+    def startCount = _startCount.get()
+    def stopCount = _stopCount.get()
 
-    override def onEnable() { _enableCount.incrementAndGet() }
-    override def onDisable() { _disableCount.incrementAndGet() }
+    override protected def onStart() { _startCount.incrementAndGet() }
+    override protected def onStop() { _stopCount.incrementAndGet() }
   }
 
   protected type Tracker = Tester
 
   behavior of "AbstractTracker"
 
-  it must "notify enable when enabling" in {
-    tracker.disable()
-    tracker.enable()
-    tracker.enableCount must be(1)
+  it must "notify start when starting" in {
+    tracker.stop
+    tracker.start
+    tracker.startCount must be(1)
   }
 
-  it must "notify enable only if previously disabled" in {
-    tracker.disable()
-    tracker.enable()
-    tracker.enable()
-    tracker.enableCount must be(1)
+  it must "notify start only if previously stopped" in {
+    tracker.stop
+    tracker.start
+    tracker.start
+    tracker.startCount must be(1)
   }
 
-  it must "notify disable when disabling" in {
-    tracker.enable()
-    tracker.disable()
-    tracker.disableCount must be(1)
+  it must "notify stop when stopping" in {
+    tracker.start
+    tracker.stop
+    tracker.stopCount must be(1)
   }
 
-  it must "notify disable only if previously enabled" in {
-    tracker.enable()
-    tracker.disable()
-    tracker.disable()
-    tracker.disableCount must be(1)
+  it must "notify stop only if previously started" in {
+    tracker.start
+    tracker.stop
+    tracker.stop
+    tracker.stopCount must be(1)
   }
 
-  it must "behave correctly when enabling from multiple threads" in {
+  it must "behave correctly when starting from multiple threads" in {
     100 times {
       val tracker = create()
-      tracker.disable()
-      doInNewThreads(20, () => {
-        100 times tracker.enable()
-      })
-
-      tracker.enableCount must be(1)
-      tracker.isEnabled must be(true)
+      tracker.stop
+      doInNewThreads(20, 100 times tracker.start)
+      tracker.startCount must be(1)
+      tracker.isStarted must be(true)
     }
   }
 
-  it must "behave correctly when disabling from multiple threads" in {
+  it must "behave correctly when stopping from multiple threads" in {
     100 times {
       val tracker = create()
-      tracker.enable()
-      doInNewThreads(20, () => {
-        100 times tracker.disable()
-      })
-
-      tracker.disableCount must be(1)
-      tracker.isEnabled must be(false)
+      tracker.start
+      doInNewThreads(20, 100 times tracker.stop)
+      tracker.stopCount must be(1)
+      tracker.isStarted must be(false)
     }
   }
 
-  it must "behave correctly when enabling/disabling from multiple threads" in {
+  it must "behave correctly when starting/stopping from multiple threads" in {
     100 times {
       val tracker = create()
-      doInNewThreads(20, () => {
-        100 times {
-          tracker.enable()
-          tracker.disable()
-        }
+      doInNewThreads(20, 100 times {
+        tracker.start
+        tracker.stop
       })
 
-      val diff = tracker.enableCount - tracker.disableCount
+      val diff = tracker.startCount - tracker.stopCount
       diff must be(0 plusOrMinus 1)
-      tracker.isEnabled must be(diff > 0)
+      tracker.isStarted must be(diff > 0)
     }
   }
 
