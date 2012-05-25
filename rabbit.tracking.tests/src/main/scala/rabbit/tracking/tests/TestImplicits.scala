@@ -21,7 +21,7 @@ import org.mockito.stubbing.Answer
 
 object TestImplicits {
 
-  implicit def funToAnswer(f: InvocationOnMock => Unit): Answer[Unit] = new Answer[Unit] {
+  implicit def funToAnswer(f: InvocationOnMock => Any): Answer[Unit] = new Answer[Unit] {
     override def answer(invocation: InvocationOnMock) = f(invocation)
   }
 
