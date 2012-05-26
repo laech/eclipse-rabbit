@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
       id="org.joda.time.feature"
-      label="org.joda.time.feature"
+      label="org.joda.time"
       version="2.1.0">
 
    <plugin
