@@ -5,7 +5,7 @@ Bundle-SymbolicName: org.joda.convert
 Bundle-Version: 1.2
 Bundle-ClassPath: joda-convert-1.2.jar
 Bundle-Vendor: Joda.org
-Export-Package: org.joda.time.convert;version="1.2"
+Export-Package: org.joda.convert;version="1.2.0"
 Bundle-DocURL: http://joda-convert.sourceforge.net/
 Implementation-Title: org.joda.convert
 Implementation-Vendor: Joda.org
