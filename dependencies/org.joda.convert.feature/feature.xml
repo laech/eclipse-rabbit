@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
       id="org.joda.convert.feature"
-      label="org.joda.convert.feature"
+      label="org.joda.convert"
       version="1.2.0">
 
    <plugin
