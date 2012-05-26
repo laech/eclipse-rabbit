@@ -17,7 +17,6 @@
 package rabbit.tracking.event;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.joda.time.Instant.now;
 
 import org.eclipse.ui.IWorkbenchPart;
 import org.joda.time.Instant;
@@ -39,28 +38,6 @@ import com.google.common.base.Objects.ToStringHelper;
  * @since 2.0
  */
 public final class PartFocusEvent extends Event {
-
-  /**
-   * Creates a part focused event using the current time.
-   * 
-   * @param part the workbench part that became focused
-   * @return an event representing the given part has just became focused
-   * @throws NullPointerException if part is null
-   */
-  public static PartFocusEvent onFocused(IWorkbenchPart part) {
-    return new PartFocusEvent(now(), part, true);
-  }
-
-  /**
-   * Creates a part unfocused event using the current time.
-   * 
-   * @param part the workbench part that became unfocused
-   * @return an event representing the given part has just became unfocused
-   * @throws NullPointerException if part is null
-   */
-  public static PartFocusEvent onUnfocused(IWorkbenchPart part) {
-    return new PartFocusEvent(now(), part, false);
-  }
 
   private final boolean focused;
   private final IWorkbenchPart part;

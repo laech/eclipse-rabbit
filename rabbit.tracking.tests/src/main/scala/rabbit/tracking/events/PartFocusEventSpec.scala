@@ -49,44 +49,6 @@ final class PartFocusEventSpec extends EventSpec {
     create(focus = focus).isFocused must be(focus)
   }
 
-  behavior of classOf[PartFocusEvent].getSimpleName + ".onFocused"
-
-  it must "construct an event using current time" in {
-    val pre = currentTimeMillis
-    val event = PartFocusEvent.onFocused(mock[IWorkbenchPart])
-    val post = currentTimeMillis
-    event.instant.getMillis must be >= pre
-    event.instant.getMillis must be <= post
-  }
-
-  it must "set focus to true" in {
-    PartFocusEvent.onFocused(mock[IWorkbenchPart]).isFocused must be(true)
-  }
-
-  it must "return the part" in {
-    val part = mock[IWorkbenchPart]
-    PartFocusEvent.onFocused(part).part must be(part)
-  }
-
-  behavior of classOf[PartFocusEvent].getSimpleName + ".onUnfocused"
-
-  it must "construct an event using current time" in {
-    val pre = currentTimeMillis
-    val event = PartFocusEvent.onUnfocused(mock[IWorkbenchPart])
-    val post = currentTimeMillis
-    event.instant.getMillis must be >= pre
-    event.instant.getMillis must be <= post
-  }
-
-  it must "set focus to false" in {
-    PartFocusEvent.onUnfocused(mock[IWorkbenchPart]).isFocused must be(false)
-  }
-
-  it must "return the part" in {
-    val part = mock[IWorkbenchPart]
-    PartFocusEvent.onUnfocused(part).part must be(part)
-  }
-
   override protected def create(instant: Instant) =
     create(instant, mock[IWorkbenchPart], true)
 
