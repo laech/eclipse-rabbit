@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+      id="org.objenesis.feature"
+      label="org.objenesis.feature"
+      version="1.0.0">
+
+   <plugin
+         id="org.objenesis"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"/>
+
+</feature>
