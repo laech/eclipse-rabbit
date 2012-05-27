@@ -20,7 +20,7 @@ import org.joda.time.Duration;
 import org.joda.time.Instant;
 
 /**
- * An event with duration.
+ * An event with duration. // TODO delete
  * 
  * @since 2.0
  */

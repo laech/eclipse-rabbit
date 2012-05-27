@@ -21,8 +21,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import org.eclipse.ui.IWorkbenchPart;
 import org.joda.time.Instant;
 
-import rabbit.tracking.Event;
-
 import com.google.common.base.Objects.ToStringHelper;
 
 /**

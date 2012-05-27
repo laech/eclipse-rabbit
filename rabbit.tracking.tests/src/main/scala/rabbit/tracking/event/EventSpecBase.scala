@@ -14,7 +14,7 @@
  * the License.
  */
 
-package rabbit.tracking
+package rabbit.tracking.event
 
 import org.joda.time.Instant.now
 import org.joda.time.Instant
@@ -24,7 +24,7 @@ import org.scalatest.matchers.MustMatchers
 import org.scalatest.FlatSpec
 
 @RunWith(classOf[JUnitRunner])
-class EventSpec extends FlatSpec with MustMatchers {
+class EventSpecBase extends FlatSpec with MustMatchers {
 
   behavior of classOf[Event].getSimpleName
 
