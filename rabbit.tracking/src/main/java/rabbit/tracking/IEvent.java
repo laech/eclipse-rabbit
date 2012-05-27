@@ -19,7 +19,7 @@ package rabbit.tracking;
 import org.joda.time.Instant;
 
 /**
- * Represents an event happened at a particular time.
+ * Represents an event happened at a particular time. // TODO delete
  * 
  * @since 2.0
  */

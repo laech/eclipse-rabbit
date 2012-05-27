@@ -14,7 +14,7 @@
  * the License.
  */
 
-package rabbit.tracking;
+package rabbit.tracking.event;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -24,11 +24,11 @@ import com.google.common.base.Objects;
 import com.google.common.base.Objects.ToStringHelper;
 
 /**
- * Default implementation of an event. // TODO delete
+ * An event happened at a particular time.
  * 
  * @since 2.0
  */
-public class Event implements IEvent {
+public class Event {
 
   private final Instant instant;
 
@@ -51,17 +51,26 @@ public class Event implements IEvent {
    * @see Object#equals(Object)
    */
   @Override public boolean equals(Object obj) {
-    return super.equals(obj);
+    if (obj != null) {
+      return Objects.equal(getClass(), obj.getClass())
+          && Objects.equal(instant(), ((Event)obj).instant());
+    }
+    return false;
   }
 
   /**
    * @see Object#hashCode()
    */
   @Override public int hashCode() {
-    return super.hashCode();
+    return Objects.hashCode(instant());
   }
 
-  @Override public final Instant instant() {
+  /**
+   * The time which this event occurred.
+   * 
+   * @return the time of this event, not null
+   */
+  public final Instant instant() {
     return instant;
   }
 

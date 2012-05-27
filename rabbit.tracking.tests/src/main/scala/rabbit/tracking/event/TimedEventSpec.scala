@@ -14,7 +14,7 @@
  * the License.
  */
 
-package rabbit.tracking
+package rabbit.tracking.event
 
 import org.joda.time.Duration.ZERO
 import org.joda.time.Instant.now
@@ -23,7 +23,7 @@ import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class TimedEventSpec extends EventSpec {
+class TimedEventSpec extends EventSpecBase {
 
   behavior of classOf[TimedEvent].getSimpleName
 
@@ -38,7 +38,9 @@ class TimedEventSpec extends EventSpec {
     create(now, duration).duration must be(duration)
   }
 
-  override protected final def create(instant: Instant) = create(instant, ZERO)
+  override protected final def create(instant: Instant) =
+    create(instant, ZERO)
 
-  protected def create(instant: Instant, duration: Duration) = new TimedEvent(instant, duration)
+  protected def create(instant: Instant, duration: Duration) =
+    new TimedEvent(instant, duration)
 }

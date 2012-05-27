@@ -14,7 +14,7 @@
  * the License.
  */
 
-package rabbit.tracking.events
+package rabbit.tracking.event
 
 import java.lang.System.currentTimeMillis
 
@@ -25,11 +25,8 @@ import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar.mock
 
-import rabbit.tracking.event.PartFocusEvent
-import rabbit.tracking.EventSpec
-
 @RunWith(classOf[JUnitRunner])
-final class PartFocusEventSpec extends EventSpec {
+final class PartFocusEventSpec extends EventSpecBase {
 
   behavior of classOf[PartFocusEvent].getSimpleName
 

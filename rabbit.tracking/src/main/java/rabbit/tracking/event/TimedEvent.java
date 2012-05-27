@@ -14,7 +14,7 @@
  * the License.
  */
 
-package rabbit.tracking;
+package rabbit.tracking.event;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -28,7 +28,7 @@ import com.google.common.base.Objects.ToStringHelper;
  * 
  * @since 2.0
  */
-public class TimedEvent extends Event implements ITimedEvent {
+public class TimedEvent extends Event {
 
   private final Duration duration;
 
@@ -44,7 +44,7 @@ public class TimedEvent extends Event implements ITimedEvent {
     this.duration = checkNotNull(duration, "duration");
   }
 
-  @Override public final Duration duration() {
+  public final Duration duration() {
     return duration;
   }
 
