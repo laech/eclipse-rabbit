@@ -18,19 +18,20 @@ package rabbit.tracking.util
 
 import java.lang.Thread.sleep
 import java.util.concurrent.atomic.AtomicInteger
+
 import org.joda.time.Duration.millis
 import org.joda.time.Instant.now
 import org.joda.time.{ Instant, Duration }
 import org.junit.runner.RunWith
 import org.mockito.Matchers.any
-import org.mockito.Mockito.{ verifyZeroInteractions, verify, times, only, doAnswer }
-import org.mockito.invocation.InvocationOnMock
+import org.mockito.Mockito.{ verifyZeroInteractions, verify, times, only }
+import org.mockito.ArgumentCaptor
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar.mock
-import rabbit.tracking.tests.TestImplicits.{ nTimes, funToAnswer }
+
+import rabbit.tracking.tests.TestImplicits.nTimes
 import rabbit.tracking.tests.TestUtils.doInNewThreads
 import rabbit.tracking.ListenableSpecBase
-import rabbit.tracking.AbstractTrackerSpecBase
 
 @RunWith(classOf[JUnitRunner])
 final class RecorderSpec extends ListenableSpecBase[IRecordListener[Any], Recorder[Any]] {
@@ -90,20 +91,16 @@ final class RecorderSpec extends ListenableSpecBase[IRecordListener[Any], Record
   }
 
   it must "record with correct properties" in {
-    var record: Record[Any] = null
     val listener = mockListener
     recorder addListener listener
-    doAnswer { i: InvocationOnMock =>
-      record = i.getArguments()(0).asInstanceOf[Record[Any]]
-    } when listener onRecord whatever
-
     recorder.start("mydata")
     sleep(5)
     clock.returnStartInstant = false
     recorder.stop
 
-    verify(listener, only) onRecord record
-    check(record, "mydata")
+    val arg = ArgumentCaptor.forClass(classOf[Record[Any]])
+    verify(listener, only).onRecord(arg.capture)
+    check(arg.getValue, "mydata")
   }
 
   it must "accept start argument as optional" in {
