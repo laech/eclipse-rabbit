@@ -21,6 +21,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import org.eclipse.ui.IWorkbenchPart;
 import org.joda.time.Instant;
 
+import com.google.common.base.Objects;
 import com.google.common.base.Objects.ToStringHelper;
 
 /**
@@ -55,6 +56,20 @@ public final class PartFocusEvent extends Event {
     this.focused = focused;
   }
 
+  @Override public boolean equals(Object obj) {
+    if (obj instanceof PartFocusEvent) {
+      PartFocusEvent that = (PartFocusEvent)obj;
+      return Objects.equal(instant(), that.instant())
+          & Objects.equal(part(), that.part())
+          & Objects.equal(isFocused(), that.isFocused());
+    }
+    return super.equals(obj);
+  }
+
+  @Override public int hashCode() {
+    return Objects.hashCode(instant(), part(), isFocused());
+  }
+
   /**
    * The focus state of the workbench part of this event.
    * 
@@ -76,4 +91,5 @@ public final class PartFocusEvent extends Event {
   @Override protected ToStringHelper toStringHelper() {
     return super.toStringHelper().add("part", part).add("focused", isFocused());
   }
+
 }
