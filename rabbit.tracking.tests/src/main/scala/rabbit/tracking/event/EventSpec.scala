@@ -49,6 +49,12 @@ final class EventSpec extends EventSpecBase {
     a.equals(b) must be(true)
   }
 
+  it must "not equal to another event with different instants" in {
+    val a = new Event(now)
+    val b = new Event(now plus 1)
+    a.equals(b) must be(false)
+  }
+
   it must "not equal to another event of subtype even with same properties" in {
     val a = new Event(new Instant(101))
     val b = new Event(new Instant(101)) {}
