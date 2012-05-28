@@ -18,7 +18,7 @@ package rabbit.tracking.event
 
 import org.joda.time.Duration.ZERO
 import org.joda.time.Instant.now
-import org.joda.time.{Instant, Duration}
+import org.joda.time.{ Instant, Duration }
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.prop.TableDrivenPropertyChecks
@@ -53,8 +53,8 @@ final class TimedEventSpec extends TimedEventSpecBase with TableDrivenPropertyCh
   }
 
   it must "equal to another event with same properties" in {
-    val a = new TimedEvent(new Instant(101), ZERO)
-    val b = new TimedEvent(new Instant(101), ZERO)
+    val a = create(epoch, ZERO)
+    val b = create(epoch, ZERO)
     a must be(b)
   }
 
@@ -65,8 +65,8 @@ final class TimedEventSpec extends TimedEventSpecBase with TableDrivenPropertyCh
   }
 
   it must "not equal to another event of subtype even with same properties" in {
-    val a = new TimedEvent(new Instant(0), ZERO)
-    val b = new TimedEvent(new Instant(0), ZERO) {}
+    val a = new TimedEvent(epoch, ZERO)
+    val b = new TimedEvent(epoch, ZERO) {}
     a must not be b
   }
 
