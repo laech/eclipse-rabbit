@@ -18,29 +18,63 @@ package rabbit.tracking.event
 
 import org.joda.time.Duration.ZERO
 import org.joda.time.Instant.now
-import org.joda.time.{ Instant, Duration }
+import org.joda.time.{Instant, Duration}
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
+import org.scalatest.prop.TableDrivenPropertyChecks
 
 @RunWith(classOf[JUnitRunner])
-class TimedEventSpec extends EventSpecBase {
+final class TimedEventSpec extends TimedEventSpecBase with TableDrivenPropertyChecks {
+
+  private val differences = Table(
+    ("event a", "event b"),
+    (create(epoch, duration(0)), create(now, duration(0))), // Different instants
+    (create(epoch, duration(1)), create(epoch, duration(2))), // Different durations
+    (create(epoch, duration(1)), create(now, duration(2))) // Different durations and instants
+    )
 
   behavior of classOf[TimedEvent].getSimpleName
 
-  it must "throw NullPointerException if constructing without a duration" in {
-    intercept[NullPointerException] {
-      create(now, null)
+  it must "return same hash code if properties are same" in {
+    val a = create(epoch, ZERO)
+    val b = create(epoch, ZERO)
+    a.hashCode must be(b.hashCode)
+  }
+
+  it must "return different hash codes if any properties are different" in {
+    forAll(differences) { (a, b) =>
+      a.hashCode must not be b.hashCode
     }
   }
 
-  it must "return the duration" in {
-    val duration = Duration.millis(11)
-    create(now, duration).duration must be(duration)
+  it must "equal to itself" in {
+    val event = create(now, duration(0))
+    event must be(event)
   }
 
-  override protected final def create(instant: Instant) =
-    create(instant, ZERO)
+  it must "equal to another event with same properties" in {
+    val a = new TimedEvent(new Instant(101), ZERO)
+    val b = new TimedEvent(new Instant(101), ZERO)
+    a must be(b)
+  }
 
-  protected def create(instant: Instant, duration: Duration) =
-    new TimedEvent(instant, duration)
+  it must "not equal to a different event" in {
+    forAll(differences) { (a, b) =>
+      a must not be b
+    }
+  }
+
+  it must "not equal to another event of subtype even with same properties" in {
+    val a = new TimedEvent(new Instant(0), ZERO)
+    val b = new TimedEvent(new Instant(0), ZERO) {}
+    a must not be b
+  }
+
+  it must "not equal to null" in {
+    create(now, ZERO).equals(null) must be(false)
+  }
+
+  private def epoch() = new Instant(0)
+
+  private def duration(millis: Long) = new Duration(millis)
 }

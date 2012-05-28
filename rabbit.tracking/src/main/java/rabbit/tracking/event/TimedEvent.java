@@ -21,10 +21,13 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import org.joda.time.Duration;
 import org.joda.time.Instant;
 
+import com.google.common.base.Objects;
 import com.google.common.base.Objects.ToStringHelper;
 
 /**
- * Default implementation of a timed event. // TODO delete
+ * An event with duration.
+ * <p/>
+ * {@link #instant()} returns the start time of this event.
  * 
  * @since 2.0
  */
@@ -35,7 +38,7 @@ public class TimedEvent extends Event {
   /**
    * Constructs a new event.
    * 
-   * @param instant the instant of this event
+   * @param instant the instant (start time) of this event
    * @param duration the duration of this event
    * @throws NullPointerException if any argument is null
    */
@@ -44,8 +47,26 @@ public class TimedEvent extends Event {
     this.duration = checkNotNull(duration, "duration");
   }
 
+  /**
+   * The duration of this event.
+   * 
+   * @return the duration of this event, not null
+   */
   public final Duration duration() {
     return duration;
+  }
+
+  @Override public boolean equals(Object obj) {
+    if (obj != null && Objects.equal(getClass(), obj.getClass())) {
+      TimedEvent that = (TimedEvent)obj;
+      return Objects.equal(instant(), that.instant())
+          & Objects.equal(duration(), that.duration());
+    }
+    return false;
+  }
+
+  @Override public int hashCode() {
+    return Objects.hashCode(instant(), duration());
   }
 
   @Override protected ToStringHelper toStringHelper() {
