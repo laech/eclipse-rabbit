@@ -1,0 +1,6 @@
+Manifest-Version: 1.0
+Eclipse-SourceBundle: org.scalatest;version="1.8.0"
+Bundle-ManifestVersion: 2
+Bundle-Name: org.scalatest.source
+Bundle-SymbolicName: org.scalatest.source
+Bundle-Version: 1.8.0
