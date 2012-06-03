@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <feature url="features/org.joda.time.feature_2.1.0.jar" id="org.joda.time.feature" version="2.1.0"/>
+   <feature url="features/org.joda.time.source.feature_2.1.0.jar" id="org.joda.time.source.feature" version="2.1.0"/>
+   <feature url="features/org.scala_lang.library.feature_2.9.2.jar" id="org.scala_lang.library.feature" version="2.9.2"/>
+   <feature url="features/org.scala_lang.library.source.feature_2.9.2.jar" id="org.scala_lang.library.source.feature" version="2.9.2"/>
+   <feature url="features/org.scalatest.feature_1.8.0.jar" id="org.scalatest.feature" version="1.8.0"/>
+   <feature url="features/org.scalatest.source.feature_1.8.0.jar" id="org.scalatest.source.feature" version="1.8.0"/>
+</site>
