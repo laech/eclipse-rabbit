@@ -23,6 +23,12 @@
     <scala.version>2.9.2</scala.version>
     <scala.bundle>org.scala-lang.library</scala.bundle>
     <scala.sourcebundle>org.scala-lang.library.source</scala.sourcebundle>
+
+    <scalatest.groupId>org.scalatest</scalatest.groupId>
+    <scalatest.artifactId>scalatest_2.9.2</scalatest.artifactId>
+    <scalatest.version>1.8</scalatest.version>
+    <scalatest.bundle>org.scalatest</scalatest.bundle>
+    <scalatest.sourcebundle>org.scalatest.source</scalatest.sourcebundle>
   </properties>
 
   <build>
@@ -51,7 +57,7 @@
         <artifactId>maven-dependency-plugin</artifactId>
         <version>2.4</version>
         <executions>
-        
+
           <!-- Copy all the jars to the bundle projects -->
           <execution>
             <id>copy</id>
@@ -73,10 +79,16 @@
                   <version>${scala.version}</version>
                   <outputDirectory>${scala.bundle}</outputDirectory>
                 </artifactItem>
+                <artifactItem>
+                  <groupId>${scalatest.groupId}</groupId>
+                  <artifactId>${scalatest.artifactId}</artifactId>
+                  <version>${scalatest.version}</version>
+                  <outputDirectory>${scalatest.bundle}</outputDirectory>
+                </artifactItem>
               </artifactItems>
             </configuration>
           </execution>
-          
+
           <!-- Unzip all the sources for the source bundles -->
           <execution>
             <id>unpack</id>
@@ -99,6 +111,13 @@
                   <version>${scala.version}</version>
                   <classifier>sources</classifier>
                   <outputDirectory>${scala.sourcebundle}/${scala.artifactId}-${scala.version}${srcdir.suffix}</outputDirectory>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>${scalatest.groupId}</groupId>
+                  <artifactId>${scalatest.artifactId}</artifactId>
+                  <version>${scalatest.version}</version>
+                  <classifier>sources</classifier>
+                  <outputDirectory>${scalatest.sourcebundle}/${scalatest.artifactId}-${scalatest.version}${srcdir.suffix}</outputDirectory>
                 </artifactItem>
               </artifactItems>
             </configuration>
