@@ -3,5 +3,4 @@ Eclipse-SourceBundle: org.joda.time;version="2.1.0"
 Bundle-ManifestVersion: 2
 Bundle-Name: org.joda.time.source
 Bundle-SymbolicName: org.joda.time.source
-Bundle-Version: 2.1
-Bundle-ClassPath: joda-time-2.1-sources.jar
+Bundle-Version: 2.1.0
