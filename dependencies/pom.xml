@@ -18,6 +18,11 @@
     <joda-time.bundle>org.joda.time</joda-time.bundle>
     <joda-time.sourcebundle>org.joda.time.source</joda-time.sourcebundle>
 
+    <scala.groupId>org.scala-lang</scala.groupId>
+    <scala.artifactId>scala-library</scala.artifactId>
+    <scala.version>2.9.2</scala.version>
+    <scala.bundle>org.scala-lang.library</scala.bundle>
+    <scala.sourcebundle>org.scala-lang.library.source</scala.sourcebundle>
   </properties>
 
   <build>
@@ -41,13 +46,15 @@
         </configuration>
       </plugin>
 
-      <!-- Copy all the jars -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-dependency-plugin</artifactId>
         <version>2.4</version>
         <executions>
+        
+          <!-- Copy all the jars to the bundle projects -->
           <execution>
+            <id>copy</id>
             <phase>process-resources</phase>
             <goals>
               <goal>copy</goal>
@@ -61,36 +68,39 @@
                   <outputDirectory>${joda-time.bundle}</outputDirectory>
                 </artifactItem>
                 <artifactItem>
+                  <groupId>${scala.groupId}</groupId>
+                  <artifactId>${scala.artifactId}</artifactId>
+                  <version>${scala.version}</version>
+                  <outputDirectory>${scala.bundle}</outputDirectory>
+                </artifactItem>
+              </artifactItems>
+            </configuration>
+          </execution>
+          
+          <!-- Unzip all the sources for the source bundles -->
+          <execution>
+            <id>unpack</id>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>unpack</goal>
+            </goals>
+            <configuration>
+              <artifactItems>
+                <artifactItem>
                   <groupId>${joda-time.groupId}</groupId>
                   <artifactId>${joda-time.artifactId}</artifactId>
                   <version>${joda-time.version}</version>
                   <classifier>sources</classifier>
-                  <outputDirectory>${project.build.directory}</outputDirectory>
+                  <outputDirectory>${joda-time.sourcebundle}/${joda-time.artifactId}-${joda-time.version}${srcdir.suffix}</outputDirectory>
                 </artifactItem>
-                
-                
+                <artifactItem>
+                  <groupId>${scala.groupId}</groupId>
+                  <artifactId>${scala.artifactId}</artifactId>
+                  <version>${scala.version}</version>
+                  <classifier>sources</classifier>
+                  <outputDirectory>${scala.sourcebundle}/${scala.artifactId}-${scala.version}${srcdir.suffix}</outputDirectory>
+                </artifactItem>
               </artifactItems>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-antrun-plugin</artifactId>
-        <version>1.7</version>
-        <executions>
-          <execution>
-            <phase>process-resources</phase>
-            <goals>
-              <goal>run</goal>
-            </goals>
-            <configuration>
-              <tasks>
-                <unzip
-                  src="${project.build.directory}/${joda-time.artifactId}-${joda-time.version}-sources.jar"
-                  dest="${joda-time.sourcebundle}/${joda-time.artifactId}-${joda-time.version}${srcdir.suffix}"/>
-              </tasks>
             </configuration>
           </execution>
         </executions>

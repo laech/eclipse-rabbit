@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+      id="org.scala_lang.library.source.feature"
+      label="org.scala-lang.library.source"
+      version="2.9.2">
+
+   <plugin
+         id="org.scala-lang.library.source"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+</feature>
