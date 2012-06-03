@@ -1,0 +1,6 @@
+*/.settings
+*/*src
+*/*.jar
+*/target
+*/bin
+*/build
