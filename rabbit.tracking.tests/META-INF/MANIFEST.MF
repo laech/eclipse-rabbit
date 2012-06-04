@@ -45,4 +45,5 @@ Export-Package: rabbit.tracking;version="2.0.0",
  rabbit.tracking.internal;version="2.0.0",
  rabbit.tracking.tests;version="2.0.0",
  rabbit.tracking.util;version="2.0.0"
-Require-Bundle: org.eclipse.help;bundle-version="[3.4.0,4.0.0)"
+Require-Bundle: org.eclipse.help;bundle-version="[3.4.0,4.0.0)",
+ org.eclipse.jdt.ui;bundle-version="3.5.2"
