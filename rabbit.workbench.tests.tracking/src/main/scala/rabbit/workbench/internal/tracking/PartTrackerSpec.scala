@@ -91,7 +91,7 @@ final class PartTrackerSpec extends AbstractTrackerSpecBase {
     }).when(partTracker).stop
 
     tracker.stop
-    verify(listener).onEvent(notNull(classOf[IPartEvent]))
+    verify(listener).onEvent(notNull.asInstanceOf[IPartEvent])
   }
 
   it must "not notify event if disabled" in {

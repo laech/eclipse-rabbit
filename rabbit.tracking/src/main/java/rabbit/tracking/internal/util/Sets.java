@@ -25,7 +25,7 @@ public final class Sets {
    * Creates a new {@link CopyOnWriteArraySet} from the given collection.
    * 
    * @param elements the initial elements for the set
-   * @throws a new set containing the elements
+   * @returns a new set containing the elements
    */
   public static <E> CopyOnWriteArraySet<E> newCopyOnWriteSet(
       Collection<? extends E> elements) {

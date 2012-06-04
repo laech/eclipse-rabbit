@@ -91,7 +91,7 @@ final class PerspectiveTrackerSpec extends AbstractTrackerSpecBase {
     } when perspTracker stop
 
     tracker.stop
-    verify(listener) onEvent notNull(classOf[IPerspectiveEvent])
+    verify(listener) onEvent notNull.asInstanceOf[IPerspectiveEvent]
   }
 
   it must "not notify event if stopped" in {

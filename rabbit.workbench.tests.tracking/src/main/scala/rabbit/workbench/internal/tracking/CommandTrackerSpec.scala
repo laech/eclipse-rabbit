@@ -56,7 +56,7 @@ final class CommandTrackerSpec extends AbstractTrackerSpecBase {
   it must "attach to command service when starting" in {
     val (tracker, service) = createWithMockService()
     tracker.start
-    verify(service).addExecutionListener(notNull(classOf[IExecutionListener]))
+    verify(service).addExecutionListener(notNull.asInstanceOf[IExecutionListener])
     verifyNoMoreInteractions(service)
   }
 
@@ -65,7 +65,7 @@ final class CommandTrackerSpec extends AbstractTrackerSpecBase {
     tracker.start
     tracker.stop
     val order = inOrder(service)
-    order.verify(service).removeExecutionListener(notNull(classOf[IExecutionListener]))
+    order.verify(service).removeExecutionListener(notNull.asInstanceOf[IExecutionListener])
     order.verifyNoMoreInteractions()
   }
 

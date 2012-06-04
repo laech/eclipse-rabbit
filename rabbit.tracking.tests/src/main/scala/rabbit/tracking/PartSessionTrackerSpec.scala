@@ -90,7 +90,7 @@ final class PartSessionTrackerSpec
     partTracker: IListenableTracker[IPartFocusListener] = partTracker) =
     new PartSessionTracker(recorder, monitor, workbench, partTracker)
 
-  private def notNullUserMonitorListener = notNull(classOf[IUserListener])
+  private def notNullUserMonitorListener = notNull.asInstanceOf[IUserListener]
 
   override protected def mockListenerWithResult() = {
     val listener = mock[IPartSessionListener]

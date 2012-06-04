@@ -356,5 +356,5 @@ final class LaunchTrackerSpec extends AbstractTrackerSpecBase with Timeouts {
     }
   }
 
-  private def notNull[T](implicit m: Manifest[T]): T = Matchers.notNull(m.erasure.asInstanceOf[Class[T]])
+  private def notNull[T]: T = Matchers.notNull.asInstanceOf[T]
 }
