@@ -5,7 +5,7 @@ Bundle-SymbolicName: org.scalatest
 Bundle-Version: 1.8.0
 Bundle-ClassPath: scalatest_2.9.2-1.8.jar
 Bundle-Vendor: Artima
-Export-Package: org.scalatest;version="1.8";
+Export-Package: org.scalatest;version="1.8.0";
   uses:="scala.collection.immutable,
    scala,
    scala.reflect,
@@ -22,7 +22,7 @@ Export-Package: org.scalatest;version="1.8";
    javax.xml.transform,
    javax.xml.parsers,
    scala.math",
- org.scalatest.concurrent;version="1.8";
+ org.scalatest.concurrent;version="1.8.0";
   uses:="scala,
    org.scalatest.time,
    scala.runtime,
@@ -35,7 +35,7 @@ Export-Package: org.scalatest;version="1.8";
    org.scalatest.fixture,
    scala.collection.generic,
    org.scalatest.tools",
- org.scalatest.events;version="1.8";
+ org.scalatest.events;version="1.8.0";
   uses:="scala.math,
    scala,
    scala.reflect,
@@ -45,7 +45,7 @@ Export-Package: org.scalatest;version="1.8";
    scala.collection.immutable,
    scala.collection.generic,
    org.scalatest",
- org.scalatest.exceptions;version="1.8";
+ org.scalatest.exceptions;version="1.8.0";
   uses:="scala,
    scala.reflect,
    scala.runtime,
@@ -55,7 +55,7 @@ Export-Package: org.scalatest;version="1.8";
    scala.collection.immutable,
    scala.collection.generic,
    org.scalatest.time",
- org.scalatest.fixture;version="1.8";
+ org.scalatest.fixture;version="1.8.0";
   uses:="scala.collection.immutable,
    scala,
    scala.reflect,
@@ -68,7 +68,7 @@ Export-Package: org.scalatest;version="1.8";
    scala.collection.generic,
    org.scalatest.events,
    scala.math",
- org.scalatest.junit;version="1.8";
+ org.scalatest.junit;version="1.8.0";
   uses:="org.scalatest,
    scala,
    scala.reflect,
@@ -86,7 +86,7 @@ Export-Package: org.scalatest;version="1.8";
    org.scalatest.verb,
    org.scalatest.matchers,
    org.scalatest.events",
- org.scalatest.matchers;version="1.8";
+ org.scalatest.matchers;version="1.8.0";
   uses:="scala,
    scala.reflect,
    scala.runtime,
@@ -100,7 +100,7 @@ Export-Package: org.scalatest;version="1.8";
    scala.util.matching,
    org.scalatest.exceptions,
    org.scalatest.verb",
- org.scalatest.mock;version="1.8";
+ org.scalatest.mock;version="1.8.0";
   uses:="scala,
    scala.collection,
    scala.runtime,
@@ -114,7 +114,7 @@ Export-Package: org.scalatest;version="1.8";
    org.hamcrest,
    org.mockito,
    org.mockito.stubbing",
- org.scalatest.path;version="1.8";
+ org.scalatest.path;version="1.8.0";
   uses:="scala.collection.immutable,
    scala,
    org.scalatest,
@@ -123,7 +123,7 @@ Export-Package: org.scalatest;version="1.8";
    scala.collection.mutable,
    scala.reflect,
    org.scalatest.verb",
- org.scalatest.prop;version="1.8";
+ org.scalatest.prop;version="1.8.0";
   uses:="scala,
    org.scalacheck,
    scala.runtime,
@@ -136,7 +136,7 @@ Export-Package: org.scalatest;version="1.8";
    scala.reflect,
    scala.math,
    scala.collection.parallel",
- org.scalatest.testng;version="1.8";
+ org.scalatest.testng;version="1.8.0";
   uses:="org.testng,
    scala,
    scala.reflect,
@@ -148,14 +148,14 @@ Export-Package: org.scalatest;version="1.8";
    org.scalatest.events,
    scala.collection.immutable,
    scala.runtime",
- org.scalatest.time;version="1.8";
+ org.scalatest.time;version="1.8.0";
   uses:="scala,
    scala.collection,
    scala.runtime,
    scala.reflect,
    scala.collection.mutable,
    org.scalatest",
- org.scalatest.tools;version="1.8";
+ org.scalatest.tools;version="1.8.0";
   uses:="scala.collection.mutable,
    org.scalatest,
    javax.swing.border,
@@ -178,7 +178,7 @@ Export-Package: org.scalatest;version="1.8";
    org.apache.tools.ant,
    org.apache.tools.ant.taskdefs,
    org.scalatools.testing",
- org.scalatest.verb;version="1.8";
+ org.scalatest.verb;version="1.8.0";
   uses:="scala,
    scala.reflect,
    scala.runtime,
