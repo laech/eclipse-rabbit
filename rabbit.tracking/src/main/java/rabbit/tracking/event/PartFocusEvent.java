@@ -34,6 +34,8 @@ import com.google.common.base.Objects.ToStringHelper;
  * therefore there will be at most one focused part at any time regardless of
  * how many workbench windows are opened.
  * 
+ * // TODO no instantiate
+ * 
  * @since 2.0
  */
 public final class PartFocusEvent extends Event {
@@ -89,7 +91,9 @@ public final class PartFocusEvent extends Event {
   }
 
   @Override protected ToStringHelper toStringHelper() {
-    return super.toStringHelper().add("part", part).add("focused", isFocused());
+    return super.toStringHelper()
+        .add("part", part())
+        .add("focused", isFocused());
   }
 
 }

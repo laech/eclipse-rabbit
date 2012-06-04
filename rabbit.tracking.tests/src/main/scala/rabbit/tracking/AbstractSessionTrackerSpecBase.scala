@@ -224,14 +224,14 @@ abstract class AbstractSessionTrackerSpecBase[T: Manifest, L <: AnyRef]
     val tracker = create(monitor = monitor)
     tracker.start
     tracker.stop
-    verify(monitor).removeListener(notNull(classOf[IUserListener]))
+    verify(monitor).removeListener(notNull.asInstanceOf[IUserListener])
   }
 
   it must "attatch listener to user monitor when starting" in {
     val monitor = mock[IUserMonitor]
     val tracker = create(monitor = monitor)
     tracker.start
-    verify(monitor).addListener(notNull(classOf[IUserListener]))
+    verify(monitor).addListener(notNull.asInstanceOf[IUserListener])
   }
 
   it must "stop recorder when stopping" in {
