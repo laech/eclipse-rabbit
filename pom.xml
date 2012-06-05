@@ -19,6 +19,8 @@
     <module>rabbit.target</module>
     <module>rabbit.tracking</module>
     <module>rabbit.tracking.tests</module>
+    <module>rabbit.workbench.tracking</module>
+    <module>rabbit.workbench.tests.tracking</module>
   </modules>
 
   <build>
