@@ -47,6 +47,12 @@ import com.google.inject.Inject;
  */
 public final class Recorder<T> implements IRecorder<T> {
 
+  // TODO single listener only?
+
+  public static <T> Recorder<T> create(IRecordListener<T> listener) {
+    return withClock(SystemClock.INSTANCE, listener);
+  }
+
   /**
    * Creates a recorder.
    * 
