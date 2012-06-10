@@ -2,3 +2,4 @@
 **/target
 **/.cache
 **/.settings
+**/src/main/generated-sources
