@@ -24,7 +24,7 @@ import org.scalatest.matchers.MustMatchers
 import org.scalatest.FlatSpec
 
 @RunWith(classOf[JUnitRunner])
-class EventSpecBase extends FlatSpec with MustMatchers {
+class EventSpec extends FlatSpec with MustMatchers {
 
   behavior of classOf[Event].getSimpleName
 

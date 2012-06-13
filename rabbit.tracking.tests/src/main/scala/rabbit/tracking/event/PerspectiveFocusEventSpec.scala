@@ -18,7 +18,7 @@ package rabbit.tracking.event
 
 import java.lang.reflect.Modifier
 
-import org.eclipse.ui.{IWorkbenchPart, part}
+import org.eclipse.ui.IPerspectiveDescriptor
 import org.joda.time.Instant.now
 import org.joda.time.Instant
 import org.junit.runner.RunWith
@@ -28,27 +28,23 @@ import org.scalatest.mock.MockitoSugar.mock
 import rabbit.tracking.tests.EqualsSpecBase
 
 @RunWith(classOf[JUnitRunner])
-final class PartFocusEventSpec extends EventSpec with EqualsSpecBase {
+final class PerspectiveFocusEventSpec extends EventSpec with EqualsSpecBase {
 
   behavior of classOf[PartFocusEvent].getSimpleName
 
   it must "be final" in {
-    Modifier.isFinal(classOf[PartFocusEvent].getModifiers) must be(true)
+    Modifier.isFinal(classOf[PerspectiveFocusEvent].getModifiers) must be(true)
   }
 
-  it must "not equal to null" in {
-    create(epoch, part, true).equals(null) must be(false)
-  }
-
-  it must "throw NullPointerException if constructing without a part" in {
+  it must "throw NullPointerException if constructing without a perspective" in {
     intercept[NullPointerException] {
       create(now, null, true)
     }
   }
 
-  it must "return the part" in {
-    val part = mock[IWorkbenchPart]
-    create(part = part).part must be(part)
+  it must "return the perspective" in {
+    val perspective = mock[IPerspectiveDescriptor]
+    create(perspective = perspective).perspective must be(perspective)
   }
 
   it must "return the focus" in {
@@ -56,26 +52,26 @@ final class PartFocusEventSpec extends EventSpec with EqualsSpecBase {
     create(focus = focus).isFocused must be(focus)
   }
 
-  private val part = mock[IWorkbenchPart]
+  private val perspective = mock[IPerspectiveDescriptor]
 
   override protected def differences() = Table(
     ("event a", "event b"),
-    (create(epoch, part, true), create(now, part, true)), // Different instants
-    (create(epoch, part, true), create(epoch, mock[IWorkbenchPart], true)), // Different parts
-    (create(epoch, part, true), create(epoch, part, false)), // Different focuses
-    (create(epoch, part, true), create(now, mock[IWorkbenchPart], false)) // Different all 
+    (create(epoch, perspective, true), create(now, perspective, true)), // Different instants
+    (create(epoch, perspective, true), create(epoch, mock[IPerspectiveDescriptor], true)), // Different perspectives
+    (create(epoch, perspective, true), create(epoch, perspective, false)), // Different focuses
+    (create(epoch, perspective, true), create(now, mock[IPerspectiveDescriptor], false)) // Different all 
     )
 
-  override protected def equalObject() = create(epoch, part, true)
+  override protected def equalObject() = create(epoch, perspective, true)
 
-  override protected def create(instant: Instant) =
-    create(instant, mock[IWorkbenchPart], true)
+  override protected def create(instant: Instant): PerspectiveFocusEvent =
+    create(instant, mock[IPerspectiveDescriptor], true)
 
   private def create(
     instant: Instant = now,
-    part: IWorkbenchPart = mock[IWorkbenchPart],
+    perspective: IPerspectiveDescriptor = mock[IPerspectiveDescriptor],
     focus: Boolean = true) =
-    new PartFocusEvent(instant, part, focus)
+    new PerspectiveFocusEvent(instant, perspective, focus)
 
   private def epoch() = new Instant(0)
 
