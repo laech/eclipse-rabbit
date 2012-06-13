@@ -17,7 +17,6 @@
 package rabbit.tracking.event
 
 import java.lang.reflect.Modifier
-
 import org.eclipse.ui.IWorkbenchPart
 import org.joda.time.Duration.ZERO
 import org.joda.time.Instant.now
@@ -26,50 +25,12 @@ import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar.mock
 import org.scalatest.prop.TableDrivenPropertyChecks
+import rabbit.tracking.tests.EqualsSpecBase
 
 @RunWith(classOf[JUnitRunner])
-final class PartSessionEventSpec extends TimedEventSpecBase with TableDrivenPropertyChecks {
-
-  private val part = mock[IWorkbenchPart]
-
-  private val differences = Table(
-    ("event a", "event b"), //
-    (create(epoch, ZERO, part), create(now, ZERO, part)), // Different instants
-    (create(epoch, ZERO, part), create(epoch, duration(1), part)), // Different durations
-    (create(epoch, ZERO, part), create(epoch, ZERO, mock[IWorkbenchPart])), // Different parts
-    (create(epoch, ZERO, part), create(now, duration(1), mock[IWorkbenchPart])) // Different all
-    )
+final class PartSessionEventSpec extends TimedEventSpec with EqualsSpecBase {
 
   behavior of classOf[PartSessionEvent].getSimpleName
-
-  it must "return same hash code if properties are the same" in {
-    val a = create(epoch, ZERO, part)
-    val b = create(epoch, ZERO, part)
-    a.hashCode must be(b.hashCode)
-  }
-
-  it must "return different hash codes if any properties are different" in {
-    forAll(differences) { (a, b) =>
-      a.hashCode must not be b.hashCode
-    }
-  }
-
-  it must "equal to itself" in {
-    val event = create(epoch, ZERO, part)
-    event must be(event)
-  }
-
-  it must "equal to another event with same properties" in {
-    val a = create(epoch, ZERO, part)
-    val b = create(epoch, ZERO, part)
-    a must be(b)
-  }
-
-  it must "not equal to a different event" in {
-    forAll(differences) { (a, b) =>
-      a must not be b
-    }
-  }
 
   it must "be final" in {
     Modifier.isFinal(classOf[PartSessionEvent].getModifiers) must be(true)
@@ -84,6 +45,18 @@ final class PartSessionEventSpec extends TimedEventSpecBase with TableDrivenProp
   it must "return the part" in {
     create(epoch, ZERO, part).part must be(part)
   }
+
+  private val part = mock[IWorkbenchPart]
+
+  override protected def differences() = Table(
+    ("event a", "event b"), //
+    (create(epoch, ZERO, part), create(now, ZERO, part)), // Different instants
+    (create(epoch, ZERO, part), create(epoch, duration(1), part)), // Different durations
+    (create(epoch, ZERO, part), create(epoch, ZERO, mock[IWorkbenchPart])), // Different parts
+    (create(epoch, ZERO, part), create(now, duration(1), mock[IWorkbenchPart])) // Different all
+    )
+
+  override protected def equalObject() = create(epoch, ZERO, part)
 
   override protected def create(instant: Instant, duration: Duration) =
     create(instant, duration, mock[IWorkbenchPart])

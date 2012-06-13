@@ -23,7 +23,7 @@ import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class TimedEventSpecBase extends EventSpecBase {
+class TimedEventSpec extends EventSpec {
 
   behavior of classOf[TimedEvent].getSimpleName
 
@@ -38,7 +38,7 @@ class TimedEventSpecBase extends EventSpecBase {
     create(now, duration).duration must be(duration)
   }
 
-  override protected final def create(instant: Instant) =
+  override protected final def create(instant: Instant): TimedEvent =
     create(instant, ZERO)
 
   protected def create(instant: Instant, duration: Duration) =
