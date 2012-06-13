@@ -21,11 +21,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import org.joda.time.Duration;
 import org.joda.time.Instant;
 
-import com.google.common.base.Objects;
 import com.google.common.base.Objects.ToStringHelper;
 
 /**
- * An event with duration.
+ * Base class for an event with a duration.
  * <p/>
  * {@link #instant()} returns the start time of this event.
  * 
@@ -54,19 +53,6 @@ public class TimedEvent extends Event {
    */
   public final Duration duration() {
     return duration;
-  }
-
-  @Override public boolean equals(Object obj) {
-    if (obj != null && Objects.equal(getClass(), obj.getClass())) {
-      TimedEvent that = (TimedEvent)obj;
-      return Objects.equal(instant(), that.instant())
-          & Objects.equal(duration(), that.duration());
-    }
-    return false;
-  }
-
-  @Override public int hashCode() {
-    return Objects.hashCode(instant(), duration());
   }
 
   @Override protected ToStringHelper toStringHelper() {
