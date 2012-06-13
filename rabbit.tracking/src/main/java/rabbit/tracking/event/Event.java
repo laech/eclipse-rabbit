@@ -24,7 +24,7 @@ import com.google.common.base.Objects;
 import com.google.common.base.Objects.ToStringHelper;
 
 /**
- * An event happened at a particular time.
+ * Base class for an event happened at a particular time.
  * 
  * @since 2.0
  */
@@ -40,29 +40,6 @@ public class Event {
    */
   public Event(Instant instant) {
     this.instant = checkNotNull(instant, "instant");
-  }
-
-  /**
-   * Compares two events for equality.
-   * <p/>
-   * Two events are only equal if they are of the same <strong>concrete</strong>
-   * type and all properties are equal.
-   * 
-   * @see Object#equals(Object)
-   */
-  @Override public boolean equals(Object obj) {
-    if (obj != null) {
-      return Objects.equal(getClass(), obj.getClass())
-          && Objects.equal(instant(), ((Event)obj).instant());
-    }
-    return false;
-  }
-
-  /**
-   * @see Object#hashCode()
-   */
-  @Override public int hashCode() {
-    return Objects.hashCode(instant());
   }
 
   /**
