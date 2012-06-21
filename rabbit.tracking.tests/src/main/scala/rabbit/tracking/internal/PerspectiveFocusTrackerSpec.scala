@@ -135,13 +135,6 @@ final class PerspectiveFocusTrackerSpec extends AbstractTrackerSpecBase {
     arg.getAllValues.get(0) must be(perspectiveFocusEvent(clock.now, p1, true))
     arg.getAllValues.get(1) must be(perspectiveFocusEvent(clock.now, p1, false))
     arg.getAllValues.get(2) must be(perspectiveFocusEvent(clock.now, p2, true))
-
-    println(arg.getAllValues)
-
-    //    val order = inOrder(eventBus)
-    //    order.verify(eventBus).post(perspectiveFocusEvent(clock.now, p1, false))
-    //    order.verify(eventBus).post(perspectiveFocusEvent(clock.now, p2, true))
-    //    order.verifyNoMoreInteractions
   }
 
   it must "not notify when stopped" in {
