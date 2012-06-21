@@ -241,7 +241,7 @@ final class PartFocusTrackerSpec extends AbstractTrackerSpecBase {
     tracker.start
     val window = openWindow
     val part = openRandomPart(window)
-    verify(bus, atLeast(1)).post(any[PartFocusEvent])
+    verify(bus, atLeast(2)).post(any[PartFocusEvent]) // One for old window, some for new window
   }
 
   behavior of "WorkbenchWindow"
