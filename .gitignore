@@ -3,3 +3,8 @@
 **/.cache
 **/.settings
 **/src/main/generated-sources
+*/**/bin
+*/**/target
+*/**/.cache
+*/**/.settings
+*/**/src/main/generated-sources
