@@ -6,11 +6,16 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>rabbit</groupId>
-    <artifactId>tests</artifactId>
+    <artifactId>rabbit.parent</artifactId>
     <version>2.0.0-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
-  <artifactId>rabbit.workbench.tests.tracking</artifactId>
-  <packaging>eclipse-test-plugin</packaging>
+  <artifactId>tests</artifactId>
+  <packaging>pom</packaging>
+
+  <modules>
+    <module>rabbit.tracking.tests</module>
+    <module>rabbit.workbench.tests.tracking</module>
+  </modules>
 
 </project>

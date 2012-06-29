@@ -27,7 +27,7 @@ import org.scalatest.matchers.MustMatchers
 import org.scalatest.{ FlatSpec, BeforeAndAfter }
 
 import rabbit.tracking.tests.TestImplicits.funToRunnable
-import rabbit.tracking.tests.Workbenches.{ openWindow, openRandomPerspective, openRandomPart }
+import rabbit.tracking.tests.Workbenches.{ closeAllPerspectives, openWindow, openRandomPerspective, openRandomPart }
 
 @RunWith(classOf[JUnitRunner])
 final class WorkbenchesSpec extends FlatSpec with MustMatchers with BeforeAndAfter {
@@ -38,6 +38,8 @@ final class WorkbenchesSpec extends FlatSpec with MustMatchers with BeforeAndAft
   before {
     workbench = getWorkbench
     display = workbench.getDisplay
+    closeAllPerspectives
+    openRandomPerspective
   }
 
   behavior of "Workbenches.getFocusedWindow"
