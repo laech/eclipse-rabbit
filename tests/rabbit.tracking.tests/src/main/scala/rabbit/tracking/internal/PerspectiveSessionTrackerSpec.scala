@@ -37,37 +37,10 @@ import rabbit.tracking.util.IClock
 import rabbit.tracking.AbstractTrackerSpecBase
 
 @RunWith(classOf[JUnitRunner])
-final class PerspectiveSessionTrackerSpec extends AbstractTrackerSpecBase {
+final class PerspectiveSessionTrackerSpec extends AbstractTrackerSpecBase
+  with EventBusTrackerSpecBase {
 
   behavior of classOf[PerspectiveSessionTracker].getSimpleName
-
-  it must "register to the event bus when starting" in {
-    val eventBus = mock[EventBus]
-    val tracker = create(eventBus, clock, workbench)
-    try {
-      tracker.start
-      verify(eventBus, only).register(tracker)
-
-    } finally {
-      tracker.stop
-    }
-  }
-
-  it must "unregister from the event bus when stopping" in {
-    val eventBus = mock[EventBus]
-    val tracker = create(eventBus, clock, workbench)
-    try {
-      tracker.start
-      tracker.stop
-
-      val order = inOrder(eventBus)
-      order.verify(eventBus).unregister(tracker)
-      order.verifyNoMoreInteractions
-
-    } finally {
-      tracker.stop
-    }
-  }
 
   it must "record perspective session duration using events from event bus" in {
     val perspective = mock[IPerspectiveDescriptor]
@@ -175,7 +148,10 @@ final class PerspectiveSessionTrackerSpec extends AbstractTrackerSpecBase {
     closeAllPerspectives
   }
 
-  override protected def create() = create(eventBus, clock, workbench)
+  override protected def create() = create(eventBus)
+
+  override protected def create(eventBus: EventBus) =
+    create(eventBus, clock, workbench)
 
   private def create(eventBus: EventBus, clock: IClock, workbench: IWorkbench) =
     new PerspectiveSessionTracker(eventBus, clock, workbench)
