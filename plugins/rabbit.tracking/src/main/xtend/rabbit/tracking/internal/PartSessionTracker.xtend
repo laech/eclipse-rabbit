@@ -55,18 +55,17 @@ class PartSessionTracker extends AbstractTracker {
 
   override protected onStart() {
     val part = workbench.focusedPart
-    if (part != null) {
+    if (part != null)
       onEvent(new PartFocusEvent(clock.now, part, true))
-    }
+
     eventBus.register(this)
   }
   
   override protected onStop() {
     eventBus.unregister(this)
     val event = startEvent.get
-    if (event != null) {
+    if (event != null)
       onEvent(new PartFocusEvent(clock.now, event.part, false))
-    }
   }
   
   @Subscribe def void onEvent(PartFocusEvent event) {
@@ -76,12 +75,8 @@ class PartSessionTracker extends AbstractTracker {
     }
     
     val start = startEvent.getAndSet(null)
-    if (start == null) {
+    if (start == null || start.part != event.part)
       return
-    }
-    if (start.part != event.part) {
-      return
-    }
     
     val instant = start.instant
     val duration = new Duration(start.instant, event.instant)
