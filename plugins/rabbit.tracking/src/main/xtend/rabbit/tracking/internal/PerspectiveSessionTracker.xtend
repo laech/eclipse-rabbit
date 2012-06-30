@@ -22,29 +22,29 @@ import java.util.concurrent.atomic.AtomicReference
 import org.eclipse.ui.IWorkbench
 import org.joda.time.Duration
 import rabbit.tracking.AbstractTracker
-import rabbit.tracking.event.PartFocusEvent
-import rabbit.tracking.event.PartSessionEvent
+import rabbit.tracking.event.PerspectiveFocusEvent
+import rabbit.tracking.event.PerspectiveSessionEvent
 import rabbit.tracking.util.IClock
 
 import static extension com.google.common.base.Preconditions.*
 import static extension rabbit.tracking.internal.util.Workbenches.*
 
 /**
- * Posts {@link PartSessionEvent}s to an event bus generated base on the 
- * {@link PartFocusEvent}s received from the event bus.  
+ * Publishes {@link PerspectiveSessionEvent}s based on the
+ * {@link PerspectiveFocusEvent}s received from an event bus.
  */
-class PartSessionTracker extends AbstractTracker {
+class PerspectiveSessionTracker extends AbstractTracker {
   
   val EventBus eventBus
   val IWorkbench workbench
   val IClock clock
   
-  val startEvent = new AtomicReference<PartFocusEvent>()
+  val startEvent = new AtomicReference<PerspectiveFocusEvent>()
   
   /**
    * @param eventBus the event bus to listen and publish events
-   * @param clock the clock to get the current time
-   * @param workbench the workbench to track events for
+   * @param clock the clock for getting the current time
+   * @param workbench the workbench to track
    * @throws NullPointerException if any argument is null
    */
   new(EventBus eventBus, IClock clock, IWorkbench workbench) {
@@ -54,37 +54,32 @@ class PartSessionTracker extends AbstractTracker {
   }
 
   override protected onStart() {
-    val part = workbench.focusedPart
-    if (part != null) {
-      onEvent(new PartFocusEvent(clock.now, part, true))
-    }
+    val perspective = workbench.focusedPerspective
+    if (perspective != null)
+      onEvent(new PerspectiveFocusEvent(clock.now, perspective, true))
+      
     eventBus.register(this)
   }
   
   override protected onStop() {
     eventBus.unregister(this)
+    
     val event = startEvent.get
-    if (event != null) {
-      onEvent(new PartFocusEvent(clock.now, event.part, false))
-    }
+    if (event != null)
+      onEvent(new PerspectiveFocusEvent(clock.now, event.perspective, false))
   }
   
-  @Subscribe def void onEvent(PartFocusEvent event) {
+  @Subscribe def void onEvent(PerspectiveFocusEvent event) {
     if (event.focused) {
       startEvent.set(event)
       return
     }
     
     val start = startEvent.getAndSet(null)
-    if (start == null) {
+    if (start == null || start.perspective != event.perspective)
       return
-    }
-    if (start.part != event.part) {
-      return
-    }
     
-    val instant = start.instant
     val duration = new Duration(start.instant, event.instant)
-    eventBus.post(new PartSessionEvent(instant, duration, event.part))
+    eventBus.post(new PerspectiveSessionEvent(start.instant, duration, start.perspective))
   }
 }

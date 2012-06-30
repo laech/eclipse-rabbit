@@ -16,10 +16,11 @@
 
 package rabbit.tracking.internal
 
+import java.lang.System.currentTimeMillis
 import java.lang.Thread.sleep
 
 import org.eclipse.ui.PlatformUI.getWorkbench
-import org.eclipse.ui.{ IWorkbenchPart, IWorkbench }
+import org.eclipse.ui.{ IWorkbench, IPerspectiveDescriptor }
 import org.joda.time.Instant.now
 import org.joda.time.{ Instant, Duration }
 import org.junit.runner.RunWith
@@ -28,17 +29,17 @@ import org.mockito.Mockito.{ verify, only, inOrder }
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar.mock
 
-import com.google.common.eventbus.{ EventBus }
+import com.google.common.eventbus.EventBus
 
-import rabbit.tracking.event.{ PartSessionEvent, PartFocusEvent }
-import rabbit.tracking.tests.Workbenches.{ openRandomPart, closeAllParts }
+import rabbit.tracking.event.{ PerspectiveSessionEvent, PerspectiveFocusEvent }
+import rabbit.tracking.tests.Workbenches.{ openRandomPerspective, closeAllPerspectives }
 import rabbit.tracking.util.IClock
 import rabbit.tracking.AbstractTrackerSpecBase
 
 @RunWith(classOf[JUnitRunner])
-final class PartSessionTrackerSpec extends AbstractTrackerSpecBase {
+final class PerspectiveSessionTrackerSpec extends AbstractTrackerSpecBase {
 
-  behavior of classOf[PartSessionTracker].getSimpleName
+  behavior of classOf[PerspectiveSessionTracker].getSimpleName
 
   it must "register to the event bus when starting" in {
     val eventBus = mock[EventBus]
@@ -68,10 +69,10 @@ final class PartSessionTrackerSpec extends AbstractTrackerSpecBase {
     }
   }
 
-  it must "record part session duration using events from event bus" in {
-    val part = mock[IWorkbenchPart]
-    val start = new PartFocusEvent(new Instant(10), part, true)
-    val end = new PartFocusEvent(new Instant(100), part, false)
+  it must "record perspective session duration using events from event bus" in {
+    val perspective = mock[IPerspectiveDescriptor]
+    val start = new PerspectiveFocusEvent(new Instant(10), perspective, true)
+    val end = new PerspectiveFocusEvent(new Instant(100), perspective, false)
 
     tracker.start
     eventBus.post(start)
@@ -79,61 +80,61 @@ final class PartSessionTrackerSpec extends AbstractTrackerSpecBase {
 
     eventBus.events.size must be(1)
     val event = eventBus.events(0)
-    event.part must be(part)
+    event.perspective must be(perspective)
     event.instant must be(start.instant)
     event.duration must be(new Duration(start.instant, end.instant))
   }
 
-  it must "record part session duration on part switch" in {
-    val helper = new PartFocusTracker(eventBus, clock, workbench)
+  it must "record perspective session duration on perspective switch" in {
+    val helper = new PerspectiveFocusTracker(eventBus, clock, workbench)
     helper.start
     try {
-      tracker.start
 
+      tracker.start
       val start = new Instant(0)
       given(clock.now).willReturn(start)
-      val part = openRandomPart
+      val perspective = openRandomPerspective
 
       sleep(10)
 
       val end = new Instant(100)
       given(clock.now).willReturn(end)
-      openRandomPart
+      openRandomPerspective
 
       eventBus.events.size must be(1)
-      verifyEvent(eventBus.events(0), part, start, end)
+      verifyEvent(eventBus.events(0), perspective, start, end)
 
     } finally {
       helper.stop
     }
   }
 
-  it must "record part session duration on start if there is a focused part" in {
-    val part = openRandomPart
+  it must "record perspective session duration on start if there is a focused perspective" in {
+    val perspective = openRandomPerspective
 
-    val start = new Instant(0)
+    val start = new Instant(1)
     given(clock.now).willReturn(start)
     tracker.start
 
     sleep(10)
 
-    val end = new Instant(100)
+    val end = new Instant(1010)
     given(clock.now).willReturn(end)
     tracker.stop
 
     eventBus.events.size must be(1)
-    verifyEvent(eventBus.events(0), part, start, end)
+    verifyEvent(eventBus.events(0), perspective, start, end)
   }
 
-  it must "record part session duration on stop if there is a session in progress" in {
+  it must "record perspective session duration on stop if there is a session in progress" in {
     tracker.start
-    eventBus.post(new PartFocusEvent(now, mock[IWorkbenchPart], true))
+    eventBus.post(new PerspectiveFocusEvent(now, mock[IPerspectiveDescriptor], true))
     tracker.stop
     eventBus.events.size must be(1)
   }
 
-  it must "record nothing on start if there is no focused part" in {
-    closeAllParts
+  it must "record nothing on start if there is no focused perspective" in {
+    closeAllPerspectives
     tracker.start
     tracker.stop
     eventBus.events must be(Seq.empty)
@@ -157,42 +158,44 @@ final class PartSessionTrackerSpec extends AbstractTrackerSpecBase {
     }
   }
 
-  private var eventBus = mockEventBus
-  private var clock: IClock = _
   private var workbench: IWorkbench = _
+  private var clock: IClock = _
+  private var eventBus = mockEventBus
+
+  override protected type Tracker = PerspectiveSessionTracker
 
   override def beforeEach {
     workbench = getWorkbench
     eventBus = mockEventBus
     clock = mock[IClock]
     given(clock.now).willReturn(now)
-    super.beforeEach
-    closeAllParts
-  }
 
-  override protected type Tracker = PartSessionTracker
+    super.beforeEach
+
+    closeAllPerspectives
+  }
 
   override protected def create() = create(eventBus, clock, workbench)
 
   private def create(eventBus: EventBus, clock: IClock, workbench: IWorkbench) =
-    new PartSessionTracker(eventBus, clock, workbench)
+    new PerspectiveSessionTracker(eventBus, clock, workbench)
 
   private def mockEventBus() = new EventBus {
-    var events = Seq.empty[PartSessionEvent]
+    var events = Seq.empty[PerspectiveSessionEvent]
     override def post(event: Object) {
       super.post(event)
-      if (event.isInstanceOf[PartSessionEvent])
-        events :+= event.asInstanceOf[PartSessionEvent]
+      if (event.isInstanceOf[PerspectiveSessionEvent])
+        events :+= event.asInstanceOf[PerspectiveSessionEvent]
     }
   }
 
   private def verifyEvent(
-    event: PartSessionEvent,
-    part: IWorkbenchPart,
+    event: PerspectiveSessionEvent,
+    perspective: IPerspectiveDescriptor,
     start: Instant,
     end: Instant) {
 
-    event.part must be(part)
+    event.perspective must be(perspective)
     event.instant must be(start)
     event.duration must be(new Duration(start, end))
   }
