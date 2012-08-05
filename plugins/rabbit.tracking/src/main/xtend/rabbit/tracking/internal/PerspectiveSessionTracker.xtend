@@ -19,6 +19,7 @@ package rabbit.tracking.internal
 import com.google.common.eventbus.EventBus
 import com.google.common.eventbus.Subscribe
 import java.util.concurrent.atomic.AtomicReference
+import org.eclipse.ui.IPerspectiveDescriptor
 import org.eclipse.ui.IWorkbench
 import org.joda.time.Duration
 import rabbit.tracking.AbstractTracker
@@ -39,7 +40,7 @@ class PerspectiveSessionTracker extends AbstractTracker {
   val IWorkbench workbench
   val IClock clock
   
-  val startEvent = new AtomicReference<PerspectiveFocusEvent>()
+  val startEventRef = new AtomicReference<PerspectiveFocusEvent>()
   
   /**
    * @param eventBus the event bus to listen and publish events
@@ -54,32 +55,59 @@ class PerspectiveSessionTracker extends AbstractTracker {
   }
 
   override protected onStart() {
-    val perspective = workbench.focusedPerspective
-    if (perspective != null)
-      onEvent(new PerspectiveFocusEvent(clock.now, perspective, true))
-      
+    startSessionIfNotNull(workbench.focusedPerspective)
     eventBus.register(this)
   }
   
   override protected onStop() {
     eventBus.unregister(this)
-    
-    val event = startEvent.get
-    if (event != null)
-      onEvent(new PerspectiveFocusEvent(clock.now, event.perspective, false))
+    stopSessionIfNotNull(startEventRef.get?.perspective)
+  }
+
+  def private startSessionIfNotNull(IPerspectiveDescriptor perspective) {
+    if (perspective != null) handle(focused(perspective))
+  }
+
+  def private stopSessionIfNotNull(IPerspectiveDescriptor perspective) {
+    if (perspective != null) handle(unfocused(perspective))
+  }
+
+  def private focused(IPerspectiveDescriptor perspective) {
+    new PerspectiveFocusEvent(clock.now, perspective, true)
+  }
+
+  def private unfocused(IPerspectiveDescriptor perspective) {
+    new PerspectiveFocusEvent(clock.now, perspective, false)
   }
   
-  @Subscribe def void onEvent(PerspectiveFocusEvent event) {
-    if (event.focused) {
-      startEvent.set(event)
-      return
+  @Subscribe def void handle(PerspectiveFocusEvent event) {
+    if (isSessionStart(event)) handleSessionStart(event) else handleSessionEnd(event)
+  }
+
+  def private isSessionStart(PerspectiveFocusEvent event) {
+    event.focused
+  }
+
+  def private handleSessionStart(PerspectiveFocusEvent startEvent) {
+    startEventRef.set(startEvent)
+  }
+
+  def private handleSessionEnd(PerspectiveFocusEvent endEvent) {
+    val startEvent = startEventRef.getAndSet(null)
+    postNewSessionEventIf(isValidSession(startEvent, endEvent), startEvent, endEvent)
+  }
+
+  def private isValidSession(PerspectiveFocusEvent startEvent, PerspectiveFocusEvent endEvent) {
+    startEvent != null && startEvent.perspective == endEvent.perspective
+  }
+
+  def private postNewSessionEventIf(
+      boolean doIt, PerspectiveFocusEvent startEvent, PerspectiveFocusEvent endEvent) {
+    if (doIt) {
+      val instant = startEvent.instant
+      val duration = new Duration(startEvent.instant, endEvent.instant)
+      val perspective = startEvent.perspective
+      eventBus.post(new PerspectiveSessionEvent(instant, duration, perspective))
     }
-    
-    val start = startEvent.getAndSet(null)
-    if (start == null || start.perspective != event.perspective)
-      return
-    
-    val duration = new Duration(start.instant, event.instant)
-    eventBus.post(new PerspectiveSessionEvent(start.instant, duration, start.perspective))
   }
 }
