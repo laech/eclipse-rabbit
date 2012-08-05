@@ -25,6 +25,7 @@ import rabbit.tracking.AbstractTracker
 import rabbit.tracking.event.PartFocusEvent
 import rabbit.tracking.event.PartSessionEvent
 import rabbit.tracking.util.IClock
+import org.eclipse.ui.IWorkbenchPart
 
 import static extension com.google.common.base.Preconditions.*
 import static extension rabbit.tracking.internal.util.Workbenches.*
@@ -39,7 +40,7 @@ class PartSessionTracker extends AbstractTracker {
   val IWorkbench workbench
   val IClock clock
   
-  val startEvent = new AtomicReference<PartFocusEvent>()
+  val startEventRef = new AtomicReference<PartFocusEvent>()
   
   /**
    * @param eventBus the event bus to listen and publish events
@@ -54,32 +55,57 @@ class PartSessionTracker extends AbstractTracker {
   }
 
   override protected onStart() {
-    val part = workbench.focusedPart
-    if (part != null)
-      onEvent(new PartFocusEvent(clock.now, part, true))
-
+    startSessionIfNotNull(workbench.focusedPart)
     eventBus.register(this)
   }
   
   override protected onStop() {
     eventBus.unregister(this)
-    val event = startEvent.get
-    if (event != null)
-      onEvent(new PartFocusEvent(clock.now, event.part, false))
+    stopSessionIfNotNull(startEventRef.get?.part)
   }
   
-  @Subscribe def void onEvent(PartFocusEvent event) {
-    if (event.focused) {
-      startEvent.set(event)
-      return
+  def private void startSessionIfNotNull(IWorkbenchPart part) {
+    if (part != null) handle(focused(part))
+  }
+  
+  def private void stopSessionIfNotNull(IWorkbenchPart part) {
+    if (part != null) handle(unfocused(part))
+  }
+  
+  def private focused(IWorkbenchPart part) {
+    new PartFocusEvent(clock.now, part, true)
+  }
+  
+  def private unfocused(IWorkbenchPart part) {
+    new PartFocusEvent(clock.now, part, false)
+  }
+  
+  @Subscribe def void handle(PartFocusEvent event) {
+    if (isSessionStart(event)) handleSessionStart(event) else handleSessionEnd(event)
+  }
+  
+  def private isSessionStart(PartFocusEvent event) {
+    event.focused
+  }
+  
+  def private void handleSessionStart(PartFocusEvent startEvent) {
+    startEventRef.set(startEvent)
+  }
+  
+  def private void handleSessionEnd(PartFocusEvent endEvent) {
+    val startEvent = startEventRef.getAndSet(null)
+    postNewSessionEventIf(isValidSession(startEvent, endEvent), startEvent, endEvent)
+  }
+  
+  def private isValidSession(PartFocusEvent startEvent, PartFocusEvent endEvent) {
+    startEvent != null && startEvent.part == endEvent.part
+  }
+  
+  def private postNewSessionEventIf(boolean doIt, PartFocusEvent startEvent, PartFocusEvent endEvent) {
+    if (doIt) {
+      val instant = startEvent.instant
+      val duration = new Duration(startEvent.instant, endEvent.instant)
+      eventBus.post(new PartSessionEvent(instant, duration, endEvent.part))
     }
-    
-    val start = startEvent.getAndSet(null)
-    if (start == null || start.part != event.part)
-      return
-    
-    val instant = start.instant
-    val duration = new Duration(start.instant, event.instant)
-    eventBus.post(new PartSessionEvent(instant, duration, event.part))
   }
 }
