@@ -19,7 +19,7 @@ import com.google.common.collect.ImmutableList
 import com.google.common.eventbus.EventBus
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
-import java.util.concurrent.atomic.AtomicLong
+import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicReference
 import org.eclipse.swt.widgets.Display
 import org.eclipse.swt.widgets.Event
@@ -98,7 +98,7 @@ class UserStateChecker implements Runnable, Listener {
   
   val terminated = new AtomicBoolean
   val userActive = new AtomicBoolean
-  val lastEventNanos = new AtomicLong
+  val lastEventId = new AtomicInteger
   val backgroundThread = new AtomicReference<Thread>
   
   val long timeoutMillis
@@ -138,9 +138,9 @@ class UserStateChecker implements Runnable, Listener {
   }
 
   def private notifyUserIsInactive() {
-    val snapshotTime = getLastUserInputTime
+    val snapshotId = lastEventId.get
     display.asyncExec[ |
-        if (isLastUserInputTime(snapshotTime)) 
+        if (snapshotId == lastEventId.get) 
           eventBus.post(new UserStateEvent(clock.now(), false))
     ]
   }
@@ -167,17 +167,11 @@ class UserStateChecker implements Runnable, Listener {
   override handleEvent(Event event) { responseToUserInput }
 
   def private responseToUserInput() {
-    recordLastUserInputTime
+    lastEventId.incrementAndGet
     notifyUserIsActiveIf(userWasInactive)
     wakeupBackgrondThread
   }
-
-  def private getLastUserInputTime() { lastEventNanos.get }
   
-  def private recordLastUserInputTime() { lastEventNanos.set(System::nanoTime) }
-  
-  def private isLastUserInputTime(long time) { getLastUserInputTime == time }
-
   def private wakeupBackgrondThread() { backgroundThread.get.interrupt }
 
   def private userWasInactive() { !userActive.getAndSet(true) }

@@ -63,7 +63,7 @@ final class UserStateTrackerSpec extends AbstractTrackerSpecBase with Timeouts {
   it must "do nothing after the display has been disposed" in {
     val display = mock[Display]
     given(display.isDisposed).willReturn(true)
-    val tracker = create(display)
+    val tracker = create(display = display)
     try {
       tracker.start
     } catch {
@@ -87,7 +87,7 @@ final class UserStateTrackerSpec extends AbstractTrackerSpecBase with Timeouts {
     val instant = now
     val clock = mock[IClock]
     given(clock.now).willReturn(instant)
-    val tracker = create(clock)
+    val tracker = create(clock = clock)
     try {
       val listener = registerNewListener
       tracker.start
@@ -100,13 +100,13 @@ final class UserStateTrackerSpec extends AbstractTrackerSpecBase with Timeouts {
 
   it must "throw NullPointerException if constructing without a display" in {
     intercept[NullPointerException] {
-      create(null.asInstanceOf[Display])
+      create(display = null)
     }
   }
 
   it must "throw IllegalArgumentException if constructing with a negative timeout" in {
     intercept[IllegalArgumentException] {
-      create(-1)
+      create(timeout = -1)
     }
   }
 
@@ -170,16 +170,14 @@ final class UserStateTrackerSpec extends AbstractTrackerSpecBase with Timeouts {
     display.asyncExec(() => { shell.dispose })
   }
 
-  override protected def create() = create(display)
+  override protected def create() = create(display = display)
 
-  private def create(clock: IClock) =
-    new UserStateTracker(eventBus, clock, display, defaultTimeoutMillis, MILLISECONDS)
-
-  private def create(timeout: Long) =
+  private def create(
+    eventBus: EventBus = eventBus,
+    clock: IClock = clock,
+    display: Display = display,
+    timeout: Long = defaultTimeoutMillis) =
     new UserStateTracker(eventBus, clock, display, timeout, MILLISECONDS)
-
-  private def create(display: Display) =
-    new UserStateTracker(eventBus, clock, display, defaultTimeoutMillis, MILLISECONDS)
 
   private def registerNewListener() = {
     val listener = new CountingListener
