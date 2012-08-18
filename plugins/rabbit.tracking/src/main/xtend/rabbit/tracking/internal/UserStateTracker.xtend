@@ -77,13 +77,17 @@ class UserStateTracker extends AbstractTracker {
 
   def private starthelper() {
     val helper = obtainNewhelper
-    display.asyncExec(| EVENTS.forEach(evt | display.addFilter(evt, helper)))
-    new Thread(helper).start
+    if (!display.disposed) {
+      display.asyncExec(| EVENTS.forEach(evt | display.addFilter(evt, helper)))
+      new Thread(helper).start
+    }
   }
 
   def private stophelper() {
     val helper = helperRef.getAndSet(null)
-    display.asyncExec(| EVENTS.forEach(evt | display.removeFilter(evt, helper)))
+    if (!display.disposed) {
+      display.asyncExec(| EVENTS.forEach(evt | display.removeFilter(evt, helper)))
+    }
     helper.terminate
   }
   
@@ -172,7 +176,7 @@ class UserStateChecker implements Runnable, Listener {
     wakeupBackgrondThread
   }
   
-  def private wakeupBackgrondThread() { backgroundThread.get.interrupt }
+  def private wakeupBackgrondThread() { backgroundThread.get?.interrupt }
 
   def private userWasInactive() { !userActive.getAndSet(true) }
 
