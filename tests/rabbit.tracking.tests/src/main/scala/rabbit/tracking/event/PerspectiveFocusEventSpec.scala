@@ -24,6 +24,7 @@ import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar.mock
 
 import rabbit.tracking.tests.{ FinalSpecBase, EqualsSpecBase }
+import rabbit.tracking.tests.TestUtils.epoch
 
 @RunWith(classOf[JUnitRunner])
 final class PerspectiveFocusEventSpec extends EventSpec with EqualsSpecBase with FinalSpecBase {
@@ -68,7 +69,5 @@ final class PerspectiveFocusEventSpec extends EventSpec with EqualsSpecBase with
     perspective: IPerspectiveDescriptor = mock[IPerspectiveDescriptor],
     focus: Boolean = true) =
     new PerspectiveFocusEvent(instant, perspective, focus)
-
-  private def epoch() = new Instant(0)
 
 }

@@ -24,6 +24,7 @@ import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar.mock
 
 import rabbit.tracking.tests.{ FinalSpecBase, EqualsSpecBase }
+import rabbit.tracking.tests.TestUtils.epoch
 
 @RunWith(classOf[JUnitRunner])
 final class PartFocusEventSpec extends EventSpec with EqualsSpecBase with FinalSpecBase {
@@ -72,7 +73,5 @@ final class PartFocusEventSpec extends EventSpec with EqualsSpecBase with FinalS
     part: IWorkbenchPart = mock[IWorkbenchPart],
     focus: Boolean = true) =
     new PartFocusEvent(instant, part, focus)
-
-  private def epoch() = new Instant(0)
 
 }
