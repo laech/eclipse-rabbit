@@ -16,26 +16,20 @@
 
 package rabbit.tracking.event
 
-import java.lang.reflect.Modifier
-import org.eclipse.ui.IWorkbenchPart
+import org.eclipse.ui.IPerspectiveDescriptor
 import org.joda.time.Duration.ZERO
 import org.joda.time.Instant.now
 import org.joda.time.{ Instant, Duration }
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar.mock
-import org.scalatest.prop.TableDrivenPropertyChecks
-import rabbit.tracking.tests.EqualsSpecBase
-import org.eclipse.ui.IPerspectiveDescriptor
+
+import rabbit.tracking.tests.{ FinalSpecBase, EqualsSpecBase }
 
 @RunWith(classOf[JUnitRunner])
-final class PerspectiveSessionEventSpec extends TimedEventSpec with EqualsSpecBase {
+final class PerspectiveSessionEventSpec extends TimedEventSpec with EqualsSpecBase with FinalSpecBase {
 
-  behavior of classOf[PerspectiveSessionEvent].getSimpleName
-
-  it must "be final" in {
-    Modifier.isFinal(classOf[PartSessionEvent].getModifiers) must be(true)
-  }
+  behavior of clazz.getSimpleName
 
   it must "throw NullPointerException if constructing without a perspective" in {
     intercept[NullPointerException] {
@@ -56,6 +50,8 @@ final class PerspectiveSessionEventSpec extends TimedEventSpec with EqualsSpecBa
     (create(epoch, ZERO, perspective), create(epoch, ZERO, mock[IPerspectiveDescriptor])), // Different perspective
     (create(epoch, ZERO, perspective), create(now, duration(1), mock[IPerspectiveDescriptor])) // Different all
     )
+
+  override protected def clazz = classOf[PerspectiveSessionEvent]
 
   override protected def equalObject() = create(epoch, ZERO, perspective)
 
