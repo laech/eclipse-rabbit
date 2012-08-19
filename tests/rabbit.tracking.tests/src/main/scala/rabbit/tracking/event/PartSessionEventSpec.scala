@@ -25,6 +25,7 @@ import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar.mock
 
 import rabbit.tracking.tests.{ FinalSpecBase, EqualsSpecBase }
+import rabbit.tracking.tests.TestUtils.{ epoch, duration }
 
 @RunWith(classOf[JUnitRunner])
 final class PartSessionEventSpec extends TimedEventSpec with EqualsSpecBase with FinalSpecBase {
@@ -61,7 +62,4 @@ final class PartSessionEventSpec extends TimedEventSpec with EqualsSpecBase with
   private def create(instant: Instant, duration: Duration, part: IWorkbenchPart) =
     new PartSessionEvent(instant, duration, part)
 
-  private def epoch() = new Instant(0)
-
-  private def duration(millis: Long) = new Duration(millis)
 }

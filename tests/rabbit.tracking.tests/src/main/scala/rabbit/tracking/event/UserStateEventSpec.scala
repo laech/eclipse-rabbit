@@ -22,6 +22,7 @@ import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 
 import rabbit.tracking.tests.{ FinalSpecBase, EqualsSpecBase }
+import rabbit.tracking.tests.TestUtils.epoch
 
 @RunWith(classOf[JUnitRunner])
 final class UserStateEventSpec extends EventSpec with EqualsSpecBase with FinalSpecBase {
@@ -53,5 +54,4 @@ final class UserStateEventSpec extends EventSpec with EqualsSpecBase with FinalS
   private def create(instant: Instant = now, userActive: Boolean = true) =
     new UserStateEvent(instant, userActive)
 
-  private def epoch() = new Instant(0)
 }

@@ -17,8 +17,9 @@
 package rabbit.tracking.tests
 
 import java.util.concurrent.CountDownLatch
-
 import rabbit.tracking.tests.TestImplicits.funToRunnable
+import org.joda.time.Instant
+import org.joda.time.Duration
 
 object TestUtils {
 
@@ -50,4 +51,8 @@ object TestUtils {
       throw error
     }
   }
+
+  val epoch = new Instant(0)
+
+  def duration(millis: Long) = new Duration(millis)
 }
