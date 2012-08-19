@@ -16,23 +16,17 @@
 
 package rabbit.tracking.event
 
-import java.lang.reflect.Modifier
-
 import org.joda.time.Instant.now
 import org.joda.time.Instant
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 
-import rabbit.tracking.tests.EqualsSpecBase
+import rabbit.tracking.tests.{ FinalSpecBase, EqualsSpecBase }
 
 @RunWith(classOf[JUnitRunner])
-final class UserStateEventSpec extends EventSpec with EqualsSpecBase {
+final class UserStateEventSpec extends EventSpec with EqualsSpecBase with FinalSpecBase {
 
-  behavior of classOf[UserStateEvent].getSimpleName
-
-  it must "be final" in {
-    Modifier.isFinal(classOf[UserStateEvent].getModifiers) must be(true)
-  }
+  behavior of clazz.getSimpleName
 
   it must "not equal to null" in {
     create(epoch, true).equals(null) must be(false)
@@ -42,6 +36,8 @@ final class UserStateEventSpec extends EventSpec with EqualsSpecBase {
     val active = true
     create(userActive = active).isUserActive must be(active)
   }
+
+  override protected def clazz = classOf[UserStateEvent]
 
   override protected def differences() = Table(
     ("event a", "event b"),

@@ -16,8 +16,6 @@
 
 package rabbit.tracking.event
 
-import java.lang.reflect.Modifier
-
 import org.eclipse.ui.IPerspectiveDescriptor
 import org.joda.time.Instant.now
 import org.joda.time.Instant
@@ -25,16 +23,12 @@ import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar.mock
 
-import rabbit.tracking.tests.EqualsSpecBase
+import rabbit.tracking.tests.{ FinalSpecBase, EqualsSpecBase }
 
 @RunWith(classOf[JUnitRunner])
-final class PerspectiveFocusEventSpec extends EventSpec with EqualsSpecBase {
+final class PerspectiveFocusEventSpec extends EventSpec with EqualsSpecBase with FinalSpecBase {
 
-  behavior of classOf[PartFocusEvent].getSimpleName
-
-  it must "be final" in {
-    Modifier.isFinal(classOf[PerspectiveFocusEvent].getModifiers) must be(true)
-  }
+  behavior of clazz.getSimpleName
 
   it must "throw NullPointerException if constructing without a perspective" in {
     intercept[NullPointerException] {
@@ -61,6 +55,8 @@ final class PerspectiveFocusEventSpec extends EventSpec with EqualsSpecBase {
     (create(epoch, perspective, true), create(epoch, perspective, false)), // Different focuses
     (create(epoch, perspective, true), create(now, mock[IPerspectiveDescriptor], false)) // Different all 
     )
+
+  override protected def clazz = classOf[PartFocusEvent]
 
   override protected def equalObject() = create(epoch, perspective, true)
 

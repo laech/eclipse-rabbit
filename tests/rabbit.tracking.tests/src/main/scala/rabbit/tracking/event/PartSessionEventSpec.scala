@@ -16,7 +16,6 @@
 
 package rabbit.tracking.event
 
-import java.lang.reflect.Modifier
 import org.eclipse.ui.IWorkbenchPart
 import org.joda.time.Duration.ZERO
 import org.joda.time.Instant.now
@@ -24,17 +23,13 @@ import org.joda.time.{ Instant, Duration }
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar.mock
-import org.scalatest.prop.TableDrivenPropertyChecks
-import rabbit.tracking.tests.EqualsSpecBase
+
+import rabbit.tracking.tests.{ FinalSpecBase, EqualsSpecBase }
 
 @RunWith(classOf[JUnitRunner])
-final class PartSessionEventSpec extends TimedEventSpec with EqualsSpecBase {
+final class PartSessionEventSpec extends TimedEventSpec with EqualsSpecBase with FinalSpecBase {
 
-  behavior of classOf[PartSessionEvent].getSimpleName
-
-  it must "be final" in {
-    Modifier.isFinal(classOf[PartSessionEvent].getModifiers) must be(true)
-  }
+  behavior of clazz.getSimpleName
 
   it must "throw NullPointerException if constructing without a part" in {
     intercept[NullPointerException] {
@@ -55,6 +50,8 @@ final class PartSessionEventSpec extends TimedEventSpec with EqualsSpecBase {
     (create(epoch, ZERO, part), create(epoch, ZERO, mock[IWorkbenchPart])), // Different parts
     (create(epoch, ZERO, part), create(now, duration(1), mock[IWorkbenchPart])) // Different all
     )
+
+  override protected def clazz = classOf[PartSessionEvent]
 
   override protected def equalObject() = create(epoch, ZERO, part)
 

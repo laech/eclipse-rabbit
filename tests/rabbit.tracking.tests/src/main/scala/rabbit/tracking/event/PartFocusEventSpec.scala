@@ -16,25 +16,19 @@
 
 package rabbit.tracking.event
 
-import java.lang.reflect.Modifier
-
-import org.eclipse.ui.{IWorkbenchPart, part}
+import org.eclipse.ui.IWorkbenchPart
 import org.joda.time.Instant.now
 import org.joda.time.Instant
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.mock.MockitoSugar.mock
 
-import rabbit.tracking.tests.EqualsSpecBase
+import rabbit.tracking.tests.{ FinalSpecBase, EqualsSpecBase }
 
 @RunWith(classOf[JUnitRunner])
-final class PartFocusEventSpec extends EventSpec with EqualsSpecBase {
+final class PartFocusEventSpec extends EventSpec with EqualsSpecBase with FinalSpecBase {
 
-  behavior of classOf[PartFocusEvent].getSimpleName
-
-  it must "be final" in {
-    Modifier.isFinal(classOf[PartFocusEvent].getModifiers) must be(true)
-  }
+  behavior of clazz.getSimpleName
 
   it must "not equal to null" in {
     create(epoch, part, true).equals(null) must be(false)
@@ -65,6 +59,8 @@ final class PartFocusEventSpec extends EventSpec with EqualsSpecBase {
     (create(epoch, part, true), create(epoch, part, false)), // Different focuses
     (create(epoch, part, true), create(now, mock[IWorkbenchPart], false)) // Different all 
     )
+
+  override protected def clazz = classOf[PartFocusEvent]
 
   override protected def equalObject() = create(epoch, part, true)
 
