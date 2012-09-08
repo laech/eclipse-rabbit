@@ -34,20 +34,65 @@ import org.eclipse.ui.IWorkbenchWindow;
 public final class Workbenches {
 
   /**
+   * Gets all the {@link IPartService}s from the currently opened windows.
+   * 
+   * @param workbench the workbench to get all the part service for
+   * @return a set of all {@link IPartService}s, not null, may be empty,
+   *         unmodifiable
+   * @throws NullPointerException if workbench is null
+   */
+  public static Set<IPartService> allPartServicesOf(IWorkbench workbench) {
+    IWorkbenchWindow[] windows = assertNotNull(workbench).getWorkbenchWindows();
+    Set<IPartService> services = newHashSetWithExpectedSize(windows.length);
+    for (IWorkbenchWindow window : windows)
+      services.add(window.getPartService());
+
+    return unmodifiableSet(services);
+  }
+
+  /**
+   * Gets the current workbench part in focus.
+   * 
+   * @param workbench the workbench to get the focused part for
+   * @return the currently focused workbench part, or null if none
+   * @throws NullPointerException if workbench is null
+   */
+  public static IWorkbenchPart focusedPartOf(IWorkbench workbench) {
+    IWorkbenchWindow window = focusedWindowOf(assertNotNull(workbench));
+    return window != null ? window.getPartService().getActivePart() : null;
+  }
+
+  /**
+   * Gets the current perspective in focus.
+   * 
+   * @param workbench the workbench to get the focused perspective for
+   * @return the current focused perspective, or null if none
+   * @throws NullPointerException if workbench is null
+   */
+  public static IPerspectiveDescriptor focusedPerspectiveOf(IWorkbench workbench) {
+    IWorkbenchWindow window = focusedWindowOf(workbench);
+    if (window == null)
+      return null;
+
+    IWorkbenchPage page = window.getActivePage();
+    return page == null ? null : page.getPerspective();
+  }
+
+  /**
    * Gets the current workbench window in focus.
    * 
    * @param workbench the workbench to get the focused window for
    * @return the currently focused window, or null if none
    * @throws NullPointerException if workbench is null
    */
-  public static IWorkbenchWindow getFocusedWindow(final IWorkbench workbench) {
-    check(workbench);
+  public static IWorkbenchWindow focusedWindowOf(final IWorkbench workbench) {
+    assertNotNull(workbench);
 
-    if (Display.getCurrent() != null) {
+    if (currentThreadIsUiThread()) {
       IWorkbenchWindow window = workbench.getActiveWorkbenchWindow();
-      if (window == null) {
+      if (window == null)
         return null;
-      }
+
       return isFocused(window) ? window : null;
     }
 
@@ -63,60 +108,18 @@ public final class Workbenches {
     return result[0];
   }
 
-  /**
-   * Gets the current workbench part in focus.
-   * 
-   * @param workbench the workbench to get the focused part for
-   * @return the currently focused workbench part, or null if none
-   * @throws NullPointerException if workbench is null
-   */
-  public static IWorkbenchPart getFocusedPart(IWorkbench workbench) {
-    IWorkbenchWindow window = getFocusedWindow(check(workbench));
-    return window != null ? window.getPartService().getActivePart() : null;
+  private static IWorkbench assertNotNull(IWorkbench workbench) {
+    return checkNotNull(workbench, "workbench");
   }
 
-  /**
-   * Gets the current perspective in focus.
-   * 
-   * @param workbench the workbench to get the focused perspective for
-   * @return the current focused perspective, or null if none
-   * @throws NullPointerException if workbench is null
-   */
-  public static IPerspectiveDescriptor getFocusedPerspective(
-      IWorkbench workbench) {
-    IWorkbenchWindow window = getFocusedWindow(workbench);
-    if (window == null) {
-      return null;
-    }
-    IWorkbenchPage page = window.getActivePage();
-    return page == null ? null : page.getPerspective();
-  }
-
-  /**
-   * Gets all the {@link IPartService}s from the currently opened windows.
-   * 
-   * @param workbench the workbench to get all the part service for
-   * @return a set of all {@link IPartService}s, not null, may be empty,
-   *         unmodifiable
-   * @throws NullPointerException if workbench is null
-   */
-  public static Set<IPartService> getPartServices(IWorkbench workbench) {
-    IWorkbenchWindow[] windows = check(workbench).getWorkbenchWindows();
-    Set<IPartService> services = newHashSetWithExpectedSize(windows.length);
-    for (IWorkbenchWindow window : windows) {
-      services.add(window.getPartService());
-    }
-    return unmodifiableSet(services);
+  private static boolean currentThreadIsUiThread() {
+    return Display.getCurrent() != null;
   }
 
   private static boolean isFocused(IWorkbenchWindow window) {
     Shell shell = window.getShell();
     return shell.getDisplay().getActiveShell() == shell
         && !shell.getMinimized();
-  }
-
-  private static IWorkbench check(IWorkbench workbench) {
-    return checkNotNull(workbench, "workbench");
   }
 
   private Workbenches() {

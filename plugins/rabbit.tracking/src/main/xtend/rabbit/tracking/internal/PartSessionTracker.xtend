@@ -55,7 +55,7 @@ class PartSessionTracker extends AbstractTracker {
   }
 
   override protected onStart() {
-    startSessionIfNotNull(workbench.focusedPart)
+    startSessionIfNotNull(workbench.focusedPartOf)
     eventBus.register(this)
   }
   

@@ -50,12 +50,12 @@ class PartFocusTracker extends AbstractTracker
   
   override protected onStart() {
     workbench.addWindowListener(this)
-    workbench.partServices.forEach[addPartListener(this)]
+    workbench.allPartServicesOf.forEach[addPartListener(this)]
   }
   
   override protected onStop() {
     workbench.removeWindowListener(this)
-    workbench.partServices.forEach[removePartListener(this)]
+    workbench.allPartServicesOf.forEach[removePartListener(this)]
   }
   
   def private onFocused(IWorkbenchPart part) {
@@ -87,13 +87,13 @@ class PartFocusTracker extends AbstractTracker
   // IPartListener methods:
 
   override partActivated(IWorkbenchPart part) {
-    if (part.site.workbenchWindow == workbench.focusedWindow) {
+    if (part.site.workbenchWindow == workbench.focusedWindowOf) {
       part.onFocused
     }
   }
   
   override partDeactivated(IWorkbenchPart part) {
-    if (part.site.workbenchWindow == workbench.focusedWindow) {
+    if (part.site.workbenchWindow == workbench.focusedWindowOf) {
       part.onUnfocused
     }
   }
