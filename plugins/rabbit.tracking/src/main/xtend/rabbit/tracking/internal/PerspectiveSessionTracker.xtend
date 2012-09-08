@@ -55,7 +55,7 @@ class PerspectiveSessionTracker extends AbstractTracker {
   }
 
   override protected onStart() {
-    startSessionIfNotNull(workbench.focusedPerspective)
+    startSessionIfNotNull(workbench.focusedPerspectiveOf)
     eventBus.register(this)
   }
   

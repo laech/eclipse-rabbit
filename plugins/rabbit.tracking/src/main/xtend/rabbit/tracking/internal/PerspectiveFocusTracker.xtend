@@ -26,11 +26,11 @@ import org.eclipse.ui.IWorkbenchPartReference
 import org.eclipse.ui.IWorkbenchWindow
 import rabbit.tracking.AbstractTracker
 import rabbit.tracking.event.PerspectiveFocusEvent
+import rabbit.tracking.util.IClock
 
 import static extension com.google.common.base.Preconditions.*
 import static extension rabbit.tracking.internal.PerspectiveFocusTracker.*
 import static extension rabbit.tracking.internal.util.Workbenches.*
-import rabbit.tracking.util.IClock
 
 /**
  * Tracks {@link PerspectiveFocusEvent}.
@@ -97,17 +97,17 @@ class PerspectiveFocusTracker extends AbstractTracker
   // Perspective listener methods:
   
   override perspectiveActivated(IWorkbenchPage page, IPerspectiveDescriptor perspective) {
-    if (page.workbenchWindow == workbench.focusedWindow)
+    if (page.workbenchWindow == workbench.focusedWindowOf)
       perspective.onFocused
   }
   
   override perspectiveDeactivated(IWorkbenchPage page, IPerspectiveDescriptor perspective) {
-    if (page.workbenchWindow == workbench.focusedWindow)
+    if (page.workbenchWindow == workbench.focusedWindowOf)
       perspective.onUnfocused
   }
 
   override perspectiveClosed(IWorkbenchPage page, IPerspectiveDescriptor perspective) {
-    if (page.workbenchWindow == workbench.focusedWindow
+    if (page.workbenchWindow == workbench.focusedWindowOf
         && page.perspective == perspective)
       perspective.onUnfocused
   }
