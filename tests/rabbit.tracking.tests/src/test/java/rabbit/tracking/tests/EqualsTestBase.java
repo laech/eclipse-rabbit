@@ -21,45 +21,43 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 
 import org.junit.Test;
-import org.junit.runners.Parameterized;
 
 public abstract class EqualsTestBase {
 
-  private final Object b;
-  private final Object a1;
-  private final Object a2;
+  private final Object a;
+  private final Object objectEqualToA;
+  private final Object objectNotEqualToA;
 
-  /**
-   * a1 is equal to a2, b is different than a1 and a2, this constructor is
-   * designed to used with {@link Parameterized} tests.
-   */
-  public EqualsTestBase(Object a1, Object a2, Object b) {
-    this.a1 = a1;
-    this.a2 = a2;
-    this.b = b;
-  }
-
-  @Test public void sameHashCodeIfPropertiesAreSame() {
-    assertThat(a1.hashCode(), is(a2.hashCode()));
+  public EqualsTestBase(
+      Object a,
+      Object objectEqualToA,
+      Object objectNotEqualToA) {
+    this.a = a;
+    this.objectEqualToA = objectEqualToA;
+    this.objectNotEqualToA = objectNotEqualToA;
   }
 
   @Test public void differentHashCodeIfPropertiesAreDifferent() {
-    assertThat(a1.hashCode(), is(not(b.hashCode())));
-  }
-
-  @Test public void equalsToSelf() {
-    assertThat(a1.equals(a1), is(true));
+    assertThat(a.hashCode(), is(not(objectNotEqualToA.hashCode())));
   }
 
   @Test public void equalsToAnotherObjectWithSameProperties() {
-    assertThat(a1.equals(a2), is(true));
+    assertThat(a.equals(objectEqualToA), is(true));
+  }
+
+  @Test public void equalsToSelf() {
+    assertThat(a.equals(a), is(true));
   }
 
   @Test public void notEqualToDifferentObject() throws Exception {
-    assertThat(a1.equals(b), is(false));
+    assertThat(a.equals(objectNotEqualToA), is(false));
   }
 
   @Test public void notEqualToNull() throws Exception {
-    assertThat(a1.equals(null), is(false));
+    assertThat(a.equals(null), is(false));
+  }
+
+  @Test public void sameHashCodeIfPropertiesAreSame() {
+    assertThat(a.hashCode(), is(objectEqualToA.hashCode()));
   }
 }

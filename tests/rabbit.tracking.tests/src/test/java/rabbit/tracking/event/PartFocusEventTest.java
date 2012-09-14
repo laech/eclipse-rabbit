@@ -27,33 +27,33 @@ import org.junit.Test;
 
 public final class PartFocusEventTest extends EventTest {
 
-  static PartFocusEvent create(Instant instant) {
-    return create(instant, mock(IWorkbenchPart.class), false);
+  static PartFocusEvent eventWith(Instant instant) {
+    return eventWith(instant, mock(IWorkbenchPart.class), false);
   }
 
-  static PartFocusEvent create(IWorkbenchPart part) {
-    return create(now(), part, false);
+  static PartFocusEvent eventWith(IWorkbenchPart part) {
+    return eventWith(now(), part, false);
   }
 
-  static PartFocusEvent create(boolean focused) {
-    return create(now(), mock(IWorkbenchPart.class), focused);
+  static PartFocusEvent eventWith(boolean focused) {
+    return eventWith(now(), mock(IWorkbenchPart.class), focused);
   }
 
-  static PartFocusEvent create(
+  static PartFocusEvent eventWith(
       Instant instant, IWorkbenchPart part, boolean focused) {
     return new PartFocusEvent(instant, part, focused);
   }
 
   @Test public void returnsThePart() {
     IWorkbenchPart part = mock(IWorkbenchPart.class);
-    assertThat(create(part).part(), is(part));
+    assertThat(eventWith(part).part(), is(part));
   }
 
   @Test public void returnsTheFocus() {
-    assertThat(create(true).isFocused(), is(true));
+    assertThat(eventWith(true).isFocused(), is(true));
   }
 
   @Override protected PartFocusEvent newEvent(Instant instant) {
-    return create(instant);
+    return eventWith(instant);
   }
 }

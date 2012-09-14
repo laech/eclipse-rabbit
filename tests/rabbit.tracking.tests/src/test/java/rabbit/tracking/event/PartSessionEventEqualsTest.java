@@ -21,7 +21,7 @@ import static org.joda.time.Duration.ZERO;
 import static org.joda.time.Duration.millis;
 import static org.joda.time.Instant.now;
 import static org.mockito.Mockito.mock;
-import static rabbit.tracking.event.PartSessionEventTest.create;
+import static rabbit.tracking.event.PartSessionEventTest.eventWith;
 import static rabbit.tracking.tests.Instants.epoch;
 
 import java.util.List;
@@ -41,21 +41,21 @@ public final class PartSessionEventEqualsTest extends EqualsTestBase {
   @Parameters public static List<Object[]> data() {
     return asList(new Object[][]{
         {
-            create(epoch(), ZERO, PART),
-            create(epoch(), ZERO, PART),
-            create(now(), ZERO, PART)},
+            eventWith(epoch(), ZERO, PART),
+            eventWith(epoch(), ZERO, PART),
+            eventWith(now(), ZERO, PART)},
         {
-            create(epoch(), ZERO, PART),
-            create(epoch(), ZERO, PART),
-            create(epoch(), millis(1), PART)},
+            eventWith(epoch(), ZERO, PART),
+            eventWith(epoch(), ZERO, PART),
+            eventWith(epoch(), millis(1), PART)},
         {
-            create(epoch(), ZERO, PART),
-            create(epoch(), ZERO, PART),
-            create(epoch(), ZERO, mock(IWorkbenchPart.class))},
+            eventWith(epoch(), ZERO, PART),
+            eventWith(epoch(), ZERO, PART),
+            eventWith(epoch(), ZERO, mock(IWorkbenchPart.class))},
         {
-            create(epoch(), ZERO, PART),
-            create(epoch(), ZERO, PART),
-            create(now(), millis(1), mock(IWorkbenchPart.class))},
+            eventWith(epoch(), ZERO, PART),
+            eventWith(epoch(), ZERO, PART),
+            eventWith(now(), millis(1), mock(IWorkbenchPart.class))},
 
     });
   }

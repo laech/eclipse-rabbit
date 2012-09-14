@@ -25,23 +25,23 @@ import org.junit.Test;
 
 public final class UserStateEventTest extends EventTest {
 
-  static UserStateEvent create(Instant instant) {
-    return create(instant, false);
+  static UserStateEvent eventWith(Instant instant) {
+    return eventWith(instant, false);
   }
 
-  static UserStateEvent create(boolean userActive) {
-    return create(now(), userActive);
+  static UserStateEvent eventWith(boolean userActive) {
+    return eventWith(now(), userActive);
   }
 
-  static UserStateEvent create(Instant instant, boolean userActive) {
+  static UserStateEvent eventWith(Instant instant, boolean userActive) {
     return new UserStateEvent(instant, userActive);
   }
 
   @Test public void returnsTheUserState() {
-    assertThat(create(true).isUserActive(), is(true));
+    assertThat(eventWith(true).isUserActive(), is(true));
   }
 
   @Override protected UserStateEvent newEvent(Instant instant) {
-    return create(instant, false);
+    return eventWith(instant, false);
   }
 }
