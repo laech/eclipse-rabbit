@@ -184,7 +184,7 @@ public final class TestWorkbenches {
     return window.getActivePage().getPerspective();
   }
 
-  private static IWorkbenchWindow currentWindow() {
+  public static IWorkbenchWindow currentWindow() {
     final IWorkbenchWindow[] window = new IWorkbenchWindow[1];
     syncExec(new Runnable() {
       @Override public void run() {
