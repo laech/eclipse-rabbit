@@ -18,7 +18,7 @@ package rabbit.tracking.event;
 
 import static java.util.Arrays.asList;
 import static org.joda.time.Instant.now;
-import static rabbit.tracking.event.UserStateEventTest.create;
+import static rabbit.tracking.event.UserStateEventTest.eventWith;
 import static rabbit.tracking.tests.Instants.epoch;
 
 import java.util.List;
@@ -35,17 +35,17 @@ public final class UserStateEventEqualsTest extends EqualsTestBase {
   @Parameters public static List<Object[]> data() {
     return asList(new Object[][]{
         {
-            create(epoch()),
-            create(epoch()),
-            create(now())},
+            eventWith(epoch()),
+            eventWith(epoch()),
+            eventWith(now())},
         {
-            create(true),
-            create(true),
-            create(false)},
+            eventWith(true),
+            eventWith(true),
+            eventWith(false)},
         {
-            create(epoch(), true),
-            create(epoch(), true),
-            create(now(), false)},
+            eventWith(epoch(), true),
+            eventWith(epoch(), true),
+            eventWith(now(), false)},
     });
   }
 

@@ -29,31 +29,31 @@ import org.junit.Test;
 
 public final class PartSessionEventTest extends TimedEventTest {
 
-  static PartSessionEvent create(Instant instant) {
+  static PartSessionEvent eventWith(Instant instant) {
     return new PartSessionEvent(instant, ZERO, mock(IWorkbenchPart.class));
   }
 
-  static PartSessionEvent create(Duration duration) {
+  static PartSessionEvent eventWith(Duration duration) {
     return new PartSessionEvent(now(), duration, mock(IWorkbenchPart.class));
   }
 
-  static PartSessionEvent create(IWorkbenchPart part) {
+  static PartSessionEvent eventWith(IWorkbenchPart part) {
     return new PartSessionEvent(now(), ZERO, part);
   }
 
-  static PartSessionEvent create(
+  static PartSessionEvent eventWith(
       Instant instant, Duration duration, IWorkbenchPart part) {
     return new PartSessionEvent(instant, duration, part);
   }
 
   @Test(expected = NullPointerException.class)//
   public void throwsNpeOnConstructWithoutPart() {
-    create(now(), ZERO, null);
+    eventWith(now(), ZERO, null);
   }
 
   @Test public void returnsThePart() {
     IWorkbenchPart part = mock(IWorkbenchPart.class);
-    assertThat(create(part).part(), is(part));
+    assertThat(eventWith(part).part(), is(part));
   }
 
   @Override protected TimedEvent newEvent(Instant instant, Duration duration) {

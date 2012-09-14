@@ -19,7 +19,7 @@ package rabbit.tracking.event;
 import static java.util.Arrays.asList;
 import static org.joda.time.Instant.now;
 import static org.mockito.Mockito.mock;
-import static rabbit.tracking.event.PartFocusEventTest.create;
+import static rabbit.tracking.event.PartFocusEventTest.eventWith;
 import static rabbit.tracking.tests.Instants.epoch;
 
 import java.util.List;
@@ -41,21 +41,21 @@ public final class PartFocusEventEqualsTest extends EqualsTestBase {
   @Parameters public static List<Object[]> data() {
     return asList(new Object[][]{
         {
-            create(epoch(), PART, true),
-            create(epoch(), PART, true),
-            create(now(), PART, true)},
+            eventWith(epoch(), PART, true),
+            eventWith(epoch(), PART, true),
+            eventWith(now(), PART, true)},
         {
-            create(epoch(), PART, true),
-            create(epoch(), PART, true),
-            create(epoch(), newPart(), true)},
+            eventWith(epoch(), PART, true),
+            eventWith(epoch(), PART, true),
+            eventWith(epoch(), newPart(), true)},
         {
-            create(epoch(), PART, true),
-            create(epoch(), PART, true),
-            create(epoch(), PART, false)},
+            eventWith(epoch(), PART, true),
+            eventWith(epoch(), PART, true),
+            eventWith(epoch(), PART, false)},
         {
-            create(TIME, PART, true),
-            create(TIME, PART, true),
-            create(epoch(), newPart(), false)},
+            eventWith(TIME, PART, true),
+            eventWith(TIME, PART, true),
+            eventWith(epoch(), newPart(), false)},
     });
   }
 

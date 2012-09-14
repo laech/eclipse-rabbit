@@ -27,43 +27,43 @@ import org.junit.Test;
 
 public final class PerspectiveFocusEventTest extends EventTest {
 
-  static IPerspectiveDescriptor newPerspective() {
+  static IPerspectiveDescriptor mockPerspective() {
     return mock(IPerspectiveDescriptor.class);
   }
 
-  static PerspectiveFocusEvent create(Instant instant) {
-    return create(instant, newPerspective(), false);
+  static PerspectiveFocusEvent eventWith(Instant instant) {
+    return eventWith(instant, mockPerspective(), false);
   }
 
-  static PerspectiveFocusEvent create(IPerspectiveDescriptor perspective) {
-    return create(now(), perspective, false);
+  static PerspectiveFocusEvent eventWith(IPerspectiveDescriptor perspective) {
+    return eventWith(now(), perspective, false);
   }
 
-  static PerspectiveFocusEvent create(boolean focused) {
-    return create(now(), newPerspective(), focused);
+  static PerspectiveFocusEvent eventWith(boolean focused) {
+    return eventWith(now(), mockPerspective(), focused);
   }
 
-  static PerspectiveFocusEvent create(
+  static PerspectiveFocusEvent eventWith(
       Instant instant, IPerspectiveDescriptor perspective, boolean focused) {
     return new PerspectiveFocusEvent(instant, perspective, focused);
   }
 
   @Test(expected = NullPointerException.class)//
   public void throwsNpeOnConstructWithoutPerspective() {
-    create(now(), null, false);
+    eventWith(now(), null, false);
   }
 
   @Test public void returnsThePerspective() {
-    IPerspectiveDescriptor p = newPerspective();
-    assertThat(create(p).perspective(), is(p));
+    IPerspectiveDescriptor p = mockPerspective();
+    assertThat(eventWith(p).perspective(), is(p));
   }
 
   @Test public void returnsTheFocus() {
-    assertThat(create(true).isFocused(), is(true));
+    assertThat(eventWith(true).isFocused(), is(true));
   }
 
   @Override protected PerspectiveFocusEvent newEvent(Instant instant) {
     return new PerspectiveFocusEvent(
-        instant, newPerspective(), false);
+        instant, mockPerspective(), false);
   }
 }

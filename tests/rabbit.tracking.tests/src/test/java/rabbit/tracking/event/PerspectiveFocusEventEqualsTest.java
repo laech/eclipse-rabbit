@@ -18,8 +18,8 @@ package rabbit.tracking.event;
 
 import static java.util.Arrays.asList;
 import static org.joda.time.Instant.now;
-import static rabbit.tracking.event.PerspectiveFocusEventTest.create;
-import static rabbit.tracking.event.PerspectiveFocusEventTest.newPerspective;
+import static rabbit.tracking.event.PerspectiveFocusEventTest.eventWith;
+import static rabbit.tracking.event.PerspectiveFocusEventTest.mockPerspective;
 import static rabbit.tracking.tests.Instants.epoch;
 
 import java.util.List;
@@ -34,29 +34,29 @@ import rabbit.tracking.tests.EqualsTestBase;
 @RunWith(Parameterized.class)
 public final class PerspectiveFocusEventEqualsTest extends EqualsTestBase {
 
-  private static final IPerspectiveDescriptor PERSPECTIVE = newPerspective();
+  private static final IPerspectiveDescriptor PERSPECTIVE = mockPerspective();
 
   @Parameters public static List<Object[]> data() {
     return asList(new Object[][]{
         {
 
-            create(epoch(), PERSPECTIVE, true),
-            create(epoch(), PERSPECTIVE, true),
-            create(now(), PERSPECTIVE, true)},
+            eventWith(epoch(), PERSPECTIVE, true),
+            eventWith(epoch(), PERSPECTIVE, true),
+            eventWith(now(), PERSPECTIVE, true)},
         {
 
-            create(epoch(), PERSPECTIVE, true),
-            create(epoch(), PERSPECTIVE, true),
-            create(epoch(), newPerspective(), true)},
+            eventWith(epoch(), PERSPECTIVE, true),
+            eventWith(epoch(), PERSPECTIVE, true),
+            eventWith(epoch(), mockPerspective(), true)},
         {
 
-            create(epoch(), PERSPECTIVE, true),
-            create(epoch(), PERSPECTIVE, true),
-            create(epoch(), PERSPECTIVE, false)},
+            eventWith(epoch(), PERSPECTIVE, true),
+            eventWith(epoch(), PERSPECTIVE, true),
+            eventWith(epoch(), PERSPECTIVE, false)},
         {
-            create(epoch(), PERSPECTIVE, true),
-            create(epoch(), PERSPECTIVE, true),
-            create(now(), newPerspective(), false)},
+            eventWith(epoch(), PERSPECTIVE, true),
+            eventWith(epoch(), PERSPECTIVE, true),
+            eventWith(now(), mockPerspective(), false)},
     });
   }
 

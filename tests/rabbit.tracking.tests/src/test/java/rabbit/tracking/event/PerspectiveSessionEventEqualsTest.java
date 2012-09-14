@@ -20,7 +20,7 @@ import static java.util.Arrays.asList;
 import static org.joda.time.Duration.ZERO;
 import static org.joda.time.Duration.millis;
 import static org.joda.time.Instant.now;
-import static rabbit.tracking.event.PerspectiveSessionEventTest.create;
+import static rabbit.tracking.event.PerspectiveSessionEventTest.eventWith;
 import static rabbit.tracking.event.PerspectiveSessionEventTest.newPerspective;
 import static rabbit.tracking.tests.Instants.epoch;
 
@@ -41,21 +41,21 @@ public final class PerspectiveSessionEventEqualsTest extends EqualsTestBase {
   @Parameters public static List<Object[]> data() {
     return asList(new Object[][]{
         {
-            create(epoch(), ZERO, PERSPECTIVE),
-            create(epoch(), ZERO, PERSPECTIVE),
-            create(now(), ZERO, PERSPECTIVE)},
+            eventWith(epoch(), ZERO, PERSPECTIVE),
+            eventWith(epoch(), ZERO, PERSPECTIVE),
+            eventWith(now(), ZERO, PERSPECTIVE)},
         {
-            create(epoch(), ZERO, PERSPECTIVE),
-            create(epoch(), ZERO, PERSPECTIVE),
-            create(epoch(), millis(1), PERSPECTIVE)},
+            eventWith(epoch(), ZERO, PERSPECTIVE),
+            eventWith(epoch(), ZERO, PERSPECTIVE),
+            eventWith(epoch(), millis(1), PERSPECTIVE)},
         {
-            create(epoch(), ZERO, PERSPECTIVE),
-            create(epoch(), ZERO, PERSPECTIVE),
-            create(epoch(), ZERO, newPerspective())},
+            eventWith(epoch(), ZERO, PERSPECTIVE),
+            eventWith(epoch(), ZERO, PERSPECTIVE),
+            eventWith(epoch(), ZERO, newPerspective())},
         {
-            create(epoch(), ZERO, PERSPECTIVE),
-            create(epoch(), ZERO, PERSPECTIVE),
-            create(now(), millis(1), newPerspective())},
+            eventWith(epoch(), ZERO, PERSPECTIVE),
+            eventWith(epoch(), ZERO, PERSPECTIVE),
+            eventWith(now(), millis(1), newPerspective())},
     });
   }
 
