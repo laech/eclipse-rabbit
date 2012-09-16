@@ -64,6 +64,33 @@ public final class PerspectiveSessionTrackerTest
     openRandomPerspectiveOnCurrentWindow();
   }
 
+  @Test public void cleansStateOnSessionEnd() {
+    IPerspectiveDescriptor perspective = mockPerspective();
+    PerspectiveFocusEvent start = event(new Instant(10), perspective, focus());
+    PerspectiveFocusEvent stop = event(new Instant(100), perspective, unfocus());
+
+    tracker().start();
+    bus.post(start);
+    bus.post(stop);
+    tracker().stop();
+    tracker().stop();
+    tracker().stop();
+
+    assertThat(bus.sessions.size(), is(1));
+  }
+
+  @Test public void cleansStateOnStop() {
+    openRandomPerspectiveOnCurrentWindow();
+    tracker().start();
+    tracker().stop();
+
+    closePerspectivesOfCurrentWindow();
+    tracker().start();
+    tracker().stop();
+
+    assertThat(bus.sessions.size(), is(1));
+  }
+
   @Test public void recordsNothingOnStartIfFocusPerspectiveAbsent() {
     closePerspectivesOfCurrentWindow();
     tracker().start();

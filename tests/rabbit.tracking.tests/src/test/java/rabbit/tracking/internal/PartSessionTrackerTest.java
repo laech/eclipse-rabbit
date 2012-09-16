@@ -61,6 +61,33 @@ public final class PartSessionTrackerTest
   private IClock clock;
   private IWorkbench workbench;
 
+  @Test public void cleansStateOnSessionEnd() {
+    IWorkbenchPart part = mockPart();
+    PartFocusEvent start = event(new Instant(10), part, focused());
+    PartFocusEvent end = event(new Instant(100), part, unfocused());
+
+    tracker().start();
+    bus.post(start);
+    bus.post(end);
+    tracker().stop();
+    tracker().stop();
+    tracker().stop();
+
+    assertThat(bus.sessions.size(), is(1));
+  }
+
+  @Test public void cleansStateOnStop() {
+    openRandomPartOnCurrentWindow();
+    tracker().start();
+    tracker().stop();
+    
+    closePartsOfCurrentWindow();
+    tracker().start();
+    tracker().stop();
+    
+    assertThat(bus.sessions.size(), is(1));
+  }
+
   @Test public void recordsNothingOnStartIfFocusPartAbsent() {
     closePartsOfCurrentWindow();
     tracker().start();
