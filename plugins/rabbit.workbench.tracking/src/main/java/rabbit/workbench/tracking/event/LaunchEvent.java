@@ -14,7 +14,7 @@
  * the License.
  */
 
-package rabbit.workbench.internal.event;
+package rabbit.workbench.tracking.event;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -35,7 +35,9 @@ import com.google.common.base.Objects.ToStringHelper;
 import com.google.common.collect.ImmutableSet;
 
 /**
- * An event representing a launch session.
+ * An event representing a launch (run/debug) session.
+ * 
+ * @since 2.0
  */
 public final class LaunchEvent extends TimedEvent {
 
@@ -51,6 +53,14 @@ public final class LaunchEvent extends TimedEvent {
    * parameters rather than just taking the ILaunch.
    */
 
+  /**
+   * @param instant the start time of the event
+   * @param duration the duration of the launch
+   * @param launch the launch instance
+   * @param files the files stepped into during the launch
+   * @throws CoreException if unable to get {@link ILaunchConfiguration} or
+   *         {@link ILaunchConfigurationType} from the launch
+   */
   public LaunchEvent(
       Instant instant,
       Duration duration,

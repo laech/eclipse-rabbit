@@ -38,7 +38,6 @@ import org.joda.time.Instant;
 import org.junit.Test;
 
 import rabbit.tracking.event.TimedEventTest;
-import rabbit.workbench.internal.event.LaunchEvent;
 
 public final class LaunchEventTest extends TimedEventTest {
 

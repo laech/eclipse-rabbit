@@ -17,17 +17,20 @@ package rabbit.workbench.internal.tracking;
 
 import static com.google.common.base.Objects.equal;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.joda.time.Instant.now;
 
-import org.eclipse.core.commands.Command;
+import java.util.concurrent.atomic.AtomicReference;
+
 import org.eclipse.core.commands.ExecutionEvent;
+import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.commands.IExecutionListener;
+import org.eclipse.core.commands.NotHandledException;
 import org.eclipse.ui.commands.ICommandService;
 
 import rabbit.tracking.AbstractTracker;
-import rabbit.tracking.IEventListener;
+import rabbit.tracking.util.IClock;
+import rabbit.workbench.tracking.event.CommandEvent;
 
-import com.google.inject.Inject;
+import com.google.common.eventbus.EventBus;
 
 public final class CommandTracker extends AbstractTracker {
 
@@ -42,69 +45,48 @@ public final class CommandTracker extends AbstractTracker {
    * still be called. Therefore we don't use preExecute(String, ExecutionEvent).
    */
 
-  private final IExecutionListener executionListener = new ExecutionListener() {
+  private final IExecutionListener executionListener = new IExecutionListener() {
 
-    /**
-     * The last recorded ExecutionEvent, to be updated every time
-     * {@link #preExecute(String, ExecutionEvent)} is called. We need this
-     * because {@link #postExecuteSuccess(String, Object)} does not have an
-     * {@link ExecutionEvent} parameter. This variable is null from the
-     * beginning.
-     */
-    private ExecutionEvent lastExecution;
+    private final AtomicReference<ExecutionEvent> startRef =
+        new AtomicReference<ExecutionEvent>(null);
 
-    @Override public void preExecute(String cmdId, ExecutionEvent event) {
-      super.preExecute(cmdId, event);
-      setEvent(event);
+    @Override public void notHandled(
+        String commandId, NotHandledException exception) {
+    }
+
+    @Override public void postExecuteFailure(
+        String commandId, ExecutionException exception) {
     }
 
     @Override public void postExecuteSuccess(String cmdId, Object returnValue) {
-      super.postExecuteSuccess(cmdId, returnValue);
-      ExecutionEvent execution = getAndResetEvent();
-      if (execution != null) {
-        Command cmd = execution.getCommand();
-        if (cmd != null && equal(cmdId, cmd.getId())) {
-          eventListener.onEvent(new CommandEvent(now(), execution));
-        }
-      }
+      ExecutionEvent startEvent = startRef.getAndSet(null);
+      if (startEvent == null)
+        return;
+
+      if (equal(cmdId, startEvent.getCommand().getId()))
+        bus.post(new CommandEvent(clock.now(), startEvent));
     }
 
-    private void setEvent(ExecutionEvent event) {
-      synchronized (this) {
-        lastExecution = event;
-      }
-    }
-
-    private ExecutionEvent getAndResetEvent() {
-      ExecutionEvent execution = null;
-      synchronized (this) {
-        execution = lastExecution;
-        lastExecution = null;
-      }
-      return execution;
+    @Override public void preExecute(String cmdId, ExecutionEvent event) {
+      startRef.set(event);
     }
   };
 
-  private final IEventListener<ICommandEvent> eventListener;
+  private final EventBus bus;
+  private final IClock clock;
   private final ICommandService service;
 
-  /**
-   * @param service the command service to listener on
-   * @param listener the object to receive event notifications
-   * @throws NullPointerException if any argument is null
-   */
-  @Inject public CommandTracker(
-      ICommandService service,
-      IEventListener<ICommandEvent> listener) {
+  public CommandTracker(EventBus bus, IClock clock, ICommandService service) {
+    this.bus = checkNotNull(bus, "bus");
+    this.clock = checkNotNull(clock, "clock");
     this.service = checkNotNull(service, "service");
-    this.eventListener = checkNotNull(listener, "listener");
-  }
-
-  @Override protected void onStop() {
-    service.removeExecutionListener(executionListener);
   }
 
   @Override protected void onStart() {
     service.addExecutionListener(executionListener);
+  }
+
+  @Override protected void onStop() {
+    service.removeExecutionListener(executionListener);
   }
 }
