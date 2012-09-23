@@ -27,12 +27,12 @@ public abstract class AbstractTrackerTestBase<T extends AbstractTracker> {
 
   private T tracker;
 
-  @Before public void before() {
+  @Before public void before() throws Exception {
     init();
     tracker = newTracker();
   }
 
-  @After public void after() {
+  @After public void after() throws Exception {
     tracker.stop();
   }
 
@@ -57,6 +57,6 @@ public abstract class AbstractTrackerTestBase<T extends AbstractTracker> {
 
   protected abstract T newTracker();
 
-  protected void init() {
+  protected void init() throws Exception {
   }
 }

@@ -58,7 +58,7 @@ public final class PerspectiveSessionTrackerTest
   private IClock clock;
   private IWorkbench workbench;
 
-  @Override public void after() {
+  @Override public void after() throws Exception {
     super.after();
     closePerspectivesOfCurrentWindow();
     openRandomPerspectiveOnCurrentWindow();
@@ -161,7 +161,7 @@ public final class PerspectiveSessionTrackerTest
     newTracker(bus, clock, null);
   }
 
-  @Override protected void init() {
+  @Override protected void init() throws Exception {
     super.init();
     workbench = getWorkbench();
     bus = new MockEventBus();

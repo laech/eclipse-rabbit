@@ -123,7 +123,7 @@ public final class CommandTrackerTest
     assertThat(arg.getValue().execution().getCommand(), is(command));
   }
 
-  @Override protected void init() {
+  @Override protected void init() throws Exception {
     super.init();
     commandService = getService(ICommandService.class);
     handlerService = getService(IHandlerService.class);

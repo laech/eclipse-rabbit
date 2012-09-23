@@ -37,11 +37,11 @@ import static rabbit.tracking.internal.util.Workbenches.focusedWindowOf;
 import static rabbit.tracking.tests.Instants.epoch;
 import static rabbit.tracking.tests.TestWorkbenches.activate;
 import static rabbit.tracking.tests.TestWorkbenches.close;
-import static rabbit.tracking.tests.TestWorkbenches.closePartsOfCurrentWindow;
 import static rabbit.tracking.tests.TestWorkbenches.closePartsOf;
+import static rabbit.tracking.tests.TestWorkbenches.closePartsOfCurrentWindow;
 import static rabbit.tracking.tests.TestWorkbenches.hide;
-import static rabbit.tracking.tests.TestWorkbenches.openRandomPartOnCurrentWindow;
 import static rabbit.tracking.tests.TestWorkbenches.openRandomPartOn;
+import static rabbit.tracking.tests.TestWorkbenches.openRandomPartOnCurrentWindow;
 
 import java.util.List;
 
@@ -80,7 +80,7 @@ public final class PartFocusTrackerTest
   private IClock clock;
   private EventBus bus;
 
-  @Override public void after() {
+  @Override public void after() throws Exception {
     super.after();
     for (IWorkbenchWindow window : windows)
       close(window);
@@ -277,7 +277,7 @@ public final class PartFocusTrackerTest
     verify(bus, atLeast(2)).post(any(PartFocusEvent.class));
   }
 
-  @Override protected void init() {
+  @Override protected void init() throws Exception {
     super.init();
     windows = newArrayListWithExpectedSize(1);
     bus = mock(EventBus.class);

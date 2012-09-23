@@ -22,7 +22,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.joda.time.Duration.ZERO;
 import static org.joda.time.Instant.now;
-import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
 import java.util.Set;
@@ -44,58 +43,62 @@ public final class LaunchEventTest extends TimedEventTest {
   static final Set<IPath> NO_FILES = emptySet();
 
   static LaunchEvent eventWith(Duration duration) {
-    try {
-      return new LaunchEvent(now(), duration, mockLaunch(), NO_FILES);
-    } catch (CoreException e) {
-      throw new AssertionError(e);
-    }
+    return new LaunchEvent(now(), duration, mockLaunch(), mockLaunchConfig(),
+        mockLaunchConfigType(), NO_FILES);
   }
 
   static LaunchEvent eventWith(ILaunch launch) {
-    try {
-      return new LaunchEvent(now(), ZERO, launch, NO_FILES);
-    } catch (CoreException e) {
-      throw new AssertionError(e);
-    }
+    return new LaunchEvent(now(), ZERO, launch, mockLaunchConfig(),
+        mockLaunchConfigType(), NO_FILES);
+  }
+
+  static LaunchEvent eventWith(ILaunchConfiguration launchConfig) {
+    return new LaunchEvent(now(), ZERO, mockLaunch(), launchConfig,
+        mockLaunchConfigType(), NO_FILES);
+  }
+
+  static LaunchEvent eventWith(ILaunchConfigurationType type) {
+    return new LaunchEvent(now(), ZERO, mockLaunch(), mockLaunchConfig(),
+        type, NO_FILES);
   }
 
   static LaunchEvent eventWith(Instant instant) {
-    try {
-      return new LaunchEvent(instant, ZERO, mockLaunch(), NO_FILES);
-    } catch (CoreException e) {
-      throw new AssertionError(e);
-    }
+    return new LaunchEvent(instant, ZERO, mockLaunch(), mockLaunchConfig(),
+        mockLaunchConfigType(), NO_FILES);
   }
 
   static LaunchEvent eventWith(
-      Instant instant, Duration duration, ILaunch launch, Set<IPath> files) {
-    try {
-      return new LaunchEvent(instant, duration, launch, files);
-    } catch (CoreException e) {
-      throw new AssertionError(e);
-    }
+      Instant instant,
+      Duration duration,
+      ILaunch launch,
+      ILaunchConfiguration config,
+      ILaunchConfigurationType type,
+      Set<IPath> files) {
+    return new LaunchEvent(instant, duration, launch, config, type, files);
   }
 
   static LaunchEvent eventWith(Set<IPath> files) {
-    try {
-      return new LaunchEvent(now(), ZERO, mockLaunch(), files);
-    } catch (CoreException e) {
-      throw new AssertionError(e);
-    }
+    return new LaunchEvent(now(), ZERO, mockLaunch(), mockLaunchConfig(),
+        mockLaunchConfigType(), files);
   }
 
   static ILaunch mockLaunch() {
-    ILaunchConfigurationType type = mock(ILaunchConfigurationType.class);
-    ILaunchConfiguration config = mock(ILaunchConfiguration.class);
-    try {
-      given(config.getType()).willReturn(type);
-    } catch (CoreException e) {
-      throw new AssertionError(e);
-    }
+    return mock(ILaunch.class);
+  }
 
-    ILaunch launch = mock(ILaunch.class);
-    given(launch.getLaunchConfiguration()).willReturn(config);
-    return launch;
+  static ILaunchConfiguration mockLaunchConfig() {
+    return mock(ILaunchConfiguration.class);
+  }
+
+  static ILaunchConfigurationType mockLaunchConfigType() {
+    return mock(ILaunchConfigurationType.class);
+  }
+
+  static Set<IPath> setOfFilePaths(String... paths) {
+    Set<IPath> set = newHashSet();
+    for (String path : paths)
+      set.add(new Path(path));
+    return set;
   }
 
   @Test public void returnsTheFiles() {
@@ -103,12 +106,22 @@ public final class LaunchEventTest extends TimedEventTest {
     assertThat(eventWith(files).files(), is(files));
   }
 
-  @Test public void returnsTheLaunchEtc() throws CoreException {
-    ILaunch l = mockLaunch();
-    LaunchEvent e = eventWith(l);
-    assertThat(e.launch(), is(l));
-    assertThat(e.launchConfig(), is(l.getLaunchConfiguration()));
-    assertThat(e.launchConfigType(), is(l.getLaunchConfiguration().getType()));
+  @Test public void returnsTheLaunch() throws CoreException {
+    ILaunch launch = mockLaunch();
+    LaunchEvent e = eventWith(launch);
+    assertThat(e.launch(), is(launch));
+  }
+
+  @Test public void returnsTheLaunchConfiguration() throws CoreException {
+    ILaunchConfiguration config = mockLaunchConfig();
+    LaunchEvent e = eventWith(config);
+    assertThat(e.launchConfig(), is(config));
+  }
+
+  @Test public void returnsTheLaunchConfigurationType() throws CoreException {
+    ILaunchConfigurationType type = mockLaunchConfigType();
+    LaunchEvent e = eventWith(type);
+    assertThat(e.launchConfigType(), is(type));
   }
 
   @Test(expected = NullPointerException.class)//
@@ -123,27 +136,17 @@ public final class LaunchEventTest extends TimedEventTest {
 
   @Test(expected = NullPointerException.class)//
   public void throwsNpeOnConstructWithoutLaunchConfig() {
-    ILaunch launch = mockLaunch();
-    given(launch.getLaunchConfiguration()).willReturn(null);
-    eventWith(launch);
+    eventWith((ILaunchConfiguration)null);
   }
 
   @Test(expected = NullPointerException.class)//
   public void throwsNpeOnConstructWithoutLaunchConfigType() throws Exception {
-    ILaunch launch = mockLaunch();
-    given(launch.getLaunchConfiguration().getType()).willReturn(null);
-    eventWith(launch);
+    eventWith((ILaunchConfigurationType)null);
   }
 
   @Override protected LaunchEvent newEvent(Instant instant, Duration duration) {
-    return eventWith(instant, duration, mockLaunch(), NO_FILES);
-  }
-
-  static Set<IPath> setOfFilePaths(String... paths) {
-    Set<IPath> set = newHashSet();
-    for (String path : paths)
-      set.add(new Path(path));
-    return set;
+    return eventWith(instant, duration, mockLaunch(), mockLaunchConfig(),
+        mockLaunchConfigType(), NO_FILES);
   }
 
 }

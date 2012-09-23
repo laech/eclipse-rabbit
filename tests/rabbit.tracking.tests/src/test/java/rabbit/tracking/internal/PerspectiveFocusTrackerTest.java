@@ -63,7 +63,7 @@ public final class PerspectiveFocusTrackerTest
   private IClock epochClock;
   private ArgumentCaptor<PerspectiveFocusEvent> arg;
 
-  @Override public void after() {
+  @Override public void after() throws Exception {
     super.after();
     close(windows);
     closePerspectivesOfCurrentWindow();
@@ -173,7 +173,7 @@ public final class PerspectiveFocusTrackerTest
     verify(bus, atLeast(2)).post(any()); // 1 for old window, some for new
   }
 
-  @Override protected void init() {
+  @Override protected void init() throws Exception {
     super.init();
     arg = captureEvent();
     windows = newArrayListWithExpectedSize(1);

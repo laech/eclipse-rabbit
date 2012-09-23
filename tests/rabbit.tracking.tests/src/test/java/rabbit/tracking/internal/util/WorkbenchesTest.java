@@ -14,7 +14,7 @@
  * the License.
  */
 
-package rabbit.tracking.util;
+package rabbit.tracking.internal.util;
 
 import static com.google.common.collect.Iterables.transform;
 import static com.google.common.collect.Sets.newHashSet;
