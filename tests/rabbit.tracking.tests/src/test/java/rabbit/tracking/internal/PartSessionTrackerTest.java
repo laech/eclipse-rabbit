@@ -80,11 +80,11 @@ public final class PartSessionTrackerTest
     openRandomPartOnCurrentWindow();
     tracker().start();
     tracker().stop();
-    
+
     closePartsOfCurrentWindow();
     tracker().start();
     tracker().stop();
-    
+
     assertThat(bus.sessions.size(), is(1));
   }
 
@@ -164,7 +164,7 @@ public final class PartSessionTrackerTest
     newTracker(bus, clock, null);
   }
 
-  @Override protected void init() {
+  @Override protected void init() throws Exception {
     super.init();
     initWorkbench();
     initEventBus();

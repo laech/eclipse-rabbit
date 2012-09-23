@@ -18,9 +18,9 @@ package rabbit.workbench.internal.tracking;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Maps.newHashMap;
-import static com.google.common.collect.Sets.newHashSet;
 import static java.util.Collections.emptySet;
 import static org.eclipse.debug.core.DebugEvent.CREATE;
+import static org.eclipse.debug.core.DebugEvent.SUSPEND;
 import static org.eclipse.debug.core.DebugEvent.TERMINATE;
 
 import java.util.Map;
@@ -38,71 +38,44 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationType;
 import org.eclipse.debug.core.model.IProcess;
 import org.eclipse.debug.core.model.ISourceLocator;
-import org.eclipse.debug.core.model.IStackFrame;
 import org.eclipse.debug.core.model.IThread;
+import org.joda.time.Duration;
+import org.joda.time.Instant;
 
 import rabbit.tracking.AbstractTracker;
-import rabbit.tracking.IEventListener;
-import rabbit.tracking.util.IRecordListener;
-import rabbit.tracking.util.IRecorder;
-import rabbit.tracking.util.Record;
-import rabbit.tracking.util.Recorder;
+import rabbit.tracking.util.IClock;
+import rabbit.workbench.tracking.event.LaunchEvent;
 
-import com.google.inject.Inject;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.SetMultimap;
+import com.google.common.eventbus.EventBus;
 
 public final class LaunchTracker extends AbstractTracker {
-
-  // TODO revisit
-
-  private final IRecordListener<ILaunch> recordListener = new IRecordListener<ILaunch>() {
-    @Override public void onRecord(Record<ILaunch> record) {
-      ILaunch launch = record.data();
-      ILaunchConfiguration config = launch.getLaunchConfiguration();
-      if (config == null) {
-        return;
-      }
-      ILaunchConfigurationType type = null;
-      try {
-        type = config.getType();
-      } catch (CoreException e) {
-        // TODO
-        return;
-      }
-
-      Set<IPath> files = launchFiles.get(launch);
-      if (files == null) {
-        files = emptySet();
-      }
-
-      eventListener.onEvent(new LaunchEvent(
-          record.instant(), record.duration(), files, launch, config, type));
-    }
-  };
 
   private final IDebugEventSetListener listener = new IDebugEventSetListener() {
     @Override public void handleDebugEvents(DebugEvent[] events) {
       for (DebugEvent event : events) {
-        handleDebugEvent(event);
+        try {
+          handleDebugEvent(event);
+        } catch (CoreException letThisEventGo) {
+        }
       }
     }
   };
 
+  private final EventBus bus;
+  private final IClock clock;
   private final DebugPlugin plugin;
-  private final IEventListener<ILaunchEvent> eventListener;
 
-  /** A map of launches and the files involved (for debug launches). */
-  private final Map<ILaunch, Set<IPath>> launchFiles = newHashMap();
+  private final Map<ILaunch, Instant> launchStarts;
+  private final SetMultimap<ILaunch, IPath> launchFiles;
 
-  /** One recorder for each launch. */
-  private final Map<ILaunch, IRecorder<ILaunch>> recorders = newHashMap();
-
-  // TODO thread safety
-
-  @Inject public LaunchTracker(
-      DebugPlugin plugin,
-      IEventListener<ILaunchEvent> listener) {
+  public LaunchTracker(EventBus bus, IClock clock, DebugPlugin plugin) {
+    this.bus = checkNotNull(bus, "bus");
+    this.clock = checkNotNull(clock, "clock");
     this.plugin = checkNotNull(plugin, "plugin");
-    this.eventListener = checkNotNull(listener, "listener");
+    this.launchFiles = HashMultimap.create();
+    this.launchStarts = newHashMap();
   }
 
   @Override protected void onStart() {
@@ -113,80 +86,78 @@ public final class LaunchTracker extends AbstractTracker {
     plugin.removeDebugEventListener(listener);
   }
 
-  private void handleDebugEvent(DebugEvent event) {
+  private void handleDebugEvent(DebugEvent event) throws CoreException {
     Object source = event.getSource();
 
     if (source instanceof IProcess) {
-      handleProcessEvent(event, (IProcess)source);
+      handleProcess(event, (IProcess)source);
 
     } else if (source instanceof IThread) {
-      handleThreadEvent(event, (IThread)source);
+      handleThread(event, (IThread)source);
     }
   }
 
-  private void handleProcessEvent(DebugEvent event, IProcess process) {
-    ILaunch launch = process.getLaunch();
-
-    // Records the start time of this launch:
-    int kind = event.getKind();
-    if (kind == CREATE) {
-      IRecorder<ILaunch> recorder = recorders.get(launch);
-      if (recorder == null) {
-        recorder = Recorder.create();
-        recorder.addListener(recordListener);
-        recorders.put(launch, recorder);
-      }
-      recorder.start(launch);
-
-    } else if (kind == TERMINATE) {
-      IRecorder<ILaunch> recorder = recorders.get(launch);
-      if (recorder != null) {
-        recorder.stop();
-      }
+  private void handleProcess(DebugEvent event, IProcess process)
+      throws CoreException {
+    switch (event.getKind()) {
+    case CREATE:
+      handleProcessCreation(process.getLaunch());
+      break;
+    case TERMINATE:
+      handleProcessTermination(process.getLaunch());
+      break;
     }
   }
 
-  private void handleThreadEvent(DebugEvent event, IThread thread) {
+  private void handleProcessCreation(ILaunch launch) {
+    Instant instant = clock.now();
+    synchronized (LaunchTracker.this) {
+      launchStarts.put(launch, instant);
+    }
+  }
 
-    // We are only interested in SUSPEND events:
-    if (event.getKind() != DebugEvent.SUSPEND) {
+  private void handleProcessTermination(ILaunch launch) throws CoreException {
+    Instant start;
+    Set<IPath> files;
+
+    synchronized (LaunchTracker.this) {
+      start = launchStarts.get(launch);
+      files = launchFiles.get(launch);
+    }
+
+    if (start == null)
       return;
-    }
+
+    if (files == null)
+      files = emptySet();
+
+    ILaunchConfiguration config = launch.getLaunchConfiguration();
+    if (config == null)
+      return;
+
+    ILaunchConfigurationType type = config.getType();
+    if (type == null)
+      return;
+
+    Duration duration = new Duration(start, clock.now());
+    bus.post(new LaunchEvent(start, duration, launch, config, type, files));
+  }
+
+  private void handleThread(DebugEvent event, IThread thread)
+      throws DebugException {
+    if (event.getKind() != SUSPEND)
+      return;
 
     ILaunch launch = thread.getLaunch();
-    ILaunchConfiguration config = launch.getLaunchConfiguration();
-    if (config == null) {
+    ISourceLocator locator = launch.getSourceLocator();
+    if (locator == null)
       return;
-    }
 
-    IStackFrame stack = null;
-    try {
-      stack = thread.getTopStackFrame();
-    } catch (DebugException e) {
-      // TODO
-      return;
-    }
-
-    if (stack == null) {
-      return;
-    }
-
-    ISourceLocator sourceLocator = launch.getSourceLocator();
-    if (sourceLocator == null) {
-      return;
-    }
-
-    Object element = sourceLocator.getSourceElement(stack);
-
-    // Element is a file in workspace, record it:
-    if (element != null && element instanceof IFile) {
-      IFile file = (IFile)element;
-      Set<IPath> filePaths = launchFiles.get(launch);
-      if (filePaths == null) {
-        filePaths = newHashSet();
-        launchFiles.put(launch, filePaths);
+    Object elem = locator.getSourceElement(thread.getTopStackFrame());
+    if (elem instanceof IFile) {
+      synchronized (LaunchTracker.this) {
+        launchFiles.put(launch, ((IFile)elem).getFullPath());
       }
-      filePaths.add(file.getFullPath());
     }
   }
 

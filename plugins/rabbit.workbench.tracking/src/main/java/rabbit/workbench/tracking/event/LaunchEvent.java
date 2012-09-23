@@ -20,7 +20,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Set;
 
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
@@ -57,19 +56,22 @@ public final class LaunchEvent extends TimedEvent {
    * @param instant the start time of the event
    * @param duration the duration of the launch
    * @param launch the launch instance
+   * @param launchConfig the configuration of the launch
+   * @param launchConfigType the type of the launch configuration
    * @param files the files stepped into during the launch
-   * @throws CoreException if unable to get {@link ILaunchConfiguration} or
-   *         {@link ILaunchConfigurationType} from the launch
+   * @throws NullPointerException if any argument is null
    */
   public LaunchEvent(
       Instant instant,
       Duration duration,
       ILaunch launch,
-      Set<? extends IPath> files) throws CoreException {
+      ILaunchConfiguration launchConfig,
+      ILaunchConfigurationType launchConfigType,
+      Set<? extends IPath> files) {
     super(instant, duration);
     this.launch = checkNotNull(launch, "launch");
-    this.config = checkNotNull(launch.getLaunchConfiguration(), "config");
-    this.type = checkNotNull(config.getType(), "type");
+    this.config = checkNotNull(launchConfig, "launchConfig");
+    this.type = checkNotNull(launchConfigType, "launchConfigType");
     this.filePaths = ImmutableSet.copyOf(checkNotNull(files, "files"));
   }
 

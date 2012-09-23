@@ -102,7 +102,7 @@ public final class UserStateTrackerTest
   private Display display;
   private Shell shell;
 
-  @Override public void after() {
+  @Override public void after() throws Exception {
     super.after();
     display.asyncExec(new Runnable() {
       @Override public void run() {
@@ -177,7 +177,7 @@ public final class UserStateTrackerTest
     assertThat(listener.event.instant(), is(epoch()));
   }
 
-  @Override protected void init() {
+  @Override protected void init() throws Exception {
     super.init();
     bus = new EventBus();
 

@@ -36,7 +36,7 @@ public abstract class EventBusTrackerTestBase<T extends AbstractTracker>
 
   private EventBus bus;
 
-  @Override protected void init() {
+  @Override protected void init() throws Exception {
     super.init();
     bus = mock(EventBus.class);
   }

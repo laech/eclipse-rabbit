@@ -22,13 +22,20 @@ import static org.joda.time.Duration.millis;
 import static org.joda.time.Instant.now;
 import static rabbit.tracking.tests.Instants.epoch;
 import static rabbit.workbench.tracking.event.LaunchEventTest.NO_FILES;
-import static rabbit.workbench.tracking.event.LaunchEventTest.eventWith;
 import static rabbit.workbench.tracking.event.LaunchEventTest.mockLaunch;
+import static rabbit.workbench.tracking.event.LaunchEventTest.mockLaunchConfig;
+import static rabbit.workbench.tracking.event.LaunchEventTest.mockLaunchConfigType;
 import static rabbit.workbench.tracking.event.LaunchEventTest.setOfFilePaths;
 
 import java.util.List;
+import java.util.Set;
 
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.debug.core.ILaunch;
+import org.eclipse.debug.core.ILaunchConfiguration;
+import org.eclipse.debug.core.ILaunchConfigurationType;
+import org.joda.time.Duration;
+import org.joda.time.Instant;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
@@ -39,30 +46,121 @@ import rabbit.tracking.tests.EqualsTestBase;
 public final class LaunchEventEqualsTest extends EqualsTestBase {
 
   private static final ILaunch LAUNCH = mockLaunch();
+  private static final ILaunchConfiguration CONFIG = mockLaunchConfig();
+  private static final ILaunchConfigurationType TYPE = mockLaunchConfigType();
 
   @Parameters public static List<Object[]> data() {
+    LaunchEvent event = new LaunchEvent(
+        epoch(), ZERO, LAUNCH, CONFIG, TYPE, NO_FILES);
+
     return asList(new Object[][]{
         {
-            eventWith(epoch(), ZERO, LAUNCH, NO_FILES),
-            eventWith(epoch(), ZERO, LAUNCH, NO_FILES),
-            eventWith(now(), ZERO, LAUNCH, NO_FILES)},
+            event,
+            clone(event),
+            eventWith(event, now())},
         {
-            eventWith(epoch(), ZERO, LAUNCH, NO_FILES),
-            eventWith(epoch(), ZERO, LAUNCH, NO_FILES),
-            eventWith(epoch(), millis(10), LAUNCH, NO_FILES)},
+            event,
+            clone(event),
+            eventWith(event, millis(10))},
         {
-            eventWith(epoch(), ZERO, LAUNCH, NO_FILES),
-            eventWith(epoch(), ZERO, LAUNCH, NO_FILES),
-            eventWith(epoch(), ZERO, mockLaunch(), NO_FILES)},
+            event,
+            clone(event),
+            eventWith(event, mockLaunch())},
         {
-            eventWith(epoch(), ZERO, LAUNCH, NO_FILES),
-            eventWith(epoch(), ZERO, LAUNCH, NO_FILES),
-            eventWith(epoch(), ZERO, LAUNCH, setOfFilePaths("/a/b", "/c/d"))},
+            event,
+            clone(event),
+            eventWith(event, mockLaunchConfig())},
         {
-            eventWith(epoch(), ZERO, LAUNCH, NO_FILES),
-            eventWith(epoch(), ZERO, LAUNCH, NO_FILES),
-            eventWith(now(), millis(10), mockLaunch(), setOfFilePaths("/a/b"))},
+            event,
+            clone(event),
+            eventWith(event, mockLaunchConfigType())},
+        {
+            event,
+            clone(event),
+            eventWith(event, setOfFilePaths("/a/b", "/c/d"))},
+        {
+            event,
+            clone(event),
+            new LaunchEvent(
+                now(),
+                millis(10),
+                mockLaunch(),
+                mockLaunchConfig(),
+                mockLaunchConfigType(),
+                setOfFilePaths("/a/b"))},
     });
+  }
+
+  private static LaunchEvent clone(LaunchEvent that) {
+    return new LaunchEvent(
+        that.instant(),
+        that.duration(),
+        that.launch(),
+        that.launchConfig(),
+        that.launchConfigType(),
+        that.files());
+  }
+
+  private static LaunchEvent eventWith(LaunchEvent that, Instant instant) {
+    return new LaunchEvent(
+        instant,
+        that.duration(),
+        that.launch(),
+        that.launchConfig(),
+        that.launchConfigType(),
+        that.files());
+  }
+
+  private static LaunchEvent eventWith(LaunchEvent that, Duration duration) {
+    return new LaunchEvent(
+        that.instant(),
+        duration,
+        that.launch(),
+        that.launchConfig(),
+        that.launchConfigType(),
+        that.files());
+  }
+
+  private static LaunchEvent eventWith(LaunchEvent that, ILaunch launch) {
+    return new LaunchEvent(
+        that.instant(),
+        that.duration(),
+        launch,
+        that.launchConfig(),
+        that.launchConfigType(),
+        that.files());
+  }
+
+  private static LaunchEvent eventWith(LaunchEvent that,
+      ILaunchConfiguration config) {
+    return new LaunchEvent(
+        that.instant(),
+        that.duration(),
+        that.launch(),
+        config,
+        that.launchConfigType(),
+        that.files());
+  }
+
+  private static LaunchEvent eventWith(LaunchEvent that,
+      ILaunchConfigurationType type) {
+    return new LaunchEvent(
+        that.instant(),
+        that.duration(),
+        that.launch(),
+        that.launchConfig(),
+        type,
+        that.files());
+  }
+
+  private static LaunchEvent eventWith(LaunchEvent that, Set<IPath> files) {
+    return new LaunchEvent(
+        that.instant(),
+        that.duration(),
+        that.launch(),
+        that.launchConfig(),
+        that.launchConfigType(),
+        files);
   }
 
   public LaunchEventEqualsTest(

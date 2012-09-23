@@ -1,26 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<?pde version="3.6"?>
+<?pde version="3.8"?>
 
-<target name="Rabbit" sequenceNumber="45">
+<target name="Rabbit" sequenceNumber="47">
 <locations>
-<location includeAllPlatforms="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
-<unit id="org.eclipse.swtbot.forms.feature.group" version="2.0.4.20110304_0338-e5aff47-dev-e35"/>
-<unit id="org.eclipse.swtbot.eclipse.feature.group" version="2.0.4.20110304_0338-e5aff47-dev-e35"/>
-<unit id="org.eclipse.swtbot.eclipse.gef.feature.group" version="2.0.4.20110304_0338-e5aff47-dev-e35"/>
-<unit id="org.eclipse.swtbot.feature.group" version="2.0.4.20110304_0338-e5aff47-dev-e35"/>
-<unit id="org.eclipse.swtbot.ide.feature.group" version="2.0.4.20110304_0338-e5aff47-dev-e35"/>
-<unit id="org.eclipse.swtbot.eclipse.test.junit3.feature.group" version="2.0.4.20110304_0338-e5aff47-dev-e35"/>
-<unit id="org.eclipse.swtbot.eclipse.test.junit4.feature.group" version="2.0.4.20110304_0338-e5aff47-dev-e35"/>
-<repository location="http://download.eclipse.org/technology/swtbot/galileo/dev-build/update-site"/>
-</location>
-<location includeAllPlatforms="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
-<unit id="org.eclipse.jdt.feature.group" version="3.5.2.r352_v20100108-7r88FEwFI0WTuoBl0iaG0tyhfZH6"/>
-<unit id="org.eclipse.platform.ide" version="3.5.2.M20100211-1343"/>
-<unit id="org.eclipse.equinox.executable.feature.group" version="3.3.201.R35x_v20091211-7M-FngFELSU3Pqlv3JdZn"/>
-<unit id="org.eclipse.mylyn_feature.feature.group" version="3.2.3.v20100217-0100-e3x"/>
-<repository location="http://download.eclipse.org/releases/galileo"/>
-</location>
-<location includeAllPlatforms="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
+<location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="org.aopalliance" version="1.0.0.v201105210816"/>
 <unit id="javax.inject" version="1.0.0.v20091030"/>
 <unit id="javax.inject.source" version="1.0.0.v20091030"/>
@@ -43,21 +26,17 @@
 <unit id="org.mockito" version="1.8.4.v201102171835"/>
 <repository location="http://download.eclipse.org/tools/orbit/downloads/drops/R20120526062928/repository/"/>
 </location>
-<location includeAllPlatforms="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
-<unit id="org.joda.convert.feature.feature.group" version="1.2.0"/>
-<unit id="org.joda.convert.source.feature.feature.group" version="1.2.0"/>
+<location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
+<unit id="org.eclipse.jdt.feature.group" version="3.5.2.r352_v20100108-7r88FEwFI0WTuoBl0iaG0tyhfZH6"/>
+<unit id="org.eclipse.platform.ide" version="3.5.2.M20100211-1343"/>
+<unit id="org.eclipse.equinox.executable.feature.group" version="3.3.201.R35x_v20091211-7M-FngFELSU3Pqlv3JdZn"/>
+<unit id="org.eclipse.mylyn_feature.feature.group" version="3.2.3.v20100217-0100-e3x"/>
+<repository location="http://download.eclipse.org/releases/galileo"/>
+</location>
+<location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="org.joda.time.feature.feature.group" version="2.1.0"/>
 <unit id="org.joda.time.source.feature.feature.group" version="2.1.0"/>
-<unit id="org.scala_lang.library.feature.feature.group" version="2.9.2"/>
-<unit id="org.scala_lang.library.source.feature.feature.group" version="2.9.2"/>
-<unit id="org.scalatest.feature.feature.group" version="1.8.0"/>
-<unit id="org.scalatest.source.feature.feature.group" version="1.8.0"/>
 <repository location="https://rabbit-eclipse.googlecode.com/git-history/design-2.0/dependencies/repository/"/>
-</location>
-<location includeAllPlatforms="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
-<unit id="org.eclipse.xtend.sdk.feature.group" version="2.3.0.v201206120633"/>
-<unit id="org.eclipse.xtext.xbase.feature.group" version="2.3.0.v201206120633"/>
-<repository location="http://download.eclipse.org/modeling/tmf/xtext/updates/composite/releases/"/>
 </location>
 </locations>
 </target>
