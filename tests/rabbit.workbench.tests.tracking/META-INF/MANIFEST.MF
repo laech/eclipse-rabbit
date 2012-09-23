@@ -14,4 +14,5 @@ Require-Bundle: org.eclipse.jdt.core,
  org.hamcrest.core,
  org.hamcrest.library,
  org.mockito
+Import-Package: rabbit.tracking.tests;version="2.0.0"
 

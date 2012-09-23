@@ -6,11 +6,14 @@ Bundle-Version: 2.0.0.qualifier
 Fragment-Host: rabbit.tracking
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: rabbit.tracking;version="2.0.0",
+ rabbit.tracking.event;version="2.0.0",
  rabbit.tracking.internal;version="2.0.0",
+ rabbit.tracking.internal.util;version="2.0.0",
  rabbit.tracking.tests;version="2.0.0",
  rabbit.tracking.util;version="2.0.0"
 Require-Bundle: org.hamcrest,
  org.hamcrest.core,
  org.hamcrest.library,
  org.junit4,
- org.mockito
+ org.mockito,
+ org.eclipse.jdt.ui

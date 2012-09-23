@@ -21,20 +21,6 @@
     <module>tests</module>
   </modules>
 
-  <repositories>
-    <repository>
-      <id>xtend</id>
-      <url>http://build.eclipse.org/common/xtend/maven/</url>
-    </repository>
-  </repositories>
-
-  <pluginRepositories>
-    <pluginRepository>
-      <id>xtend</id>
-      <url>http://build.eclipse.org/common/xtend/maven/</url>
-    </pluginRepository>
-  </pluginRepositories>
-
   <build>
     <plugins>
       <plugin>
@@ -52,10 +38,6 @@
           <argLine>-XX:MaxPermSize=128M</argLine>
           <useUIHarness>true</useUIHarness>
           <useUIThread>false</useUIThread>
-          <includes>
-            <include>**/*Spec.scala</include>
-            <include>**/*Test.java</include>
-          </includes>
         </configuration>
       </plugin>
 
@@ -73,37 +55,6 @@
             </artifact>
           </target>
         </configuration>
-      </plugin>
-
-      <plugin>
-        <groupId>org.eclipse.xtend</groupId>
-        <artifactId>xtend-maven-plugin</artifactId>
-        <version>2.3.0</version>
-        <executions>
-          <execution>
-            <goals>
-              <goal>compile</goal>
-              <goal>testCompile</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-
-      <plugin>
-        <groupId>org.scala-tools</groupId>
-        <artifactId>maven-scala-plugin</artifactId>
-        <version>2.15.2</version>
-        <executions>
-          <execution>
-            <goals>
-              <goal>compile</goal>
-              <goal>testCompile</goal>
-            </goals>
-            <configuration>
-              <scalaVersion>2.9.2</scalaVersion>
-            </configuration>
-          </execution>
-        </executions>
       </plugin>
     </plugins>
   </build>
