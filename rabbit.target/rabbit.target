@@ -1,8 +1,15 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <?pde version="3.8"?>
 
-<target name="Rabbit" sequenceNumber="47">
+<target name="Rabbit" sequenceNumber="49">
 <locations>
+<location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
+<unit id="org.eclipse.jdt.feature.group" version="3.5.2.r352_v20100108-7r88FEwFI0WTuoBl0iaG0tyhfZH6"/>
+<unit id="org.eclipse.platform.ide" version="3.5.2.M20100211-1343"/>
+<unit id="org.eclipse.equinox.executable.feature.group" version="3.3.201.R35x_v20091211-7M-FngFELSU3Pqlv3JdZn"/>
+<unit id="org.eclipse.mylyn_feature.feature.group" version="3.2.3.v20100217-0100-e3x"/>
+<repository location="http://download.eclipse.org/releases/galileo"/>
+</location>
 <location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
 <unit id="org.aopalliance" version="1.0.0.v201105210816"/>
 <unit id="javax.inject" version="1.0.0.v20091030"/>
@@ -26,17 +33,6 @@
 <unit id="org.mockito" version="1.8.4.v201102171835"/>
 <repository location="http://download.eclipse.org/tools/orbit/downloads/drops/R20120526062928/repository/"/>
 </location>
-<location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
-<unit id="org.eclipse.jdt.feature.group" version="3.5.2.r352_v20100108-7r88FEwFI0WTuoBl0iaG0tyhfZH6"/>
-<unit id="org.eclipse.platform.ide" version="3.5.2.M20100211-1343"/>
-<unit id="org.eclipse.equinox.executable.feature.group" version="3.3.201.R35x_v20091211-7M-FngFELSU3Pqlv3JdZn"/>
-<unit id="org.eclipse.mylyn_feature.feature.group" version="3.2.3.v20100217-0100-e3x"/>
-<repository location="http://download.eclipse.org/releases/galileo"/>
-</location>
-<location includeAllPlatforms="false" includeConfigurePhase="false" includeMode="slicer" includeSource="true" type="InstallableUnit">
-<unit id="org.joda.time.feature.feature.group" version="2.1.0"/>
-<unit id="org.joda.time.source.feature.feature.group" version="2.1.0"/>
-<repository location="https://rabbit-eclipse.googlecode.com/git-history/design-2.0/dependencies/repository/"/>
-</location>
+<location path="${project_loc}/target/dependency" type="Directory"/>
 </locations>
 </target>

@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<classpath>
-	<classpathentry exported="true" kind="lib" path="scalatest_2.9.2-1.8.jar"/>
-	<classpathentry kind="output" path="bin"/>
-</classpath>

@@ -1,7 +1,0 @@
-*/.settings
-*/*src
-com.*/*.jar
-org.*/*.jar
-*/target
-*/bin
-*/build
